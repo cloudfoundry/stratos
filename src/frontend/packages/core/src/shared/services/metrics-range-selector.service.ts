@@ -1,16 +1,19 @@
 import { Injectable } from '@angular/core';
-import { MetricQueryType, MetricQueryConfig, MetricsAction, IMetrics } from '@stratosui/store';
+import { MetricQueryType, MetricQueryConfig, MetricsRequest } from '@stratosui/store';
+import { sub, getUnixTime } from 'date-fns';
 
 import { ITimeRange, StoreMetricTimeRange } from './metrics-range-selector.types';
 
-import moment from 'moment';
-
-@Injectable()
+@Injectable({
+  providedIn: 'root'
+})
 export class MetricsRangeSelectorService {
 
   constructor() { }
 
-  public defaultTimeValue: string;
+  // Optionally set from the metrics-range-selector `selectedTimeValue`
+  // @Input; reads guard on truthiness, so it is genuinely sometimes-absent.
+  public defaultTimeValue?: string;
   public times: ITimeRange[] = [
     {
       value: '5:minute',
@@ -43,67 +46,63 @@ export class MetricsRangeSelectorService {
     }
   ];
 
-  private newMetricsAction(action: MetricsAction, newQuery: MetricQueryConfig): MetricsAction {
+  private withNewQuery(req: MetricsRequest, newQuery: MetricQueryConfig): MetricsRequest {
     return {
-      ...action,
+      ...req,
       queryType: MetricQueryType.RANGE_QUERY,
-      query: newQuery
+      query: newQuery,
     };
   }
 
-  private convertWindowToRange(value: string): [moment.Moment, moment.Moment] {
+  private convertWindowToRange(value: string): [Date, Date] {
     const windowSplit = value.split(':');
+    const amount = parseInt(windowSplit[0], 10);
+    const unit = windowSplit[1];
+    const now = new Date();
+
+    const duration: any = {};
+    if (unit === 'minute') duration.minutes = amount;
+    else if (unit === 'hour') duration.hours = amount;
+    else if (unit === 'day') duration.days = amount;
+    else if (unit === 'week') duration.weeks = amount;
+    else if (unit === 'month') duration.months = amount;
+    else if (unit === 'year') duration.years = amount;
+
     return [
-      moment().subtract(parseInt(windowSplit[0], 10), windowSplit[1] as moment.unitOfTime.DurationConstructor),
-      moment()
+      sub(now, duration),
+      now
     ];
   }
 
-  public getNewDateRangeAction(action: MetricsAction, start: moment.Moment, end: moment.Moment) {
-    const startUnix = start.unix();
-    const endUnix = end.unix();
-    return this.newMetricsAction(action, new MetricQueryConfig(action.query.metric, {
-      ...action.query.params,
+  public getNewDateRangeRequest(req: MetricsRequest, start: Date, end: Date): MetricsRequest {
+    const startUnix = getUnixTime(start);
+    const endUnix = getUnixTime(end);
+    return this.withNewQuery(req, new MetricQueryConfig(req.query.metric, {
+      ...req.query.params,
       start: startUnix,
-      end: end.unix(),
+      end: endUnix,
       step: Math.max((endUnix - startUnix) / 50, 0)
     }));
   }
 
-  public getNewTimeWindowAction(action: MetricsAction, windowValue: string) {
+  public getNewTimeWindowRequest(req: MetricsRequest, windowValue: string): MetricsRequest {
     const [start, end] = this.convertWindowToRange(windowValue);
-    const newAction = { ...action };
-    newAction.windowValue = windowValue;
-    return this.getNewDateRangeAction(newAction, start, end);
+    const next = this.getNewDateRangeRequest(req, start, end);
+    return { ...next, windowValue };
   }
 
-  public getDateFromStoreMetric(metrics: IMetrics, times = this.times): StoreMetricTimeRange {
-    if (metrics) {
-      if (metrics.windowValue) {
-        return {
-          timeRange: times.find(time => time.value === metrics.windowValue)
-        };
-      } else {
-        return {
-          timeRange: metrics.query && metrics.query.params && metrics.query.params.window ?
-            times.find(time => time.value === metrics.query.params.window) :
-            this.getDefaultTimeRange(times)
-        };
-      }
-    } else {
-      const timeRange = this.getDefaultTimeRange(times);
-      return {
-        timeRange
-      };
-    }
-  }
-
-  private getDefaultTimeRange(times = this.times) {
+  public getDefaultTimeRange(times = this.times): ITimeRange {
     if (this.defaultTimeValue) {
       return times.find(time => time.value === this.defaultTimeValue) || this.times[0];
-    } else {
-      return times.find(time => time.value === '1:hour') || this.times[0];
     }
+    return times.find(time => time.value === '1:hour') || this.times[0];
+  }
+
+  public resolveTimeRange(windowValue: string | null | undefined, times = this.times): StoreMetricTimeRange {
+    if (windowValue) {
+      return { timeRange: times.find(time => time.value === windowValue) || this.getDefaultTimeRange(times) };
+    }
+    return { timeRange: this.getDefaultTimeRange(times) };
   }
 
 }

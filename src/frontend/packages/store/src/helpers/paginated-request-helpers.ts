@@ -1,9 +1,9 @@
 import { HttpClient, HttpRequest, HttpResponse } from '@angular/common/http';
 import { forkJoin, Observable, of as observableOf, of } from 'rxjs';
-import { first, map, mergeMap, switchMap } from 'rxjs/operators';
+import { take, map, mergeMap, switchMap } from 'rxjs/operators';
 
 import { UpdatePaginationMaxedState } from '../actions/pagination.actions';
-import { ActionDispatcher } from '../entity-request-pipeline/entity-request-pipeline.types';
+import { ActionDispatcher } from '../types/entity-pipeline.types';
 
 
 // TODO: See #4208. This should be replaced with
@@ -13,7 +13,7 @@ export interface PaginationFlattener<T = any, C = any> {
   getTotalPages: (res: C) => number;
   getTotalResults: (res: C) => number;
   mergePages: (res: C[]) => T;
-  fetch: (...args) => Observable<C>;
+  fetch: (...args: any[]) => Observable<C>;
   buildFetchParams: (i: number) => any[];
   clearResults: (res: C, allResults: number) => Observable<C>;
 }
@@ -78,7 +78,7 @@ export function iteratePagination<T, C>(
   iterator: IteratePaginationConfig<T, C>
 ): Observable<C[]> {
   return request.pipe(
-    first(),
+    take(1),
     switchMap(response => {
       const nextRequest = iterator.getNext(response);
       results.push(...iterator.getResult(response));
@@ -105,14 +105,16 @@ export function flattenPagination<T, C>(
   forcedEntityKey?: string
 ) {
   return firstRequest.pipe(
-    first(),
+    take(1),
     mergeMap(firstResData => {
       const allResults = flattener.getTotalResults(firstResData);
       if (maxCount) {
         // Note - This isn't ever being used, maxCount is always undefined. See #4208
-        actionDispatcher(
-          new UpdatePaginationMaxedState(maxCount, allResults, entityType, endpointType, paginationKey, forcedEntityKey)
-        );
+        if (entityType && endpointType && paginationKey) {
+          actionDispatcher(
+            new UpdatePaginationMaxedState(maxCount, allResults, entityType, endpointType, paginationKey, forcedEntityKey)
+          );
+        }
         if (allResults > maxCount) {
           // If we have too many results only return basic first page information
           return forkJoin([flattener.clearResults(firstResData, allResults)]);

@@ -1,28 +1,37 @@
-import { Component, OnInit } from '@angular/core';
-import { Store } from '@ngrx/store';
-import { Logout, AppState } from '@stratosui/store';
+import { Component, OnInit, inject, ChangeDetectionStrategy } from '@angular/core';
+import { toObservable } from '@angular/core/rxjs-interop';
+import { CommonModule } from '@angular/common';
+import { CardWrapperComponent } from '../../../shared/components/cards/card/card.component';
 import { Observable } from 'rxjs';
-import { map } from 'rxjs/operators';
+
+import { AuthSignalService } from '../../../core/signals/auth-signal.service';
+import { IntroScreenComponent } from '../../../shared/components/intro-screen/intro-screen.component';
+import { StratosTitleComponent } from '../../../shared/components/stratos-title/stratos-title.component';
+import { AppProgressBarComponent } from '../../../shared/components/progress-bar/app-progress-bar.component';
 
 @Component({
-  selector: 'app-logout-page',
+selector: 'app-logout-page',
   templateUrl: './logout-page.component.html',
-  styleUrls: ['./logout-page.component.scss']
+  changeDetection: ChangeDetectionStrategy.OnPush,
+  standalone: true,
+  imports: [
+    CommonModule,
+    CardWrapperComponent,
+    IntroScreenComponent,
+    StratosTitleComponent,
+    AppProgressBarComponent
+  ]
 })
 export class LogoutPageComponent implements OnInit {
 
-  public error$: Observable<boolean>;
+  private auth = inject(AuthSignalService);
 
-  constructor(private store: Store<AppState>) {
-    this.error$ = this.store.select(s => s.auth).pipe(
-      map(auth => auth.error)
-    );
-  }
+  public error$: Observable<boolean> = toObservable(this.auth.error);
 
   ngOnInit() {
-    // Dispatch the logout action after 1 second - give the logging out screen time to show
+    // Trigger logout after 1 second - give the logging out screen time to show
     setTimeout(() => {
-      this.store.dispatch(new Logout());
+      this.auth.logout();
     }, 1000);
   }
 

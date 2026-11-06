@@ -1,0 +1,118 @@
+/*
+ * Static stylesheet aggregate for the curated Monaco subset
+ * (monaco-features.ts). The application builder bundles the CSS that
+ * monaco imports from JS into per-chunk .css files, but nothing attaches
+ * those to the page for a plain dynamic import() — so monaco widgets
+ * rendered on runtime-injected styles and browser defaults only (the
+ * naked ime-text-area was the visible symptom). This file is built as a
+ * non-injected styles bundle (angular.json bundleName "monaco") and
+ * linked by monaco-loader.ts when the editor loads.
+ *
+ * Relative paths because monaco-editor's exports map rewrites every
+ * package subpath to *.js, which blocks css specifiers.
+ *
+ * GENERATED from the monaco-features.ts import graph — regenerate on
+ * every monaco upgrade or feature-list change:
+ *   bun x esbuild src/frontend/packages/core/src/monaco-features.ts \
+ *     --bundle --format=esm --outdir=/tmp/esb --metafile=/tmp/meta.json \
+ *     --loader:.ttf=file
+ *   then list the .css inputs of the metafile here.
+ */
+@import '../../../../../node_modules/monaco-editor/esm/vs/base/browser/ui/actionbar/actionbar.css';
+@import '../../../../../node_modules/monaco-editor/esm/vs/base/browser/ui/aria/aria.css';
+@import '../../../../../node_modules/monaco-editor/esm/vs/base/browser/ui/button/button.css';
+@import '../../../../../node_modules/monaco-editor/esm/vs/base/browser/ui/codicons/codicon/codicon-modifiers.css';
+@import '../../../../../node_modules/monaco-editor/esm/vs/base/browser/ui/codicons/codicon/codicon.css';
+@import '../../../../../node_modules/monaco-editor/esm/vs/base/browser/ui/contextview/contextview.css';
+@import '../../../../../node_modules/monaco-editor/esm/vs/base/browser/ui/countBadge/countBadge.css';
+@import '../../../../../node_modules/monaco-editor/esm/vs/base/browser/ui/dnd/dnd.css';
+@import '../../../../../node_modules/monaco-editor/esm/vs/base/browser/ui/dropdown/dropdown.css';
+@import '../../../../../node_modules/monaco-editor/esm/vs/base/browser/ui/findinput/findInput.css';
+@import '../../../../../node_modules/monaco-editor/esm/vs/base/browser/ui/hover/hoverWidget.css';
+@import '../../../../../node_modules/monaco-editor/esm/vs/base/browser/ui/iconLabel/iconlabel.css';
+@import '../../../../../node_modules/monaco-editor/esm/vs/base/browser/ui/inputbox/inputBox.css';
+@import '../../../../../node_modules/monaco-editor/esm/vs/base/browser/ui/keybindingLabel/keybindingLabel.css';
+@import '../../../../../node_modules/monaco-editor/esm/vs/base/browser/ui/list/list.css';
+@import '../../../../../node_modules/monaco-editor/esm/vs/base/browser/ui/mouseCursor/mouseCursor.css';
+@import '../../../../../node_modules/monaco-editor/esm/vs/base/browser/ui/progressbar/progressbar.css';
+@import '../../../../../node_modules/monaco-editor/esm/vs/base/browser/ui/sash/sash.css';
+@import '../../../../../node_modules/monaco-editor/esm/vs/base/browser/ui/scrollbar/media/scrollbars.css';
+@import '../../../../../node_modules/monaco-editor/esm/vs/base/browser/ui/selectBox/selectBox.css';
+@import '../../../../../node_modules/monaco-editor/esm/vs/base/browser/ui/selectBox/selectBoxCustom.css';
+@import '../../../../../node_modules/monaco-editor/esm/vs/base/browser/ui/severityIcon/media/severityIcon.css';
+@import '../../../../../node_modules/monaco-editor/esm/vs/base/browser/ui/splitview/splitview.css';
+@import '../../../../../node_modules/monaco-editor/esm/vs/base/browser/ui/table/table.css';
+@import '../../../../../node_modules/monaco-editor/esm/vs/base/browser/ui/toggle/toggle.css';
+@import '../../../../../node_modules/monaco-editor/esm/vs/base/browser/ui/toolbar/toolbar.css';
+@import '../../../../../node_modules/monaco-editor/esm/vs/base/browser/ui/tree/media/tree.css';
+@import '../../../../../node_modules/monaco-editor/esm/vs/editor/browser/controller/editContext/native/nativeEditContext.css';
+@import '../../../../../node_modules/monaco-editor/esm/vs/editor/browser/controller/editContext/textArea/textAreaEditContext.css';
+@import '../../../../../node_modules/monaco-editor/esm/vs/editor/browser/gpu/css/media/decorationCssRuleExtractor.css';
+@import '../../../../../node_modules/monaco-editor/esm/vs/editor/browser/viewParts/blockDecorations/blockDecorations.css';
+@import '../../../../../node_modules/monaco-editor/esm/vs/editor/browser/viewParts/currentLineHighlight/currentLineHighlight.css';
+@import '../../../../../node_modules/monaco-editor/esm/vs/editor/browser/viewParts/decorations/decorations.css';
+@import '../../../../../node_modules/monaco-editor/esm/vs/editor/browser/viewParts/glyphMargin/glyphMargin.css';
+@import '../../../../../node_modules/monaco-editor/esm/vs/editor/browser/viewParts/gpuMark/gpuMark.css';
+@import '../../../../../node_modules/monaco-editor/esm/vs/editor/browser/viewParts/indentGuides/indentGuides.css';
+@import '../../../../../node_modules/monaco-editor/esm/vs/editor/browser/viewParts/lineNumbers/lineNumbers.css';
+@import '../../../../../node_modules/monaco-editor/esm/vs/editor/browser/viewParts/linesDecorations/linesDecorations.css';
+@import '../../../../../node_modules/monaco-editor/esm/vs/editor/browser/viewParts/margin/margin.css';
+@import '../../../../../node_modules/monaco-editor/esm/vs/editor/browser/viewParts/marginDecorations/marginDecorations.css';
+@import '../../../../../node_modules/monaco-editor/esm/vs/editor/browser/viewParts/minimap/minimap.css';
+@import '../../../../../node_modules/monaco-editor/esm/vs/editor/browser/viewParts/overlayWidgets/overlayWidgets.css';
+@import '../../../../../node_modules/monaco-editor/esm/vs/editor/browser/viewParts/rulers/rulers.css';
+@import '../../../../../node_modules/monaco-editor/esm/vs/editor/browser/viewParts/scrollDecoration/scrollDecoration.css';
+@import '../../../../../node_modules/monaco-editor/esm/vs/editor/browser/viewParts/selections/selections.css';
+@import '../../../../../node_modules/monaco-editor/esm/vs/editor/browser/viewParts/viewCursors/viewCursors.css';
+@import '../../../../../node_modules/monaco-editor/esm/vs/editor/browser/viewParts/viewLines/viewLines.css';
+@import '../../../../../node_modules/monaco-editor/esm/vs/editor/browser/viewParts/whitespace/whitespace.css';
+@import '../../../../../node_modules/monaco-editor/esm/vs/editor/browser/widget/codeEditor/editor.css';
+@import '../../../../../node_modules/monaco-editor/esm/vs/editor/browser/widget/diffEditor/components/accessibleDiffViewer.css';
+@import '../../../../../node_modules/monaco-editor/esm/vs/editor/browser/widget/diffEditor/style.css';
+@import '../../../../../node_modules/monaco-editor/esm/vs/editor/browser/widget/markdownRenderer/browser/renderedMarkdown.css';
+@import '../../../../../node_modules/monaco-editor/esm/vs/editor/browser/widget/multiDiffEditor/style.css';
+@import '../../../../../node_modules/monaco-editor/esm/vs/editor/contrib/anchorSelect/browser/anchorSelect.css';
+@import '../../../../../node_modules/monaco-editor/esm/vs/editor/contrib/bracketMatching/browser/bracketMatching.css';
+@import '../../../../../node_modules/monaco-editor/esm/vs/editor/contrib/codeAction/browser/lightBulbWidget.css';
+@import '../../../../../node_modules/monaco-editor/esm/vs/editor/contrib/codelens/browser/codelensWidget.css';
+@import '../../../../../node_modules/monaco-editor/esm/vs/editor/contrib/colorPicker/browser/colorPicker.css';
+@import '../../../../../node_modules/monaco-editor/esm/vs/editor/contrib/dnd/browser/dnd.css';
+@import '../../../../../node_modules/monaco-editor/esm/vs/editor/contrib/dropOrPasteInto/browser/postEditWidget.css';
+@import '../../../../../node_modules/monaco-editor/esm/vs/editor/contrib/find/browser/findOptionsWidget.css';
+@import '../../../../../node_modules/monaco-editor/esm/vs/editor/contrib/find/browser/findWidget.css';
+@import '../../../../../node_modules/monaco-editor/esm/vs/editor/contrib/floatingMenu/browser/floatingMenu.css';
+@import '../../../../../node_modules/monaco-editor/esm/vs/editor/contrib/folding/browser/folding.css';
+@import '../../../../../node_modules/monaco-editor/esm/vs/editor/contrib/gotoError/browser/media/gotoErrorWidget.css';
+@import '../../../../../node_modules/monaco-editor/esm/vs/editor/contrib/gotoSymbol/browser/link/goToDefinitionAtPosition.css';
+@import '../../../../../node_modules/monaco-editor/esm/vs/editor/contrib/gotoSymbol/browser/peek/referencesWidget.css';
+@import '../../../../../node_modules/monaco-editor/esm/vs/editor/contrib/hover/browser/hover.css';
+@import '../../../../../node_modules/monaco-editor/esm/vs/editor/contrib/inPlaceReplace/browser/inPlaceReplace.css';
+@import '../../../../../node_modules/monaco-editor/esm/vs/editor/contrib/inlineCompletions/browser/hintsWidget/inlineCompletionsHintsWidget.css';
+@import '../../../../../node_modules/monaco-editor/esm/vs/editor/contrib/inlineCompletions/browser/view/ghostText/ghostTextView.css';
+@import '../../../../../node_modules/monaco-editor/esm/vs/editor/contrib/inlineCompletions/browser/view/inlineEdits/view.css';
+@import '../../../../../node_modules/monaco-editor/esm/vs/editor/contrib/inlineProgress/browser/inlineProgressWidget.css';
+@import '../../../../../node_modules/monaco-editor/esm/vs/editor/contrib/linkedEditing/browser/linkedEditing.css';
+@import '../../../../../node_modules/monaco-editor/esm/vs/editor/contrib/links/browser/links.css';
+@import '../../../../../node_modules/monaco-editor/esm/vs/editor/contrib/message/browser/messageController.css';
+@import '../../../../../node_modules/monaco-editor/esm/vs/editor/contrib/middleScroll/browser/middleScroll.css';
+@import '../../../../../node_modules/monaco-editor/esm/vs/editor/contrib/parameterHints/browser/parameterHints.css';
+@import '../../../../../node_modules/monaco-editor/esm/vs/editor/contrib/peekView/browser/media/peekViewWidget.css';
+@import '../../../../../node_modules/monaco-editor/esm/vs/editor/contrib/placeholderText/browser/placeholderText.css';
+@import '../../../../../node_modules/monaco-editor/esm/vs/editor/contrib/rename/browser/renameWidget.css';
+@import '../../../../../node_modules/monaco-editor/esm/vs/editor/contrib/snippet/browser/snippetSession.css';
+@import '../../../../../node_modules/monaco-editor/esm/vs/editor/contrib/stickyScroll/browser/stickyScroll.css';
+@import '../../../../../node_modules/monaco-editor/esm/vs/editor/contrib/suggest/browser/media/suggest.css';
+@import '../../../../../node_modules/monaco-editor/esm/vs/editor/contrib/symbolIcons/browser/symbolIcons.css';
+@import '../../../../../node_modules/monaco-editor/esm/vs/editor/contrib/unicodeHighlighter/browser/bannerController.css';
+@import '../../../../../node_modules/monaco-editor/esm/vs/editor/contrib/unicodeHighlighter/browser/unicodeHighlighter.css';
+@import '../../../../../node_modules/monaco-editor/esm/vs/editor/contrib/wordHighlighter/browser/highlightDecorations.css';
+@import '../../../../../node_modules/monaco-editor/esm/vs/editor/contrib/zoneWidget/browser/zoneWidget.css';
+@import '../../../../../node_modules/monaco-editor/esm/vs/editor/standalone/browser/iPadShowKeyboard/iPadShowKeyboard.css';
+@import '../../../../../node_modules/monaco-editor/esm/vs/editor/standalone/browser/inspectTokens/inspectTokens.css';
+@import '../../../../../node_modules/monaco-editor/esm/vs/editor/standalone/browser/quickInput/standaloneQuickInput.css';
+@import '../../../../../node_modules/monaco-editor/esm/vs/editor/standalone/browser/standalone-tokens.css';
+@import '../../../../../node_modules/monaco-editor/esm/vs/platform/actionWidget/browser/actionWidget.css';
+@import '../../../../../node_modules/monaco-editor/esm/vs/platform/actions/browser/menuEntryActionViewItem.css';
+@import '../../../../../node_modules/monaco-editor/esm/vs/platform/hover/browser/hover.css';
+@import '../../../../../node_modules/monaco-editor/esm/vs/platform/opener/browser/link.css';
+@import '../../../../../node_modules/monaco-editor/esm/vs/platform/quickinput/browser/media/quickInput.css';

@@ -1,8 +1,10 @@
-import { CfUser, CfUserRoleParams, IUserPermissionInOrg, OrgUserRoleNames, SpaceUserRoleNames } from './cf-user.types';
+import { CfUserRoleParams, IUserPermissionInOrg, OrgUserRoleNames, SpaceUserRoleNames } from './cf-user.types';
+import { StUser } from '../../services/endpoint-data/stratos-types';
+import { ORG_ROLE_DEFS, SPACE_ROLE_DEFS, shortLabelOfScoped, longLabelOfScoped, RoleScope } from '../../roles/role-registry';
 
 export interface UsersRolesState {
   cfGuid: string;
-  users: CfUser[];
+  users: StUser[];
   newRoles: IUserPermissionInOrg;
   changedRoles: CfRoleChange[];
   usernameOrigin?: string;
@@ -17,61 +19,44 @@ export interface CfUserRolesSelected {
 }
 
 export class CfRoleChange {
-  userGuid: string;
-  orgGuid: string;
+  userGuid!: string;
+  orgGuid!: string;
   spaceGuid?: string;
-  add: boolean;
-  role: OrgUserRoleNames | SpaceUserRoleNames;
-  orgName: string;
+  add!: boolean;
+  role!: OrgUserRoleNames | SpaceUserRoleNames;
+  orgName!: string;
   spaceName?: string;
 }
 
 export class CfRoleChangeWithNames extends CfRoleChange {
-  username: string; // Why are all these names set out flat? So we can easily sort in future
-  orgName: string;
-  spaceName?: string;
-  roleName: string;
+  username!: string; // Why are all these names set out flat? So we can easily sort in future
+  declare orgName: string;
+  declare spaceName?: string;
+  roleName!: string;
 }
 
-export const UserRoleLabels = {
-  org: {
-    short: {
-      [OrgUserRoleNames.MANAGER]: 'Manager',
-      [CfUserRoleParams.MANAGED_ORGS]: 'Manager',
-      [OrgUserRoleNames.BILLING_MANAGERS]: 'Billing Manager',
-      [CfUserRoleParams.BILLING_MANAGER_ORGS]: 'Billing Manager',
-      [OrgUserRoleNames.AUDITOR]: 'Auditor',
-      [CfUserRoleParams.AUDITED_ORGS]: 'Auditor',
-      [OrgUserRoleNames.USER]: 'User',
-      [CfUserRoleParams.ORGANIZATIONS]: 'User'
-    },
-    long: {
-      [OrgUserRoleNames.MANAGER]: 'Org Manager',
-      [CfUserRoleParams.MANAGED_ORGS]: 'Org Manager',
-      [OrgUserRoleNames.BILLING_MANAGERS]: 'Org Billing Manager',
-      [CfUserRoleParams.BILLING_MANAGER_ORGS]: 'Org Billing Manager',
-      [OrgUserRoleNames.AUDITOR]: 'Org Auditor',
-      [CfUserRoleParams.AUDITED_ORGS]: 'Org Auditor',
-      [OrgUserRoleNames.USER]: 'Org User',
-      [CfUserRoleParams.ORGANIZATIONS]: 'Org User'
-    }
-  },
-  space: {
-    short: {
-      [SpaceUserRoleNames.MANAGER]: 'Manager',
-      [CfUserRoleParams.MANAGED_SPACES]: 'Manager',
-      [SpaceUserRoleNames.DEVELOPER]: 'Developer',
-      [CfUserRoleParams.SPACES]: 'Developer',
-      [SpaceUserRoleNames.AUDITOR]: 'Auditor',
-      [CfUserRoleParams.AUDITED_SPACES]: 'Auditor',
-    },
-    long: {
-      [SpaceUserRoleNames.MANAGER]: 'Space Manager',
-      [CfUserRoleParams.MANAGED_SPACES]: 'Space Manager',
-      [SpaceUserRoleNames.DEVELOPER]: 'Space Developer',
-      [CfUserRoleParams.SPACES]: 'Space Developer',
-      [SpaceUserRoleNames.AUDITOR]: 'Space Auditor',
-      [CfUserRoleParams.AUDITED_SPACES]: 'Space Auditor',
-    }
+function buildLabels(defs: ReadonlyArray<{ stratos: string; bucket: string }>, scope: RoleScope) {
+  const short: Record<string, string> = {};
+  const long: Record<string, string> = {};
+  for (const d of defs) {
+    const s = shortLabelOfScoped(d.stratos);
+    const l = longLabelOfScoped(d.stratos, scope);
+    short[d.stratos] = s; short[d.bucket] = s;
+    long[d.stratos] = l;  long[d.bucket] = l;
   }
+  return { short, long };
+}
+
+export const UserRoleLabels: {
+  org: {
+    short: Record<OrgUserRoleNames | CfUserRoleParams, string>;
+    long: Record<OrgUserRoleNames | CfUserRoleParams, string>;
+  };
+  space: {
+    short: Record<SpaceUserRoleNames | CfUserRoleParams, string>;
+    long: Record<SpaceUserRoleNames | CfUserRoleParams, string>;
+  };
+} = {
+  org: buildLabels(ORG_ROLE_DEFS, 'org') as any,
+  space: buildLabels(SPACE_ROLE_DEFS, 'space') as any,
 };

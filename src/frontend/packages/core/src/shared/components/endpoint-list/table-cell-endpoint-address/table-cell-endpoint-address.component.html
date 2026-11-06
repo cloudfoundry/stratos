@@ -1,0 +1,11 @@
+@if (endpointAddress$ | async; as address) {
+  <div class="flex items-center min-w-0">
+    <div class="min-w-0 truncate" [matTooltip]="address">{{ address }}</div>
+    <app-copy-to-clipboard class="ml-0.5 w-fit inline-flex" [compact]="true" [text]="address" tooltip="Copy to clipboard" [showSuccessText]="false">
+    </app-copy-to-clipboard>
+    @if (isDuplicate$ | async) {
+      <span class="material-icons text-warning-shade-600 dark:text-warning-shade-300 ml-1 text-base leading-none"
+        matTooltip="Another endpoint is registered at this URL">warning</span>
+    }
+  </div>
+}

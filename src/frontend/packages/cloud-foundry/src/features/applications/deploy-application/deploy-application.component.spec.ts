@@ -1,87 +1,143 @@
-import { HttpBackend, HttpClient, HttpClientModule } from '@angular/common/http';
-import { HttpClientTestingModule, HttpTestingController } from '@angular/common/http/testing';
-import { ComponentFixture, TestBed, waitForAsync } from '@angular/core/testing';
+import { CUSTOM_ELEMENTS_SCHEMA } from '@angular/core';
+import { ComponentFixture, TestBed } from '@angular/core/testing';
+import { provideZonelessChangeDetection } from '@angular/core';
+import { provideRouter, ActivatedRoute } from '@angular/router';
+import { provideHttpClient } from '@angular/common/http';
+import { provideHttpClientTesting } from '@angular/common/http/testing';
 import { NoopAnimationsModule } from '@angular/platform-browser/animations';
-import { RouterTestingModule } from '@angular/router/testing';
+import { describe, it, expect, beforeEach, vi } from 'vitest';
+import { of } from 'rxjs';
 
-import { CoreModule } from '../../../../../core/src/core/core.module';
-import { SharedModule } from '../../../../../core/src/shared/shared.module';
-import { TabNavService } from '../../../../../core/src/tab-nav.service';
-import { getGitHubAPIURL, GITHUB_API_URL } from '../../../../../git/src/shared/github.helpers';
-import { generateCfStoreModules } from '../../../../test-framework/cloud-foundry-endpoint-service.helper';
-import { CloudFoundrySharedModule } from '../../../shared/cf-shared.module';
+import { EntityCatalogTestModule, TEST_CATALOGUE_ENTITIES, generateStratosEntities, EntityCatalogHelper, EntityCatalogHelpers } from '@stratosui/store';
+import { createEmptyStoreModule, STORE_TEST_PROVIDERS } from '@stratosui/store/testing';
+import { CoreModule } from '@stratosui/core';
+import { getGitHubAPIURL, GITHUB_API_URL } from '@stratosui/git';
+
+import { generateCFEntities } from '../../../cf-entity-generator';
 import { CfOrgSpaceDataService } from '../../../shared/data-services/cf-org-space-service.service';
-import { ApplicationEnvVarsHelper } from '../application/application-tabs-base/tabs/build-tab/application-env-vars.service';
-import { CreateApplicationModule } from '../create-application/create-application.module';
-import {
-  DeployApplicationOptionsStepComponent,
-} from './deploy-application-options-step/deploy-application-options-step.component';
-import {
-  DeployApplicationStepSourceUploadComponent,
-} from './deploy-application-step-source-upload/deploy-application-step-source-upload.component';
-import { CommitListWrapperComponent } from './deploy-application-step2-1/commit-list-wrapper/commit-list-wrapper.component';
-import { DeployApplicationStep21Component } from './deploy-application-step2-1/deploy-application-step2-1.component';
-import {
-  DeployApplicationFsComponent,
-} from './deploy-application-step2/deploy-application-fs/deploy-application-fs.component';
-import { DeployApplicationStep2Component } from './deploy-application-step2/deploy-application-step2.component';
-import { DeployApplicationStep3Component } from './deploy-application-step3/deploy-application-step3.component';
 import { ApplicationDeploySourceTypes } from './deploy-application-steps.types';
 import { DeployApplicationComponent } from './deploy-application.component';
-import { GithubProjectExistsDirective } from './github-project-exists.directive';
 
 describe('DeployApplicationComponent', () => {
   let component: DeployApplicationComponent;
   let fixture: ComponentFixture<DeployApplicationComponent>;
 
-  beforeEach(waitForAsync(() => {
+  beforeEach(() => {
     TestBed.configureTestingModule({
-      declarations: [
+      imports: [
+        createEmptyStoreModule(),
+        EntityCatalogTestModule,
+        CoreModule,
+        NoopAnimationsModule,
         DeployApplicationComponent,
-        DeployApplicationStep2Component,
-        DeployApplicationStep21Component,
-        DeployApplicationStep3Component,
-        DeployApplicationOptionsStepComponent,
-        DeployApplicationStepSourceUploadComponent,
-        DeployApplicationFsComponent,
-        CommitListWrapperComponent,
-        GithubProjectExistsDirective,
       ],
       providers: [
-        CfOrgSpaceDataService,
-        ApplicationEnvVarsHelper,
-        { provide: GITHUB_API_URL, useFactory: getGitHubAPIURL },
-        HttpClient,
+        ...STORE_TEST_PROVIDERS,
         {
-          provide: HttpBackend,
-          useClass: HttpTestingController
+          provide: TEST_CATALOGUE_ENTITIES,
+          useValue: [
+            ...generateStratosEntities(),
+            ...generateCFEntities()
+          ]
         },
-        TabNavService,
-        ApplicationDeploySourceTypes
+        EntityCatalogHelper,
+        provideZonelessChangeDetection(),
+        provideRouter([]),
+        provideHttpClient(),
+        provideHttpClientTesting(),
+        {
+          provide: ActivatedRoute,
+          useValue: {
+            snapshot: {
+              params: {},
+              queryParams: {}
+            }
+          }
+        },
+        CfOrgSpaceDataService,
+        ApplicationDeploySourceTypes,
+        { provide: GITHUB_API_URL, useFactory: getGitHubAPIURL },
       ],
-      imports: [
-        ...generateCfStoreModules(),
-        SharedModule,
-        CoreModule,
-        RouterTestingModule,
-        CreateApplicationModule,
-        NoopAnimationsModule,
-        HttpClientModule,
-        HttpClientTestingModule,
-        HttpClientModule,
-        CloudFoundrySharedModule
-      ]
+      schemas: [CUSTOM_ELEMENTS_SCHEMA]
     })
       .compileComponents();
-  }));
+
+    // Set EntityCatalogHelper after TestBed is configured
+    const helper = TestBed.inject(EntityCatalogHelper);
+    EntityCatalogHelpers.SetEntityCatalogHelper(helper);
+  });
 
   beforeEach(() => {
     fixture = TestBed.createComponent(DeployApplicationComponent);
     component = fixture.componentInstance;
-    fixture.detectChanges();
+    // Don't call detectChanges() to avoid rendering child components
   });
 
   it('should create', () => {
     expect(component).toBeTruthy();
+  });
+
+  // Regression guard for the FWT-959 Part 2 file-upload deploy fix
+  // (GH #5045). step2's onNext returns the FileScannerInfo as
+  // result.data; the signal-handle submit() contract has no data
+  // channel, so the parent captures into pendingFsFileInfo and
+  // forwards via `step2_2Handle.onEnter` — which the stepper fires
+  // on activation, after step 2's submit has already run.
+  //
+  // Earlier versions of this test forwarded via the @ViewChild setter
+  // and asserted `step2_2Ref = mock` *after* submit. That order never
+  // occurs in real Angular: @ViewChild for projected content fires at
+  // parent view-init, before any submit. The old test silently passed
+  // against broken production code because it mocked an order the
+  // framework never produces. See KS doc
+  // 2026-05-26-deploy-application-ngrx-removal for the postmortem.
+  it('forwards FileScannerInfo from step2 submit to step2_2.onEnter via step2_2Handle.onEnter', async () => {
+    const fakeFileInfo = { root: 'mock-root', total: 100 };
+    const mockStep2 = { onNext: vi.fn().mockReturnValue(of({ success: true, data: fakeFileInfo })) };
+    const mockStep2_2 = { onEnter: vi.fn(), valid$: of(true) };
+
+    // ViewChild fires at parent view-init before any step submit. The
+    // setter must NOT forward at this point — pendingFsFileInfo is
+    // still undefined, so a forward here would prime the deployer
+    // with garbage and the file-upload path's readyFilter would never
+    // open the deploy WebSocket.
+    (component as any).step2_2Ref = mockStep2_2;
+    expect(mockStep2_2.onEnter).not.toHaveBeenCalled();
+
+    // Step 2 submits — handle.submit captures result.data into
+    // pendingFsFileInfo, mirroring the legacy `enterData` channel
+    // the framework no longer provides for signal-handle steps.
+    (component as any)._step2 = mockStep2;
+    await component.step2Handle.submit!();
+    expect((component as any).pendingFsFileInfo).toBe(fakeFileInfo);
+
+    // Stepper activates step 2_2 → fires handle.onEnter → the parent
+    // forwards pendingFsFileInfo to the child component and clears
+    // the holding field.
+    component.step2_2Handle.onEnter!();
+    expect(mockStep2_2.onEnter).toHaveBeenCalledWith(fakeFileInfo);
+    expect((component as any).pendingFsFileInfo).toBeUndefined();
+  });
+
+  // Regression guard for the "Source Config shows no options / Next disabled"
+  // bug. step2_1 (the git commit picker) is rendered via [hidden], so its
+  // @ViewChild fires at parent view-init — before step 2 has saved any
+  // git source. Building the commit list there (the old `v.onEnter()` in the
+  // setter) ran against an empty applicationSource and never resolved a
+  // project/branch. The build must instead happen on step activation via
+  // step2_1Handle.onEnter, which the stepper fires after step 2's submit.
+  it('builds the commit list on step2_1 activation (handle.onEnter), not at ViewChild init', () => {
+    const mockStep2_1 = { onEnter: vi.fn(), onLeave: vi.fn(), validate: of(false) };
+
+    // ViewChild fires at parent view-init. The setter must NOT call
+    // onEnter here — applicationSource has no git details yet, so the
+    // commit list would build empty (the reported bug).
+    (component as any).step2_1Ref = mockStep2_1;
+    expect(mockStep2_1.onEnter).not.toHaveBeenCalled();
+
+    // Stepper navigates into Source Config → fires handle.onEnter →
+    // the child builds the commit list against the now-populated source.
+    component.step2_1Handle.onEnter!();
+    expect(mockStep2_1.onEnter).toHaveBeenCalledTimes(1);
   });
 });

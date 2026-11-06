@@ -1,19 +1,30 @@
-import { Store } from '@ngrx/store';
 import { combineLatest, Observable, of } from 'rxjs';
-import { filter, first, map, switchMap } from 'rxjs/operators';
-
-import { GeneralEntityAppState } from '../../../../../../store/src/app-state';
+import { take, filter, map, switchMap } from 'rxjs/operators';
+import { toObservable } from '@angular/core/rxjs-interop';
+import { Injector } from '@angular/core';
 import {
+  EndpointsDataService,
+  IStratosEndpointDefinition,
   StratosCatalogEndpointEntity,
-} from '../../../../../../store/src/entity-catalog/entity-catalog-entity/entity-catalog-entity';
-import { IStratosEndpointDefinition } from '../../../../../../store/src/entity-catalog/entity-catalog.types';
-import { stratosEntityCatalog } from '../../../../../../store/src/stratos-entity-catalog';
+} from '@stratosui/store';
+
 import { TileConfigManager } from '../../../../shared/components/tile/tile-selector.helpers';
 import { ITileConfig, ITileData } from '../../../../shared/components/tile/tile-selector.types';
 
 export interface ICreateEndpointTilesData extends ITileData {
   type: string;
   parentType: string;
+}
+
+/**
+ * The tile selector's `(selection)` output is typed with the base ITileData
+ * shape (and emits null on deselect). Tiles built by BaseEndpointTileManager
+ * always carry the create-endpoint data, so narrow with a runtime check.
+ */
+export function isCreateEndpointTile(
+  tile: ITileConfig | null
+): tile is ITileConfig<ICreateEndpointTilesData> {
+  return !!tile && !!tile.data && typeof tile.data.type === 'string' && typeof tile.data.parentType === 'string';
 }
 type ExpandedEndpoint<T = number> = {
   current: number,
@@ -28,13 +39,20 @@ type ExpandedEndpoints<T = number> = ExpandedEndpoint<T>[];
  * Handles sorting, hiding, filtering, etc
  */
 export abstract class BaseEndpointTileManager {
-  protected store: Store<GeneralEntityAppState>;
+  // W36-B Wave 3: optional EndpointsDataService + Injector. When
+  // supplied, the tile-population pipeline reads endpoints from the
+  // signal-native service instead of the legacy ngrx pagination
+  // service. Subclass `super()` calls must thread these through.
+  protected endpointsData?: EndpointsDataService;
+  protected injector?: Injector;
 
   private tileManager: TileConfigManager;
 
   public tileSelectorConfig$: Observable<ITileConfig<ICreateEndpointTilesData>[]>;
 
-  protected pSelectedTile: ITileConfig<ICreateEndpointTilesData>;
+  // strict: write-only selection model — only ever assigned via the
+  // selectedTile setter (which navigates) and never read back before that.
+  protected pSelectedTile!: ITileConfig<ICreateEndpointTilesData>;
 
   get selectedTile() {
     return this.pSelectedTile;
@@ -44,8 +62,8 @@ export abstract class BaseEndpointTileManager {
   }
 
   protected sortEndpointTiles(
-    { label: aLabel, renderPriority: aRenderPriority }: IStratosEndpointDefinition,
-    { label: bLabel, renderPriority: bRenderPriority }: IStratosEndpointDefinition
+    { label: aLabel = '', renderPriority: aRenderPriority }: IStratosEndpointDefinition,
+    { label: bLabel = '', renderPriority: bRenderPriority }: IStratosEndpointDefinition
   ) {
     // We're going to do a little more work than just to compare the render priority to ensure
     // the tile order is as consistent and sensible as possible across browsers in order to provide the best UX.
@@ -84,15 +102,17 @@ export abstract class BaseEndpointTileManager {
 
   constructor(
     types$: Observable<StratosCatalogEndpointEntity[]>,
-    store: Store<GeneralEntityAppState>
+    endpointsData?: EndpointsDataService,
+    injector?: Injector,
   ) {
-    this.store = store;
+    this.endpointsData = endpointsData;
+    this.injector = injector;
     this.tileManager = new TileConfigManager();
     // Need to filter the endpoint types on the tech preview flag
     this.tileSelectorConfig$ = types$.pipe(
       // Add additional metadata to each endpoint type
       switchMap(endpointTypes => this.expandEndpointTypes(endpointTypes)),
-      first(),
+      take(1),
       map(expandedEndpointTypes => {
         // For each endpoint type...
         return expandedEndpointTypes
@@ -104,18 +124,17 @@ export abstract class BaseEndpointTileManager {
           .map(expandedEndpointType => {
             const endpoint = expandedEndpointType.definition;
             return this.tileManager.getNextTileConfig<ICreateEndpointTilesData>(
-              endpoint.label,
+              endpoint.label ?? endpoint.type ?? '',
               endpoint.logoUrl ? {
                 location: endpoint.logoUrl
               } : {
-                  matIcon: endpoint.icon,
+                  matIcon: endpoint.icon ?? '',
                   matIconFont: endpoint.iconFont
                 },
               {
-                type: endpoint.type,
-                parentType: endpoint.parentType,
-                component: endpoint.registrationComponent,
-              }
+                type: endpoint.type ?? '',
+                parentType: endpoint.parentType ?? '',
+                component: endpoint.registrationComponent }
             );
           });
       }),
@@ -123,11 +142,19 @@ export abstract class BaseEndpointTileManager {
   }
 
   protected expandEndpointTypes(endpointEntities: StratosCatalogEndpointEntity[]): Observable<ExpandedEndpoints> {
-    return stratosEntityCatalog.endpoint.store.getAll.getPaginationService().entities$.pipe(
+    // W36-B Wave 3: source endpoints from EndpointsDataService when
+    // available. Subclasses created before this wave were
+    // single-instance per page; the service is providedIn: 'root', so
+    // any caller can access it. The Injector is required to keep
+    // toObservable() inside an injection context.
+    if (!this.endpointsData || !this.injector) {
+      throw new Error('BaseEndpointTileManager requires EndpointsDataService + Injector — supply them via the subclass super() call.');
+    }
+    return toObservable(this.endpointsData.endpointsList, { injector: this.injector }).pipe(
       filter(endpoints => !!endpoints),
       map(endpoints => {
         const endpointsByType: ExpandedEndpoints<Observable<number>> = [];
-        return endpointEntities.reduce((res, endpointEntity) => {
+        return endpointEntities.reduce((res: ExpandedEndpoints<Observable<number>>, endpointEntity: StratosCatalogEndpointEntity) => {
           const { type: endpointType, subType: endpointSubType } = endpointEntity.getTypeAndSubtype();
           res.push({
             current: endpoints.filter(em => em.cnsi_type === endpointType && em.sub_type === endpointSubType).length,
@@ -137,8 +164,8 @@ export abstract class BaseEndpointTileManager {
           return res;
         }, endpointsByType);
       }),
-      switchMap(endpointsByType => combineLatest(Object.values(endpointsByType).map(type => type.limit.pipe(
-        map(limit => ({
+      switchMap(endpointsByType => combineLatest(Object.values(endpointsByType).map((type: ExpandedEndpoint<Observable<number>>) => type.limit.pipe(
+        map((limit: number) => ({
           ...type,
           limit
         }))
@@ -151,10 +178,11 @@ export abstract class BaseEndpointTileManager {
     if (!registeredLimit) {
       return of(Number.MAX_SAFE_INTEGER);
     }
-    if (typeof registeredLimit === 'number') {
-      return of(registeredLimit);
-    }
-    const res = registeredLimit(this.store);
+    // `injector` is guaranteed set here: expandEndpointTypes() throws
+    // without it before any tile (and thus any limit) is evaluated.
+    // registeredLimit is typed as a factory function; it returns either a
+    // raw number or an Observable<number>, both handled below.
+    const res = registeredLimit(this.injector!);
     return typeof res === 'number' ? of(res) : res;
   }
 

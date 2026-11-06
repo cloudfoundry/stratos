@@ -2,11 +2,11 @@ import { CommonModule } from '@angular/common';
 import { NgModule } from '@angular/core';
 import { RouterModule, Routes } from '@angular/router';
 
-import { APIKeyAuthGuardService } from './core/apiKey-auth-guard.service';
-import { AuthGuardService } from './core/auth-guard.service';
+import { apiKeyAuthGuard } from './core/apiKey-auth-guard.service';
+import { authGuard } from './core/auth-guard.service';
 import { CoreModule } from './core/core.module';
-import { EndpointsService } from './core/endpoints.service';
-import { NotSetupGuardService } from './core/not-setup-guard.service';
+import { endpointsGuard } from './core/endpoints.service';
+import { notSetupGuard } from './core/not-setup-guard.service';
 import { PageNotFoundComponentComponent } from './core/page-not-found-component/page-not-found-component.component';
 import { CustomRoutingImportModule } from './custom-import.module';
 import { DashboardBaseComponent } from './features/dashboard/dashboard-base/dashboard-base.component';
@@ -25,7 +25,7 @@ const appRoutes: Routes = [
   { path: '', redirectTo: 'home', pathMatch: 'full' },
   {
     path: 'setup',
-    canActivate: [NotSetupGuardService],
+    canActivate: [notSetupGuard],
     children: [
       {
         path: '',
@@ -59,7 +59,7 @@ const appRoutes: Routes = [
   {
     path: '',
     component: DashboardBaseComponent,
-    canActivate: [AuthGuardService, EndpointsService],
+    canActivate: [authGuard, endpointsGuard],
     children: [
       {
         path: 'home',
@@ -86,31 +86,31 @@ const appRoutes: Routes = [
         },
         children: [{
           path: 'metrics',
-          loadChildren: () => import('./features/metrics/metrics.module').then(m => m.MetricsModule),
+          loadChildren: () => import('./features/metrics/metrics.routes').then(m => m.METRICS_ROUTES),
         },
         {
           path: '',
-          loadChildren: () => import('./features/endpoints/endpoints.module').then(m => m.EndpointsModule),
+          loadChildren: () => import('./features/endpoints/endpoints.routes').then(m => m.ENDPOINTS_ROUTES),
         }]
       },
-      { path: 'about', loadChildren: () => import('./features/about/about.module').then(m => m.AboutModule) },
-      { path: 'user-profile', loadChildren: () => import('./features/user-profile/user-profile.module').then(m => m.UserProfileModule) },
+      { path: 'about', loadChildren: () => import('./features/about/about.routes').then(m => m.ABOUT_ROUTES) },
+      { path: 'user-profile', loadChildren: () => import('./features/user-profile/user-profile.routes').then(m => m.USER_PROFILE_ROUTES) },
       {
         path: 'api-keys',
-        loadChildren: () => import('./features/api-keys/api-keys.module').then(m => m.ApiKeysModule),
-        canActivate: [APIKeyAuthGuardService]
+        loadChildren: () => import('./features/api-keys/api-keys.routes').then(m => m.API_KEYS_ROUTES),
+        canActivate: [apiKeyAuthGuard]
       },
-      { path: 'events', loadChildren: () => import('./features/event-page/event-page.module').then(m => m.EventPageModule) },
+      { path: 'events', loadChildren: () => import('./features/event-page/event-page.routes').then(m => m.EVENT_PAGE_ROUTES) },
       {
         path: 'errors/:endpointId',
-        loadChildren: () => import('./features/error-page/error-page.module').then(m => m.ErrorPageModule)
+        loadChildren: () => import('./features/error-page/error-page.routes').then(m => m.ERROR_PAGE_ROUTES)
       },
     ]
   },
   {
     path: 'noendpoints',
     component: NoEndpointsNonAdminComponent,
-    canActivate: [AuthGuardService],
+    canActivate: [authGuard],
   },
   {
     path: '**',
@@ -123,7 +123,7 @@ const appRoutes: Routes = [
     CommonModule,
     CoreModule,
     SharedModule,
-    RouterModule.forRoot(appRoutes, { onSameUrlNavigation: 'reload', relativeLinkResolution: 'legacy' }),
+    RouterModule.forRoot(appRoutes, { onSameUrlNavigation: 'reload' }),
     CustomRoutingImportModule,
   ]
 })

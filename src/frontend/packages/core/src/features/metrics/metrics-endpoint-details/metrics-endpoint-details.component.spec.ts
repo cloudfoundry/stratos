@@ -1,29 +1,36 @@
-import { ComponentFixture, TestBed, waitForAsync } from '@angular/core/testing';
-
-import { createBasicStoreModule } from '../../../../../store/testing/src/store-test-helper';
-import { CoreTestingModule } from '../../../../test-framework/core-test.modules';
-import { SharedModule } from '../../../shared/shared.module';
+import { ComponentFixture, TestBed } from '@angular/core/testing';
+import { provideZonelessChangeDetection } from '@angular/core';
+import { describe, it, expect, beforeEach } from 'vitest';
+import { of } from 'rxjs';
+import { BaseTestModules, STORE_TEST_PROVIDERS } from '@test-framework';
 import { MetricsService } from '../services/metrics-service';
-import { CoreModule } from './../../../core/core.module';
 import { MetricsEndpointDetailsComponent } from './metrics-endpoint-details.component';
 
 describe('MetricsEndpointDetailsComponent', () => {
   let component: MetricsEndpointDetailsComponent;
   let fixture: ComponentFixture<MetricsEndpointDetailsComponent>;
 
-  beforeEach(waitForAsync(() => {
+  beforeEach(() => {
     TestBed.configureTestingModule({
       imports: [
-        CoreModule,
-        SharedModule,
-        CoreTestingModule,
-        createBasicStoreModule()
+        ...BaseTestModules,
+        MetricsEndpointDetailsComponent,
       ],
-      declarations: [ MetricsEndpointDetailsComponent ],
-      providers: [ MetricsService ]
-    })
-    .compileComponents();
-  }));
+      providers: [
+        {
+          provide: MetricsService,
+          useValue: {
+            metricsEndpoints$: of([]),
+            haveNoMetricsEndpoints$: of(false),
+            haveNoConnectedMetricsEndpoints$: of(false)
+          }
+        },
+        ...(STORE_TEST_PROVIDERS || []),
+        provideZonelessChangeDetection(),
+      ]
+    });
+    TestBed.compileComponents();
+  });
 
   beforeEach(() => {
     fixture = TestBed.createComponent(MetricsEndpointDetailsComponent);

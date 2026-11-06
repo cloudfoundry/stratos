@@ -1,7 +1,7 @@
-import { AbstractControl, ValidatorFn } from '@angular/forms';
+import { AbstractControl, ValidationErrors, ValidatorFn } from '@angular/forms';
 
 export function isValidJsonValidator(): ValidatorFn {
-  return (formField: AbstractControl): { [key: string]: any } => {
+  return (formField: AbstractControl): ValidationErrors | null => {
     if (formField.value) {
       try {
         const jsonObj = JSON.parse(formField.value);
@@ -9,7 +9,7 @@ export function isValidJsonValidator(): ValidatorFn {
         if (jsonObj.constructor !== {}.constructor) {
           throw new Error('not an object');
         }
-      } catch (e) {
+      } catch (_e) {
         return { notValidJson: { value: formField.value } };
       }
     }

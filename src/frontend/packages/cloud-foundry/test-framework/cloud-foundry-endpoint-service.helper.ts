@@ -1,44 +1,46 @@
-import { HttpClient, HttpClientModule, HttpHandler } from '@angular/common/http';
-import { NoopAnimationsModule } from '@angular/platform-browser/animations';
-import { ActivatedRoute } from '@angular/router';
-import { RouterTestingModule } from '@angular/router/testing';
-import { Store, StoreModule } from '@ngrx/store';
-import { testSCFEndpointGuid } from '@stratosui/store/testing';
+import { provideHttpClientTesting } from '@angular/common/http/testing';
+import {
+  provideHttpClient,
+  HttpClient,
+  HttpHandler,
+  withXhr,
+} from "@angular/common/http";
+import { NoopAnimationsModule } from "@angular/platform-browser/animations";
+import { ActivatedRoute, provideRouter } from "@angular/router";
 
-import { CoreModule } from '../../core/src/core/core.module';
-import { SharedModule } from '../../core/src/shared/shared.module';
-import { AppTestModule } from '../../core/test-framework/core-test.helper';
-import { EntityServiceFactory } from '../../store/src/entity-service-factory.service';
-import { EntityMonitorFactory } from '../../store/src/monitors/entity-monitor.factory.service';
-import { PaginationMonitorFactory } from '../../store/src/monitors/pagination-monitor.factory';
-import { appReducers } from '../../store/src/reducers.module';
-import { CFAppState } from '../src/cf-app-state';
-import { CloudFoundryTestingModule } from '../src/cloud-foundry-test.module';
-import { ActiveRouteCfOrgSpace } from '../src/features/cf/cf-page.types';
-import { CloudFoundryEndpointService } from '../src/features/cf/services/cloud-foundry-endpoint.service';
-import { UserInviteConfigureService, UserInviteService } from '../src/features/cf/user-invites/user-invite.service';
-import { CfOrgSpaceDataService } from '../src/shared/data-services/cf-org-space-service.service';
-import { CfUserService } from '../src/shared/data-services/cf-user.service';
-import { CloudFoundryService } from '../src/shared/data-services/cloud-foundry.service';
-import { createUserRoleInOrg } from '../src/store/types/cf-user.types';
-import { CfUserServiceTestProvider } from './user-service-helper';
+import { CoreModule, SharedModule } from "@stratosui/core";
+import {
+  testSCFEndpointGuid,
+  populateStoreWithTestEndpoint,
+} from "@stratosui/store/testing";
+import { AppTestModule, generateBaseTestStoreModules } from "@test-framework";
+
+// Re-export test endpoint utilities for convenience
+export { testSCFEndpointGuid, populateStoreWithTestEndpoint };
+
+import { CloudFoundryTestingModule } from "../src/cloud-foundry-test.module";
+import { ActiveRouteCfOrgSpace } from "../src/features/cf/cf-page.types";
+import { CloudFoundryEndpointService } from "../src/features/cf/services/cloud-foundry-endpoint.service";
+import {
+  UserInviteConfigureService,
+  UserInviteService,
+} from "../src/features/cf/user-invites/user-invite.service";
+import { CfOrgSpaceDataService } from "../src/shared/data-services/cf-org-space-service.service";
+import { CloudFoundryService } from "../src/shared/data-services/cloud-foundry.service";
+import { CfUserServiceTestProvider } from "./user-service-helper";
 
 export const cfEndpointServiceProviderDeps = [
-  EntityServiceFactory,
   CfOrgSpaceDataService,
-  CfUserService,
-  PaginationMonitorFactory,
-  EntityMonitorFactory,
   UserInviteService,
   HttpClient,
   HttpHandler,
-  CloudFoundryEndpointService
+  CloudFoundryEndpointService,
 ];
 export class BaseCfOrgSpaceRouteMock {
   orgGuid: string;
   spaceGuid: string;
   cfGuid: string;
-  constructor(public guid = '1234') {
+  constructor(public guid = "1234") {
     this.cfGuid = guid;
     this.spaceGuid = guid;
     this.orgGuid = guid;
@@ -55,66 +57,45 @@ export function generateCfActiveRouteMock(guid = testSCFEndpointGuid) {
           orgId: guid,
           spaceId: guid,
         },
-        queryParams: {}
-      }
-    }
+        queryParams: {},
+      },
+    },
   };
 }
 
 export function generateActiveRouteCfOrgSpaceMock(guid = testSCFEndpointGuid) {
   return {
     provide: ActiveRouteCfOrgSpace,
-    useFactory: () => new BaseCfOrgSpaceRouteMock(guid)
+    useFactory: () => new BaseCfOrgSpaceRouteMock(guid),
   };
 }
 
-export function generateTestCfEndpointServiceProvider(guid = testSCFEndpointGuid) {
+export function generateTestCfEndpointServiceProvider(
+  guid = testSCFEndpointGuid,
+) {
   return [
     generateActiveRouteCfOrgSpaceMock(guid),
     generateCfActiveRouteMock(guid),
-    CfUserServiceTestProvider,
+    ...CfUserServiceTestProvider,
     CloudFoundryEndpointService,
     UserInviteService,
     UserInviteConfigureService,
     HttpClient,
-    HttpHandler
+    HttpHandler,
   ];
 }
 
 export function generateTestCfEndpointService() {
   return [
     ...cfEndpointServiceProviderDeps,
-    generateTestCfEndpointServiceProvider()
+    ...generateTestCfEndpointServiceProvider(),
   ];
-}
-
-export function generateTestCfUserServiceProvider(guid = testSCFEndpointGuid) {
-  return {
-    provide: CfUserService,
-    useFactory: (
-      store: Store<CFAppState>,
-      paginationMonitorFactory: PaginationMonitorFactory,
-    ) => {
-      return new CfUserService(
-        store,
-        paginationMonitorFactory,
-        { cfGuid: guid, orgGuid: guid, spaceGuid: guid },
-      );
-    },
-    deps: [Store, PaginationMonitorFactory, HttpClient]
-  };
 }
 
 export function generateTestCfServiceProvider() {
   return {
     provide: CloudFoundryService,
-    useFactory: (
-      store: Store<CFAppState>,
-    ) => {
-      const appService = new CloudFoundryService();
-      return appService;
-    },
-    deps: [Store]
+    useFactory: () => new CloudFoundryService(),
   };
 }
 
@@ -122,78 +103,70 @@ export function generateCfTopLevelStoreEntities() {
   return {
     createApplication: {
       cloudFoundryDetails: null,
-      name: '',
+      name: "",
       nameCheck: {
         checking: false,
         available: true,
-        name: ''
-      }
+        name: "",
+      },
     },
     createServiceInstance: {
-      name: '',
-      servicePlanGuid: '',
-      spaceGuid: '',
-      orgGuid: '',
-      spaceScoped: false
+      name: "",
+      servicePlanGuid: "",
+      spaceGuid: "",
+      orgGuid: "",
+      spaceScoped: false,
     },
     deployApplication: {
       cloudFoundryDetails: null,
       applicationSource: {
         type: {
-          id: '',
-          name: ''
-        }
+          id: "",
+          name: "",
+        },
       },
       projectExists: {
         checking: false,
         exists: false,
-        name: '',
-        error: false
-      }
-    },
-    manageUsersRoles: {
-      users: [],
-      cfGuid: '',
-      newRoles: {
-        name: '',
-        orgGuid: '',
-        spaces: {},
-        permissions: createUserRoleInOrg(
-          undefined,
-          undefined,
-          undefined,
-          undefined
-        )
+        name: "",
+        error: false,
       },
-      changedRoles: []
     },
   };
 }
 
 export function generateCfStoreModules() {
   return [
+    // AppTestModule is imported from core test framework which includes the basic store setup
+    // This must come BEFORE CloudFoundryTestingModule because CloudFoundryTestingModule needs Store
+    ...generateBaseTestStoreModules(),
     CloudFoundryTestingModule,
-    StoreModule.forRoot(
-      appReducers, { runtimeChecks: { strictStateImmutability: false, strictActionImmutability: false } },
-      // Do not include initial store here, it's properties will be ignored as they won't have corresponding reducers in appReducers
-    ),
-    AppTestModule
-  ];
+  ].filter((m) => m !== undefined && m !== null);
+}
+
+/**
+ * Generate CF store providers for standalone component testing
+ * Use this instead of generateCfStoreModules() when using importProvidersFrom()
+ */
+export function generateCfStoreProviders() {
+  return [CloudFoundryTestingModule, AppTestModule];
 }
 
 export function generateCfBaseTestModulesNoShared() {
-  return [
-    ...generateCfStoreModules(),
-    RouterTestingModule,
-    CoreModule,
-    NoopAnimationsModule,
-    HttpClientModule
-  ];
+  return [...generateCfStoreModules(), CoreModule, NoopAnimationsModule].filter(
+    (m) => m !== undefined && m !== null,
+  );
 }
 
+export const CF_BASE_TEST_PROVIDERS = [
+  provideRouter([]),
+  provideHttpClient(withXhr()),
+  provideHttpClientTesting(),
+];
+
 export function generateCfBaseTestModules() {
-  return [
-    ...generateCfBaseTestModulesNoShared(),
-    SharedModule,
-  ];
+  return [...generateCfBaseTestModulesNoShared(), SharedModule];
 }
+
+// Re-export CloudFoundryTestingModule for convenience
+export { CloudFoundryTestingModule };

@@ -1,42 +1,30 @@
-import { ActivatedRoute } from '@angular/router';
-import { Store } from '@ngrx/store';
+import { ActivatedRoute, Router } from '@angular/router';
 import { combineLatest, Observable } from 'rxjs';
-import { filter, first, map, publishReplay, refCount, switchMap, tap } from 'rxjs/operators';
+import { take, filter, map, publishReplay, refCount, switchMap } from 'rxjs/operators';
 
-import { PermissionConfig } from '../../../../core/src/core/permissions/current-user-permissions.config';
-import { CurrentUserPermissionsService } from '../../../../core/src/core/permissions/current-user-permissions.service';
-import { getIdFromRoute, pathGet } from '../../../../core/src/core/utils.service';
 import {
+  CurrentUserPermissionsService,
   extractActualListEntity,
-} from '../../../../core/src/shared/components/list/data-sources-controllers/local-filtering-sorting';
-import { SetClientFilter } from '../../../../store/src/actions/pagination.actions';
-import { RouterNav } from '../../../../store/src/actions/router.actions';
-import { AppState } from '../../../../store/src/app-state';
-import { PaginationMonitorFactory } from '../../../../store/src/monitors/pagination-monitor.factory';
-import { getPaginationObservables } from '../../../../store/src/reducers/pagination-reducer/pagination-reducer.helper';
-import { endpointEntitiesSelector } from '../../../../store/src/selectors/endpoint.selectors';
-import { selectPaginationState } from '../../../../store/src/selectors/pagination.selectors';
-import { APIResource } from '../../../../store/src/types/api.types';
-import { EndpointModel } from '../../../../store/src/types/endpoint.types';
-import { PaginatedAction, PaginationEntityState } from '../../../../store/src/types/pagination.types';
+  getIdFromRoute,
+  PermissionConfig
+} from '@stratosui/core';
+import {
+  APIResource,
+  PaginationEntityState
+} from '@stratosui/store';
 import { IServiceInstance, IUserProvidedServiceInstance } from '../../cf-api-svc.types';
-import { CFFeatureFlagTypes, IApp, ISpace } from '../../cf-api.types';
-import { CFAppState } from '../../cf-app-state';
-import { cfEntityFactory } from '../../cf-entity-factory';
-import { getCFEntityKey } from '../../cf-entity-helpers';
-import { applicationEntityType } from '../../cf-entity-types';
-import { CFEntityConfig } from '../../cf-types';
-import { ListCfRoute } from '../../shared/components/list/list-types/cf-routes/cf-routes-data-source-base';
-import { getCurrentUserCFEndpointRolesState } from '../../store/selectors/cf-current-user-role.selectors';
+import { CFFeatureFlagTypes, IApp, IRoute, ISpace } from '../../cf-api.types';
+import { cfOsDebugLog } from '../../shared/data-services/cf-org-space-debug';
+import { CfAppsSignalConfigService } from '../../shared/signal-list-configs/app/cf-apps-signal-config.service';
 import { ICfRolesState } from '../../store/types/cf-current-user-roles.types';
+import { CfCurrentUserRolesSignalService } from '../../user-permissions/cf-current-user-roles-signal.service';
 import {
   CfUser,
   CfUserRoleParams,
   OrgUserRoleNames,
   SpaceUserRoleNames,
   UserRoleInOrg,
-  UserRoleInSpace,
-} from '../../store/types/cf-user.types';
+  UserRoleInSpace } from '../../store/types/cf-user.types';
 import { UserRoleLabels } from '../../store/types/users-roles.types';
 import { CfCurrentUserPermissions, CfPermissionTypes } from '../../user-permissions/cf-user-permissions-checkers';
 import { ActiveRouteCfCell, ActiveRouteCfOrgSpace } from './cf-page.types';
@@ -132,7 +120,7 @@ export function getSpaceRoles(userRolesInSpace: UserRoleInSpace): IUserRole<Spac
   return roles;
 }
 
-function assignRole(currentRoles: string, role: string) {
+function assignRole(currentRoles: string | null, role: string) {
   const newRoles = currentRoles ? `${currentRoles}, ${role}` : role;
   return newRoles;
 }
@@ -179,7 +167,7 @@ export function hasRoleWithinSpace(user: CfUser, spaceGuid: string): boolean {
 }
 
 export function hasRoleWithin(user: CfUser, orgGuid?: string, spaceGuid?: string): boolean {
-  return hasRoleWithinOrg(user, orgGuid) || hasRoleWithinSpace(user, spaceGuid);
+  return (!!orgGuid && hasRoleWithinOrg(user, orgGuid)) || (!!spaceGuid && hasRoleWithinSpace(user, spaceGuid));
 }
 
 export function hasSpaceRoleWithinOrg(user: CfUser, orgGuid: string): boolean {
@@ -201,27 +189,36 @@ export function hasSpaceRoleWithinOrg(user: CfUser, orgGuid: string): boolean {
   return orgSpaces.some((space) => hasRoleWithinSpace(user, space.metadata.guid));
 }
 
-function hasRole(user: CfUser, guid: string, roleType: string) {
-  if (user[roleType]) {
-    const roles = user[roleType] as APIResource[];
+function hasRole(user: CfUser, guid: string, roleType: string): boolean {
+  if ((user as Record<string, any>)[roleType]) {
+    const roles = (user as Record<string, any>)[roleType] as APIResource[];
     return !!roles.find(o => o ? o.metadata.guid === guid : false);
   }
   return false;
 }
 
 export function getActiveRouteCfOrgSpace(activatedRoute: ActivatedRoute) {
-  return ({
+  const result = {
     cfGuid: getIdFromRoute(activatedRoute, 'endpointId'),
     orgGuid: getIdFromRoute(activatedRoute, 'orgId'),
     spaceGuid: getIdFromRoute(activatedRoute, 'spaceId'),
+  };
+  // FWT-917 diagnostic: this factory is the entry point for every quota
+  // wizard, edit-org/space, and most CF-detail screens. If cfGuid/orgGuid/
+  // spaceGuid come back empty here, every downstream label/breadcrumb on
+  // that screen will be blank — that's the fingerprint for the route-wiring
+  // variant of H1 ("no cross-route handoff").
+  cfOsDebugLog('activeRoute:resolved', {
+    url: activatedRoute.snapshot?.url?.map(s => s.path).join('/') ?? null,
+    ...result,
   });
+  return result;
 }
 
 export function getActiveRouteCfCell(activatedRoute: ActivatedRoute) {
   return ({
     cfGuid: getIdFromRoute(activatedRoute, 'endpointId'),
-    cellId: getIdFromRoute(activatedRoute, 'cellId'),
-  });
+    cellId: getIdFromRoute(activatedRoute, 'cellId') });
 }
 
 export const getActiveRouteCfOrgSpaceProvider = {
@@ -240,29 +237,44 @@ export const getActiveRouteCfCellProvider = {
   ]
 };
 
-export function goToAppWall(store: Store<CFAppState>, cfGuid: string, orgGuid?: string, spaceGuid?: string) {
-  const appWallPagKey = 'applicationWall';
-  const entityKey = getCFEntityKey(applicationEntityType);
-  store.dispatch(new SetClientFilter(new CFEntityConfig(applicationEntityType), appWallPagKey,
-    {
-      string: '',
-      items: {
-        cf: cfGuid,
-        org: orgGuid,
-        space: spaceGuid
-      }
-    }
-  ));
-  store.select(selectPaginationState(entityKey, appWallPagKey)).pipe(
-    filter((state: PaginationEntityState) => {
-      const items = pathGet('clientPagination.filter.items', state);
-      return items ? items.cf === cfGuid && items.org === orgGuid && items.space === spaceGuid : false;
-    }),
-    first(),
-    tap(() => {
-      store.dispatch(new RouterNav({ path: ['applications'] }));
-    })
-  ).subscribe();
+export function goToAppWall(
+  appsConfig: CfAppsSignalConfigService,
+  router: Router,
+  cfGuid: string,
+  orgGuid?: string,
+  spaceGuid?: string
+) {
+  // Scope the signal-native app wall by writing the toolbar selections on the
+  // root-singleton CfAppsSignalConfigService — the same signals the wall's
+  // filter predicate (app.cnsiGuid/orgGuid/spaceGuid) and dropdowns read.
+  // Setting them before navigation means the wall mounts pre-filtered. (The
+  // former ngrx SetClientFilter on the `applicationWall` pagination key +
+  // selectPaginationState wait is removed — the signal wall never consumed it,
+  // so that scoping was a dead no-op since the wall's signal migration.)
+  appsConfig.selectedCnsi.set(cfGuid ?? null);
+  appsConfig.selectedOrg.set(orgGuid ?? null);
+  appsConfig.selectedSpace.set(spaceGuid ?? null);
+  router.navigate(['applications']);
+}
+
+// Like goToAppWall, but navigates to the CF-SCOPED applications tab
+// (/cloud-foundry/<cf>/applications — one endpoint) rather than the global
+// cross-CF wall (/applications). CF-scoped context must stay CF-scoped: an
+// org/space summary's "Applications" count links here. Setting the toolbar
+// signals before navigation means the tab's initialize() sees the pre-set
+// filter and eager-loads the org/space catalog, so the selection survives the
+// stale-selection reconciliation.
+export function goToCfApplications(
+  appsConfig: CfAppsSignalConfigService,
+  router: Router,
+  cfGuid: string,
+  orgGuid?: string,
+  spaceGuid?: string
+) {
+  appsConfig.selectedCnsi.set(cfGuid ?? null);
+  appsConfig.selectedOrg.set(orgGuid ?? null);
+  appsConfig.selectedSpace.set(spaceGuid ?? null);
+  router.navigate(['/cloud-foundry', cfGuid, 'applications']);
 }
 
 export function canUpdateOrgSpaceRoles(
@@ -285,85 +297,48 @@ export function canUpdateOrgRoles(
   return perms.can(CfCurrentUserPermissions.ORGANIZATION_CHANGE_ROLES, cfGuid, orgGuid);
 }
 
-export function waitForCFPermissions(store: Store<AppState>, cfGuid: string): Observable<ICfRolesState> {
-  return store.select<ICfRolesState>(getCurrentUserCFEndpointRolesState(cfGuid)).pipe(
+export function waitForCFPermissions(
+  cfRoles: CfCurrentUserRolesSignalService,
+  cfGuid: string
+): Observable<ICfRolesState> {
+  return cfRoles.cfEndpointRolesState$(cfGuid).pipe(
     filter(cf => cf && cf.state.initialised),
-    first(),
+    take(1),
     publishReplay(1),
     refCount(),
   );
 }
 
-export function selectConnectedCfs(store: Store<AppState>): Observable<EndpointModel[]> {
-  return store.select(endpointEntitiesSelector).pipe(
-    map(endpoints => Object.values(endpoints)),
-    map(endpoints => endpoints.filter(endpoint => endpoint.cnsi_type === 'cf' && endpoint.connectionStatus === 'connected')),
+export function haveMultiConnectedCfs(cfRoles: CfCurrentUserRolesSignalService): Observable<boolean> {
+  return cfRoles.connectedCfEndpointGuids$().pipe(
+    map(guids => guids.length > 1)
   );
 }
 
-export function haveMultiConnectedCfs(store: Store<AppState>): Observable<boolean> {
-  return selectConnectedCfs(store).pipe(
-    map(connectedCfs => connectedCfs.length > 1)
-  );
-}
-
-export function filterEntitiesByGuid<T>(guid: string, array?: Array<APIResource<T>>): Array<APIResource<T>> {
+export function filterEntitiesByGuid<T>(guid: string, array?: Array<APIResource<T>>): Array<APIResource<T>> | null {
   return array ? array.filter(entity => entity.metadata.guid === guid) : null;
 }
 
-export function createFetchTotalResultsPagKey(standardActionKey: string): string {
-  return standardActionKey + '-totalResults';
-}
-
-export function fetchTotalResults(
-  action: PaginatedAction,
-  store: Store<AppState>,
-  paginationMonitorFactory: PaginationMonitorFactory
-): Observable<number> {
-  const newAction = {
-    ...action,
-    paginationKey: createFetchTotalResultsPagKey(action.paginationKey),
-    flattenPagination: false,
-    includeRelations: []
-  };
-  newAction.initialParams['results-per-page'] = 1;
-
-  const pagObs = getPaginationObservables({
-    store,
-    action: newAction,
-    paginationMonitor: paginationMonitorFactory.create(
-      newAction.paginationKey,
-      cfEntityFactory(newAction.entityType),
-      newAction.flattenPagination
-    )
-  }, newAction.flattenPagination);
-
-  return combineLatest(
-    pagObs.entities$, // Ensure the request is made by sub'ing to the entities observable
-    pagObs.pagination$
-  ).pipe(
-    map(([, pagination]) => pagination),
-    filter(pagination => !!pagination && !!pagination.pageRequests && !!pagination.pageRequests[1] && !pagination.pageRequests[1].busy),
-    first(),
-    map(pagination => pagination.totalResults)
-  );
-}
-
-type CfOrgSpaceFilterTypes = IApp | ListCfRoute | IServiceInstance;
+type CfOrgSpaceFilterTypes = IApp | IRoute | IServiceInstance;
 export const cfOrgSpaceFilter = (entities: APIResource[], paginationState: PaginationEntityState) => {
   // Filtering is done remotely when maxedResults are hit (see `setMultiFilter`)
   if (!!paginationState.maxedState.isMaxedMode && !paginationState.maxedState.ignoreMaxed) {
     return entities;
   }
 
-  const fetchOrgGuid = (e: APIResource<CfOrgSpaceFilterTypes>): string => {
+  const fetchOrgGuid = (e: APIResource<CfOrgSpaceFilterTypes>): string | null => {
     return e.entity.space ? e.entity.space.entity.organization_guid : null;
   };
 
   // Filter by cf/org/space
-  const cfGuid = paginationState.clientPagination.filter.items.cf;
-  const orgGuid = paginationState.clientPagination.filter.items.org;
-  const spaceGuid = paginationState.clientPagination.filter.items.space;
+  const clientPagination = paginationState.clientPagination;
+  if (!clientPagination) {
+    // No client pagination state => no filter criteria to apply.
+    return entities;
+  }
+  const cfGuid = clientPagination.filter.items.cf;
+  const orgGuid = clientPagination.filter.items.org;
+  const spaceGuid = clientPagination.filter.items.space;
   return !cfGuid && !orgGuid && !spaceGuid ? entities : entities.filter(e => {
     e = extractActualListEntity(e);
     const validCF = !(cfGuid && cfGuid !== e.entity.cfGuid);
@@ -407,21 +382,21 @@ export function createCfOrgSpaceUserRemovalUrl(
   return route;
 }
 
-export function isServiceInstance(obj: any): IServiceInstance {
+export function isServiceInstance(obj: any): IServiceInstance | null {
   return !!obj && !!obj.service_plan_url ? obj as IServiceInstance : null;
 }
 
-export function isUserProvidedServiceInstance(obj: any): IUserProvidedServiceInstance {
+export function isUserProvidedServiceInstance(obj: any): IUserProvidedServiceInstance | null {
   return !!obj && (obj.route_service_url !== null && obj.route_service_url !== undefined) ? obj as IUserProvidedServiceInstance : null;
 }
 
 export function someFeatureFlags(
   ff: CFFeatureFlagTypes[],
   cfGuid: string,
-  store: Store<AppState>,
+  cfRoles: CfCurrentUserRolesSignalService,
   userPerms: CurrentUserPermissionsService,
 ): Observable<boolean> {
-  return waitForCFPermissions(store, cfGuid).pipe(
+  return waitForCFPermissions(cfRoles, cfGuid).pipe(
     switchMap(() => combineLatest(ff.map(flag => {
       const permConfig = new PermissionConfig(CfPermissionTypes.FEATURE_FLAG, flag);
       return userPerms.can(permConfig, cfGuid);

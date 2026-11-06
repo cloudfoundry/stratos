@@ -1,4 +1,4 @@
-import { APIResource } from '../../../../../store/src/types/api.types';
+import { APIResource } from '@stratosui/store';
 
 export const isTCPRoute = (port: string) => port !== null && port !== '';
 

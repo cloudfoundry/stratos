@@ -1,21 +1,21 @@
-import { CoreModule } from '../../../core/core.module';
-import { ComponentFixture, TestBed, waitForAsync } from '@angular/core/testing';
-
+import { ComponentFixture, TestBed } from '@angular/core/testing';
+import { provideZonelessChangeDetection } from '@angular/core';
+import { describe, it, expect, beforeEach, afterEach, beforeAll, afterAll, vi } from 'vitest';
 import { NoContentMessageComponent } from './no-content-message.component';
 
 describe('NoContentMessageComponent', () => {
   let component: NoContentMessageComponent;
   let fixture: ComponentFixture<NoContentMessageComponent>;
 
-  beforeEach(waitForAsync(() => {
+  beforeEach(() => {
     TestBed.configureTestingModule({
-      declarations: [],
+      providers: [provideZonelessChangeDetection()],
       imports: [
-        CoreModule
+        NoContentMessageComponent,
       ]
-    })
-      .compileComponents();
-  }));
+    });
+      TestBed.compileComponents();
+  });
 
   beforeEach(() => {
     fixture = TestBed.createComponent(NoContentMessageComponent);

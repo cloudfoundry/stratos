@@ -2,6 +2,7 @@ package monocular
 
 import (
 	"errors"
+	"log/slog"
 	"net/http"
 	"os"
 	"path/filepath"
@@ -9,8 +10,7 @@ import (
 
 	"github.com/cloudfoundry/stratos/src/jetstream/api"
 	"github.com/cloudfoundry/stratos/src/jetstream/plugins/monocular/store"
-	"github.com/labstack/echo/v4"
-	log "github.com/sirupsen/logrus"
+	"github.com/labstack/echo/v5"
 )
 
 const (
@@ -28,11 +28,9 @@ const (
 // Monocular is a plugin for Monocular
 type Monocular struct {
 	portalProxy     api.PortalProxy
-	chartSvcRoutes  http.Handler
 	ChartStore      store.ChartStore
 	FoundationDBURL string
 	SyncServiceURL  string
-	devSyncPID      int
 	CacheFolder     string
 }
 
@@ -57,7 +55,7 @@ func Init(portalProxy api.PortalProxy) (api.StratosPlugin, error) {
 
 // Init performs plugin initialization
 func (m *Monocular) Init() error {
-	log.Debug("Monocular init .... ")
+	slog.Debug("monocular plugin init")
 
 	if val, ok := m.portalProxy.Env().Lookup(artifactHubDisabledEnvVar); ok {
 		m.portalProxy.GetConfig().PluginConfig[artifactHubDisabled] = val
@@ -71,20 +69,20 @@ func (m *Monocular) Init() error {
 		return err
 	}
 	m.CacheFolder = folder
-	log.Infof("Using Cache folder: %s", m.CacheFolder)
+	slog.Info("using helm chart cache folder", "folder", m.CacheFolder)
 
 	// Check that the folder exists - try to make it, if not
 	if _, err := os.Stat(m.CacheFolder); os.IsNotExist(err) {
-		log.Info("Helm Cache folder does not exist - creating")
+		slog.Info("helm chart cache folder does not exist, creating it", "folder", m.CacheFolder)
 		if err := os.MkdirAll(m.CacheFolder, os.ModePerm); err != nil {
-			log.Warn("Could not create folder for Helm Cache")
+			slog.Warn("could not create the helm chart cache folder", "folder", m.CacheFolder, "error", err)
 			return err
 		}
 	}
 
 	store, err := store.NewHelmChartDBStore(m.portalProxy.GetDatabaseConnection())
 	if err != nil {
-		log.Errorf("Can not get Helm Chart store: %s", err)
+		slog.Error("could not get the helm chart store", "error", err)
 		return err
 	}
 
@@ -97,7 +95,7 @@ func (m *Monocular) Init() error {
 
 // Destroy does any cleanup for the plugin on exit
 func (m *Monocular) Destroy() {
-	log.Debug("Monocular plugin .. destroy")
+	slog.Debug("monocular plugin destroy")
 }
 
 func (m *Monocular) syncOnStartup() {
@@ -106,7 +104,7 @@ func (m *Monocular) syncOnStartup() {
 	// Get all of the helm endpoints
 	endpoints, err := m.portalProxy.ListEndpoints()
 	if err != nil {
-		log.Errorf("Chart Repository Startup: Unable to sync repositories: %v+", err)
+		slog.Error("helm repository startup: unable to list the endpoints to sync", "error", err)
 		return
 	}
 
@@ -118,7 +116,9 @@ func (m *Monocular) syncOnStartup() {
 				m.Sync(api.EndpointRegisterAction, ep)
 			} else {
 				metadata := "{}"
-				m.portalProxy.UpdateEndpointMetadata(ep.GUID, metadata)
+				if err := m.portalProxy.UpdateEndpointMetadata(ep.GUID, metadata); err != nil {
+					slog.Error("failed to reset the endpoint metadata", "endpoint", ep.GUID, "error", err)
+				}
 			}
 		}
 	}
@@ -126,24 +126,17 @@ func (m *Monocular) syncOnStartup() {
 	// Delete any endpoints left in the chart store that are no longer registered
 	// Get all of the endpoints that we have in the Database Chart Store
 	existing, err := m.ChartStore.GetEndpointIDs()
-	if err == nil {
+	if err != nil {
+		slog.Error("helm repository startup: unable to list the chart store endpoints", "error", err)
+	} else {
 		for _, id := range existing {
 			if _, ok := helmRepos[id]; !ok {
-				log.Warnf("Endpoint ID %s exists in the Chart Store but does not exist as an endpoint - deleting", id)
+				slog.Warn("endpoint exists in the chart store but is no longer registered, deleting it",
+					"endpoint", id)
 				m.deleteChartStoreForEndpoint(id)
 			}
 		}
 	}
-}
-
-// ArrayContainsString checks the string array to see if it contains the specifed value
-func arrayContainsString(a []string, x string) bool {
-	for _, n := range a {
-		if x == n {
-			return true
-		}
-	}
-	return false
 }
 
 // OnEndpointNotification handles notification that endpoint has been remoevd
@@ -151,8 +144,10 @@ func (m *Monocular) OnEndpointNotification(action api.EndpointAction, endpoint *
 	if endpoint.CNSIType == helmEndpointType && endpoint.SubType == helmRepoEndpointType {
 		m.Sync(action, endpoint)
 	} else if endpoint.CNSIType == helmEndpointType && endpoint.SubType == helmHubEndpointType && action == 1 {
-		log.Debugf("Deleting Artifact Hub Cache: %s", endpoint.Name)
-		m.deleteCacheForEndpoint(endpoint.GUID)
+		slog.Debug("deleting the artifact hub cache", "endpoint", endpoint.GUID, "name", endpoint.Name)
+		if err := m.deleteCacheForEndpoint(endpoint.GUID); err != nil {
+			slog.Warn("unable to delete the artifact hub cache for an endpoint", "endpoint", endpoint.GUID, "error", err)
+		}
 	}
 }
 
@@ -223,7 +218,7 @@ func (m *Monocular) AddSessionGroupRoutes(echoGroup *echo.Group) {
 }
 
 // isExternalMonocularRequest .. Should this request go out to an external monocular instance? IF so returns external monocular endpoint
-func (m *Monocular) isExternalMonocularRequest(c echo.Context) (*api.CNSIRecord, error) {
+func (m *Monocular) isExternalMonocularRequest(c *echo.Context) (*api.CNSIRecord, error) {
 	cnsiList := strings.Split(c.Request().Header.Get("x-cap-cnsi-list"), ",")
 
 	// If this has a cnsi then test if it for an external monocular instance
@@ -238,16 +233,21 @@ func (m *Monocular) isExternalMonocularRequest(c echo.Context) (*api.CNSIRecord,
 func (m *Monocular) validateExternalMonocularEndpoint(cnsi string) (*api.CNSIRecord, error) {
 	endpoint, err := m.portalProxy.GetCNSIRecord(cnsi)
 	if err != nil {
-		err := errors.New("Failed to fetch endpoint")
-		return nil, echo.NewHTTPError(http.StatusBadRequest, err.Error())
+		const msg = "failed to fetch endpoint"
+		slog.Error(msg, "endpoint", cnsi, "error", err)
+		return nil, echo.NewHTTPError(http.StatusBadRequest, msg)
 	}
 
 	if endpoint.CNSIType == helmEndpointType && endpoint.SubType != helmRepoEndpointType {
 		return &endpoint, nil
 	}
 
-	if m.portalProxy.GetConfig().PluginConfig[artifactHubDisabled] != "true" {
-		return nil, echo.NewHTTPError(http.StatusInternalServerError, errors.New("Artifact Hub is disabled"))
+	// The predecessor of this flag was helmHubEnabled, where != "true" meant
+	// "not enabled". The rename to artifactHubDisabled inverted the meaning
+	// but kept the comparison, so this rejected the request whenever Artifact
+	// Hub was enabled - which is the default.
+	if m.portalProxy.GetConfig().PluginConfig[artifactHubDisabled] == "true" {
+		return nil, echo.NewHTTPError(http.StatusInternalServerError, "Artifact Hub is disabled")
 	}
 
 	return nil, nil

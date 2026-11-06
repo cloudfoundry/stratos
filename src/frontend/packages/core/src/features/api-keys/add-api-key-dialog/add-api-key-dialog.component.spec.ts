@@ -1,7 +1,13 @@
-import { ComponentFixture, TestBed, waitForAsync } from '@angular/core/testing';
-import { MatDialogRef } from '@angular/material/dialog';
+import { ComponentFixture, TestBed } from '@angular/core/testing';
+import { provideZonelessChangeDetection } from '@angular/core';
+import { provideHttpClient } from '@angular/common/http';
+import { provideHttpClientTesting } from '@angular/common/http/testing';
+import { NoopAnimationsModule } from '@angular/platform-browser/animations';
+import { RouterTestingModule } from '@angular/router/testing';
+import { describe, it, expect, beforeEach } from 'vitest';
+import { createEmptyStoreModule } from '@test-framework/core-test.helper';
+import { CoreModule } from '@stratosui/core';
 
-import { BaseTestModules } from '../../../../test-framework/core-test.helper';
 import { AddApiKeyDialogComponent } from './add-api-key-dialog.component';
 
 describe('AddApiKeyDialogComponent', () => {
@@ -12,21 +18,26 @@ describe('AddApiKeyDialogComponent', () => {
     close: () => { }
   };
 
-  beforeEach(waitForAsync(() => {
+  beforeEach(() => {
     TestBed.configureTestingModule({
       imports: [
-        ...BaseTestModules,
+        CoreModule,
+        RouterTestingModule,
+        NoopAnimationsModule,
+        createEmptyStoreModule(),
+        AddApiKeyDialogComponent,
       ],
-      declarations: [AddApiKeyDialogComponent],
       providers: [
         {
-          provide: MatDialogRef,
-          useValue: mockDialogRef
-        }
+          provide: 'TailwindDialogRef',
+          useValue: mockDialogRef,
+        },
+        provideHttpClient(),
+        provideHttpClientTesting(),
+        provideZonelessChangeDetection(),
       ]
-    })
-      .compileComponents();
-  }));
+    });
+  });
 
   beforeEach(() => {
     fixture = TestBed.createComponent(AddApiKeyDialogComponent);

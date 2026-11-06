@@ -4,7 +4,7 @@ import { RouterModule, Routes } from '@angular/router';
 const customRoutes: Routes = [
   {
     path: 'applications',
-    loadChildren: () => import('./features/applications/applications.module').then(m => m.ApplicationsModule),
+    loadChildren: () => import('./features/applications/applications.routes').then(m => m.APPLICATIONS_ROUTES),
     data: {
       stratosNavigation: {
         label: 'Applications',
@@ -16,8 +16,8 @@ const customRoutes: Routes = [
   },
   {
     path: 'marketplace',
-    loadChildren: () => import('./features/service-catalog/service-catalog.module')
-      .then(m => m.ServiceCatalogModule),
+    loadChildren: () => import('./features/service-catalog/service-catalog.routes')
+      .then(m => m.SERVICE_CATALOG_ROUTES),
     data: {
       stratosNavigation: {
         label: 'Marketplace',
@@ -29,7 +29,7 @@ const customRoutes: Routes = [
   },
   {
     path: 'services',
-    loadChildren: () => import('./features/services/services.module').then(m => m.ServicesModule),
+    loadChildren: () => import('./features/services/services.routes').then(m => m.SERVICES_ROUTES),
     data: {
       stratosNavigation: {
         label: 'Services',
@@ -42,7 +42,7 @@ const customRoutes: Routes = [
   },
   {
     path: 'cloud-foundry',
-    loadChildren: () => import('./features/cf/cloud-foundry-section.module').then(m => m.CloudFoundrySectionModule),
+    loadChildren: () => import('./features/cf/cloud-foundry-section.routes').then(m => m.CLOUD_FOUNDRY_SECTION_ROUTES),
     data: {
       stratosNavigation: {
         label: 'Cloud Foundry',
@@ -57,7 +57,7 @@ const customRoutes: Routes = [
 
 @NgModule({
   imports: [
-    RouterModule.forRoot(customRoutes, { relativeLinkResolution: 'legacy' }),
+    RouterModule.forChild(customRoutes),
   ],
   declarations: []
 })

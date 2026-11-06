@@ -1,11 +1,11 @@
-import { Injectable } from '@angular/core';
+import { Injectable, inject } from '@angular/core';
+import { toObservable } from '@angular/core/rxjs-interop';
 import {
   APIResource,
   EntityInfo,
   EndpointModel,
+  EndpointsDataService,
   getFullEndpointApiUrl,
-  PaginationMonitor,
-  stratosEntityCatalog,
 } from '@stratosui/store';
 import { Observable } from 'rxjs';
 import { map, publishReplay, refCount } from 'rxjs/operators';
@@ -17,21 +17,25 @@ export interface MetricsEndpointProvider {
 
 @Injectable()
 export class MetricsService {
-  metricsEndpoints$: Observable<MetricsEndpointProvider[]>;
-  endpointsMonitor: PaginationMonitor<EndpointModel>;
-  waitForAppEntity$: Observable<EntityInfo<APIResource>>;
-  haveNoMetricsEndpoints$: Observable<boolean>;
-  haveNoConnectedMetricsEndpoints$: Observable<boolean>;
+  // W36-B Wave 3: source endpoints from EndpointsDataService instead
+  // of the legacy ngrx PaginationMonitor. The metrics endpoint set was
+  // never paginated server-side; the new service's endpointsList()
+  // signal is the authoritative source.
+  private endpointsData = inject(EndpointsDataService);
+  private endpoints$ = toObservable(this.endpointsData.endpointsList);
+
+  metricsEndpoints$!: Observable<MetricsEndpointProvider[]>;
+  waitForAppEntity$!: Observable<EntityInfo<APIResource>>;
+  haveNoMetricsEndpoints$!: Observable<boolean>;
+  haveNoConnectedMetricsEndpoints$!: Observable<boolean>;
 
   constructor() {
-    this.endpointsMonitor = stratosEntityCatalog.endpoint.store.getPaginationMonitor();
-
     this.setupObservables();
   }
 
   private setupObservables() {
-    this.metricsEndpoints$ = this.endpointsMonitor.currentPage$.pipe(
-      map((endpoints: any) => {
+    this.metricsEndpoints$ = this.endpoints$.pipe(
+      map((endpoints: EndpointModel[]) => {
         const result: MetricsEndpointProvider[] = [];
         const metrics = endpoints.filter(e => e.cnsi_type === 'metrics');
         metrics.forEach(ep => {
@@ -42,7 +46,7 @@ export class MetricsService {
           endpoints.forEach(e => {
             if (e.metadata && e.metadata.metrics && e.metadata.metrics === ep.guid) {
               provider.endpoints.push(e);
-              e.url = getFullEndpointApiUrl(e);
+              (e as any).url = getFullEndpointApiUrl(e);
             }
           });
           result.push(provider);
@@ -53,8 +57,8 @@ export class MetricsService {
       refCount(),
     );
 
-    this.haveNoMetricsEndpoints$ = this.endpointsMonitor.currentPage$.pipe(
-      map((endpoints: any) => {
+    this.haveNoMetricsEndpoints$ = this.endpoints$.pipe(
+      map((endpoints: EndpointModel[]) => {
         const metrics = endpoints.filter(e => e.cnsi_type === 'metrics');
         return metrics.length === 0;
       }),
@@ -62,8 +66,8 @@ export class MetricsService {
       refCount(),
     );
 
-    this.haveNoConnectedMetricsEndpoints$ = this.endpointsMonitor.currentPage$.pipe(
-      map((endpoints: any) => {
+    this.haveNoConnectedMetricsEndpoints$ = this.endpoints$.pipe(
+      map((endpoints: EndpointModel[]) => {
         const metrics = endpoints.filter(e => e.cnsi_type === 'metrics');
         const connected = metrics.filter(e => !!e.user);
         return connected.length === 0;

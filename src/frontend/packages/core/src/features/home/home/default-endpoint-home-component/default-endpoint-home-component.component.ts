@@ -1,20 +1,28 @@
-import { Component, Input, OnInit } from '@angular/core';
+import { ChangeDetectionStrategy, Component, Input, OnInit  } from '@angular/core';
+
 import { Observable, of } from 'rxjs';
 
 import { getFullEndpointApiUrl } from '../../../../../../store/src/endpoint-utils';
 import { EndpointModel } from '../../../../../../store/src/public-api';
 import { HomePageCardLayout, HomePageEndpointCard } from '../../home.types';
+import { MetadataItemComponent } from '../../../../shared/components/metadata-item/metadata-item.component';
 
 @Component({
   selector: 'app-default-endpoint-home-component',
   templateUrl: './default-endpoint-home-component.component.html',
-  styleUrls: ['./default-endpoint-home-component.component.scss']
+  standalone: true,
+  imports: [
+    MetadataItemComponent
+],
+  changeDetection: ChangeDetectionStrategy.OnPush
 })
 export class DefaultEndpointHomeComponent implements OnInit, HomePageEndpointCard {
 
-  url: string;
+  // strict: assigned in ngOnInit before any template read
+  url!: string;
 
-  pLayout: HomePageCardLayout;
+  // strict: assigned via the @Input set layout accessor
+  pLayout!: HomePageCardLayout;
 
   get layout(): HomePageCardLayout {
     return this.pLayout;
@@ -26,7 +34,7 @@ export class DefaultEndpointHomeComponent implements OnInit, HomePageEndpointCar
     }
   }
 
-  @Input() endpoint: EndpointModel;
+  @Input() endpoint!: EndpointModel;
 
   ngOnInit(): void {
     this.url = getFullEndpointApiUrl(this.endpoint);

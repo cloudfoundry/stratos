@@ -1,19 +1,27 @@
-import { ComponentFixture, TestBed, waitForAsync } from '@angular/core/testing';
+import { ComponentFixture, TestBed } from '@angular/core/testing';
+import { provideZonelessChangeDetection } from '@angular/core';
+import { describe, it, expect, beforeEach, afterEach, beforeAll, afterAll, vi } from 'vitest';
 
-import { BaseTestModulesNoShared } from '../../../../test-framework/core-test.helper';
+import { BaseTestModulesNoShared, STORE_TEST_PROVIDERS } from "@test-framework";
 import { FileInputComponent } from './file-input.component';
 
 describe('FileInputComponent', () => {
   let component: FileInputComponent;
   let fixture: ComponentFixture<FileInputComponent>;
 
-  beforeEach(waitForAsync(() => {
+  beforeEach(() => {
     TestBed.configureTestingModule({
-      declarations: [FileInputComponent],
-      imports: [...BaseTestModulesNoShared]
-    })
-      .compileComponents();
-  }));
+      providers: [
+        ...(STORE_TEST_PROVIDERS || []),
+        provideZonelessChangeDetection()
+      ],
+      imports: [
+        ...BaseTestModulesNoShared,
+        FileInputComponent,
+      ]
+    });
+      TestBed.compileComponents();
+  });
 
   beforeEach(() => {
     fixture = TestBed.createComponent(FileInputComponent);

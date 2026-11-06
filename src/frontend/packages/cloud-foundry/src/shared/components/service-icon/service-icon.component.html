@@ -1,4 +1,8 @@
-<div class='service-icon' [ngClass]="{'service-icon__padding': addMenuPadding}">
-  <mat-icon *ngIf="!image" fontSet="stratos-icons">service</mat-icon>
-  <img [src]="image" *ngIf="image" (error)="imageLoadError()">
+<div class="self-end flex" [ngClass]="{'pr-6': addMenuPadding}">
+  @if (!image) {
+    <app-custom-icon class="text-[48px] h-12 w-12" [fontSet]="'stratos-icons'">service</app-custom-icon>
+  }
+  @if (image) {
+    <img class="h-12 w-12" [src]="image" (error)="imageLoadError()" alt="">
+  }
 </div>

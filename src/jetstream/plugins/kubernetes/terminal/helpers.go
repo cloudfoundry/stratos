@@ -5,18 +5,18 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
+	"log/slog"
 	"regexp"
 	"strings"
 	"time"
 
-	"github.com/labstack/echo/v4"
-	uuid "github.com/satori/go.uuid"
-	log "github.com/sirupsen/logrus"
+	"github.com/google/uuid"
+	"github.com/labstack/echo/v5"
 
 	"github.com/cloudfoundry/stratos/src/jetstream/api"
 	"github.com/cloudfoundry/stratos/src/jetstream/plugins/kubernetes/auth"
 
-	"github.com/gorilla/websocket"
+	"github.com/coder/websocket"
 	v1 "k8s.io/api/core/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/client-go/kubernetes"
@@ -48,7 +48,7 @@ func (k *KubeTerminal) getClients() (corev1.PodInterface, corev1.SecretInterface
 	}
 	kubeClient, err := kubernetes.NewForConfig(config)
 	if err != nil {
-		log.Error("Could not get kube client")
+		slog.Error("could not create the Kubernetes client for the terminal", "apiServer", k.APIServer, "namespace", k.Namespace, "error", err)
 		return nil, nil, err
 	}
 
@@ -58,14 +58,17 @@ func (k *KubeTerminal) getClients() (corev1.PodInterface, corev1.SecretInterface
 }
 
 // Create a pod for a user to run the Kube terminal
-func (k *KubeTerminal) createPod(c echo.Context, kubeConfig, kubeVersion string, ws *websocket.Conn) (*PodCreationData, error) {
+func (k *KubeTerminal) createPod(c *echo.Context, kubeConfig, kubeVersion string, ws *websocket.Conn) (*PodCreationData, error) {
 	// Unique ID for the secret and pod name
-	id := uuid.NewV4().String()
+	id := uuid.New().String()
 	id = strings.ReplaceAll(id, "-", "")
 	// Names for the secret and pod
 	secretName := fmt.Sprintf("terminal-%s", id)
 	podName := secretName
 	podClient, secretClient, err := k.getClients()
+	if err != nil {
+		return nil, err
+	}
 	ctx := context.Background()
 	result := &PodCreationData{}
 	result.Namespace = k.Namespace
@@ -107,7 +110,7 @@ func (k *KubeTerminal) createPod(c echo.Context, kubeConfig, kubeVersion string,
 
 	_, err = secretClient.Create(ctx, secretSpec, metav1.CreateOptions{})
 	if err != nil {
-		log.Warnf("Kubernetes Terminal: Unable to create Secret: %+v", err)
+		slog.Warn("Kubernetes Terminal could not create the secret", "secret", secretName, "namespace", k.Namespace, "error", err)
 		return result, err
 	}
 
@@ -166,7 +169,7 @@ func (k *KubeTerminal) createPod(c echo.Context, kubeConfig, kubeVersion string,
 	// Create a new pod
 	pod, err := podClient.Create(ctx, podSpec, metav1.CreateOptions{})
 	if err != nil {
-		log.Warnf("Kubernetes Terminal: Unable to create Pod: %+v", err)
+		slog.Warn("Kubernetes Terminal could not create the pod", "pod", podName, "namespace", k.Namespace, "error", err)
 		// Secret will get cleaned up by caller
 		return result, err
 	}
@@ -180,8 +183,8 @@ func (k *KubeTerminal) createPod(c echo.Context, kubeConfig, kubeVersion string,
 	for {
 		// This ensures we keep the web socket alive while the container is creating
 		sendProgressMessage(ws, startingProgressMessage)
-		status, err := podClient.Get(ctx, pod.Name, statusOptions)
-		if err == nil && status.Status.Phase == "Running" {
+		status, getErr := podClient.Get(ctx, pod.Name, statusOptions)
+		if getErr == nil && status.Status.Phase == "Running" {
 			break
 		}
 
@@ -209,23 +212,25 @@ func setResourcMetadata(metadata *metav1.ObjectMeta, sessionID string) {
 }
 
 // Cleanup the pod and secret
-func (k *KubeTerminal) cleanupPodAndSecret(podData *PodCreationData) error {
+func (k *KubeTerminal) cleanupPodAndSecret(podData *PodCreationData) {
 	ctx := context.Background()
 	if podData == nil {
 		// Already been cleaned up
-		return nil
+		return
 	}
 
 	if len(podData.PodName) > 0 {
 		//captureBashHistory(podData)
-		podData.PodClient.Delete(ctx, podData.PodName, metav1.DeleteOptions{})
+		if err := podData.PodClient.Delete(ctx, podData.PodName, metav1.DeleteOptions{}); err != nil {
+			slog.Warn("could not delete the Kubernetes Terminal pod", "pod", podData.PodName, "error", err)
+		}
 	}
 
 	if len(podData.SecretName) > 0 {
-		podData.SecretClient.Delete(ctx, podData.SecretName, metav1.DeleteOptions{})
+		if err := podData.SecretClient.Delete(ctx, podData.SecretName, metav1.DeleteOptions{}); err != nil {
+			slog.Warn("could not delete the Kubernetes Terminal secret", "secret", podData.SecretName, "error", err)
+		}
 	}
-
-	return nil
 }
 
 func getHelmRepoSetupScript(portalProxy api.PortalProxy) string {
@@ -234,7 +239,7 @@ func getHelmRepoSetupScript(portalProxy api.PortalProxy) string {
 	// Get all of the helm endpoints
 	endpoints, err := portalProxy.ListEndpoints()
 	if err != nil {
-		log.Error("Can not list Helm Repository endpoints")
+		slog.Error("could not list the Helm repository endpoints", "error", err)
 		return str
 	}
 
@@ -253,8 +258,8 @@ func sendProgressMessage(ws *websocket.Conn, progressMsg string) {
 	// Send a message to say that we are creating the pod
 	msg := fmt.Sprintf("\033]2;%s\007", progressMsg)
 	bytes := fmt.Sprintf("% x\n", []byte(msg))
-	if err := ws.WriteMessage(websocket.TextMessage, []byte(bytes)); err != nil {
-		log.Error("Could not send message to client to indicate terminal is starting")
+	if err := api.WriteText(ws, []byte(bytes)); err != nil {
+		slog.Error("could not send the terminal progress message to the client", "progress", progressMsg, "error", err)
 	}
 }
 
@@ -273,7 +278,7 @@ func (k *KubeTerminal) getKubeVersion(endpointID, userID string) (string, error)
 	if len(nodes.Items) > 0 {
 		// Get the version number - remove any 'v' perfix or '+' suffix
 		version := nodes.Items[0].Status.NodeInfo.KubeletVersion
-		reg, err := regexp.Compile("[^0-9\\.]+")
+		reg, err := regexp.Compile(`[^0-9.]+`)
 		if err == nil {
 			version = reg.ReplaceAllString(version, "")
 		}

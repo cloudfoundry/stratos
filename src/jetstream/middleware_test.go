@@ -4,6 +4,8 @@ import (
 	"database/sql"
 	"errors"
 	"fmt"
+	"io"
+	"log/slog"
 	"net/http"
 	"net/http/httptest"
 	"testing"
@@ -14,17 +16,16 @@ import (
 	"github.com/cloudfoundry/stratos/src/jetstream/datastore"
 	"github.com/cloudfoundry/stratos/src/jetstream/repository/apikeys"
 	mock_apikeys "github.com/cloudfoundry/stratos/src/jetstream/repository/apikeys/mock"
-	"github.com/golang/mock/gomock"
-	"github.com/labstack/echo/v4"
-	log "github.com/sirupsen/logrus"
+	"github.com/labstack/echo/v5"
 	. "github.com/smartystreets/goconvey/convey"
+	"go.uber.org/mock/gomock"
 	sqlmock "gopkg.in/DATA-DOG/go-sqlmock.v1"
 )
 
 func makeMockServer(apiKeysRepo apikeys.Repository, mockStratosAuth api.StratosAuth) *portalProxy {
 	db, _, dberr := sqlmock.New()
 	if dberr != nil {
-		log.Panicf("an error '%s' was not expected when opening a stub database connection", dberr)
+		panic(fmt.Sprintf("an error '%s' was not expected when opening a stub database connection", dberr))
 	}
 
 	pp := setupPortalProxy(db)
@@ -35,7 +36,7 @@ func makeMockServer(apiKeysRepo apikeys.Repository, mockStratosAuth api.StratosA
 	return pp
 }
 
-func makeNewRequest() (echo.Context, *httptest.ResponseRecorder) {
+func makeNewRequest() (*echo.Context, *httptest.ResponseRecorder) {
 	req := setupMockReq("GET", "", map[string]string{})
 	rec := httptest.NewRecorder()
 	e := echo.New()
@@ -44,7 +45,7 @@ func makeNewRequest() (echo.Context, *httptest.ResponseRecorder) {
 	return ctx, rec
 }
 
-func makeNewRequestWithParams(httpVerb string, formValues map[string]string) (echo.Context, *httptest.ResponseRecorder) {
+func makeNewRequestWithParams(httpVerb string, formValues map[string]string) (*echo.Context, *httptest.ResponseRecorder) {
 	req := setupMockReq(httpVerb, "", formValues)
 	rec := httptest.NewRecorder()
 	e := echo.New()
@@ -53,11 +54,72 @@ func makeNewRequestWithParams(httpVerb string, formValues map[string]string) (ec
 	return ctx, rec
 }
 
+// Filenames mirror a real dist/frontend/browser build — including a hash
+// that itself contains a dash (chunk-B40-posg.js) and the uppercase media
+// hashes esbuild emits. Everything unhashed must keep the conservative
+// no-cache header; see immutableAssetPath in middleware.go (#5562).
+func TestStaticCacheMiddlewareImmutableAllowlist(t *testing.T) {
+	p := &portalProxy{}
+	mw := p.setStaticCacheContentMiddleware(func(c *echo.Context) error { return nil })
+
+	serve := func(path string) http.Header {
+		rec := httptest.NewRecorder()
+		c := echo.New().NewContext(httptest.NewRequest(http.MethodGet, path, nil), rec)
+		if err := mw(c); err != nil {
+			t.Fatalf("middleware(%s): %v", path, err)
+		}
+		return rec.Header()
+	}
+
+	immutable := []string{
+		"/main-Bv2flKV8.js",
+		"/main-Qw12_ab9.css",
+		"/styles-B5ABX2YE.css",
+		"/polyfills-AbCd12_x.js",
+		"/chunk-B40-posg.js",
+		"/chunk-_4dOh9uF.js",
+		"/worker-Zz9varAB.js",
+		"/media/roboto-v18-latin-300-5THLCT4U.woff2",
+		"/prefix/stripped/main-Bv2flKV8.js",
+	}
+	for _, path := range immutable {
+		h := serve(path)
+		if got := h.Get("Cache-Control"); got != "public, max-age=31536000, immutable" {
+			t.Errorf("%s: want immutable cache-control, got %q", path, got)
+		}
+		if got := h.Get("Pragma"); got != "" {
+			t.Errorf("%s: immutable asset must not carry pragma, got %q", path, got)
+		}
+	}
+
+	mutable := []string{
+		"/",
+		"/index.html",
+		"/favicon.ico",
+		"/assets/company-config.json",
+		"/core/plugin-bundle.js",
+		"/media/unhashed-font.woff2",
+		"/chunk-toolong123.js",
+		"/chunk-short.js",
+		"/hackchunk-AAAAAAAA.js",
+		"/applications/deep/link",
+	}
+	for _, path := range mutable {
+		h := serve(path)
+		if got := h.Get("Cache-Control"); got != "no-cache" {
+			t.Errorf("%s: want no-cache, got %q", path, got)
+		}
+		if got := h.Get("Pragma"); got != "no-cache" {
+			t.Errorf("%s: want pragma no-cache, got %q", path, got)
+		}
+	}
+}
+
 func Test_apiKeyMiddleware(t *testing.T) {
 	t.Parallel()
 
 	// disabling logging noise
-	log.SetLevel(log.PanicLevel)
+	slog.SetDefault(slog.New(slog.NewTextHandler(io.Discard, nil)))
 
 	ctrl := gomock.NewController(t)
 	mockAPIRepo := mock_apikeys.NewMockRepository(ctrl)
@@ -66,7 +128,7 @@ func Test_apiKeyMiddleware(t *testing.T) {
 	defer ctrl.Finish()
 	defer pp.DatabaseConnectionPool.Close()
 
-	handlerFunc := func(c echo.Context) error {
+	handlerFunc := func(c *echo.Context) error {
 		return c.String(http.StatusOK, "test")
 	}
 
@@ -393,7 +455,7 @@ func TestEndpointAdminMiddleware(t *testing.T) {
 		pp, db, _ := setupPortalProxyWithAuthService(mockStratosAuth)
 		defer db.Close()
 
-		handlerFunc := func(c echo.Context) error {
+		handlerFunc := func(c *echo.Context) error {
 			return c.String(http.StatusOK, "test")
 		}
 
@@ -484,9 +546,8 @@ func TestEndpointUpdateDeleteMiddleware(t *testing.T) {
 		res := httptest.NewRecorder()
 		req := setupMockReq("POST", "", nil)
 		_, ctx := setupEchoContext(res, req)
-		ctx.SetParamNames("id")
 
-		handlerFunc := func(c echo.Context) error {
+		handlerFunc := func(c *echo.Context) error {
 			return c.String(http.StatusOK, "test")
 		}
 		middleware := pp.endpointUpdateDeleteMiddleware(handlerFunc)
@@ -509,7 +570,7 @@ func TestEndpointUpdateDeleteMiddleware(t *testing.T) {
 				t.Error(errors.New("unable to mock/stub user in session object"))
 			}
 			Convey("edit admin endpoint", func() {
-				ctx.SetParamValues(fmt.Sprintf("%v", adminEndpointArgs[0]))
+				ctx.SetPathValues(echo.PathValues{{Name: "id", Value: fmt.Sprintf("%v", adminEndpointArgs[0])}})
 
 				mockStratosAuth.
 					EXPECT().
@@ -527,7 +588,7 @@ func TestEndpointUpdateDeleteMiddleware(t *testing.T) {
 				})
 			})
 			Convey("edit user endpoint", func() {
-				ctx.SetParamValues(fmt.Sprintf("%v", userEndpoint1Args[0]))
+				ctx.SetPathValues(echo.PathValues{{Name: "id", Value: fmt.Sprintf("%v", userEndpoint1Args[0])}})
 
 				mockStratosAuth.
 					EXPECT().
@@ -550,7 +611,7 @@ func TestEndpointUpdateDeleteMiddleware(t *testing.T) {
 				t.Error(errors.New("unable to mock/stub user in session object"))
 			}
 			Convey("edit admin endpoint", func() {
-				ctx.SetParamValues(fmt.Sprintf("%v", adminEndpointArgs[0]))
+				ctx.SetPathValues(echo.PathValues{{Name: "id", Value: fmt.Sprintf("%v", adminEndpointArgs[0])}})
 
 				mockStratosAuth.
 					EXPECT().
@@ -574,7 +635,7 @@ func TestEndpointUpdateDeleteMiddleware(t *testing.T) {
 				})
 			})
 			Convey("edit own endpoint", func() {
-				ctx.SetParamValues(fmt.Sprintf("%v", userEndpoint1Args[0]))
+				ctx.SetPathValues(echo.PathValues{{Name: "id", Value: fmt.Sprintf("%v", userEndpoint1Args[0])}})
 
 				mockStratosAuth.
 					EXPECT().
@@ -592,7 +653,7 @@ func TestEndpointUpdateDeleteMiddleware(t *testing.T) {
 				})
 			})
 			Convey("edit endpoint from different user", func() {
-				ctx.SetParamValues(fmt.Sprintf("%v", userEndpoint2Args[0]))
+				ctx.SetPathValues(echo.PathValues{{Name: "id", Value: fmt.Sprintf("%v", userEndpoint2Args[0])}})
 
 				mockStratosAuth.
 					EXPECT().

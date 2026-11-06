@@ -1,12 +1,13 @@
-import { Component, EventEmitter, Input, OnChanges, OnInit, Output } from '@angular/core';
-import { Store } from '@ngrx/store';
-import { BehaviorSubject } from 'rxjs';
+import { CommonModule } from '@angular/common';
+import { Component, EventEmitter, Input, OnChanges, OnInit, Output, signal, inject, ChangeDetectionStrategy } from '@angular/core';
+import { toObservable } from '@angular/core/rxjs-interop';
+import { Router } from '@angular/router';
+import { Observable } from 'rxjs';
 
-import { RouterNav } from '../../../../../../store/src/actions/router.actions';
-import { AppState } from '../../../../../../store/src/app-state';
-import { StratosStatus } from '../../../../../../store/src/types/shared.types';
+import { StratosStatus } from '@stratosui/store';
+import { isUnlimited } from '../../../../core/cf-quota.types';
 import { UtilsService } from '../../../../core/utils.service';
-import { determineCardStatus } from '../card-status/card-status.component';
+import { CardStatusComponent, determineCardStatus } from '../card-status/card-status.component';
 
 enum AlertLevel {
   OK = 0,
@@ -19,26 +20,32 @@ enum AlertLevel {
 @Component({
   selector: 'app-card-number-metric',
   templateUrl: './card-number-metric.component.html',
-  styleUrls: ['./card-number-metric.component.scss']
+  styleUrls: ['./card-number-metric.component.scss'],
+  changeDetection: ChangeDetectionStrategy.OnPush,
+  standalone: true,
+  imports: [
+    CommonModule,
+    CardStatusComponent
+  ]
 })
 export class CardNumberMetricComponent implements OnInit, OnChanges {
 
-  @Input() icon: string;
-  @Input() iconFont: string;
-  @Input() label: string;
-  @Input() labelSingular: string;
-  @Input() limit: string;
-  @Input() units: string;
-  @Input() value: string;
+  @Input() icon!: string;
+  @Input() iconFont!: string;
+  @Input() label!: string;
+  @Input() labelSingular!: string;
+  @Input() limit!: string;
+  @Input() units!: string;
+  @Input() value!: string;
   @Input() showUsage = false;
   @Input() textOnly = false;
   @Input() labelAtTop = false;
-  @Input() link: () => void | string;
+  @Input() link?: string | (() => void | string);
   @Output() showAlerts = new EventEmitter<any>();
-  @Input() mode: string;
+  @Input() mode!: string;
 
-  @Input('alerts')
-  set alerts(alerts) {
+  @Input()
+  set alerts(alerts: any[]) {
     if (alerts) {
       this.processAlerts(alerts);
     }
@@ -46,14 +53,16 @@ export class CardNumberMetricComponent implements OnInit, OnChanges {
 
   alertInfo: any;
 
-  formattedValue: string;
-  formattedLimit: string;
-  usage: string;
+  formattedValue!: string;
+  formattedLimit?: string;
+  usage!: string;
+  private utils = inject(UtilsService);
+  private router = inject(Router);
 
-  status$ = new BehaviorSubject<StratosStatus>(StratosStatus.NONE);
-  isUnlimited: boolean;
-
-  constructor(private utils: UtilsService, private store: Store<AppState>) { }
+  private _status = signal<StratosStatus>(StratosStatus.NONE);
+  public status = this._status.asReadonly();
+  public status$: Observable<StratosStatus> = toObservable(this._status);
+  isUnlimited!: boolean;
 
   ngOnInit() {
     this.format();
@@ -79,7 +88,7 @@ export class CardNumberMetricComponent implements OnInit, OnChanges {
   handleValue() {
     const value = parseInt(this.value, 10);
     this.isUnlimited = false;
-    if (value === -1) {
+    if (isUnlimited(value)) {
       this.formattedValue = 'Unlimited';
       this.isUnlimited = true;
     } else {
@@ -91,10 +100,10 @@ export class CardNumberMetricComponent implements OnInit, OnChanges {
     }
 
     const status = determineCardStatus(parseInt(this.value, 10), parseInt(this.limit, 10));
-    this.status$.next(status);
+    this._status.set(status);
 
     const limit = parseInt(this.limit, 10);
-    if (limit === -1) {
+    if (isUnlimited(limit)) {
       this.formattedLimit = '∞';
       this.usage = '';
     } else {
@@ -116,20 +125,20 @@ export class CardNumberMetricComponent implements OnInit, OnChanges {
 
   goToLink() {
     if (typeof (this.link) === 'string') {
-      this.store.dispatch(new RouterNav({ path: [this.link] }));
+      this.router.navigate([this.link]);
     } else {
-      this.link();
+      this.link?.();
     }
   }
 
-  processAlerts(alerts) {
+  processAlerts(alerts: any[]) {
     this.alertInfo = {
       info: 0,
       warning: 0,
       error: 0
     };
 
-    alerts.forEach((alert) => {
+    alerts.forEach((alert: any) => {
       switch (alert.level as AlertLevel) {
         case AlertLevel.Warning:
           this.alertInfo.warning++;

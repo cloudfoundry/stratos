@@ -1,78 +1,56 @@
-// @import "@angular/material/prebuilt-themes/indigo-pink.css";
-@import '../sass/fonts';
-@import '../sass/icons';
-@import '../sass/theme';
-@import '../sass/mixins';
-@import '../sass/scroll-bar-measure';
-@import '../sass/components/card-wall';
-@import '../sass/components/mat-card';
-@import '../sass/components/mat-popup';
-@import '../sass/components/mat-snack-bar';
-@import '../sass/components/mat-tabs';
-@import '../sass/components/mat-table';
-@import '../sass/components/mat-button-toggle-group';
-@import '../sass/components/json-schema-form';
+// Tailwind CSS and theme files are now imported via angular.json
+// to ensure correct processing order (PostCSS before SCSS)
 
+// Import fonts and icons
+@use '../sass/fonts';
+@use '../sass/icons';
+
+// Import Tailwind animations for custom components
+@use './shared/styles/tailwind-animations.scss';
+
+@reference 'tailwindcss';
+
+// Base styles are handled by Tailwind in main.css
+// The interface face. Inter led this list but was never vendored, so it only
+// ever rendered on machines that happened to have it installed; everyone else
+// fell through to Lato. Lato ships no 500 or 600, which are the two weights the
+// templates ask for most, so both resolved to a face that says nothing —
+// font-medium rendered as font-normal, font-semibold as font-bold.
 body {
-  font-family: Lato, sans-serif; // font-size: 13px;
-  margin: 0;
+  font-family: 'IBM Plex Sans', sans-serif;
+  // Plex's stylistic alternates: dotted zero, single-storey a, simple g.
+  // The dotted zero disambiguates 0 from O without colliding with ø the
+  // way a slashed zero (the `zero` feature) would for Danish/Norwegian
+  // text. Inherits everywhere the family reaches; requires the upstream
+  // font files — Google-pipeline subsets strip the salt feature.
+  font-feature-settings: 'salt' 1;
 }
 
-body,
-html {
-  height: 100%;
+// Angular 20 breaking change: [hidden] attribute support removed
+// Restore default browser behavior for [hidden] attribute
+[hidden] {
+  display: none !important;
 }
 
+// Utility classes for legacy compatibility
 .inline-icon {
-  display: inline-block;
+  @apply inline-block;
 
   &__form {
-    margin-left: 8px;
-    position: absolute;
-    right: -25px;
-    top: 0;
+    @apply ml-2 absolute -right-6 top-0;
   }
 }
 
-.dashboard {
-  .mat-drawer-content {
-    overflow: visible;
-  }
-  .mat-drawer-side {
-    border: 0;
-  }
-  .mat-card-title {
-    font-size: inherit;
-    font-weight: inherit;
-  }
+// Theme feature flags
+.dark-theme-supported {
+  @apply hidden;
 }
 
-
-
-html {
-  box-sizing: border-box;
+// Host-element layout utilities. Applied via `host: { class: '...' }` in
+// component decorators to eliminate single-rule :host stylesheets.
+.app-host-fill {
+  @apply block h-full min-h-0;
 }
-
-*,
-*:before,
-*:after {
-  box-sizing: inherit;
-}
-
-button.mat-simple-snackbar-action {
-  margin-left: 0;
-}
-
-// .router-component {
-//   display: flex;
-//   flex: 1;
-//   flex-direction: column;
-// }
-
-
-// Add selector so that the UI can detect if a dark theme is available
-@if $stratos-dark-theme-supported {
-  .dark-theme-supported {
-    margin: 0;
-  }
+.app-host-flex-1 {
+  @apply flex-1;
 }

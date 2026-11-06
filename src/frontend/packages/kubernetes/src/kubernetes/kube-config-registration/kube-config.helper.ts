@@ -1,15 +1,51 @@
-import { Injectable } from '@angular/core';
+import { Injectable, signal, WritableSignal, inject } from '@angular/core';
 import * as yaml from 'js-yaml';
 import { BehaviorSubject, combineLatest, Observable, of } from 'rxjs';
-import { filter, first, map, tap } from 'rxjs/operators';
+import { filter, map, take, tap } from 'rxjs/operators';
 
 import { EndpointsService } from '../../../../core/src/core/endpoints.service';
 import { createGuid } from '../../../../core/src/core/utils.service';
-import { RowState } from '../../../../core/src/shared/components/list/data-sources-controllers/list-data-source-types';
+import { RowState } from '../../../../core/src/shared/components/signal-list/row-state.types';
 import { getFullEndpointApiUrl } from '../../../../store/src/endpoint-utils';
 import { EndpointModel } from '../../../../store/src/public-api';
 import { KubeConfigAuthHelper } from './kube-config-auth.helper';
 import { KubeConfigFile, KubeConfigFileCluster } from './kube-config.types';
+
+/**
+ * Signal wrapper providing dual API compatibility with BehaviorSubject
+ * Allows gradual migration from BehaviorSubject to Signal patterns
+ */
+function createSignalWrapper<T>(initialValue: T) {
+  const _signal = signal<T>(initialValue);
+  // asObservable() must be callable outside injection contexts (wrappers are
+  // created and read from event handlers, e.g. the file-input parse), so it
+  // is backed by a BehaviorSubject kept in sync on every write instead of a
+  // lazy toObservable(), which throws NG0203 there.
+  const _subject = new BehaviorSubject<T>(initialValue);
+  const write = (value: T) => {
+    _signal.set(value);
+    _subject.next(value);
+  };
+  const wrapper = Object.assign(
+    // Make it callable like a signal
+    () => _signal(),
+    {
+      // WritableSignal methods
+      set: write,
+      update: (fn: (value: T) => T) => write(fn(_signal())),
+      asReadonly: () => _signal.asReadonly(),
+      // BehaviorSubject compatibility methods
+      next: write,
+      getValue: () => _signal(),
+      asObservable: () => _subject.asObservable(),
+    }
+  );
+  return wrapper as WritableSignal<T> & {
+    next: (value: T) => void;
+    getValue: () => T;
+    asObservable: () => Observable<T>;
+  };
+}
 
 /**
  * Helper to parse the kubeconfig and transform it into data
@@ -20,25 +56,22 @@ import { KubeConfigFile, KubeConfigFileCluster } from './kube-config.types';
  */
 @Injectable()
 export class KubeConfigHelper {
+  endpointsService = inject(EndpointsService);
+
 
   authHelper = new KubeConfigAuthHelper();
 
-  clusters = new BehaviorSubject<KubeConfigFileCluster[]>(null);
-  clusters$ = this.clusters.asObservable().pipe(
+  private _clusters = createSignalWrapper<KubeConfigFileCluster[] | null>(null);
+  clusters$ = this._clusters.asObservable().pipe(
     filter(clusters => !!clusters)
   );
 
-  constructor(
-    public endpointsService: EndpointsService,
-  ) {
-  }
-
-  public clustersChanged: () => void;
+  public clustersChanged!: () => void;
   public update = (cluster: KubeConfigFileCluster) => {
     this.checkValidity(cluster).subscribe(() => this.clustersChanged());
   };
 
-  public updateAll(): Observable<any> {
+  public updateAll(): Observable<KubeConfigFileCluster[]> {
     return this.clusters$.pipe(
       tap(clusters => clusters.forEach(cluster => this.update(cluster))),
     );
@@ -50,7 +83,7 @@ export class KubeConfigHelper {
     const clusters: { [name: string]: KubeConfigFileCluster, } = {};
 
     try {
-      doc = yaml.safeLoad(config) as KubeConfigFile;
+      doc = yaml.load(config) as KubeConfigFile;
     } catch (e) {
       return of(`${e}`);
     }
@@ -66,12 +99,12 @@ export class KubeConfigHelper {
       if (cluster) {
         // Found the cluster
         if (!clusters[cluster.name]) {
-          const clstr = {
+          const clstr: KubeConfigFileCluster = {
             ...cluster,
             _users: []
           };
           clusters[cluster.name] = clstr;
-          clstr._state = new BehaviorSubject<RowState>({});
+          clstr._state = createSignalWrapper<RowState>({});
         }
 
         // Get the user
@@ -107,7 +140,7 @@ export class KubeConfigHelper {
       map(() => {
         // Notify cluster changes
         this.clustersChanged();
-        this.clusters.next(Object.values(clusters));
+        this._clusters.next(Object.values(clusters));
         return '';
       })
     );
@@ -119,24 +152,29 @@ export class KubeConfigHelper {
     // Check endpoint name
     return combineLatest([
       this.endpointsService.endpoints$,
-      this.clusters.asObservable() // Might be called before we've loaded clusters, so used the non-filtered one
+      this._clusters.asObservable() // Might be called before we've loaded clusters, so used the non-filtered one
     ]).pipe(
-      first(),
+      take(1),
       map(([eps, clusters]) => this.validate(Object.values(eps), cluster, clusters))
     );
   }
 
-  private validate(endpoints: EndpointModel[], cluster: KubeConfigFileCluster, clusters: KubeConfigFileCluster[]) {
+  private validate(endpoints: EndpointModel[], cluster: KubeConfigFileCluster, clusters: KubeConfigFileCluster[] | null) {
     cluster._invalid = false;
+    // Recompute connect-only from scratch: a stale _guid from a previous
+    // pass would otherwise pin the cluster to connect-only after the user
+    // renames it away from the collision (import skips registration when
+    // _guid is set).
+    cluster._guid = '';
     let reset = true;
 
     const found = endpoints.find(item => item.name === cluster.name);
     if (found) {
       // If the URL is the same, then we will just connect to the existing endpoint
-      if (getFullEndpointApiUrl(found) === cluster.cluster.server && !!cluster._user) {
+      if (getFullEndpointApiUrl(found) === cluster.cluster.server && !!cluster._user && !!found.guid) {
         cluster._guid = found.guid;
         cluster._state.next({
-          message: 'This endpoint will be connected and not registered (endpoint is already registered)',
+          message: 'This endpoint is already registered — importing will connect it, not register a new one. Rename it to register a separate endpoint.',
           info: true
         });
         reset = false;
@@ -146,10 +184,15 @@ export class KubeConfigHelper {
         cluster._state.next({ message: 'An endpoint with this name already exists', warning: true });
       }
     } else {
-      // Check endpoint url is not registered with a different name
+      // A registered endpoint already uses this URL under a different name.
+      // Duplicate URLs are allowed (the endpoints list surfaces them with a
+      // warning icon), so inform the user but don't block the import.
       if (endpoints.find(item => getFullEndpointApiUrl(item) === cluster.cluster.server)) {
-        cluster._invalid = true;
-        cluster._state.next({ message: 'An endpoint with this URL already exists', warning: true });
+        reset = false;
+        cluster._state.next({
+          message: 'Another endpoint is already registered at this URL — importing will register this as an additional endpoint.',
+          warning: true
+        });
       }
     }
 
@@ -160,7 +203,7 @@ export class KubeConfigHelper {
         const newState = this.authHelper.parseAuth(cluster, user);
         if (!!newState && !!newState.message) {
           reset = false;
-          cluster._invalid = newState.error || newState.warning;
+          cluster._invalid = !!(newState.error || newState.warning);
           cluster._state.next(newState);
         }
       }

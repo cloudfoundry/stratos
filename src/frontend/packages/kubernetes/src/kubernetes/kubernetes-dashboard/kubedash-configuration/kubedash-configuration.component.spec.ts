@@ -1,19 +1,22 @@
 import { HttpClient, HttpHandler } from '@angular/common/http';
-import { ComponentFixture, TestBed, waitForAsync } from '@angular/core/testing';
+import { ComponentFixture, TestBed } from '@angular/core/testing';
+import { provideZonelessChangeDetection } from '@angular/core';
+import { describe, it, expect, beforeEach, afterEach, beforeAll, afterAll, vi } from 'vitest';
 import { ActivatedRoute } from '@angular/router';
 
 import { TabNavService } from '../../../../../core/src/tab-nav.service';
-import { KubernetesBaseTestModules } from '../../kubernetes.testing.module';
+import { seedEndpointsDataService } from '@stratosui/store/testing';
+
+import { KubernetesBaseTestModules, kubeTestEndpoint } from '../../kubernetes.testing.module';
 import { KubedashConfigurationComponent } from './kubedash-configuration.component';
 
 describe('KubedashConfigurationComponent', () => {
   let component: KubedashConfigurationComponent;
   let fixture: ComponentFixture<KubedashConfigurationComponent>;
 
-  beforeEach(waitForAsync(() => {
-    TestBed.configureTestingModule({
-      imports: [...KubernetesBaseTestModules],
-      declarations: [KubedashConfigurationComponent],
+  beforeEach(async () => {
+    await TestBed.configureTestingModule({
+      imports: [KubedashConfigurationComponent, ...KubernetesBaseTestModules],
       providers: [
         {
           provide: ActivatedRoute,
@@ -30,11 +33,11 @@ describe('KubedashConfigurationComponent', () => {
         HttpClient,
         HttpHandler,
       ]
-    })
-      .compileComponents();
-  }));
+    }).compileComponents();
+  });
 
   beforeEach(() => {
+    seedEndpointsDataService([kubeTestEndpoint]);
     fixture = TestBed.createComponent(KubedashConfigurationComponent);
     component = fixture.componentInstance;
     fixture.detectChanges();

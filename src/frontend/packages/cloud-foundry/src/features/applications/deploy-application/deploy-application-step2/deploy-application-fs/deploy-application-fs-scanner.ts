@@ -21,6 +21,7 @@ export interface FileScannerInfo {
   summaryItem: any;
   manifestFile: any;
   cfIgnoreFile: any;
+  rootFolderName?: string;
 }
 
 export class DeployApplicationFSScanner implements FileScannerInfo {
@@ -29,13 +30,13 @@ export class DeployApplicationFSScanner implements FileScannerInfo {
   public total = 0;
   public files = 0;
   public folders = 0;
-  public excludes = [];
-  public root = {
+  public excludes: any[] = [];
+  public root: { files: any[]; folders: any } = {
     files: [],
     folders: {}
   };
   public summaryType: FileScannerInfoType = 'file';
-  public summaryItem;
+  public summaryItem: any;
 
   public manifestFile: any;
   public cfIgnoreFile: any;
@@ -50,7 +51,7 @@ export class DeployApplicationFSScanner implements FileScannerInfo {
     return archiveRegex.test(fileName);
   }
 
-  file(context: FileScannerFolderContext, file, path) {
+  file(context: FileScannerFolderContext, file: any, path: string) {
     let fullName = path + '/' + file.name;
     if (fullName.indexOf('/') === 0) {
       fullName = fullName.substr(1);
@@ -69,7 +70,7 @@ export class DeployApplicationFSScanner implements FileScannerInfo {
     }
   }
 
-  folder(context: FileScannerFolderContext, name: string, fullName: string): FileScannerFolderContext {
+  folder(context: FileScannerFolderContext, name: string, fullName: string): FileScannerFolderContext | undefined {
     if (context.folders[name]) {
       return context.folders[name];
     }
@@ -83,7 +84,7 @@ export class DeployApplicationFSScanner implements FileScannerInfo {
       return undefined;
     }
     this.folders++;
-    const newContext = {
+    const newContext: { folders: any; files: any[] } = {
       folders: {},
       files: []
     };
@@ -94,20 +95,21 @@ export class DeployApplicationFSScanner implements FileScannerInfo {
   /**
    * Add a file to the list - will add necessary folders and check to see if the file should be excluded
    */
-  addFile(file) {
+  addFile(file: any) {
     // Make the folder for the file
     const fileParts = file.webkitRelativePath.split('/');
-    let context = this.root;
+    let context: FileScannerFolderContext = this.root;
     let fullPath = '';
     if (fileParts.length > 1) {
       for (let i = 0; i < fileParts.length - 1; i++) {
         if (!(this.rootFolderName && i === 0 && fileParts[i] === this.rootFolderName)) {
           fullPath += '/' + fileParts[i];
-          context = this.folder(context, fileParts[i], fullPath);
-          if (!context) {
+          const nextContext = this.folder(context, fileParts[i], fullPath);
+          if (!nextContext) {
             // Ignored folder
             return this;
           }
+          context = nextContext;
         }
       }
     }
@@ -129,11 +131,10 @@ export class DeployApplicationFSScanner implements FileScannerInfo {
     }
   }
 
-  readItemContents(item): Promise<string> {
-    const scanner = this;
+  readItemContents(item: any): Promise<string> {
     return new Promise((resolve, reject) => {
-      item.file(file => {
-        scanner.readFileContents(file).then((data: string) => {
+      item.file((file: any) => {
+        this.readFileContents(file).then((data: string) => {
           resolve(data);
         }).catch(() => {
           reject();
@@ -142,7 +143,7 @@ export class DeployApplicationFSScanner implements FileScannerInfo {
     });
   }
 
-  readFileContents(file): Promise<string> {
+  readFileContents(file: any): Promise<string> {
     return new Promise((resolve, reject) => {
       const reader = new FileReader();
       reader.onload = () => resolve(reader.result as string);

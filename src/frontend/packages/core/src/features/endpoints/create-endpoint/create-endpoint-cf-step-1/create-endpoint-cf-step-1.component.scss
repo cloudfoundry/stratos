@@ -1,35 +1,64 @@
-$checkbox-margin: 30px;
+$checkbox-margin: 20px;
 
 :host {
   height: 100%;
   width: 100%;
 }
 
-mat-checkbox {
+app-checkbox {
   padding-top: $checkbox-margin;
 }
 
 form.stepper-form {
   max-width: unset;
-  mat-form-field,
-  mat-checkbox {
-    max-width: 450px;
-  }
+
   P {
     max-width: unset;
   }
 }
 
+.create-endpoint__grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 40px;
+  margin-bottom: 20px;
+
+  @media (max-width: 768px) {
+    grid-template-columns: 1fr;
+    gap: 20px;
+  }
+}
+
+.create-endpoint__info-column,
+.create-endpoint__options-column {
+  display: flex;
+  flex-direction: column;
+
+  app-checkbox {
+    padding-top: $checkbox-margin;
+    max-width: unset;
+  }
+}
+
+.create-endpoint__options-column {
+  app-checkbox {
+    // Reduce top padding for option checkboxes after the title
+    &:not(:first-of-type) {
+      padding-top: 15px;
+    }
+  }
+}
+
 .create-endpoint {
   &__section {
-    margin-top: $checkbox-margin;
+    margin-top: 15px;
 
     &-title {
       font-size: 16px;
     }
   }
   &__sso {
-    margin-top: $checkbox-margin;
+    margin-top: 15px;
   }
   &__advanced {
     display: flex;
@@ -53,7 +82,7 @@ form.stepper-form {
     margin: 10px 0;
   }
   &__cacert {
-    font-family: "Source Code Pro";
+    font-family: var(--font-mono);
     font-size: 14px;
     line-break: anywhere;
     max-width: 580px;

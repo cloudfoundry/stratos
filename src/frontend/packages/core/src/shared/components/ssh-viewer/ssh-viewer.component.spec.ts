@@ -1,4 +1,6 @@
-import { ComponentFixture, TestBed, waitForAsync } from '@angular/core/testing';
+import { ComponentFixture, TestBed } from '@angular/core/testing';
+import { provideZonelessChangeDetection } from '@angular/core';
+import { describe, it, expect, beforeEach, afterEach, beforeAll, afterAll, vi } from 'vitest';
 
 import { CoreModule } from '../../../core/core.module';
 import { SshViewerComponent } from './ssh-viewer.component';
@@ -7,20 +9,28 @@ describe('SshViewerComponent', () => {
   let component: SshViewerComponent;
   let fixture: ComponentFixture<SshViewerComponent>;
 
-  beforeEach(waitForAsync(() => {
+  beforeEach(() => {
     TestBed.configureTestingModule({
-      declarations: [ SshViewerComponent ],
+      providers: [provideZonelessChangeDetection()],
       imports: [
+        SshViewerComponent,
         CoreModule,
       ]
-    })
-    .compileComponents();
-  }));
+    });
+    TestBed.compileComponents();
+  });
 
   beforeEach(() => {
     fixture = TestBed.createComponent(SshViewerComponent);
     component = fixture.componentInstance;
     fixture.detectChanges();
+  });
+
+  afterEach(() => {
+    // Properly clean up the component
+    if (fixture) {
+      fixture.destroy();
+    }
   });
 
   it('should create', () => {

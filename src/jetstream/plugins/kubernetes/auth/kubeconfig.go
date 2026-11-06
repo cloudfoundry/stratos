@@ -3,13 +3,12 @@ package auth
 import (
 	"encoding/base64"
 	"fmt"
-	"io/ioutil"
+	"log/slog"
 	"time"
 
 	"github.com/cloudfoundry/stratos/src/jetstream/api"
 	"github.com/cloudfoundry/stratos/src/jetstream/plugins/kubernetes/config"
-	"github.com/labstack/echo/v4"
-	log "github.com/sirupsen/logrus"
+	"github.com/labstack/echo/v5"
 	clientcmdapi "k8s.io/client-go/tools/clientcmd/api"
 )
 
@@ -32,23 +31,23 @@ func (c *KubeConfigAuth) GetName() string {
 }
 
 func (c *KubeConfigAuth) AddAuthInfo(info *clientcmdapi.AuthInfo, tokenRec api.TokenRecord) error {
-	log.Error("KubeConfigAuth: AddAuthInfo: Not supported")
-	return fmt.Errorf("Not supported: %s", tokenRec.AuthType)
+	const msg = "KubeConfigAuth: AddAuthInfo: not supported"
+	slog.Error(msg, "authType", tokenRec.AuthType, "token", tokenRec.TokenGUID)
+	return fmt.Errorf("%s: %s", msg, tokenRec.AuthType)
 }
 
-func (c *KubeConfigAuth) FetchToken(cnsiRecord api.CNSIRecord, ec echo.Context) (*api.TokenRecord, *api.CNSIRecord, error) {
-	log.Debug("FetchToken (KubeConfigAuth)")
+func (c *KubeConfigAuth) FetchToken(cnsiRecord api.CNSIRecord, ec *echo.Context) (*api.TokenRecord, *api.CNSIRecord, error) {
+	slog.Debug("FetchToken (KubeConfigAuth)", "endpoint", cnsiRecord.GUID)
 
-	req := ec.Request()
-
-	// Need to extract the parameters from the request body
-	defer req.Body.Close()
-	body, err := ioutil.ReadAll(req.Body)
-	if err != nil {
-		return nil, nil, err
+	body := ec.FormValue("kubeconfig")
+	if len(body) == 0 {
+		return nil, nil, fmt.Errorf("kubeconfig content is required")
 	}
 
-	kubeConfig, err := config.ParseKubeConfig(body)
+	kubeConfig, err := config.ParseKubeConfig([]byte(body))
+	if err != nil {
+		return nil, nil, fmt.Errorf("unable to parse kubeconfig: %v", err)
+	}
 	kubeConfigUser, err := kubeConfig.GetUserForCluster(cnsiRecord.APIEndpoint.String())
 	if err != nil {
 		return nil, nil, fmt.Errorf("Unable to find cluster in kubeconfig")

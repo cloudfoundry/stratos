@@ -1,6 +1,6 @@
 class ArrayHelper {
-  public flatten<T = any>(arr): T[] {
-    return arr.reduce((flat, toFlatten) => {
+  public flatten<T = any>(arr: any[]): T[] {
+    return arr.reduce((flat: T[], toFlatten: any) => {
       return flat.concat(Array.isArray(toFlatten) ? this.flatten(toFlatten) : toFlatten);
     }, []);
   }

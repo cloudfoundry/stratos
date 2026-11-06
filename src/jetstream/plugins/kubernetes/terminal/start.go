@@ -1,30 +1,26 @@
 package terminal
 
 import (
+	"context"
 	"crypto/tls"
+	"crypto/x509"
 	"errors"
 	"fmt"
+	"log/slog"
 
 	//"encoding/base64"
 	"encoding/json"
 	"net/http"
 	"strings"
-	"time"
 
-	"github.com/labstack/echo/v4"
-	log "github.com/sirupsen/logrus"
+	"github.com/labstack/echo/v5"
 
 	"github.com/cloudfoundry/stratos/src/jetstream/api"
 
-	"github.com/gorilla/websocket"
+	"github.com/coder/websocket"
 )
 
 // TTY Resize, see: https://gitlab.cncf.ci/kubernetes/kubernetes/commit/3b21a9901bcd48bb452d3bf1a0cddc90dae142c4#9691a2f9b9c30711f0397221db0b9ac55ab0e2d1
-
-// Allow connections from any Origin
-var upgrader = websocket.Upgrader{
-	CheckOrigin: func(r *http.Request) bool { return true },
-}
 
 // KeyCode - JSON object that is passed from the front-end to notify of a key press or a term resize
 type KeyCode struct {
@@ -38,26 +34,12 @@ type terminalSize struct {
 	Height uint16
 }
 
-const (
-	// Time allowed to write a message to the peer.
-	writeWait = 10 * time.Second
-
-	// Time allowed to read the next pong message from the peer.
-	pongWait = 60 * time.Second
-
-	// Send pings to peer with this period. Must be less than pongWait.
-	pingPeriod = (pongWait * 9) / 10
-
-	// Time to wait before force close on connection.
-	closeGracePeriod = 10 * time.Second
-)
-
 // Start handles web-socket request to launch a Kubernetes Terminal
-func (k *KubeTerminal) Start(c echo.Context) error {
-	log.Debug("Kube Terminal start request")
-
+func (k *KubeTerminal) Start(c *echo.Context) error {
 	endpointGUID := c.Param("guid")
 	userGUID := c.Get("user_id").(string)
+
+	slog.Debug("Kubernetes Terminal start request", "endpoint", endpointGUID, "user", userGUID)
 
 	cnsiRecord, err := k.PortalProxy.GetCNSIRecord(endpointGUID)
 	if err != nil {
@@ -77,16 +59,25 @@ func (k *KubeTerminal) Start(c echo.Context) error {
 	}
 
 	// Determine the Kubernetes version
-	version, _ := k.getKubeVersion(endpointGUID, userGUID)
-	log.Debugf("Kubernetes Version: %s", version)
+	version, err := k.getKubeVersion(endpointGUID, userGUID)
+	if err != nil {
+		// Not fatal - the terminal image falls back to a default kubectl
+		slog.Warn("could not determine the Kubernetes version for the terminal", "endpoint", endpointGUID, "user", userGUID, "error", err)
+	}
+	slog.Debug("determined the Kubernetes version for the terminal", "endpoint", endpointGUID, "version", version)
 
 	// Upgrade the web socket for the incoming request
-	ws, pingTicker, err := api.UpgradeToWebSocket(c)
+	ws, err := api.UpgradeToWebSocket(c)
 	if err != nil {
 		return err
 	}
-	defer ws.Close()
-	defer pingTicker.Stop()
+	defer func() { _ = ws.CloseNow() }()
+
+	// A pasted block of text arrives as a single KeyCode message of unbounded
+	// size, so no read limit can be safely applied to this socket
+	ws.SetReadLimit(-1)
+
+	readCtx := c.Request().Context()
 
 	// At this point we aer using web sockets, so we can not return errors to the client as the connection
 	// has been upgraded to a web socket
@@ -103,7 +94,7 @@ func (k *KubeTerminal) Start(c echo.Context) error {
 	sendProgressMessage(ws, "")
 
 	if err != nil {
-		log.Errorf("Kubernetes Terminal: Error creating secret or pod: %+v", err)
+		slog.Error("Kubernetes Terminal could not create the secret or the pod", "endpoint", endpointGUID, "user", userGUID, "error", err)
 		k.cleanupPodAndSecret(podData)
 
 		// Send error message
@@ -114,10 +105,14 @@ func (k *KubeTerminal) Start(c echo.Context) error {
 	// API Endpoint to SSH/exec into a container
 	target := fmt.Sprintf("%s/api/v1/namespaces/%s/pods/%s/exec?command=/bin/bash&stdin=true&stderr=true&stdout=true&tty=true", k.APIServer, k.Namespace, podData.PodName)
 
-	dialer := &websocket.Dialer{
-		TLSClientConfig: &tls.Config{
-			InsecureSkipVerify: true,
-		},
+	// Verify the API server against the in-cluster CA; only skip
+	// verification in the dev setup where no CA file is mounted
+	tlsConfig := &tls.Config{InsecureSkipVerify: true}
+	if len(k.CACert) > 0 {
+		pool := x509.NewCertPool()
+		if pool.AppendCertsFromPEM(k.CACert) {
+			tlsConfig = &tls.Config{RootCAs: pool}
+		}
 	}
 
 	if strings.HasPrefix(target, "https://") {
@@ -126,62 +121,60 @@ func (k *KubeTerminal) Start(c echo.Context) error {
 		target = "ws://" + target[7:]
 	}
 
-	header := &http.Header{}
+	header := http.Header{}
 	header.Add("Authorization", fmt.Sprintf("Bearer %s", string(k.Token)))
-	wsConn, _, err := dialer.Dial(target, *header)
+	wsConn, _, err := websocket.Dial(readCtx, target, &websocket.DialOptions{
+		HTTPClient: &http.Client{
+			Transport: &http.Transport{TLSClientConfig: tlsConfig},
+		},
+		HTTPHeader:      header,
+		CompressionMode: websocket.CompressionDisabled,
+	})
 
 	if err == nil {
-		defer wsConn.Close()
+		defer func() { _ = wsConn.CloseNow() }()
+		// Terminal output from the API server can arrive in arbitrarily large
+		// messages - this is a trusted upstream, so no read limit
+		wsConn.SetReadLimit(-1)
 	}
 
 	if err != nil {
 		k.cleanupPodAndSecret(podData)
-		log.Warn("Kube Terminal: Could not connect to pod")
+		slog.Warn("Kubernetes Terminal could not connect to the pod", "endpoint", endpointGUID, "user", userGUID, "pod", podData.PodName, "namespace", k.Namespace, "error", err)
 		// No point returning an error - we've already upgraded to web sockets, so we can't use the HTTP response now
 		return nil
 	}
 
-	stdoutDone := make(chan bool)
-	go pumpStdout(ws, wsConn, stdoutDone)
-	go ping(ws, stdoutDone)
-
-	// If the downstream connection is closed, close the other web socket as well
-	ws.SetCloseHandler(func(code int, text string) error {
-		wsConn.Close()
-		// Cleanup
-		k.cleanupPodAndSecret(podData)
-		podData = nil
-		return nil
-	})
-
-	// Wait a while when reading - can take some time for the container to launch
-	ws.SetReadDeadline(time.Now().Add(pongWait))
-	ws.SetPongHandler(func(string) error { ws.SetReadDeadline(time.Now().Add(pongWait)); return nil })
+	go pumpStdout(ws, wsConn)
 
 	// Read the input from the web socket and pipe it to the SSH client
 	for {
-		_, r, err := ws.ReadMessage()
+		_, r, err := ws.Read(readCtx)
 		if err != nil {
-			// Error reading - so clean up
+			// Error reading (including the client closing the web socket) - so clean up
 			k.cleanupPodAndSecret(podData)
 			podData = nil
 
-			ws.SetWriteDeadline(time.Now().Add(writeWait))
-			ws.WriteMessage(websocket.CloseMessage, websocket.FormatCloseMessage(websocket.CloseNormalClosure, ""))
-			time.Sleep(closeGracePeriod)
-			ws.Close()
+			_ = wsConn.CloseNow()
+			_ = ws.Close(websocket.StatusNormalClosure, "")
 
 			// No point returning an error - we've already upgraded to web sockets, so we can't use the HTTP response now
 			return nil
 		}
 
 		res := KeyCode{}
-		json.Unmarshal(r, &res)
+		if err := json.Unmarshal(r, &res); err != nil {
+			// Zero-valued res would otherwise be sent on as an empty keystroke
+			slog.Warn("Kubernetes Terminal could not parse a client message", "endpoint", endpointGUID, "user", userGUID, "error", err)
+			continue
+		}
 		if res.Cols == 0 {
 			slice := make([]byte, 1)
 			slice[0] = 0
 			slice = append(slice, []byte(res.Key)...)
-			wsConn.WriteMessage(websocket.TextMessage, slice)
+			if err := api.WriteText(wsConn, slice); err != nil {
+				slog.Warn("Kubernetes Terminal could not forward a keystroke", "endpoint", endpointGUID, "user", userGUID, "error", err)
+			}
 		} else {
 			size := terminalSize{
 				Width:  uint16(res.Cols),
@@ -190,41 +183,31 @@ func (k *KubeTerminal) Start(c echo.Context) error {
 			j, _ := json.Marshal(size)
 			resizeStream := []byte{4}
 			slice := append(resizeStream, j...)
-			wsConn.WriteMessage(websocket.TextMessage, slice)
-		}
-	}
-}
-
-func pumpStdout(ws *websocket.Conn, source *websocket.Conn, done chan bool) {
-	for {
-		_, r, err := source.ReadMessage()
-		if err != nil {
-			// Close
-			ws.Close()
-			done <- true
-			break
-		}
-		ws.SetWriteDeadline(time.Now().Add(writeWait))
-		bytes := fmt.Sprintf("% x\n", r[1:])
-		if err := ws.WriteMessage(websocket.TextMessage, []byte(bytes)); err != nil {
-			log.Errorf("Kubernetes Terminal failed to write message: %+v", err)
-			ws.Close()
-			break
-		}
-	}
-}
-
-func ping(ws *websocket.Conn, done chan bool) {
-	ticker := time.NewTicker(pingPeriod)
-	defer ticker.Stop()
-	for {
-		select {
-		case <-ticker.C:
-			if err := ws.WriteControl(websocket.PingMessage, []byte{}, time.Now().Add(writeWait)); err != nil {
-				log.Errorf("Web socket ping error: %+v", err)
+			if err := api.WriteText(wsConn, slice); err != nil {
+				slog.Warn("Kubernetes Terminal could not forward a resize", "endpoint", endpointGUID, "user", userGUID, "error", err)
 			}
-		case <-done:
-			return
+		}
+	}
+}
+
+func pumpStdout(ws *websocket.Conn, source *websocket.Conn) {
+	for {
+		_, r, err := source.Read(context.Background())
+		if err != nil {
+			// Close - unblocks the client read loop so it cleans up the pod
+			_ = ws.CloseNow()
+			break
+		}
+		if len(r) == 0 {
+			// Exec stream messages carry a leading channel byte; tolerate
+			// empty keepalive frames
+			continue
+		}
+		bytes := fmt.Sprintf("% x\n", r[1:])
+		if err := api.WriteText(ws, []byte(bytes)); err != nil {
+			slog.Error("Kubernetes Terminal failed to write a message to the client", "error", err)
+			_ = ws.CloseNow()
+			break
 		}
 	}
 }

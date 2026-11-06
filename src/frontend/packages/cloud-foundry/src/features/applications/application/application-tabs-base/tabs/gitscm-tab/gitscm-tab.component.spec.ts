@@ -1,48 +1,73 @@
 import { DatePipe } from '@angular/common';
-import { HttpClientModule } from '@angular/common/http';
-import { HttpClientTestingModule } from '@angular/common/http/testing';
-import { ComponentFixture, TestBed, waitForAsync } from '@angular/core/testing';
-import { NoopAnimationsModule } from '@angular/platform-browser/animations';
-import { RouterTestingModule } from '@angular/router/testing';
+import { provideHttpClient } from '@angular/common/http';
+import { provideHttpClientTesting } from '@angular/common/http/testing';
+import { ComponentFixture, TestBed } from '@angular/core/testing';
+import { provideZonelessChangeDetection, NO_ERRORS_SCHEMA, signal } from '@angular/core';
+import { provideRouter } from '@angular/router';
+import { provideNoopAnimations } from '@angular/platform-browser/animations';
+import { describe, it, expect, beforeEach } from 'vitest';
 
-import { CoreModule } from '../../../../../../../../core/src/core/core.module';
-import { SharedModule } from '../../../../../../../../core/src/shared/shared.module';
-import {
-  GithubCommitAuthorComponent,
-} from '../../../../../../../../git/src/shared/components/github-commit-author/github-commit-author.component';
-import { getGitHubAPIURL, GITHUB_API_URL } from '../../../../../../../../git/src/shared/github.helpers';
-import { GitSCMService } from '../../../../../../../../git/src/shared/scm/scm.service';
-import { ApplicationServiceMock } from '../../../../../../../test-framework/application-service-helper';
-import { generateCfStoreModules } from '../../../../../../../test-framework/cloud-foundry-endpoint-service.helper';
+import { CommonModule } from '@angular/common';
+import { getGitHubAPIURL, GITHUB_API_URL, GitSCMService } from '@stratosui/git';
+import { TailwindSnackBarService } from '@stratosui/core';
+import { EMPTY } from 'rxjs';
+
+import { AppDetailDataService } from '../../../../../../features/applications/app-detail-data.service';
+import { CfDeployAppDataService } from '../../../../../../services/domain-data/cf-deploy-app-data.service';
 import { ApplicationService } from '../../../../application.service';
 import { GitSCMTabComponent } from './gitscm-tab.component';
+
+/**
+ * Minimal AppDetailDataService stub. Used only for `data.stratosProject()`
+ * reads from the template; ngOnInit branches on ApplicationService instead.
+ */
+const makeDataStub = () => ({
+  stratosProject: signal<any>(null).asReadonly(),
+});
+
+/**
+ * Minimal ApplicationService stub. EMPTY suppresses the inner subscribe
+ * body so ngOnInit doesn't reach into the git entity catalog — same intent
+ * as the AppDetailDataService stub above for the legacy code path.
+ */
+const makeAppServiceStub = () => ({
+  applicationStratProject$: EMPTY,
+  waitForAppEntity$: EMPTY,
+  appSpace$: EMPTY,
+});
 
 describe('GitSCMTabComponent', () => {
   let component: GitSCMTabComponent;
   let fixture: ComponentFixture<GitSCMTabComponent>;
-  beforeEach(waitForAsync(() => {
-    TestBed.configureTestingModule({
-      declarations: [GitSCMTabComponent, GithubCommitAuthorComponent],
+
+  beforeEach(async () => {
+    await TestBed.configureTestingModule({
       imports: [
-        ...generateCfStoreModules(),
-        CoreModule,
-        SharedModule,
-        RouterTestingModule,
-        NoopAnimationsModule,
-        HttpClientModule,
-        HttpClientTestingModule
+        GitSCMTabComponent,
       ],
       providers: [
-        { provide: ApplicationService, useClass: ApplicationServiceMock },
+        provideZonelessChangeDetection(),
+        provideHttpClient(),
+        provideHttpClientTesting(),
+        provideRouter([]),
+        provideNoopAnimations(),
+        TailwindSnackBarService,
         { provide: GITHUB_API_URL, useFactory: getGitHubAPIURL },
         DatePipe,
         GitSCMService,
-      ]
+        { provide: AppDetailDataService, useFactory: makeDataStub },
+        { provide: ApplicationService, useFactory: makeAppServiceStub },
+        { provide: CfDeployAppDataService, useValue: {} },
+      ],
+      schemas: [NO_ERRORS_SCHEMA]
     })
-      .compileComponents();
-  }));
+    // Keep CommonModule (async pipe) but strip deep child components that pull
+    // in the full ngrx entity store. Logic under test is injection + ngOnInit.
+    .overrideComponent(GitSCMTabComponent, {
+      set: { imports: [CommonModule] },
+    })
+    .compileComponents();
 
-  beforeEach(() => {
     fixture = TestBed.createComponent(GitSCMTabComponent);
     component = fixture.componentInstance;
     fixture.detectChanges();

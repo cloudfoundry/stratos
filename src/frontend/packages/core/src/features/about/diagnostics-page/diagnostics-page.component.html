@@ -1,87 +1,171 @@
-<app-page-header [breadcrumbs]="breadcrumbs">
-  <h1>Diagnostics</h1>
-</app-page-header>
+@if ((sessionData$ | async); as session) {
+  <div class="flex flex-col gap-4">
+    <!-- Summary bar -->
+    <app-card>
+      <div class="flex flex-wrap gap-6 px-4 py-3 items-baseline">
+        <span class="flex gap-2 items-baseline">
+          <span class="text-xs font-semibold uppercase tracking-wider text-content-muted">Version</span>
+          <span class="text-sm font-medium">{{ session.version?.proxy_version }}</span>
+        </span>
+        <span class="flex gap-2 items-baseline">
+          <span class="text-xs font-semibold uppercase tracking-wider text-content-muted">Built</span>
+          <span class="text-sm font-medium">{{ buildInfo.buildDate | date:"yyyy-MM-dd HH:mm 'UTC'":"UTC" }}</span>
+        </span>
+        @if (!!gitCommit) {
+          <span class="flex gap-2 items-baseline">
+            <span class="text-xs font-semibold uppercase tracking-wider text-content-muted">Commit</span>
+            <a class="text-sm font-medium text-primary hover:underline" [href]="gitCommitLink" rel="noopener noreferrer" target="_blank">{{ gitCommit | slice:0:8 }}</a>
+          </span>
+        }
+        <span class="flex gap-2 items-baseline">
+          <span class="text-xs font-semibold uppercase tracking-wider text-content-muted">Deploy</span>
+          <span class="text-sm font-medium">{{ session.diagnostics.deploymentType }}</span>
+        </span>
+      </div>
+    </app-card>
 
-<div *ngIf="(sessionData$ | async) as session">
-  <mat-card class="diagnostics-page__card">
-    <app-metadata-item icon="web_asset" label="Version">{{ session.version.proxy_version }}</app-metadata-item>
-    <app-metadata-item icon="date_range" label="Build Date">{{ buildDate }}</app-metadata-item>
-    <div *ngIf="(this.userIsAdmin$ | async) as isAdminUser">
-      <app-metadata-item *ngIf="!isAdminUser" icon="person" label="User">{{ session.user.name }}</app-metadata-item>
-      <app-metadata-item class="about-page__mat-warning-icon" *ngIf="isAdminUser" icon="security" label="User">
-        {{ session.user.name }} (You have administrative privileges)</app-metadata-item>
-      <app-metadata-item *ngIf="session.config.enableTechPreview" class="about-page__mat-warning-icon" icon="whatshot"
-        label="Tech Preview">Tech Preview features are enabled</app-metadata-item>
-      <app-metadata-item class="about-page__mat-warning-icon diagnostics-page__maxed" icon="list"
-        label="Lists - Jetstream Configuration">
-        <div class="diagnostics-page__maxed__content">
-          <span>List max size: {{session.config.listMaxSize || 'Not Set'}}</span>
-          <span>Allow fetch of all entities of a maxed list: {{!!session.config.listAllowLoadMaxed}}</span>
+    <!-- Two-column info -->
+    <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+      <!-- Build info -->
+      <app-info-card title="Build">
+        <div class="py-1">
+          @if (!!gitHubRepository) {
+            <div class="grid grid-cols-[1.5rem_auto_1fr] gap-x-2 items-center px-4 py-1 min-h-7">
+              <app-custom-icon class="text-base text-content-muted">code</app-custom-icon>
+              <span class="text-sm text-content-muted whitespace-nowrap">Repository</span>
+              <a class="text-sm font-medium text-right text-primary hover:underline truncate" [href]="gitHubRepositoryLink" rel="noopener noreferrer" target="_blank">{{ gitHubRepository }}</a>
+            </div>
+            @if (!!gitBranch) {
+              <div class="grid grid-cols-[1.5rem_auto_1fr] gap-x-2 items-center px-4 py-1 min-h-7">
+                <app-custom-icon class="text-base text-content-muted">account_tree</app-custom-icon>
+                <span class="text-sm text-content-muted whitespace-nowrap">Branch</span>
+                <a class="text-sm font-medium text-right text-primary hover:underline truncate" [href]="gitBranchLink" rel="noopener noreferrer" target="_blank">{{ gitBranch }}</a>
+              </div>
+            }
+          }
+          <div class="grid grid-cols-[1.5rem_auto_1fr] gap-x-2 items-center px-4 py-1 min-h-7">
+            <app-custom-icon class="text-base text-content-muted">info_outline</app-custom-icon>
+            <span class="text-sm text-content-muted whitespace-nowrap">Git Client</span>
+            <span class="text-sm font-medium text-right">{{ session.diagnostics.gitClientVersion || 'N/A' }}</span>
+          </div>
+          @if (session.diagnostics.deploymentType === 'Kubernetes') {
+            <div class="grid grid-cols-[1.5rem_auto_1fr] gap-x-2 items-center px-4 py-1 min-h-7">
+              <app-custom-icon class="text-base text-content-muted">web_asset</app-custom-icon>
+              <span class="text-sm text-content-muted whitespace-nowrap">Chart Version</span>
+              <span class="text-sm font-medium text-right">{{ session.diagnostics.helmChartVersion || 'N/A' }}</span>
+            </div>
+            <div class="grid grid-cols-[1.5rem_auto_1fr] gap-x-2 items-center px-4 py-1 min-h-7">
+              <app-custom-icon class="text-base text-content-muted">label</app-custom-icon>
+              <span class="text-sm text-content-muted whitespace-nowrap">Helm Release</span>
+              <span class="text-sm font-medium text-right">{{ session.diagnostics.helmName || 'N/A' }}</span>
+            </div>
+            <div class="grid grid-cols-[1.5rem_auto_1fr] gap-x-2 items-center px-4 py-1 min-h-7">
+              <app-custom-icon class="text-base text-content-muted">update</app-custom-icon>
+              <span class="text-sm text-content-muted whitespace-nowrap">Helm Revision</span>
+              <span class="text-sm font-medium text-right">{{ session.diagnostics.helmRevision || 'N/A' }}</span>
+            </div>
+            <div class="grid grid-cols-[1.5rem_auto_1fr] gap-x-2 items-center px-4 py-1 min-h-7">
+              <app-custom-icon class="text-base text-content-muted">date_range</app-custom-icon>
+              <span class="text-sm text-content-muted whitespace-nowrap">Helm Modified</span>
+              <span class="text-sm font-medium text-right">{{ helmLastModified$ | async | date:'medium' }}</span>
+            </div>
+          }
         </div>
-      </app-metadata-item>
-    </div>
-  </mat-card>
+      </app-info-card>
 
-  <mat-card class="diagnostics-page__card diagnostics-page__columns">
-    <div class="diagnostics-page__two-column">
-      <div *ngIf="!!gitHubRepository">
-        <app-metadata-item icon="storage" label="GitHub Repository">
-          <a [href]="gitHubRepositoryLink" rel="noopener noreferrer" target="_blank">{{ gitHubRepository }}</a>
-        </app-metadata-item>
-        <app-metadata-item *ngIf="!!gitBranch" icon="storage" label="Branch">
-          <a *ngIf="!!gitBranch" [href]="gitBranchLink" rel="noopener noreferrer" target="_blank">{{ gitBranch }}</a>
-          <span *ngIf="!gitBranch">Not available</span>
-        </app-metadata-item>
-        <app-metadata-item icon="storage" label="Commit">
-          <a *ngIf="!!gitCommit" [href]="gitCommitLink" rel="noopener noreferrer"
-            target="_blank">{{ gitCommit | slice:0:8 }}</a>
-          <span *ngIf="!gitCommit">Not available</span>
-        </app-metadata-item>
-      </div>
-      <app-metadata-item icon="info_outline" label="Git Client Version">
-        {{ session.diagnostics.gitClientVersion || 'N/A' }}</app-metadata-item>
+      <!-- Runtime + User info -->
+      <app-info-card title="Runtime">
+        <div class="py-1">
+          <div class="grid grid-cols-[1.5rem_auto_1fr] gap-x-2 items-center px-4 py-1 min-h-7">
+            <app-custom-icon class="text-base text-content-muted">code</app-custom-icon>
+            <span class="text-sm text-content-muted whitespace-nowrap">Angular</span>
+            <span class="text-sm font-medium text-right">{{ angularVersion }}</span>
+          </div>
+          <div class="grid grid-cols-[1.5rem_auto_1fr] gap-x-2 items-center px-4 py-1 min-h-7">
+            <app-custom-icon class="text-base text-content-muted">code</app-custom-icon>
+            <span class="text-sm text-content-muted whitespace-nowrap">TypeScript</span>
+            <span class="text-sm font-medium text-right">{{ buildInfo.typescriptVersion }}</span>
+          </div>
+          <div class="grid grid-cols-[1.5rem_auto_1fr] gap-x-2 items-center px-4 py-1 min-h-7">
+            <app-custom-icon class="text-base text-content-muted">code</app-custom-icon>
+            <span class="text-sm text-content-muted whitespace-nowrap">Node.js</span>
+            <span class="text-sm font-medium text-right">{{ buildInfo.nodeVersion }}</span>
+          </div>
+          <div class="grid grid-cols-[1.5rem_auto_1fr] gap-x-2 items-center px-4 py-1 min-h-7">
+            <app-custom-icon class="text-base text-content-muted">code</app-custom-icon>
+            <span class="text-sm text-content-muted whitespace-nowrap">Bun</span>
+            <span class="text-sm font-medium text-right">{{ buildInfo.bunVersion }}</span>
+          </div>
+        </div>
+        @if ((this.userIsAdmin$ | async); as isAdminUser) {
+          <div class="border-t border-content-border mx-4 my-3"></div>
+          <div class="flex items-center gap-1.5 text-xs font-semibold uppercase tracking-wider text-content-muted px-4 pb-1">
+            @if (isAdminUser) {
+              <app-custom-icon class="text-base text-warning-shade-500">security</app-custom-icon>
+            }
+            User
+          </div>
+          <div class="py-1">
+            <div class="grid grid-cols-[1.5rem_auto_1fr] gap-x-2 items-center px-4 py-1 min-h-7">
+              <app-custom-icon class="text-base text-content-muted">person</app-custom-icon>
+              <span class="text-sm text-content-muted whitespace-nowrap">Name</span>
+              <span class="text-sm font-medium text-right">{{ session.user?.name }}@if (isAdminUser) { <span class="text-content-muted">(admin)</span>}</span>
+            </div>
+            @if (session.config.enableTechPreview) {
+              <div class="grid grid-cols-[1.5rem_auto_1fr] gap-x-2 items-center px-4 py-1 min-h-7">
+                <app-custom-icon class="text-base text-warning-shade-500">whatshot</app-custom-icon>
+                <span class="text-sm text-content-muted whitespace-nowrap">Tech Preview</span>
+                <span class="text-sm font-medium text-right">Enabled</span>
+              </div>
+            }
+            <div class="grid grid-cols-[1.5rem_auto_1fr] gap-x-2 items-center px-4 py-1 min-h-7">
+              <app-custom-icon class="text-base text-content-muted">list</app-custom-icon>
+              <span class="text-sm text-content-muted whitespace-nowrap">List Max Size</span>
+              <span class="text-sm font-medium text-right">{{ session.config.listMaxSize || 'Not Set' }}</span>
+            </div>
+            <div class="grid grid-cols-[1.5rem_auto_1fr] gap-x-2 items-center px-4 py-1 min-h-7">
+              <app-custom-icon class="text-base text-content-muted">list</app-custom-icon>
+              <span class="text-sm text-content-muted whitespace-nowrap">List Fetch All</span>
+              <span class="text-sm font-medium text-right">{{ !!session.config.listAllowLoadMaxed }}</span>
+            </div>
+          </div>
+        }
+      </app-info-card>
     </div>
-    <div class="diagnostics-page__two-column">
-      <app-metadata-item icon="storage" label="Deployment Type">{{ session.diagnostics.deploymentType }}
-      </app-metadata-item>
-      <div *ngIf="session.diagnostics.deploymentType === 'Kubernetes'">
-        <app-metadata-item icon="storage" label="Helm Chart Version">{{ session.diagnostics.helmChartVersion || 'N/A' }}
-        </app-metadata-item>
-        <app-metadata-item icon="storage" label="Helm Release">{{ session.diagnostics.helmName || 'N/A' }}
-        </app-metadata-item>
-        <app-metadata-item icon="storage" label="Helm Revision">{{ session.diagnostics.helmRevision || 'N/A' }}
-        </app-metadata-item>
-        <app-metadata-item icon="date_range" label="Helm Last Modified">{{ helmLastModified$ | async | date:'medium' }}
-        </app-metadata-item>
-      </div>
-    </div>
-  </mat-card>
 
-  <mat-card class="diagnostics-page__card">
-    <app-metadata-item icon="storage" label="Database">{{ session.diagnostics.databaseBackend || 'N/A' }}
-    </app-metadata-item>
-    <app-metadata-item icon="storage" label="Database Migrations"></app-metadata-item>
-    <table mat-table [dataSource]="session.diagnostics.databaseMigrations" class="diagnostics-page__migrations">
-      <ng-container matColumnDef="id">
-        <th mat-header-cell *matHeaderCellDef> ID </th>
-        <td mat-cell *matCellDef="let row"> {{row.id}} </td>
-      </ng-container>
-      <ng-container matColumnDef="applied">
-        <th mat-header-cell *matHeaderCellDef> Applied </th>
-        <td mat-cell *matCellDef="let row">
-          <app-boolean-indicator [isTrue]="row.is_applied" type="yes-no" subtle="true"></app-boolean-indicator>
-        </td>
-      </ng-container>
-      <ng-container matColumnDef="version">
-        <th mat-header-cell *matHeaderCellDef> Version </th>
-        <td mat-cell *matCellDef="let row"> {{row.version_id}} </td>
-      </ng-container>
-      <ng-container matColumnDef="timestamp">
-        <th mat-header-cell *matHeaderCellDef> Timestamp </th>
-        <td mat-cell *matCellDef="let row"> {{row.timestamp}} </td>
-      </ng-container>
-      <tr mat-header-row *matHeaderRowDef="['id', 'version', 'applied', 'timestamp']"></tr>
-      <tr mat-row *matRowDef="let row; columns: ['id', 'version', 'applied', 'timestamp']"></tr>
-    </table>
-  </mat-card>
-</div>
+    <!-- Database & Migrations -->
+    <app-info-card title="Database &amp; Migrations">
+      <details class="px-4 py-3 group">
+        <summary class="flex items-center gap-2 cursor-pointer list-none py-1 [&::-webkit-details-marker]:hidden">
+          <app-custom-icon class="text-base text-content-muted">storage</app-custom-icon>
+          <span class="text-sm text-content-muted">Database</span>
+          <span class="text-sm font-medium">{{ session.diagnostics.databaseBackend || 'N/A' }}</span>
+          <span class="text-xs text-content-muted ml-auto mr-4">{{ getMigrationSummary(session.diagnostics.databaseMigrations) }}</span>
+          <span class="text-content-muted transition-transform group-open:rotate-90">&#9656;</span>
+        </summary>
+        <div class="pt-2 overflow-x-auto">
+          <table class="w-full border-collapse text-sm">
+            <thead>
+              <tr>
+                <th class="text-left text-xs font-semibold uppercase tracking-wider text-content-muted px-3 py-1.5 border-b border-content-border">ID</th>
+                <th class="text-left text-xs font-semibold uppercase tracking-wider text-content-muted px-3 py-1.5 border-b border-content-border">Version</th>
+                <th class="text-left text-xs font-semibold uppercase tracking-wider text-content-muted px-3 py-1.5 border-b border-content-border">Applied</th>
+                <th class="text-left text-xs font-semibold uppercase tracking-wider text-content-muted px-3 py-1.5 border-b border-content-border">Timestamp</th>
+              </tr>
+            </thead>
+            <tbody>
+              @for (row of session.diagnostics.databaseMigrations; track row) {
+                <tr class="hover:bg-content-secondary transition-colors">
+                  <td class="px-3 py-1.5 whitespace-nowrap">{{ row.id }}</td>
+                  <td class="px-3 py-1.5 whitespace-nowrap">{{ row.version_id }}</td>
+                  <td class="px-3 py-1.5 whitespace-nowrap"><app-boolean-indicator [isTrue]="row.is_applied" type="yes-no" [subtle]="true"></app-boolean-indicator></td>
+                  <td class="px-3 py-1.5 whitespace-nowrap">{{ row.timestamp }}</td>
+                </tr>
+              }
+            </tbody>
+          </table>
+        </div>
+      </details>
+    </app-info-card>
+  </div>
+}

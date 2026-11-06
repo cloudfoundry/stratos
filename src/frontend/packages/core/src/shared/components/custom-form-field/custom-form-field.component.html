@@ -1,0 +1,145 @@
+<div class="custom-form-field group relative w-full mb-2 block text-left"
+  [class.focused]="focused"
+  [class.has-value]="hasValue"
+  [class.invalid]="isInvalid"
+  [class.valid]="isValid"
+  [class.disabled]="isDisabled"
+  [class.appearance-standard]="appearance === 'standard'"
+  [class.appearance-fill]="appearance === 'fill'"
+  [class.appearance-outline]="appearance === 'outline'"
+  [class.appearance-legacy]="appearance === 'legacy'"
+  [class.color-primary]="color === 'primary'"
+  [class.color-accent]="color === 'accent'"
+  [class.color-warn]="color === 'warn'"
+  [class.float-label-never]="floatLabel === 'never'"
+  [class.float-label-always]="floatLabel === 'always'"
+  [class.float-label-auto]="floatLabel === 'auto'">
+
+  <div class="form-field-wrapper relative">
+
+    <!-- Main form field flex container -->
+    <div class="form-field-flex flex items-baseline box-border relative transition-all duration-200"
+         [class.w-full]="!fitContent"
+         [class.w-max]="fitContent"
+         [class.max-w-full]="fitContent">
+
+      <!-- Prefix (optional) -->
+      @if (hasPrefix) {
+        <div class="form-field-prefix flex items-center pr-2 transition-colors duration-200"
+             [class]="prefixSuffixColorClasses">
+          <ng-content select="[matPrefix], span[matPrefix]"></ng-content>
+        </div>
+      }
+
+      <!-- Input infix with floating label.
+           Default flex-auto + 180px min-width gives a comfortable
+           input width inside a full-width form-field. fitContent mode
+           shrinks the infix to its content so the trigger fits the
+           value (e.g. select showing "run.adepttech.ca"). -->
+      <div class="form-field-infix block relative min-w-0"
+           [class.flex-auto]="!fitContent"
+           [class.flex-none]="fitContent"
+           [class.w-max]="fitContent"
+           [style.padding]="'0.25em 0'"
+           [style.min-width.px]="fitContent ? null : 180">
+
+        <!-- Input content -->
+        <ng-content select="input, textarea, select, app-select"></ng-content>
+
+        <!-- Floating Label — suppressed for app-select; the select renders its own muted placeholder -->
+        @if (placeholder && !selectComponent) {
+          <label
+            [for]="inputId"
+            [class]="labelClasses"
+            [attr.aria-hidden]="true">
+            @if (isRequired && !hideRequiredMarker) {
+              <span class="text-danger mr-0.5 font-medium" aria-label="required">*</span>
+            }
+            {{ placeholder }}
+          </label>
+        }
+      </div>
+
+      <!-- Suffix -->
+      <div class="form-field-suffix flex items-center pl-2 gap-1 transition-colors duration-200"
+           [class]="prefixSuffixColorClasses">
+        <ng-content select="[matSuffix], span[matSuffix]"></ng-content>
+
+        <!-- Error icon indicator -->
+        @if (isInvalid) {
+          <svg
+            class="error-icon w-5 h-5 shrink-0 transition-opacity duration-200 text-danger"
+            viewBox="0 0 20 20"
+            fill="currentColor"
+            xmlns="http://www.w3.org/2000/svg"
+            aria-hidden="true">
+            <path fill-rule="evenodd"
+              d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7 4a1 1 0 11-2 0 1 1 0 012 0zm-1-9a1 1 0 00-1 1v4a1 1 0 102 0V6a1 1 0 00-1-1z"
+              clip-rule="evenodd"/>
+          </svg>
+        }
+
+        <!-- Success icon indicator — only when there's an actual value -->
+        @if (isValid && hasValue) {
+          <svg
+            class="success-icon w-5 h-5 shrink-0 transition-opacity duration-200 text-success"
+            viewBox="0 0 20 20"
+            fill="currentColor"
+            xmlns="http://www.w3.org/2000/svg"
+            aria-hidden="true">
+            <path fill-rule="evenodd"
+              d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z"
+              clip-rule="evenodd"/>
+          </svg>
+        }
+      </div>
+    </div>
+
+    <!-- Underline (for standard and legacy appearances) -->
+    @if (appearance === 'standard' || appearance === 'legacy') {
+      <div class="form-field-underline relative w-full h-px transition-colors duration-200"
+           [class]="underlineColorClasses">
+      <span class="form-field-ripple absolute bottom-0 left-0 w-full h-0.5
+                   transform origin-center transition-transform duration-300 ease-out"
+            [class]="rippleColorClasses"></span>
+      </div>
+    }
+
+    <!-- Subscript wrapper for hints and errors — takes space only when content present -->
+    <div class="form-field-subscript-wrapper box-border w-full overflow-hidden pt-1">
+
+      <!-- Error Messages -->
+      @if (isInvalid && errorMessage) {
+        <div class="form-field-error-wrapper flex items-start gap-1 animate-slideDown text-danger"
+          role="alert"
+          aria-live="polite">
+          <svg class="w-4 h-4 shrink-0 mt-0.5"
+            fill="currentColor"
+            viewBox="0 0 20 20"
+            xmlns="http://www.w3.org/2000/svg"
+            aria-hidden="true">
+            <path fill-rule="evenodd"
+              d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7 4a1 1 0 11-2 0 1 1 0 012 0zm-1-9a1 1 0 00-1 1v4a1 1 0 102 0V6a1 1 0 00-1-1z"
+              clip-rule="evenodd"/>
+          </svg>
+          <div class="form-field-error flex-1 text-xs leading-tight"
+            [id]="inputId + '-error'">
+            {{ errorMessage }}
+          </div>
+          <ng-content select="mat-error"></ng-content>
+        </div>
+      }
+
+      <!-- Hint Text (only shown when no errors) -->
+      @if (!isInvalid && hintLabel) {
+        <div class="form-field-hint-wrapper flex justify-between gap-2 text-content-muted">
+          <div class="form-field-hint flex-1 text-xs leading-tight"
+            [id]="inputId + '-hint'">
+            {{ hintLabel }}
+          </div>
+          <ng-content select="mat-hint"></ng-content>
+        </div>
+      }
+    </div>
+  </div>
+</div>

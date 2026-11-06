@@ -1,4 +1,6 @@
-import { ComponentFixture, TestBed, waitForAsync } from '@angular/core/testing';
+import { ComponentFixture, TestBed } from '@angular/core/testing';
+import { provideZonelessChangeDetection } from '@angular/core';
+import { describe, it, expect, beforeEach, afterEach, beforeAll, afterAll, vi } from 'vitest';
 
 import { CoreModule } from '../../../core/core.module';
 import { EntitySummaryTitleComponent } from './entity-summary-title.component';
@@ -7,15 +9,16 @@ describe('EntitySummaryTitleComponent', () => {
   let component: EntitySummaryTitleComponent;
   let fixture: ComponentFixture<EntitySummaryTitleComponent>;
 
-  beforeEach(waitForAsync(() => {
+  beforeEach(() => {
     TestBed.configureTestingModule({
+      providers: [provideZonelessChangeDetection()],
       imports: [
+        EntitySummaryTitleComponent, // Now standalone
         CoreModule,
-      ],
-      declarations: [EntitySummaryTitleComponent]
-    })
-      .compileComponents();
-  }));
+      ]
+    });
+      TestBed.compileComponents();
+  });
 
   beforeEach(() => {
     fixture = TestBed.createComponent(EntitySummaryTitleComponent);

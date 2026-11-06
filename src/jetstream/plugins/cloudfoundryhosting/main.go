@@ -4,18 +4,19 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
+	"log/slog"
 	"net/http"
 	"net/url"
+	"os"
 	"strconv"
 	"strings"
 
+	"github.com/google/uuid"
 	"github.com/gorilla/sessions"
-	"github.com/govau/cf-common/env"
-	"github.com/labstack/echo/v4"
-	uuid "github.com/satori/go.uuid"
-	log "github.com/sirupsen/logrus"
+	"github.com/labstack/echo/v5"
 
 	"github.com/cloudfoundry/stratos/src/jetstream/api"
+	"github.com/cloudfoundry/stratos/src/jetstream/api/env"
 )
 
 // Constants
@@ -37,8 +38,7 @@ func init() {
 
 // CFHosting is a plugin to configure Stratos when hosted in Cloud Foundry
 type CFHosting struct {
-	portalProxy  api.PortalProxy
-	endpointType string
+	portalProxy api.PortalProxy
 }
 
 // Package initialization
@@ -59,7 +59,7 @@ func ConfigInit(envLookup *env.VarSet, jetstreamConfig *api.PortalConfig) {
 		if isSQLite {
 			// If SQLIte - create a random value to use, since each app instance has its own DB
 			// and sessions should not be accessible across different instances
-			jetstreamConfig.SessionStoreSecret = uuid.NewV4().String()
+			jetstreamConfig.SessionStoreSecret = uuid.New().String()
 		}
 		// If not SQLite then we are using a shared DB
 		// Just drop through and we'll later use a random value and log a warning
@@ -74,7 +74,7 @@ func ConfigInit(envLookup *env.VarSet, jetstreamConfig *api.PortalConfig) {
 			appInstanceIndex, ok := envLookup.Lookup("CF_INSTANCE_INDEX")
 			if ok {
 				jetstreamConfig.SessionStoreSecret = jetstreamConfig.SessionStoreSecret + "_" + appInstanceIndex
-				log.Infof("Updated session secret for Cloud Foundry App Instance: %s", appInstanceIndex)
+				slog.Info("Updated the session secret for this Cloud Foundry app instance", "instanceIndex", appInstanceIndex)
 			}
 		}
 	}
@@ -84,7 +84,7 @@ func ConfigInit(envLookup *env.VarSet, jetstreamConfig *api.PortalConfig) {
 		if appInstanceIndex, ok := envLookup.Lookup("CF_INSTANCE_INDEX"); ok {
 			if index, err := strconv.Atoi(appInstanceIndex); err == nil {
 				jetstreamConfig.CanMigrateDatabaseSchema = (index == 0)
-				log.Infof("Skipping DB migration => not index 0 (%d)", index)
+				slog.Info("Skipping the DB migration: not instance index 0", "instanceIndex", index)
 			}
 		}
 	}
@@ -119,7 +119,7 @@ func (ch *CFHosting) Init() error {
 
 	// Determine if we are running CF by presence of env var "VCAP_APPLICATION" and configure appropriately
 	if ch.portalProxy.Env().IsSet(VCapApplication) {
-		log.Info("Detected that Console is deployed as a Cloud Foundry Application")
+		slog.Info("Detected that Console is deployed as a Cloud Foundry Application")
 
 		// Record that we are deployed in Cloud Foundry
 		ch.portalProxy.GetConfig().IsCloudFoundry = true
@@ -140,7 +140,7 @@ func (ch *CFHosting) Init() error {
 		stratosAdminScope, ok := ch.portalProxy.Env().Lookup("STRATOS_ADMIN_SCOPE")
 		if ok {
 			ch.portalProxy.GetConfig().ConsoleConfig.ConsoleAdminScope = stratosAdminScope
-			log.Infof("Overriden Console Admin Scope to: %s", stratosAdminScope)
+			slog.Info("Overrode the Console admin scope", "scope", stratosAdminScope)
 		}
 
 		// Need to run as HTTP on the port we were told to use
@@ -149,7 +149,7 @@ func (ch *CFHosting) Init() error {
 		port, ok := ch.portalProxy.Env().Lookup("PORT")
 		if ok {
 			ch.portalProxy.GetConfig().TLSAddress = ":" + port
-			log.Infof("Updated Console address to: %s", ch.portalProxy.GetConfig().TLSAddress)
+			slog.Info("Updated the Console address", "address", ch.portalProxy.GetConfig().TLSAddress)
 		}
 
 		// Get the cf_api value from the JSON
@@ -158,25 +158,25 @@ func (ch *CFHosting) Init() error {
 		data := []byte(vCapApp)
 		err := json.Unmarshal(data, &appData)
 		if err != nil {
-			log.Fatalf("Could not get the Cloud Foundry API URL: %+v", err)
-			return nil
+			slog.Error("could not get the Cloud Foundry API URL", "error", err)
+			os.Exit(1)
 		}
 
-		log.Infof("CF API URL: %s", appData.API)
+		slog.Info("CF API URL", "url", appData.API)
 
 		// Allow the URL to be overridden by an application environment variable
 		if ch.portalProxy.Env().IsSet(CFApiURLOverride) {
 			apiUrl, _ := ch.portalProxy.Env().Lookup(CFApiURLOverride)
 			appData.API = apiUrl
-			log.Infof("Overriden CF API URL from environment variable %s", apiUrl)
+			slog.Info("Overrode the CF API URL from an environment variable", "url", apiUrl)
 		}
 
 		if ch.portalProxy.Env().IsSet(CFApiForceSecure) {
 			// Force the API URL protocol to be https
 			appData.API = strings.Replace(appData.API, "http://", "https://", 1)
-			log.Infof("Ensuring that CF API URL is accessed over HTTPS")
+			slog.Info("Ensuring the CF API URL is accessed over HTTPS")
 		} else {
-			log.Info("No forced override to HTTPS")
+			slog.Info("No forced override to HTTPS")
 		}
 
 		// Ephemeral Database indicates if we are running with a DB like SQLite, which is Ephemeral
@@ -187,20 +187,20 @@ func (ch *CFHosting) Init() error {
 			// Force the Endpoint Dashboard to be visible?
 			disablePersistenceFeatures = !ch.portalProxy.Env().MustBool(ForceEnablePersistenceFeatures)
 			if disablePersistenceFeatures {
-				log.Info("Features requiring persistence have been DISABLED")
+				slog.Info("Features requiring persistence have been DISABLED")
 			} else {
-				log.Info("Features requiring persistence have been ENABLED")
+				slog.Info("Features requiring persistence have been ENABLED")
 			}
 		}
 		ch.portalProxy.GetConfig().PluginConfig["disablePersistenceFeatures"] = strconv.FormatBool(disablePersistenceFeatures)
-		log.Infof("Features requiring persistence: enabled: %s", strconv.FormatBool(!disablePersistenceFeatures))
+		slog.Info("Features requiring persistence", "enabled", !disablePersistenceFeatures)
 
-		log.Infof("Using Cloud Foundry API URL: %s", appData.API)
+		slog.Info("Using the Cloud Foundry API URL", "url", appData.API)
 		cfEndpointSpec, _ := ch.portalProxy.GetEndpointTypeSpec("cf")
 		newCNSI, _, err := cfEndpointSpec.Info(appData.API, true, "")
 		if err != nil {
-			log.Fatalf("Could not get the info for Cloud Foundry: %+v", err)
-			return nil
+			slog.Error("could not get the info for Cloud Foundry", "url", appData.API, "error", err)
+			os.Exit(1)
 		}
 
 		// Override the configuration to set the authorization endpoint
@@ -219,17 +219,17 @@ func (ch *CFHosting) Init() error {
 
 		ch.portalProxy.GetConfig().ConsoleConfig.UAAEndpoint = url
 
-		log.Infof("Cloud Foundry UAA is: %s", ch.portalProxy.GetConfig().ConsoleConfig.UAAEndpoint)
+		slog.Info("Cloud Foundry UAA", "endpoint", ch.portalProxy.GetConfig().ConsoleConfig.UAAEndpoint)
 
 		// Not set in the environment and failed to read from the Secrets file
 		// CHECK is this necessary to set here?
 		ch.portalProxy.GetConfig().ConsoleConfig.SkipSSLValidation = ch.portalProxy.Env().MustBool("SKIP_SSL_VALIDATION")
 
 		if !ch.portalProxy.Env().IsSet(SkipAutoRegister) {
-			log.Info("Setting AUTO_REG_CF_URL config to ", appData.API)
+			slog.Info("Setting the AUTO_REG_CF_URL config", "url", appData.API)
 			ch.portalProxy.GetConfig().AutoRegisterCFUrl = appData.API
 		} else {
-			log.Infof("Skipping auto-register of CF Endpoint - %s is set", SkipAutoRegister)
+			slog.Info("Skipping auto-register of the CF endpoint", "because", SkipAutoRegister+" is set")
 		}
 
 		// Store the space and id of the Console application - we can use these to prevent stop/delete in the front-end
@@ -239,21 +239,21 @@ func (ch *CFHosting) Init() error {
 		ch.portalProxy.GetConfig().CloudFoundryInfo.SpaceGUID = appData.SpaceID
 		ch.portalProxy.GetConfig().CloudFoundryInfo.AppGUID = appData.ApplicationID
 
-		log.Info("All done for Cloud Foundry deployment")
+		slog.Info("All done for Cloud Foundry deployment")
 	}
 	return nil
 }
 
 // EchoMiddleware is the Echo server middleware provided by this plugin
 func (ch *CFHosting) EchoMiddleware(h echo.HandlerFunc) echo.HandlerFunc {
-	return func(c echo.Context) error {
+	return func(c *echo.Context) error {
 
 		// If request is a WebSocket request, don't do anything special
 		upgrade := c.Request().Header.Get("Upgrade")
 		webSocketKey := c.Request().Header.Get("Sec-Websocket-Key")
 
 		if len(upgrade) > 0 && len(webSocketKey) > 0 {
-			log.Infof("Not redirecting this request")
+			slog.Info("Not redirecting this request")
 			return h(c)
 		}
 
@@ -279,21 +279,25 @@ func (ch *CFHosting) EchoMiddleware(h echo.HandlerFunc) echo.HandlerFunc {
 // For cloud foundry session affinity
 // Ensure we add a cookie named "JSESSIONID" for Cloud Foundry session affinity
 func (ch *CFHosting) SessionEchoMiddleware(h echo.HandlerFunc) echo.HandlerFunc {
-	return func(c echo.Context) error {
+	return func(c *echo.Context) error {
 		// Make sure there is a JSESSIONID cookie set to the session ID
 		session, err := ch.portalProxy.GetSession(c)
 		if err == nil {
 			// We have a session
 			guid, err := ch.portalProxy.GetSessionValue(c, cfSessionCookieName)
 			if err != nil || guid == nil {
-				guid = uuid.NewV4().String()
+				guid = uuid.New().String()
 				session.Values[cfSessionCookieName] = guid
-				ch.portalProxy.SaveSession(c, session)
+				if err := ch.portalProxy.SaveSession(c, session); err != nil {
+					slog.Warn("unable to save the session for Cloud Foundry session affinity", "error", err)
+				}
 			}
 			sessionGUID := fmt.Sprintf("%s", guid)
 			// Set the JSESSIONID coolie for Cloud Foundry session affinity
-			w := c.Response().Writer
+			w := c.Response()
 			cookie := sessions.NewCookie(cfSessionCookieName, sessionGUID, session.Options)
+			// CF hosting always terminates TLS (X-Forwarded-Proto is enforced above)
+			cookie.Secure = true
 			http.SetCookie(w, cookie)
 		}
 		return h(c)

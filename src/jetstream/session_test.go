@@ -3,33 +3,14 @@ package main
 import (
 	"errors"
 	"net/http"
+	"net/http/httptest"
 	"testing"
 
 	"github.com/cloudfoundry/stratos/src/jetstream/api"
 	"github.com/gorilla/sessions"
-	"github.com/labstack/echo/v4"
+	"github.com/labstack/echo/v5"
 	. "github.com/smartystreets/goconvey/convey"
 )
-
-type sessionTestPortalProxy struct {
-	portalProxy
-}
-
-type testEchoContext struct {
-	echo.Context
-}
-
-func (s *testEchoContext) Request() *http.Request {
-	return nil
-}
-
-func (s *testEchoContext) Get(key string) interface{} {
-	return nil
-}
-
-func (p *sessionTestPortalProxy) GetSession(c echo.Context) (*sessions.Session, error) {
-	return nil, errors.New("Test error")
-}
 
 type testSessionStore struct {
 	api.SessionStorer
@@ -55,7 +36,10 @@ func TestSession(t *testing.T) {
 			SessionStore: &testSessionStore{},
 		}
 
-		ctx := &testEchoContext{}
+		ctx := echo.New().NewContext(
+			httptest.NewRequest(http.MethodGet, "/", nil),
+			httptest.NewRecorder(),
+		)
 
 		_, err := pp.GetSession(ctx)
 		So(err, ShouldNotBeNil)

@@ -1,3 +1,4 @@
+import { describe, it, expect } from 'vitest';
 import { isEqual } from './autoscaler-util';
 import {
   autoscalerTransformArrayToMap,
@@ -93,11 +94,11 @@ describe('Autoscaler Transform Policy Helper', () => {
             days_of_week: [
               1,
               2,
-              3
+              3,
             ],
             instance_min_count: 1,
             instance_max_count: 10,
-            initial_min_instance_count: 5
+            initial_min_instance_count: 5,
           },
           {
             start_date: '2099-06-27',
@@ -107,10 +108,10 @@ describe('Autoscaler Transform Policy Helper', () => {
             days_of_month: [
               5,
               15,
-              25
+              25,
             ],
             instance_min_count: 3,
-            instance_max_count: 10
+            instance_max_count: 10,
           }
         ],
         specific_date: [
@@ -119,13 +120,13 @@ describe('Autoscaler Transform Policy Helper', () => {
             end_date_time: '2099-06-15T13:59',
             instance_min_count: 1,
             instance_max_count: 4,
-            initial_min_instance_count: 2
+            initial_min_instance_count: 2,
           },
           {
             start_date_time: '2099-01-04T20:00',
             end_date_time: '2099-02-19T23:15',
             instance_min_count: 2,
-            instance_max_count: 5
+            instance_max_count: 5,
           }
         ]
       }
@@ -325,5 +326,28 @@ describe('Autoscaler Transform Policy Helper', () => {
     delete arrayPolicy.scaling_rules;
     mapPolicy.scaling_rules_form = [];
     expect(isEqual(arrayPolicy, autoscalerTransformMapToArray(mapPolicy))).toBe(true);
+  });
+
+  it('preserves cool_down_secs distinct from breach_duration_secs (regression)', () => {
+    const local = {
+      instance_min_count: 1,
+      instance_max_count: 5,
+      scaling_rules_form: [
+        {
+          metric_type: 'memoryused',
+          breach_duration_secs: 600,
+          cool_down_secs: 120,
+          threshold: 30,
+          operator: '>=',
+          adjustment: '+1'
+        }
+      ]
+    } as AppAutoscalerPolicyLocal;
+
+    const rule = autoscalerTransformMapToArray(local).scaling_rules?.[0];
+    // Previously cool_down_secs was serialized from breach_duration_secs,
+    // silently discarding the user's entered cooldown.
+    expect(rule?.cool_down_secs).toBe(120);
+    expect(rule?.breach_duration_secs).toBe(600);
   });
 });

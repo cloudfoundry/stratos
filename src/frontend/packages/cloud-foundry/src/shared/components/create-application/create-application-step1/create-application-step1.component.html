@@ -1,41 +1,55 @@
 <b>{{ stepperText }}</b>
 <form #cfForm="ngForm" class="create-app-step-1 stepper-form">
-  <mat-form-field *ngIf="!isMarketplaceMode">
-    <mat-select #cfSelect="ngModel" [disabled]="(cfOrgSpaceService.cf.loading$ | async)"
-      [ngModel]="cfOrgSpaceService.cf.select.getValue()"
-      (selectionChange)="cfOrgSpaceService.cf.select.next($event.value)" required name="cf" [disabled]="isRedeploy"
-      placeholder="Cloud Foundry" [appFocus]="!(cfOrgSpaceService.cf.loading$ | async)">
-      <mat-option *ngFor="let cf of cfOrgSpaceService.cf.list$ | async" [value]="cf.guid">
-        <span>{{ cf.name }}</span>
-      </mat-option>
-    </mat-select>
-  </mat-form-field>
-  <mat-form-field>
-    <mat-select #orgSelect="ngModel"
-      [disabled]="!cfOrgSpaceService.cf.select.getValue() || (cfOrgSpaceService.org.loading$ | async) || isRedeploy"
-      [ngModel]="cfOrgSpaceService.org.select.getValue()"
-      (selectionChange)="cfOrgSpaceService.org.select.next($event.value)" required placeholder="Organization" name="org"
-      [appFocus]="isMarketplaceMode && !(!cfOrgSpaceService.cf.select.getValue() || (cfOrgSpaceService.org.loading$ | async) || isRedeploy)">
-      <mat-option *ngFor="let org of cfOrgSpaceService.org.list$ | async" [value]="org.guid">
-        <span>{{ org.name }}</span>
-      </mat-option>
-    </mat-select>
-    <mat-error *ngIf="!(hasOrgs$ | async)">
-      There are no organizations in this Cloud Foundry
-    </mat-error>
-  </mat-form-field>
-  <mat-form-field>
-    <mat-select #spaceSelect="ngModel"
-      [disabled]="!cfOrgSpaceService.org.select.getValue() || (cfOrgSpaceService.space.loading$ | async) || isRedeploy"
-      [ngModel]="cfOrgSpaceService.space.select.getValue()"
-      (selectionChange)="cfOrgSpaceService.space.select.next($event.value)" required placeholder="Space" name="space">
-      <mat-option *ngFor="let space of spaces$ | async" [value]="space.guid">
-        <span>{{ space.name }}</span>
-      </mat-option>
-    </mat-select>
-    <mat-error *ngIf="!(hasSpaces$ | async)">
-      There are no spaces in this organization
-    </mat-error>
-  </mat-form-field>
-  <p>Don't see your organization or space? Please make sure you have the relevant permissions.</p>
+  @if (!isMarketplaceMode) {
+    <app-form-field>
+      <app-select id="cf" #cfSelect="ngModel" placeholder="Cloud Foundry" [autoSelectSingleOption]="false"
+        [disabled]="cfOrgSpaceService.cf.loading() || isRedeploy || endpointScoped"
+        [ngModel]="cfOrgSpaceService.cf.select()"
+        (selectionChange)="onCfChange($event.value)" [required]="true" name="cf"
+        [appFocus]="!cfOrgSpaceService.cf.loading()">
+        <app-option [value]="null">None</app-option>
+        @for (cf of cfOrgSpaceService.cf.list(); track cf) {
+          <app-option [value]="cf.guid" [label]="cf.name">
+            <span>{{ cf.name }}</span>
+          </app-option>
+        }
+      </app-select>
+    </app-form-field>
+  }
+  <app-form-field>
+    <app-select id="org" #orgSelect="ngModel" placeholder="Organization" [autoSelectSingleOption]="false"
+      [disabled]="!cfOrgSpaceService.cf.select() || cfOrgSpaceService.org.loading() || isRedeploy"
+      [loading]="cfOrgSpaceService.org.loading()"
+      [ngModel]="cfOrgSpaceService.org.select()"
+      (selectionChange)="onOrgChange($event.value)" [required]="true" name="org"
+      [appFocus]="isMarketplaceMode && !(!cfOrgSpaceService.cf.select() || cfOrgSpaceService.org.loading() || isRedeploy)">
+      <app-option [value]="null">None</app-option>
+      @for (org of cfOrgSpaceService.org.list(); track org) {
+        <app-option [value]="org.guid" [label]="org.name">
+          <span>{{ org.name }}</span>
+        </app-option>
+      }
+    </app-select>
+    @if (cfOrgSpaceService.cf.select() && !cfOrgSpaceService.org.loading() && !hasOrgs()) {
+      <app-error>There are no organizations in this Cloud Foundry</app-error>
+    }
+  </app-form-field>
+  <app-form-field>
+    <app-select id="space" #spaceSelect="ngModel" placeholder="Space" [autoSelectSingleOption]="false"
+      [disabled]="!cfOrgSpaceService.org.select() || cfOrgSpaceService.space.loading() || isRedeploy"
+      [loading]="cfOrgSpaceService.space.loading()"
+      [ngModel]="cfOrgSpaceService.space.select()"
+      (selectionChange)="onSpaceChange($event.value)" [required]="true" name="space">
+      <app-option [value]="null">None</app-option>
+      @for (space of spaces$ | async; track space) {
+        <app-option [value]="space.guid" [label]="space.name">
+          <span>{{ space.name }}</span>
+        </app-option>
+      }
+    </app-select>
+    @if (cfOrgSpaceService.org.select() && !cfOrgSpaceService.space.loading() && (hasSpaces$ | async) === false) {
+      <app-error>There are no spaces in this organization</app-error>
+    }
+  </app-form-field>
+  <p class="text-sm text-content-muted">Don't see your organization or space? Please make sure you have the relevant permissions.</p>
 </form>

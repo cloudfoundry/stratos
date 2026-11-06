@@ -1,0 +1,382 @@
+@import 'tailwindcss';
+
+/* Tailwind v4 plugins — replaces v3 plugins: [require(...)] in tailwind.config.js.
+ * Plugin packages remain @tailwindcss/forms + @tailwindcss/typography (peer
+ * dependencies declare v4 compatibility); only the load mechanism changes. */
+@plugin "@tailwindcss/forms" {
+  strategy: class;
+}
+@plugin "@tailwindcss/typography";
+
+/* darkMode: 'class' from v3 config. Matches descendants of .dark; keeps
+ * stratos's `.dark` and `.dark-theme` distinction unchanged. */
+@custom-variant dark (&:where(.dark, .dark *));
+
+/* Content sources for the v4 scanner. Paths are relative to this file
+ * (`src/frontend/packages/theme/styles/tailwind.css`); `../../` reaches
+ * `src/frontend/packages/`. */
+@source "../../*/src/**/*.html";
+@source "../../*/src/**/*.ts";
+
+/* v3 safelist — classes referenced dynamically (template variable
+ * interpolation, runtime class names) that the JIT scanner cannot see.
+ * v4 uses @source inline() with brace expansion for the same effect. */
+@source inline("bg-brand-{400,500,600}");
+@source inline("bg-accent-shade-{400,500,600}");
+@source inline("bg-danger-shade-{400,500,600}");
+@source inline("from-app-bg bg-gradient-to-t");
+
+/* ============================================================
+ * @theme — translated from tailwind.config.v3-legacy.js
+ *
+ * Functional parity: every utility v3 generated still resolves.
+ * Singleton semantic colors (`primary` etc.) carry the static LIGHT
+ * value here; `.dark-theme` below overrides the same custom property
+ * for dark mode. The `var(--x)`-references for nav/app/header/etc.
+ * are not self-referential (left side is `--color-x`, right side is
+ * the runtime token `--x`).
+ *
+ * Defer to Task 6: @source, @plugin, safelist, container utility.
+ * ============================================================ */
+@theme {
+  /* ─── Colors: scales (Material palettes) ──────────────── */
+  --color-brand-50:  oklch(95.325% 0.0218 239.43);
+  --color-brand-100: oklch(88.479% 0.0546 243.39);
+  --color-brand-200: oklch(81.633% 0.0896 243.62);
+  --color-brand-300: oklch(74.82% 0.1235 244.75);
+  --color-brand-400: oklch(70.018% 0.1488 246.66);
+  --color-brand-500: oklch(65.816% 0.169 248.81);
+  --color-brand-600: oklch(61.788% 0.1668 250.87);
+  --color-brand-700: oklch(56.453% 0.1633 253.27);
+  --color-brand-800: oklch(51.34% 0.1603 255.67);
+  --color-brand-900: oklch(42.172% 0.1569 259.91);
+
+  --color-accent-shade-50:  oklch(96.025% 0.0244 206.2);
+  --color-accent-shade-100: oklch(90.347% 0.0585 205.57);
+  --color-accent-shade-200: oklch(84.67% 0.0909 206.2);
+  --color-accent-shade-300: oklch(79.311% 0.1145 207.31);
+  --color-accent-shade-400: oklch(75.875% 0.1243 208.28);
+  --color-accent-shade-500: oklch(72.912% 0.1265 210.82);
+  --color-accent-shade-600: oklch(68.209% 0.118 210.05);
+  --color-accent-shade-700: oklch(61.867% 0.1063 207.97);
+  --color-accent-shade-800: oklch(55.706% 0.0953 206.08);
+  --color-accent-shade-900: oklch(44.443% 0.0756 199.77);
+
+  --color-success-shade-50:  oklch(95.715% 0.021 147.64);
+  --color-success-shade-100: oklch(89.522% 0.0504 146.04);
+  --color-success-shade-200: oklch(82.921% 0.0827 145.82);
+  --color-success-shade-300: oklch(76.603% 0.1179 145.3);
+  --color-success-shade-400: oklch(71.849% 0.1417 144.89);
+  --color-success-shade-500: oklch(67.31% 0.1624 144.21);
+  --color-success-shade-600: oklch(62.912% 0.1543 144.2);
+  --color-success-shade-700: oklch(57.525% 0.1446 144.18);
+  --color-success-shade-800: oklch(52.343% 0.1347 144.17);
+  --color-success-shade-900: oklch(42.539% 0.1159 144.31);
+
+  --color-warning-shade-50:  oklch(96.853% 0.0282 79.48);
+  --color-warning-shade-100: oklch(92.127% 0.0687 77.49);
+  --color-warning-shade-200: oklch(87.407% 0.1102 76.47);
+  --color-warning-shade-300: oklch(82.867% 0.1452 73.54);
+  --color-warning-shade-400: oklch(79.718% 0.1638 69.62);
+  --color-warning-shade-500: oklch(77.026% 0.1741 64.05);
+  --color-warning-shade-600: oklch(74.53% 0.1759 59.37);
+  --color-warning-shade-700: oklch(71.2% 0.1795 53.54);
+  --color-warning-shade-800: oklch(67.987% 0.1847 48.15);
+  --color-warning-shade-900: oklch(63.104% 0.197 40.25);
+
+  --color-danger-shade-50:  oklch(95.685% 0.0221 7.17);
+  --color-danger-shade-100: oklch(89.311% 0.0569 11.54);
+  --color-danger-shade-200: oklch(77.157% 0.1024 19.67);
+  --color-danger-shade-300: oklch(68.755% 0.142 21.46);
+  --color-danger-shade-400: oklch(65.392% 0.1926 25.14);
+  --color-danger-shade-500: oklch(64.265% 0.2153 28.81);
+  --color-danger-shade-600: oklch(60.828% 0.209 27.03);
+  --color-danger-shade-700: oklch(56.799% 0.2002 26.41);
+  --color-danger-shade-800: oklch(53.857% 0.1937 26.72);
+  --color-danger-shade-900: oklch(50.164% 0.1887 27.48);
+
+  /* info-shade is the same Material Blue as brand */
+  --color-info-shade-50:  oklch(95.325% 0.0218 239.43);
+  --color-info-shade-100: oklch(88.479% 0.0546 243.39);
+  --color-info-shade-200: oklch(81.633% 0.0896 243.62);
+  --color-info-shade-300: oklch(74.82% 0.1235 244.75);
+  --color-info-shade-400: oklch(70.018% 0.1488 246.66);
+  --color-info-shade-500: oklch(65.816% 0.169 248.81);
+  --color-info-shade-600: oklch(61.788% 0.1668 250.87);
+  --color-info-shade-700: oklch(56.453% 0.1633 253.27);
+  --color-info-shade-800: oklch(51.34% 0.1603 255.67);
+  --color-info-shade-900: oklch(42.172% 0.1569 259.91);
+
+  /* ─── Colors: semantic shaded scales (defensive duplicate of *-shade) ─── */
+  /* `bg-primary-600` etc. — habit-shape; canonical templates use *-shade-{n}. */
+  --color-primary-50:  oklch(95.325% 0.0218 239.43);
+  --color-primary-100: oklch(88.479% 0.0546 243.39);
+  --color-primary-200: oklch(81.633% 0.0896 243.62);
+  --color-primary-300: oklch(74.82% 0.1235 244.75);
+  --color-primary-400: oklch(70.018% 0.1488 246.66);
+  --color-primary-500: oklch(65.816% 0.169 248.81);
+  --color-primary-600: oklch(61.788% 0.1668 250.87);
+  --color-primary-700: oklch(56.453% 0.1633 253.27);
+  --color-primary-800: oklch(51.34% 0.1603 255.67);
+  --color-primary-900: oklch(42.172% 0.1569 259.91);
+
+  --color-accent-50:  oklch(96.025% 0.0244 206.2);
+  --color-accent-100: oklch(90.347% 0.0585 205.57);
+  --color-accent-200: oklch(84.67% 0.0909 206.2);
+  --color-accent-300: oklch(79.311% 0.1145 207.31);
+  --color-accent-400: oklch(75.875% 0.1243 208.28);
+  --color-accent-500: oklch(72.912% 0.1265 210.82);
+  --color-accent-600: oklch(68.209% 0.118 210.05);
+  --color-accent-700: oklch(61.867% 0.1063 207.97);
+  --color-accent-800: oklch(55.706% 0.0953 206.08);
+  --color-accent-900: oklch(44.443% 0.0756 199.77);
+
+  --color-success-50:  oklch(95.715% 0.021 147.64);
+  --color-success-100: oklch(89.522% 0.0504 146.04);
+  --color-success-200: oklch(82.921% 0.0827 145.82);
+  --color-success-300: oklch(76.603% 0.1179 145.3);
+  --color-success-400: oklch(71.849% 0.1417 144.89);
+  --color-success-500: oklch(67.31% 0.1624 144.21);
+  --color-success-600: oklch(62.912% 0.1543 144.2);
+  --color-success-700: oklch(57.525% 0.1446 144.18);
+  --color-success-800: oklch(52.343% 0.1347 144.17);
+  --color-success-900: oklch(42.539% 0.1159 144.31);
+
+  --color-warning-50:  oklch(96.853% 0.0282 79.48);
+  --color-warning-100: oklch(92.127% 0.0687 77.49);
+  --color-warning-200: oklch(87.407% 0.1102 76.47);
+  --color-warning-300: oklch(82.867% 0.1452 73.54);
+  --color-warning-400: oklch(79.718% 0.1638 69.62);
+  --color-warning-500: oklch(77.026% 0.1741 64.05);
+  --color-warning-600: oklch(74.53% 0.1759 59.37);
+  --color-warning-700: oklch(71.2% 0.1795 53.54);
+  --color-warning-800: oklch(67.987% 0.1847 48.15);
+  --color-warning-900: oklch(63.104% 0.197 40.25);
+
+  --color-danger-50:  oklch(95.685% 0.0221 7.17);
+  --color-danger-100: oklch(89.311% 0.0569 11.54);
+  --color-danger-200: oklch(77.157% 0.1024 19.67);
+  --color-danger-300: oklch(68.755% 0.142 21.46);
+  --color-danger-400: oklch(65.392% 0.1926 25.14);
+  --color-danger-500: oklch(64.265% 0.2153 28.81);
+  --color-danger-600: oklch(60.828% 0.209 27.03);
+  --color-danger-700: oklch(56.799% 0.2002 26.41);
+  --color-danger-800: oklch(53.857% 0.1937 26.72);
+  --color-danger-900: oklch(50.164% 0.1887 27.48);
+
+  --color-info-50:  oklch(95.325% 0.0218 239.43);
+  --color-info-100: oklch(88.479% 0.0546 243.39);
+  --color-info-200: oklch(81.633% 0.0896 243.62);
+  --color-info-300: oklch(74.82% 0.1235 244.75);
+  --color-info-400: oklch(70.018% 0.1488 246.66);
+  --color-info-500: oklch(65.816% 0.169 248.81);
+  --color-info-600: oklch(61.788% 0.1668 250.87);
+  --color-info-700: oklch(56.453% 0.1633 253.27);
+  --color-info-800: oklch(51.34% 0.1603 255.67);
+  --color-info-900: oklch(42.172% 0.1569 259.91);
+
+  /* error is an alias of danger — same defensive duplicate idea */
+  --color-error-50:  oklch(95.685% 0.0221 7.17);
+  --color-error-100: oklch(89.311% 0.0569 11.54);
+  --color-error-200: oklch(77.157% 0.1024 19.67);
+  --color-error-300: oklch(68.755% 0.142 21.46);
+  --color-error-400: oklch(65.392% 0.1926 25.14);
+  --color-error-500: oklch(64.265% 0.2153 28.81);
+  --color-error-600: oklch(60.828% 0.209 27.03);
+  --color-error-700: oklch(56.799% 0.2002 26.41);
+  --color-error-800: oklch(53.857% 0.1937 26.72);
+  --color-error-900: oklch(50.164% 0.1887 27.48);
+
+  /* ─── Colors: semantic singletons (static LIGHT value) ─── */
+  /* .dark-theme below overrides each at runtime for dark mode. */
+  --color-primary:   oklch(62.308% 0.188 259.81);
+  --color-secondary: oklch(71.374% 0.1434 254.62);
+  --color-accent:    oklch(71.374% 0.1434 254.62);
+  --color-success:   oklch(72.275% 0.192 149.58);
+  --color-warning:   oklch(76.859% 0.1647 70.08);
+  --color-danger:    oklch(63.683% 0.2078 25.33);
+  --color-info:      oklch(62.308% 0.188 259.81);
+  --color-error:     oklch(63.683% 0.2078 25.33);
+
+  /* ─── Color: neutral status ─── */
+  /* tentative — gray for "uncertain / initialising" status icons. Not theme-shifted. */
+  --color-tentative: oklch(71.366% 0.0192 261.32);
+
+  /* ─── Colors: layout semantic tokens (var-references, no self-cycle) ─── */
+  /* Right-hand side is the runtime token defined in :root / .dark-theme. */
+  --color-nav-bg:         var(--nav-bg);
+  --color-nav-text:       var(--nav-text);
+  --color-nav-text-muted: var(--nav-text-muted);
+  --color-nav-hover:      var(--nav-hover);
+  --color-nav-active:     var(--nav-active);
+  --color-nav-border:     var(--nav-border);
+  --color-nav-tooltip:    var(--nav-tooltip);
+
+  --color-app-bg:         var(--app-bg);
+  --color-app-text:       var(--app-text);
+  --color-body-bg:        var(--body-bg);
+
+  --color-header-bg:      var(--header-bg);
+  --color-header-text:    var(--header-text);
+  --color-header-border:  var(--header-border);
+
+  --color-content-bg:        var(--content-bg);
+  --color-content-secondary: var(--content-secondary);
+  --color-content-border:    var(--content-border);
+  --color-content-text:      var(--content-text);
+  --color-content-muted:     var(--content-muted);
+
+  --color-logo-bg:        var(--logo-bg);
+  --color-login-bg:       var(--login-bg);
+  --color-login-card:     var(--login-card-bg);
+
+  --color-input-bg:           var(--input-bg);
+  --color-input-text:         var(--input-text);
+  --color-input-border:       var(--input-border);
+  --color-input-placeholder:  var(--input-placeholder);
+  --color-input-focus-border: var(--input-focus-border);
+  --color-input-disabled-bg:  var(--input-disabled-bg);
+
+  /* ─── Background images ─── */
+  --background-image-login-bg:        var(--login-bg-image);
+  --background-image-gradient-radial: radial-gradient(var(--tw-gradient-stops));
+  --background-image-gradient-conic:  conic-gradient(from 180deg at 50% 50%, var(--tw-gradient-stops));
+
+  /* ─── Fonts ─── */
+  /* Roboto is deliberately absent from the fallbacks: it is also a family this
+     repo vendors, so a fallback could land on our own files rather than the
+     OS font and make a screenshot unreproducible. */
+  --font-sans: 'IBM Plex Sans', system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Helvetica Neue', Arial, sans-serif;
+  --font-mono: 'IBM Plex Mono', Menlo, Monaco, Consolas, 'Liberation Mono', 'Courier New', monospace;
+
+  /* ─── Font sizes (with paired line-heights) ─── */
+  --text-xs:   0.75rem;   --text-xs--line-height:   1rem;
+  --text-sm:   0.875rem;  --text-sm--line-height:   1.25rem;
+  --text-base: 1rem;      --text-base--line-height: 1.5rem;
+  --text-lg:   1.125rem;  --text-lg--line-height:   1.75rem;
+  --text-xl:   1.25rem;   --text-xl--line-height:   1.75rem;
+  --text-2xl:  1.5rem;    --text-2xl--line-height:  2rem;
+  --text-3xl:  1.875rem;  --text-3xl--line-height:  2.25rem;
+  --text-4xl:  2.25rem;   --text-4xl--line-height:  2.5rem;
+  --text-5xl:  3rem;      --text-5xl--line-height:  1;
+  --text-6xl:  3.75rem;   --text-6xl--line-height:  1;
+
+  /* ─── Spacing scale ─── */
+  /* v4 derives most spacing from --spacing; we keep the v3 explicit scale
+   * for behavior identity (some values like 0.5/1.5/2.5 are non-default). */
+  --spacing-0:    0;
+  --spacing-0_5:  0.125rem;
+  --spacing-1:    0.25rem;
+  --spacing-1_5:  0.375rem;
+  --spacing-2:    0.5rem;
+  --spacing-2_5:  0.625rem;
+  --spacing-3:    0.75rem;
+  --spacing-3_5:  0.875rem;
+  --spacing-4:    1rem;
+  --spacing-5:    1.25rem;
+  --spacing-6:    1.5rem;
+  --spacing-7:    1.75rem;
+  --spacing-8:    2rem;
+  --spacing-9:    2.25rem;
+  --spacing-10:   2.5rem;
+  --spacing-11:   2.75rem;
+  --spacing-12:   3rem;
+  --spacing-14:   3.5rem;
+  --spacing-16:   4rem;
+  --spacing-20:   5rem;
+  --spacing-24:   6rem;
+  --spacing-28:   7rem;
+  --spacing-32:   8rem;
+  --spacing-36:   9rem;
+  --spacing-40:   10rem;
+  --spacing-44:   11rem;
+  --spacing-48:   12rem;
+  --spacing-52:   13rem;
+  --spacing-56:   14rem;
+  --spacing-60:   15rem;
+  --spacing-64:   16rem;
+  --spacing-72:   18rem;
+  --spacing-80:   20rem;
+  --spacing-96:   24rem;
+
+  /* ─── Border radius ─── */
+  --radius-none: 0;
+  --radius-sm:   0.125rem;
+  --radius:      0.25rem;   /* v3 DEFAULT */
+  --radius-md:   0.375rem;
+  --radius-lg:   0.5rem;
+  --radius-xl:   0.75rem;
+  --radius-2xl:  1rem;
+  --radius-3xl:  1.5rem;
+  --radius-full: 9999px;
+
+  /* ─── Shadows (Tailwind + Material elevation) ─── */
+  --shadow-xs:    0 1px 2px 0 rgba(0, 0, 0, 0.05);
+  --shadow-sm:    0 1px 3px 0 rgba(0, 0, 0, 0.1), 0 1px 2px -1px rgba(0, 0, 0, 0.1);
+  --shadow:       0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -2px rgba(0, 0, 0, 0.1);
+  --shadow-md:    0 6px 16px -1px rgba(0, 0, 0, 0.1), 0 4px 8px -2px rgba(0, 0, 0, 0.1);
+  --shadow-lg:    0 10px 24px -3px rgba(0, 0, 0, 0.1), 0 8px 16px -4px rgba(0, 0, 0, 0.1);
+  --shadow-xl:    0 20px 32px -3px rgba(0, 0, 0, 0.1), 0 12px 24px -4px rgba(0, 0, 0, 0.1);
+  --shadow-2xl:   0 25px 50px -12px rgba(0, 0, 0, 0.25);
+  --shadow-inner: inset 0 2px 4px 0 rgba(0, 0, 0, 0.06);
+  --shadow-none:  none;
+  --shadow-elevation-1: 0 1px 3px rgba(0,0,0,0.12), 0 1px 2px rgba(0,0,0,0.24);
+  --shadow-elevation-2: 0 3px 6px rgba(0,0,0,0.15), 0 2px 4px rgba(0,0,0,0.12);
+  --shadow-elevation-3: 0 10px 20px rgba(0,0,0,0.15), 0 3px 6px rgba(0,0,0,0.10);
+  --shadow-elevation-4: 0 15px 25px rgba(0,0,0,0.15), 0 5px 10px rgba(0,0,0,0.05);
+  --shadow-elevation-5: 0 20px 40px rgba(0,0,0,0.2);
+
+  /* ─── Ease (transition-timing-function) ─── */
+  --ease-in-out-cubic:        cubic-bezier(0.4, 0, 0.2, 1);
+  --ease-in-cubic:            cubic-bezier(0.4, 0, 1, 1);
+  --ease-out-cubic:           cubic-bezier(0, 0, 0.2, 1);
+  --ease-out-expo:            cubic-bezier(0.16, 1, 0.3, 1);
+  --ease-material-standard:     cubic-bezier(0.4, 0.0, 0.2, 1);
+  --ease-material-deceleration: cubic-bezier(0.0, 0.0, 0.2, 1);
+  --ease-material-acceleration: cubic-bezier(0.4, 0.0, 1, 1);
+  --ease-material-sharp:        cubic-bezier(0.4, 0.0, 0.6, 1);
+
+  /* ─── Animation (utilities; @keyframes blocks below at root) ─── */
+  --animate-fade-in:     fadeIn 0.3s ease-in-out;
+  --animate-fade-out:    fadeOut 0.3s ease-in-out;
+  --animate-slide-down:  slideDown 0.3s ease-out;
+  --animate-slide-up:    slideUp 0.3s ease-out;
+  --animate-slide-left:  slideLeft 0.3s ease-out;
+  --animate-slide-right: slideRight 0.3s ease-out;
+  --animate-scale-in:    scaleIn 0.2s ease-out;
+  --animate-scale-out:   scaleOut 0.2s ease-in;
+  --animate-scale-pop-in: scalePopIn 0.5s var(--ease-out-expo);
+  --animate-spin-slow:   spin 3s linear infinite;
+  --animate-pulse-slow:  pulse 3s cubic-bezier(0.4, 0, 0.6, 1) infinite;
+  --animate-dialog-enter:           dialogEnter 0.25s cubic-bezier(0.0, 0.0, 0.2, 1);
+  --animate-dialog-exit:            dialogExit 0.2s cubic-bezier(0.4, 0.0, 1, 1);
+  --animate-backdrop-enter:         backdropEnter 0.3s cubic-bezier(0.0, 0.0, 0.2, 1);
+  --animate-backdrop-exit:          backdropExit 0.2s cubic-bezier(0.4, 0.0, 1, 1);
+  --animate-dialog-scale-fade-in:   dialogScaleFadeIn 0.25s cubic-bezier(0.0, 0.0, 0.2, 1);
+  --animate-dialog-scale-fade-out:  dialogScaleFadeOut 0.2s cubic-bezier(0.4, 0.0, 1, 1);
+
+  /* ─── Breakpoints (from v3 screens) ─── */
+  --breakpoint-xs:  475px;
+  --breakpoint-sm:  640px;
+  --breakpoint-md:  768px;
+  --breakpoint-lg:  1024px;
+  --breakpoint-xl:  1280px;
+  --breakpoint-2xl: 1536px;
+}
+
+/* ─── @keyframes — live at root, referenced by --animate-* in @theme above ─── */
+@keyframes fadeIn  { 0% { opacity: 0; } 100% { opacity: 1; } }
+@keyframes fadeOut { 0% { opacity: 1; } 100% { opacity: 0; } }
+@keyframes slideDown  { 0% { transform: translateY(-10px); opacity: 0; } 100% { transform: translateY(0); opacity: 1; } }
+@keyframes slideUp    { 0% { transform: translateY(10px);  opacity: 0; } 100% { transform: translateY(0); opacity: 1; } }
+@keyframes slideLeft  { 0% { transform: translateX(10px);  opacity: 0; } 100% { transform: translateX(0); opacity: 1; } }
+@keyframes slideRight { 0% { transform: translateX(-10px); opacity: 0; } 100% { transform: translateX(0); opacity: 1; } }
+@keyframes scaleIn    { 0% { transform: scale(0.95); opacity: 0; } 100% { transform: scale(1); opacity: 1; } }
+@keyframes scaleOut   { 0% { transform: scale(1); opacity: 1; } 100% { transform: scale(0.95); opacity: 0; } }
+@keyframes scalePopIn { 0% { transform: scale(0.2); } 100% { transform: scale(1); } }
+@keyframes dialogEnter { 0% { opacity: 0; transform: scale(0.9) translateY(-20px); } 100% { opacity: 1; transform: scale(1) translateY(0); } }
+@keyframes dialogExit  { 0% { opacity: 1; transform: scale(1) translateY(0); } 100% { opacity: 0; transform: scale(0.9) translateY(-20px); } }
+@keyframes backdropEnter { 0% { opacity: 0; } 100% { opacity: 1; } }
+@keyframes backdropExit  { 0% { opacity: 1; } 100% { opacity: 0; } }
+@keyframes dialogScaleFadeIn  { 0% { opacity: 0; transform: scale(0.85); } 100% { opacity: 1; transform: scale(1); } }
+@keyframes dialogScaleFadeOut { 0% { opacity: 1; transform: scale(1); } 100% { opacity: 0; transform: scale(0.85); } }

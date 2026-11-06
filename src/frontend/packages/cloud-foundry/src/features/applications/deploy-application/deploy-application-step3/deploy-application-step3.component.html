@@ -1,7 +1,10 @@
-<div class="deploy-app" *ngIf="showOverlay$ | async">
-  <div class="deploy-app__title">{{ deployer ? deployer.streamTitle : 'Pending' }}</div>
-  <mat-progress-spinner *ngIf="deployer && deployer.deploying" diameter="20" mode="indeterminate">
-  </mat-progress-spinner>
+<div class="flex items-center px-3 py-3 h-[43px] border-b border-content-border shrink-0">
+  <div class="flex-1 font-semibold">{{ deployer ? deployer.streamTitle : 'Pending' }}</div>
+  @if (deployer && deployer.deploying) {
+    <app-busy class="text-primary" size="1.25rem" context="deploy"></app-busy>
+  }
 </div>
-<app-log-viewer class="deploy-app__log" *ngIf="deployer && deployer.messages" [logStream]="deployer.messages">
-</app-log-viewer>
+@if (deployer) {
+  <app-log-viewer class="flex-1 min-h-0 flex" [logStream]="deployer.messages.asObservable()">
+  </app-log-viewer>
+}

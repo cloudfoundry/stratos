@@ -1,4 +1,6 @@
-import { inject, TestBed } from '@angular/core/testing';
+import { TestBed } from '@angular/core/testing';
+import { provideZonelessChangeDetection } from '@angular/core';
+import { describe, it, expect, beforeEach, vi } from 'vitest';
 
 import { UtilsService } from '../../core/utils.service';
 import { UptimePipe } from './uptime.pipe';
@@ -8,24 +10,26 @@ describe('UptimePipe', () => {
   let pipe: UptimePipe;
   let utilsService: UtilsService;
 
-  beforeEach(() => TestBed.configureTestingModule({
-    providers: [
-      UptimePipe,
-      UtilsService
-    ]
-  }));
+  beforeEach(() => {
+    TestBed.configureTestingModule({
+      providers: [
+        
+        UptimePipe,
+        UtilsService,
+        provideZonelessChangeDetection(),
+      ]
+    });
 
-  beforeEach(inject([UptimePipe], (p: UptimePipe) => {
-    utilsService = TestBed.get(UtilsService);
-    pipe = p;
-  }));
+    utilsService = TestBed.inject(UtilsService);
+    pipe = TestBed.inject(UptimePipe);
+  });
 
   it('create an instance', () => {
     expect(pipe).toBeTruthy();
   });
 
   it('should call utils method', () => {
-    spyOn(utilsService, 'formatUptime');
+    vi.spyOn(utilsService, 'formatUptime');
     pipe.transform(1024);
 
     expect(utilsService.formatUptime).toHaveBeenCalledWith(1024);

@@ -4,23 +4,22 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
-	"io/ioutil"
+	"io"
+	"log/slog"
 	"net/http"
 	"strings"
 	"time"
 
 	"github.com/cloudfoundry/stratos/src/jetstream/plugins/analysis/store"
 
-	"github.com/labstack/echo/v4"
-
-	log "github.com/sirupsen/logrus"
+	"github.com/labstack/echo/v5"
 )
 
 const mainReportFile = "report.json"
 
 // listReports will list the analysis repotrs that have run
-func (c *Analysis) listReports(ec echo.Context) error {
-	log.Debug("listReports")
+func (c *Analysis) listReports(ec *echo.Context) error {
+	slog.Debug("listReports")
 	var p = c.portalProxy
 
 	// Need to get a config object for the target endpoint
@@ -47,8 +46,8 @@ func (c *Analysis) listReports(ec echo.Context) error {
 }
 
 // getReportsByPath will list the completed analysis repotrs that have run for the specified path
-func (c *Analysis) getReportsByPath(ec echo.Context) error {
-	log.Debug("getReportsByPath")
+func (c *Analysis) getReportsByPath(ec *echo.Context) error {
+	slog.Debug("getReportsByPath")
 	var p = c.portalProxy
 
 	// Need to get a config object for the target endpoint
@@ -89,8 +88,8 @@ func populateSummary(report *store.AnalysisRecord) {
 	}
 }
 
-func (c *Analysis) getLatestReport(ec echo.Context) error {
-	log.Debug("getLatestReport")
+func (c *Analysis) getLatestReport(ec *echo.Context) error {
+	slog.Debug("getLatestReport")
 	var p = c.portalProxy
 
 	// Need to get a config object for the target endpoint
@@ -116,8 +115,7 @@ func (c *Analysis) getLatestReport(ec echo.Context) error {
 	}
 
 	if ec.Request().Method == "HEAD" {
-		ec.Response().Status = 200
-		return nil
+		return ec.NoContent(200)
 	}
 
 	// Get the report contents from the analysis server
@@ -130,8 +128,8 @@ func (c *Analysis) getLatestReport(ec echo.Context) error {
 	return ec.JSON(200, report)
 }
 
-func (c *Analysis) getReport(ec echo.Context) error {
-	log.Debug("getReport")
+func (c *Analysis) getReport(ec *echo.Context) error {
+	slog.Debug("getReport")
 	var p = c.portalProxy
 
 	// Need to get a config object for the target endpoint
@@ -163,21 +161,20 @@ func (c *Analysis) getReport(ec echo.Context) error {
 	return ec.JSON(200, report)
 }
 
-func (c *Analysis) deleteReports(ec echo.Context) error {
-	log.Debug("deleteReports")
+func (c *Analysis) deleteReports(ec *echo.Context) error {
+	slog.Debug("deleteReports")
 	var p = c.portalProxy
 
 	// Need to get a config object for the target endpoint
 	userID := ec.Get("user_id").(string)
 
-	defer ec.Request().Body.Close()
-	body, err := ioutil.ReadAll(ec.Request().Body)
+	defer func() { _ = ec.Request().Body.Close() }()
+	body, err := io.ReadAll(ec.Request().Body)
 	if err != nil {
 		return err
 	}
 
-	var ids []string
-	ids = make([]string, 0)
+	ids := make([]string, 0)
 	if err = json.Unmarshal(body, &ids); err != nil {
 		return err
 	}
@@ -195,12 +192,16 @@ func (c *Analysis) deleteReports(ec echo.Context) error {
 			client := &http.Client{Timeout: 30 * time.Second}
 			rsp, err := client.Do(r)
 			if err != nil {
-				log.Warnf("Could not delete analysis report for: %s", job.ID)
+				slog.Warn("the request to delete the analysis report failed",
+					"report", job.ID, "url", deleteURL, "error", err)
 			} else if rsp.StatusCode != http.StatusOK {
-				log.Warnf("Could not delete analysis report for: %s", job.ID)
+				slog.Warn("the analysis server refused to delete the report",
+					"report", job.ID, "url", deleteURL, "status", rsp.StatusCode)
 			}
 		}
-		dbStore.Delete(userID, id)
+		if err := dbStore.Delete(userID, id); err != nil {
+			slog.Warn("could not delete the analysis report from the store", "report", id, "user", userID, "error", err)
+		}
 	}
 
 	return ec.JSON(200, ids)
@@ -218,8 +219,8 @@ func (c *Analysis) getReportFile(userID, endpointID, ID, name string) ([]byte, e
 		return nil, fmt.Errorf("Failed getting report from Analyzer service: %d", rsp.StatusCode)
 	}
 
-	defer rsp.Body.Close()
-	response, err := ioutil.ReadAll(rsp.Body)
+	defer func() { _ = rsp.Body.Close() }()
+	response, err := io.ReadAll(rsp.Body)
 	if err != nil {
 		return nil, fmt.Errorf("Could not read response: %v", err)
 	}

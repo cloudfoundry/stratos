@@ -1,15 +1,17 @@
 package main
 
 import (
+	"context"
 	"database/sql"
 	"regexp"
+	"sync"
 	"time"
 
 	"github.com/cloudfoundry/stratos/src/jetstream/api"
+	"github.com/cloudfoundry/stratos/src/jetstream/api/env"
 	"github.com/cloudfoundry/stratos/src/jetstream/repository/apikeys"
 	"github.com/gorilla/sessions"
-	"github.com/govau/cf-common/env"
-	"github.com/labstack/echo/v4"
+	"github.com/labstack/echo/v5"
 )
 
 type portalProxy struct {
@@ -25,10 +27,20 @@ type portalProxy struct {
 	EmptyCookieMatcher     *regexp.Regexp // Used to detect and remove empty Cookies sent by certain browsers
 	AuthProviders          map[string]api.AuthProvider
 	env                    *env.VarSet
-	StratosAuthService     api.StratosAuth
-	APIKeysRepository      apikeys.Repository
-	PluginRegisterRoutes   map[string]func(echo.Context) error
-	StoreFactory           api.StoreFactory
+	refreshRoutines        struct {
+		wg      sync.WaitGroup
+		context context.Context
+		cancel  context.CancelFunc
+	}
+	StratosAuthService   api.StratosAuth
+	APIKeysRepository    apikeys.Repository
+	PluginRegisterRoutes map[string]func(*echo.Context) error
+	StoreFactory         api.StoreFactory
+	// indexHTMLTemplate is the pristine index.html, read once at startup;
+	// serveIndexHTML injects a per-response CSP nonce into a copy of it. Empty
+	// when the UI is not served from disk, which leaves the SPA document on the
+	// plain static path with no nonce and no CSP header.
+	indexHTMLTemplate string
 }
 
 // HttpSessionStore - Interface for a store that can manage HTTP Sessions

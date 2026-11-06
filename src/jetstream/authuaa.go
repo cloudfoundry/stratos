@@ -2,18 +2,16 @@ package main
 
 import (
 	"database/sql"
-	"encoding/base64"
 	"encoding/json"
-	"errors"
 	"fmt"
+	"log/slog"
 	"net/http"
 	"net/url"
+	"regexp"
 	"strings"
 	"time"
 
-	log "github.com/sirupsen/logrus"
-
-	"github.com/labstack/echo/v4"
+	"github.com/labstack/echo/v5"
 
 	"github.com/cloudfoundry/stratos/src/jetstream/api"
 	"github.com/cloudfoundry/stratos/src/jetstream/stringutils"
@@ -26,20 +24,21 @@ const UAAAdminIdentifier = "stratos.admin"
 type uaaAuth struct {
 	databaseConnectionPool *sql.DB
 	p                      *portalProxy
-	skipSSLValidation      bool
 }
 
 func (a *uaaAuth) ShowConfig(config *api.ConsoleConfig) {
-	log.Infof("... UAA Endpoint            : %s", config.UAAEndpoint)
-	log.Infof("... Authorization Endpoint  : %s", config.AuthorizationEndpoint)
-	log.Infof("... Console Client          : %s", config.ConsoleClient)
-	log.Infof("... Admin Scope             : %s", config.ConsoleAdminScope)
-	log.Infof("... Use SSO Login           : %t", config.UseSSO)
+	// Deliberately still formatted: this is an aligned startup banner an
+	// operator reads, not a record anything queries.
+	slog.Info(fmt.Sprintf("... UAA Endpoint            : %s", config.UAAEndpoint))
+	slog.Info(fmt.Sprintf("... Authorization Endpoint  : %s", config.AuthorizationEndpoint))
+	slog.Info(fmt.Sprintf("... Console Client          : %s", config.ConsoleClient))
+	slog.Info(fmt.Sprintf("... Admin Scope             : %s", config.ConsoleAdminScope))
+	slog.Info(fmt.Sprintf("... Use SSO Login           : %t", config.UseSSO))
 }
 
 // Login provides UAA-auth specific Stratos login
-func (a *uaaAuth) Login(c echo.Context) error {
-	log.Debug("UAA Login")
+func (a *uaaAuth) Login(c *echo.Context) error {
+	slog.Debug("UAA Login")
 	//This check will remain in until auth is factored down into its own package
 	if api.AuthEndpointTypes[a.p.Config.ConsoleConfig.AuthEndpointType] != api.Remote {
 		err := api.NewHTTPShadowError(
@@ -63,13 +62,13 @@ func (a *uaaAuth) Login(c echo.Context) error {
 	a.p.ensureXSRFToken(c)
 
 	c.Response().Header().Set("Content-Type", "application/json")
-	c.Response().Write(jsonString)
+	_, err = c.Response().Write(jsonString)
 
-	return nil
+	return err
 }
 
 // Logout provides UAA-auth specific Stratos login
-func (a *uaaAuth) Logout(c echo.Context) error {
+func (a *uaaAuth) Logout(c *echo.Context) error {
 	return a.logout(c)
 }
 
@@ -88,22 +87,22 @@ func (a *uaaAuth) GetUsername(userid string) (string, error) {
 
 // GetUser gets the user guid for the specified UAA user
 func (a *uaaAuth) GetUser(userGUID string) (*api.ConnectedUser, error) {
-	log.Debug("GetUser")
+	slog.Debug("GetUser", "user", userGUID)
 
 	// get the uaa token record
 	uaaTokenRecord, err := a.p.GetUAATokenRecord(userGUID)
 	if err != nil {
 		msg := "unable to retrieve UAA token record"
-		log.Error(msg)
+		slog.Error(msg, "user", userGUID, "error", err)
 		return nil, fmt.Errorf("%s", msg)
 	}
 
 	// get the scope out of the JWT token data
 	userTokenInfo, err := a.p.GetUserTokenInfo(uaaTokenRecord.AuthToken)
 	if err != nil {
-		msg := "unable to find scope information in the UAA Auth Token: %s"
-		log.Errorf(msg, err)
-		return nil, fmt.Errorf(msg, err)
+		const msg = "unable to find scope information in the UAA Auth Token"
+		slog.Error(msg, "user", userGUID, "error", err)
+		return nil, fmt.Errorf("%s: %w", msg, err)
 	}
 
 	// is the user a UAA admin?
@@ -121,16 +120,16 @@ func (a *uaaAuth) GetUser(userGUID string) (*api.ConnectedUser, error) {
 
 }
 
-func (a *uaaAuth) BeforeVerifySession(c echo.Context) {}
+func (a *uaaAuth) BeforeVerifySession(c *echo.Context) {}
 
 // VerifySession verifies the session the specified UAA user and refreshes the token if necessary
-func (a *uaaAuth) VerifySession(c echo.Context, sessionUser string, sessionExpireTime int64) error {
+func (a *uaaAuth) VerifySession(c *echo.Context, sessionUser string, sessionExpireTime int64) error {
 
 	tr, err := a.p.GetUAATokenRecord(sessionUser)
 
 	if err != nil {
 		msg := fmt.Sprintf("Unable to find UAA Token: %s", err)
-		log.Error(msg, err)
+		slog.Error("unable to find the UAA token", "user", sessionUser, "error", err)
 		return echo.NewHTTPError(http.StatusForbidden, msg)
 	}
 
@@ -138,10 +137,10 @@ func (a *uaaAuth) VerifySession(c echo.Context, sessionUser string, sessionExpir
 	if time.Now().After(time.Unix(sessionExpireTime, 0)) {
 
 		// UAA Token has expired, refresh the token, if that fails, fail the request
-		uaaRes, tokenErr := a.p.getUAATokenWithRefreshToken(a.p.Config.ConsoleConfig.SkipSSLValidation, tr.RefreshToken, a.p.Config.ConsoleConfig.ConsoleClient, a.p.Config.ConsoleConfig.ConsoleClientSecret, a.p.getUAAIdentityEndpoint(), "")
+		uaaRes, tokenErr := a.p.getUAATokenWithRefreshToken(a.p.Config.ConsoleConfig.SkipSSLValidation, "", tr.RefreshToken, a.p.Config.ConsoleConfig.ConsoleClient, a.p.Config.ConsoleConfig.ConsoleClientSecret, a.p.getUAAIdentityEndpoint(), "")
 		if tokenErr != nil {
 			msg := "Could not refresh UAA token"
-			log.Error(msg, tokenErr)
+			slog.Error(msg, "user", sessionUser, "error", tokenErr)
 			return echo.NewHTTPError(http.StatusForbidden, msg)
 		}
 
@@ -166,17 +165,19 @@ func (a *uaaAuth) VerifySession(c echo.Context, sessionUser string, sessionExpir
 }
 
 // logout performs the underlying logout from the UAA endpoint
-func (a *uaaAuth) logout(c echo.Context) error {
-	log.Debug("logout")
+func (a *uaaAuth) logout(c *echo.Context) error {
+	slog.Debug("logout")
 
 	a.p.removeEmptyCookie(c)
 
 	// Remove the XSRF Token from the session
-	a.p.unsetSessionValue(c, XSRFTokenSessionName)
+	if err := a.p.unsetSessionValue(c, XSRFTokenSessionName); err != nil {
+		slog.Warn("unable to remove the XSRF token from the session", "error", err)
+	}
 
 	err := a.p.clearSession(c)
 	if err != nil {
-		log.Errorf("Unable to clear session: %v", err)
+		slog.Error("unable to clear the session", "error", err)
 	}
 
 	// Send JSON document
@@ -188,9 +189,9 @@ func (a *uaaAuth) logout(c echo.Context) error {
 }
 
 // loginToUAA performs the underlying login to the UAA endpoint
-func (p *portalProxy) loginToUAA(c echo.Context) (*api.LoginRes, error) {
-	log.Debug("loginToUAA")
-	uaaRes, u, err := p.login(c, p.Config.ConsoleConfig.SkipSSLValidation, p.Config.ConsoleConfig.ConsoleClient, p.Config.ConsoleConfig.ConsoleClientSecret, p.getUAAIdentityEndpoint())
+func (p *portalProxy) loginToUAA(c *echo.Context) (*api.LoginRes, error) {
+	slog.Debug("loginToUAA")
+	uaaRes, u, err := p.login(c, p.Config.ConsoleConfig.SkipSSLValidation, "", p.Config.ConsoleConfig.ConsoleClient, p.Config.ConsoleConfig.ConsoleClientSecret, p.getUAAIdentityEndpoint())
 	var resp *api.LoginRes
 	if err != nil {
 		// Check the Error
@@ -233,7 +234,7 @@ func (p *portalProxy) loginToUAA(c echo.Context) (*api.LoginRes, error) {
 
 		err = p.ExecuteLoginHooks(c)
 		if err != nil {
-			log.Warnf("Login hooks failed: %v", err)
+			slog.Warn("login hooks failed", "error", err)
 		}
 
 		uaaAdmin := strings.Contains(uaaRes.Scope, p.Config.ConsoleConfig.ConsoleAdminScope)
@@ -249,13 +250,13 @@ func (p *portalProxy) loginToUAA(c echo.Context) (*api.LoginRes, error) {
 
 // getUAAIdentityEndpoint gets the token endpoint for the UAA
 func (p *portalProxy) getUAAIdentityEndpoint() string {
-	log.Debug("getUAAIdentityEndpoint")
+	slog.Debug("getUAAIdentityEndpoint")
 	return fmt.Sprintf("%s/oauth/token", p.Config.ConsoleConfig.UAAEndpoint)
 }
 
 // saveAuthToken stores the UAA token for a given user
 func (p *portalProxy) saveAuthToken(u api.JWTUserTokenInfo, authTok string, refreshTok string) (api.TokenRecord, error) {
-	log.Debug("saveAuthToken")
+	slog.Debug("saveAuthToken", "user", u.UserGUID)
 
 	key := u.UserGUID
 	tokenRecord := api.TokenRecord{
@@ -275,7 +276,7 @@ func (p *portalProxy) saveAuthToken(u api.JWTUserTokenInfo, authTok string, refr
 
 // setUAATokenRecord saves the uaa token for the given user, to our store
 func (p *portalProxy) setUAATokenRecord(key string, t api.TokenRecord) error {
-	log.Debug("setUAATokenRecord")
+	slog.Debug("setUAATokenRecord", "user", key)
 
 	tokenRepo, err := p.GetStoreFactory().TokenStore()
 	if err != nil {
@@ -292,8 +293,8 @@ func (p *portalProxy) setUAATokenRecord(key string, t api.TokenRecord) error {
 
 // RefreshUAALogin refreshes the UAA login and optionally stores the new token
 func (p *portalProxy) RefreshUAALogin(username, password string, store bool) error {
-	log.Debug("RefreshUAALogin")
-	uaaRes, err := p.getUAATokenWithCreds(p.Config.ConsoleConfig.SkipSSLValidation, username, password, p.Config.ConsoleConfig.ConsoleClient, p.Config.ConsoleConfig.ConsoleClientSecret, p.getUAAIdentityEndpoint())
+	slog.Debug("RefreshUAALogin", "username", username)
+	uaaRes, err := p.getUAATokenWithCreds(p.Config.ConsoleConfig.SkipSSLValidation, "", username, password, p.Config.ConsoleConfig.ConsoleClient, p.Config.ConsoleConfig.ConsoleClientSecret, p.getUAAIdentityEndpoint())
 	if err != nil {
 		return err
 	}
@@ -314,8 +315,8 @@ func (p *portalProxy) RefreshUAALogin(username, password string, store bool) err
 }
 
 // getUAATokenWithAuthorizationCode
-func (p *portalProxy) getUAATokenWithAuthorizationCode(skipSSLValidation bool, code, client, clientSecret, authEndpoint string, state string, cnsiGUID string) (*api.UAAResponse, error) {
-	log.Debug("getUAATokenWithAuthorizationCode")
+func (p *portalProxy) getUAATokenWithAuthorizationCode(skipSSLValidation bool, caCert string, code, client, clientSecret, authEndpoint string, state string, cnsiGUID string) (*api.UAAResponse, error) {
+	slog.Debug("getUAATokenWithAuthorizationCode")
 
 	body := url.Values{}
 	body.Set("grant_type", "authorization_code")
@@ -324,12 +325,12 @@ func (p *portalProxy) getUAATokenWithAuthorizationCode(skipSSLValidation bool, c
 	body.Set("client_secret", clientSecret)
 	body.Set("redirect_uri", getSSORedirectURI(state, state, cnsiGUID))
 
-	return p.getUAAToken(body, skipSSLValidation, client, clientSecret, authEndpoint)
+	return p.getUAAToken(body, skipSSLValidation, caCert, client, clientSecret, authEndpoint)
 }
 
 // getUAATokenWithCreds
-func (p *portalProxy) getUAATokenWithCreds(skipSSLValidation bool, username, password, client, clientSecret, authEndpoint string) (*api.UAAResponse, error) {
-	log.Debug("getUAATokenWithCreds")
+func (p *portalProxy) getUAATokenWithCreds(skipSSLValidation bool, caCert string, username, password, client, clientSecret, authEndpoint string) (*api.UAAResponse, error) {
+	slog.Debug("getUAATokenWithCreds")
 
 	body := url.Values{}
 	body.Set("grant_type", "password")
@@ -337,12 +338,12 @@ func (p *portalProxy) getUAATokenWithCreds(skipSSLValidation bool, username, pas
 	body.Set("password", password)
 	body.Set("response_type", "token")
 
-	return p.getUAAToken(body, skipSSLValidation, client, clientSecret, authEndpoint)
+	return p.getUAAToken(body, skipSSLValidation, caCert, client, clientSecret, authEndpoint)
 }
 
 // getUAATokenWithRefreshToken
-func (p *portalProxy) getUAATokenWithRefreshToken(skipSSLValidation bool, refreshToken, client, clientSecret, authEndpoint string, scopes string) (*api.UAAResponse, error) {
-	log.Debug("getUAATokenWithRefreshToken")
+func (p *portalProxy) getUAATokenWithRefreshToken(skipSSLValidation bool, caCert string, refreshToken, client, clientSecret, authEndpoint string, scopes string) (*api.UAAResponse, error) {
+	slog.Debug("getUAATokenWithRefreshToken")
 
 	body := url.Values{}
 	body.Set("grant_type", "refresh_token")
@@ -353,36 +354,53 @@ func (p *portalProxy) getUAATokenWithRefreshToken(skipSSLValidation bool, refres
 		body.Set("scope", scopes)
 	}
 
-	return p.getUAAToken(body, skipSSLValidation, client, clientSecret, authEndpoint)
+	return p.getUAAToken(body, skipSSLValidation, caCert, client, clientSecret, authEndpoint)
 }
 
+// tokenEndpointPattern constrains a UAA/OIDC token endpoint to an absolute
+// http(s) URL with a plain host[:port] and a plain path. User info, query and
+// fragment are all excluded: a token POST needs none of them, and each is a
+// way to steer the request somewhere other than the host the operator thinks
+// they configured.
+var tokenEndpointPattern = regexp.MustCompile(
+	`^https?://(?:[A-Za-z0-9.-]+|\[[0-9A-Fa-f:.]+\])(?::[0-9]{1,5})?(?:/[A-Za-z0-9._~%-]*)*$`)
+
 // getUAAToken
-func (p *portalProxy) getUAAToken(body url.Values, skipSSLValidation bool, client, clientSecret, authEndpoint string) (*api.UAAResponse, error) {
-	log.WithField("authEndpoint", authEndpoint).Debug("getUAAToken")
+func (p *portalProxy) getUAAToken(body url.Values, skipSSLValidation bool, caCert string, client, clientSecret, authEndpoint string) (*api.UAAResponse, error) {
+	slog.Debug("getUAAToken", "authEndpoint", authEndpoint)
+
+	// Checked here rather than where the endpoint is built: setupGetAvailableScopes
+	// takes it straight off the unauthenticated first-run setup form, so the only
+	// place every caller is covered is the one that makes the request.
+	if !tokenEndpointPattern.MatchString(authEndpoint) {
+		slog.Error("refusing to request a token from a malformed endpoint", "authEndpoint", authEndpoint)
+		return nil, fmt.Errorf("invalid UAA token endpoint: %q", authEndpoint)
+	}
+
 	req, err := http.NewRequest("POST", authEndpoint, strings.NewReader(body.Encode()))
 	if err != nil {
-		msg := "failed to create request for UAA: %v"
-		log.Errorf(msg, err)
-		return nil, fmt.Errorf(msg, err)
+		const msg = "failed to create request for UAA"
+		slog.Error(msg, "authEndpoint", authEndpoint, "error", err)
+		return nil, fmt.Errorf("%s: %w", msg, err)
 	}
 
 	req.SetBasicAuth(url.QueryEscape(client), url.QueryEscape(clientSecret))
 	req.Header.Set(echo.HeaderContentType, echo.MIMEApplicationForm)
 
-	var h = p.GetHttpClientForRequest(req, skipSSLValidation, "")
+	var h = p.GetHttpClientForRequest(req, skipSSLValidation, caCert)
 	res, err := h.Do(req)
 	if err != nil || res.StatusCode != http.StatusOK {
-		log.Errorf("Error performing http request - response: %v, error: %v", res, err)
+		slog.Error("error performing the http request", "authEndpoint", authEndpoint, "response", res, "error", err)
 		return nil, api.LogHTTPError(res, err)
 	}
 
-	defer res.Body.Close()
+	defer func() { _ = res.Body.Close() }()
 
 	var response api.UAAResponse
 
 	dec := json.NewDecoder(res.Body)
 	if err = dec.Decode(&response); err != nil {
-		log.Errorf("Error decoding response: %v", err)
+		slog.Error("error decoding the UAA response", "authEndpoint", authEndpoint, "error", err)
 		return nil, fmt.Errorf("getUAAToken Decode: %s", err)
 	}
 
@@ -391,17 +409,17 @@ func (p *portalProxy) getUAAToken(body url.Values, skipSSLValidation bool, clien
 
 // GetUAATokenRecord fetched the uaa token for the given user, from our store
 func (p *portalProxy) GetUAATokenRecord(userGUID string) (api.TokenRecord, error) {
-	log.Debug("GetUAATokenRecord")
+	slog.Debug("GetUAATokenRecord", "user", userGUID)
 
 	tokenRepo, err := p.GetStoreFactory().TokenStore()
 	if err != nil {
-		log.Errorf("Database error getting repo for UAA token: %v", err)
+		slog.Error("database error getting the repo for the UAA token", "error", err)
 		return api.TokenRecord{}, err
 	}
 
 	tr, err := tokenRepo.FindAuthToken(userGUID, p.Config.EncryptionKeyInBytes)
 	if err != nil {
-		log.Errorf("Database error finding UAA token: %v", err)
+		slog.Error("database error finding the UAA token", "user", userGUID, "error", err)
 		return api.TokenRecord{}, err
 	}
 
@@ -410,14 +428,14 @@ func (p *portalProxy) GetUAATokenRecord(userGUID string) (api.TokenRecord, error
 
 // RefreshUAAToken refreshes the UAA Token for the user using the refresh token, then updates our store
 func (p *portalProxy) RefreshUAAToken(userGUID string) (t api.TokenRecord, err error) {
-	log.Debug("RefreshUAAToken")
+	slog.Debug("RefreshUAAToken", "user", userGUID)
 
 	userToken, err := p.GetUAATokenRecord(userGUID)
 	if err != nil {
 		return t, fmt.Errorf("UAA Token info could not be found for user with GUID %s", userGUID)
 	}
 
-	uaaRes, err := p.getUAATokenWithRefreshToken(p.Config.ConsoleConfig.SkipSSLValidation, userToken.RefreshToken,
+	uaaRes, err := p.getUAATokenWithRefreshToken(p.Config.ConsoleConfig.SkipSSLValidation, "", userToken.RefreshToken,
 		p.Config.ConsoleConfig.ConsoleClient, p.Config.ConsoleConfig.ConsoleClientSecret, p.getUAAIdentityEndpoint(), "")
 	if err != nil {
 		err = fmt.Errorf("UAA Token refresh request failed: %v", err)
@@ -442,7 +460,7 @@ func (p *portalProxy) RefreshUAAToken(userGUID string) (t api.TokenRecord, err e
 
 // ssoLoginToUAA is a callback invoked after the UAA login flow has completed and during logout
 // We use a single callback so this can be allow-listed in the client
-func (p *portalProxy) ssoLoginToUAA(c echo.Context) error {
+func (p *portalProxy) ssoLoginToUAA(c *echo.Context) error {
 	state := c.QueryParam("state")
 
 	stateErr := validateSSORedirectState(state, p.Config.SSOAllowList)
@@ -476,7 +494,7 @@ func (p *portalProxy) ssoLoginToUAA(c echo.Context) error {
 }
 
 // ssoLogoutOfUAA performs SSO logout from the UAA
-func (p *portalProxy) ssoLogoutOfUAA(c echo.Context) error {
+func (p *portalProxy) ssoLogoutOfUAA(c *echo.Context) error {
 	if !p.Config.SSOLogin {
 		err := api.NewHTTPShadowError(
 			http.StatusNotFound,
@@ -515,7 +533,7 @@ func (p *portalProxy) hasSSOOption(option string) bool {
 }
 
 // initSSOlogin performs SSO Login via UAA
-func (p *portalProxy) initSSOlogin(c echo.Context) error {
+func (p *portalProxy) initSSOlogin(c *echo.Context) error {
 	if !p.Config.SSOLogin {
 		err := api.NewHTTPShadowError(
 			http.StatusNotFound,
@@ -531,8 +549,7 @@ func (p *portalProxy) initSSOlogin(c echo.Context) error {
 	}
 
 	redirectURL := fmt.Sprintf("%s/oauth/authorize?response_type=code&client_id=%s&redirect_uri=%s", p.Config.ConsoleConfig.AuthorizationEndpoint, p.Config.ConsoleConfig.ConsoleClient, url.QueryEscape(getSSORedirectURI(state, state, "")))
-	c.Redirect(http.StatusTemporaryRedirect, redirectURL)
-	return nil
+	return c.Redirect(http.StatusTemporaryRedirect, redirectURL)
 }
 
 func validateSSORedirectState(state string, allowListStr string) error {
@@ -584,37 +601,4 @@ func getSSORedirectURI(base string, state string, endpointGUID string) string {
 		returnURL = fmt.Sprintf("%s&guid=%s", returnURL, endpointGUID)
 	}
 	return returnURL
-}
-
-//HTTP Basic
-
-// fetchHTTPBasicToken currently unused?
-func (p *portalProxy) fetchHTTPBasicToken(cnsiRecord api.CNSIRecord, c echo.Context) (*api.UAAResponse, *api.JWTUserTokenInfo, *api.CNSIRecord, error) {
-
-	uaaRes, u, err := p.loginHTTPBasic(c)
-
-	if err != nil {
-		return nil, nil, nil, api.NewHTTPShadowError(
-			http.StatusUnauthorized,
-			"Login failed",
-			"Login failed: %v", err)
-	}
-	return uaaRes, u, &cnsiRecord, nil
-}
-
-// fetchHTTPBasicToken currently unused?
-func (p *portalProxy) loginHTTPBasic(c echo.Context) (uaaRes *api.UAAResponse, u *api.JWTUserTokenInfo, err error) {
-	log.Debug("login")
-	username := c.FormValue("username")
-	password := c.FormValue("password")
-
-	if len(username) == 0 || len(password) == 0 {
-		return uaaRes, u, errors.New("needs username and password")
-	}
-
-	authString := fmt.Sprintf("%s:%s", username, password)
-	base64EncodedAuthString := base64.StdEncoding.EncodeToString([]byte(authString))
-
-	uaaRes.AccessToken = fmt.Sprintf("Basic %s", base64EncodedAuthString)
-	return uaaRes, u, nil
 }

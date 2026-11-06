@@ -2,12 +2,25 @@
   &__title {
     margin-bottom: 10px;
     margin-top: 20px;
+    color: var(--content-text);
   }
   &__item {
     align-items: center;
     display: flex;
     margin-bottom: 10px;
     margin-left: 12px;
+
+    // Let the text column shrink inside the flex row so titles wrap to a
+    // second line when the sidebar is genuinely too narrow, instead of
+    // overflowing the card edge.
+    > div:last-child {
+      min-width: 0;
+    }
+
+    a {
+      color: var(--color-primary);
+      overflow-wrap: break-word;
+    }
 
     mat-icon {
       cursor: pointer;

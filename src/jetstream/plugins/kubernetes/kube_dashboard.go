@@ -3,10 +3,10 @@ package kubernetes
 import (
 	"encoding/json"
 	"errors"
+	"log/slog"
 	"net/http"
 
-	"github.com/labstack/echo/v4"
-	log "github.com/sirupsen/logrus"
+	"github.com/labstack/echo/v5"
 	"k8s.io/client-go/rest"
 
 	"github.com/cloudfoundry/stratos/src/jetstream/api"
@@ -20,12 +20,13 @@ func (k *KubernetesSpecification) getConfig(cnsiRecord *api.CNSIRecord, tokenRec
 }
 
 // Proxy the request
-func (k *KubernetesSpecification) kubeDashboardProxy(c echo.Context) error {
-	log.Debug("kubeDashboardTest request")
+func (k *KubernetesSpecification) kubeDashboardProxy(c *echo.Context) error {
 	var p = k.portalProxy
 
 	cnsiGUID := c.Param("guid")
 	userGUID := c.Get("user_id").(string)
+
+	slog.Debug("Kubernetes dashboard proxy request", "endpoint", cnsiGUID, "user", userGUID)
 
 	cnsiRecord, err := p.GetCNSIRecord(cnsiGUID)
 	if err != nil {
@@ -50,7 +51,7 @@ func (k *KubernetesSpecification) kubeDashboardProxy(c echo.Context) error {
 }
 
 // Determine if the specified Kube endpoint has the dashboard installed and ready
-func (k *KubernetesSpecification) kubeDashboardStatus(c echo.Context) error {
+func (k *KubernetesSpecification) kubeDashboardStatus(c *echo.Context) error {
 	var p = k.portalProxy
 	endpointGUID := c.Param("guid")
 	userGUID := c.Get("user_id").(string)
@@ -66,77 +67,82 @@ func (k *KubernetesSpecification) kubeDashboardStatus(c echo.Context) error {
 	}
 
 	c.Response().Header().Set("Content-Type", "application/json")
-	c.Response().Write(jsonString)
-	return nil
+	_, writeErr := c.Response().Write(jsonString)
+
+	return writeErr
 }
 
 // Login to the kubernetes dashboard and then redirect to the UI
-func (k *KubernetesSpecification) kubeDashboardLogin(c echo.Context) error {
+func (k *KubernetesSpecification) kubeDashboardLogin(c *echo.Context) error {
 	var p = k.portalProxy
 	err := dashboard.KubeDashboardLogin(c, p)
 	return err
 }
 
 // Creates service account for dashboard access
-func (k *KubernetesSpecification) kubeDashboardCreateServiceAccount(c echo.Context) error {
+func (k *KubernetesSpecification) kubeDashboardCreateServiceAccount(c *echo.Context) error {
 	var p = k.portalProxy
 	endpointGUID := c.Param("guid")
 	userGUID := c.Get("user_id").(string)
 
 	err := dashboard.CreateServiceAccount(p, endpointGUID, userGUID)
 	if err != nil {
-		return api.NewHTTPShadowError(http.StatusInternalServerError, err.Error(), err.Error())
+		return api.NewHTTPShadowError(http.StatusInternalServerError, err.Error(), "%s", err.Error())
 	}
 
 	c.Response().Header().Set("Content-Type", "application/json")
-	c.Response().Write([]byte("{ \"created\": true }"))
-	return nil
+	_, writeErr := c.Response().Write([]byte("{ \"created\": true }"))
+
+	return writeErr
 }
 
 // Delete service account used for Dashboard access
-func (k *KubernetesSpecification) kubeDashboardDeleteServiceAccount(c echo.Context) error {
+func (k *KubernetesSpecification) kubeDashboardDeleteServiceAccount(c *echo.Context) error {
 	var p = k.portalProxy
 	endpointGUID := c.Param("guid")
 	userGUID := c.Get("user_id").(string)
 
 	err := dashboard.DeleteServiceAccount(p, endpointGUID, userGUID)
 	if err != nil {
-		return api.NewHTTPShadowError(http.StatusInternalServerError, err.Error(), err.Error())
+		return api.NewHTTPShadowError(http.StatusInternalServerError, err.Error(), "%s", err.Error())
 	}
 
 	c.Response().Header().Set("Content-Type", "application/json")
-	c.Response().Write([]byte("{ \"deleted\": true }"))
-	return nil
+	_, writeErr := c.Response().Write([]byte("{ \"deleted\": true }"))
+
+	return writeErr
 }
 
 // Install dashboard in a cluster
-func (k *KubernetesSpecification) kubeDashboardInstallDashboard(c echo.Context) error {
+func (k *KubernetesSpecification) kubeDashboardInstallDashboard(c *echo.Context) error {
 	var p = k.portalProxy
 	endpointGUID := c.Param("guid")
 	userGUID := c.Get("user_id").(string)
 
 	err := dashboard.InstallDashboard(p, endpointGUID, userGUID)
 	if err != nil {
-		return api.NewHTTPShadowError(http.StatusInternalServerError, err.Error(), err.Error())
+		return api.NewHTTPShadowError(http.StatusInternalServerError, err.Error(), "%s", err.Error())
 	}
 
 	c.Response().Header().Set("Content-Type", "application/json")
-	c.Response().Write([]byte("{ \"installation\": true }"))
-	return nil
+	_, writeErr := c.Response().Write([]byte("{ \"installation\": true }"))
+
+	return writeErr
 }
 
 // Delete dashboard in a cluster
-func (k *KubernetesSpecification) kubeDashboardDeleteDashboard(c echo.Context) error {
+func (k *KubernetesSpecification) kubeDashboardDeleteDashboard(c *echo.Context) error {
 	var p = k.portalProxy
 	endpointGUID := c.Param("guid")
 	userGUID := c.Get("user_id").(string)
 
 	err := dashboard.DeleteDashboard(p, endpointGUID, userGUID)
 	if err != nil {
-		return api.NewHTTPShadowError(http.StatusInternalServerError, err.Error(), err.Error())
+		return api.NewHTTPShadowError(http.StatusInternalServerError, err.Error(), "%s", err.Error())
 	}
 
 	c.Response().Header().Set("Content-Type", "application/json")
-	c.Response().Write([]byte("{ \"deleted\": true }"))
-	return nil
+	_, writeErr := c.Response().Write([]byte("{ \"deleted\": true }"))
+
+	return writeErr
 }

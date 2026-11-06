@@ -1,0 +1,15 @@
+{
+  "$schema": "@angular-devkit/architect/src/builders-schema.json",
+  "builders": {
+    "application": {
+      "implementation": "./application/index.js",
+      "schema": "./application/schema.json",
+      "description": "Build an Angular application with Stratos pre-build processing"
+    },
+    "dev-server": {
+      "implementation": "./dev-server/index.js",
+      "schema": "./dev-server/schema.json",
+      "description": "Serve an Angular application with Stratos pre-build processing"
+    }
+  }
+}

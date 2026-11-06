@@ -1,69 +1,92 @@
 <div class="add-route">
-  <div>Create a new route or map an existing one. </div>
-  <div>
-    <mat-radio-group [(ngModel)]="addRouteMode" class="add-route__radios">
-      <mat-radio-button *ngFor="let mode of addRouteModes" [value]="mode" class="add-route__radios-btn">
-        {{ mode.label }}
-      </mat-radio-button>
-    </mat-radio-group>
+  <div class="add-route__section add-route__section--primary" data-test="create-route-form">
+    <div class="add-route__section-title">Create a new route</div>
+    <form class="stepper-form w-1/2" [formGroup]="domainFormGroup">
+      <app-form-field [fitContent]="true">
+        <app-select formControlName="domain" placeholder="Domain" [required]="true" [appFocus]="domains().length > 0">
+          @for (domain of domains(); track domain.guid) {
+            <app-option [value]="domain">{{domain.name}}</app-option>
+          }
+        </app-select>
+      </app-form-field>
+    </form>
+
+    @if (!selectedDomain()?.supportedProtocols?.includes('tcp')) {
+      <form [formGroup]="addHTTPRoute" class="stepper-form w-1/2">
+        <div class="add-route__form-prompt">
+          This is an HTTP Domain - an HTTP Route will be created
+        </div>
+        <div class="add-route__form-fields">
+          <div>
+            <app-form-field>
+              <input appInput formControlName="host" placeholder="Host" required class="w-full placeholder:!text-transparent focus:outline-none">
+              @if (addHTTPRoute.controls['host'].errors?.pattern) {
+                <app-error>Invalid Hostname</app-error>
+              }
+              @if (addHTTPRoute.controls['host'].errors?.maxlength) {
+                <app-error>Host cannot exceed 63 characters</app-error>
+              }
+            </app-form-field>
+          </div>
+          <div>
+            <app-form-field>
+              <input appInput formControlName="path" placeholder="Path" class="w-full placeholder:!text-transparent focus:outline-none">
+              @if (addHTTPRoute.controls['path'].errors?.pattern) {
+                <app-error>Invalid Path</app-error>
+              }
+              @if (addHTTPRoute.controls['path'].errors?.maxlength) {
+                <app-error>Path cannot exceed 128 characters</app-error>
+              }
+            </app-form-field>
+          </div>
+        </div>
+      </form>
+    }
+    @if (selectedDomain()?.supportedProtocols?.includes('tcp')) {
+      <form [formGroup]="addTCPRoute" class="stepper-form w-1/2">
+        <div class="add-route__form-prompt">
+          This is a TCP Domain - a TCP Route will be created
+        </div>
+        <div class="add-route__form-fields">
+          <div>
+            <app-checkbox formControlName="useRandomPort">Use a random port</app-checkbox>
+            <app-form-field>
+              <input type="number" appInput formControlName="port" placeholder="Port" required class="w-full placeholder:!text-transparent focus:outline-none">
+              @if (addTCPRoute.controls['port'].errors?.pattern) {
+                <app-error>Invalid Port</app-error>
+              }
+            </app-form-field>
+          </div>
+        </div>
+      </form>
+    }
+
+    @if (hostCollision()) {
+      <div class="add-route__collision" role="alert" data-test="host-collision-warning">
+        A route with these values already exists in this space
+        @if ((hostCollision()!.appGuids ?? []).length === 0) {
+          (currently detached). Pick it from the list below to attach it instead.
+        } @else {
+          (attached to another app). Pick it from the list below to attach it to this app as well, or choose different values.
+        }
+      </div>
+    }
   </div>
-  <div class="add-route__form" *ngIf="addRouteMode?.id === 'create'">
-    <div>
-      Please specify details for the new route.
+
+  <div class="add-route__section" data-test="available-routes">
+    <div class="add-route__section-title">Or attach an existing route</div>
+    <app-signal-list [config]="mapListConfig" class="flex-1 min-h-0"></app-signal-list>
+  </div>
+
+  <details class="add-route__section add-route__section--secondary add-route__accordion"
+           data-test="attached-routes"
+           [open]="attachedListOpen()"
+           (toggle)="attachedListExpanded.set($any($event.target).open)">
+    <summary class="add-route__accordion-summary">
+      Already attached to this app ({{ attachedListConfig.totalFilteredResults() }})
+    </summary>
+    <div class="add-route__accordion-body">
+      <app-signal-list [config]="attachedListConfig" class="flex-1 min-h-0"></app-signal-list>
     </div>
-    <form class="stepper-form" [formGroup]="domainFormGroup">
-      <mat-form-field>
-        <mat-select formControlName="domain" placeholder="Domain" [(ngModel)]="selectedDomain" required [appFocus]="domains">
-          <mat-option *ngFor="let domain of domains" [value]="domain">{{domain?.entity?.name}}</mat-option>
-        </mat-select>
-      </mat-form-field>
-    </form>
-
-    <form [formGroup]="addHTTPRoute" class="stepper-form" *ngIf="selectedDomain?.entity.router_group_type !== 'tcp'">
-      <div class="add-route__form-prompt">
-        This is an HTTP Domain - an HTTP Route will be created
-      </div>
-      <div class="add-route__form-fields">
-        <div>
-          <mat-form-field>
-            <input matInput formControlName="host" placeholder="Host" required>
-            <mat-error *ngIf="addHTTPRoute.controls['host'].errors?.pattern">Invalid Hostname</mat-error>
-            <mat-error *ngIf="addHTTPRoute.controls['host'].errors?.maxlength">Host cannot exceed 63 characters</mat-error>
-          </mat-form-field>
-        </div>
-        <div>
-          <mat-form-field>
-            <input matInput formControlName="path" placeholder="Path">
-            <mat-error *ngIf="addHTTPRoute.controls['path'].errors?.pattern">Invalid Path</mat-error>
-            <mat-error *ngIf="addHTTPRoute.controls['path'].errors?.maxlength">Path cannot exceed 128 characters</mat-error>
-            <span matPrefix>/&nbsp;</span>
-          </mat-form-field>
-        </div>
-      </div>
-    </form>
-
-    <form [formGroup]="addTCPRoute" class="stepper-form" *ngIf="selectedDomain?.entity.router_group_type === 'tcp'">
-      <div class="add-route__form-prompt">
-        This is a TCP Domain - a TCP Route will be created
-      </div>
-      <div class="add-route__form-fields">
-        <div>
-          <mat-checkbox formControlName="useRandomPort">Use a random port</mat-checkbox>
-          <mat-form-field>
-            <input type="number" matInput formControlName="port" placeholder="Port" required>
-            <mat-error *ngIf="addTCPRoute.controls['port'].errors?.pattern">Invalid Port</mat-error>
-          </mat-form-field>
-        </div>
-      </div>
-    </form>
-  </div>
-
-  <div class="add-route__form" *ngIf="addRouteMode?.id === 'map'">
-    <div class="add-route__form-message">
-      Please select the route you wish to map
-    </div>
-    <form class="add-route__form-maptable">
-      <app-map-routes [selectedRoute$]="selectedRoute$"></app-map-routes>
-    </form>
-  </div>
+  </details>
 </div>

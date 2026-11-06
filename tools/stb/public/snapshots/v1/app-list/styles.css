@@ -1,0 +1,22 @@
+body { margin: 0; font-family: system-ui; background-color: var(--color-brand-50); }
+nav {
+  background-color: var(--nav-bg); color: var(--nav-text);
+  padding: 1rem; font-weight: 600;
+}
+nav .logo { color: var(--nav-text); }
+main { padding: 2rem; }
+main h1 { color: var(--color-brand-900); }
+.app-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(250px, 1fr)); gap: 1rem; }
+.app-card {
+  background: white; border: 1px solid var(--color-brand-200);
+  border-radius: 8px; padding: 1rem;
+}
+.app-card h2 { color: var(--color-brand-700); margin-top: 0; }
+.status { display: inline-block; padding: 0.2rem 0.5rem; border-radius: 999px; font-size: 0.8rem; color: white; }
+.status-success { background-color: var(--color-success); }
+.status-warning { background-color: var(--color-warning); }
+.status-danger  { background-color: var(--color-danger); }
+
+.dark-theme body { background-color: var(--color-brand-900); }
+.dark-theme .app-card { background-color: var(--color-brand-800); border-color: var(--color-brand-700); }
+.dark-theme .app-card h2, .dark-theme main h1 { color: var(--color-brand-50); }

@@ -1,6 +1,9 @@
 import { inject, TestBed } from '@angular/core/testing';
+import { provideZonelessChangeDetection } from '@angular/core';
+import { describe, it, expect, beforeEach, afterEach, beforeAll, afterAll, vi } from 'vitest';
+import { Subscription } from 'rxjs';
 
-import { pathGet, pathSet, safeStringToObj, safeUnsubscribe, UtilsService } from './utils.service';
+import { pathGet, safeStringToObj, safeUnsubscribe, UtilsService } from './utils.service';
 
 describe('UtilsService', () => {
   let service: UtilsService;
@@ -8,7 +11,10 @@ describe('UtilsService', () => {
   beforeEach(() => {
     service = new UtilsService();
     TestBed.configureTestingModule({
-      providers: [UtilsService]
+      providers: [
+        UtilsService,
+        provideZonelessChangeDetection(),
+      ]
     });
   });
 
@@ -27,7 +33,8 @@ describe('UtilsService', () => {
 
     it('should return empty string', () => {
       expect(service.bytesToHumanSize('')).toBe('');
-      expect(service.bytesToHumanSize(null)).toBe('');
+      // strict: deliberately passing null to exercise the runtime null-guard
+      expect(service.bytesToHumanSize(null as unknown as string)).toBe('');
     });
 
     it('should return unlimited char when -1', () => {
@@ -44,7 +51,8 @@ describe('UtilsService', () => {
     });
 
     it('should return empty string', () => {
-      expect(service.mbToHumanSize(null)).toBe('');
+      // strict: deliberately passing null to exercise the runtime null-guard
+      expect(service.mbToHumanSize(null as unknown as number)).toBe('');
     });
 
     it('should return unlimited char when -1', () => {
@@ -61,9 +69,9 @@ describe('UtilsService', () => {
 
   describe('#usageBytes', () => {
     it('should return empty value', () => {
-      expect(service.usageBytes(0)).toBe('-');
-      expect(service.usageBytes(Number.POSITIVE_INFINITY)).toBe('-');
-      expect(service.usageBytes(NaN)).toBe('-');
+      expect(service.usageBytes(0 as any)).toBe('-');
+      expect(service.usageBytes(Number.POSITIVE_INFINITY as any)).toBe('-');
+      expect(service.usageBytes(NaN as any)).toBe('-');
       expect(service.usageBytes([])).toBe('-');
     });
 
@@ -79,9 +87,10 @@ describe('UtilsService', () => {
 
   describe('#formatUptime', () => {
     it('should return empty value if invalid', () => {
-      expect(service.formatUptime(undefined)).toBe('-');
+      // strict: deliberately passing undefined/null to exercise the runtime guard
+      expect(service.formatUptime(undefined as unknown as number)).toBe('-');
       expect(service.formatUptime(NaN)).toBe('-');
-      expect(service.formatUptime(null)).toBe('-');
+      expect(service.formatUptime(null as unknown as number)).toBe('-');
     });
 
     it('should return 0s if now', () => {
@@ -100,9 +109,10 @@ describe('UtilsService', () => {
 
   describe('#percent', () => {
     it('should return empty string if invalid value', () => {
-      expect(service.percent(null)).toBe('');
+      // strict: deliberately passing null/undefined to exercise the runtime guard
+      expect(service.percent(null as unknown as number)).toBe('');
       expect(service.percent(NaN)).toBe('');
-      expect(service.percent(undefined)).toBe('');
+      expect(service.percent(undefined as unknown as number)).toBe('');
     });
 
     it('should format precision if passed', () => {
@@ -133,19 +143,6 @@ describe('UtilsService', () => {
     });
   });
 
-  describe('#pathSet', () => {
-    it('should set object value based on path ', () => {
-      const obj: any = { a: { b: {} } };
-      pathSet('a.b', obj, 1);
-
-      expect(obj.a.b).toBe(1);
-    });
-
-    it('should throw exception if path doesnt exist', () => {
-      expect(() => pathSet('a.b', {}, 1)).toThrowError();
-    });
-  });
-
   describe('#safeStringToObj', () => {
     it('should convert json obj string to object', () => {
       expect(safeStringToObj('{}')).toEqual({});
@@ -160,9 +157,10 @@ describe('UtilsService', () => {
 
   describe('#safeUnsubscribe', () => {
     it('should call unsubscribe method from objects', () => {
-      const spy = jasmine.createSpyObj('subscriber', ['unsubscribe']);
-      const spy2 = jasmine.createSpyObj('subscriber', ['unsubscribe']);
-      safeUnsubscribe(spy, spy2);
+      // safeUnsubscribe only reads `.unsubscribe`; minimal Subscription stubs suffice
+      const spy: Pick<Subscription, 'unsubscribe'> = { unsubscribe: vi.fn() };
+      const spy2: Pick<Subscription, 'unsubscribe'> = { unsubscribe: vi.fn() };
+      safeUnsubscribe(spy as Subscription, spy2 as Subscription);
 
       expect(spy.unsubscribe).toHaveBeenCalled();
       expect(spy2.unsubscribe).toHaveBeenCalled();

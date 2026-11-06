@@ -1,5 +1,5 @@
 import { Injectable } from '@angular/core';
-import { ISimpleListConfig } from 'frontend/packages/core/src/shared/components/list/list.component.types';
+import { ISimpleListConfig } from '@stratosui/core';
 
 interface KubernetesListConfig {
   [name: string]: ISimpleListConfig<any>;
@@ -20,7 +20,7 @@ export class KubernetesListConfigService {
     this.configs[name] = config;
   }
 
-  get<T= any>(name: string): ISimpleListConfig<T> {
+  get<T= any>(name: string): ISimpleListConfig<T> | undefined {
     return name ? this.configs[name] : undefined;
   }
 }

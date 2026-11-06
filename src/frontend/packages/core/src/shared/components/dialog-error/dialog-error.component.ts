@@ -1,18 +1,21 @@
 import { ChangeDetectionStrategy, Component, Input, OnInit } from '@angular/core';
 
+
 @Component({
   selector: 'app-dialog-error',
   templateUrl: './dialog-error.component.html',
   styleUrls: ['./dialog-error.component.scss'],
-  changeDetection: ChangeDetectionStrategy.OnPush
+  changeDetection: ChangeDetectionStrategy.OnPush,
+  standalone: true,
+  imports: []
 })
 export class DialogErrorComponent implements OnInit {
 
   constructor() { }
 
-  @Input() message: string;
+  @Input() message!: string;
 
-  @Input() show: boolean;
+  @Input() show!: boolean;
 
   ngOnInit() {
   }

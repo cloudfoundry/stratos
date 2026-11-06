@@ -1,8 +1,16 @@
-<div *ngIf="row.status === 'running'" class="status__running">
-  <mat-progress-spinner diameter="20" mode="indeterminate"></mat-progress-spinner> Running
-</div>
-<div *ngIf="row.status === 'completed'">Completed</div>
-<div *ngIf="row.status === 'error'" class="status__error">
-  <div>Error</div>
-   <mat-icon class="text-warning" *ngIf="row.error" matTooltip="{{ row.error }}">warning</mat-icon>
-</div>
+@if (row.status === 'running') {
+  <div class="flex items-center">
+    <app-busy class="text-primary" size="1.25rem" context="analysis"></app-busy> Running
+  </div>
+}
+@if (row.status === 'completed') {
+  <div>Completed</div>
+}
+@if (row.status === 'error') {
+  <div class="flex items-center">
+    <div>Error</div>
+    @if (row.error) {
+      <span class="material-symbols-outlined text-warning cursor-help text-xl size-5 ml-2" matTooltip="{{ row.error }}">warning</span>
+    }
+  </div>
+}

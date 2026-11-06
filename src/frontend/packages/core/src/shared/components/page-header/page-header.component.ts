@@ -1,23 +1,27 @@
-import { TemplatePortal } from '@angular/cdk/portal';
-import { AfterViewInit, Component, Input, OnDestroy, TemplateRef, ViewChild } from '@angular/core';
-import { ActivatedRoute, Router } from '@angular/router';
-import { Store } from '@ngrx/store';
+import { Portal, TemplatePortal } from '@angular/cdk/portal';
+import { CommonModule } from '@angular/common';
+import { HttpClient } from '@angular/common/http';
+import { ChangeDetectionStrategy, ChangeDetectorRef, AfterViewInit, Component, Input, OnDestroy, TemplateRef, ViewChild, ViewContainerRef, computed, inject } from '@angular/core';
+import { RouterModule, ActivatedRoute, Router } from '@angular/router';
+import { toObservable, takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import {
   InternalEventSeverity,
   IFavoriteMetadata,
   UserFavorite,
-  AddRecentlyVisitedEntityAction,
+  RecentlyVisitedDataService,
   StratosStatus,
-  selectDashboardState,
-  ToggleSideNav,
-  AppState,
-  selectIsMobile,
   UserProfileInfo,
+  AuthTokenEnvelope,
 } from '@stratosui/store';
-import moment from 'moment';
-import { combineLatest, Observable } from 'rxjs';
+import { StratosBrandingService } from '../../../../../theme/stratos-branding.service';
+import { DashboardSignalService } from '../../../core/signals/dashboard-signal.service';
+import { DashboardDataService } from '../../../core/dashboard-data.service';
+import { getTime } from 'date-fns';
+import { combineLatest, firstValueFrom, Observable, shareReplay } from 'rxjs';
 import { map, startWith } from 'rxjs/operators';
+import { TailwindSnackBarService } from '../../services/tailwind-snackbar.service';
 
+import { StratosActionType } from '../../../core/extension/extension-service';
 import { CurrentUserPermissionsService } from '../../../core/permissions/current-user-permissions.service';
 import { StratosCurrentUserPermissions } from '../../../core/permissions/stratos-user-permissions.checker';
 import { UserProfileService } from '../../../core/user-profile.service';
@@ -27,25 +31,120 @@ import { GlobalEventService, IGlobalEvent } from '../../global-events.service';
 import { EndpointsService } from './../../../core/endpoints.service';
 import { environment } from './../../../environments/environment';
 import { BREADCRUMB_URL_PARAM, IHeaderBreadcrumb, IHeaderBreadcrumbLink } from './page-header.types';
+import { EntityFavoriteStarComponent } from '../../../core/entity-favorite-star/entity-favorite-star.component';
+import { CustomTooltipDirective } from '../custom-tooltip/custom-tooltip.directive';
+import { ExtensionButtonsComponent } from '../extension-buttons/extension-buttons.component';
+import { RecentEntitiesComponent } from '../recent-entities/recent-entities.component';
+import { UserAvatarComponent } from '../user-avatar/user-avatar.component';
+import { PageHeaderEventsComponent } from './page-header-events/page-header-events.component';
+import { ThemeToggleComponent } from '../theme-toggle/theme-toggle.component';
+
+// Shared between the anchor's target and the popup window.open call, so both
+// modes address the same window and reuse it on repeat clicks.
+const DOCUMENTATION_WINDOW_NAME = 'stratos-docs';
 
 @Component({
   selector: 'app-page-header',
   templateUrl: './page-header.component.html',
-  styleUrls: ['./page-header.component.scss']
+  styleUrls: ['./page-header.component.scss'],
+  standalone: true,
+  imports: [
+    CommonModule,
+    RouterModule,
+    CustomTooltipDirective,
+    EntityFavoriteStarComponent,
+    ExtensionButtonsComponent,
+    RecentEntitiesComponent,
+    UserAvatarComponent,
+    PageHeaderEventsComponent,
+    ThemeToggleComponent
+  ],
+  changeDetection: ChangeDetectionStrategy.OnPush
 })
 export class PageHeaderComponent implements OnDestroy, AfterViewInit {
-  public canAPIKeys$: Observable<boolean>;
-  public breadcrumbDefinitions: IHeaderBreadcrumbLink[] = null;
-  private breadcrumbKey: string;
-  public eventSeverity = InternalEventSeverity;
-  public pFavorite: UserFavorite<IFavoriteMetadata>;
-  private pTabs: IPageSideNavTab[];
+  private recents = inject(RecentlyVisitedDataService);
+  private route = inject(ActivatedRoute);
+  private tabNavService = inject(TabNavService);
+  private router = inject(Router);
+  private userProfileService = inject(UserProfileService);
+  private cups = inject(CurrentUserPermissionsService);
+  private endpointsService = inject(EndpointsService);
+  private currentUserPermissionsService = inject(CurrentUserPermissionsService);
+  private cdr = inject(ChangeDetectorRef);
+  private http = inject(HttpClient);
+  private snackBarService = inject(TailwindSnackBarService);
+  private dashboardSignals = inject(DashboardSignalService);
+  private dashboardData = inject(DashboardDataService);
+  private viewContainerRef = inject(ViewContainerRef);
+  private branding = inject(StratosBrandingService);
 
-  public isMobile$: Observable<boolean> = this.store.select(selectIsMobile);
+  // Operator-configured docs link, https-validated by the branding service.
+  public documentationUrl = computed(() => this.branding.getDocumentationUrl());
+  public documentationTarget = computed(() => this.branding.getDocumentationTarget());
+  // Operators can rename "documentation" to whatever they call their docs.
+  public documentationLabel = computed(() => this.branding.getDocumentationLabel());
+  public documentationTooltip = computed(() =>
+    `Open ${this.documentationLabel()} in a reusable tab or window`
+  );
+
+  // Word toggle, behaving like the home page's sort button: the label shows the
+  // current state and the tooltip says what clicking will do.
+  public documentationTargetLabel = computed(() =>
+    this.documentationTarget() === 'popup' ? 'Window' : 'Tab'
+  );
+  public documentationTargetTooltip = computed(() =>
+    this.documentationTarget() === 'popup'
+      ? `Opens in a separate window — click to use a tab instead`
+      : `Opens in a tab — click to use a separate window instead`
+  );
+
+  /**
+   * In 'tab' mode the anchor does the work unaided, so middle-click and
+   * cmd-click keep behaving normally. Only 'popup' needs intercepting, because
+   * a window features string has no markup equivalent.
+   *
+   * The named target is what makes repeat clicks reuse one window instead of
+   * piling up; it only works while this window remains the opener, which is why
+   * there is deliberately no rel="noopener" here. See #5690.
+   */
+  openDocumentation(event: MouseEvent, url: string): void {
+    if (this.documentationTarget() !== 'popup') {
+      return;
+    }
+    event.preventDefault();
+    window.open(url, DOCUMENTATION_WINDOW_NAME, 'width=1024,height=900');
+  }
+
+  public canAPIKeys$: Observable<boolean>;
+  public breadcrumbDefinitions: IHeaderBreadcrumbLink[] | null = null;
+  private breadcrumbKey: string | null;
+  // Last [breadcrumbs] input value, retained so the queryParamMap
+  // subscription can re-resolve the active breadcrumb after a key change.
+  private latestBreadcrumbs: IHeaderBreadcrumb[] | null = null;
+  public eventSeverity = InternalEventSeverity;
+  public pFavorite!: UserFavorite<IFavoriteMetadata>;
+  private pTabs!: IPageSideNavTab[];
+
+  public isMobile$: Observable<boolean> = toObservable(this.dashboardSignals.isMobile);
 
   public environment = environment;
 
-  @ViewChild('pageHeaderTmpl', { static: true }) pageHeaderTmpl: TemplateRef<any>;
+  // Menu state for Tailwind dropdowns
+  public isHistoryMenuOpen = false;
+  public isUserMenuOpen = false;
+  public isTokenMenuOpen = false;
+
+  @ViewChild('pageHeaderTmpl', { static: true }) pageHeaderTmpl!: TemplateRef<any>;
+
+  // Our own portal registered in ngAfterViewInit; used to verify ownership
+  // before clearing, and to avoid wiping another component's portal.
+  private myPortal: TemplatePortal<any> | null = null;
+  // Whatever portal was registered with TabNavService before us; restored on
+  // destroy. Handles nested page-headers (e.g. an inner component loaded
+  // inside a modal registers its own page-header over ours — when it's
+  // destroyed we rewind to our portal, when we're destroyed we rewind to the
+  // previous owner instead of leaving the outlet empty).
+  private previousPortal: Portal<any> | undefined;
 
   @Input() hideSideNavButton = false;
 
@@ -54,7 +153,7 @@ export class PageHeaderComponent implements OnDestroy, AfterViewInit {
   @Input() hideMenu = false;
 
   @Input()
-  endpointIds$: Observable<string[]>;
+  endpointIds$!: Observable<string[]>;
 
   @Input()
   set tabs(tabs: IPageSideNavTab[]) {
@@ -89,24 +188,29 @@ export class PageHeaderComponent implements OnDestroy, AfterViewInit {
 
   public events$: Observable<IGlobalEvent[]>;
   public unreadEventCount$: Observable<number>;
-  public eventPriorityStatus$: Observable<StratosStatus>;
+  public eventPriorityStatus$: Observable<StratosStatus | undefined>;
 
-  @Input() set favorite(favorite: UserFavorite<IFavoriteMetadata>) {
+  @Input() set favorite(favorite: UserFavorite<IFavoriteMetadata> | null) {
     if (favorite && (!this.pFavorite || (favorite.guid !== this.pFavorite.guid))) {
       if (favorite.canFavorite()) {
         this.pFavorite = favorite;
-        this.store.dispatch(new AddRecentlyVisitedEntityAction({
-          guid: favorite.guid,
-          date: moment().valueOf(),
-          entityType: favorite.entityType,
-          endpointType: favorite.endpointType,
-          entityId: favorite.entityId,
-          name: favorite.metadata.name,
-          routerLink: favorite.getLink(),
-          prettyType: favorite.getPrettyTypeName(),
-          endpointId: favorite.endpointId,
-          metadata: { name: favorite.metadata.name },
-        }));
+        // A recently-visited record genuinely requires an entityId, name and
+        // router link; only record entity favorites that carry all three.
+        if (favorite.entityId && favorite.metadata) {
+          const routerLink = favorite.getLink();
+          this.recents.add({
+            guid: favorite.guid,
+            date: getTime(new Date()),
+            entityType: favorite.entityType,
+            endpointType: favorite.endpointType,
+            entityId: favorite.entityId,
+            name: favorite.metadata.name,
+            routerLink: routerLink ?? undefined,
+            prettyType: favorite.getPrettyTypeName(),
+            endpointId: favorite.endpointId,
+            metadata: { name: favorite.metadata.name },
+          });
+        }
       }
     }
   }
@@ -115,18 +219,23 @@ export class PageHeaderComponent implements OnDestroy, AfterViewInit {
   public user$: Observable<UserProfileInfo>;
   public allowGravatar$: Observable<boolean>;
   public canLogout$: Observable<boolean>;
+  public authToken$!: Observable<string>;
+  public refreshToken$!: Observable<string>;
+  public tokenExpiry$!: Observable<Date | null>;
 
-  public actionsKey: string;
+  public actionsKey: StratosActionType | null;
 
   @Input()
-  set breadcrumbs(breadcrumbs: IHeaderBreadcrumb[]) {
+  set breadcrumbs(breadcrumbs: IHeaderBreadcrumb[] | null) {
+    this.latestBreadcrumbs = breadcrumbs;
     this.breadcrumbDefinitions = this.getBreadcrumb(breadcrumbs);
+    this.cdr.markForCheck();
   }
 
   // Used when non-admin logs in with no-endpoints -> only show logout in the menu
-  @Input() logoutOnly: boolean;
+  @Input() logoutOnly?: boolean;
 
-  private getBreadcrumb(breadcrumbs: IHeaderBreadcrumb[]) {
+  private getBreadcrumb(breadcrumbs: IHeaderBreadcrumb[] | null) {
     if (!breadcrumbs || !breadcrumbs.length) {
       return [];
     }
@@ -147,20 +256,13 @@ export class PageHeaderComponent implements OnDestroy, AfterViewInit {
   }
 
   public toggleSidenav() {
-    this.store.dispatch(new ToggleSideNav());
+    this.dashboardData.toggleSideNav();
   }
 
-  constructor(
-    private store: Store<AppState>,
-    private route: ActivatedRoute,
-    private tabNavService: TabNavService,
-    private router: Router,
-    eventService: GlobalEventService,
-    private userProfileService: UserProfileService,
-    private cups: CurrentUserPermissionsService,
-    private endpointsService: EndpointsService,
-    private currentUserPermissionsService: CurrentUserPermissionsService,
-  ) {
+  constructor() {
+    const route = this.route;
+    const eventService = inject(GlobalEventService);
+
     this.events$ = eventService.events$.pipe(
       startWith([])
     );
@@ -171,7 +273,22 @@ export class PageHeaderComponent implements OnDestroy, AfterViewInit {
     this.eventPriorityStatus$ = eventService.priorityStratosStatus$;
 
     this.actionsKey = this.route.snapshot.data ? this.route.snapshot.data.extensionsActionsKey : null;
-    this.breadcrumbKey = route.snapshot.queryParams[BREADCRUMB_URL_PARAM] || null;
+    // Reactive breadcrumb key — re-resolves whenever the URL's
+    // ?breadcrumbs= query param changes. Snapshot-only reads broke on
+    // tab navigation that re-emits params, and on async query-param
+    // arrival when the route resolves before the param lands. Seed
+    // synchronously from snapshot so the initial render gets the key,
+    // then subscribe reactively when queryParamMap is available.
+    this.breadcrumbKey = route.snapshot?.queryParams?.[BREADCRUMB_URL_PARAM] || null;
+    if (route.queryParamMap) {
+      route.queryParamMap.pipe(takeUntilDestroyed()).subscribe(qp => {
+        this.breadcrumbKey = qp.get(BREADCRUMB_URL_PARAM) || null;
+        if (this.latestBreadcrumbs) {
+          this.breadcrumbDefinitions = this.getBreadcrumb(this.latestBreadcrumbs);
+          this.cdr.markForCheck();
+        }
+      });
+    }
 
     this.user$ = this.userProfileService.userProfile$;
 
@@ -186,9 +303,7 @@ export class PageHeaderComponent implements OnDestroy, AfterViewInit {
       })
     );
 
-    this.allowGravatar$ = this.store.select(selectDashboardState).pipe(
-      map(dashboardState => dashboardState.gravatarEnabled)
-    );
+    this.allowGravatar$ = toObservable(this.dashboardSignals.gravatarEnabled);
 
     // Must be enabled and the user must have permission
     this.canAPIKeys$ = combineLatest([
@@ -201,16 +316,102 @@ export class PageHeaderComponent implements OnDestroy, AfterViewInit {
     this.canLogout$ = this.currentUserPermissionsService.can(StratosCurrentUserPermissions.CAN_NOT_LOGOUT).pipe(
       map(noLogout => !noLogout)
     );
+  }
 
+  // Fetch fresh token envelope — called every time the token menu opens so
+  // the user can't grab a stale/expired token from a cached observable. The
+  // three derived observables share one HTTP call via shareReplay(1).
+  private refreshTokenObservables() {
+    const env$ = this.http
+      .get<AuthTokenEnvelope>(`/api/${environment.proxyAPIVersion}/auth/token`)
+      .pipe(shareReplay(1));
+
+    this.authToken$ = env$.pipe(map(res => res.data?.auth_token ?? ''));
+    this.refreshToken$ = env$.pipe(map(res => res.data?.refresh_token ?? ''));
+    this.tokenExpiry$ = env$.pipe(
+      map(res => res.data ? new Date(res.data.token_expiry * 1000) : null)
+    );
+  }
+
+  // Copy a token value to the clipboard without ever rendering it in the DOM.
+  // The token$ observable is resolved at click time and piped straight into
+  // the browser clipboard API — no hidden <div>{{ token }}</div> buffer.
+  async copyToken(token$: Observable<string>, label: string) {
+    try {
+      const value = await firstValueFrom(token$);
+      if (!value) {
+        this.snackBarService.show(`No ${label} available`, 'Close');
+        return;
+      }
+      await navigator.clipboard.writeText(value);
+      this.snackBarService.show(`${label} copied to clipboard`, 'Close');
+    } catch {
+      this.snackBarService.show(`Failed to copy ${label}`, 'Close');
+    }
   }
 
   ngOnDestroy() {
-    this.tabNavService.clear();
+    // Only rewind if we're still the active portal. If some other component
+    // has overwritten us (e.g. we registered first, a nested page-header
+    // registered second and is still alive), leave it alone.
+    if (this.myPortal && this.tabNavService.pageHeader() === this.myPortal) {
+      if (this.previousPortal) {
+        // Restore whoever owned the portal before us — typically an outer
+        // page-header that's still alive and waiting for us to hand back.
+        this.tabNavService.setPageHeader(this.previousPortal);
+      } else {
+        this.tabNavService.clear();
+      }
+    }
   }
 
   ngAfterViewInit() {
-    const portal = new TemplatePortal(this.pageHeaderTmpl, undefined, {});
-    this.tabNavService.setPageHeader(portal);
+    // Remember the current portal so we can hand it back in ngOnDestroy.
+    this.previousPortal = this.tabNavService.pageHeader();
+    this.myPortal = new TemplatePortal(this.pageHeaderTmpl, this.viewContainerRef, {});
+    this.tabNavService.setPageHeader(this.myPortal);
+  }
+
+  // Tailwind dropdown menu methods
+  toggleHistoryMenu() {
+    this.isHistoryMenuOpen = !this.isHistoryMenuOpen;
+    if (this.isHistoryMenuOpen) {
+      this.isUserMenuOpen = false;
+      this.isTokenMenuOpen = false;
+    }
+  }
+
+  toggleUserMenu() {
+    this.isUserMenuOpen = !this.isUserMenuOpen;
+    if (this.isUserMenuOpen) {
+      this.isHistoryMenuOpen = false;
+      this.isTokenMenuOpen = false;
+    }
+  }
+
+  toggleTokenMenu() {
+    this.isTokenMenuOpen = !this.isTokenMenuOpen;
+    if (this.isTokenMenuOpen) {
+      this.isHistoryMenuOpen = false;
+      this.isUserMenuOpen = false;
+      this.refreshTokenObservables();
+    }
+  }
+
+  toggleDocumentationTarget() {
+    this.branding.setDocumentationTarget(this.documentationTarget() === 'popup' ? 'tab' : 'popup');
+  }
+
+  closeUserMenu() {
+    this.isUserMenuOpen = false;
+  }
+
+  closeHistoryMenu() {
+    this.isHistoryMenuOpen = false;
+  }
+
+  closeTokenMenu() {
+    this.isTokenMenuOpen = false;
   }
 
 }

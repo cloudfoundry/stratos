@@ -8,7 +8,7 @@ import (
 
 	api "github.com/cloudfoundry/stratos/src/jetstream/api/config"
 	"github.com/gorilla/sessions"
-	"github.com/labstack/echo/v4"
+	"github.com/labstack/echo/v5"
 )
 
 type AuthHandlerFunc func(tokenRec TokenRecord, cnsi CNSIRecord) (*http.Response, error)
@@ -27,8 +27,24 @@ type LogCacheLink struct {
 	Href string `json:"href"`
 }
 
+type ApiRootLink struct {
+	Href string `json:"href"`
+}
+
+type CloudControllerV3Link struct {
+	Href string `json:"href"`
+	Meta struct {
+		Version string `json:"version"`
+	} `json:"meta"`
+}
+
 type ApiRootLinks struct {
-	LogCache LogCacheLink `json:"log_cache"`
+	LogCache          LogCacheLink          `json:"log_cache"`
+	Login             ApiRootLink           `json:"login"`
+	Uaa               ApiRootLink           `json:"uaa"`
+	Logging           ApiRootLink           `json:"logging"`
+	Routing           ApiRootLink           `json:"routing"`
+	CloudControllerV3 CloudControllerV3Link `json:"cloud_controller_v3"`
 }
 
 type ApiRoot struct {
@@ -47,6 +63,26 @@ type V2Info struct {
 	RoutingEndpoint          string `json:"routing_endpoint"`
 	MinCLIVersion            string `json:"min_cli_version"`
 	MinRecommendedCLIVersion string `json:"min_recommended_cli_version"`
+}
+
+// V3Info is the response for the Cloud Foundry /v3/info API
+type V3Info struct {
+	Build string `json:"build"`
+	Name  string `json:"name"`
+	Links struct {
+		Self struct {
+			Href string `json:"href"`
+		} `json:"self"`
+	} `json:"links"`
+}
+
+// CFEndpointMetadata stores capability flags detected at registration time.
+// Assumed=true means both probes failed at registration; values are defaults
+// and will be confirmed when the user first connects.
+type CFEndpointMetadata struct {
+	SupportsV2 bool `json:"supportsV2"`
+	SupportsV3 bool `json:"supportsV3"`
+	Assumed    bool `json:"assumed"`
 }
 
 type EndpointInfo struct {
@@ -139,18 +175,18 @@ type BackupTokenRecord struct {
 
 // TokenRecord repsrents and endpoint or uaa token
 type TokenRecord struct {
-	TokenGUID      string
-	AuthToken      string
-	RefreshToken   string
-	TokenExpiry    int64
-	Disconnected   bool
-	AuthType       string
-	Metadata       string
-	SystemShared   bool
-	LinkedGUID     string // Indicates the GUID of the token that this token is linked to (if any)
-	Certificate    string
-	CertificateKey string
-	Enabled        bool
+	TokenGUID      string `json:"token_guid"`
+	AuthToken      string `json:"auth_token"`
+	RefreshToken   string `json:"refresh_token"`
+	TokenExpiry    int64  `json:"token_expiry"`
+	Disconnected   bool   `json:"disconnected"`
+	AuthType       string `json:"auth_type"`
+	Metadata       string `json:"metadata"`
+	SystemShared   bool   `json:"system_shared"`
+	LinkedGUID     string `json:"linked_guid"` // Indicates the GUID of the token that this token is linked to (if any)
+	Certificate    string `json:"certificate"`
+	CertificateKey string `json:"certificate_key"`
+	Enabled        bool   `json:"enabled"`
 }
 
 type CFInfo struct {
@@ -184,7 +220,7 @@ type LocalLoginRes struct {
 	User *ConnectedUser `json:"user"`
 }
 
-type LoginHookFunc func(c echo.Context) error
+type LoginHookFunc func(c *echo.Context) error
 type LoginHook struct {
 	Priority int
 	Function LoginHookFunc
@@ -258,12 +294,15 @@ type Info struct {
 	PluginConfig  map[string]string                     `json:"plugin-config,omitempty"`
 	Diagnostics   *Diagnostics                          `json:"diagnostics,omitempty"`
 	Configuration struct {
-		TechPreview               bool   `json:"enableTechPreview"`
-		ListMaxSize               int64  `json:"listMaxSize,omitempty"`
-		ListAllowLoadMaxed        bool   `json:"listAllowLoadMaxed,omitempty"`
-		APIKeysEnabled            string `json:"APIKeysEnabled"`
-		HomeViewShowFavoritesOnly bool   `json:"homeViewShowFavoritesOnly"`
-		UserEndpointsEnabled      string `json:"userEndpointsEnabled"`
+		TechPreview                bool   `json:"enableTechPreview"`
+		ListMaxSize                int64  `json:"listMaxSize,omitempty"`
+		ListAllowLoadMaxed         bool   `json:"listAllowLoadMaxed,omitempty"`
+		APIKeysEnabled             string `json:"APIKeysEnabled"`
+		HomeViewShowFavoritesOnly  bool   `json:"homeViewShowFavoritesOnly"`
+		HideNavLogout              bool   `json:"hideNavLogout"`
+		UserEndpointsEnabled       string `json:"userEndpointsEnabled"`
+		EndpointCardConcurrency    int    `json:"endpointCardConcurrency"`
+		EndpointRequestConcurrency int    `json:"endpointRequestConcurrency"`
 	} `json:"config"`
 }
 
@@ -274,6 +313,8 @@ type EndpointDetail struct {
 	User              *ConnectedUser    `json:"user"`
 	Creator           *CreatorInfo      `json:"creator"`
 	Metadata          map[string]string `json:"metadata,omitempty"`
+	TokenExpiry       int64             `json:"token_expiry,omitempty"`
+	TokenRenewable    bool              `json:"token_renewable,omitempty"`
 	TokenMetadata     string            `json:"-"`
 	SystemSharedToken bool              `json:"system_shared_token"`
 }
@@ -282,6 +323,9 @@ type EndpointDetail struct {
 type Versions struct {
 	ProxyVersion    string `json:"proxy_version"`
 	DatabaseVersion int64  `json:"database_version"`
+	BuildDate       string `json:"build_date"`
+	GitCommit       string `json:"git_commit"`
+	GitBranch       string `json:"git_branch"`
 }
 
 // AuthEndpointType - Restrict the possible values of the configured
@@ -397,12 +441,18 @@ type PortalConfig struct {
 	CFClient                           string   `configName:"CF_CLIENT"`
 	CFClientSecret                     string   `configName:"CF_CLIENT_SECRET"`
 	AllowedOrigins                     []string `configName:"ALLOWED_ORIGINS"`
+	CSPPolicy                          string   `configName:"CONSOLE_CSP"`
+	CSPReportOnlyPolicy                string   `configName:"CONSOLE_CSP_REPORT_ONLY"`
+	CSPReportCollector                 string   `configName:"CONSOLE_CSP_REPORT_COLLECTOR"`
+	HSTSPolicy                         string   `configName:"CONSOLE_HSTS"`
 	SessionStoreSecret                 string   `configName:"SESSION_STORE_SECRET"`
 	EncryptionKeyVolume                string   `configName:"ENCRYPTION_KEY_VOLUME"`
 	EncryptionKeyFilename              string   `configName:"ENCRYPTION_KEY_FILENAME"`
 	EncryptionKey                      string   `configName:"ENCRYPTION_KEY"`
 	AutoRegisterCFUrl                  string   `configName:"AUTO_REG_CF_URL"`
 	AutoRegisterCFName                 string   `configName:"AUTO_REG_CF_NAME"`
+	AutoRegisterCFCACert               string   `configName:"AUTO_REG_CF_CA_CERT"`
+	AutoRegisterCFCACertPath           string   `configName:"AUTO_REG_CF_CA_CERT_PATH"`
 	SSOLogin                           bool     `configName:"SSO_LOGIN"`
 	SSOOptions                         string   `configName:"SSO_OPTIONS"`
 	SSOAllowList                       string   `configName:"SSO_ALLOWLIST,SSO_WHITELIST"`
@@ -411,6 +461,7 @@ type PortalConfig struct {
 	LogLevel                           string   `configName:"LOG_LEVEL"`
 	UIListMaxSize                      int64    `configName:"UI_LIST_MAX_SIZE"`
 	UIListAllowLoadMaxed               bool     `configName:"UI_LIST_ALLOW_LOAD_MAXED"`
+	AutoRefreshCNSITokens              bool     `configName:"AUTOREFRESH_CNSI_TOKENS"`
 	CFAdminIdentifier                  string
 	CloudFoundryInfo                   *CFInfo
 	HTTPS                              bool
@@ -426,7 +477,14 @@ type PortalConfig struct {
 	CanMigrateDatabaseSchema           bool
 	APIKeysEnabled                     api.APIKeysConfigValue       `configName:"API_KEYS_ENABLED"`
 	HomeViewShowFavoritesOnly          bool                         `configName:"HOME_VIEW_SHOW_FAVORITES_ONLY"`
+	HideNavLogout                      bool                         `configName:"HIDE_NAV_LOGOUT"`
+	EndpointCardConcurrency            int                          `configName:"ENDPOINT_CARD_CONCURRENCY"`
+	EndpointRequestConcurrency         int                          `configName:"ENDPOINT_REQUEST_CONCURRENCY"`
 	UserEndpointsEnabled               api.UserEndpointsConfigValue `configName:"USER_ENDPOINTS_ENABLED"`
+	// DiagnosticsEnabled gates the admin-only /pp/v1/admin/diagnostics endpoint.
+	// Off by default in production; opt-in per deployment (dev, staging) via the
+	// DIAGNOSTICS_ENABLED env var. FWT-934.
+	DiagnosticsEnabled bool `configName:"DIAGNOSTICS_ENABLED"`
 	// CanMigrateDatabaseSchema indicates if we can safely perform migrations
 	// This depends on the deployment mechanism and the database config
 	// e.g. if running in Cloud Foundry with a shared DB, then only the 0-index application instance
@@ -460,7 +518,12 @@ type RegisterEndpointParams struct {
 }
 
 type UpdateEndpointParams struct {
-	ID            string `json:"id" form:"id" query:"id"`
+	// param:"id" binds the :id from the route path (POST /endpoints/:id) —
+	// the resource being POSTed to is the resource being updated. The
+	// form/json/query bindings remain because clients also send the id in
+	// the body to correlate parallel operations; a body id, when present,
+	// overrides the path value (echo binds path params before the body).
+	ID            string `json:"id" form:"id" query:"id" param:"id"`
 	Name          string `json:"name" form:"name" query:"name"`
 	SkipSSL       string `json:"skipSSL" form:"skipSSL" query:"skipSSL"`
 	SetClientInfo string `json:"setClientInfo" form:"setClientInfo" query:"setClientInfo"`
@@ -470,11 +533,11 @@ type UpdateEndpointParams struct {
 	CACert        string `json:"ca_cert" form:"ca_cert" query:"ca_cert"`
 }
 
-// BindOnce -- allows to call echo.Context.Bind() multiple times on the same request
+// BindOnce -- allows to call *echo.Context.Bind() multiple times on the same request
 // After calling Bind(), request body stream is closed and the context can't be bound again.
 // Bound struct is stored in the context store after the first call and retrieved from store
 // on subsequent calls.
-func BindOnce(params interface{}, c echo.Context) error {
+func BindOnce(params interface{}, c *echo.Context) error {
 	typeStr := reflect.TypeOf(params).String()
 	ctxType := c.Get("magicBindType")
 	if ctxType != nil && ctxType != typeStr {

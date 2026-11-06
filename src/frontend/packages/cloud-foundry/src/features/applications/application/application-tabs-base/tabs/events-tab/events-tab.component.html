@@ -1,1 +1,4 @@
-<app-cloud-foundry-events-list [typeMustContain]="'audit.app'"></app-cloud-foundry-events-list>
+<app-cloud-foundry-events-list
+  [targetGuid]="data.appGuid"
+  [typeMustContain]="'audit.app'">
+</app-cloud-foundry-events-list>

@@ -1,68 +1,72 @@
-import { Component, Input, OnInit } from '@angular/core';
+import { Component, Input, OnInit , ChangeDetectionStrategy } from '@angular/core';
 
-import { MetricsConfig } from '../../../../../core/src/shared/components/metrics-chart/metrics-chart.component';
-import { MetricsLineChartConfig } from '../../../../../core/src/shared/components/metrics-chart/metrics-chart.types';
-import { MetricsChartHelpers } from '../../../../../core/src/shared/components/metrics-chart/metrics.component.helpers';
-import { MetricQueryConfig } from '../../../../../store/src/actions/metrics.actions';
-import { IMetricMatrixResult } from '../../../../../store/src/types/base-metric.types';
-import { IMetricApplication, MetricQueryType } from '../../../../../store/src/types/metric.types';
-import { FetchApplicationMetricsAction } from '../../../actions/cf-metrics.actions';
+import { MetricsChartComponent, MetricsConfig, MetricsLineChartConfig, MetricsChartHelpers, MetricsRangeSelectorComponent } from '@stratosui/core';
+import { MetricQueryConfig, IMetricMatrixResult, IMetricApplication, MetricQueryType, MetricsRequest } from '@stratosui/store';
+
+const APP_METRICS_BASE_URL = '/pp/v1/metrics';
 
 @Component({
   selector: 'app-application-instance-chart',
   templateUrl: './application-instance-chart.component.html',
-  styleUrls: ['./application-instance-chart.component.scss']
+  standalone: true,
+  changeDetection: ChangeDetectionStrategy.OnPush,
+  imports: [
+    MetricsChartComponent,
+    MetricsRangeSelectorComponent
+  ]
 })
 export class ApplicationInstanceChartComponent implements OnInit {
 
   @Input()
-  private appGuid: string;
+  private appGuid!: string;
 
   @Input()
-  private endpointGuid: string;
+  private endpointGuid!: string;
 
   @Input()
-  private yAxisLabel: string;
+  private yAxisLabel!: string;
 
   // Prometheus query string
   @Input()
-  private queryString: string;
+  private queryString!: string;
 
   @Input()
-  private seriesTranslation: string;
+  private seriesTranslation!: string;
 
   @Input()
   private queryRange = false;
 
   @Input()
-  public title: string;
+  public title!: string;
 
-  public instanceChartConfig: MetricsLineChartConfig;
+  public instanceChartConfig!: MetricsLineChartConfig;
 
-  public instanceMetricConfig: MetricsConfig<IMetricMatrixResult<IMetricApplication>>;
+  public instanceMetricConfig!: MetricsConfig<IMetricMatrixResult<IMetricApplication>>;
 
   constructor() { }
 
   ngOnInit() {
     this.instanceChartConfig = MetricsChartHelpers.buildChartConfig(this.yAxisLabel);
+    const request: MetricsRequest = {
+      endpointGuid: this.endpointGuid,
+      url: `${APP_METRICS_BASE_URL}/cf/app/${this.appGuid}`,
+      query: new MetricQueryConfig(this.queryString),
+      queryType: this.queryRange ? MetricQueryType.RANGE_QUERY : MetricQueryType.QUERY,
+      windowValue: null,
+    };
     this.instanceMetricConfig = {
       getSeriesName: result => `Instance ${result.metric.instance_index}`,
       mapSeriesItemName: MetricsChartHelpers.getDateSeriesName,
       sort: MetricsChartHelpers.sortBySeriesName,
       mapSeriesItemValue: this.mapSeriesItemValue(),
-      metricsAction: new FetchApplicationMetricsAction(
-        this.appGuid,
-        this.endpointGuid,
-        new MetricQueryConfig(this.queryString),
-        this.queryRange ? MetricQueryType.RANGE_QUERY : MetricQueryType.QUERY
-      ),
+      request,
     };
   }
 
   private mapSeriesItemValue() {
     switch (this.seriesTranslation) {
       case 'mb':
-        return (bytes) => (bytes / 1000000).toFixed(2);
+        return (bytes: number) => (bytes / 1000000).toFixed(2);
       default:
         return undefined;
     }

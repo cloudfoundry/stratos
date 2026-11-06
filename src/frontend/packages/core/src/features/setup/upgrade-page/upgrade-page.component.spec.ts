@@ -1,4 +1,6 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
+import { provideZonelessChangeDetection } from '@angular/core';
+import { describe, it, expect, beforeEach, afterEach, beforeAll, afterAll, vi } from 'vitest';
 
 import { UpgradePageComponent } from './upgrade-page.component';
 import { IntroScreenComponent } from '../../../shared/components/intro-screen/intro-screen.component';
@@ -9,14 +11,16 @@ describe('UpgradePageComponent', () => {
   let component: UpgradePageComponent;
   let fixture: ComponentFixture<UpgradePageComponent>;
 
-  beforeEach(() => {
-    TestBed.configureTestingModule({
-      declarations: [UpgradePageComponent, IntroScreenComponent, StratosTitleComponent],
+  beforeEach(async () => {
+    await TestBed.configureTestingModule({
+      providers: [provideZonelessChangeDetection()],
       imports: [
         MDAppModule,
+        UpgradePageComponent,
+        IntroScreenComponent,
+        StratosTitleComponent,
       ]
-    })
-      .compileComponents();
+    }).compileComponents();
   });
 
   beforeEach(() => {

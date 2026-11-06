@@ -1,39 +1,57 @@
-<div class="chartInfo">
+<div>
 
-  <app-chart-details-usage [chart]=chart *ngIf="currentVersion" [currentVersion]=currentVersion.attributes.version>
-  </app-chart-details-usage>
+  @if (currentVersion) {
+    <app-chart-details-usage [chart]=chart [currentVersion]=currentVersion.attributes.version>
+    </app-chart-details-usage>
+  }
 
-  <mat-card class="chartInfo__properties">
-    <div class="chartInfo__versions">
-      <app-chart-details-versions [versions]=versions [currentVersion]=currentVersion></app-chart-details-versions>
+  <app-card class="overflow-auto block mb-8 max-w-[260px]">
+    <div>
+      <app-chart-details-versions [versions]="versions()" [currentVersion]=currentVersion></app-chart-details-versions>
     </div>
-    <div class="chartInfo__home" *ngIf="chart.attributes.home">
-      <h1>Home</h1>
+    @if (chart.attributes.home) {
       <div>
-        <a class="chartInfo__link" href="{{ chart.attributes.home }}" target="_blank">{{chart.attributes.home}}</a>
+        <h1 class="text-base">Home</h1>
+        <div>
+          <a class="text-sm break-all" href="{{ chart.attributes.home }}" target="_blank">{{chart.attributes.home}}</a>
+        </div>
       </div>
-    </div>
-    <div class="chartInfo__maintainers" *ngIf="maintainers.length">
-      <h1>Maintainers</h1>
-      <div *ngFor="let maintainer of maintainers">
-        <a href="{{ maintainerUrl(maintainer) }}" class="chartInfo__link" target="_blank">{{ maintainer.name }}</a>
+    }
+    @if (maintainers.length) {
+      <div>
+        <h1 class="text-base">Maintainers</h1>
+        @for (maintainer of maintainers; track maintainer) {
+          <div>
+            <a href="{{ maintainerUrl(maintainer) }}" class="text-sm" target="_blank">{{ maintainer.name }}</a>
+          </div>
+        }
       </div>
-    </div>
-    <div class="chartInfo__related" *ngIf="sources.length">
-      <h1>Related</h1>
-      <div *ngFor="let source of sources">
-        <a href="{{ source }}" class="chartInfo__link" target="_blank">{{ source }}</a>
+    }
+    @if (sources.length) {
+      <div>
+        <h1 class="text-base">Related</h1>
+        @for (source of sources; track source) {
+          <div>
+            <a href="{{ source }}" class="text-sm break-all" target="_blank">{{ source }}</a>
+          </div>
+        }
       </div>
-    </div>
-    <div class="chartInfo__related" *ngIf="schema">
-      <h1>Schema</h1>
-      <div class="chartInfo__link">This chart contains a values schema</div>
-    </div>
-    <div class="chartInfo__related" *ngIf="currentVersion">
-      <h1>Chart</h1>
-      <div *ngFor="let url of currentVersion.attributes.urls">
-        <a href="{{ url }}" class="chartInfo__link" target="_blank">{{ url }}</a>
+    }
+    @if (schema()) {
+      <div>
+        <h1 class="text-base">Schema</h1>
+        <div class="text-sm">This chart contains a values schema</div>
       </div>
-    </div>
-  </mat-card>
+    }
+    @if (currentVersion) {
+      <div>
+        <h1 class="text-base">Chart</h1>
+        @for (url of currentVersion.attributes.urls; track url) {
+          <div>
+            <a href="{{ url }}" class="text-sm break-all" target="_blank">{{ url }}</a>
+          </div>
+        }
+      </div>
+    }
+  </app-card>
 </div>

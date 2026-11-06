@@ -1,10 +1,18 @@
-<form class="date-time-form">
-  <mat-form-field class="form-field">
-    <input matInput name="date" [formControl]="date" [matDatepicker]="picker" placeholder="Choose a date">
-    <mat-datepicker-toggle matSuffix [for]="picker"></mat-datepicker-toggle>
-    <mat-datepicker disabled="false" #picker></mat-datepicker>
-  </mat-form-field>
-  <mat-form-field class="form-field">
-    <input matInput name="time" [formControl]="time" placeholder="Choose time" type="time">
-  </mat-form-field>
+<form class="flex gap-2">
+  <div class="flex flex-1 h-[66px]">
+    <input
+      class="w-full px-3 py-2 border border-input-border rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-primary focus:border-primary bg-input-bg text-input-text"
+      name="date"
+      [formControl]="date"
+      type="date"
+      placeholder="Choose a date">
+  </div>
+  <div class="flex flex-1 h-[66px]">
+    <input
+      class="w-full px-3 py-2 border border-input-border rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-primary focus:border-primary bg-input-bg text-input-text"
+      name="time"
+      [formControl]="time"
+      placeholder="Choose time"
+      type="time">
+  </div>
 </form>

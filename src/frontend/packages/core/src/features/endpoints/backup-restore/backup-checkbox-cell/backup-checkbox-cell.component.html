@@ -1,2 +1,2 @@
-<mat-checkbox [(ngModel)]="service.state[row.guid][config.type]" [disabled]="disabled()" (change)="validate()">
-</mat-checkbox>
+<app-checkbox class="ml-[15px]" [(ngModel)]="$any(service.state[row.guid!])[config.type]" [disabled]="disabled()" (change)="validate()">
+</app-checkbox>

@@ -1,3 +1,5 @@
-<mat-select placeholder="Select type" [(value)]="selected" (selectionChange)="valueChanged($event.value)">
-  <mat-option *ngFor="let type of subTypes" [value]="type.id">{{ type.name }}</mat-option>
-</mat-select>
+<app-select placeholder="Select type" [(value)]="selected" (selectionChange)="valueChanged($event.value)">
+  @for (type of subTypes; track type) {
+    <app-option [value]="type.id">{{ type.name }}</app-option>
+  }
+</app-select>

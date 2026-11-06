@@ -1,0 +1,24 @@
+---
+# Full release from a pushed v* tag — identical to the release.yml
+# GitHub Actions path: build, package + checksums, publish. The tag
+# body already carries the release notes (make publish --notes-from-tag).
+platform: linux
+
+inputs:
+  - name: stratos
+
+params:
+  GH_TOKEN:  # gh release create
+
+run:
+  path: bash
+  dir: stratos
+  args:
+    - -ce
+    - |
+      TAG=$(git describe --tags --exact-match)
+      echo "Releasing ${TAG}"
+      bun install --frozen-lockfile
+      make build VERSION="${TAG}"
+      make release cf github VERSION="${TAG}"
+      make publish TAG="${TAG}"

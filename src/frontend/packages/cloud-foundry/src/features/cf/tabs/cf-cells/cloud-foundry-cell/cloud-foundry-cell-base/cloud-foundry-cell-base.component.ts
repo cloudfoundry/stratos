@@ -1,11 +1,13 @@
-import { Component } from '@angular/core';
-import { Observable } from 'rxjs';
-import { first, map } from 'rxjs/operators';
+import { CommonModule } from '@angular/common';
+import { Component, ChangeDetectionStrategy, inject } from '@angular/core';
+import { RouterModule } from '@angular/router';
+import { Observable, of } from 'rxjs';
+import { catchError, map, startWith, take } from 'rxjs/operators';
 
+import { PageHeaderComponent } from '../../../../../../../../core/src/shared/components/page-header/page-header.component';
+import { LoadingPageComponent } from '../../../../../../../../core/src/shared/components/loading-page/loading-page.component';
 import { IPageSideNavTab } from '../../../../../../../../core/src/features/dashboard/page-side-nav/page-side-nav.component';
 import { IHeaderBreadcrumb } from '../../../../../../../../core/src/shared/components/page-header/page-header.types';
-import { metricEntityType } from '../../../../../../../../store/src/helpers/stratos-entity-factory';
-import { cfEntityFactory } from '../../../../../../cf-entity-factory';
 import { getActiveRouteCfCellProvider } from '../../../../cf.helpers';
 import { CloudFoundryEndpointService } from '../../../../services/cloud-foundry-endpoint.service';
 import { CloudFoundryCellService } from '../cloud-foundry-cell.service';
@@ -13,10 +15,17 @@ import { CloudFoundryCellService } from '../cloud-foundry-cell.service';
 @Component({
   selector: 'app-cloud-foundry-cell-base',
   templateUrl: './cloud-foundry-cell-base.component.html',
-  styleUrls: ['./cloud-foundry-cell-base.component.scss'],
   providers: [
     getActiveRouteCfCellProvider,
     CloudFoundryCellService
+  ],
+  standalone: true,
+  changeDetection: ChangeDetectionStrategy.OnPush,
+  imports: [
+    CommonModule,
+    RouterModule,
+    PageHeaderComponent,
+    LoadingPageComponent
   ]
 })
 export class CloudFoundryCellBaseComponent {
@@ -44,19 +53,24 @@ export class CloudFoundryCellBaseComponent {
 
   public breadcrumbs$: Observable<IHeaderBreadcrumb[]>;
   public name$: Observable<string>;
-  public waitForEntityId: string;
-  public waitForEntitySchema = cfEntityFactory(metricEntityType);
-  public cfCellService: CloudFoundryCellService;
+  public isLoading$: Observable<boolean>;
+  public cfCellService!: CloudFoundryCellService;
 
 
-  constructor(
-    cfEndpointService: CloudFoundryEndpointService,
-    cfCellService: CloudFoundryCellService
-  ) {
+  constructor() {
+    const cfEndpointService = inject(CloudFoundryEndpointService);
+    const cfCellService = inject(CloudFoundryCellService);
 
-    this.waitForEntityId = cfCellService.healthyMetricId;
+
+    this.isLoading$ = cfCellService.cellMetric$.pipe(
+      map(() => false),
+      catchError(() => of(false)),
+      startWith(true)
+    );
     this.name$ = cfCellService.cellMetric$.pipe(
-      map(metric => `${metric.bosh_job_id}`)
+      // The metric can emit null before the cell metric resolves; a bare
+      // deref threw an unhandled TypeError inside the rxjs map.
+      map(metric => `${metric?.bosh_job_id ?? ''}`)
     );
 
     this.breadcrumbs$ = cfEndpointService.endpoint$.pipe(
@@ -70,10 +84,11 @@ export class CloudFoundryCellBaseComponent {
           ]
         }
       ])),
-      first()
+      take(1)
     );
 
-    this.tabLinks.find(link => link.link === CloudFoundryCellBaseComponent.AppsLinks).hidden$ =
+    // strict: AppsLinks tab is statically present in the tabLinks array literal above
+    this.tabLinks.find(link => link.link === CloudFoundryCellBaseComponent.AppsLinks)!.hidden$ =
       cfEndpointService.currentUser$.pipe(
         map(user => !user.admin)
       );

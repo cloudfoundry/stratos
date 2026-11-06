@@ -12,28 +12,31 @@ import {
   TestEntityCatalog,
 } from '../../../../store/src/public-api';
 import { generateStratosEntities } from '../../../../store/src/stratos-entity-generator';
-import { createBasicStoreModule } from '../../../../store/testing/public-api';
+import { createBasicStoreModule, STORE_TEST_PROVIDERS } from '../../../../store/testing/public-api';
 import { generateHelmEntities } from '../../helm/helm-entity-generator';
 import { HelmTestingModule } from '../../helm/helm-testing.module';
 import { kubeEntityCatalog } from '../kubernetes-entity-generator';
 
 @NgModule({
-  imports: [{
-    ngModule: EntityCatalogFeatureModule,
-    providers: [
-      {
-        provide: CATALOGUE_ENTITIES, useFactory: () => {
-          const testEntityCatalog = entityCatalog as TestEntityCatalog;
-          testEntityCatalog.clear();
-          return [
-            ...generateStratosEntities(),
-            ...kubeEntityCatalog.allKubeEntities(),
-            ...generateHelmEntities(),
-          ];
-        }
-      }
-    ]
-  }]
+  imports: [
+    EntityCatalogFeatureModule,
+  ],
+  providers: [
+    ...STORE_TEST_PROVIDERS,
+    {
+      provide: CATALOGUE_ENTITIES,
+      useFactory: () => {
+        const testEntityCatalog = entityCatalog as TestEntityCatalog;
+        testEntityCatalog.clear();
+        return [
+          ...generateStratosEntities(),
+          ...kubeEntityCatalog.allKubeEntities(),
+          ...generateHelmEntities(),
+        ];
+      },
+      multi: true
+    }
+  ]
 })
 export class WorkloadsTestingModule { }
 

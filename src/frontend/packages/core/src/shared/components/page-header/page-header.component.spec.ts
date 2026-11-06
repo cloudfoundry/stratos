@@ -1,52 +1,52 @@
-import { ComponentFixture, TestBed, waitForAsync } from '@angular/core/testing';
+import { ComponentFixture, TestBed } from '@angular/core/testing';
+import { provideZonelessChangeDetection } from '@angular/core';
+import { provideHttpClient } from '@angular/common/http';
+import { provideHttpClientTesting, HttpTestingController } from '@angular/common/http/testing';
+import { describe, it, expect, beforeEach, afterEach, vi } from 'vitest';
 import { ActivatedRoute } from '@angular/router';
 import { RouterTestingModule } from '@angular/router/testing';
-import { StoreModule } from '@ngrx/store';
+import { CommonModule } from '@angular/common';
 
-import { InternalEventMonitorFactory } from '../../../../../store/src/monitors/internal-event-monitor.factory';
-import { appReducers } from '../../../../../store/src/reducers.module';
-import { CoreModule } from '../../../core/core.module';
+import { CoreTestingModule } from '@test-framework';
 import { EndpointsService } from '../../../core/endpoints.service';
-import { MDAppModule } from '../../../core/md.module';
 import { CurrentUserPermissionsService } from '../../../core/permissions/current-user-permissions.service';
 import { TabNavService } from '../../../tab-nav.service';
-import { SharedModule } from '../../shared.module';
+import { TailwindSnackBarService } from '../../services/tailwind-snackbar.service';
+import { environment } from '../../../environments/environment';
 import { PageHeaderComponent } from './page-header.component';
-import { PageHeaderModule } from './page-header.module';
 
 describe('PageHeaderComponent', () => {
   let component: PageHeaderComponent;
   let fixture: ComponentFixture<PageHeaderComponent>;
   const URL_KEY = 'key';
-  beforeEach(waitForAsync(() => {
-    TestBed.configureTestingModule({
+  beforeEach(async () => {
+    TestBed.resetTestingModule();
+    await TestBed.configureTestingModule({
       providers: [
-        InternalEventMonitorFactory,
         {
           provide: ActivatedRoute,
           useValue: {
             snapshot: {
-              queryParams: { breadcrumbs: URL_KEY }
+              queryParams: { breadcrumbs: URL_KEY },
+              data: {}
             }
           }
         },
         TabNavService,
         CurrentUserPermissionsService,
         EndpointsService,
+        provideZonelessChangeDetection(),
+        provideHttpClient(),
+        provideHttpClientTesting(),
       ],
       imports: [
-        MDAppModule,
-        CoreModule,
-        SharedModule,
-        PageHeaderModule,
+        CoreTestingModule,
+        CommonModule,
         RouterTestingModule,
-        StoreModule.forRoot(
-          appReducers
-        )
+        PageHeaderComponent,
       ]
-    })
-      .compileComponents();
-  }));
+    }).compileComponents();
+  });
 
   beforeEach(() => {
     fixture = TestBed.createComponent(PageHeaderComponent);
@@ -84,7 +84,8 @@ describe('PageHeaderComponent', () => {
     ];
     const breadcrumbDefinitions = component.breadcrumbDefinitions;
     expect(breadcrumbDefinitions).toBeDefined();
-    expect(breadcrumbDefinitions.length).toEqual(3);
+    // strict: asserted defined above; setting breadcrumbs populates breadcrumbDefinitions
+    expect(breadcrumbDefinitions!.length).toEqual(3);
   });
 
   it('should have 2 breadcrumb', () => {
@@ -116,6 +117,111 @@ describe('PageHeaderComponent', () => {
     ];
     const breadcrumbDefinitions = component.breadcrumbDefinitions;
     expect(breadcrumbDefinitions).toBeDefined();
-    expect(breadcrumbDefinitions.length).toEqual(2);
+    // strict: asserted defined above; setting breadcrumbs populates breadcrumbDefinitions
+    expect(breadcrumbDefinitions!.length).toEqual(2);
+  });
+
+  describe('copyToken (UAA token menu)', () => {
+    let httpMock: HttpTestingController;
+    let writeTextMock: ReturnType<typeof vi.fn>;
+    let snackSpy: ReturnType<typeof vi.spyOn>;
+    const tokenUrl = `/api/${environment.proxyAPIVersion}/auth/token`;
+
+    beforeEach(() => {
+      httpMock = TestBed.inject(HttpTestingController);
+
+      writeTextMock = vi.fn().mockResolvedValue(undefined);
+      Object.defineProperty(navigator, 'clipboard', {
+        value: { writeText: writeTextMock },
+        writable: true,
+        configurable: true,
+      });
+
+      const snack = TestBed.inject(TailwindSnackBarService);
+      snackSpy = vi.spyOn(snack, 'show');
+    });
+
+    afterEach(() => {
+      // Absorb any pending company-config request from StratosBrandingService before verify
+      httpMock.match('/assets/company-config.json');
+      httpMock.verify();
+      vi.restoreAllMocks();
+    });
+
+    it('toggleTokenMenu flips isTokenMenuOpen and closes the other menus', () => {
+      component.isHistoryMenuOpen = true;
+      component.isUserMenuOpen = true;
+      component.toggleTokenMenu();
+
+      expect(component.isTokenMenuOpen).toBe(true);
+      expect(component.isHistoryMenuOpen).toBe(false);
+      expect(component.isUserMenuOpen).toBe(false);
+
+      component.closeTokenMenu();
+      expect(component.isTokenMenuOpen).toBe(false);
+    });
+
+    it('copyToken copies the auth token value and shows a success snackbar', async () => {
+      component.toggleTokenMenu();
+
+      const promise = component.copyToken(component.authToken$, 'Auth token');
+      const req = httpMock.expectOne(tokenUrl);
+      expect(req.request.method).toBe('GET');
+      req.flush({
+        status: 'ok',
+        error: '',
+        data: { auth_token: 'auth-123', refresh_token: 'refresh-456', token_expiry: 1700000000 },
+      });
+      await promise;
+
+      expect(writeTextMock).toHaveBeenCalledWith('auth-123');
+      expect(snackSpy).toHaveBeenCalledWith('Auth token copied to clipboard', 'Close');
+    });
+
+    it('copyToken copies the refresh token value and shows a success snackbar', async () => {
+      component.toggleTokenMenu();
+
+      const promise = component.copyToken(component.refreshToken$, 'Refresh token');
+      httpMock.expectOne(tokenUrl).flush({
+        status: 'ok',
+        error: '',
+        data: { auth_token: 'auth-123', refresh_token: 'refresh-456', token_expiry: 1700000000 },
+      });
+      await promise;
+
+      expect(writeTextMock).toHaveBeenCalledWith('refresh-456');
+      expect(snackSpy).toHaveBeenCalledWith('Refresh token copied to clipboard', 'Close');
+    });
+
+    it('copyToken shows a "no value" snackbar when the token is empty', async () => {
+      component.toggleTokenMenu();
+
+      const promise = component.copyToken(component.authToken$, 'Auth token');
+      httpMock.expectOne(tokenUrl).flush({
+        status: 'error',
+        error: 'no session',
+        data: null,
+      });
+      await promise;
+
+      expect(writeTextMock).not.toHaveBeenCalled();
+      expect(snackSpy).toHaveBeenCalledWith('No Auth token available', 'Close');
+    });
+
+    it('copyToken shows a failure snackbar when the clipboard write rejects', async () => {
+      writeTextMock.mockRejectedValueOnce(new Error('denied'));
+      component.toggleTokenMenu();
+
+      const promise = component.copyToken(component.authToken$, 'Auth token');
+      httpMock.expectOne(tokenUrl).flush({
+        status: 'ok',
+        error: '',
+        data: { auth_token: 'auth-123', refresh_token: 'refresh-456', token_expiry: 1700000000 },
+      });
+      await promise;
+
+      expect(writeTextMock).toHaveBeenCalledWith('auth-123');
+      expect(snackSpy).toHaveBeenCalledWith('Failed to copy Auth token', 'Close');
+    });
   });
 });

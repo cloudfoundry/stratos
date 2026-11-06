@@ -3,10 +3,11 @@ package userinvite
 import (
 	"errors"
 	"fmt"
+	"log/slog"
+	"net/http"
 
 	"github.com/cloudfoundry/stratos/src/jetstream/api"
-	"github.com/labstack/echo/v4"
-	log "github.com/sirupsen/logrus"
+	"github.com/labstack/echo/v5"
 )
 
 // Module init will register plugin
@@ -14,10 +15,29 @@ func init() {
 	api.AddPlugin("userinvite", []string{"cloudfoundry"}, Init)
 }
 
+// inviteProxy is the narrow set of portal-proxy operations the invite handlers need.
+// Production wires it to api.PortalProxy; tests set testProxy to inject a fake.
+type inviteProxy interface {
+	DoProxySingleRequest(cnsiGUID, userGUID, method, requestUrl string, headers http.Header, body []byte) (*api.CNSIRequest, error)
+	GetCNSIUser(cnsiGUID, userGUID string) (*api.ConnectedUser, bool)
+}
+
 // UserInvite is a plugin to allow user invitations
 type UserInvite struct {
 	portalProxy api.PortalProxy
 	Config      *Config
+	// testProxy overrides portalProxy for unit tests.
+	// Production code always leaves this nil.
+	testProxy inviteProxy
+}
+
+// proxy returns the narrow proxy used by invite operations. Tests can set
+// testProxy to override; production falls through to portalProxy.
+func (invite *UserInvite) proxy() inviteProxy {
+	if invite.testProxy != nil {
+		return invite.testProxy
+	}
+	return invite.portalProxy
 }
 
 // UserInviteUserID is the User ID for the user invitation token
@@ -80,7 +100,9 @@ func (userinvite *UserInvite) Init() error {
 	}
 
 	userinvite.portalProxy.GetConfig().PluginConfig[UserInvitePluginConfigSetting] = "true"
-	userinvite.portalProxy.AddLoginHook(5, userinvite.initClientToken)
+	if err := userinvite.portalProxy.AddLoginHook(5, userinvite.initClientToken); err != nil {
+		return err
+	}
 	userinvite.portalProxy.AddAuthProvider(UAAClientAuthType, api.AuthProvider{
 		Handler:  userinvite.doUAAClientAuthFlow,
 		UserInfo: userinvite.getCNSIUserFromUAAClientToken,
@@ -89,7 +111,7 @@ func (userinvite *UserInvite) Init() error {
 	return nil
 }
 
-func (userinvite *UserInvite) initClientToken(context echo.Context) error {
+func (userinvite *UserInvite) initClientToken(context *echo.Context) error {
 	// Do we have a valid cf guid?
 	if userinvite.portalProxy.GetConfig().CloudFoundryInfo == nil ||
 		len(userinvite.portalProxy.GetConfig().CloudFoundryInfo.EndpointGUID) == 0 {
@@ -120,6 +142,6 @@ func (userinvite *UserInvite) initClientToken(context echo.Context) error {
 		return fmt.Errorf("Failed to verify invite client id and secret: %v", err)
 	}
 
-	log.Info("Invite User UAA client initialized")
+	slog.Info("Invite User UAA client initialized")
 	return nil
 }

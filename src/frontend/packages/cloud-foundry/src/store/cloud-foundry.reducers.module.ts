@@ -1,17 +1,9 @@
 import { NgModule } from '@angular/core';
-import { StoreModule } from '@ngrx/store';
 
-import { cfUsersRolesReducer } from './reducers/cf-users-roles.reducer';
-import { createAppReducer } from './reducers/create-application.reducer';
-import { createServiceInstanceReducer } from './reducers/create-service-instance.reducer';
-import { deployAppReducer } from './reducers/deploy-app.reducer';
-
+// The `createApplication` ngrx feature slice was removed in favour of the
+// signal-native CreateAppStateService; this module is retained (empty)
+// because several feature/test modules still import it.
 @NgModule({
-  imports: [
-    StoreModule.forFeature('createApplication', createAppReducer),
-    StoreModule.forFeature('deployApplication', deployAppReducer),
-    StoreModule.forFeature('createServiceInstance', createServiceInstanceReducer),
-    StoreModule.forFeature('manageUsersRoles', cfUsersRolesReducer),
-  ]
+  imports: []
 })
 export class CloudFoundryReducersModule { }

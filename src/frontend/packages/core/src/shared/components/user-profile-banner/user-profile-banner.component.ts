@@ -1,25 +1,31 @@
-import { Component, Input } from '@angular/core';
+
+import { ChangeDetectionStrategy, Component, Input  } from '@angular/core';
 import { UserProfileInfo } from '@stratosui/store';
+import { UserAvatarComponent } from '../user-avatar/user-avatar.component';
 
 @Component({
   selector: 'app-user-profile-banner',
   templateUrl: './user-profile-banner.component.html',
-  styleUrls: ['./user-profile-banner.component.scss']
+  standalone: true,
+  imports: [
+    UserAvatarComponent
+],
+  changeDetection: ChangeDetectionStrategy.OnPush
 })
 export class UserProfileBannerComponent {
 
-  name: string;
-  email: string;
-  username: string;
+  name!: string;
+  email!: string;
+  username!: string;
   userProfile: any;
-  canUseGravatar: boolean;
+  canUseGravatar!: boolean;
 
   @Input()
   set allowGravatar(allowed: boolean) {
     this.canUseGravatar = allowed;
   }
 
-  @Input('user')
+  @Input()
   set user(user: UserProfileInfo) {
     this.userProfile = user;
     if (user) {

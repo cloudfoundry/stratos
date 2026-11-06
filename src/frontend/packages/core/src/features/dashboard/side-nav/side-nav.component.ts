@@ -1,13 +1,16 @@
-import { Component, EventEmitter, InjectionToken, Input, OnInit, Output } from '@angular/core';
-import { Store } from '@ngrx/store';
-import { ToggleSideNav, AppState } from '@stratosui/store';
-import { Observable } from 'rxjs';
+import { ChangeDetectionStrategy, Component, EventEmitter, Input, OnInit, Output, computed, inject } from '@angular/core';
+import { CommonModule } from '@angular/common';
+import { Router, RouterModule } from '@angular/router';
+import { Observable, map } from 'rxjs';
 
+import { StratosBrandingService } from '../../../../../theme/stratos-branding.service';
+import { AuthSignalService } from '../../../core/signals/auth-signal.service';
+import { CurrentUserPermissionsService } from '../../../core/permissions/current-user-permissions.service';
+import { StratosCurrentUserPermissions } from '../../../core/permissions/stratos-user-permissions.checker';
+import { DashboardDataService } from '../../../core/dashboard-data.service';
 import { CustomizationService, CustomizationsMetadata } from '../../../core/customizations.types';
 import { environment } from '../../../environments/environment';
 import { TabNavItem } from '../../../tab-nav.types';
-
-export const SIDENAV_COPYRIGHT = new InjectionToken<string>('Optional copyright string for side nav');
 
 export interface SideNavItem extends TabNavItem {
   label: string;
@@ -27,39 +30,99 @@ export interface SideNavItem extends TabNavItem {
 @Component({
   selector: 'app-side-nav',
   templateUrl: './side-nav.component.html',
-  styleUrls: ['./side-nav.component.scss']
+  styleUrls: ['./side-nav.component.scss'],
+  standalone: true,
+  imports: [
+    CommonModule,
+    RouterModule
+  ],
+  changeDetection: ChangeDetectionStrategy.OnPush
 })
 
 export class SideNavComponent implements OnInit {
+  private router = inject(Router);
+  private branding = inject(StratosBrandingService);
+  private dashboardData = inject(DashboardDataService);
+  private authSignals = inject(AuthSignalService);
+  private permissionsService = inject(CurrentUserPermissionsService);
+
+  // Same guard the page header uses: the 'stratos.noauth' scope means there
+  // is no session to end, so offering Sign Out is meaningless.
+  public canLogout$: Observable<boolean> = this.permissionsService
+    .can(StratosCurrentUserPermissions.CAN_NOT_LOGOUT)
+    .pipe(map(noLogout => !noLogout));
+
+  // HIDE_NAV_LOGOUT removes this button only. The header user menu keeps its
+  // own Sign Out, so hiding it here is presentation, not a capability change.
+  public hideNavLogout = computed(() => !!this.authSignals.sessionData()?.config?.hideNavLogout);
+
 
   public customizations: CustomizationsMetadata;
 
+  // Theme-related signals (computed from branding service)
+  public navLogo = computed(() =>
+    this.branding.theme()?.branding?.navLogo || '/core/assets/logo.png'
+  );
+
+  public navLogoIcon = computed(() =>
+    this.branding.theme()?.branding?.navLogoIcon || '/core/assets/logo.png'
+  );
+
+  public displayName = computed(() =>
+    this.branding.theme()?.branding?.displayName ||
+    this.branding.theme()?.branding?.companyName ||
+    'Stratos'
+  );
+
+  public copyright = computed(() => this.branding.getCopyrightText());
+
+  // Operator-configured company links. website is https-validated by the service.
+  public companyWebsite = computed(() => this.branding.getCompanyWebsite());
+  public supportEmail = computed(() => this.branding.getSupportEmail());
+
   public environment = environment;
+  public showAllMenuItems = false;
+
+  /** Debug affordance (c5c1009a85): only rendered when the deployment's
+   *  company config opts in via debug.showAllMenuItemsToggle. */
+  public showMenuItemsToggle = computed(() => this.branding.getShowAllMenuItemsToggle());
+
+  /** Effective reveal flag: a saved preference counts only while the debug
+   *  toggle is available — a hidden checkbox must not leak hidden nav items. */
+  get revealHiddenItems(): boolean {
+    return this.showMenuItemsToggle() && this.showAllMenuItems;
+  }
 
   tooltipDelay = 0;
 
-  constructor(
-    private store: Store<AppState>,
-    cs: CustomizationService
-  ) {
+  private readonly SHOW_ALL_MENU_ITEMS_KEY = 'stratos-show-all-menu-items';
+
+  constructor() {
+    const cs = inject(CustomizationService);
+
     this.customizations = cs.get();
   }
   @Input() set iconMode(isIconMode: boolean) {
     if (isIconMode !== this.isIconMode) {
       this.isIconMode = isIconMode;
-      this.changedMode.next();
+      this.changedMode.next(void 0);
     }
   }
   get iconMode() {
     return this.isIconMode;
   }
 
-  @Input() tabs: SideNavItem[];
+  @Input() tabs: SideNavItem[] = [];
   @Output() changedMode = new EventEmitter();
   private isIconMode = true;
 
   public toggleSidenav() {
-    this.store.dispatch(new ToggleSideNav());
+    this.dashboardData.toggleSideNav();
+  }
+
+  public toggleSidenavMode() {
+    // Toggle the sidebar open/closed state which controls iconMode
+    this.dashboardData.toggleSideNav();
   }
 
   ngOnInit() {
@@ -69,5 +132,80 @@ export class SideNavComponent implements OnInit {
       this.tooltipDelay = 2000;
     }
 
+    // Load the show all menu items setting from localStorage
+    this.loadShowAllMenuItemsSetting();
+  }
+
+  public isActiveRoute(route: string): boolean {
+    return this.router.isActive(route, false);
+  }
+
+  public getIconName(tab: SideNavItem): string {
+    // If matIcon is provided, use it
+    if (tab.matIcon && tab.matIcon.trim()) {
+      return tab.matIcon;
+    }
+
+    // Try to infer icon from label/text
+    const label = (tab.label || tab.text || '').toLowerCase();
+
+    // Common icon mappings based on label
+    const iconMap: { [key: string]: string } = {
+      'home': 'home',
+      'application': 'apps',
+      'apps': 'apps',
+      'marketplace': 'store',
+      'market': 'store',
+      'service': 'cloud',
+      'cloud foundry': 'cloud',
+      'cloud': 'cloud',
+      'endpoint': 'settings',
+      'kubernetes': 'settings',
+      'metric': 'analytics',
+      'user': 'person',
+      'organization': 'business',
+      'space': 'folder',
+      'domain': 'domain',
+      'security': 'security',
+      'admin': 'admin_panel_settings'
+    };
+
+    // Look for matching icon in the map
+    for (const [key, icon] of Object.entries(iconMap)) {
+      if (label.includes(key)) {
+        return icon;
+      }
+    }
+
+    // Default fallback
+    return 'dashboard';
+  }
+
+  public signOut() {
+    this.authSignals.logout();
+  }
+
+  public toggleShowAllMenuItems(event: Event) {
+    const checkbox = event.target as HTMLInputElement;
+    this.showAllMenuItems = checkbox.checked;
+    this.saveShowAllMenuItemsSetting();
+  }
+
+  private loadShowAllMenuItemsSetting() {
+    try {
+      const saved = localStorage.getItem(this.SHOW_ALL_MENU_ITEMS_KEY);
+      this.showAllMenuItems = saved === 'true';
+    } catch (error) {
+      console.warn('Failed to load show all menu items setting:', error);
+      this.showAllMenuItems = false;
+    }
+  }
+
+  private saveShowAllMenuItemsSetting() {
+    try {
+      localStorage.setItem(this.SHOW_ALL_MENU_ITEMS_KEY, this.showAllMenuItems.toString());
+    } catch (error) {
+      console.warn('Failed to save show all menu items setting:', error);
+    }
   }
 }

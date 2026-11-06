@@ -1,27 +1,47 @@
-import { Component, OnDestroy, OnInit } from '@angular/core';
-import { AbstractControl, UntypedFormBuilder, UntypedFormGroup, Validators } from '@angular/forms';
-import { ErrorStateMatcher, ShowOnDirtyErrorStateMatcher } from '@angular/material/core';
+import { CommonModule } from '@angular/common';
+import { HttpClient } from '@angular/common/http';
+import { Component, OnDestroy, OnInit, ChangeDetectionStrategy, inject } from '@angular/core';
+import { toObservable } from '@angular/core/rxjs-interop';
+import { ReactiveFormsModule, Validators, FormBuilder, FormControl, FormGroup } from '@angular/forms';
+import { ErrorStateMatcher, ShowOnDirtyErrorStateMatcher } from '@stratosui/core';
 import { ActivatedRoute } from '@angular/router';
-import { Store } from '@ngrx/store';
 import { combineLatest, Observable, of as observableOf, Subscription } from 'rxjs';
-import { filter, first, map, share, startWith, switchMap } from 'rxjs/operators';
+import { take, filter, map, share, startWith, switchMap } from 'rxjs/operators';
 
-import { SaveAppOverrides } from '../../../../../../cloud-foundry/src/actions/deploy-applications.actions';
-import { CFAppState } from '../../../../../../cloud-foundry/src/cf-app-state';
+import { StepOnNextFunction } from '@stratosui/core';
+import { CfDeployAppDataService } from '../../../../services/domain-data/cf-deploy-app-data.service';
+import { NewAppCFDetails } from '../../../../store/types/create-application.types';
 import {
-  selectCfDetails,
-  selectDeployAppState,
-  selectSourceType,
-} from '../../../../../../cloud-foundry/src/store/selectors/deploy-application.selector';
-import { OverrideAppDetails, SourceType } from '../../../../../../cloud-foundry/src/store/types/deploy-application.types';
-import { StepOnNextFunction } from '../../../../../../core/src/shared/components/stepper/step/step.component';
-import { APIResource } from '../../../../../../store/src/types/api.types';
-import { IDomain } from '../../../../cf-api.types';
-import { cfEntityCatalog } from '../../../../cf-entity-catalog';
+  DeployApplicationSource,
+  DeployApplicationState,
+  DockerAppDetails,
+  OverrideAppDetails,
+  SourceType,
+} from '../../../../store/types/deploy-application.types';
 import {
-  ApplicationEnvVarsHelper,
-} from '../../application/application-tabs-base/tabs/build-tab/application-env-vars.service';
+  ApplicationEnvVarsHelper } from '../../application/application-tabs-base/tabs/build-tab/application-env-vars.service';
+import { StDomain, StDomainsResponse, StEnvVars, StStack, StStacksResponse } from '../../../../services/endpoint-data/stratos-types';
 import { DEPLOY_TYPES_IDS } from '../deploy-application-steps.types';
+
+interface DeployOptionsForm {
+  name: FormControl<string | null>;
+  instances: FormControl<number | null>;
+  disk_quota: FormControl<number | null>;
+  memory: FormControl<number | null>;
+  host: FormControl<string | null>;
+  domain: FormControl<string | null>;
+  path: FormControl<string | null>;
+  buildpack: FormControl<string | null>;
+  no_route: FormControl<boolean>;
+  random_route: FormControl<boolean>;
+  no_start: FormControl<boolean>;
+  startCmd: FormControl<string | null>;
+  healthCheckType: FormControl<string | null>;
+  stack: FormControl<string | null>;
+  time: FormControl<number | null>;
+  dockerImage: FormControl<string | null>;
+  dockerUsername: FormControl<string | null>;
+}
 
 @Component({
   selector: 'app-deploy-application-options-step',
@@ -29,54 +49,64 @@ import { DEPLOY_TYPES_IDS } from '../deploy-application-steps.types';
   styleUrls: ['./deploy-application-options-step.component.scss'],
   providers: [
     { provide: ErrorStateMatcher, useClass: ShowOnDirtyErrorStateMatcher }
+  ],
+  standalone: true,
+  changeDetection: ChangeDetectionStrategy.OnPush,
+  imports: [
+    CommonModule,
+    ReactiveFormsModule
   ]
 })
 export class DeployApplicationOptionsStepComponent implements OnInit, OnDestroy {
+  private fb = inject(FormBuilder);
+  private http = inject(HttpClient);
+  private appEnvVarsService = inject(ApplicationEnvVarsHelper);
+  private activatedRoute = inject(ActivatedRoute);
+  private deployData = inject(CfDeployAppDataService);
+  private deployState$ = toObservable(this.deployData.state);
+  private deployCfDetails$ = toObservable(this.deployData.cfDetails);
+  private deploySourceType$ = toObservable(this.deployData.sourceType);
+
 
   valid$: Observable<boolean>;
-  domains$: Observable<APIResource<IDomain>[]>;
-  stacks$: Observable<APIResource<IDomain>[]>;
-  deployOptionsForm: UntypedFormGroup;
+  domains$!: Observable<StDomain[]>;
+  stacks$!: Observable<StStack[]>;
+  deployOptionsForm: FormGroup<DeployOptionsForm>;
   subs: Subscription[] = [];
-  appGuid: string;
+  appGuid!: string;
   stepOpts: any;
 
   public healthCheckTypes = ['http', 'port', 'process'];
-  public sourceType$: Observable<SourceType>;
+  public sourceType$!: Observable<SourceType | undefined>;
   public DEPLOY_TYPES_IDS = DEPLOY_TYPES_IDS;
 
-  constructor(
-    private fb: UntypedFormBuilder,
-    private store: Store<CFAppState>,
-    private appEnvVarsService: ApplicationEnvVarsHelper,
-    private activatedRoute: ActivatedRoute
-  ) {
-    this.deployOptionsForm = this.fb.group({
-      name: null,
-      instances: [null, [
+  constructor() {
+    this.deployOptionsForm = this.fb.group<DeployOptionsForm>({
+      name: new FormControl<string | null>(null),
+      instances: new FormControl<number | null>(null, [
         Validators.min(0)
-      ]],
-      disk_quota: [null, [
+      ]),
+      disk_quota: new FormControl<number | null>(null, [
         Validators.min(0)
-      ]],
-      memory: [null, [
+      ]),
+      memory: new FormControl<number | null>(null, [
         Validators.min(0)
-      ]],
-      host: null,
-      domain: null,
-      path: null,
-      buildpack: null,
-      no_route: false,
-      random_route: false,
-      no_start: false,
-      startCmd: null,
-      healthCheckType: null,
-      stack: null,
-      time: [null, [
+      ]),
+      host: new FormControl<string | null>(null),
+      domain: new FormControl<string | null>(null),
+      path: new FormControl<string | null>(null),
+      buildpack: new FormControl<string | null>(null),
+      no_route: new FormControl<boolean>(false, { nonNullable: true }),
+      random_route: new FormControl<boolean>(false, { nonNullable: true }),
+      no_start: new FormControl<boolean>(false, { nonNullable: true }),
+      startCmd: new FormControl<string | null>(null),
+      healthCheckType: new FormControl<string | null>(null),
+      stack: new FormControl<string | null>(null),
+      time: new FormControl<number | null>(null, [
         Validators.min(0)
-      ]],
-      dockerImage: null,
-      dockerUsername: null
+      ]),
+      dockerImage: new FormControl<string | null>(null),
+      dockerUsername: new FormControl<string | null>(null)
     });
     this.valid$ = this.deployOptionsForm.valueChanges.pipe(
       map(() => this.deployOptionsForm.valid),
@@ -84,10 +114,50 @@ export class DeployApplicationOptionsStepComponent implements OnInit, OnDestroy 
     );
   }
 
+  // Guards the no_route / random_route mutual-exclusivity wiring against
+  // feedback loops: setValue/enable/disable on one control fires the
+  // other's valueChanges, which would otherwise recurse and undo the
+  // address-field state.
+  private syncingRoutes = false;
+
   private disableAddressFields() {
     this.deployOptionsForm.controls.host.disable();
     this.deployOptionsForm.controls.domain.disable();
     this.deployOptionsForm.controls.path.disable();
+  }
+
+  // no_route ("don't create a route") and random_route ("create a random
+  // route") are mutually exclusive — CF rejects `--no-route` together with
+  // `--random-route`. Checking either one CLEARS the other's value (so a
+  // stale flag isn't read out in formToObj and sent to cf push) and
+  // disables it; unchecking re-enables the other. random_route stays
+  // disabled on redeploy (appGuid present).
+  private syncRouteOptions(changed: 'no_route' | 'random_route', checked: boolean) {
+    if (this.syncingRoutes) {
+      return;
+    }
+    this.syncingRoutes = true;
+    try {
+      const controls = this.deployOptionsForm.controls;
+      const other = changed === 'no_route' ? controls.random_route : controls.no_route;
+      if (checked) {
+        // Clear the value FIRST so formToObj never reads a stale `true`,
+        // then lock the control.
+        if (other.value) {
+          other.setValue(false);
+        }
+        other.disable();
+        this.disableAddressFields();
+      } else {
+        const canEnable = other === controls.random_route ? !this.appGuid : true;
+        if (canEnable) {
+          other.enable();
+        }
+        this.enableAddressFields();
+      }
+    } finally {
+      this.syncingRoutes = false;
+    }
   }
 
   private enableAddressFields() {
@@ -97,11 +167,13 @@ export class DeployApplicationOptionsStepComponent implements OnInit, OnDestroy 
   }
 
   ngOnInit() {
-    this.sourceType$ = this.store.select(selectSourceType);
+    this.sourceType$ = this.deploySourceType$;
 
     // Set previously supplied docker values
-    this.subs.push(this.store.select(selectDeployAppState).pipe(
-      filter(deployAppState =>
+    this.subs.push(this.deployState$.pipe(
+      filter((deployAppState): deployAppState is DeployApplicationState & {
+        applicationSource: DeployApplicationSource & { dockerDetails: DockerAppDetails };
+      } =>
         !!deployAppState &&
         !!deployAppState.applicationSource &&
         !!deployAppState.applicationSource.dockerDetails &&
@@ -109,67 +181,56 @@ export class DeployApplicationOptionsStepComponent implements OnInit, OnDestroy 
     ).subscribe(deployAppState => {
       const sourceType = deployAppState.applicationSource.type;
       if (sourceType.id === DEPLOY_TYPES_IDS.DOCKER_IMG) {
-        this.deployOptionsForm.controls.name.setValue(deployAppState.applicationSource.dockerDetails.applicationName);
-        this.deployOptionsForm.controls.dockerImage.setValue(deployAppState.applicationSource.dockerDetails.dockerImage);
-        this.deployOptionsForm.controls.dockerUsername.setValue(deployAppState.applicationSource.dockerDetails.dockerUsername);
+        this.deployOptionsForm.controls.name.setValue(deployAppState.applicationSource.dockerDetails.applicationName ?? null);
+        this.deployOptionsForm.controls.dockerImage.setValue(deployAppState.applicationSource.dockerDetails.dockerImage ?? null);
+        this.deployOptionsForm.controls.dockerUsername.setValue(deployAppState.applicationSource.dockerDetails.dockerUsername ?? null);
       }
     }));
 
     const noRouteChanged$ = this.deployOptionsForm.controls.no_route.valueChanges.pipe(startWith(false));
     const randomRouteChanged$ = this.deployOptionsForm.controls.random_route.valueChanges.pipe(startWith(false));
 
-    const cfDetails$ = this.store.select(selectCfDetails).pipe(
-      filter(cfDetails => !!cfDetails && !!cfDetails.cloudFoundry)
+    const cfDetails$ = this.deployCfDetails$.pipe(
+      filter((cfDetails): cfDetails is NewAppCFDetails => !!cfDetails && !!cfDetails.cloudFoundry)
     );
 
-    // Create the domains list for the domains drop down
+    // Create the domains list for the domains drop down. cf push overrides
+    // do not support tcp routes (no way to specify port), so filter them out.
     this.domains$ = cfDetails$.pipe(
-      switchMap(cfDetails =>
-        cfEntityCatalog.domain.store.getOrganizationDomains.getPaginationService(cfDetails.org, cfDetails.cloudFoundry).entities$
-      ),
-      // cf push overrides do not support tcp routes (no way to specify port)
-      map(domains => domains.filter(domain => domain.entity.router_group_type !== 'tcp')),
+      switchMap(cfDetails => this.http.get<StDomainsResponse>(
+        `/pp/v1/cf/org/${cfDetails.cloudFoundry}/${cfDetails.org}/private_domains`,
+      )),
+      map(resp => (resp?.resources ?? []).filter(d => !d.supportedProtocols?.includes('tcp'))),
       share()
     );
 
     this.stacks$ = cfDetails$.pipe(
-      switchMap(cfDetails => cfEntityCatalog.stack.store.getPaginationService(null, cfDetails.cloudFoundry).entities$),
+      switchMap(cfDetails => this.http.get<StStacksResponse>(
+        `/pp/v1/cf/stacks/${cfDetails.cloudFoundry}`,
+      )),
+      map(resp => resp?.resources ?? []),
       share()
     );
 
-    // Ensure that when the no route + random route options are checked the host, domain and path fields are enabled/disabled
-    this.subs.push(noRouteChanged$.subscribe(value => {
-      if (value) {
-        this.disableAddressFields();
-        this.deployOptionsForm.controls.random_route.disable();
-      } else {
-        this.enableAddressFields();
-        if (!this.appGuid) {
-          // This can only be enabled if this is not a redeploy
-          this.deployOptionsForm.controls.random_route.enable();
-        }
-      }
-    }));
-    this.subs.push(combineLatest([
-      noRouteChanged$,
-      randomRouteChanged$
-    ]).subscribe(([noRoute, randomRoute]) => {
-      // control.valueChanges fires whenever the value ... or enabled/disabled state changes. This means whenever noRouteChanged$ changes
-      // randomRoute this also fires ... which undos the host+domain state
-      if (noRoute || randomRoute) {
-        this.disableAddressFields();
-      } else {
-        this.enableAddressFields();
-      }
-    }));
+    // Keep no_route / random_route mutually exclusive (two-way) and toggle
+    // the host/domain/path address fields. See syncRouteOptions for why the
+    // re-entrancy guard is needed.
+    this.subs.push(noRouteChanged$.subscribe(value => this.syncRouteOptions('no_route', !!value)));
+    this.subs.push(randomRouteChanged$.subscribe(value => this.syncRouteOptions('random_route', !!value)));
 
-    // Extract any existing values from the app's env var and assign to form
+    // Extract any existing values from the app's env var and assign to form.
+    // Redeploy path: the wizard was launched against an existing app and the
+    // STRATOS_PROJECT env var (written by a prior deploy step) carries the
+    // overrides we want to preseed.
     this.appGuid = this.activatedRoute.snapshot.queryParams.appGuid;
     if (this.appGuid) {
       combineLatest(this.domains$, cfDetails$).pipe(
-        switchMap(([, cfDetails]) => this.appEnvVarsService.createEnvVarsObs(this.appGuid, cfDetails.cloudFoundry).entities$),
-        map(applicationEnvVars => this.appEnvVarsService.FetchStratosProject(applicationEnvVars[0].entity)),
-        first()
+        switchMap(([, cfDetails]) => this.http.get<StEnvVars>(
+          `/pp/v1/cf/apps/${cfDetails.cloudFoundry}/${this.appGuid}/env`,
+        )),
+        map(env => this.appEnvVarsService.FetchStratosProject(env?.environment)),
+        filter((proj): proj is NonNullable<typeof proj> => !!proj),
+        take(1)
       ).subscribe(envVars => this.objToForm(envVars.deployOverrides));
     }
 
@@ -179,9 +240,7 @@ export class DeployApplicationOptionsStepComponent implements OnInit, OnDestroy 
     this.subs.forEach(sub => sub.unsubscribe());
   }
 
-  formToObj(controls: {
-    [key: string]: AbstractControl;
-  }): OverrideAppDetails {
+  formToObj(controls: DeployOptionsForm): OverrideAppDetails {
     return {
       name: controls.name.value,
       buildpack: controls.buildpack.value,
@@ -210,8 +269,8 @@ export class DeployApplicationOptionsStepComponent implements OnInit, OnDestroy 
     controls.name.disable();
     controls.buildpack.setValue(overrides.buildpack);
     controls.instances.setValue(overrides.instances);
-    controls.disk_quota.setValue(overrides.diskQuota.replace('MB', ''));
-    controls.memory.setValue(overrides.memQuota.replace('MB', ''));
+    controls.disk_quota.setValue(overrides.diskQuota ? parseInt(overrides.diskQuota.replace('MB', ''), 10) : null);
+    controls.memory.setValue(overrides.memQuota ? parseInt(overrides.memQuota.replace('MB', ''), 10) : null);
     controls.no_start.setValue(overrides.doNotStart);
     controls.no_route.setValue(overrides.noRoute);
     // Random route has no affect on redeploy, so disable.
@@ -231,7 +290,7 @@ export class DeployApplicationOptionsStepComponent implements OnInit, OnDestroy 
   }
 
   onNext: StepOnNextFunction = () => {
-    this.store.dispatch(new SaveAppOverrides(this.formToObj(this.deployOptionsForm.controls)));
+    this.deployData.saveAppOverrides(this.formToObj(this.deployOptionsForm.controls));
     return observableOf({
       success: true, data: this.stepOpts
     });

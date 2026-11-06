@@ -1,26 +1,66 @@
-import { DatePipe } from '@angular/common';
-import { ComponentFixture, TestBed, waitForAsync } from '@angular/core/testing';
+import { ComponentFixture, TestBed } from '@angular/core/testing';
+import { importProvidersFrom, provideZonelessChangeDetection } from '@angular/core';
+import { provideHttpClient } from '@angular/common/http';
+import { provideHttpClientTesting } from '@angular/common/http/testing';
+import { provideRouter } from '@angular/router';
+import { provideNoopAnimations } from '@angular/platform-browser/animations';
+import { describe, it, expect, beforeEach } from 'vitest';
 
-import { TabNavService } from '../../../../../../core/src/tab-nav.service';
-import { CFBaseTestModules } from '../../../../../test-framework/cf-test-helper';
-import { generateTestCfEndpointServiceProvider } from '../../../../../test-framework/cloud-foundry-endpoint-service.helper';
 import {
-  CfSpaceQuotasListConfigService,
-} from '../../../../shared/components/list/list-types/cf-space-quotas/cf-space-quotas-list-config.service';
+  TEST_CATALOGUE_ENTITIES,
+  generateStratosEntities,
+  EntityCatalogTestModule,
+  EntityCatalogHelper,
+  EntityCatalogHelpers
+} from '@stratosui/store';
+import { STORE_TEST_PROVIDERS, testSCFEndpointGuid, populateStoreWithTestEndpoint } from '@stratosui/store/testing';
+import { generateCFEntities, generateTestCfEndpointServiceProvider } from '@test-framework/cf';
+import { ActiveRouteCfOrgSpace } from '../../cf-page.types';
 import { CloudFoundryOrganizationSpaceQuotasComponent } from './cloud-foundry-organization-space-quotas.component';
 
 describe('CloudFoundryOrganizationSpaceQuotasComponent', () => {
   let component: CloudFoundryOrganizationSpaceQuotasComponent;
   let fixture: ComponentFixture<CloudFoundryOrganizationSpaceQuotasComponent>;
 
-  beforeEach(waitForAsync(() => {
-    TestBed.configureTestingModule({
-      declarations: [CloudFoundryOrganizationSpaceQuotasComponent],
-      providers: [CfSpaceQuotasListConfigService, generateTestCfEndpointServiceProvider(), TabNavService, DatePipe],
-      imports: [...CFBaseTestModules]
-    })
-      .compileComponents();
-  }));
+  beforeEach(async () => {
+    await TestBed.configureTestingModule({
+      imports: [
+        CloudFoundryOrganizationSpaceQuotasComponent,
+      ],
+      providers: [
+        provideZonelessChangeDetection(),
+        provideRouter([]),
+        provideHttpClient(),
+        provideHttpClientTesting(),
+        provideNoopAnimations(),
+        ...STORE_TEST_PROVIDERS,
+        importProvidersFrom(
+          EntityCatalogTestModule
+        ),
+        {
+          provide: TEST_CATALOGUE_ENTITIES,
+          useValue: [
+            ...generateStratosEntities(),
+            ...generateCFEntities()
+          ]
+        },
+        ...generateTestCfEndpointServiceProvider(testSCFEndpointGuid),
+        {
+          provide: ActiveRouteCfOrgSpace,
+          useValue: {
+            cfGuid: testSCFEndpointGuid,
+            orgGuid: testSCFEndpointGuid,
+            spaceGuid: testSCFEndpointGuid
+          }
+        },
+      ]
+    }).compileComponents();
+
+    const entityCatalogHelper = TestBed.inject(EntityCatalogHelper);
+    EntityCatalogHelpers.SetEntityCatalogHelper(entityCatalogHelper);
+
+    populateStoreWithTestEndpoint();
+  });
 
   beforeEach(() => {
     fixture = TestBed.createComponent(CloudFoundryOrganizationSpaceQuotasComponent);

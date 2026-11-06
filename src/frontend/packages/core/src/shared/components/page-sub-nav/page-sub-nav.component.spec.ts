@@ -1,4 +1,6 @@
-import { ComponentFixture, TestBed, waitForAsync } from '@angular/core/testing';
+import { ComponentFixture, TestBed } from '@angular/core/testing';
+import { provideZonelessChangeDetection } from '@angular/core';
+import { describe, it, expect, beforeEach, afterEach, beforeAll, afterAll, vi } from 'vitest';
 import { RouterTestingModule } from '@angular/router/testing';
 
 import { TabNavService } from '../../../tab-nav.service';
@@ -8,14 +10,19 @@ describe('PageSubNavComponent', () => {
   let component: PageSubNavComponent;
   let fixture: ComponentFixture<PageSubNavComponent>;
 
-  beforeEach(waitForAsync(() => {
+  beforeEach(() => {
     TestBed.configureTestingModule({
-      imports: [RouterTestingModule],
-      declarations: [PageSubNavComponent],
-      providers: [TabNavService]
-    })
-      .compileComponents();
-  }));
+      imports: [
+        RouterTestingModule,
+        PageSubNavComponent,
+      ],
+      providers: [
+        TabNavService,
+        provideZonelessChangeDetection(),
+      ]
+    });
+      TestBed.compileComponents();
+  });
 
   beforeEach(() => {
     fixture = TestBed.createComponent(PageSubNavComponent);

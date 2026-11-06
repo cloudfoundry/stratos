@@ -1,6 +1,6 @@
-<mat-progress-spinner *ngIf="!(initialValue$ | async); else haveInitialValue" diameter="20" mode="indeterminate">
-</mat-progress-spinner>
-<ng-template #haveInitialValue>
-  <mat-checkbox [checked]="(initialValue$ | async).checked" (change)="valueChanged($event.checked)" color="primary">
-  </mat-checkbox>
-</ng-template>
+@if (initialValue$ | async; as initialValue) {
+  <app-checkbox [checked]="initialValue.checked" (change)="valueChanged($event.checked)" color="primary">
+  </app-checkbox>
+} @else {
+  <app-busy class="text-primary" size="1.25rem" context="kube-cert"></app-busy>
+}

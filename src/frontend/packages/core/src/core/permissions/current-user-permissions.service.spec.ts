@@ -1,26 +1,66 @@
 import { TestBed } from '@angular/core/testing';
-import { createBasicStoreModule, createEntityStoreState, TestStoreEntity } from '@stratosui/store/testing';
-import { first, tap } from 'rxjs/operators';
-
-import { AppState } from '../../../../store/src/app-state';
-import { EntityCatalogTestModule, TEST_CATALOGUE_ENTITIES } from '../../../../store/src/entity-catalog-test.module';
-import { EntityCatalogEntityConfig } from '../../../../store/src/entity-catalog/entity-catalog.types';
-import { endpointEntityType, stratosEntityFactory } from '../../../../store/src/helpers/stratos-entity-factory';
-import { generateStratosEntities } from '../../../../store/src/stratos-entity-generator';
-import { EndpointModel } from '../../../../store/src/types/endpoint.types';
-import { BaseEntityValues } from '../../../../store/src/types/entity.types';
-import { PaginationState } from '../../../../store/src/types/pagination.types';
-import { AppTestModule } from '../../../test-framework/core-test.helper';
+import { provideZonelessChangeDetection } from '@angular/core';
+import { describe, it, expect, beforeEach, afterEach, beforeAll, afterAll, vi } from 'vitest';
+import { firstValueFrom } from 'rxjs';
+import { AppState, BaseEntityValues, CurrentUserRolesDataService, EntityCatalogEntityConfig, EntityCatalogTestModule, EndpointModel, PaginationEntityState, TEST_CATALOGUE_ENTITIES, endpointEntityType, generateStratosEntities, stratosEntityFactory } from '@stratosui/store';
+import {
+  createBasicStoreModule,
+  createEntityStoreState,
+  TestStoreEntity,
+  STORE_TEST_PROVIDERS,
+} from '@stratosui/store/testing';
+import { AppTestModule } from '@test-framework';
 import { PermissionConfig } from './current-user-permissions.config';
 import { CurrentUserPermissionsService } from './current-user-permissions.service';
 import { StratosPermissionStrings, StratosPermissionTypes, StratosScopeStrings } from './stratos-user-permissions.checker';
 
 
+/**
+ * Roles fixture shape. Roles no longer live on the ngrx `AppState` slice — they
+ * were relocated to the signal-native `CurrentUserRolesDataService` (favorites/
+ * roles island Wave 2). This local type mirrors the fixture that seeds that
+ * service, keeping it out of the store-state object that `createBasicStoreModule`
+ * consumes.
+ */
+interface TestUserRolesFixture {
+  internal: {
+    isAdmin: boolean;
+    scopes: StratosScopeStrings[];
+  };
+  endpoints: {
+    cf: Record<string, any>;
+  };
+  state: {
+    initialised: boolean;
+    fetching: boolean;
+    error: null;
+  };
+}
+
+type TestStoreStateFixture = Partial<Omit<AppState<BaseEntityValues>, 'pagination'>> & {
+  // The fixture only seeds a subset of pagination sections; the production
+  // `AppState.pagination` requires every BaseEntityValues key, so model it as a
+  // partial record of pagination entity-type states here.
+  pagination?: Record<string, Record<string, PaginationEntityState>>;
+  currentUserRoles: TestUserRolesFixture;
+};
+
+/**
+ * Strip the (signal-native) roles fixture, leaving the ngrx store-state slice
+ * that `createBasicStoreModule` consumes.
+ */
+function toStoreState(fixture: TestStoreStateFixture): Partial<AppState<BaseEntityValues>> {
+  const { currentUserRoles, ...storeState } = fixture;
+  // The fixture's pagination is intentionally a partial record of the production
+  // ExtendedRequestState (only the sections the test seeds); reconcile the shapes.
+  return storeState as Partial<AppState<BaseEntityValues>>;
+}
+
 describe('CurrentUserPermissionsService', () => {
   let service: CurrentUserPermissionsService;
 
 
-  function createStoreState(): Partial<AppState<BaseEntityValues>> {
+  function createStoreState(): TestStoreStateFixture {
     // Data
     const endpoints: EndpointModel[] = [
       {
@@ -53,12 +93,12 @@ describe('CurrentUserPermissionsService', () => {
         creator: {
           name: 'admin',
           admin: true,
-          system: false
+          system: false,
         },
         metricsAvailable: false,
         connectionStatus: 'connected',
         system_shared_token: false,
-        sso_allowed: false
+        sso_allowed: false,
       },
       {
         guid: 'c80420ca-204b-4879-bf69-b6b7a202ad87',
@@ -85,31 +125,32 @@ describe('CurrentUserPermissionsService', () => {
           admin: true,
           scopes: [
             StratosScopeStrings.STRATOS_CHANGE_PASSWORD,
-            StratosScopeStrings.SCIM_READ
+            StratosScopeStrings.SCIM_READ,
           ]
         },
         creator: {
           name: 'admin',
           admin: true,
-          system: false
+          system: false,
         },
         metricsAvailable: false,
         connectionStatus: 'connected',
         system_shared_token: false,
-        sso_allowed: false
+        sso_allowed: false,
       }
     ];
 
 
     // Pagination
-    const pagination: PaginationState = {
+    const pagination = {
       stratosEndpoint: {
         'endpoint-list': {
           currentPage: 1,
           totalResults: 2,
           pageCount: 1,
           ids: {
-            1: endpoints.map(endpoint => endpoint.guid)
+            // strict: every endpoint fixture above declares a literal guid
+            1: endpoints.map(endpoint => endpoint.guid!),
           },
           pageRequests: {
             1: {
@@ -132,10 +173,10 @@ describe('CurrentUserPermissionsService', () => {
               string: '',
               items: {}
             },
-            totalResults: 2
+            totalResults: 2,
           },
           maxedState: {},
-          isListPagination: true
+          isListPagination: true,
         }
       },
     };
@@ -150,10 +191,11 @@ describe('CurrentUserPermissionsService', () => {
     const entityMap = new Map<EntityCatalogEntityConfig, Array<TestStoreEntity | string>>([
       [
         stratosEntityFactory(endpointEntityType),
-        endpoints.map(endpoint => ({
-          guid: endpoint.guid,
-          data: endpoint
-        }))
+        endpoints.map((endpoint): TestStoreEntity => ({
+          // strict: every endpoint fixture above declares a literal guid
+          guid: endpoint.guid!,
+          data: endpoint,
+        })),
       ],
     ]);
     const requestAndRequestData = createEntityStoreState(entityMap);
@@ -164,7 +206,7 @@ describe('CurrentUserPermissionsService', () => {
           isAdmin: false,
           scopes: [
             StratosScopeStrings.STRATOS_CHANGE_PASSWORD,
-            StratosScopeStrings.SCIM_READ
+            StratosScopeStrings.SCIM_READ,
           ],
         },
         endpoints: {
@@ -189,7 +231,7 @@ describe('CurrentUserPermissionsService', () => {
                   orgId: 'abc',
                   isManager: true,
                   isAuditor: false,
-                  isDeveloper: true
+                  isDeveloper: true,
                 }
               },
               organizations: {
@@ -211,7 +253,7 @@ describe('CurrentUserPermissionsService', () => {
               state: {
                 initialised: true,
                 fetching: false,
-                error: null
+                error: null,
               }
             },
             'c80420ca-204b-4879-bf69-b6b7a202ad87': {
@@ -287,7 +329,7 @@ describe('CurrentUserPermissionsService', () => {
               state: {
                 initialised: true,
                 fetching: false,
-                error: null
+                error: null,
               }
             },
             READ_ONLY_ADMIN: {
@@ -315,19 +357,19 @@ describe('CurrentUserPermissionsService', () => {
                   orgId: 'abc',
                   isManager: true,
                   isAuditor: false,
-                  isDeveloper: true
+                  isDeveloper: true,
                 },
                 'c6450a21-aa1a-4643-9437-035cc818ea72': {
                   orgId: 'abc',
                   isManager: true,
                   isAuditor: false,
-                  isDeveloper: true
+                  isDeveloper: true,
                 },
                 '86577124-4b64-4ca1-9a78-d904c60505c4': {
                   orgId: 'abc',
                   isManager: true,
                   isAuditor: false,
-                  isDeveloper: true
+                  isDeveloper: true,
                 }
               },
               organizations: {
@@ -363,7 +405,7 @@ describe('CurrentUserPermissionsService', () => {
               state: {
                 initialised: true,
                 fetching: false,
-                error: null
+                error: null,
               }
             },
             READ_ONLY_USER: {
@@ -439,7 +481,7 @@ describe('CurrentUserPermissionsService', () => {
               state: {
                 initialised: true,
                 fetching: false,
-                error: null
+                error: null,
               }
             }
           },
@@ -447,16 +489,16 @@ describe('CurrentUserPermissionsService', () => {
         state: {
           initialised: true,
           fetching: false,
-          error: null
+          error: null,
         }
       },
       requestData: {
         ...initialState.requestData,
-        ...requestAndRequestData.requestData
+        ...requestAndRequestData.requestData,
       },
       pagination: {
         ...initialState.pagination,
-        ...pagination
+        ...pagination,
       },
     };
   }
@@ -465,24 +507,39 @@ describe('CurrentUserPermissionsService', () => {
     TestBed.configureTestingModule({
       providers: [
         CurrentUserPermissionsService,
-      ],
-      imports: [
+        ...STORE_TEST_PROVIDERS,
         {
-          ngModule: EntityCatalogTestModule,
-          providers: [
-            {
-              provide: TEST_CATALOGUE_ENTITIES, useValue: [
-                ...generateStratosEntities(),
-              ]
-            }
+          provide: TEST_CATALOGUE_ENTITIES,
+          useValue: [
+            ...generateStratosEntities(),
           ]
         },
-        createBasicStoreModule(createStoreState()),
-        AppTestModule
+        provideZonelessChangeDetection(),
+      ],
+      imports: [
+        // `currentUserRoles` is seeded into the signal-native data service below,
+        // not the ngrx store, so only the store-state slice goes to the module.
+        createBasicStoreModule(toStoreState(createStoreState())),
+        EntityCatalogTestModule,
+        AppTestModule,
       ],
 
     });
-    service = TestBed.get(CurrentUserPermissionsService);
+
+    // Roles are no longer read from the ngrx slice — seed the signal-native
+    // source of truth (favorites/roles island Wave 2) with the same fixture the
+    // store module is built from, so the permission checker (which now reads via
+    // CurrentUserRolesDataService) sees the test roles.
+    const roles = createStoreState().currentUserRoles;
+    const rolesData = TestBed.inject(CurrentUserRolesDataService);
+    if (roles?.endpoints?.cf) {
+      rolesData.updateEndpointRoles('cf', () => roles.endpoints.cf);
+    }
+    if (roles?.internal) {
+      rolesData.applySessionScopes({ admin: roles.internal.isAdmin, scopes: roles.internal.scopes } as any);
+    }
+
+    service = TestBed.inject(CurrentUserPermissionsService);
   });
 
   it('should be created', () => {
@@ -490,32 +547,25 @@ describe('CurrentUserPermissionsService', () => {
   });
 
 
-  it('should allow if stratos admin', done => {
-    service.can(new PermissionConfig(StratosPermissionTypes.STRATOS, StratosPermissionStrings.STRATOS_ADMIN)).pipe(
-      tap(can => {
-        expect(can).toBe(false);
-        done();
-      }),
-      first()
-    ).subscribe();
+  it('should allow if stratos admin', async () => {
+    const can = await firstValueFrom(
+      service.can(new PermissionConfig(StratosPermissionTypes.STRATOS, StratosPermissionStrings.STRATOS_ADMIN))
+    );
+    expect(can).toBe(false);
   });
 
-  it('should allow if has stratos change password scope', done => {
-    service.can(new PermissionConfig(StratosPermissionTypes.STRATOS_SCOPE, StratosScopeStrings.STRATOS_CHANGE_PASSWORD)).pipe(
-      tap(can => {
-        expect(can).toBe(true);
-        done();
-      }),
-      first()
-    ).subscribe();
+  it('should allow if has stratos change password scope', async () => {
+    const can = await firstValueFrom(
+      service.can(new PermissionConfig(StratosPermissionTypes.STRATOS_SCOPE, StratosScopeStrings.STRATOS_CHANGE_PASSWORD))
+    );
+    expect(can).toBe(true);
+  });
 
-    service.can([new PermissionConfig(StratosPermissionTypes.STRATOS_SCOPE, StratosScopeStrings.STRATOS_CHANGE_PASSWORD)]).pipe(
-      tap(can => {
-        expect(can).toBe(true);
-        done();
-      }),
-      first()
-    ).subscribe();
+  it('should allow if has stratos change password scope (array config)', async () => {
+    const can = await firstValueFrom(
+      service.can([new PermissionConfig(StratosPermissionTypes.STRATOS_SCOPE, StratosScopeStrings.STRATOS_CHANGE_PASSWORD)])
+    );
+    expect(can).toBe(true);
   });
 
 

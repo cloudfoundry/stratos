@@ -1,55 +1,88 @@
-import { Component, OnInit } from '@angular/core';
+import { ChangeDetectionStrategy, Component, Injector, OnInit, computed, inject } from '@angular/core';
+import { CommonModule } from '@angular/common';
+import { toObservable } from '@angular/core/rxjs-interop';
 import { DomSanitizer, SafeUrl } from '@angular/platform-browser';
-import { ActivatedRoute } from '@angular/router';
-import { Store } from '@ngrx/store';
+import { ActivatedRoute, RouterModule } from '@angular/router';
 import {
-  InternalEventMonitorFactory,
   EndpointModel,
-  getPreviousRoutingState,
+  EndpointsDataService,
+  EndpointErrorEventsService,
+  RoutingHistoryService,
   StratosStatus,
-  endpointEntityType,
-  stratosEntityCatalog,
   InternalEventState,
-  SendClearEndpointEventsAction,
-  AppState,
 } from '@stratosui/store';
-import { Observable, of } from 'rxjs';
-import { first, map, withLatestFrom } from 'rxjs/operators';
+import { Observable, combineLatest } from 'rxjs';
+import { take, map } from 'rxjs/operators';
 
 import { eventReturnUrlParam } from '../../event-page/events-page/events-page.component';
+import { PageHeaderComponent } from '../../../shared/components/page-header/page-header.component';
+import { CardWrapperComponent } from '../../../shared/components/cards/card/card.component';
+import { CustomIconComponent } from '../../../shared/components/custom-material/custom-material.component';
 
 @Component({
   selector: 'app-error-page',
   templateUrl: './error-page.component.html',
-  styleUrls: ['./error-page.component.scss']
+  styleUrls: ['./error-page.component.scss'],
+  standalone: true,
+  imports: [
+    CommonModule,
+    RouterModule,
+    PageHeaderComponent,
+    CardWrapperComponent,
+    CustomIconComponent,
+  ],
+  changeDetection: ChangeDetectionStrategy.OnPush
 })
 export class ErrorPageComponent implements OnInit {
+  private activatedRoute = inject(ActivatedRoute);
+  private routingHistory = inject(RoutingHistoryService);
+  private errorEvents = inject(EndpointErrorEventsService);
+  private sanitizer = inject(DomSanitizer);
+  private endpointsData = inject(EndpointsDataService);
+  private injector = inject(Injector);
+
   public back$: Observable<string>;
   public backParams$: Observable<object>;
-  public errorDetails$: Observable<{ endpoint: EndpointModel; errors: InternalEventState[], }>;
+  // strict: only assigned in ngOnInit when an endpointId route param is present; left
+  // undefined otherwise. The template guards via `@if (errorDetails$ | async; as ...)`
+  // and the async pipe tolerates an undefined source.
+  public errorDetails$?: Observable<{ endpoint: EndpointModel | null; errors: InternalEventState[], }>;
   public icon = StratosStatus.ERROR;
-  public jsonDownloadHref$: Observable<SafeUrl>;
+  public jsonDownloadHref$?: Observable<SafeUrl>;
 
-  public dismissEndpointErrors(endpointGuid: string) {
-    this.store.dispatch(new SendClearEndpointEventsAction(endpointGuid));
+  // The endpoint may not have resolved yet (guid optional on EndpointModel).
+  public dismissEndpointErrors(endpointGuid: string | undefined) {
+    if (!endpointGuid) {
+      return;
+    }
+    this.errorEvents.clearEndpoint(endpointGuid);
   }
 
   ngOnInit() {
     const endpointId = this.activatedRoute.snapshot.params.endpointId;
     if (endpointId) {
-      const endpointMonitor = stratosEntityCatalog.endpoint.store.getEntityMonitor(endpointId);
-      const cfEndpointEventMonitor = this.internalEventMonitorFactory.getMonitor(endpointEntityType, of([endpointId]));
-      this.errorDetails$ = cfEndpointEventMonitor.hasErroredOverTimeNoPoll(30).pipe(
-        withLatestFrom(endpointMonitor.entity$),
-        map(([errors, endpoint]) => {
-          return {
-            endpoint,
-            errors: errors ? errors[endpointId] : null
-          };
-        })
+      // W36-B Wave 3: read endpoint via EndpointsDataService signal
+      // bridge instead of legacy EntityMonitor.entity$.
+      const endpoint$ = toObservable(
+        this.endpointsData.endpointById(endpointId),
+        { injector: this.injector },
+      );
+      // Read per-endpoint error history from the signal-native error bus,
+      // filtered to backend (5xx) errors in the last 30 minutes — preserving
+      // the old InternalEventMonitor.hasErroredOverTimeNoPoll(30) behaviour.
+      const errorsSig = this.errorEvents.errorsForEndpoint(endpointId);
+      const errors$ = toObservable(
+        computed(() => {
+          const cutoff = Date.now() - 30 * 60 * 1000;
+          return errorsSig().filter(e => e.eventCode?.[0] === '5' && (e.timestamp ?? 0) > cutoff);
+        }),
+        { injector: this.injector },
+      );
+      this.errorDetails$ = combineLatest([errors$, endpoint$]).pipe(
+        map(([errors, endpoint]: [InternalEventState[], EndpointModel | null]) => ({ endpoint, errors }))
       );
       this.jsonDownloadHref$ = this.errorDetails$.pipe(
-        map((info) => {
+        map((info: any) => {
           const jsonString = JSON.stringify(info);
           return this.sanitizer.bypassSecurityTrustUrl('data:text/json;charset=UTF-8,' + encodeURIComponent(jsonString));
         })
@@ -57,25 +90,20 @@ export class ErrorPageComponent implements OnInit {
     }
   }
 
-  constructor(
-    private activatedRoute: ActivatedRoute,
-    private store: Store<AppState>,
-    private internalEventMonitorFactory: InternalEventMonitorFactory,
-    private sanitizer: DomSanitizer
-  ) {
-    this.back$ = store.select(getPreviousRoutingState).pipe(first()).pipe(
-      map(previousState => previousState && previousState.url !== '/login' ? previousState.url.split('?')[0] : '/home')
+  constructor() {
+    this.back$ = this.routingHistory.previousState$.pipe(take(1)).pipe(
+      map((previousState: any) => previousState && previousState.url !== '/login' ? previousState.url.split('?')[0] : '/home')
     );
 
     this.backParams$ = this.back$.pipe(
-      map(urlBack => {
+      map((urlBack: string) => {
         // If we've come from the events page ensure we pass it back it's param
         const overrideReturnUrl = this.activatedRoute.snapshot.queryParams[eventReturnUrlParam];
         return urlBack && urlBack.startsWith('/events') ? {
           [eventReturnUrlParam]: overrideReturnUrl || null
         } : {};
       }),
-      first()
+      take(1)
     );
   }
 }

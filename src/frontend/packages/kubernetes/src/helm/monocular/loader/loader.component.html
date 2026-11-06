@@ -1,6 +1,10 @@
 <div>
-  <div *ngIf="loading" class="loader">
-    <mat-spinner></mat-spinner>
-  </div>
-  <ng-content *ngIf="!loading"></ng-content>
+  @if (loading) {
+    <div class="text-center my-8">
+      <app-busy class="text-primary" size="2rem" context="monocular"></app-busy>
+    </div>
+  }
+  @if (!loading) {
+    <ng-content></ng-content>
+  }
 </div>

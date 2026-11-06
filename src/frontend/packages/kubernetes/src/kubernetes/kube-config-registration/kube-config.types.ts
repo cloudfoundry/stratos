@@ -1,11 +1,20 @@
 import { Observable, Subject } from 'rxjs';
+import { WritableSignal } from '@angular/core';
 
 import {
   IActionMonitorComponentState,
 } from '../../../../core/src/shared/components/app-action-monitor-icon/app-action-monitor-icon.component';
-import { RowState } from '../../../../core/src/shared/components/list/data-sources-controllers/list-data-source-types';
+import { RowState } from '../../../../core/src/shared/components/signal-list/row-state.types';
 import { EndpointAuthTypeConfig } from '../../../../store/src/extension-types';
-import { ActionStatus } from './../../../../store/src/reducers/api-request-reducer/types';
+import { ActionStatus } from './../../../../store/src/types/entity-pipeline.types';
+
+// Type alias for signal wrapper with BehaviorSubject compatibility
+// Accepts either Subject<T> OR WritableSignal<T> with BehaviorSubject API methods
+type SignalOrSubject<T> = Subject<T> | (WritableSignal<T> & {
+  next: (value: T) => void;
+  getValue: () => T;
+  asObservable: () => Observable<T>;
+});
 
 // Types for a Kubernetes Configuration file
 
@@ -25,8 +34,8 @@ export interface KubeConfigFileCluster {
   _selected: boolean;
   // Is this cluster invalid? i.e. requires more information
   _invalid: boolean;
-  // row state
-  _state: Subject<RowState>;
+  // row state - accepts either Subject or Signal wrapper
+  _state: SignalOrSubject<RowState>;
   // status of import
   _status: string;
   // guid of the existing endpoint for this cluster
@@ -51,7 +60,12 @@ export interface KubeConfigFileUserDetail {
   'client-certificate-data'?: string;
   'client-key-data'?: string;
   token?: string;
-  exec?: any;
+  exec?: {
+    apiVersion?: string;
+    command?: string;
+    args?: string[];
+    env?: { name: string; value: string }[];
+  };
   username?: string;
   password?: string;
 }
@@ -74,14 +88,16 @@ export interface KubeConfigFile {
 }
 
 export interface KubeConfigImportAction {
-  action: string;
+  // null marks a skipped action (e.g. a connect whose register failed)
+  action: string | null;
   description: string;
   cluster: KubeConfigFileCluster;
   user?: KubeConfigFileUser;
   status?: ActionStatus;
-  state: Subject<RowState>;
+  // state and actionState - accept either Subject or Signal wrapper for gradual migration
+  state: SignalOrSubject<RowState>;
   actionState$?: Observable<IActionMonitorComponentState>;
-  actionState: Subject<IActionMonitorComponentState>;
+  actionState: SignalOrSubject<IActionMonitorComponentState>;
   depends?: KubeConfigImportAction;
 }
 

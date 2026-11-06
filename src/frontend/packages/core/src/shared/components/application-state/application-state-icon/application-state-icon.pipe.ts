@@ -1,7 +1,8 @@
 import { Pipe, PipeTransform } from '@angular/core';
 
 @Pipe({
-  name: 'applicationStateIcon'
+  name: 'applicationStateIcon',
+  standalone: true
 })
 export class ApplicationStateIconPipe implements PipeTransform {
 
@@ -16,7 +17,7 @@ export class ApplicationStateIconPipe implements PipeTransform {
     }
   }
 
-  transform(value: string, args?: string): string {
+  transform(value: string | null, args?: string): string {
     if (!value) {
       return '';
     }

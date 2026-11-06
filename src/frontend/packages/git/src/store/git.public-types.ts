@@ -1,19 +1,3 @@
-
-export const FETCH_BRANCHES_FOR_PROJECT = '[Deploy App] Fetch branches';
-export const FETCH_BRANCH_FOR_PROJECT = '[Deploy App] Fetch branch';
-export const FETCH_GITHUB_REPO = '[Github] Fetch Github repo details';
-
-export const FETCH_COMMIT = '[Deploy App] Fetch commit';
-export const FETCH_COMMITS = '[Deploy App] Fetch commits';
-
-export const FETCH_BRANCH_START = '[GitHub] Fetch branch start';
-export const FETCH_BRANCH_SUCCESS = '[GitHub] Fetch branch succeeded';
-export const FETCH_BRANCH_FAILED = '[GitHub] Fetch branch failed';
-
-export const FETCH_BRANCHES_START = '[GitHub] Fetch branches start';
-export const FETCH_BRANCHES_SUCCESS = '[GitHub] Fetch branches succeeded';
-export const FETCH_BRANCHES_FAILED = '[GitHub] Fetch branches failed';
-
 export interface GitEntity {
   guid: string;
   endpointGuid: string;
@@ -45,6 +29,9 @@ export interface GitUser {
   html_url: string;
   id: number;
   login: string;
+  // GitLab repo owners are mapped with a display name instead of a login
+  // (see GitLabSCM.convertProject), so consumers can fall back to it.
+  name?: string;
 }
 
 export interface GitBranch extends GitEntity {

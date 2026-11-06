@@ -1,16 +1,39 @@
 <app-page-sub-nav>
-  <div class="sub-nav-menu-button" *ngIf="namespaces$">
-    <mat-menu #appMenu="matMenu" class="menu">
-      <button (click)="select('*')" mat-menu-item>All namespaces</button>
-      <button *ngFor="let ns of namespaces$ | async" (click)="select(ns)" mat-menu-item>{{ ns }}</button>
-    </mat-menu>
-    <button mat-button [matMenuTriggerFor]="appMenu" class="sub-nav-menu-button__btn"
-      [ngClass]="{'sub-nav-menu-button__not-allowed': !isNamespacedView}">
-      <mat-icon *ngIf="selectedNamespace" fontSet="stratos-icons" class="sub-nav-menu-button__icon">namespace</mat-icon>
-      <span class="sub-nav-menu-button__label">{{ selectedNamespace || 'All namespaces'}}</span>
-      <mat-icon class="sub-nav-menu-button__arrow">arrow_drop_down</mat-icon>
-    </button>
-  </div>
+  @if (namespaces$) {
+    <div class="rounded ml-5 w-[200px]">
+      <div class="relative inline-block">
+        <button class="btn btn-ghost w-full leading-7 py-0 pr-2 pl-3"
+          [class.opacity-50]="!isNamespacedView"
+          (click)="menuOpen = !menuOpen">
+          @if (selectedNamespace) {
+            <span class="stratos-icons">namespace</span>
+          }
+          <span class="flex-1 overflow-hidden text-left truncate whitespace-nowrap">{{ selectedNamespace || 'All namespaces'}}</span>
+          <span class="material-symbols-outlined m-0 ml-2.5">arrow_drop_down</span>
+        </button>
+        @if (menuOpen) {
+          <div
+            class="absolute left-0 mt-1 w-56 bg-content-bg rounded-md shadow-lg ring-1 ring-black/5 z-50">
+            <div class="py-1">
+              <button (click)="select('*'); menuOpen = false"
+                class="block w-full text-left px-4 py-2 text-sm text-content-text hover:bg-content-secondary">
+                All namespaces
+              </button>
+              @for (ns of namespaces$ | async; track ns) {
+                <button
+                  (click)="select(ns); menuOpen = false"
+                  class="block w-full text-left px-4 py-2 text-sm text-content-text hover:bg-content-secondary">
+                  {{ ns }}
+                </button>
+              }
+            </div>
+          </div>
+        }
+      </div>
+    </div>
+  }
 </app-page-sub-nav>
 
-<app-list-view [config]="provider"></app-list-view>
+@if (signalListConfig(); as cfg) {
+  <app-signal-list [config]="cfg"></app-signal-list>
+}

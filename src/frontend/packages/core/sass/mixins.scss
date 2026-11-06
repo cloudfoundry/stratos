@@ -1,3 +1,15 @@
+// Modern responsive breakpoints (mobile-first)
+$breakpoints: (
+  'xs': 0,
+  'sm': 640px,
+  'md': 768px,
+  'lg': 1024px,
+  'xl': 1280px,
+  '2xl': 1536px,
+  '3xl': 1920px
+);
+
+// Legacy breakpoint names (maintained for backward compatibility)
 @mixin breakpoint($point) {
   @if $point==desktop {
     @media (min-width: 1800px) {
@@ -24,4 +36,56 @@
       @content ;
     }
   }
+}
+
+// Modern mobile-first breakpoint mixin
+@mixin responsive($breakpoint) {
+  @if map-has-key($breakpoints, $breakpoint) {
+    $value: map-get($breakpoints, $breakpoint);
+    @if $value == 0 {
+      @content;
+    } @else {
+      @media (min-width: $value) {
+        @content;
+      }
+    }
+  } @else {
+    @warn "Breakpoint #{$breakpoint} not found in $breakpoints map.";
+  }
+}
+
+// Max-width breakpoint (for desktop-first if needed)
+@mixin responsive-max($breakpoint) {
+  @if map-has-key($breakpoints, $breakpoint) {
+    $value: map-get($breakpoints, $breakpoint);
+    @media (max-width: $value - 1px) {
+      @content;
+    }
+  }
+}
+
+// Container queries mixin (modern approach)
+@mixin container($min-width) {
+  @container (min-width: #{$min-width}) {
+    @content;
+  }
+}
+
+// Responsive grid helper
+@mixin responsive-grid($cols: 1, $gap: 1rem, $min-width: 250px) {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(min(#{$min-width}, 100%), 1fr));
+  gap: $gap;
+
+  @supports (width: min(#{$min-width}, 100%)) {
+    grid-template-columns: repeat(auto-fit, minmax(min(#{$min-width}, 100%), 1fr));
+  }
+}
+
+// Responsive flexbox helper
+@mixin responsive-flex($direction: row, $wrap: wrap, $gap: 1rem) {
+  display: flex;
+  flex-direction: $direction;
+  flex-wrap: $wrap;
+  gap: $gap;
 }

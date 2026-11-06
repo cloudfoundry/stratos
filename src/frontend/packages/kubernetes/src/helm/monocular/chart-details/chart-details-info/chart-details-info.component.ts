@@ -1,23 +1,35 @@
-import { Component, Input, OnInit } from '@angular/core';
+
+import { Component, Input, OnInit, inject, ChangeDetectionStrategy, signal } from '@angular/core';
+import { CardWrapperComponent } from '@stratosui/core';
 import { of } from 'rxjs';
-import { catchError, first } from 'rxjs/operators';
+import { take, catchError,  } from 'rxjs/operators';
 
 import { Chart } from '../../shared/models/chart';
 import { ChartVersion } from '../../shared/models/chart-version';
 import { Maintainer } from '../../shared/models/maintainer';
 import { ChartsService } from '../../shared/services/charts.service';
+import { ChartDetailsUsageComponent } from '../chart-details-usage/chart-details-usage.component';
+import { ChartDetailsVersionsComponent } from '../chart-details-versions/chart-details-versions.component';
 
 @Component({
   selector: 'app-chart-details-info',
   templateUrl: './chart-details-info.component.html',
-  styleUrls: ['./chart-details-info.component.scss']
+  changeDetection: ChangeDetectionStrategy.OnPush,
+  standalone: true,
+  imports: [
+    CardWrapperComponent,
+    ChartDetailsUsageComponent,
+    ChartDetailsVersionsComponent
+]
 })
 export class ChartDetailsInfoComponent implements OnInit {
-  @Input() chart: Chart;
-  versions: ChartVersion[];
-  schema: any = null;
+  @Input() chart!: Chart;
+  // Signals: both arrive from HTTP after the first render, and an OnPush view
+  // under zoneless CD only repaints for signal writes.
+  readonly versions = signal<ChartVersion[]>([]);
+  readonly schema = signal<unknown>(null);
 
-  private pCurrentVersion: ChartVersion;
+  private pCurrentVersion!: ChartVersion;
 
   get currentVersion(): ChartVersion {
     return this.pCurrentVersion;
@@ -30,7 +42,7 @@ export class ChartDetailsInfoComponent implements OnInit {
     }
   }
 
-  constructor(private chartsService: ChartsService) { }
+  private chartsService = inject(ChartsService);
 
   ngOnInit() {
     this.loadVersions(this.chart);
@@ -48,7 +60,7 @@ export class ChartDetailsInfoComponent implements OnInit {
     this.chartsService
       .getVersions(chart.attributes.repo.name, chart.attributes.name)
       .subscribe(versions => {
-        this.versions = versions;
+        this.versions.set(versions);
       });
   }
 
@@ -71,10 +83,10 @@ export class ChartDetailsInfoComponent implements OnInit {
 
   private getSchema(currentVersion: ChartVersion, chart: Chart) {
     this.chartsService.getChartSchema(currentVersion, chart).pipe(
-      first(),
+      take(1),
       catchError(() => of(null))
     ).subscribe(schema => {
-      this.schema = schema;
+      this.schema.set(schema);
     });
   }
 

@@ -1,22 +1,26 @@
-import { ComponentFixture, TestBed, waitForAsync } from '@angular/core/testing';
+import { ComponentFixture, TestBed } from '@angular/core/testing';
+import { provideZonelessChangeDetection } from '@angular/core';
+import { describe, it, expect, beforeEach, afterEach, beforeAll, afterAll, vi } from 'vitest';
 
 import { TileSelectorTileComponent } from './tile-selector-tile.component';
-import { ITileImgConfig } from '../tile/tile-selector.types';
 import { MDAppModule } from '../../../core/md.module';
 
 describe('TileSelectorTileComponent', () => {
-  let component: TileSelectorTileComponent<ITileImgConfig>;
-  let fixture: ComponentFixture<TileSelectorTileComponent<ITileImgConfig>>;
+  let component: TileSelectorTileComponent;
+  let fixture: ComponentFixture<TileSelectorTileComponent>;
 
-  beforeEach(waitForAsync(() => {
+  beforeEach(() => {
     TestBed.configureTestingModule({
+      
+      providers: [provideZonelessChangeDetection()],
+      
       imports: [
-        MDAppModule
-      ],
-      declarations: [ TileSelectorTileComponent ]
-    })
-    .compileComponents();
-  }));
+        MDAppModule,
+        TileSelectorTileComponent,
+      ]
+    });
+    TestBed.compileComponents();
+  });
 
   beforeEach(() => {
     fixture = TestBed.createComponent(TileSelectorTileComponent) as ComponentFixture<TileSelectorTileComponent<ITileImgConfig>>;

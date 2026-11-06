@@ -7,5 +7,6 @@
 *.woff2 binary
 *.tff binary
 *.jpg binary
+*.webp binary
 *.ico binary
 *.ttf binary

@@ -1,38 +1,47 @@
-import { Component, Input } from '@angular/core';
-import { UntypedFormGroup } from '@angular/forms';
+import { ChangeDetectionStrategy, Component, Input} from '@angular/core';
+import { FormControl, FormGroup, ReactiveFormsModule } from '@angular/forms';
 
+import { FileInputComponent } from '../../../../../core/src/shared/components/file-input/file-input.component';
+import { CustomTabGroupComponent, CustomTabComponent } from '../../../../../core/src/shared/components/custom-tabs/custom-tabs.component';
 import { EndpointAuthValues, IEndpointAuthComponent } from '../../../../../store/src/extension-types';
 
+interface CertsAuthForm {
+  cert: FormControl<string>;
+  certKey: FormControl<string>;
+}
 
 @Component({
+  changeDetection: ChangeDetectionStrategy.OnPush,
   selector: 'app-kubernetes-certs-auth-form',
   templateUrl: './kubernetes-certs-auth-form.component.html',
-  styleUrls: ['./kubernetes-certs-auth-form.component.scss']
+  standalone: true,
+  imports: [
+    ReactiveFormsModule,
+    CustomTabGroupComponent,
+    CustomTabComponent,
+    FileInputComponent,
+  ]
 })
 export class KubernetesCertsAuthFormComponent implements IEndpointAuthComponent {
-  @Input() formGroup: UntypedFormGroup;
+  @Input() formGroup!: FormGroup<CertsAuthForm>; // strict: required @Input (IAuthForm contract), assigned by the auth-form host
 
 
   public getValues(values: EndpointAuthValues): EndpointAuthValues {
-    return {};
+    let certValue = (values?.cert as string) ?? '';
+    let certKeyValue = (values?.certKey as string) ?? '';
+
+    // Base64-encode PEM content; leave already-encoded values as-is
+    if (certValue.startsWith('-----BEGIN')) {
+      certValue = btoa(certValue);
+    }
+    if (certKeyValue.startsWith('-----BEGIN')) {
+      certKeyValue = btoa(certKeyValue);
+    }
+
+    return { cert: certValue, certKey: certKeyValue };
   }
 
   public getBody(): string {
-    /** Body content is in the following encoding:
-     * base64encoded:base64encoded
-     */
-
-    let certBase64 = this.formGroup.value.authValues.cert;
-    let certKeyBase64 = this.formGroup.value.authValues.certKey;
-
-    // May already be base64 encoded
-    if (certBase64.indexOf('-----BEGIN') === 0) {
-      certBase64 = btoa(this.formGroup.value.authValues.cert);
-    }
-
-    if (certKeyBase64.indexOf('-----BEGIN') === 0) {
-      certKeyBase64 = btoa(this.formGroup.value.authValues.certKey);
-    }
-    return `${certBase64}:${certKeyBase64}`;
+    return '';
   }
 }

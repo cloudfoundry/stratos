@@ -1,0 +1,287 @@
+@reference 'tailwindcss';
+
+/* ============================================================================
+   Custom Form Field Component - Tailwind-based Material Replacement
+
+   FWT-956 Tailwind-finish pass (2026-04-25):
+   - Prefix/suffix/underline/ripple/error/hint state-driven coloring is now
+     handled by template-bound getters on CustomFormFieldComponent
+     (`prefixSuffixColorClasses`, `underlineColorClasses`,
+     `rippleColorClasses`) instead of SCSS descendant combinators.
+   - Static color rules (.error-icon, .success-icon, .form-field-error,
+     .form-field-hint) moved inline to the template as Tailwind utilities.
+   - This file now only retains rules that can't be expressed in template
+     Tailwind: appearance variants (fill / outline / legacy use color-mix
+     and CSS-var-driven backgrounds that Tailwind utilities don't cover),
+     compact float-label-never variant, and media-query rules (responsive,
+     print, reduced-motion, high-contrast).
+
+   Dead rules that targeted projected <input>/<textarea>/<select> content
+   have been removed — Angular ViewEncapsulation rewrites them with
+   _ngcontent attributes that never match the projected elements, so they
+   had no effect. Consumer templates now apply Tailwind classes directly
+   to their own inputs (w-full, placeholder:!text-transparent, etc.).
+   ============================================================================ */
+
+/* ============================================================================
+   Base Form Field Structure
+   ============================================================================ */
+
+.custom-form-field {
+  /* Base layout - uses Tailwind classes in HTML, minimal overrides here */
+  background-color: transparent;
+
+  &.disabled {
+    @apply opacity-60 cursor-not-allowed pointer-events-none;
+  }
+}
+
+/* ============================================================================
+   Form Field Container Base Styles
+   ============================================================================ */
+
+.form-field-wrapper,
+.form-field-flex,
+.form-field-infix {
+  background-color: transparent;
+}
+
+/* ============================================================================
+   Appearance Variants
+   ============================================================================ */
+
+/* Fill Appearance */
+.appearance-fill {
+  .form-field-flex {
+    @apply rounded-t px-3 transition-colors duration-200;
+    background-color: color-mix(in srgb, var(--input-bg) 95%, var(--input-border));
+
+    .dark-theme & {
+      background-color: color-mix(in srgb, var(--input-bg) 90%, transparent);
+    }
+  }
+
+  .form-field-underline {
+    bottom: 0 !important;
+  }
+
+  &.focused .form-field-flex {
+    background-color: color-mix(in srgb, var(--input-bg) 95%, var(--input-focus-border) 10%);
+  }
+
+  &.invalid .form-field-flex {
+    background-color: color-mix(in srgb, var(--input-bg) 95%, var(--color-danger) 10%);
+  }
+
+  &.valid .form-field-flex {
+    background-color: color-mix(in srgb, var(--input-bg) 95%, var(--color-success) 5%);
+  }
+}
+
+/* Outline Appearance */
+.appearance-outline {
+  .form-field-flex {
+    @apply rounded border px-3 transition-all duration-200;
+    border-color: var(--input-border);
+  }
+
+  .form-field-underline {
+    @apply hidden;
+  }
+
+  &.focused .form-field-flex {
+    @apply border-2;
+    border-color: var(--input-focus-border);
+    padding-left: calc(0.75rem - 1px);
+    padding-right: calc(0.75rem - 1px);
+  }
+
+  &.invalid .form-field-flex {
+    @apply border-2;
+    border-color: var(--color-danger);
+    padding-left: calc(0.75rem - 1px);
+    padding-right: calc(0.75rem - 1px);
+  }
+
+  &.valid .form-field-flex {
+    border-color: var(--color-success);
+  }
+
+  &.color-accent.focused .form-field-flex {
+    border-color: var(--color-accent);
+  }
+
+  &.disabled .form-field-flex {
+    border-color: var(--input-border);
+    @apply opacity-60;
+  }
+}
+
+/* Legacy Appearance */
+.appearance-legacy {
+  .form-field-infix {
+    padding: 0.4375em 0 !important;
+  }
+}
+
+/* Standard Appearance (default) */
+.appearance-standard {
+  /* Uses default styles with underline */
+}
+
+/* ============================================================================
+   Material Icons Support
+   ============================================================================ */
+
+.material-icons {
+  @apply font-normal not-italic text-2xl leading-none tracking-normal normal-case;
+  @apply inline-block whitespace-nowrap antialiased;
+  font-family: 'Material Icons';
+  word-wrap: normal;
+  direction: ltr;
+  -webkit-font-feature-settings: 'liga';
+  font-feature-settings: 'liga';
+}
+
+/* ============================================================================
+   Animation Utilities
+   ============================================================================ */
+
+@keyframes slideDown {
+  from {
+    opacity: 0;
+    transform: translateY(-4px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.animate-slideDown {
+  animation: slideDown 0.2s ease-out;
+}
+
+/* ============================================================================
+   Accessibility Enhancements
+   ============================================================================ */
+
+/* High contrast mode support */
+@media (prefers-contrast: high) {
+  .form-field-hint,
+  .form-field-error {
+    @apply font-semibold;
+  }
+
+  .form-field-underline {
+    @apply h-0.5;
+  }
+
+  .form-field-ripple {
+    @apply h-1;
+  }
+
+  .appearance-outline .form-field-flex {
+    @apply border-2;
+  }
+}
+
+/* Reduced motion support (WCAG AAA) */
+@media (prefers-reduced-motion: reduce) {
+  .form-field-ripple,
+  .form-field-flex,
+  .form-field-prefix,
+  .form-field-suffix,
+  .form-field-underline,
+  .error-icon,
+  .success-icon {
+    @apply transition-none;
+    animation: none !important;
+  }
+
+  .animate-slideDown {
+    animation: none;
+  }
+
+  @keyframes slideDown {
+    from, to {
+      opacity: 1;
+      transform: translateY(0);
+    }
+  }
+}
+
+/* ============================================================================
+   Compact Form Field for Filters
+   ============================================================================ */
+
+/* When floatLabel is 'never', reduce padding and margins */
+.custom-form-field[ng-reflect-float-label="never"],
+.custom-form-field.float-label-never {
+  @apply mb-0;
+  background-color: transparent !important;
+
+  .form-field-wrapper {
+    padding-bottom: 0 !important;
+    background-color: transparent !important;
+  }
+
+  .form-field-flex {
+    background-color: transparent !important;
+  }
+
+  .form-field-infix {
+    padding: 0 !important;
+    min-width: auto !important;
+    background-color: transparent !important;
+
+    app-select {
+      display: block;
+      background-color: var(--input-bg) !important;
+      border: none !important;
+      border-radius: 0.375rem;
+    }
+  }
+
+  .form-field-subscript-wrapper {
+    @apply hidden;
+  }
+
+  .form-field-underline {
+    @apply hidden;
+  }
+}
+
+/* ============================================================================
+   Responsive Adjustments
+   ============================================================================ */
+
+@media (max-width: 640px) {
+  .form-field-infix {
+    min-width: 120px !important;
+  }
+
+  .form-field-hint,
+  .form-field-error {
+    @apply text-[0.7rem];
+  }
+
+  .error-icon,
+  .success-icon {
+    @apply w-4 h-4;
+  }
+}
+
+/* ============================================================================
+   Print Styles
+   ============================================================================ */
+
+@media print {
+  .custom-form-field {
+    .form-field-ripple,
+    .error-icon,
+    .success-icon {
+      @apply hidden;
+    }
+  }
+}

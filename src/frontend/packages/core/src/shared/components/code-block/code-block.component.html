@@ -1,6 +1,14 @@
-<div class="app-code-block" [ngClass]="{ 'app-code-block__pre': codeBlockStyle === 'pre'}">
-  <div class="app-code-block__content" #preBlock>
+<div class="relative rounded-md p-[10px_20px] bg-[var(--code-block-bg)] border border-[var(--code-block-border)] text-[var(--code-block-text)]"
+  [class.px-\[20px\]]="codeBlockStyle === 'pre'">
+  <div class="flex flex-col justify-center p-4 font-mono text-sm overflow-x-auto mr-[20px]" #preBlock>
     <ng-content></ng-content>
   </div>
-  <app-copy-to-clipboard *ngIf="!hideCopy" class="app-code-block__copy" [text]="text"></app-copy-to-clipboard>
+  @if (!hideCopy) {
+    <app-copy-to-clipboard
+      class="absolute top-[10px] right-[20px]"
+      [text]="text"
+      tooltip="Copy to clipboard"
+      [compact]="true">
+    </app-copy-to-clipboard>
+  }
 </div>

@@ -2,21 +2,17 @@ package main
 
 import (
 	"fmt"
+	"log/slog"
 	"testing"
 	"time"
 
-	uuid "github.com/satori/go.uuid"
-	log "github.com/sirupsen/logrus"
+	"github.com/google/uuid"
 	sqlmock "gopkg.in/DATA-DOG/go-sqlmock.v1"
 
 	"github.com/cloudfoundry/stratos/src/jetstream/api"
 	"github.com/cloudfoundry/stratos/src/jetstream/crypto"
 	"github.com/cloudfoundry/stratos/src/jetstream/repository/localusers"
 	. "github.com/smartystreets/goconvey/convey"
-)
-
-const (
-	insertLocalUserSQL = `INSERT INTO local_users (user_guid, password_hash, user_name, user_email, user_scope) VALUES ($1, $2, $3, $4, $5)`
 )
 
 func TestAddLocalUser(t *testing.T) {
@@ -34,6 +30,7 @@ func TestAddLocalUser(t *testing.T) {
 
 		mock.ExpectExec(addLocalUser).WillReturnResult(sqlmock.NewResult(1, 1))
 		guid, err := pp.AddLocalUser(ctx)
+		So(err, ShouldBeNil)
 
 		expectedGUIDRow := sqlmock.NewRows([]string{"user_guid"}).AddRow(guid)
 		mock.ExpectQuery(findUserGUID).WillReturnRows(expectedGUIDRow)
@@ -118,6 +115,7 @@ func TestAddLocalUserDuplicate(t *testing.T) {
 
 		mock.ExpectExec(addLocalUser).WillReturnResult(sqlmock.NewResult(1, 1))
 		guid, err := pp.AddLocalUser(ctx)
+		So(err, ShouldBeNil)
 
 		//Check that the new local user has been added correctly before we try to add a duplicate
 		expectedGUIDRow := sqlmock.NewRows([]string{"user_guid"}).AddRow(guid)
@@ -158,7 +156,7 @@ func TestFindPasswordHash(t *testing.T) {
 
 		localUsersRepo, err := localusers.NewPgsqlLocalUsersRepository(db)
 		if err != nil {
-			log.Errorf("Database error getting repo for Local users: %v", err)
+			slog.Error("database error getting the repo for local users", "error", err)
 		}
 
 		username := "testuser"
@@ -170,18 +168,19 @@ func TestFindPasswordHash(t *testing.T) {
 		generatedPasswordHash, _ := crypto.HashPassword(password)
 
 		//generate a user GUID
-		userGUID := uuid.NewV4().String()
+		userGUID := uuid.New().String()
 
 		mock.ExpectExec(addLocalUser).WillReturnResult(sqlmock.NewResult(1, 1))
 		user := api.LocalUser{UserGUID: userGUID, PasswordHash: generatedPasswordHash, Username: username, Email: email, Scope: scope}
 		err = localUsersRepo.AddLocalUser(user)
 		if err != nil {
-			log.Errorf("Error hashing user password: %v", err)
+			slog.Error("error hashing the user password", "error", err)
 		}
 
 		expectedHashRow := sqlmock.NewRows([]string{"password_hash"}).AddRow(generatedPasswordHash)
 		mock.ExpectQuery(findPasswordHash).WillReturnRows(expectedHashRow)
 		fetchedPasswordHash, err := localUsersRepo.FindPasswordHash(userGUID)
+		So(err, ShouldBeNil)
 
 		Convey("Password hashes should match", func() {
 			So(fetchedPasswordHash, ShouldResemble, generatedPasswordHash)
@@ -215,7 +214,7 @@ func TestUpdateLastLoginTime(t *testing.T) {
 		generatedPasswordHash, _ := crypto.HashPassword(password)
 
 		//generate a user GUID
-		userGUID := uuid.NewV4().String()
+		userGUID := uuid.New().String()
 
 		mock.ExpectExec(addLocalUser).WillReturnResult(sqlmock.NewResult(1, 1))
 

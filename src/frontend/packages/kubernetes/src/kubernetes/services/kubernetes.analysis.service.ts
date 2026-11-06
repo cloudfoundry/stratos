@@ -1,15 +1,14 @@
-import { Injectable } from '@angular/core';
+import { HttpClient } from '@angular/common/http';
+import { Injectable, computed, Injector, inject, runInInjectionContext } from '@angular/core';
+import { toSignal, toObservable } from '@angular/core/rxjs-interop';
 import { ActivatedRoute } from '@angular/router';
-import { Store } from '@ngrx/store';
-import { combineLatest, Observable } from 'rxjs';
-import { filter, first, map, pairwise, startWith, tap } from 'rxjs/operators';
+import { Observable, of, BehaviorSubject } from 'rxjs';
+import { catchError, filter, map, startWith, switchMap, tap } from 'rxjs/operators';
 
-import { SnackBarService } from '../../../../core/src/shared/services/snackbar.service';
-import { ResetPaginationOfType } from '../../../../store/src/actions/pagination.actions';
-import { AppState } from '../../../../store/src/app-state';
-import { ListActionState, RequestInfoState } from '../../../../store/src/reducers/api-request-reducer/types';
-import { kubeEntityCatalog } from '../kubernetes-entity-generator';
-import { GetAnalysisReports } from '../store/analysis.actions';
+import { SessionService } from '../../../../core/src/core/session.service';
+import { TailwindSnackBarService } from '../../../../core/src/shared/services/tailwind-snackbar.service';
+import { KubeScoreReportHelper } from './kubescore-report.helper';
+import { PopeyeReportHelper } from './popeye-report.helper';
 import { AnalysisReport } from '../store/kube.types';
 import { getHelmReleaseDetailsFromGuid } from '../workloads/store/workloads-entity-factory';
 import { KubernetesEndpointService } from './kubernetes-endpoint.service';
@@ -22,46 +21,56 @@ export interface KubernetesAnalysisType {
   descriptionUrl?: string;
 }
 
-@Injectable()
+@Injectable({
+  providedIn: 'root'
+})
 export class KubernetesAnalysisService {
+  kubeEndpointService = inject(KubernetesEndpointService);
+  activatedRoute = inject(ActivatedRoute);
+  private session = inject(SessionService);
+  private http = inject(HttpClient);
+  private snackbarService = inject(TailwindSnackBarService);
+
   kubeGuid: string;
 
   public analyzers$: Observable<KubernetesAnalysisType[]>;
-  public namespaceAnalyzers$: Observable<KubernetesAnalysisType[]>;
+  // strict: assigned inside the constructor's runInInjectionContext callback;
+  // emits null when analysis is disabled (template guards with @if/async).
+  public namespaceAnalyzers$!: Observable<KubernetesAnalysisType[] | null>;
 
   public enabled$: Observable<boolean>;
   public hideAnalysis$: Observable<boolean>;
 
-  private action: GetAnalysisReports;
+  // Wave-3.5: refresh trigger replaces the legacy
+  // `ResetPaginationOfType(action)` ngrx dispatch. Consumers that
+  // re-fetch the report list now subscribe to a stream gated on this
+  // BehaviorSubject's tick.
+  private readonly refreshTrigger$ = new BehaviorSubject<number>(0);
 
-  public static isAnalysisEnabled(store: Store<AppState>): Observable<boolean> {
-    // Is the backend plugin available?
-    const enabled$ = store.select('auth').pipe(
-      map(auth => auth.sessionData.plugins && auth.sessionData.plugins.analysis)
-    );
-    return enabled$.pipe(startWith(false));
+  // Reads the `plugins.analysis` flag from session data via the
+  // signal-native SessionService — no ngrx Store / `store.select('auth')`.
+  public static isAnalysisEnabled(session: SessionService): Observable<boolean> {
+    return of(!!session?.sessionData()?.plugins?.analysis).pipe(startWith(false));
   }
 
-  constructor(
-    public kubeEndpointService: KubernetesEndpointService,
-    public activatedRoute: ActivatedRoute,
-    public store: Store<AppState>,
-    private snackbarService: SnackBarService
-  ) {
+  private injector = inject(Injector);
+
+  constructor() {
+    const kubeEndpointService = this.kubeEndpointService;
+    const activatedRoute = this.activatedRoute;
+
     this.kubeGuid = kubeEndpointService.kubeGuid || getHelmReleaseDetailsFromGuid(activatedRoute.snapshot.params.guid).endpointId;
 
     // Is the backend plugin available?
-    this.enabled$ = KubernetesAnalysisService.isAnalysisEnabled(this.store);
+    this.enabled$ = KubernetesAnalysisService.isAnalysisEnabled(this.session);
     this.hideAnalysis$ = this.enabled$.pipe(map(enabled => !enabled));
 
-    const allEngines = {
+    const allEngines: Record<string, { name: string; id: string; namespaceAware: boolean; descriptionUrl: string }> = {
       popeye:
       {
         name: 'PopEye',
         id: 'popeye',
         namespaceAware: true,
-        // iconUrl: '/core/assets/custom/analysis/popeye.png',
-        // iconWidth: '80',
         descriptionUrl: '/core/assets/custom/analysis/popeye.md'
       },
       'kube-score':
@@ -69,57 +78,62 @@ export class KubernetesAnalysisService {
         name: 'Kube Score',
         id: 'kube-score',
         namespaceAware: true,
-        // iconUrl: '/core/assets/custom/analysis/kubescore.png',
-        // iconWidth: '120',
         descriptionUrl: '/core/assets/custom/analysis/kubescore.md'
       }
-      // {
-      //   name: 'Sonobuoy',
-      //   id: 'sonobuoy',
-      //   namespaceAware: false,
-      //   iconUrl: '/core/assets/custom/analysis/sonobuoy.png',
-      //   iconWidth: '70',
-      //   descriptionUrl: '/core/assets/custom/analysis/sonobuoy.md'
-      // }
     };
 
-    // Determine which analyzers are enabled
-    this.analyzers$ = this.store.select('auth').pipe(
-      filter(auth => !!auth.sessionData['plugin-config']),
-      map(auth => auth.sessionData['plugin-config'].analysisEngines),
-      map(engines => engines.split(',').map(e => allEngines[e.trim()]).filter(e => !!e))
-    );
+    // Determine which analyzers are enabled — read off plugin-config via
+    // the SessionService signal-native shim instead of store.select('auth').
+    const pluginCfg = this.session.sessionData()?.['plugin-config'];
+    const enginesCsv = pluginCfg?.analysisEngines;
+    const enabledAnalyzers: KubernetesAnalysisType[] = enginesCsv
+      ? enginesCsv.split(',').map(e => allEngines[e.trim()]).filter(e => !!e)
+      : [];
+    this.analyzers$ = of(enabledAnalyzers);
 
-    this.namespaceAnalyzers$ = combineLatest(
-      this.analyzers$,
-      this.enabled$
-    ).pipe(
-      map(([a, enabled]) => {
+    // Convert to signals for computed within injection context
+    runInInjectionContext(this.injector, () => {
+      const analyzersSignal = toSignal(
+        this.analyzers$,
+        { initialValue: [] as KubernetesAnalysisType[] }
+      );
+
+      const enabledSignal = toSignal(
+        this.enabled$,
+        { initialValue: false }
+      );
+
+      // Compute namespace analyzers
+      const namespaceAnalyzersComputed = computed(() => {
+        const analyzers = analyzersSignal();
+        const enabled = enabledSignal();
         if (!enabled) {
           return null;
         }
-        return a.filter(v => v.namespaceAware);
-      })
+        return analyzers.filter(v => v.namespaceAware);
+      });
+
+      this.namespaceAnalyzers$ = toObservable(namespaceAnalyzersComputed);
+    });
+  }
+
+  public delete(endpointID: string, item: { id: string }): Observable<any> {
+    const url = `/pp/v1/analysis/reports`;
+    return this.http.delete(url, { body: [item.id] }).pipe(
+      tap(() => this.refresh()),
     );
-
-    this.action = kubeEntityCatalog.analysisReport.actions.getMultiple(this.kubeGuid);
   }
 
-  public delete(endpointID: string, item: { id: string, }) {
-    return kubeEntityCatalog.analysisReport.api.delete(endpointID, item.id);
-  }
-
-  public refresh() {
-    this.store.dispatch(new ResetPaginationOfType(this.action));
+  // Bump the refresh tick — consumers that watch the refresh stream
+  // (e.g. report-list pages) will re-issue their fetch. Replaces the
+  // legacy `store.dispatch(new ResetPaginationOfType(action))` flow.
+  public refresh(): void {
+    this.refreshTrigger$.next(this.refreshTrigger$.value + 1);
   }
 
   public run(id: string, endpointID: string, namespace?: string, app?: string): Observable<any> {
-    const obs$ = kubeEntityCatalog.analysisReport.api.run<RequestInfoState>(endpointID, id, namespace, app).pipe(
-      pairwise(),
-      filter(([oldE, newE]) => oldE.creating && !newE.creating),
-      map(([, newE]) => newE),
-      first()
-    );
+    const url = `/pp/v1/analysis/run/${id}/${endpointID}`;
+    const obs$ = this.http.post<AnalysisReport>(url, { namespace, app });
     obs$.subscribe(() => {
       const type = id.charAt(0).toUpperCase() + id.substring(1);
       let msg;
@@ -136,31 +150,50 @@ export class KubernetesAnalysisService {
     return obs$;
   }
 
-  public getByID(endpoint: string, id: string, refresh = false): Observable<AnalysisReport> {
-    if (refresh) {
-      kubeEntityCatalog.analysisReport.api.getById<RequestInfoState>(endpoint, id);
-    }
-
-    const entityService = kubeEntityCatalog.analysisReport.store.getById.getEntityService(endpoint, id);
-    return entityService.waitForEntity$.pipe(
-      map(e => e.entity),
-      tap(entity => {
-        if (!refresh && !entity.report) {
-          kubeEntityCatalog.analysisReport.api.getById<RequestInfoState>(endpoint, id);
-          refresh = true;
-        }
+  public getByID(endpoint: string, id: string, _refresh = false): Observable<AnalysisReport> {
+    // Always do a network fetch — there's no entity cache to wait for.
+    // The detail view requires the heavy `report` payload, which is only
+    // returned on this dedicated detail endpoint (the list endpoint
+    // returns headers only).
+    const url = `/pp/v1/analysis/reports/${endpoint}/${id}`;
+    return this.http.get<AnalysisReport>(url).pipe(
+      map(report => {
+        this.processReport(report);
+        return report;
       }),
-      filter(entity => !!entity.report)
+      filter(entity => !!entity?.report),
     );
   }
 
-  public getByPath(endpointID: string, path: string, refresh = false): Observable<AnalysisReport[]> {
-    if (refresh) {
-      kubeEntityCatalog.analysisReport.api.getByPath<ListActionState>(endpointID, path);
+  public getByPath(endpointID: string, path: string, _refresh = false): Observable<AnalysisReport[]> {
+    const url = `/pp/v1/analysis/completed/${endpointID}/${path}`;
+    // Re-fire the request on each refresh tick. switchMap cancels any
+    // in-flight request, mirroring the legacy ResetPaginationOfType
+    // semantics.
+    return this.refreshTrigger$.pipe(
+      switchMap(() => this.http.get<AnalysisReport[]>(url).pipe(
+        catchError(() => of([] as AnalysisReport[])),
+      )),
+      filter(entities => !!entities),
+    );
+  }
+
+  private processReport(report: AnalysisReport): void {
+    const path = (report as unknown as { path?: string }).path;
+    if (!path || path.split('/').length !== 2) {
+      return;
     }
-    return kubeEntityCatalog.analysisReport.store.getByPath.getPaginationService(endpointID, path).entities$.pipe(
-      filter(entities => !!entities)
-    );
+    switch (report.format) {
+      case 'popeye': {
+        new PopeyeReportHelper(report as unknown as Record<string, unknown>).map();
+        break;
+      }
+      case 'kubescore': {
+        new KubeScoreReportHelper(report as unknown as Record<string, unknown>).map();
+        break;
+      }
+      default:
+        break;
+    }
   }
-
 }

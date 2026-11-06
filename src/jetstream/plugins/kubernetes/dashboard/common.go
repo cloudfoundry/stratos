@@ -4,11 +4,11 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
+	"log/slog"
 	"time"
 
 	"github.com/cloudfoundry/stratos/src/jetstream/api"
-	"github.com/labstack/echo/v4"
-	log "github.com/sirupsen/logrus"
+	"github.com/labstack/echo/v5"
 
 	v1 "k8s.io/api/core/v1"
 )
@@ -49,14 +49,14 @@ type StatusResponse struct {
 
 // Determine if the specified Kube endpoint has the dashboard installed and ready
 func getKubeDashboardPod(p api.PortalProxy, cnsiGUID, userGUID string, labelSelector string) (*v1.Pod, error) {
-	log.Debug("kubeDashboardStatus request")
+	slog.Debug("fetching the Kubernetes dashboard pod", "endpoint", cnsiGUID, "user", userGUID, "labelSelector", labelSelector)
 
 	response, err := p.DoProxySingleRequest(cnsiGUID, userGUID, "GET", "/api/v1/pods?labelSelector="+labelSelector, nil, nil)
 	if err != nil || response.StatusCode != 200 {
 		return nil, errors.New("Could not fetch pod list")
 	}
 
-	ok, list, err := tryDecodePodList(response.Response)
+	ok, list, _ := tryDecodePodList(response.Response)
 	if !ok {
 		return nil, errors.New("Kube dashboard not installed - could not decode pod list")
 	}
@@ -76,7 +76,7 @@ func getKubeDashboardPod(p api.PortalProxy, cnsiGUID, userGUID string, labelSele
 
 // Get the service for the kubernetes dashboard
 func getKubeDashboardService(p api.PortalProxy, cnsiGUID, userGUID string, labelSelector string) (ServiceInfo, error) {
-	log.Debug("getKubeDashboardService request")
+	slog.Debug("fetching the Kubernetes dashboard service", "endpoint", cnsiGUID, "user", userGUID, "labelSelector", labelSelector)
 
 	info := ServiceInfo{}
 	response, err := p.DoProxySingleRequest(cnsiGUID, userGUID, "GET", "/api/v1/services?labelSelector="+labelSelector, nil, nil)
@@ -84,7 +84,7 @@ func getKubeDashboardService(p api.PortalProxy, cnsiGUID, userGUID string, label
 		return info, errors.New("Could not fetch service list")
 	}
 
-	ok, list, err := tryDecodeServiceList(response.Response)
+	ok, list, _ := tryDecodeServiceList(response.Response)
 	if !ok {
 		return info, errors.New("Kube dashboard not installed - could not decode service list")
 	}
@@ -126,14 +126,14 @@ func getKubeDashboardServiceInfo(p api.PortalProxy, endpointGUID, userGUID strin
 
 // Get the service account for the kubernetes dashboard
 func getKubeDashboardServiceAccount(p api.PortalProxy, cnsiGUID, userGUID string, labelSelector string) (*v1.ServiceAccount, error) {
-	log.Debug("getKubeDashboardService request")
+	slog.Debug("fetching the Kubernetes dashboard service account", "endpoint", cnsiGUID, "user", userGUID, "labelSelector", labelSelector)
 
 	response, err := p.DoProxySingleRequest(cnsiGUID, userGUID, "GET", "/api/v1/serviceaccounts?labelSelector="+labelSelector, nil, nil)
 	if err != nil || response.StatusCode != 200 {
 		return nil, errors.New("Could not fetch service account list")
 	}
 
-	ok, list, err := tryDecodeServiceAccountList(response.Response)
+	ok, list, _ := tryDecodeServiceAccountList(response.Response)
 	if !ok {
 		return nil, errors.New("Could not find service account for Kubernetes dashboard")
 	}
@@ -153,7 +153,7 @@ func getKubeDashboardServiceAccount(p api.PortalProxy, cnsiGUID, userGUID string
 
 // Get the service account for the kubernetes dashboard
 func getKubeDashboardSecretToken(p api.PortalProxy, cnsiGUID, userGUID string, sa *v1.ServiceAccount) (string, error) {
-	log.Debug("getKubeDashboardSecretToken request")
+	slog.Debug("fetching the Kubernetes dashboard service account token", "endpoint", cnsiGUID, "user", userGUID, "serviceAccount", sa.Name)
 
 	namespace := sa.Namespace
 
@@ -168,7 +168,7 @@ func getKubeDashboardSecretToken(p api.PortalProxy, cnsiGUID, userGUID string, s
 		return "", errors.New("Could not find secrets for Kubernetes dashboard")
 	}
 
-	ok, secrets, err := tryDecodeSecrets(response.Response)
+	ok, secrets, _ := tryDecodeSecrets(response.Response)
 	if !ok {
 		return "", errors.New("Could not find secrets for Kubernetes dashboard")
 	}
@@ -198,9 +198,8 @@ func hasAnnotation(annotations map[string]string, key, value string) bool {
 
 func tryDecodePodList(data []byte) (bool, v1.PodList, error) {
 	var pods v1.PodList
-	var err error
 
-	err = json.Unmarshal(data, &pods)
+	err := json.Unmarshal(data, &pods)
 	if err != nil {
 		return false, pods, err
 	}
@@ -209,9 +208,8 @@ func tryDecodePodList(data []byte) (bool, v1.PodList, error) {
 
 func tryDecodeServiceList(data []byte) (bool, v1.ServiceList, error) {
 	var svcs v1.ServiceList
-	var err error
 
-	err = json.Unmarshal(data, &svcs)
+	err := json.Unmarshal(data, &svcs)
 	if err != nil {
 		return false, svcs, err
 	}
@@ -220,9 +218,8 @@ func tryDecodeServiceList(data []byte) (bool, v1.ServiceList, error) {
 
 func tryDecodeServiceAccountList(data []byte) (bool, v1.ServiceAccountList, error) {
 	var svcAccounts v1.ServiceAccountList
-	var err error
 
-	err = json.Unmarshal(data, &svcAccounts)
+	err := json.Unmarshal(data, &svcAccounts)
 	if err != nil {
 		return false, svcAccounts, err
 	}
@@ -231,9 +228,8 @@ func tryDecodeServiceAccountList(data []byte) (bool, v1.ServiceAccountList, erro
 
 func tryDecodeSecrets(data []byte) (bool, v1.SecretList, error) {
 	var secrets v1.SecretList
-	var err error
 
-	err = json.Unmarshal(data, &secrets)
+	err := json.Unmarshal(data, &secrets)
 	if err != nil {
 		return false, secrets, err
 	}
@@ -242,8 +238,8 @@ func tryDecodeSecrets(data []byte) (bool, v1.SecretList, error) {
 
 // Send an error page that will get loaded into the IFRAME and the onload handler will detect
 // it and show a Stratos error message
-func sendErrorPage(c echo.Context, msg string) error {
+func sendErrorPage(c *echo.Context, msg string) error {
 	html := fmt.Sprintf("<html><body><stratos-error>%s</stratos-error></body></html>", msg)
-	c.Response().Write([]byte(html))
-	return nil
+	_, err := c.Response().Write([]byte(html))
+	return err
 }

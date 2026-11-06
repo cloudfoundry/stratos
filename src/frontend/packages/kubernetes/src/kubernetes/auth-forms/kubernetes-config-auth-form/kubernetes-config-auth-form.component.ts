@@ -1,23 +1,31 @@
-import { Component, Input } from '@angular/core';
-import { UntypedFormGroup } from '@angular/forms';
+import { ChangeDetectionStrategy, Component, Input} from '@angular/core';
+import { FormControl, FormGroup, ReactiveFormsModule } from '@angular/forms';
 
+import { FileInputComponent } from '../../../../../core/src/shared/components/file-input/file-input.component';
 import { EndpointAuthValues, IEndpointAuthComponent } from '../../../../../store/src/extension-types';
 
-
+interface ConfigAuthForm {
+  kubeconfig: FormControl<string>;
+}
 
 @Component({
+  changeDetection: ChangeDetectionStrategy.OnPush,
   selector: 'app-kubernetes-config-auth-form',
   templateUrl: './kubernetes-config-auth-form.component.html',
-  styleUrls: ['./kubernetes-config-auth-form.component.scss']
+  standalone: true,
+  imports: [
+    ReactiveFormsModule,
+    FileInputComponent,
+  ]
 })
 export class KubernetesConfigAuthFormComponent implements IEndpointAuthComponent {
-  @Input() formGroup: UntypedFormGroup;
+  @Input() formGroup!: FormGroup<ConfigAuthForm>; // strict: required @Input (IAuthForm contract), assigned by the auth-form host
 
   public getValues(values: EndpointAuthValues): EndpointAuthValues {
-    return {};
+    return { kubeconfig: (values?.kubeconfig as string) ?? '' };
   }
 
   public getBody(): string {
-    return this.formGroup.value.authValues.kubeconfig;
+    return '';
   }
 }

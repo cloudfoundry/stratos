@@ -1,4 +1,6 @@
-import { ComponentFixture, TestBed, waitForAsync } from '@angular/core/testing';
+import { ComponentFixture, TestBed } from '@angular/core/testing';
+import { provideZonelessChangeDetection } from '@angular/core';
+import { describe, it, expect, beforeEach, afterEach, beforeAll, afterAll, vi } from 'vitest';
 
 import { TileGridComponent } from './tile-grid.component';
 
@@ -6,12 +8,13 @@ describe('TileGridComponent', () => {
   let component: TileGridComponent;
   let fixture: ComponentFixture<TileGridComponent>;
 
-  beforeEach(waitForAsync(() => {
+  beforeEach(() => {
     TestBed.configureTestingModule({
-      declarations: [ TileGridComponent ]
-    })
-    .compileComponents();
-  }));
+      providers: [provideZonelessChangeDetection()],
+      imports: [ TileGridComponent ]
+    });
+    TestBed.compileComponents();
+  });
 
   beforeEach(() => {
     fixture = TestBed.createComponent(TileGridComponent);

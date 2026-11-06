@@ -65,4 +65,11 @@ export interface IChartData {
       value: number
     }
   ];
+  chartJsData: {
+    labels: string[];
+    datasets: [{
+      data: number[];
+      backgroundColor: string[];
+    }];
+  };
 }

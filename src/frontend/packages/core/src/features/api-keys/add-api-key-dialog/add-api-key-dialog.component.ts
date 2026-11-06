@@ -1,62 +1,72 @@
-import { Component, OnDestroy } from '@angular/core';
-import { UntypedFormBuilder, UntypedFormGroup, Validators } from '@angular/forms';
-import { MatDialogRef } from '@angular/material/dialog';
-import { entityCatalog, stratosEntityCatalog, NormalizedResponse, ApiKey, RequestInfoState } from '@stratosui/store';
-import { BehaviorSubject, Subscription } from 'rxjs';
-import { filter, first, map, pairwise, tap } from 'rxjs/operators';
+import {
+  ChangeDetectionStrategy,
+  Component,
+  inject,
+  signal,
+} from '@angular/core';
 
-import { safeUnsubscribe } from '../../../core/utils.service';
+import {
+  FormBuilder,
+  FormControl,
+  FormGroup,
+  ReactiveFormsModule,
+  Validators,
+} from '@angular/forms';
+import { ApiKey } from '@stratosui/store';
+
+import { AppInputDirective, CustomFormFieldComponent } from '../../../shared/components/custom-form-field/custom-form-field.component';
+import { DialogErrorComponent } from '../../../shared/components/dialog-error/dialog-error.component';
+import { AppProgressBarComponent } from '../../../shared/components/progress-bar/app-progress-bar.component';
+import { TailwindDialogRef } from '../../../shared/services/tailwind-dialog.service';
+import { ApiKeysDataService } from '../api-keys-data.service';
+
+interface AddApiKeyForm {
+  comment: FormControl<string>;
+}
 
 @Component({
   selector: 'app-add-api-key-dialog',
   templateUrl: './add-api-key-dialog.component.html',
-  styleUrls: ['./add-api-key-dialog.component.scss']
+  styleUrls: ['./add-api-key-dialog.component.scss'],
+  standalone: true,
+  imports: [
+    ReactiveFormsModule,
+    AppInputDirective,
+    CustomFormFieldComponent,
+    AppProgressBarComponent,
+    DialogErrorComponent,
+  ],
+  changeDetection: ChangeDetectionStrategy.OnPush,
 })
-export class AddApiKeyDialogComponent implements OnDestroy {
+export class AddApiKeyDialogComponent {
+  private fb = inject(FormBuilder);
+  private dataService = inject(ApiKeysDataService);
+  dialogRef = inject<TailwindDialogRef<ApiKey>>('TailwindDialogRef' as any);
 
-  private hasErrored = new BehaviorSubject(null);
-  public hasErrored$ = this.hasErrored.asObservable();
-  private isBusy = new BehaviorSubject(false);
-  public isBusy$ = this.isBusy.asObservable();
+  public hasErrored = signal<string | null>(null);
+  public isBusy = signal<boolean>(false);
 
-  private sub: Subscription;
+  public formGroup: FormGroup<AddApiKeyForm>;
 
-  public formGroup: UntypedFormGroup;
-
-  constructor(
-    private fb: UntypedFormBuilder,
-    public dialogRef: MatDialogRef<ApiKey>,
-  ) {
-    this.formGroup = this.fb.group({
-      comment: ['', Validators.required],
+  constructor() {
+    this.formGroup = this.fb.group<AddApiKeyForm>({
+      comment: new FormControl('', {
+        nonNullable: true,
+        validators: [Validators.required],
+      }),
     });
   }
 
-  ngOnDestroy(): void {
-    safeUnsubscribe(this.sub);
+  async submit(): Promise<void> {
+    this.isBusy.set(true);
+    this.hasErrored.set(null);
+    try {
+      const created = await this.dataService.create(this.formGroup.controls.comment.value);
+      this.dialogRef.close(created);
+    } catch (err: unknown) {
+      const message = err instanceof Error ? err.message : String(err);
+      this.hasErrored.set(`Failed to create key: ${message}`);
+      this.isBusy.set(false);
+    }
   }
-
-  submit() {
-    this.sub = stratosEntityCatalog.apiKey.api.create<RequestInfoState>(this.formGroup.controls.comment.value).pipe(
-      tap(() => {
-        this.isBusy.next(true);
-        this.hasErrored.next(null);
-      }),
-      pairwise(),
-      filter(([oldR, newR]) => oldR.creating && !newR.creating),
-      map(([, newR]) => newR),
-      tap(state => {
-        if (state.error) {
-          this.hasErrored.next(`Failed to create key: ${state.message}`);
-          this.isBusy.next(false);
-        } else {
-          const response: NormalizedResponse<ApiKey> = state.response;
-          const entityKey = entityCatalog.getEntityKey(stratosEntityCatalog.apiKey.actions.create(''));
-          this.dialogRef.close(response.entities[entityKey][response.result[0]]);
-        }
-      }),
-      first()
-    ).subscribe();
-  }
-
 }

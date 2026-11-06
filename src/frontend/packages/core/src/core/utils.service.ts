@@ -2,6 +2,8 @@ import { Injectable } from '@angular/core';
 import { ActivatedRoute } from '@angular/router';
 import { Subscription } from 'rxjs';
 
+import { isUnlimited } from './cf-quota.types';
+
 export function getIdFromRoute(activatedRoute: ActivatedRoute, id: string) {
   if (activatedRoute.snapshot.params[id]) {
     return activatedRoute.snapshot.params[id];
@@ -11,44 +13,31 @@ export function getIdFromRoute(activatedRoute: ActivatedRoute, id: string) {
   return null;
 }
 
+// Simplified URL validation expression compatible with HTML5 pattern attribute
+// Validates: http(s)://hostname[:port][/path]
+// Excludes common private IP ranges for security
 export const urlValidationExpression =
-  '^' +
-  // protocol identifier
-  'http(s)?://' +
-  // user:pass authentication
-  '(?:\\S+(?::\\S*)?@)?' +
-  '(?:' +
-  // IP address exclusion
-  // private & local networks
+  '^https?:\\/\\/' + // protocol
+  '(' +
+  // IP address with exclusions for private networks
   '(?!(?:10|127)(?:\\.\\d{1,3}){3})' +
   '(?!(?:169\\.254|192\\.168)(?:\\.\\d{1,3}){2})' +
-  '(?!172\\.(?:1[6-9]|2\\d|3[0-1])(?:\\.\\d{1,3}){2})' +
-  // IP address dotted notation octets
-  // excludes loopback network 0.0.0.0
-  // excludes reserved space >= 224.0.0.0
-  // excludes network & broadcast addresses
-  // (first & last IP address of each class)
+  '(?!172\\.(?:1[6-9]|2[0-9]|3[0-1])(?:\\.\\d{1,3}){2})' +
   '(?:[1-9]\\d?|1\\d\\d|2[01]\\d|22[0-3])' +
   '(?:\\.(?:1?\\d{1,2}|2[0-4]\\d|25[0-5])){2}' +
   '(?:\\.(?:[1-9]\\d?|1\\d\\d|2[0-4]\\d|25[0-4]))' +
   '|' +
-  // host name
-  '(?:(?:[a-z\\u00a1-\\uffff0-9]-*)*[a-z\\u00a1-\\uffff0-9]+)' +
-  // domain name
-  '(?:\\.(?:[a-z\\u00a1-\\uffff0-9]-*)*[a-z\\u00a1-\\uffff0-9]+)*' +
-  // TLD identifier
-  '(?:\\.(?:[a-z\\u00a1-\\uffff]{2,}))' +
-  // TLD may end with dot
-  '\\.?' +
+  // hostname (domain name)
+  '(?:[a-zA-Z0-9](?:[a-zA-Z0-9-]{0,61}[a-zA-Z0-9])?)' +
+  '(?:\\.[a-zA-Z0-9](?:[a-zA-Z0-9-]{0,61}[a-zA-Z0-9])?)*' +
   ')' +
-  // port number
-  '(?::\\d{2,5})?' +
-  // resource path
-  '(?:[/?#]\\S*)?' +
-  '$'
-  ;
+  '(?::\\d{2,5})?' + // optional port
+  '(?:\\/[^\\s]*)?' + // optional path
+  '$';
 
-@Injectable()
+@Injectable({
+  providedIn: 'root'
+})
 export class UtilsService {
 
   private units = ['bytes', 'kB', 'MB', 'GB', 'TB', 'PB'];
@@ -63,7 +52,12 @@ export class UtilsService {
 
   constructor() { }
 
-  precisionIfUseful(size: number, precision: number = 1) {
+  precisionIfUseful(size: number, precision: number = 1): number {
+    // Type guard: ensure size is a valid number
+    if (size == null || typeof size !== 'number' || !isFinite(size)) {
+      return 0;
+    }
+
     const floored = Math.floor(size);
     const fixed = Number(size.toFixed(precision));
     if (floored === fixed) {
@@ -72,13 +66,26 @@ export class UtilsService {
     return fixed;
   }
 
-  mbToHumanSize(mb: number): string {
+  mbToHumanSize(mb: number | null | undefined): string {
+    // Handle null/undefined
     if (mb == null) {
       return '';
     }
-    if (mb === -1) {
+
+    // Type guard: ensure mb is a valid number
+    if (typeof mb !== 'number' || isNaN(mb)) {
+      return '';
+    }
+
+    if (isUnlimited(mb)) {
       return '∞';
     }
+
+    // Ensure non-negative for size calculations
+    if (mb < 0) {
+      return '';
+    }
+
     if (mb >= 1048576) {
       return this.precisionIfUseful(mb / 1048576) + ' TB';
     }
@@ -89,35 +96,55 @@ export class UtilsService {
   }
 
   bytesToHumanSize(value: string): string {
-    const bytes = parseInt(value, 10);
-    let retBytes = '';
-    if (!bytes && bytes !== 0) {
+    // Handle null/undefined/empty string
+    if (value == null || value === '') {
       return '';
     }
-    if (bytes === -1) {
-      retBytes = '∞';
+
+    const bytes = parseInt(value, 10);
+
+    // Type guard: ensure parsing succeeded
+    if (isNaN(bytes)) {
+      return '';
     }
+
+    if (isUnlimited(bytes)) {
+      return '∞';
+    }
+
+    // Ensure non-negative for size calculations
+    if (bytes < 0) {
+      return '';
+    }
+
+    // Calculate appropriate unit
     if (bytes >= 1099511627776) {
-      retBytes = this.precisionIfUseful(bytes / 1099511627776) + ' TB';
+      return this.precisionIfUseful(bytes / 1099511627776) + ' TB';
     } else if (bytes >= 1073741824) {
-      retBytes = this.precisionIfUseful(bytes / 1073741824) + ' GB';
+      return this.precisionIfUseful(bytes / 1073741824) + ' GB';
     } else if (bytes >= 1048576) {
-      retBytes = this.precisionIfUseful(bytes / 1048576) + ' MB';
+      return this.precisionIfUseful(bytes / 1048576) + ' MB';
     } else if (bytes >= 1024) {
-      retBytes = this.precisionIfUseful(bytes / 1024) + ' kB';
-    } else if (bytes >= 0) {
-      retBytes = this.precisionIfUseful(bytes) + ' B';
+      return this.precisionIfUseful(bytes / 1024) + ' kB';
+    } else {
+      return this.precisionIfUseful(bytes) + ' B';
     }
-    return retBytes;
   }
 
-  usageBytes(usage, usedPrecision?, totalPrecision?): string {
+  usageBytes(usage: number[], usedPrecision?: number, totalPrecision?: number): string {
+    // Type guard: ensure usage is an array with at least 2 elements
+    if (!Array.isArray(usage) || usage.length < 2) {
+      return '-';
+    }
+
     const used = usage[0];
     const total = usage[1];
 
-    if (isNaN(parseFloat(used)) || !isFinite(used) ||
-      isNaN(parseFloat(total)) || !isFinite(total) ||
-      total === 0) {
+    // Type guard: ensure both values are valid numbers
+    if (used == null || total == null ||
+        typeof used !== 'number' || typeof total !== 'number' ||
+        !isFinite(used) || !isFinite(total) ||
+        total === 0) {
       return '-';
     }
 
@@ -127,7 +154,7 @@ export class UtilsService {
 
     // Units
     const value = this.getNumber(total);
-    let usedNumber = null;
+    let usedNumber: number | null = null;
 
     // Values to display
     const totalDisplay = this.getReducedValue(total, value).toFixed(totalPrecision);
@@ -149,7 +176,7 @@ export class UtilsService {
    * @param uptime in seconds
    * @returns formatted uptime string
    */
-  formatUptime(uptime): string {
+  formatUptime(uptime: number): string {
     if (uptime === undefined || uptime === null || isNaN(uptime)) {
       return '-';
     }
@@ -173,9 +200,11 @@ export class UtilsService {
   }
 
   percent(value: number, decimals: number = 2): string {
-    if (!value && value !== 0) {
+    // Type guard: ensure value is a valid number
+    if (value == null || typeof value !== 'number' || isNaN(value)) {
       return '';
     }
+
     const val = (value * 100).toFixed(decimals);
     return val + '%';
   }
@@ -184,9 +213,9 @@ export class UtilsService {
     return (value / Math.pow(1024, Math.floor(multiplier)));
   }
 
-  private getDefaultPrecision(precision: number): number {
+  private getDefaultPrecision(precision?: number): number {
     if (precision === undefined || precision === null) {
-      precision = 0;
+      return 0;
     }
     return precision;
   }
@@ -195,14 +224,14 @@ export class UtilsService {
     return Math.floor(Math.log(value) / Math.log(1024));
   }
 
-  private getFormattedTime(isPlural, value, unit): string {
+  private getFormattedTime(isPlural: boolean, value: string | number, unit: string): string {
     // i18n
     // const formatString = isPlural ? 'dateTime.plural.format' : 'dateTime.singular.format';
     // return $translate.instant(formatString, { value: value, unit: unit });
     return value + unit;
   }
 
-  private formatPart(count, single, plural): string {
+  private formatPart(count: number, single: string, plural: string): string {
     if (count === 0) {
       return '';
     } else if (count === 1) {
@@ -228,21 +257,7 @@ export function pathGet(path: string, object: any): any {
   return (index && index === length) ? object : undefined;
 }
 
-export function pathSet(path: string, object: any, value: any) {
-  const params = path.split('.');
-
-  let index = 0;
-  const length = params.length - 1;
-
-  while (object !== null && object !== undefined && index < length) {
-    object = object[params[index++]];
-  }
-  if ((index && index === length)) {
-    object[params[index++]] = value;
-  }
-}
-
-export function safeStringToObj<T = object>(value: string): T {
+export function safeStringToObj<T = object>(value: string): T | null {
   try {
     if (value) {
       const jsonObj = JSON.parse(value);
@@ -252,7 +267,7 @@ export function safeStringToObj<T = object>(value: string): T {
       }
       return jsonObj;
     }
-  } catch (e) {
+  } catch (_e) {
     return null;
   }
   return null;
@@ -267,7 +282,7 @@ export const safeUnsubscribe = (...subs: Subscription[]) => {
 };
 
 export const truthyIncludingZero = (obj: any): boolean => !!obj || obj === 0;
-export const truthyIncludingZeroString = (obj: any): string => truthyIncludingZero(obj) ? obj.toString() : null;
+export const truthyIncludingZeroString = (obj: any): string | null => truthyIncludingZero(obj) ? obj.toString() : null;
 
 /**
  * Real basic, shallow check

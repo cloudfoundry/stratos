@@ -2,11 +2,11 @@ package helm
 
 import (
 	"fmt"
+	"log/slog"
 
 	"reflect"
 	"strings"
 
-	log "github.com/sirupsen/logrus"
 	appsv1 "k8s.io/api/apps/v1"
 	appsv1beta1 "k8s.io/api/apps/v1beta1"
 	appsv1beta2 "k8s.io/api/apps/v1beta2"
@@ -59,7 +59,7 @@ func (r *HelmReleaseGraph) AddLink(source, target string) {
 		Target: target,
 	}
 	r.Links[link.ID] = link
-	log.Debugf("Adding link %s -> %s", source, target)
+	slog.Debug("adding a link to the release graph", "source", source, "target", target)
 }
 
 // ParseManifest
@@ -124,7 +124,7 @@ func (r *HelmReleaseGraph) ParseManifest(release *HelmRelease) {
 			target := getShortResourceId(item.Kind, o.Name)
 			r.ParseClusterRoleBinding(target, o)
 		default:
-			log.Debugf("Graph: Unknown type: %s", reflect.TypeOf(o))
+			slog.Debug("unknown resource type in the release graph", "type", reflect.TypeOf(o).String(), "kind", item.Kind)
 		}
 
 		// Add or replace the node in the map
@@ -172,14 +172,14 @@ func (r *HelmReleaseGraph) ProcessPod(id string, res KubeResource, spec v1.PodSp
 	// Look through volumes
 	// name and: PersistentVolumeClaim.ClaimName or Secret.SecretName
 	for _, volume := range spec.Volumes {
-		if volume.VolumeSource.PersistentVolumeClaim != nil {
-			ref := fmt.Sprintf("PersistentVolumeClaim-%s", volume.VolumeSource.PersistentVolumeClaim.ClaimName)
+		if volume.PersistentVolumeClaim != nil {
+			ref := fmt.Sprintf("PersistentVolumeClaim-%s", volume.PersistentVolumeClaim.ClaimName)
 			r.AddLink(id, ref)
-		} else if volume.VolumeSource.Secret != nil {
-			ref := fmt.Sprintf("Secret-%s", volume.VolumeSource.Secret.SecretName)
+		} else if volume.Secret != nil {
+			ref := fmt.Sprintf("Secret-%s", volume.Secret.SecretName)
 			r.AddLink(id, ref)
-		} else if volume.VolumeSource.ConfigMap != nil {
-			ref := fmt.Sprintf("ConfigMap-%s", volume.VolumeSource.ConfigMap.Name)
+		} else if volume.ConfigMap != nil {
+			ref := fmt.Sprintf("ConfigMap-%s", volume.ConfigMap.Name)
 			r.AddLink(id, ref)
 		}
 	}

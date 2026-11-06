@@ -1,4 +1,6 @@
-import { ComponentFixture, TestBed, waitForAsync } from '@angular/core/testing';
+import { ComponentFixture, TestBed } from '@angular/core/testing';
+import { provideZonelessChangeDetection } from '@angular/core';
+import { describe, it, expect, beforeEach, afterEach, beforeAll, afterAll, vi } from 'vitest';
 
 import { CoreModule } from '../../../core/core.module';
 import { AppChipsComponent } from './chips.component';
@@ -15,15 +17,16 @@ describe('AppChipsComponent', () => {
     { value: 'value5', custom: 'custom5' }
   ];
 
-  beforeEach(waitForAsync(() => {
+  beforeEach(() => {
     TestBed.configureTestingModule({
-      declarations: [AppChipsComponent],
+      providers: [provideZonelessChangeDetection()],
       imports: [
-        CoreModule
+        AppChipsComponent, // Now standalone
+        CoreModule,
       ]
-    })
-      .compileComponents();
-  }));
+    });
+      TestBed.compileComponents();
+  });
 
   beforeEach(() => {
     fixture = TestBed.createComponent(AppChipsComponent);
@@ -45,6 +48,7 @@ describe('AppChipsComponent', () => {
   it('should show number of hidden items when compacted', () => {
     component.toggleLimit(); // show less
     component.toggleLimit(); // +2
+    // Method calls markForCheck(), but we need detectChanges in zoneless mode
     fixture.detectChanges();
 
     expect(element.textContent).toContain('+2');
@@ -52,6 +56,7 @@ describe('AppChipsComponent', () => {
 
   it('should show "show less" when expanded', () => {
     component.toggleLimit();
+    // Method calls markForCheck(), but we need detectChanges in zoneless mode
     fixture.detectChanges();
 
     expect(element.textContent).toContain('Show less');
@@ -59,6 +64,7 @@ describe('AppChipsComponent', () => {
 
   it('should display custom object property', () => {
     component.displayProperty = 'custom';
+    // Setter calls markForCheck(), but we need detectChanges in zoneless mode
     fixture.detectChanges();
 
     expect(element.textContent).toContain('custom1');

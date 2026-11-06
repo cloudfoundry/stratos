@@ -1,4 +1,6 @@
-import { ComponentFixture, TestBed, waitForAsync } from '@angular/core/testing';
+import { ComponentFixture, TestBed } from '@angular/core/testing';
+import { provideZonelessChangeDetection } from '@angular/core';
+import { describe, it, expect, beforeEach, afterEach, beforeAll, afterAll, vi } from 'vitest';
 import { ActivatedRoute } from '@angular/router';
 
 import { TabNavService } from '../../../../core/src/tab-nav.service';
@@ -9,10 +11,9 @@ describe('KubernetesTabBaseComponent', () => {
   let component: KubernetesTabBaseComponent;
   let fixture: ComponentFixture<KubernetesTabBaseComponent>;
 
-  beforeEach(waitForAsync(() => {
-    TestBed.configureTestingModule({
-      declarations: [KubernetesTabBaseComponent],
-      imports: KubernetesBaseTestModules,
+  beforeEach(async () => {
+    await TestBed.configureTestingModule({
+      imports: [KubernetesTabBaseComponent, ...KubernetesBaseTestModules],
       providers: [
         TabNavService,
         {
@@ -27,9 +28,8 @@ describe('KubernetesTabBaseComponent', () => {
           }
         }
       ]
-    })
-      .compileComponents();
-  }));
+    }).compileComponents();
+  });
 
   beforeEach(() => {
     fixture = TestBed.createComponent(KubernetesTabBaseComponent);

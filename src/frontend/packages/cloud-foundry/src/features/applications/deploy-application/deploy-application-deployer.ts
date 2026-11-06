@@ -1,24 +1,55 @@
-import { Store } from '@ngrx/store';
-import { BehaviorSubject, of as observableOf, Subject, Subscription } from 'rxjs';
+import { Injector, signal, WritableSignal } from '@angular/core';
+import { toObservable } from '@angular/core/rxjs-interop';
+import { Observable, Subject, Subscription } from 'rxjs';
 import websocketConnect from 'rxjs-websockets';
-import { catchError, combineLatest, filter, first, map, mergeMap, share, switchMap, tap } from 'rxjs/operators';
+import { take, catchError, filter, map, share, switchMap, tap } from 'rxjs/operators';
 
-import { CFAppState } from '../../../../../cloud-foundry/src/cf-app-state';
-import { organizationEntityType, spaceEntityType } from '../../../../../cloud-foundry/src/cf-entity-types';
-import { selectCfEntity } from '../../../../../cloud-foundry/src/store/selectors/api.selectors';
-import { selectDeployAppState } from '../../../../../cloud-foundry/src/store/selectors/deploy-application.selector';
 import {
   AppData,
   DeployApplicationSource,
   DeployApplicationState,
   OverrideAppDetails,
-  SocketEventTypes,
-} from '../../../../../cloud-foundry/src/store/types/deploy-application.types';
+  SocketEventTypes } from '../../../../../cloud-foundry/src/store/types/deploy-application.types';
 import { environment } from '../../../../../core/src/environments/environment.prod';
+import { CfDeployAppDataService } from '../../../services/domain-data/cf-deploy-app-data.service';
 import { CfOrgSpaceDataService } from '../../../shared/data-services/cf-org-space-service.service';
 import { FileScannerInfo } from './deploy-application-step2/deploy-application-fs/deploy-application-fs-scanner';
 import { DEPLOY_TYPES_IDS } from './deploy-application-steps.types';
 
+// Helper function to create a signal wrapper compatible with BehaviorSubject API
+// The wrapper provides BehaviorSubject-like API (.next, .getValue, .asObservable)
+// while being backed by a Signal for fine-grained reactivity.
+//
+// `equal: () => false` makes every set() emit, restoring BehaviorSubject's
+// "always notify" semantics. The deployer code mutates state objects in place
+// (e.g. fileTransferStatus.filesSent++) and re-emits the same reference;
+// without this, the default Object.is dedupe silently drops every update
+// after the first and the upload progress UI freezes.
+function createSignalWrapper<T>(initialValue: T, injector: Injector) {
+  const _signal = signal<T>(initialValue, { equal: () => false });
+  // Create the observable once during initialization, outside of any reactive context
+  // This prevents NG0602 errors when asObservable() is called from reactive contexts
+  const _observable = toObservable(_signal, { injector });
+
+  const wrapper = Object.assign(
+    // Make it callable like a signal
+    () => _signal(),
+    {
+      // WritableSignal methods
+      set: (value: T) => _signal.set(value),
+      update: (fn: (value: T) => T) => _signal.update(fn),
+      asReadonly: () => _signal.asReadonly(),
+      // BehaviorSubject compatibility methods
+      next: (value: T) => _signal.set(value),
+      getValue: () => _signal(),
+      asObservable: () => _observable }
+  );
+  return wrapper as WritableSignal<T> & {
+    next: (value: T) => void;
+    getValue: () => T;
+    asObservable: () => Observable<T>;
+  };
+}
 
 export interface DeployApplicationDeployerStatus {
   error: boolean;
@@ -41,10 +72,11 @@ interface DeploySource {
 interface GitSCMSourceInfo extends DeploySource {
   project: string;
   branch: string;
-  url: string;
-  commit: string;
+  url?: string;
+  commit?: string;
   scm: string;
   endpointGuid: string;
+  accessToken?: string;
 }
 
 // Structure used to provide metadata about the Git Url source
@@ -57,7 +89,7 @@ interface GitUrlSourceInfo extends DeploySource {
 interface DockerImageSourceInfo extends DeploySource {
   applicationName: string;
   dockerImage: string;
-  dockerUsername: string;
+  dockerUsername?: string;
 }
 
 interface FolderSourceInfo extends DeploySource {
@@ -68,49 +100,60 @@ interface FolderSourceInfo extends DeploySource {
 
 export class DeployApplicationDeployer {
 
-  isRedeploy: string;
-  connectSub: Subscription;
-  updateSub: Subscription;
-  msgSub: Subscription;
+  isRedeploy!: string;
+  connectSub!: Subscription;
+  updateSub!: Subscription;
+  msgSub!: Subscription;
   streamTitle = 'Preparing...';
-  appData: AppData;
+  // strict: populated from the MANIFEST websocket event before any read
+  appData!: AppData;
   proxyAPIVersion = environment.proxyAPIVersion;
-  cfGuid: string;
-  orgGuid: string;
-  spaceGuid: string;
+  cfGuid!: string;
+  orgGuid!: string;
+  spaceGuid!: string;
   applicationSource: any;
-  applicationOverrides: OverrideAppDetails;
+  applicationOverrides!: OverrideAppDetails;
 
-  status$ = new BehaviorSubject<DeployApplicationDeployerStatus>({
-    error: false,
-    deploying: false
-  });
+  // Signal wrappers with BehaviorSubject-compatible API for backward compatibility
+  // These provide both Signal reactivity and Observable API via .asObservable()
+  status$: ReturnType<typeof createSignalWrapper<DeployApplicationDeployerStatus>>;
 
   // Observable on the application GUID of the application being deployed
-  applicationGuid$ = new BehaviorSubject<string>(null);
+  applicationGuid$: ReturnType<typeof createSignalWrapper<string | null>>;
 
   // Status of file transfers
-  fileTransferStatus$ = new BehaviorSubject<FileTransferStatus>(undefined);
+  fileTransferStatus$: ReturnType<typeof createSignalWrapper<FileTransferStatus | undefined>>;
 
-  public messages = new BehaviorSubject<string>('');
+  public messages: ReturnType<typeof createSignalWrapper<string>>;
 
   // Are we deploying?
   deploying = false;
 
-  private inputStream;
+  private inputStream: any;
 
   private isOpen = false;
 
-  public fsFileInfo: FileScannerInfo;
+  public fsFileInfo!: FileScannerInfo;
 
-  private fileTransfers;
-  private fileTransferStatus: FileTransferStatus;
-  private currentFileTransfer;
+  private fileTransfers: any;
+  private fileTransferStatus!: FileTransferStatus;
+  private currentFileTransfer: any;
 
   constructor(
-    private store: Store<CFAppState>,
     public cfOrgSpaceService: CfOrgSpaceDataService,
-  ) { }
+    private injector: Injector,
+  ) {
+    this.status$ = createSignalWrapper<DeployApplicationDeployerStatus>({
+      error: false,
+      deploying: false
+    }, this.injector);
+
+    this.applicationGuid$ = createSignalWrapper<string | null>(null, this.injector);
+
+    this.fileTransferStatus$ = createSignalWrapper<FileTransferStatus | undefined>(undefined, this.injector);
+
+    this.messages = createSignalWrapper<string>('', this.injector);
+  }
 
   updateStatus(error = false, errorMsg?: string) {
     this.status$.next({
@@ -144,39 +187,48 @@ export class DeployApplicationDeployer {
       () => true :
       (appDetail: DeployApplicationState) => {
         if (!appDetail.applicationSource || !appDetail.applicationOverrides) {
-          return;
+          return false;
         }
         return (!!appDetail.applicationSource.gitDetails && !!appDetail.applicationSource.gitDetails.projectName) ||
           (!!appDetail.applicationSource.dockerDetails && !!appDetail.applicationSource.dockerDetails.dockerImage);
 
       };
     this.isOpen = true;
-    this.connectSub = this.store.select(selectDeployAppState).pipe(
-      filter((appDetail: DeployApplicationState) => !!appDetail.cloudFoundryDetails && readyFilter(appDetail)),
-      mergeMap(appDetails => {
-        const orgSubscription = this.store.select(selectCfEntity(organizationEntityType, appDetails.cloudFoundryDetails.org));
-        const spaceSubscription = this.store.select(selectCfEntity(spaceEntityType, appDetails.cloudFoundryDetails.space));
-        return observableOf(appDetails).pipe(combineLatest(orgSubscription, spaceSubscription));
-      }),
-      first(),
-      tap(([appDetail, org, space]) => {
+    const deployData = this.injector.get(CfDeployAppDataService);
+    const deployState$ = toObservable(deployData.state, { injector: this.injector });
+    this.connectSub = deployState$.pipe(
+      filter((appDetail): appDetail is DeployApplicationState & { cloudFoundryDetails: NonNullable<DeployApplicationState['cloudFoundryDetails']>; } =>
+        !!appDetail && !!appDetail.cloudFoundryDetails && readyFilter(appDetail)),
+      take(1),
+      tap((appDetail) => {
         this.cfGuid = appDetail.cloudFoundryDetails.cloudFoundry;
         this.orgGuid = appDetail.cloudFoundryDetails.org;
         this.spaceGuid = appDetail.cloudFoundryDetails.space;
         this.applicationSource = appDetail.applicationSource;
-        this.applicationOverrides = appDetail.applicationOverrides;
+        if (appDetail.applicationOverrides) {
+          this.applicationOverrides = appDetail.applicationOverrides;
+        }
+        // Resolve org / space names from the signal-native picker — it
+        // already loaded both lists when the user made their selection,
+        // so the lookup is synchronous. Replaces the legacy ngrx
+        // `selectCfEntity` selectors that the V3 signal-native cutover
+        // stopped populating for org / space, which was causing the
+        // deployer to crash here on `undefined.entity.name`.
+        const orgName = this.cfOrgSpaceService.orgList().find(o => o.guid === this.orgGuid)?.name ?? '';
+        const spaceName = this.cfOrgSpaceService.spaceList().find(s => s.guid === this.spaceGuid)?.name ?? '';
         const host = window.location.host;
+        const protocol = window.location.protocol === 'https:' ? 'wss' : 'ws';
         const appId = this.isRedeploy ? `&app=${this.isRedeploy}` : '';
         const streamUrl = (
-          `wss://${host}/pp/${this.proxyAPIVersion}/${this.cfGuid}/${this.orgGuid}/${this.spaceGuid}/deploy` +
-          `?org=${org.entity.name}&space=${space.entity.name}${appId}`
+          `${protocol}://${host}/pp/${this.proxyAPIVersion}/${this.cfGuid}/${this.orgGuid}/${this.spaceGuid}/deploy` +
+          `?org=${encodeURIComponent(orgName)}&space=${encodeURIComponent(spaceName)}${appId}`
         );
 
         this.inputStream = new Subject<string>();
         const buffer = websocketConnect(streamUrl)
           .pipe(
             switchMap((get) => get(this.inputStream)),
-            catchError(e => {
+            catchError((_e: any): any[] => {
               return [];
             }),
             filter(l => !!l),
@@ -205,10 +257,12 @@ export class DeployApplicationDeployer {
     ).subscribe();
 
     // Watch for updates to the app overrides - use case is app overrides being set after source file/folder upload
-    this.updateSub = this.store.select(selectDeployAppState).pipe(
-      filter((appDetail: DeployApplicationState) => !!appDetail.cloudFoundryDetails && readyFilter(appDetail)),
+    this.updateSub = deployState$.pipe(
+      filter((appDetail): appDetail is DeployApplicationState => !!appDetail && !!appDetail.cloudFoundryDetails && readyFilter(appDetail)),
       tap((appDetail) => {
-        this.applicationOverrides = appDetail.applicationOverrides;
+        if (appDetail.applicationOverrides) {
+          this.applicationOverrides = appDetail.applicationOverrides;
+        }
       })
     ).subscribe();
   }
@@ -246,14 +300,19 @@ export class DeployApplicationDeployer {
   };
 
   sendGitSCMSourceMetadata = (appSource: DeployApplicationSource) => {
+    // strict: only reached via sendProjectInfo when type.group === 'gitscm',
+    // which the source-type selection guarantees populates gitDetails.
+    const gitDetails = appSource.gitDetails!;
     const gitscm: GitSCMSourceInfo = {
-      project: appSource.gitDetails.projectName,
-      branch: appSource.gitDetails.branch.name,
-      type: appSource.type.group,
-      commit: appSource.gitDetails.commit,
-      url: appSource.gitDetails.url,
+      project: gitDetails.projectName,
+      branch: gitDetails.branch.name,
+      // strict: gitscm branch guarantees type.group === 'gitscm'
+      type: appSource.type.group!,
+      commit: gitDetails.commit,
+      url: gitDetails.url,
       scm: appSource.type.id,
-      endpointGuid: appSource.gitDetails.endpointGuid
+      endpointGuid: gitDetails.endpointGuid,
+      accessToken: gitDetails.accessToken,
     };
 
     const msg = {
@@ -265,9 +324,12 @@ export class DeployApplicationDeployer {
   };
 
   sendGitUrlSourceMetadata = (appSource: DeployApplicationSource) => {
+    // strict: only reached via sendProjectInfo when type.id === GIT_URL,
+    // which the source-type selection guarantees populates gitDetails.
+    const gitDetails = appSource.gitDetails!;
     const gitUrl: GitUrlSourceInfo = {
-      url: appSource.gitDetails.projectName,
-      branch: appSource.gitDetails.branch.name,
+      url: gitDetails.projectName,
+      branch: gitDetails.branch.name,
       type: appSource.type.id
     };
 
@@ -280,10 +342,13 @@ export class DeployApplicationDeployer {
   };
 
   sendDockerImageMetadata = (appSource: DeployApplicationSource) => {
+    // strict: only reached via sendProjectInfo when type.id === DOCKER_IMG,
+    // which the source-type selection guarantees populates dockerDetails.
+    const dockerDetails = appSource.dockerDetails!;
     const dockerInfo: DockerImageSourceInfo = {
-      applicationName: appSource.dockerDetails.applicationName,
-      dockerImage: appSource.dockerDetails.dockerImage,
-      dockerUsername: appSource.dockerDetails.dockerUsername,
+      applicationName: dockerDetails.applicationName,
+      dockerImage: dockerDetails.dockerImage,
+      dockerUsername: dockerDetails.dockerUsername,
       type: appSource.type.id
     };
 
@@ -304,7 +369,7 @@ export class DeployApplicationDeployer {
     return JSON.stringify(msg);
   };
 
-  processWebSocketMessage = (log) => {
+  processWebSocketMessage = (log: any) => {
     switch (log.type) {
       case SocketEventTypes.MANIFEST:
         this.streamTitle = 'Starting deployment...';
@@ -355,7 +420,7 @@ export class DeployApplicationDeployer {
         this.onClose(log, 'Deploy Failed!',
           'Failed to deploy app!');
         break;
-      case SocketEventTypes.SOURCE_REQUIRED:
+      case SocketEventTypes.SOURCE_REQUIRED: {
         const sourceInfo = this.sendProjectInfo(this.applicationSource);
         if (!sourceInfo) {
           this.onClose(log, 'Deploy Failed - Unknown source type',
@@ -364,13 +429,14 @@ export class DeployApplicationDeployer {
           this.inputStream.next(sourceInfo);
         }
         break;
-      case SocketEventTypes.OVERRIDES_REQUIRED:
+      }
+      case SocketEventTypes.OVERRIDES_REQUIRED: {
         const overrides = this.sendAppOverride(this.applicationOverrides);
         this.inputStream.next(overrides);
         break;
+      }
       case SocketEventTypes.EVENT_CLONED:
       case SocketEventTypes.EVENT_FETCHED_MANIFEST:
-      case SocketEventTypes.MANIFEST:
         break;
       case SocketEventTypes.SOURCE_FILE_ACK:
         this.sendNextFile();
@@ -415,7 +481,7 @@ export class DeployApplicationDeployer {
     }
   }
 
-  private onClose(log, title, error) {
+  private onClose(log: any, title: string | null, error: any) {
     if (title) {
       this.streamTitle = title;
     }
@@ -428,7 +494,7 @@ export class DeployApplicationDeployer {
 
   // File Upload
   sendLocalSourceMetadata() {
-    const metadata = {
+    const metadata: { files: any[]; folders: any[] } = {
       files: [],
       folders: []
     };
@@ -462,9 +528,9 @@ export class DeployApplicationDeployer {
   }
 
   // Flatten files and folders
-  collectFoldersAndFiles(metadata, base, folder) {
+  collectFoldersAndFiles(metadata: any, base: string | null, folder: any) {
     if (folder.files) {
-      folder.files.forEach(file => {
+      folder.files.forEach((file: any) => {
         file.fullPath = base ? base + '/' + file.name : file.name;
         metadata.files.push(file);
       });

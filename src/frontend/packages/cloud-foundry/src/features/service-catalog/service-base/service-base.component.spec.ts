@@ -1,27 +1,31 @@
-import { DatePipe } from '@angular/common';
-import { ComponentFixture, TestBed, waitForAsync } from '@angular/core/testing';
+import { ComponentFixture, TestBed } from '@angular/core/testing';
+import { provideZonelessChangeDetection } from '@angular/core';
+import { provideRouter } from '@angular/router';
+import { provideHttpClient } from '@angular/common/http';
+import { provideHttpClientTesting } from '@angular/common/http/testing';
+import { NoopAnimationsModule } from '@angular/platform-browser/animations';
+import { describe, it, expect, beforeEach } from 'vitest';
 
-import { generateCfBaseTestModules } from '../../../../test-framework/cloud-foundry-endpoint-service.helper';
-import { ServicesService } from '../services.service';
-import { ServicesServiceMock } from '../services.service.mock';
 import { ServiceBaseComponent } from './service-base.component';
 
 describe('ServiceBaseComponent', () => {
   let component: ServiceBaseComponent;
   let fixture: ComponentFixture<ServiceBaseComponent>;
 
-  beforeEach(waitForAsync(() => {
-    TestBed.configureTestingModule({
-      declarations: [ServiceBaseComponent],
-      providers: [
-        { provide: ServicesService, useClass: ServicesServiceMock },
-        DatePipe],
+  beforeEach(async () => {
+    await TestBed.configureTestingModule({
       imports: [
-        generateCfBaseTestModules(),
-      ]
-    })
-      .compileComponents();
-  }));
+        ServiceBaseComponent,
+        NoopAnimationsModule,
+      ],
+      providers: [
+        provideZonelessChangeDetection(),
+        provideRouter([]),
+        provideHttpClient(),
+        provideHttpClientTesting(),
+      ],
+    }).compileComponents();
+  });
 
   beforeEach(() => {
     fixture = TestBed.createComponent(ServiceBaseComponent);

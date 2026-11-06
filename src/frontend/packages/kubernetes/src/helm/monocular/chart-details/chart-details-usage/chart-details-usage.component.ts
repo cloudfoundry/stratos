@@ -1,8 +1,7 @@
-import { Component, Input, OnInit, ViewEncapsulation } from '@angular/core';
-import { MatIconRegistry } from '@angular/material/icon';
-import { MatSnackBar } from '@angular/material/snack-bar';
-import { DomSanitizer } from '@angular/platform-browser';
-import { ActivatedRoute } from '@angular/router';
+import { AsyncPipe } from '@angular/common';
+import { Component, Input, ViewEncapsulation, inject, ChangeDetectionStrategy } from '@angular/core';
+import { CustomTooltipDirective } from '@stratosui/core';
+import { ActivatedRoute, RouterLink } from '@angular/router';
 
 import { EndpointsService } from '../../../../../../core/src/core/endpoints.service';
 import { Chart } from '../../shared/models/chart';
@@ -11,32 +10,17 @@ import { getMonocularEndpoint } from '../../stratos-monocular.helper';
 @Component({
   selector: 'app-chart-details-usage',
   templateUrl: './chart-details-usage.component.html',
-  styleUrls: ['./chart-details-usage.component.scss'],
-  viewProviders: [MatIconRegistry],
-  encapsulation: ViewEncapsulation.None
+  encapsulation: ViewEncapsulation.None,
+  changeDetection: ChangeDetectionStrategy.OnPush,
+  standalone: true,
+  imports: [AsyncPipe, CustomTooltipDirective, RouterLink]
 })
-export class ChartDetailsUsageComponent implements OnInit {
-  @Input() chart: Chart;
-  @Input() currentVersion: string;
-  installing: boolean;
-
-  constructor(
-    private mdIconRegistry: MatIconRegistry,
-    private sanitizer: DomSanitizer,
-    public snackBar: MatSnackBar,
-    public endpointsService: EndpointsService,
-    private route: ActivatedRoute,
-  ) { }
-
-  ngOnInit() {
-    this.mdIconRegistry.addSvgIcon(
-      'content-copy',
-      this.sanitizer.bypassSecurityTrustResourceUrl(
-        // TODO: See #150 - content-copy.svg doesn't exist
-        '/assets/icons/content-copy.svg'
-      )
-    );
-  }
+export class ChartDetailsUsageComponent {
+  @Input() chart!: Chart;
+  @Input() currentVersion!: string; // strict: required @Input, only rendered inside @if (currentVersion) with a bound string
+  installing!: boolean;
+  public endpointsService = inject(EndpointsService);
+  private route = inject(ActivatedRoute);
 
   get installUrl(): string {
     return `/workloads/install/${getMonocularEndpoint(this.route, this.chart)}/${this.chart.id}/${this.currentVersion}`;

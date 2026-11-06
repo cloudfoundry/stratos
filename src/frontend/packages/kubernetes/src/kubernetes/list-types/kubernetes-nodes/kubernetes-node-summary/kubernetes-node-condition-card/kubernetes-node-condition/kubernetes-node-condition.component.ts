@@ -1,28 +1,33 @@
-import { Component, Input, OnInit } from '@angular/core';
+import { AsyncPipe, NgStyle } from '@angular/common';
+import {Component, Input, OnInit, inject, ChangeDetectionStrategy } from '@angular/core';
 import { Observable } from 'rxjs';
 import { filter, map } from 'rxjs/operators';
 
+import { BooleanIndicatorComponent, BooleanIndicatorTypeValue } from '@stratosui/core';
 import { KubernetesNodeService } from '../../../../../services/kubernetes-node.service';
 import { ConditionType, ConditionTypeLabels, KubernetesCondition } from '../../../../../store/kube.types';
 
 @Component({
   selector: 'app-kubernetes-node-condition',
   templateUrl: './kubernetes-node-condition.component.html',
-  styleUrls: ['./kubernetes-node-condition.component.scss']
+  changeDetection: ChangeDetectionStrategy.OnPush,
+  standalone: true,
+  imports: [AsyncPipe, NgStyle, BooleanIndicatorComponent]
 })
 export class KubernetesNodeConditionComponent implements OnInit {
 
 
   @Input()
-  condition: ConditionType;
-  condition$: Observable<boolean>;
-  hasCondition$: Observable<boolean>;
+  condition!: ConditionType | `${ConditionType}`; // strict: required @Input, templates bind literal strings (condition="Ready")
+  // boolean | undefined: an "Unknown" condition status renders as the indicator's unknown state
+  condition$!: Observable<boolean | undefined>; // strict: assigned in ngOnInit before the template reads it
+  hasCondition$!: Observable<boolean>; // strict: assigned in ngOnInit before the template reads it
 
   @Input()
-  overrideCondition$: Observable<boolean>;
+  overrideCondition$?: Observable<boolean>;
 
   @Input()
-  type = 'yes-no';
+  type: BooleanIndicatorTypeValue = 'yes-no';
 
   @Input()
   inverse = false;
@@ -46,10 +51,7 @@ export class KubernetesNodeConditionComponent implements OnInit {
     CaaspDisruptive: ['warning', 'material-icons'],
     CaaspSecurity: ['security', 'material-icons']
   };
-
-  constructor(
-    public kubeNodeService: KubernetesNodeService
-  ) { }
+  public kubeNodeService = inject(KubernetesNodeService);
 
   ngOnInit() {
     this.condition$ = this.overrideCondition$ ? this.overrideCondition$ : this.kubeNodeService.node$.pipe(
@@ -64,7 +66,7 @@ export class KubernetesNodeConditionComponent implements OnInit {
     );
   }
 
-  shouldBeGreen(condition: KubernetesCondition) {
+  shouldBeGreen(condition: KubernetesCondition): boolean | undefined {
     if (condition.status === 'True') {
       if (condition.type === ConditionType.Ready) {
         return true;

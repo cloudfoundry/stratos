@@ -1,0 +1,27 @@
+# Bun Configuration for Stratos
+#
+# CRITICAL: This configuration prevents Bun's built-in test runner from
+# interfering with Vitest. All testing MUST go through Vitest.
+#
+# Bun 1.3.x changed test discovery behavior, so we explicitly disable it here.
+
+[test]
+# Completely disable Bun's built-in test runner
+# All testing is handled by Vitest via bun run scripts
+preload = []
+
+# Empty file patterns - do NOT discover any test files
+# This prevents Bun from finding .spec.ts or .test.ts files
+# Vitest workspace configuration handles all test discovery
+coverage = false
+
+[install]
+# Automatically install peer dependencies
+auto = true
+
+# Enable lockfile
+lockfile = true
+
+[install.cache]
+# Enable caching for faster installs
+disable = false

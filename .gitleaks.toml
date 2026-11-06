@@ -1,0 +1,43 @@
+# gitleaks config for `make audit secrets` — extends the default ruleset
+# with allowlists for known non-secrets. Every entry below was reviewed:
+# they are published dev/example values or generated build output, not
+# live credentials. Anything new that gitleaks flags is worth a look.
+
+[extend]
+useDefault = true
+
+[[allowlists]]
+description = "Published dev/example values shipped in sample configs"
+regexes = [
+  # Development ENCRYPTION_KEY published in config.example and sample
+  # configs since the SUSE era — a documented placeholder, not a secret.
+  '''B374A26A71490437AA024E4FADD5B497FDFF1A8EA6FF12F6FB65AF2720B59CCF''',
+]
+
+[[allowlists]]
+description = "Build output, caches, and committed dev/test fixtures"
+paths = [
+  # Generated build output and tool caches (gitignored, but `gitleaks dir`
+  # scans the filesystem, not the git index).
+  '''^dist/''',
+  '''^\.angular/''',
+  '''node_modules/''',
+  # Third-party Helm charts pulled into the jetstream chart cache at test time.
+  '''\.helm-cache/''',
+  # The developer's own E2E credentials. `.gitignore` keeps these out of the
+  # index, but `gitleaks dir` walks the filesystem, so every run flagged them.
+  # Allow-listed by exact path so a secret in any *trackable* file still shows.
+  '''^secrets\.yaml$''',
+  '''^secrets\.yaml\.enc$''',
+  # Self-signed localhost TLS pair for local development. No longer committed
+  # (generated per developer by `make dev cert`); the path stays allow-listed
+  # so history scans do not flag the pair that used to be tracked.
+  '''^dev-ssl/''',
+  # Legacy deployment samples with embedded example keys.
+  '''^deploy/uaa/uaa\.yml$''',
+  '''^deploy/fissile/defaults\.txt$''',
+  '''^deploy/stratos-ui-release/bosh-lite/deployment\.yml$''',
+  # Test fixtures: dummy JWTs, throwaway keypairs, fake API keys.
+  '''^src/jetstream/.*_test\.go$''',
+  '''^src/jetstream/testutils/testhelpers\.go$''',
+]

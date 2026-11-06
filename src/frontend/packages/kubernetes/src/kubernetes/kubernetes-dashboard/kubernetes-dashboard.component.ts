@@ -1,13 +1,17 @@
-import { Component, ElementRef, OnInit, Renderer2, ViewChild } from '@angular/core';
+import { Component, ElementRef, OnInit, Renderer2, ViewChild, signal, inject, ChangeDetectionStrategy, Injector } from '@angular/core';
+import { toObservable } from '@angular/core/rxjs-interop';
+import { CommonModule } from '@angular/common';
 import { DomSanitizer, SafeResourceUrl } from '@angular/platform-browser';
-import { ActivatedRoute } from '@angular/router';
-import { BehaviorSubject, Observable } from 'rxjs';
+import { ActivatedRoute, RouterModule } from '@angular/router';
+import { Observable } from 'rxjs';
 import { map } from 'rxjs/operators';
 
 import {
   EndpointMissingMessageParts,
 } from '../../../../core/src/shared/components/endpoints-missing/endpoints-missing.component';
 import { IHeaderBreadcrumb } from '../../../../core/src/shared/components/page-header/page-header.types';
+import { PageHeaderModule } from '../../../../core/src/shared/components/page-header/page-header.module';
+import { LoadingPageComponent, NoContentMessageComponent } from '@stratosui/core';
 import { BaseKubeGuid } from '../kubernetes-page.types';
 import { KubernetesEndpointService } from '../services/kubernetes-endpoint.service';
 import { KubernetesService } from '../services/kubernetes.service';
@@ -15,7 +19,15 @@ import { KubernetesService } from '../services/kubernetes.service';
 @Component({
   selector: 'app-kubernetes-dashboard',
   templateUrl: './kubernetes-dashboard.component.html',
-  styleUrls: ['./kubernetes-dashboard.component.scss'],
+  changeDetection: ChangeDetectionStrategy.OnPush,
+  standalone: true,
+  imports: [
+    CommonModule,
+    RouterModule,
+    PageHeaderModule,
+    LoadingPageComponent,
+    NoContentMessageComponent
+  ],
   providers: [
     {
       provide: BaseKubeGuid,
@@ -34,7 +46,9 @@ import { KubernetesService } from '../services/kubernetes.service';
 })
 export class KubernetesDashboardTabComponent implements OnInit {
 
-  private pKubeDash: ElementRef;
+  // The @ViewChild setter is never hit in tests, so this can genuinely be unset;
+  // every read guards with `if (this.pKubeDash ...)`.
+  private pKubeDash: ElementRef | undefined;
   @ViewChild('kubeDash', { read: ElementRef, static: false }) set kubeDash(kubeDash: ElementRef) {
     if (!this.pKubeDash) {
       this.pKubeDash = kubeDash;
@@ -42,25 +56,35 @@ export class KubernetesDashboardTabComponent implements OnInit {
       this.setupEventListener();
     }
   }
-  get kubeDash(): ElementRef {
+  get kubeDash(): ElementRef | undefined {
     return this.pKubeDash;
   }
 
-  source: SafeResourceUrl;
+  source!: SafeResourceUrl; // strict: assigned in ngOnInit
   href = '';
-  isLoading$ = new BehaviorSubject<boolean>(true);
-  hasError$ = new BehaviorSubject<boolean>(false);
+  private isLoadingSignal = signal<boolean>(true);
+  private hasErrorSignal = signal<boolean>(false);
+  isLoading$: Observable<boolean>;
+  hasError$: Observable<boolean>;
   expanded = true;
 
   private loadCheckTries = 0;
   private haveSetupEventLister = false;
   private hasIframeLoaded = false;
-  public breadcrumbs$: Observable<IHeaderBreadcrumb[]>;
+  public breadcrumbs$!: Observable<IHeaderBreadcrumb[]>; // strict: assigned in ngOnInit
 
-  public errorMsg$ = new BehaviorSubject<EndpointMissingMessageParts>({} as EndpointMissingMessageParts);
+  public errorMsg = signal<EndpointMissingMessageParts>({} as EndpointMissingMessageParts);
 
-  constructor(public kubeEndpointService: KubernetesEndpointService, private sanitizer: DomSanitizer, public renderer: Renderer2) {
-    this.hasError$.next(false);
+  public kubeEndpointService = inject(KubernetesEndpointService);
+  private sanitizer = inject(DomSanitizer);
+  public renderer = inject(Renderer2);
+  private injector = inject(Injector);
+
+  constructor() {
+    this.hasErrorSignal.set(false);
+    // Convert signals to observables for compatibility with LoadingPageComponent
+    this.isLoading$ = toObservable(this.isLoadingSignal, { injector: this.injector });
+    this.hasError$ = toObservable(this.hasErrorSignal, { injector: this.injector });
   }
 
   ngOnInit() {
@@ -98,17 +122,17 @@ export class KubernetesDashboardTabComponent implements OnInit {
   checkPageLoad() {
     let hasLoaded = false;
     const errMsg = this.getStratosError();
-    if (!!errMsg) {
+    if (errMsg) {
       hasLoaded = true;
-      this.errorMsg$.next({
+      this.errorMsg.set({
         firstLine: errMsg,
         secondLine: { text: '' }
       });
-      this.hasError$.next(true);
+      this.hasErrorSignal.set(true);
     }
 
     const kdToolbar = this.getKubeDashToolbar();
-    if (!!kdToolbar) {
+    if (kdToolbar) {
       hasLoaded = true;
     }
     if (this.getKubeDashLogin()) {
@@ -125,7 +149,7 @@ export class KubernetesDashboardTabComponent implements OnInit {
     }
 
     if (hasLoaded) {
-      this.isLoading$.next(false);
+      this.isLoadingSignal.set(false);
       this.toggle(true);
     }
 
@@ -143,8 +167,8 @@ export class KubernetesDashboardTabComponent implements OnInit {
         let h2 = decodeURI(this.href);
         h2 = decodeURI(h2);
 
-        h2 = h2.replace('%3F', '?');
-        h2 = h2.replace('%3D', '=');
+        h2 = h2.replace(/%3F/g, '?');
+        h2 = h2.replace(/%3D/g, '=');
         h2 = '#!' + h2;
         iframeWindow.location.hash = h2;
         this.href = '';
@@ -153,7 +177,7 @@ export class KubernetesDashboardTabComponent implements OnInit {
   }
 
   // toggle visibility of the kube dashboard header bar
-  toggle(val: boolean) {
+  toggle(val?: boolean) {
     if (val !== undefined) {
       this.expanded = val;
     } else {
@@ -162,7 +186,7 @@ export class KubernetesDashboardTabComponent implements OnInit {
 
     const height = this.expanded ? '48px' : '0px';
     const kdToolbar = this.getKubeDashToolbar();
-    if (!!kdToolbar) {
+    if (kdToolbar) {
       this.renderer.setStyle(kdToolbar, 'height', height);
       this.renderer.setStyle(kdToolbar, 'minHeight', height);
     }
@@ -200,7 +224,7 @@ export class KubernetesDashboardTabComponent implements OnInit {
   }
 
   // Can we detect a Stratos error message page?
-  private getStratosError(): string {
+  private getStratosError(): string | null {
     if (this.pKubeDash &&
       this.pKubeDash.nativeElement &&
       this.pKubeDash.nativeElement.contentDocument &&

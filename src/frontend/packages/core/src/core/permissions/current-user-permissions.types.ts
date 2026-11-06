@@ -18,33 +18,35 @@ export interface IPermissionCheckCombiner {
 export interface ICurrentUserPermissionsChecker {
   /**
    * For the given permission action find the checker configuration that will determine if the user can or cannot do the action
-   * If this is not supported by the the checker null is returned. If another checker also lays claim to the same string the check will
-   * always return denied
+   * If this is not supported by the the checker null/undefined is returned. If another checker also lays claim to the same string
+   * the check will always return denied
    */
-  getPermissionConfig: (action: string) => PermissionConfigType;
+  getPermissionConfig: (action: string) => PermissionConfigType | undefined;
   /**
-   * Simple checks are used when the permission config contains a single thing to check
+   * Simple checks are used when the permission config contains a single thing to check.
+   * Returns undefined if this checker does not handle the given config.
    */
   getSimpleCheck: (
     permissionConfig: PermissionConfig,
     endpointGuid?: string,
     ...args: any[]
-  ) => Observable<boolean>;
+  ) => Observable<boolean> | undefined;
   /**
-   * Used when the permission config contains multiple things to check
+   * Used when the permission config contains multiple things to check.
+   * Returns null if this checker cannot handle all of the given configs.
    */
   getComplexCheck: (
     permissionConfig: PermissionConfig[],
-    permission: PermissionTypes,
+    permission?: PermissionTypes,
     ...args: any[]
-  ) => IPermissionCheckCombiner[];
+  ) => IPermissionCheckCombiner[] | null;
   /**
-   * If no checker provides simple
+   * If no checker provides simple. Returns null if this checker has no fallback.
    */
   getFallbackCheck: (
     endpointGuid: string,
     endpointType: string
-  ) => Observable<boolean>;
+  ) => Observable<boolean> | null;
 }
 
 export abstract class BaseCurrentUserPermissionsChecker {

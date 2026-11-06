@@ -1,47 +1,54 @@
-import { ComponentFixture, TestBed, waitForAsync } from '@angular/core/testing';
-import { RouterTestingModule } from '@angular/router/testing';
+import { CUSTOM_ELEMENTS_SCHEMA } from '@angular/core';
+import { ComponentFixture, TestBed } from '@angular/core/testing';
+import { provideZonelessChangeDetection } from '@angular/core';
+import { provideRouter } from '@angular/router';
+import { describe, it, expect, beforeEach, vi } from 'vitest';
 import { of } from 'rxjs';
 
-import { generateCfStoreModules } from '../../../../test-framework/cloud-foundry-endpoint-service.helper';
+import { CfOrgSpaceLinksComponent } from "./cf-org-space-links.component";
 import { CfOrgSpaceLabelService } from '../../services/cf-org-space-label.service';
-import { CfOrgSpaceLinksComponent } from './cf-org-space-links.component';
 
+// The component only reads the name/URL getters and multipleConnectedEndpoints$
+// off its injected label service; the test double implements exactly that
+// surface. Pick the consumed members so the mock stays faithful to the type.
+type CfOrgSpaceLabelServiceMock = Pick<
+  CfOrgSpaceLabelService,
+  'getCfName' | 'getCfURL' | 'getOrgName' | 'getOrgURL' | 'getSpaceName' | 'getSpaceURL' | 'multipleConnectedEndpoints$'
+>;
 
 describe('CfOrgSpaceLinksComponent', () => {
   let component: CfOrgSpaceLinksComponent;
   let fixture: ComponentFixture<CfOrgSpaceLinksComponent>;
-  let service;
-
-  beforeEach(waitForAsync(() => {
-    TestBed.configureTestingModule({
-      declarations: [CfOrgSpaceLinksComponent],
-      imports: [
-        RouterTestingModule,
-        generateCfStoreModules()
-      ]
-    })
-      .compileComponents();
-  }));
+  let service: CfOrgSpaceLabelServiceMock;
 
   beforeEach(() => {
-    service = jasmine.createSpyObj<CfOrgSpaceLabelService>('CfOrgSpaceLabelService', [
-      'getCfName',
-      'getCfURL',
-      'getOrgName',
-      'getOrgURL',
-      'getSpaceName',
-      'getSpaceURL'
-    ]);
-    service.multipleConnectedEndpoints$ = of(false);
-    service.getCfName.and.returnValue(of('CfName'));
-    service.getCfURL.and.returnValue(['/cf/path']);
-    service.getOrgName.and.returnValue(of('OrgName'));
-    service.getOrgURL.and.returnValue(['/org/path']);
-    service.getSpaceName.and.returnValue(of('SpaceName'));
-    service.getSpaceURL.and.returnValue(['/space/path']);
+    TestBed.configureTestingModule({
+      imports: [
+        CfOrgSpaceLinksComponent,
+      ],
+      providers: [
+        provideRouter([]),
+        provideZonelessChangeDetection(),
+      ],
+      schemas: [CUSTOM_ELEMENTS_SCHEMA]
+    });
+  });
+
+  beforeEach(() => {
+    service = {
+      getCfName: vi.fn().mockReturnValue(of('CfName')),
+      getCfURL: vi.fn().mockReturnValue(['/cf/path']),
+      getOrgName: vi.fn().mockReturnValue(of('OrgName')),
+      getOrgURL: vi.fn().mockReturnValue(['/org/path']),
+      getSpaceName: vi.fn().mockReturnValue(of('SpaceName')),
+      getSpaceURL: vi.fn().mockReturnValue(['/space/path']),
+      multipleConnectedEndpoints$: of(false)
+    };
     fixture = TestBed.createComponent(CfOrgSpaceLinksComponent);
     component = fixture.componentInstance;
-    component.service = service;
+    // strict: assign the consumed-surface test double; the component only
+    // touches the members CfOrgSpaceLabelServiceMock implements.
+    component.service = service as CfOrgSpaceLabelService;
     fixture.detectChanges();
   });
 
@@ -56,7 +63,22 @@ describe('CfOrgSpaceLinksComponent', () => {
 
   describe('with multiple endpoints', () => {
     beforeEach(() => {
-      service.multipleConnectedEndpoints$ = of(true);
+      // Create a new service instance with multipleConnectedEndpoints$ set to true
+      service = {
+        getCfName: vi.fn().mockReturnValue(of('CfName')),
+        getCfURL: vi.fn().mockReturnValue(['/cf/path']),
+        getOrgName: vi.fn().mockReturnValue(of('OrgName')),
+        getOrgURL: vi.fn().mockReturnValue(['/org/path']),
+        getSpaceName: vi.fn().mockReturnValue(of('SpaceName')),
+        getSpaceURL: vi.fn().mockReturnValue(['/space/path']),
+        multipleConnectedEndpoints$: of(true)
+      };
+      // Recreate the component with the new service
+      fixture = TestBed.createComponent(CfOrgSpaceLinksComponent);
+      component = fixture.componentInstance;
+      // strict: assign the consumed-surface test double; the component only
+    // touches the members CfOrgSpaceLabelServiceMock implements.
+    component.service = service as CfOrgSpaceLabelService;
       fixture.detectChanges();
     });
 

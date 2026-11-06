@@ -1,11 +1,11 @@
-import { ComponentFixture, TestBed, waitForAsync } from '@angular/core/testing';
+import { ComponentFixture, TestBed } from '@angular/core/testing';
+import { provideZonelessChangeDetection } from '@angular/core';
+import { describe, it, expect, beforeEach, vi } from 'vitest';
+import { NoopAnimationsModule } from '@angular/platform-browser/animations';
 import { RouterTestingModule } from '@angular/router/testing';
-import { createBasicStoreModule } from '@stratosui/store/testing';
+import { createBasicStoreModule, STORE_TEST_PROVIDERS, CoreTestingModule } from '@test-framework';
 
-import { CoreTestingModule } from '../../../../test-framework/core-test.modules';
-import { CoreModule } from '../../../core/core.module';
 import { CurrentUserPermissionsService } from '../../../core/permissions/current-user-permissions.service';
-import { SharedModule } from '../../../shared/shared.module';
 import { TabNavService } from '../../../tab-nav.service';
 import { AboutPageComponent } from './about-page.component';
 
@@ -13,23 +13,23 @@ describe('AboutPageComponent', () => {
   let component: AboutPageComponent;
   let fixture: ComponentFixture<AboutPageComponent>;
 
-  beforeEach(waitForAsync(() => {
-    TestBed.configureTestingModule({
-      declarations: [AboutPageComponent],
+  beforeEach(async () => {
+    await TestBed.configureTestingModule({
       imports: [
-        CoreModule,
-        RouterTestingModule,
-        SharedModule,
         CoreTestingModule,
+        RouterTestingModule,
+        NoopAnimationsModule,
         createBasicStoreModule(),
+        AboutPageComponent,
       ],
       providers: [
         TabNavService,
-        CurrentUserPermissionsService
+        CurrentUserPermissionsService,
+        ...STORE_TEST_PROVIDERS,
+        provideZonelessChangeDetection(),
       ]
-    })
-      .compileComponents();
-  }));
+    }).compileComponents();
+  });
 
   beforeEach(() => {
     fixture = TestBed.createComponent(AboutPageComponent);
@@ -39,5 +39,37 @@ describe('AboutPageComponent', () => {
 
   it('should create', () => {
     expect(component).toBeTruthy();
+  });
+
+  it('should expose buildInfo from BUILD_INFO token', () => {
+    expect(component.buildInfo).toBeDefined();
+    expect(component.buildInfo.version).toBeDefined();
+    expect(component.buildInfo.gitCommit).toBeDefined();
+    expect(component.buildInfo.gitBranch).toBeDefined();
+    expect(component.buildInfo.buildDate).toBeDefined();
+  });
+
+  it('should have non-empty build info fields', () => {
+    expect(component.buildInfo.version.length).toBeGreaterThan(0);
+    expect(component.buildInfo.gitCommit.length).toBeGreaterThan(0);
+    expect(component.buildInfo.gitBranch.length).toBeGreaterThan(0);
+    expect(component.buildInfo.buildDate.length).toBeGreaterThan(0);
+  });
+
+  it('should expose sessionData$ observable', () => {
+    expect(component.sessionData$).toBeDefined();
+  });
+
+  it('should expose userIsAdmin$ observable', () => {
+    expect(component.userIsAdmin$).toBeDefined();
+  });
+
+  it('should expose versionNumber$ observable', () => {
+    expect(component.versionNumber$).toBeDefined();
+  });
+
+  it('should expose angularVersion matching semver', () => {
+    expect(component.angularVersion).toBeDefined();
+    expect(component.angularVersion).toMatch(/^\d+\.\d+\.\d+/);
   });
 });

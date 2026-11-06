@@ -1,88 +1,128 @@
-import { ComponentFixture, TestBed, waitForAsync } from '@angular/core/testing';
-import { of } from 'rxjs';
+import { ComponentFixture, ComponentFixtureAutoDetect, TestBed } from '@angular/core/testing';
+import { importProvidersFrom, provideZonelessChangeDetection, signal } from '@angular/core';
+import { HttpErrorResponse, provideHttpClient } from '@angular/common/http';
+import { provideHttpClientTesting } from '@angular/common/http/testing';
+import { provideRouter } from '@angular/router';
+import { describe, it, expect, beforeEach } from 'vitest';
 
-import { EntityService } from '../../../../../store/src/entity-service';
-import { EntityMonitorFactory } from '../../../../../store/src/monitors/entity-monitor.factory.service';
-import { StratosStatus } from '../../../../../store/src/types/shared.types';
-import { generateCfBaseTestModulesNoShared } from '../../../../test-framework/cloud-foundry-endpoint-service.helper';
-import * as servicesHelpers from '../../../features/service-catalog/services-helper';
-import { ServicesService } from '../../../features/service-catalog/services.service';
-import { ServicesServiceMock } from '../../../features/service-catalog/services.service.mock';
+import { STORE_TEST_PROVIDERS } from '@stratosui/store/testing';
+import { generateCfBaseTestModulesNoShared } from '@test-framework/cf';
+import { ServiceCatalogDataService, SignalSource } from '../../../services/endpoint-data/service-catalog-data.service';
+import { StServicePlan, StServicePlanVisibility } from '../../../services/endpoint-data/stratos-types';
 import { ServicePlanPublicComponent } from './service-plan-public.component';
 
-const getCfService = {
-  waitForEntity$: {
-    pipe() { }
+class ServiceCatalogDataServiceStub {
+  visibilityResponse: StServicePlanVisibility | null = { type: 'public' };
+  errorOnVisibility = false;
+
+  planVisibility(_cnsi: string, _planGuid: string): SignalSource<StServicePlanVisibility | null> {
+    if (this.errorOnVisibility) {
+      return {
+        value: signal<StServicePlanVisibility | null>(null).asReadonly(),
+        isLoading: signal(false).asReadonly(),
+        error: signal(new HttpErrorResponse({ status: 500, statusText: 'forced error' })).asReadonly(),
+      };
+    }
+    return {
+      value: signal(this.visibilityResponse).asReadonly(),
+      isLoading: signal(false).asReadonly(),
+      error: signal<HttpErrorResponse | null>(null).asReadonly(),
+    };
   }
-} as unknown as EntityService;
+}
+
+const buildPlan = (overrides: Partial<StServicePlan> = {}): StServicePlan => ({
+  guid: 'plan-1',
+  cnsiGuid: 'cnsi-1',
+  name: 'small',
+  visibilityType: 'public',
+  createdAt: '2024-01-01T00:00:00Z',
+  ...overrides,
+});
 
 describe('ServicePlanPublicComponent', () => {
   let component: ServicePlanPublicComponent;
   let fixture: ComponentFixture<ServicePlanPublicComponent>;
   let element: HTMLElement;
-  let servicesService: ServicesServiceMock;
+  let catalogStub: ServiceCatalogDataServiceStub;
 
-  beforeEach(waitForAsync(() => {
-    TestBed.configureTestingModule({
-      declarations: [ServicePlanPublicComponent],
-      imports: generateCfBaseTestModulesNoShared(),
+  beforeEach(async () => {
+    catalogStub = new ServiceCatalogDataServiceStub();
+    await TestBed.configureTestingModule({
+      imports: [ServicePlanPublicComponent],
       providers: [
-        EntityMonitorFactory,
-        { provide: ServicesService, useClass: ServicesServiceMock },
-      ]
-    })
-      .compileComponents();
-  }));
+        provideZonelessChangeDetection(),
+        provideRouter([]),
+        provideHttpClient(),
+        provideHttpClientTesting(),
+        ...STORE_TEST_PROVIDERS,
+        importProvidersFrom(generateCfBaseTestModulesNoShared()),
+        { provide: ServiceCatalogDataService, useValue: catalogStub },
+        { provide: ComponentFixtureAutoDetect, useValue: true },
+      ],
+    }).compileComponents();
+  });
 
   beforeEach(() => {
     fixture = TestBed.createComponent(ServicePlanPublicComponent);
-    servicesService = TestBed.get(ServicesService);
     component = fixture.componentInstance;
-    fixture.detectChanges();
     element = fixture.nativeElement;
   });
 
-  it('should create', () => {
+  it('creates', () => {
     expect(component).toBeTruthy();
   });
 
-  it('should display if service plan is public', () => {
-    component.servicePlan = servicesService.servicePlan;
+  it('renders Yes when the plan is public', () => {
+    component.servicePlan = buildPlan({ visibilityType: 'public' });
+    fixture.detectChanges();
     fixture.detectChanges();
 
-    expect(element.textContent).toContain('Yes');
+    expect(component.servicePlan?.visibilityType).toBe('public');
+    expect(element.textContent?.trim()).toContain('Yes');
   });
 
-  it('should display if service plan is not public', () => {
-    component.servicePlan = {
-      ...servicesService.servicePlan,
-      entity: {
-        ...servicesService.servicePlan.entity,
-        public: false,
-      }
-    };
+  it('renders No when the plan is not public', () => {
+    component.servicePlan = buildPlan({ visibilityType: 'admin' });
+    fixture.detectChanges();
     fixture.detectChanges();
 
-    expect(element.textContent).toContain('No');
+    expect(element.textContent?.trim()).toContain('No');
   });
 
-  it('should display if service plan is reachable', () => {
-    const planAccessibility$ = of(StratosStatus.WARNING);
-    const s0 = spyOn(servicesHelpers, 'getServicePlanAccessibilityCardStatus').and.returnValue(planAccessibility$);
-    component.servicePlan = servicesService.servicePlan;
+  it('shows "limited visibility" when V3 visibility is organization', () => {
+    catalogStub.visibilityResponse = { type: 'organization', organizations: [{ guid: 'o-1' }] };
+    component.servicePlan = buildPlan({ visibilityType: 'organization' });
+    fixture.detectChanges();
     fixture.detectChanges();
 
-    expect(s0).toHaveBeenCalled();
     expect(element.textContent).toContain('Service Plan has limited visibility');
   });
 
-  it('should display if service plan is not reachable', () => {
-    const planAccessibility$ = of(StratosStatus.ERROR);
-    const s0 = spyOn(servicesHelpers, 'getServicePlanAccessibilityCardStatus').and.returnValue(planAccessibility$);
-    component.servicePlan = servicesService.servicePlan;
+  it('shows "limited visibility" when V3 visibility is space', () => {
+    catalogStub.visibilityResponse = { type: 'space', space: { guid: 's-1' } };
+    component.servicePlan = buildPlan({ visibilityType: 'space' });
+    fixture.detectChanges();
     fixture.detectChanges();
 
-    expect(s0).toHaveBeenCalled();
+    expect(element.textContent).toContain('Service Plan has limited visibility');
+  });
+
+  it('shows "no visibility" when V3 visibility is admin-only', () => {
+    catalogStub.visibilityResponse = { type: 'admin' };
+    component.servicePlan = buildPlan({ visibilityType: 'admin' });
+    fixture.detectChanges();
+    fixture.detectChanges();
+
+    expect(element.textContent).toContain('Service Plan has no visibility');
+  });
+
+  it('falls through to "no visibility" when the visibility lookup errors', () => {
+    catalogStub.errorOnVisibility = true;
+    component.servicePlan = buildPlan({ visibilityType: 'admin' });
+    fixture.detectChanges();
+    fixture.detectChanges();
+
     expect(element.textContent).toContain('Service Plan has no visibility');
   });
 });

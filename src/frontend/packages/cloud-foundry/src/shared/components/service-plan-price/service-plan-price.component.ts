@@ -1,45 +1,40 @@
-import { registerLocaleData } from '@angular/common';
+import { CommonModule, registerLocaleData } from '@angular/common';
 import localeFr from '@angular/common/locales/fr';
-import { Component, Input } from '@angular/core';
+import { Component, Input, ChangeDetectionStrategy } from '@angular/core';
 
-import { APIResource } from '../../../../../store/src/types/api.types';
-import { IServicePlan, IServicePlanCost } from '../../../cf-api-svc.types';
+import { StServicePlan, StServicePlanCost } from '../../../services/endpoint-data/stratos-types';
 
 
 @Component({
   selector: 'app-service-plan-price',
   templateUrl: './service-plan-price.component.html',
-  styleUrls: ['./service-plan-price.component.scss']
+  standalone: true,
+  changeDetection: ChangeDetectionStrategy.OnPush,
+  imports: [
+    CommonModule,
+    // Note: CurrencyPipe is provided by CommonModule
+  ]
 })
 export class ServicePlanPriceComponent {
 
-  @Input() servicePlan: APIResource<IServicePlan>;
+  @Input() servicePlan!: StServicePlan;
 
   constructor() {
+    // Locale registration is required for the currency pipe to format
+    // EUR amounts in French locale conventions. This was historically
+    // tied to the open-service-broker `extra` JSON pattern; under V3
+    // costs come typed at top level and the locale heuristic remains.
     registerLocaleData(localeFr);
   }
 
-  /*
- * Pick the first country listed in the amount object. It's unclear whether there could be a different number of these depending on
- * which region the CF is being served from (IBM seem to charge different amounts per country)
- */
-  private getCountryCode = (cost: IServicePlanCost): string => Object.keys(cost.amount)[0];
+  // V3 StServicePlanCost: { amount: number, currency: string, unit: string }.
+  // Currency drives the per-cost locale (EUR formats in French style; rest
+  // fall through to en-US). Symbol resolution is delegated to the `currency`
+  // pipe in the template.
+  protected getCostValue = (cost: StServicePlanCost): number => cost.amount;
 
-  /*
-   * Find the charge for the chosen country
-   */
-  protected getCostValue = (cost: IServicePlanCost) => cost.amount[this.getCountryCode(cost)];
+  protected getCostCurrency = (cost: StServicePlanCost): string => (cost.currency || '').toUpperCase();
 
-  /*
-   * Determine the currency for the chosen country
-   */
-  protected getCostCurrency = (cost: IServicePlanCost) => this.getCountryCode(cost).toUpperCase();
-
-  /*
-   * Artificially supply a locale for the chosen country.
-   *
-   * This will be updated once with do i18n
-   */
-  protected getCurrencyLocale = (cost: IServicePlanCost) => this.getCostCurrency(cost) === 'EUR' ? 'fr' : 'en-US';
-
+  protected getCurrencyLocale = (cost: StServicePlanCost): string =>
+    this.getCostCurrency(cost) === 'EUR' ? 'fr' : 'en-US';
 }

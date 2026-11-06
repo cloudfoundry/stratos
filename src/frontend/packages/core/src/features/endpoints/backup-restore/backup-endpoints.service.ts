@@ -1,9 +1,9 @@
 import { HttpClient, HttpParams } from '@angular/common/http';
-import { Injectable } from '@angular/core';
-import { Store } from '@ngrx/store';
-import { GeneralEntityAppState, BrowserStandardEncoder, EndpointModel, entityCatalog } from '@stratosui/store';
-import { BehaviorSubject, Observable } from 'rxjs';
-import { first, map } from 'rxjs/operators';
+import { Injectable, signal, Injector, inject } from '@angular/core';
+import { BrowserStandardEncoder, EndpointModel, entityCatalog } from '@stratosui/store';
+import { Observable } from 'rxjs';
+import { take, map } from 'rxjs/operators';
+import { toObservable } from '@angular/core/rxjs-interop';
 
 import {
   BackupEndpointConfigUI,
@@ -18,26 +18,35 @@ interface BackupRequest {
   password: string;
 }
 
-@Injectable()
+@Injectable({
+  providedIn: 'root'
+})
 export class BackupEndpointsService {
+  private http = inject(HttpClient);
+  private injector = inject(Injector);
 
-  hasChanges = new BehaviorSubject(false);
-  hasChanges$ = this.hasChanges.asObservable();
-  allChanged = new BehaviorSubject(false);
-  allChanged$ = this.allChanged.asObservable();
+
+  private _hasChanges = signal<boolean>(false);
+  public hasChanges = this._hasChanges.asReadonly();
+  public hasChanges$: Observable<boolean>;
+  private _allChanged = signal<boolean>(false);
+  public allChanged = this._allChanged.asReadonly();
+  public allChanged$: Observable<boolean>;
 
   state: BackupEndpointsConfig<BackupEndpointConfigUI> = {};
-  password: string;
+  password!: string;
 
-  constructor(
-    private store: Store<GeneralEntityAppState>,
-    private http: HttpClient
-  ) {
+  constructor() {
+    this.hasChanges$ = toObservable(this._hasChanges, { injector: this.injector });
+    this.allChanged$ = toObservable(this._allChanged, { injector: this.injector });
   }
 
   // State Related
   initialize(endpoints: EndpointModel[]) {
-    endpoints.forEach(entity => {
+    endpoints.forEach((entity: EndpointModel) => {
+      if (!entity.guid) {
+        return;
+      }
       this.state[entity.guid] = {
         [BackupEndpointTypes.ENDPOINT]: false,
         [BackupEndpointTypes.CONNECT]: BackupEndpointConnectionTypes.NONE,
@@ -49,18 +58,18 @@ export class BackupEndpointsService {
 
   stateUpdated() {
     const endpoints = Object.values(this.state);
-    endpoints.forEach(endpoint => {
+    endpoints.forEach((endpoint: BackupEndpointConfigUI) => {
       if (!endpoint[BackupEndpointTypes.ENDPOINT]) {
         endpoint[BackupEndpointTypes.CONNECT] = BackupEndpointConnectionTypes.NONE;
       }
     });
 
-    const hasChanges = !!endpoints.find(endpoint =>
+    const hasChanges = !!endpoints.find((endpoint: BackupEndpointConfigUI) =>
       endpoint[BackupEndpointTypes.ENDPOINT] ||
       endpoint[BackupEndpointTypes.CONNECT] !== BackupEndpointConnectionTypes.NONE
     );
-    this.hasChanges.next(hasChanges);
-    const allChanged = endpoints.every(endpoint => {
+    this._hasChanges.set(hasChanges);
+    const allChanged = endpoints.every((endpoint: BackupEndpointConfigUI) => {
       const e = !this.canBackupEndpoint(endpoint.entity, BackupEndpointTypes.ENDPOINT) || endpoint[BackupEndpointTypes.ENDPOINT];
       const c = !this.canBackupEndpoint(endpoint.entity, BackupEndpointTypes.CONNECT) ||
         endpoint[BackupEndpointTypes.CONNECT] !== BackupEndpointConnectionTypes.NONE;
@@ -68,7 +77,7 @@ export class BackupEndpointsService {
     }
 
     );
-    this.allChanged.next(allChanged);
+    this._allChanged.set(allChanged);
   }
 
   canBackupEndpoint(endpoint: EndpointModel, type: BackupEndpointTypes): boolean {
@@ -78,13 +87,17 @@ export class BackupEndpointsService {
     }
 
     // All other settings require endpoint to be backed up
-    if (!this.state[endpoint.guid] || !this.state[endpoint.guid][BackupEndpointTypes.ENDPOINT]) {
+    if (!endpoint.guid || !this.state[endpoint.guid] || !this.state[endpoint.guid][BackupEndpointTypes.ENDPOINT]) {
       return false;
     }
 
-    const epType = entityCatalog.getEndpoint(endpoint.cnsi_type, endpoint.sub_type).definition;
+    if (!endpoint.cnsi_type) {
+      return false;
+    }
+    const epType = entityCatalog.getEndpoint(endpoint.cnsi_type, endpoint.sub_type)?.definition;
+    // An unregistered type can't be described, let alone backed up.
     // The endpoint type supports connection details
-    if (epType.unConnectable) {
+    if (!epType || epType.unConnectable) {
       return false;
     }
 
@@ -96,7 +109,7 @@ export class BackupEndpointsService {
   }
 
   selectAll() {
-    Object.values(this.state).forEach(endpoint => {
+    Object.values(this.state).forEach((endpoint: BackupEndpointConfigUI) => {
       if (this.canBackupEndpoint(endpoint.entity, BackupEndpointTypes.ENDPOINT)) {
         endpoint[BackupEndpointTypes.ENDPOINT] = true;
       }
@@ -108,7 +121,7 @@ export class BackupEndpointsService {
   }
 
   selectNone() {
-    Object.values(this.state).forEach(endpoint => {
+    Object.values(this.state).forEach((endpoint: BackupEndpointConfigUI) => {
       endpoint[BackupEndpointTypes.ENDPOINT] = false;
       endpoint[BackupEndpointTypes.CONNECT] = BackupEndpointConnectionTypes.NONE;
     });
@@ -116,7 +129,7 @@ export class BackupEndpointsService {
   }
 
   hasConnectionDetails(): boolean {
-    return !!Object.values(this.state).find(e => e[BackupEndpointTypes.CONNECT] !== BackupEndpointConnectionTypes.NONE);
+    return !!Object.values(this.state).find((e: BackupEndpointConfigUI) => e[BackupEndpointTypes.CONNECT] !== BackupEndpointConnectionTypes.NONE);
   }
 
   // Request Related
@@ -132,16 +145,16 @@ export class BackupEndpointsService {
     // return this.getSessionData().pipe(
     //   switchMap(ses => this.http.post(url, this.createBodyToSend(ses), { params })),
     //   map(res => new Blob([JSON.stringify(res)])),
-    //   first(),
+    //   take(1),
     // );
     return this.http.post(url, this.createBodyToSend(), { params }).pipe(
-      map(res => new Blob([JSON.stringify(res)])),
-      first(),
+      map((res: any) => new Blob([JSON.stringify(res)])),
+      take(1),
     );
   }
 
   private createBodyToSend(): BackupRequest {
-    const state: BackupEndpointsConfig<BaseEndpointConfig> = Object.entries(this.state).reduce((res, [endpointId, endpoint]) => {
+    const state: BackupEndpointsConfig<BaseEndpointConfig> = Object.entries(this.state).reduce((res: BackupEndpointsConfig<BaseEndpointConfig>, [endpointId, endpoint]: [string, BackupEndpointConfigUI]) => {
       if (endpoint[BackupEndpointTypes.ENDPOINT]) {
         const { entity, ...rest } = endpoint;
         const requestConfig: BaseEndpointConfig = {
@@ -169,7 +182,7 @@ export class BackupEndpointsService {
   //   return this.store.select(s => s.auth).pipe(
   //     filter(auth => !!(auth && auth.sessionData)),
   //     map((auth: AuthState) => auth.sessionData),
-  //     first()
+  //     take(1)
   //   );
   // }
 

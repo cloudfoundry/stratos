@@ -1,70 +1,69 @@
-$tile-grid-gutter: 1em;
+$tile-grid-gap: 1.5rem;
+
+// Thresholds below are container widths and must be absolute lengths (a
+// container query condition cannot read a custom property), so the gaps are
+// repeated here in px: 1.5rem and 0.5rem at the default root size.
+$gap-px: 24px;
+$gap-px-compact: 8px;
+
+// The narrowest a column can be while its tile still reads properly, measured
+// from the widest tile of each kind:
+//   default  a bordered number metric needs 228px to keep "Memory Usage" and
+//            its "/ 100 GB" on one line; below ~220px the labels wrap and the
+//            row goes ragged.
+//   compact  a plain (chromeless) metric has no card padding and measures
+//            129px with a five-digit count.
+$col-min: 220px;
+$col-min-compact: 130px;
+
+// A group declares how many columns it wants (tile-group-<n>-cols, set by the
+// template or host-bound from the tile count). That declaration is the design
+// intent and is kept; all that changes is that it is now conditional on the
+// group's OWN width rather than the viewport's, so a group in a narrow card
+// steps down instead of overflowing. Steps are emitted 2..n ascending, so the
+// widest matching rule wins.
+@mixin fit-columns($max, $min, $gap) {
+  @for $n from 2 through $max {
+    @container (min-width: #{$n * $min + ($n - 1) * $gap}) {
+      grid-template-columns: repeat($n, 1fr);
+    }
+  }
+}
 
 app-tile-group {
-  display: flex;
-  flex-flow: row;
-  flex-wrap: wrap;
+  display: grid;
+  gap: $tile-grid-gap;
+  width: 100%;
 
-  &.tile-group-1-cols > app-tile {
-    flex: 0 0 100%;
+  // Narrower than the first step, and the no-container fallback: one column.
+  grid-template-columns: 1fr;
+
+  &.tile-group-1-cols {
+    grid-template-columns: 1fr;
   }
 
-  // Mobile layout
-  &.tile-group-2-cols > app-tile {
-    flex: 0 0 100%;
+  @for $n from 2 through 6 {
+    &.tile-group-#{$n}-cols {
+      @include fit-columns($n, $col-min, $gap-px);
+    }
   }
 
-  &.tile-group-3-cols > app-tile {
-    flex: 0 0 100%;
-  }
-
-  &.tile-group-4-cols > app-tile {
-    flex: 0 0 100%;
-  }
-
-  &.tile-group-6-cols > app-tile {
-    flex: 0 0 100%;
-  }
-
+  // Legacy gutter support (converted to gap)
   &.tile-group-gutters {
-    margin-left: -$tile-grid-gutter;
-
-    app-tile {
-      // $top-bottom: $tile-grid-gutter / 2;
-      padding: 0 0 $tile-grid-gutter $tile-grid-gutter;
-    }
+    gap: $tile-grid-gap;
   }
-}
 
-// Tablet (medium) screens
-@media (min-width: 30em) {
-  app-tile-group {
-    &.tile-group-4-cols > app-tile {
-      flex: 0 0 calc(50% - #{$tile-grid-gutter});
-    }
-    &.tile-group-6-cols > app-tile {
-      flex: 0 0 calc(33% - #{$tile-grid-gutter});
-    }
-  }
-}
+  // Compact groups hold chromeless tiles, so they fit more per row and are
+  // declared after the gutter rule — TileGroupComponent host-binds
+  // tile-group-gutters on every group, so an earlier declaration never won and
+  // compact was silently a no-op.
+  &.tile-group-compact {
+    gap: 0.5rem;
 
-// Large screens
-@media (min-width: 48em) {
-  app-tile-group {
-    &.tile-group-2-cols > app-tile {
-      flex: 1;
-    }
-
-    &.tile-group-3-cols > app-tile {
-      flex: 1;
-    }
-
-    &.tile-group-4-cols > app-tile {
-      flex: 1;
-    }
-
-    &.tile-group-6-cols > app-tile {
-      flex: 1;
+    @for $n from 2 through 6 {
+      &.tile-group-#{$n}-cols {
+        @include fit-columns($n, $col-min-compact, $gap-px-compact);
+      }
     }
   }
 }

@@ -1,14 +1,51 @@
 app-tile-grid {
-  display: flex;
-  flex-direction: column;
+  // Establishes the query container the tile groups size themselves against,
+  // so a group in a narrow card steps its columns down instead of taking its
+  // count from the viewport. Inline-size only: block size stays content-driven.
+  container-type: inline-size;
+  display: grid;
+  grid-template-columns: 1fr;
+  grid-auto-rows: min-content;
+  gap: 1.5rem;
+  overflow-y: auto;
+  width: 100%;
+  padding: 1rem;
+
+  // Always-visible scrollbar: macOS overlay scrollbars are 0px wide when
+  // idle, leaving no affordance that the grid scrolls.
+  &::-webkit-scrollbar {
+    width: 6px;
+  }
+
+  &::-webkit-scrollbar-track {
+    background: var(--content-secondary);
+    border-radius: 3px;
+  }
+
+  &::-webkit-scrollbar-thumb {
+    background: var(--content-border);
+    border-radius: 3px;
+  }
+
+  &::-webkit-scrollbar-thumb:hover {
+    background: var(--input-border);
+  }
+
   &.app-tile-grid-fit {
     height: 100%;
     width: 100%;
+
     > app-tile-group {
       &:last-child {
-        flex: 1 1;
         margin-bottom: 0;
       }
     }
+  }
+
+  // Responsive: single column on mobile, auto on larger screens
+  @media (max-width: 767px) {
+    grid-template-columns: 1fr;
+    gap: 1rem;
+    padding: 0.5rem;
   }
 }

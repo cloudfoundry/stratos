@@ -1,422 +1,174 @@
+import { ChangeDetectionStrategy, ChangeDetectorRef, Component, EventEmitter, Input, Output, ViewEncapsulation, OnChanges, inject } from '@angular/core';
+import { ChartConfiguration, ChartEvent } from 'chart.js';
+import { BaseChartDirective } from 'ng2-charts';
+
 import {
-  Component,
-  ContentChild,
-  EventEmitter,
-  HostListener,
-  Input,
-  Output,
-  TemplateRef,
-  ViewChild,
-  ViewEncapsulation,
-} from '@angular/core';
-import {
-  BaseChartComponent,
-  calculateViewDimensions,
-  ColorHelper,
-  LineSeriesComponent,
-  ScaleType,
-  ViewDimensions,
-} from '@swimlane/ngx-charts';
-import { scaleBand, scaleLinear, scalePoint, scaleTime } from 'd3-scale';
-import { curveLinear } from 'd3-shape';
+  AppAutoscalerMetricDataLine,
+  AppAutoscalerMetricDataPoint,
+  AppAutoscalerMetricLegend,
+} from '../../../../../store/app-autoscaler.types';
 
 @Component({
   selector: 'app-autoscaler-combo-chart-component',
   templateUrl: './combo-chart.component.html',
   styleUrls: ['./combo-chart.component.scss'],
-  encapsulation: ViewEncapsulation.None
+  changeDetection: ChangeDetectionStrategy.OnPush,
+  encapsulation: ViewEncapsulation.None,
+  standalone: true,
+  imports: [
+    BaseChartDirective,
+  ]
 })
-export class AppAutoscalerComboChartComponent extends BaseChartComponent {
+export class AppAutoscalerComboChartComponent implements OnChanges {
+  private cdr = inject(ChangeDetectorRef);
 
-  @ViewChild(LineSeriesComponent) lineSeriesComponent: LineSeriesComponent;
 
-  @Input() curve: any = curveLinear;
+  @Input() width = 400;
+  @Input() height = 300;
   @Input() legend = false;
-  @Input() legendTitle = 'Legend';
-  @Input() legendPosition = 'right';
-  @Input() xAxis;
-  @Input() yAxis;
-  @Input() showXAxisLabel;
-  @Input() showYAxisLabel;
-  @Input() xAxisLabel;
-  @Input() yAxisLabel;
-  @Input() tooltipDisabled = false;
-  @Input() gradient: boolean;
+  @Input() xAxis = false;
+  @Input() yAxis = false;
+  @Input() showXAxisLabel = false;
+  @Input() showYAxisLabel = false;
   @Input() showGridLines = true;
-  @Input() activeEntries: any[] = [];
-  @Input() schemeType: ScaleType;
-  @Input() xAxisTickFormatting: any;
-  @Input() yAxisTickFormatting: any;
-  @Input() roundDomains = false;
-  @Input() colorSchemeLine: any[];
-  @Input() autoScale;
-  @Input() lineChart: any;
-  @Input() yLeftAxisScaleFactor: any;
-  @Input() rangeFillOpacity: number;
+  @Input() tooltipDisabled = false;
   @Input() animations = true;
-  @Input() yScaleMax: number;
-  @Input() metricName: string;
-  @Input() legendData: any[];
+  @Input() xAxisLabel!: string;
+  @Input() yAxisLabel!: string;
+  // Name of the metric series; used as the bar dataset label (tooltips).
+  @Input() metricName!: string;
+  // Ensure the y axis extends at least this far, so trigger thresholds
+  // near the top of the range stay visible.
+  @Input() yScaleMax?: number;
+  // Flat time-bucket points — one bar per point.
+  @Input() results: AppAutoscalerMetricDataPoint[] = [];
+  // Trigger threshold mark-lines: one flat line series per scaling rule.
+  @Input() lineChart: AppAutoscalerMetricDataLine[] = [];
+  // Colour overrides matched by name: time-bucket names for the bars plus
+  // trigger names for the threshold lines (see buildMetricColorData).
+  @Input() customColors: AppAutoscalerMetricDataPoint[] = [];
+  // Informational legend entries (trigger threshold ranges) shown instead
+  // of the dataset labels, matching the legacy custom legend.
+  @Input() legendData: AppAutoscalerMetricLegend[] = [];
+  @Input() colorSchemeLine: any;
+  @Input() scheme: any;
 
-  @Output() activate: EventEmitter<any> = new EventEmitter();
-  @Output() deactivate: EventEmitter<any> = new EventEmitter();
+  // eslint-disable-next-line @angular-eslint/no-output-native -- intentional ngx-charts API parity: re-emits the wrapped chart's (select) event under the same name
+  @Output() select = new EventEmitter();
+  @Output() activate = new EventEmitter();
+  @Output() deactivate = new EventEmitter();
 
-  @ContentChild('tooltipTemplate', { static: true }) tooltipTemplate: TemplateRef<any>;
-  @ContentChild('seriesTooltipTemplate', { static: true }) seriesTooltipTemplate: TemplateRef<any>;
+  public comboChartData: ChartConfiguration['data'] = { labels: [], datasets: [] };
+  public comboChartOptions: ChartConfiguration['options'] = this.buildOptions();
 
-  dims: ViewDimensions;
-  xScale: any;
-  yScale: any;
-  xDomain: any;
-  yDomain: any;
-  transform: string;
-  colors: ColorHelper;
-  colorsLine: ColorHelper;
-  colorsExtra: ColorHelper;
-  margin: any[] = [10, 20, 10, 20];
-  xAxisHeight = 0;
-  yAxisWidth = 0;
-  legendOptions: any;
-  legendOptionsExtra: any;
-  scaleType = 'linear';
-  xScaleLine;
-  yScaleLine;
-  xDomainLine;
-  yDomainLine;
-  seriesDomain;
-  scaledAxis;
-  combinedSeries;
-  xSet;
-  filteredDomain;
-  hoveredVertical;
-  yOrientLeft = 'left';
-  yOrientRight = 'right';
-  legendSpacing = 0;
-  bandwidth;
-  barPadding = 2;
-
-  trackBy(index, item): string {
-    return item.name;
+  ngOnChanges() {
+    this.updateChartData();
+    this.cdr.markForCheck();
   }
 
-  update(): void {
-    super.update();
-    if (!this.yAxis) {
-      this.legendSpacing = 0;
-    } else {
-      this.legendSpacing = 50;
-    }
+  private updateChartData() {
+    const results = this.results ?? [];
+    const lines = this.lineChart ?? [];
+    const colorByName = new Map<string, string>((this.customColors ?? []).map(item => [item.name, String(item.value)]));
 
-    this.dims = calculateViewDimensions({
-      width: this.legend ? this.width - this.legendSpacing : this.width,
-      height: this.height,
-      margins: this.margin,
-      showXAxis: this.xAxis,
-      showYAxis: this.yAxis,
-      xAxisHeight: this.xAxisHeight,
-      yAxisWidth: this.yAxisWidth,
-      showXLabel: this.showXAxisLabel,
-      showYLabel: this.showYAxisLabel,
-      showLegend: this.legend,
-      legendType: this.schemeType,
+    // Bars: one per pre-formatted time bucket, coloured by trigger state.
+    const barFallback: string = this.scheme?.domain?.[0] ?? '#01579b';
+    const datasets: ChartConfiguration['data']['datasets'] = [{
+      type: 'bar',
+      label: this.metricName,
+      data: results.map(point => Number(point.value)),
+      backgroundColor: results.map(point => colorByName.get(point.name) || barFallback),
+      yAxisID: 'y',
+    }];
+
+    // Threshold mark-lines share the bars' unit and scale, so they render
+    // on the same axis; colours come from the trigger colour map.
+    const lineFallback: string[] = this.colorSchemeLine?.domain ?? ['#01579b'];
+    lines.forEach((series, index) => {
+      const color = colorByName.get(series.name) || lineFallback[index % lineFallback.length];
+      datasets.push({
+        type: 'line',
+        label: series.name,
+        data: series.series.map(point => Number(point.value)),
+        borderColor: color,
+        backgroundColor: color,
+        fill: false,
+        pointRadius: 0,
+        tension: 0,
+        yAxisID: 'y',
+      });
     });
 
-    this.xScale = this.getXScale();
-    this.yScale = this.getYScale();
-
-    // line chart
-    this.xDomainLine = this.getXDomainLine();
-    if (this.filteredDomain) {
-      this.xDomainLine = this.filteredDomain;
-    }
-
-    this.yDomainLine = this.getYDomain();
-    this.seriesDomain = this.getSeriesDomain();
-
-    this.xScaleLine = this.getXScaleLine(this.xDomainLine, this.dims.width);
-    this.yScaleLine = this.getYScaleLine(this.yDomainLine, this.dims.height);
-
-    this.setColors();
-    this.legendOptions = this.getLegendOptions();
-    this.legendOptionsExtra = this.getLegendOptionsExtra();
-
-    this.transform = `translate(${this.dims.xOffset} , ${this.margin[0]})`;
-  }
-
-  deactivateAll() {
-    this.activeEntries = [...this.activeEntries];
-    for (const entry of this.activeEntries) {
-      this.deactivate.emit({ value: entry, entries: [] });
-    }
-    this.activeEntries = [];
-  }
-
-  @HostListener('mouseleave')
-  hideCircles(): void {
-    this.hoveredVertical = null;
-    this.deactivateAll();
-  }
-
-  updateHoveredVertical(item): void {
-    this.hoveredVertical = item.value;
-    this.deactivateAll();
-  }
-
-  updateDomain(domain): void {
-    this.filteredDomain = domain;
-    this.xDomainLine = this.filteredDomain;
-    this.xScaleLine = this.getXScaleLine(this.xDomainLine, this.dims.width);
-  }
-
-  getSeriesDomain(): any[] {
-    this.combinedSeries = [];
-    this.combinedSeries.push({
-      name: this.metricName,
-      series: this.results
-    });
-    return this.combinedSeries.map(d => d.name);
-  }
-
-  isDate(value): boolean {
-    if (value instanceof Date) {
-      return true;
-    }
-
-    return false;
-  }
-
-  getScaleType(values): string {
-    let date = true;
-    let num = true;
-
-    for (const value of values) {
-      if (!this.isDate(value)) {
-        date = false;
-      }
-
-      if (typeof value !== 'number') {
-        num = false;
-      }
-    }
-
-    if (date) {
-      return 'time';
-    }
-    if (num) {
-      return 'linear';
-    }
-    return 'ordinal';
-  }
-
-  getXDomainLine(): any[] {
-    let values = [];
-
-    for (const results of this.lineChart) {
-      for (const d of results.series) {
-        if (!values.includes(d.name)) {
-          values.push(d.name);
-        }
-      }
-    }
-
-    this.scaleType = this.getScaleType(values);
-    let domain = [];
-
-    if (this.scaleType === 'time') {
-      const min = Math.min(...values);
-      const max = Math.max(...values);
-      domain = [min, max];
-    } else if (this.scaleType === 'linear') {
-      values = values.map(v => Number(v));
-      const min = Math.min(...values);
-      const max = Math.max(...values);
-      domain = [min, max];
-    } else {
-      domain = values;
-    }
-
-    this.xSet = values;
-    return domain;
-  }
-
-  getYDomainLine(): any[] {
-    const domain = [];
-
-    for (const results of this.lineChart) {
-      for (const d of results.series) {
-        if (domain.indexOf(d.value) < 0) {
-          domain.push(d.value);
-        }
-        if (d.min !== undefined && domain.indexOf(d.min) < 0) {
-          domain.push(d.min);
-        }
-        if (d.max !== undefined && domain.indexOf(d.max) < 0) {
-          domain.push(d.max);
-        }
-      }
-    }
-
-    const min = Math.min(...domain);
-    const max = this.yScaleMax
-      ? this.yScaleMax
-      : Math.max(...domain);
-    return [min, max];
-  }
-
-  getXScaleLine(domain, width): any {
-    let scale;
-    if (this.bandwidth === undefined) {
-      this.bandwidth = (this.dims.width - this.barPadding);
-    }
-
-    if (this.scaleType === 'time') {
-      scale = scaleTime()
-        .range([0, width])
-        .domain(domain);
-    } else if (this.scaleType === 'linear') {
-      scale = scaleLinear()
-        .range([0, width])
-        .domain(domain);
-
-      if (this.roundDomains) {
-        scale = scale.nice();
-      }
-    } else if (this.scaleType === 'ordinal') {
-      scale = scalePoint()
-        .range([this.bandwidth / 2, width - this.bandwidth / 2])
-        .domain(domain);
-    }
-
-    return scale;
-  }
-
-  getYScaleLine(domain, height): any {
-    const scale = scaleLinear()
-      .range([height, 0])
-      .domain(domain);
-
-    return this.roundDomains ? scale.nice() : scale;
-  }
-
-  getXScale(): any {
-    this.xDomain = this.getXDomain();
-    const spacing = this.xDomain.length / (this.dims.width / this.barPadding + 1);
-    return scaleBand()
-      .range([0, this.dims.width])
-      .paddingInner(spacing)
-      .domain(this.xDomain);
-  }
-
-  getYScale(): any {
-    this.yDomain = this.getYDomain();
-    const scale = scaleLinear()
-      .range([this.dims.height, 0])
-      .domain(this.yDomain);
-    return this.roundDomains ? scale.nice() : scale;
-  }
-
-  getXDomain(): any[] {
-    return this.results.map(d => d.name);
-  }
-
-  getYDomain() {
-    const values = this.results.map(d => d.value);
-    const min = Math.min(0, ...values);
-    const max = this.yScaleMax
-      ? Math.max(this.yScaleMax, ...values)
-      : Math.max(0, ...values);
-    if (this.yLeftAxisScaleFactor) {
-      const minMax = this.yLeftAxisScaleFactor(min, max);
-      return [Math.min(0, minMax.min), minMax.max];
-    } else {
-      return [min, max];
-    }
-  }
-
-  onClick(data) {
-    this.select.emit(data);
-  }
-
-  setColors(): void {
-    let domain;
-    if (this.schemeType === 'ordinal') {
-      domain = this.xDomain;
-    } else {
-      domain = this.yDomain;
-    }
-    this.colors = new ColorHelper(this.scheme, this.schemeType, domain, this.customColors);
-    this.colorsLine = new ColorHelper({ domain: this.colorSchemeLine, name: "colorsSchemeLine", selectable: true, group: this.schemeType }, this.schemeType, domain, this.customColors);
-    this.colorsExtra = new ColorHelper(this.scheme, this.schemeType, domain, this.customColors);
-  }
-
-  getLegendOptions() {
-    const opts = {
-      scaleType: this.schemeType,
-      colors: undefined,
-      domain: this.seriesDomain,
-      title: undefined,
-      position: this.legendPosition
+    this.comboChartData = {
+      labels: results.map(point => point.name),
+      datasets,
     };
-    if (opts.scaleType === 'ordinal') {
-      opts.colors = this.colorsLine;
-      opts.title = this.legendTitle;
-    } else {
-      opts.colors = this.colors.scale;
-    }
-    return opts;
+    this.comboChartOptions = this.buildOptions();
   }
 
-  getLegendOptionsExtra() {
-    const opts = {
-      scaleType: this.schemeType,
-      colors: this.colorsExtra,
-      domain: [],
-      title: this.legendTitle,
-      position: this.legendPosition
+  private buildOptions(): ChartConfiguration['options'] {
+    return {
+      responsive: true,
+      maintainAspectRatio: false,
+      animation: this.animations ? undefined : false,
+      interaction: {
+        intersect: false,
+      },
+      scales: {
+        x: {
+          display: this.xAxis,
+          grid: {
+            display: false,
+          },
+          title: {
+            display: this.showXAxisLabel && !!this.xAxisLabel,
+            text: this.xAxisLabel ?? '',
+          },
+        },
+        y: {
+          type: 'linear',
+          display: this.yAxis,
+          position: 'left',
+          beginAtZero: true,
+          suggestedMax: this.yScaleMax,
+          grid: {
+            display: this.showGridLines,
+          },
+          title: {
+            display: this.showYAxisLabel && !!this.yAxisLabel,
+            text: this.yAxisLabel ?? '',
+          },
+        },
+      },
+      plugins: {
+        legend: {
+          display: this.legend,
+          // The legend lists trigger threshold ranges (informational),
+          // not toggleable datasets — mirror the legacy custom legend.
+          ...(this.legendData?.length ? {
+            onClick: () => { /* informational entries — nothing to toggle */ },
+            labels: {
+              generateLabels: () => this.legendData.map(item => ({
+                text: item.name,
+                fillStyle: item.value,
+                strokeStyle: item.value,
+                lineWidth: 0,
+              })),
+            },
+          } : {}),
+        },
+        tooltip: {
+          enabled: !this.tooltipDisabled,
+        },
+      },
     };
-    opts.colors.colorDomain = [];
-    opts.colors.customColors = this.legendData;
-    this.legendData.map((item) => {
-      opts.colors.colorDomain.push(item.value);
-      (opts.colors.domain as any[]).push(item.name);
-      opts.domain.push(item.name);
-    });
-    return opts;
   }
 
-  updateLineWidth(width): void {
-    this.bandwidth = width;
-  }
-  updateYAxisWidth({ width }): void {
-    this.yAxisWidth = width + 20;
-    this.update();
+  onChartClick(event: ChartEvent | undefined, active: object[] | undefined) {
+    this.select.emit({ event, active });
   }
 
-  updateXAxisHeight({ height }): void {
-    this.xAxisHeight = height;
-    this.update();
-  }
-
-  onActivate(item) {
-    const idx = this.activeEntries.findIndex(d => {
-      return d.name === item.name && d.value === item.value && d.series === item.series;
-    });
-    if (idx > -1) {
-      return;
-    }
-
-    this.activeEntries = [item, ...this.activeEntries];
-    this.activate.emit({ value: item, entries: this.activeEntries });
-  }
-
-  onDeactivate(item) {
-    const idx = this.activeEntries.findIndex(d => {
-      return d.name === item.name && d.value === item.value && d.series === item.series;
-    });
-
-    this.activeEntries.splice(idx, 1);
-    this.activeEntries = [...this.activeEntries];
-
-    this.deactivate.emit({ value: item, entries: this.activeEntries });
+  onChartHover(event: ChartEvent, active: object[]) {
+    this.activate.emit({ event, active });
   }
 }

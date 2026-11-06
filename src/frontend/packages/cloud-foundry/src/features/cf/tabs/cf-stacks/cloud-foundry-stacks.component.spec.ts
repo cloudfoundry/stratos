@@ -1,21 +1,67 @@
-import { ComponentFixture, TestBed, waitForAsync } from '@angular/core/testing';
+import { ComponentFixture, TestBed } from '@angular/core/testing';
+import { importProvidersFrom, provideZonelessChangeDetection } from '@angular/core';
+import { provideHttpClient } from '@angular/common/http';
+import { provideHttpClientTesting } from '@angular/common/http/testing';
+import { provideRouter } from '@angular/router';
+import { provideNoopAnimations } from '@angular/platform-browser/animations';
+import { describe, it, expect, beforeEach } from 'vitest';
 
-import { generateCfBaseTestModules } from '../../../../../test-framework/cloud-foundry-endpoint-service.helper';
+import {
+  TEST_CATALOGUE_ENTITIES,
+  generateStratosEntities,
+  EntityCatalogTestModule,
+  EntityCatalogHelper,
+  EntityCatalogHelpers
+} from '@stratosui/store';
+import { STORE_TEST_PROVIDERS, testSCFEndpointGuid, populateStoreWithTestEndpoint } from '@stratosui/store/testing';
+import { generateCFEntities, generateTestCfEndpointServiceProvider } from '@test-framework/cf';
 import { ActiveRouteCfOrgSpace } from '../../cf-page.types';
-import { CloudFoundryStacksComponent } from './cloud-foundry-stacks.component';
+import { CloudFoundryStacksComponent } from "./cloud-foundry-stacks.component";
 
 describe('CloudFoundryStacksComponent', () => {
   let component: CloudFoundryStacksComponent;
   let fixture: ComponentFixture<CloudFoundryStacksComponent>;
 
-  beforeEach(waitForAsync(() => {
-    TestBed.configureTestingModule({
-      declarations: [CloudFoundryStacksComponent],
-      imports: generateCfBaseTestModules(),
-      providers: [ActiveRouteCfOrgSpace]
-    })
-      .compileComponents();
-  }));
+  beforeEach(async () => {
+    await TestBed.configureTestingModule({
+      imports: [
+        CloudFoundryStacksComponent,
+      ],
+      providers: [
+        provideZonelessChangeDetection(),
+        provideRouter([]),
+        provideHttpClient(),
+        provideHttpClientTesting(),
+        provideNoopAnimations(),
+        ...STORE_TEST_PROVIDERS,
+        importProvidersFrom(
+          EntityCatalogTestModule
+        ),
+        {
+          provide: TEST_CATALOGUE_ENTITIES,
+          useValue: [
+            ...generateStratosEntities(),
+            ...generateCFEntities()
+          ]
+        },
+        ...generateTestCfEndpointServiceProvider(testSCFEndpointGuid),
+        {
+          provide: ActiveRouteCfOrgSpace,
+          useValue: {
+            cfGuid: testSCFEndpointGuid,
+            orgGuid: testSCFEndpointGuid,
+            spaceGuid: testSCFEndpointGuid
+          }
+        },
+      ]
+    }).compileComponents();
+
+    // Initialize EntityCatalogHelper
+    const entityCatalogHelper = TestBed.inject(EntityCatalogHelper);
+    EntityCatalogHelpers.SetEntityCatalogHelper(entityCatalogHelper);
+
+    populateStoreWithTestEndpoint();
+  });
 
   beforeEach(() => {
     fixture = TestBed.createComponent(CloudFoundryStacksComponent);

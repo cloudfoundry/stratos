@@ -1,5 +1,7 @@
 <app-sidepanel-preview title="{{title}}">
-  <div *ngIf="resource">
-    <app-resource-alert-view [alerts]="resource"></app-resource-alert-view>  
-  </div>
+  @if (resource) {
+    <div>
+      <app-resource-alert-view [alerts]="resource"></app-resource-alert-view>
+    </div>
+  }
 </app-sidepanel-preview>

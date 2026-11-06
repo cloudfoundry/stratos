@@ -1,5 +1,10 @@
 <app-page-header>
-    <h1>Kubernetes</h1>
+  <h1>Kubernetes</h1>
 </app-page-header>
-<app-list *ngIf="(connectedEndpoints$ | async) > 1">
-</app-list>
+<app-duplicate-url-banner
+  [endpoints$]="connectedKubeEndpoints$"
+  message="Several of the endpoints below are views of the same cluster.">
+</app-duplicate-url-banner>
+@if (((connectedEndpoints$ | async) ?? 0) > 1) {
+  <app-signal-list [config]="endpointsSignalConfig.config" class="flex-1 min-h-0"></app-signal-list>
+}

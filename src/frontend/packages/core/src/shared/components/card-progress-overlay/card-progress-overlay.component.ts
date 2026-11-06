@@ -1,15 +1,22 @@
-import { Component, Input } from '@angular/core';
+import { CommonModule } from '@angular/common';
+import { ChangeDetectionStrategy, Component, Input  } from '@angular/core';
 import { Observable } from 'rxjs';
+import { AppBusyComponent } from '../busy-indicator/busy-indicator.component';
 
 @Component({
   selector: 'app-card-progress-overlay',
+  standalone: true,
+  imports: [
+    AppBusyComponent,
+    CommonModule
+  ],
   templateUrl: './card-progress-overlay.component.html',
-  styleUrls: ['./card-progress-overlay.component.scss']
+  changeDetection: ChangeDetectionStrategy.OnPush
 })
 export class CardProgressOverlayComponent {
 
-  @Input() label: string;
+  @Input() label!: string;
 
-  @Input() busy: Observable<boolean>;
+  @Input() busy!: Observable<boolean>;
 
 }

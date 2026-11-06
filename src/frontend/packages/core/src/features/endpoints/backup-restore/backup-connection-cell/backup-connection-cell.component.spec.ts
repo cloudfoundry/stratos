@@ -1,7 +1,9 @@
-import { ComponentFixture, TestBed, waitForAsync } from '@angular/core/testing';
-
-import { EndpointModel } from '../../../../../../store/src/types/endpoint.types';
-import { BaseTestModulesNoShared } from '../../../../../test-framework/core-test.helper';
+import { ComponentFixture, TestBed } from '@angular/core/testing';
+import { provideZonelessChangeDetection } from '@angular/core';
+import { describe, it, expect, beforeEach, afterEach, beforeAll, afterAll, vi } from 'vitest';
+import { EndpointModel } from '@stratosui/store';
+import { STORE_TEST_PROVIDERS } from '@stratosui/store/testing';
+import { BaseTestModulesNoShared, BASE_TEST_PROVIDERS } from "@test-framework/core-test.helper";
 import { BackupEndpointsService } from '../backup-endpoints.service';
 import { BackupConnectionCellComponent } from './backup-connection-cell.component';
 
@@ -9,20 +11,21 @@ describe('BackupConnectionCellComponent', () => {
   let component: BackupConnectionCellComponent;
   let fixture: ComponentFixture<BackupConnectionCellComponent>;
 
-  beforeEach(waitForAsync(() => {
+  beforeEach(() => {
     TestBed.configureTestingModule({
-      declarations: [
+      imports: [
+        ...BaseTestModulesNoShared,
         BackupConnectionCellComponent,
       ],
-      imports: [
-        ...BaseTestModulesNoShared
-      ],
       providers: [
-        BackupEndpointsService
+        ...BASE_TEST_PROVIDERS,
+        ...(STORE_TEST_PROVIDERS || []),
+        BackupEndpointsService,
+        provideZonelessChangeDetection(),
       ]
-    })
-      .compileComponents();
-  }));
+    });
+    TestBed.compileComponents();
+  });
 
   beforeEach(() => {
     fixture = TestBed.createComponent(BackupConnectionCellComponent);

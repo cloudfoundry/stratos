@@ -1,24 +1,28 @@
-import { Component, Input, OnChanges, OnInit } from '@angular/core';
-import { Store } from '@ngrx/store';
-import { RouterNav, AppState } from '@stratosui/store';
+import { Component, Input, OnChanges, OnInit, inject, ChangeDetectionStrategy } from '@angular/core';
+import { CommonModule } from '@angular/common';
+import { Router } from '@angular/router';
 
 @Component({
   selector: 'app-card-boolean-metric',
   templateUrl: './card-boolean-metric.component.html',
-  styleUrls: ['./card-boolean-metric.component.scss']
+  changeDetection: ChangeDetectionStrategy.OnPush,
+  standalone: true,
+  imports: [
+    CommonModule
+  ]
 })
 export class CardBooleanMetricComponent implements OnInit, OnChanges {
 
-  @Input() icon: string;
-  @Input() iconFont: string;
-  @Input() label: string;
-  @Input() value: string;
+  @Input() icon!: string;
+  @Input() iconFont!: string;
+  @Input() label!: string;
+  @Input() value!: string;
   @Input() textOnly = false;
-  @Input() link: () => void | string;
+  @Input() link?: () => void | string;
 
-  formattedValue: string;
+  formattedValue!: string;
 
-  constructor(private store: Store<AppState>) { }
+  private router = inject(Router);
 
   ngOnInit() {
     this.format();
@@ -50,9 +54,9 @@ export class CardBooleanMetricComponent implements OnInit, OnChanges {
 
   goToLink() {
     if (typeof (this.link) === 'string') {
-      this.store.dispatch(new RouterNav({ path: [this.link] }));
+      this.router.navigate([this.link]);
     } else {
-      this.link();
+      this.link?.();
     }
   }
 }

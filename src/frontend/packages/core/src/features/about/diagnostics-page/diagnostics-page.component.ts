@@ -1,78 +1,89 @@
-import { Component, OnInit } from '@angular/core';
+import { ChangeDetectionStrategy, Component, OnInit, VERSION, inject } from '@angular/core';
+import { CommonModule } from '@angular/common';
+import { toObservable } from '@angular/core/rxjs-interop';
 import { Meta } from '@angular/platform-browser';
-import { Store } from '@ngrx/store';
-import { GeneralEntityAppState, AuthState, SessionData } from '@stratosui/store';
+import { Diagnostics, SessionData } from '@stratosui/store';
 import { Observable } from 'rxjs';
 import { filter, map } from 'rxjs/operators';
+
+import { AuthSignalService } from '../../../core/signals/auth-signal.service';
+import { BooleanIndicatorComponent } from '../../../shared/components/boolean-indicator/boolean-indicator.component';
+import { CardWrapperComponent } from '../../../shared/components/cards/card/card.component';
+import { CustomIconComponent } from '../../../shared/components/custom-material/custom-material.component';
+import { InfoCardComponent } from '../../../shared/components/info-card/info-card.component';
+import { BUILD_INFO } from '../../../environments/build-info';
 
 @Component({
   selector: 'app-diagnostics-page',
   templateUrl: './diagnostics-page.component.html',
-  styleUrls: ['./diagnostics-page.component.scss']
+  standalone: true,
+  imports: [
+    CommonModule,
+    BooleanIndicatorComponent,
+    CardWrapperComponent,
+    CustomIconComponent,
+    InfoCardComponent
+  ],
+  changeDetection: ChangeDetectionStrategy.OnPush
 })
 export class DiagnosticsPageComponent implements OnInit {
+  private meta = inject(Meta);
+  private auth = inject(AuthSignalService);
 
-  sessionData$: Observable<SessionData>;
-  versionNumber$: Observable<string>;
-  userIsAdmin$: Observable<boolean>;
-  helmLastModified$: Observable<Date>;
 
-  public breadcrumbs = [
-    {
-      breadcrumbs: [{ value: 'About', routerLink: '/about' }]
-    }
-  ];
+  // toObservable() requires an injection context — bridge the signal here
+  // (field initializer runs in DI context) rather than in ngOnInit (which is not).
+  sessionData$: Observable<SessionData & { diagnostics: Diagnostics; }> = toObservable(this.auth.sessionData).pipe(
+    filter((sessionData): sessionData is SessionData & { diagnostics: Diagnostics; } => !!sessionData && !!sessionData.diagnostics)
+  );
+  versionNumber$!: Observable<string>;
+  userIsAdmin$!: Observable<boolean>;
+  helmLastModified$!: Observable<Date>;
 
-  public gitProject: string;
-  public gitBranch: string;
-  public gitCommit: string;
-  public buildDate: string;
-  public gitHubRepository: string;
-  public gitHubRepositoryLink: string;
-  public gitBranchLink: string;
-  public gitCommitLink: string;
+  angularVersion = VERSION.full;
+  buildInfo = BUILD_INFO;
 
-  constructor(
-    private meta: Meta,
-    private store: Store<GeneralEntityAppState>,
-  ) { }
+  // These are populated by ngOnInit before the template reads them.
+  public gitProject!: string; // strict: assigned in ngOnInit
+  public gitBranch: string | null = null; // may be cleared when branch is 'HEAD'
+  public gitCommit!: string; // strict: assigned in ngOnInit
+  public buildDate!: string; // strict: assigned in ngOnInit
+  public gitHubRepository!: string; // strict: assigned in ngOnInit
+  // Links are only built when the corresponding info is present.
+  public gitHubRepositoryLink?: string;
+  public gitBranchLink?: string;
+  public gitCommitLink?: string;
 
   ngOnInit() {
 
     const helmLastModifiedRegEx = /seconds:([0-9]*)/;
 
-    this.sessionData$ = this.store.select(s => s.auth).pipe(
-      filter(auth => !!(auth && auth.sessionData)),
-      filter(auth => !!(auth.sessionData.diagnostics)),
-      map((auth: AuthState) => auth.sessionData)
-    );
-
     this.userIsAdmin$ = this.sessionData$.pipe(
-      map(session => session.user && session.user.admin)
+      map(session => !!(session.user && session.user.admin))
     );
 
     this.versionNumber$ = this.sessionData$.pipe(
       map((sessionData: SessionData) => {
-        const versionNumber = sessionData.version.proxy_version;
+        const versionNumber = sessionData.version?.proxy_version ?? '';
         return versionNumber.split('-')[0];
       })
     );
 
     this.helmLastModified$ = this.sessionData$.pipe(
       map((sessionData: SessionData) => {
-        const lastModified = sessionData.diagnostics.helmLastModified;
-        const match = helmLastModifiedRegEx.exec(lastModified);
-        if (match.length === 2) {
+        const lastModified = sessionData.diagnostics?.helmLastModified;
+        const match = lastModified ? helmLastModifiedRegEx.exec(lastModified) : null;
+        if (match && match.length === 2) {
           return new Date(parseInt(match[1], 10) * 1000);
         }
         return new Date(0);
       })
     );
 
-    this.gitProject = this.getMeta('stratos_git_project');
-    this.gitBranch = this.getMeta('stratos_git_branch');
-    this.gitCommit = this.getMeta('stratos_git_commit');
-    this.buildDate = this.getMeta('stratos_build_date');
+    this.gitProject = this.buildInfo.gitProject || this.getMeta('stratos_git_project');
+    this.gitBranch = this.buildInfo.gitBranch || this.getMeta('stratos_git_branch');
+    this.gitCommit = this.buildInfo.gitCommit || this.getMeta('stratos_git_commit');
+    this.buildDate = this.buildInfo.buildDate || this.getMeta('stratos_build_date');
 
     // Don't show branch if it is recorded as HEAD
     if (this.gitBranch === 'HEAD') {
@@ -80,12 +91,12 @@ export class DiagnosticsPageComponent implements OnInit {
     }
 
     this.gitHubRepository = this.getGitHubProject(this.gitProject);
-    if (!!this.gitHubRepository) {
+    if (this.gitHubRepository) {
       this.gitHubRepositoryLink = `https://github.com/${this.gitHubRepository}`;
-      if (!!this.gitBranch) {
+      if (this.gitBranch) {
         this.gitBranchLink = `https://github.com/${this.gitHubRepository}/tree/${this.gitBranch}`;
       }
-      if (!!this.gitCommit) {
+      if (this.gitCommit) {
         this.gitCommitLink = `https://github.com/${this.gitHubRepository}/commit/${this.gitCommit}`;
       }
     }
@@ -105,6 +116,13 @@ export class DiagnosticsPageComponent implements OnInit {
       return projectUrl.substr(19);
     }
     return '';
+  }
+
+  getMigrationSummary(migrations: any[]): string {
+    if (!migrations || migrations.length === 0) return 'None';
+    const applied = migrations.filter(m => m.is_applied).length;
+    if (applied === migrations.length) return `${migrations.length} applied`;
+    return `${applied}/${migrations.length} applied`;
   }
 
   private getMeta(name: string): string {

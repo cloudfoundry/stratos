@@ -1,56 +1,102 @@
 import { HttpClient } from '@angular/common/http';
-import { Component, NgZone, OnDestroy, OnInit } from '@angular/core';
+import {Component, NgZone, OnDestroy, OnInit, computed, inject, ChangeDetectionStrategy, Injector, runInInjectionContext } from '@angular/core';
+import { toSignal, toObservable } from '@angular/core/rxjs-interop';
+import { CommonModule } from '@angular/common';
 import { SafeResourceUrl } from '@angular/platform-browser';
-import { Router } from '@angular/router';
-import { Store } from '@ngrx/store';
-import { combineLatest, interval, Observable, Subscription } from 'rxjs';
-import { first, map, startWith } from 'rxjs/operators';
+import { Router, RouterModule } from '@angular/router';
+import { interval, Observable, Subscription } from 'rxjs';
+import { map, startWith } from 'rxjs/operators';
 
 import { safeUnsubscribe } from '../../../../../core/src/core/utils.service';
 import {
   IChartThresholds,
   ISimpleUsageChartData,
 } from '../../../../../core/src/shared/components/simple-usage-chart/simple-usage-chart.types';
-import { PaginationMonitorFactory } from '../../../../../store/src/monitors/pagination-monitor.factory';
-import { AppState, entityCatalog } from '../../../../../store/src/public-api';
-import { getCurrentPageRequestInfo } from '../../../../../store/src/reducers/pagination-reducer/pagination-reducer.types';
-import { PaginatedAction, PaginationEntityState } from '../../../../../store/src/types/pagination.types';
-import { kubeEntityCatalog } from '../../kubernetes-entity-generator';
+import { SimpleUsageChartComponent } from '../../../../../core/src/shared/components/simple-usage-chart/simple-usage-chart.component';
+import { PageSubNavComponent } from '../../../../../core/src/shared/components/page-sub-nav/page-sub-nav.component';
+import { LoadingPageComponent } from '../../../../../core/src/shared/components/loading-page/loading-page.component';
+import {
+  CardNumberMetricComponent,
+  EntitySummaryTitleComponent,
+  MetadataItemComponent,
+  TileComponent,
+  TileGridComponent,
+  TileGroupComponent,
+} from '@stratosui/core';
+import { entityCatalog } from '@stratosui/store';
+import { KubePodDataService } from '../../../services/domain-data/kube-pod-data.service';
+import { KubeNodeDataService } from '../../../services/domain-data/kube-node-data.service';
+import { KubeNamespaceDataService } from '../../../services/domain-data/kube-namespace-data.service';
+import { KubernetesNode, KubernetesPod } from '../../store/kube.types';
 import { CaaspNodesData, KubernetesEndpointService } from '../../services/kubernetes-endpoint.service';
 
-interface IValueLabels {
-  usedLabel?: string;
-  remainingLabel?: string;
-  unknownLabel?: string;
-  warningText?: string;
-}
+const cssVar = (n: string) => getComputedStyle(document.documentElement).getPropertyValue(n).trim();
+
 interface IEndpointDetails {
-  imagePath: string;
-  label: string;
+  // imagePath/label derive from the endpoint definition's optional
+  // logoUrl/label fields, so both may legitimately be absent.
+  imagePath?: string;
+  label?: string;
   name: string;
 }
 
 @Component({
   selector: 'app-kubernetes-summary',
   templateUrl: './kubernetes-summary.component.html',
-  styleUrls: ['./kubernetes-summary.component.scss']
+  styleUrls: ['./kubernetes-summary.component.scss'],
+  changeDetection: ChangeDetectionStrategy.OnPush,
+  standalone: true,
+  imports: [
+    CommonModule,
+    RouterModule,
+    SimpleUsageChartComponent,
+    PageSubNavComponent,
+    LoadingPageComponent,
+    EntitySummaryTitleComponent,
+    TileGridComponent,
+    TileGroupComponent,
+    TileComponent,
+    CardNumberMetricComponent,
+    MetadataItemComponent
+  ]
 })
 export class KubernetesSummaryTabComponent implements OnInit, OnDestroy {
-  public podCount$: Observable<number>;
-  public nodeCount$: Observable<number>;
-  public namespaceCount$: Observable<number>;
+  // strict: the count/chart/loading streams below are all assigned in ngOnInit
+  // before the template subscribes to them
+  public podCount$!: Observable<number | null>;
+  public nodeCount$!: Observable<number | null>;
+  public namespaceCount$!: Observable<number | null>;
+
+  // Resolve adaptive theme colors once at construction. These feed
+  // SimpleUsageChart domains; the component is not rebuilt on a live theme
+  // toggle, so the colors reflect the theme active when this view loaded.
+  private successColor = cssVar('--color-success');
+  private successTint = `color-mix(in srgb, ${this.successColor} 18%, transparent)`;
+  private neutralTrack = `color-mix(in srgb, ${cssVar('--content-text')} 15%, transparent)`;
 
   public highUsageColors = {
-    domain: ['#00000026', '#00af00']
+    domain: [this.neutralTrack, this.successColor]
   };
   public normalUsageColors = {
-    domain: ['#00af00', '#00af002e']
+    domain: [this.successColor, this.successTint]
   };
   public chartHeight = '150px';
+
+  public kubeEndpointService = inject(KubernetesEndpointService);
+  public httpClient = inject(HttpClient);
+  private podData = inject(KubePodDataService);
+  private nodeData = inject(KubeNodeDataService);
+  private namespaceData = inject(KubeNamespaceDataService);
+  private ngZone = inject(NgZone);
+  private router = inject(Router);
+  private injector = inject(Injector);
+
   public endpointDetails$: Observable<IEndpointDetails> = this.kubeEndpointService.endpoint$.pipe(
     map(endpoint => {
-      const endpointConfig = entityCatalog.getEndpoint(endpoint.entity.cnsi_type, endpoint.entity.sub_type);
-      const { logoUrl, label } = endpointConfig.definition;
+      // strict: this view only renders for a connected kubernetes endpoint,
+      // so its model always carries a cnsi_type
+      const endpointConfig = entityCatalog.getEndpoint(endpoint.entity.cnsi_type!, endpoint.entity.sub_type);
+      const { logoUrl, label } = endpointConfig?.definition ?? {};
       // const { imagePath, label } = entityCatalog.getEndpoint(endpoint.entity.cnsi_type, endpoint.entity.sub_type);
 
       // const { imagePath, label } = getEndpointType(endpoint.entity.cnsi_type, endpoint.entity.sub_type);
@@ -61,19 +107,22 @@ export class KubernetesSummaryTabComponent implements OnInit, OnDestroy {
       };
     })
   );
-  source: SafeResourceUrl;
+  source?: SafeResourceUrl;
 
-  dashboardLink: string;
-  kubeTerminalLink: string;
+  // strict: assigned in ngOnInit before the template reads them
+  dashboardLink!: string;
+  kubeTerminalLink!: string;
 
-  public podCapacity$: Observable<ISimpleUsageChartData>;
-  public diskPressure$: Observable<ISimpleUsageChartData>;
-  public memoryPressure$: Observable<ISimpleUsageChartData>;
-  public outOfDisk$: Observable<ISimpleUsageChartData>;
-  public nodesReady$: Observable<ISimpleUsageChartData>;
-  public networkUnavailable$: Observable<ISimpleUsageChartData>;
-  public kubeNodeVersions$: Observable<string>;
-  public caaspData$: Observable<CaaspNodesData>;
+  public podCapacity$!: Observable<ISimpleUsageChartData>;
+  public diskPressure$!: Observable<ISimpleUsageChartData>;
+  public memoryPressure$!: Observable<ISimpleUsageChartData>;
+  public outOfDisk$!: Observable<ISimpleUsageChartData>;
+  public nodesReady$!: Observable<ISimpleUsageChartData>;
+  // getNodeStatusCount decorates the chart data with a `supported` flag —
+  // NetworkUnavailable is only reported by some K8S versions.
+  public networkUnavailable$!: Observable<ISimpleUsageChartData & { supported?: boolean }>;
+  public kubeNodeVersions$!: Observable<string>;
+  public caaspData$!: Observable<CaaspNodesData | null>;
 
   public pressureChartThresholds: IChartThresholds = {
     danger: 90,
@@ -96,17 +145,8 @@ export class KubernetesSummaryTabComponent implements OnInit, OnDestroy {
 
   private polls: Subscription[] = [];
 
-  public isLoading$: Observable<boolean>;
-
-  constructor(
-    public kubeEndpointService: KubernetesEndpointService,
-    public httpClient: HttpClient,
-    public paginationMonitorFactory: PaginationMonitorFactory,
-    private store: Store<AppState>,
-    private ngZone: NgZone,
-    private router: Router,
-  ) {
-  }
+  // strict: assigned in ngOnInit before the template subscribes
+  public isLoading$!: Observable<boolean>;
 
   // Go the Kubernetes Dashboard configuration page
   public configureDashboard() {
@@ -116,15 +156,19 @@ export class KubernetesSummaryTabComponent implements OnInit, OnDestroy {
   ngOnInit() {
     const guid = this.kubeEndpointService.baseKube.guid;
 
-    const podsObs = kubeEntityCatalog.pod.store.getPaginationService(guid);
-    const pods$ = podsObs.entities$;
-    this.poll(kubeEntityCatalog.pod.actions.getMultiple(guid), podsObs.pagination$);
-    const nodesObs = kubeEntityCatalog.node.store.getPaginationService(guid);
-    const nodes$ = nodesObs.entities$;
-    this.poll(kubeEntityCatalog.node.actions.getMultiple(guid), nodesObs.pagination$);
-    const namespacesObs = kubeEntityCatalog.namespace.store.getPaginationService(guid);
-    const namespaces$ = namespacesObs.entities$;
-    this.poll(kubeEntityCatalog.namespace.actions.getMultiple(guid), namespacesObs.pagination$);
+    // Cluster lists now come from the signal-native data services. Bridge
+    // each signal to an Observable for the existing kubeEndpointService
+    // count/capacity/status helpers. The pod/node helpers are typed against
+    // the legacy KubernetesPod/KubernetesNode shapes; the runtime k8s JSON is
+    // identical, so cast the native-shape bridges at this boundary.
+    const pods$ = toObservable(this.podData.podsInCluster(guid), { injector: this.injector }) as unknown as Observable<KubernetesPod[]>;
+    const nodes$ = toObservable(this.nodeData.nodesInCluster(guid), { injector: this.injector }) as unknown as Observable<KubernetesNode[]>;
+    const namespaces$ = toObservable(this.namespaceData.namespacesForEndpoint(guid), { injector: this.injector });
+
+    // Prime the caches now, then poll them on the same 10s cadence the old
+    // pagination dispatch poll drove.
+    this.refreshAll(guid);
+    this.poll(guid);
 
     this.podCount$ = this.kubeEndpointService.getCountObservable(pods$);
     this.nodeCount$ = this.kubeEndpointService.getCountObservable(nodes$);
@@ -168,38 +212,54 @@ export class KubernetesSummaryTabComponent implements OnInit, OnDestroy {
 
     this.caaspData$ = this.kubeEndpointService.getCaaspNodesData(nodes$);
 
-    this.isLoading$ = combineLatest([
-      this.endpointDetails$,
-      this.podCount$,
-      this.nodeCount$,
-      this.podCapacity$,
-      this.diskPressure$,
-      this.memoryPressure$,
-      this.outOfDisk$,
-      this.nodesReady$,
-      this.networkUnavailable$,
-    ]).pipe(
-      map(() => false),
-      startWith(true),
-    );
+    // Convert all observables to signals within injection context
+    runInInjectionContext(this.injector, () => {
+      const endpointDetailsSignal = toSignal(this.endpointDetails$, { initialValue: null as any });
+      const podCountSignal = toSignal(this.podCount$, { initialValue: null as number | null });
+      const nodeCountSignal = toSignal(this.nodeCount$, { initialValue: null as number | null });
+      const podCapacitySignal = toSignal(this.podCapacity$, { initialValue: null as any });
+      const diskPressureSignal = toSignal(this.diskPressure$, { initialValue: null as any });
+      const memoryPressureSignal = toSignal(this.memoryPressure$, { initialValue: null as any });
+      const outOfDiskSignal = toSignal(this.outOfDisk$, { initialValue: null as any });
+      const nodesReadySignal = toSignal(this.nodesReady$, { initialValue: null as any });
+      const networkUnavailableSignal = toSignal(this.networkUnavailable$, { initialValue: null as any });
+
+      // Compute loading state - false when all are loaded
+      const isLoadingComputed = computed(() => {
+        // Check if all required data is loaded
+        return !(
+          endpointDetailsSignal() !== null &&
+          podCountSignal() !== null &&
+          nodeCountSignal() !== null &&
+          podCapacitySignal() !== null &&
+          diskPressureSignal() !== null &&
+          memoryPressureSignal() !== null &&
+          outOfDiskSignal() !== null &&
+          nodesReadySignal() !== null &&
+          networkUnavailableSignal() !== null
+        );
+      });
+
+      this.isLoading$ = toObservable(isLoadingComputed);
+    });
   }
 
-  private poll(action: PaginatedAction, pagination$: Observable<PaginationEntityState>) {
+  private poll(guid: string) {
     this.ngZone.runOutsideAngular(() =>
       this.polls.push(
         interval(10000).subscribe(() => {
-          this.ngZone.run(() => this.updateList(action, pagination$));
+          this.ngZone.run(() => this.refreshAll(guid));
         })
       )
     );
   }
 
-  private updateList(action: PaginatedAction, pagination$: Observable<PaginationEntityState>) {
-    pagination$.pipe(first()).subscribe(pag => {
-      if (!getCurrentPageRequestInfo(pag, { busy: true, error: false, message: '' }).busy) {
-        this.store.dispatch(action);
-      }
-    });
+  // Refresh the three cluster caches. Each data service dedups in-flight
+  // fetches, so overlapping polls don't stack duplicate requests.
+  private refreshAll(guid: string) {
+    void this.podData.refresh({ kubeGuid: guid });
+    void this.nodeData.refresh(guid);
+    void this.namespaceData.refresh({ kubeGuid: guid });
   }
 
   ngOnDestroy() {

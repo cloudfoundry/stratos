@@ -1,0 +1,52 @@
+<div class="p-6 flex flex-col gap-4 min-w-[420px]">
+  <!-- Dialog header -->
+  <h2 id="apply-quota-to-orgs-dialog-title" class="text-lg font-semibold text-content-text" data-dialog-drag-handle>
+    Apply quota to organizations
+  </h2>
+  <div class="text-sm text-content-muted">
+    Select the organizations that should use the
+    <span class="font-medium text-content-text">{{ data.quotaName }}</span> quota.
+  </div>
+
+  <!-- Org picker -->
+  <section class="flex flex-col gap-1 border-t pt-3 max-h-[45vh] overflow-y-auto" aria-label="Organizations">
+    @if (loading() && orgs().length === 0) {
+      <div class="text-sm text-content-muted py-2">Loading organizations…</div>
+    } @else if (orgs().length === 0) {
+      <div class="text-sm text-content-muted py-2">There are no organizations in this Cloud Foundry.</div>
+    } @else {
+      @for (org of orgs(); track org.guid) {
+        <label class="flex items-center gap-2 py-1 cursor-pointer text-sm">
+          <input
+            type="checkbox"
+            [attr.data-test]="'apply-quota-org-' + org.guid"
+            [checked]="isSelected(org.guid)"
+            (change)="toggle(org.guid)"
+          />
+          <span class="text-content-text">{{ org.name }}</span>
+          @if (alreadyOnQuota(org)) {
+            <span class="text-xs text-content-muted">(already on this quota)</span>
+          }
+        </label>
+      }
+    }
+  </section>
+
+  <!-- Actions -->
+  <div class="flex justify-end items-center gap-2 pt-2 border-t">
+    <span class="text-sm text-content-muted mr-auto">{{ selectedCount() }} selected</span>
+    <button
+      type="button"
+      class="px-4 py-2 text-sm rounded border"
+      [disabled]="submitting()"
+      (click)="cancel()"
+    >Cancel</button>
+    <button
+      type="button"
+      data-test="apply-quota-to-orgs-submit"
+      class="px-4 py-2 text-sm rounded bg-primary text-white disabled:opacity-50"
+      [disabled]="!canSubmit()"
+      (click)="submit()"
+    >Apply</button>
+  </div>
+</div>

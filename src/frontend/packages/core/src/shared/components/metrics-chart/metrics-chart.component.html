@@ -1,50 +1,49 @@
-<mat-card class="metrics-chart__card">
+<app-card class="metrics-chart__card">
   <div class="metrics-chart__outer">
     <div class="metrics-chart__header">
-      <h2 class="metrics-chart__title" *ngIf="title">{{title}}</h2>
+      @if (title) {
+        <h2 class="metrics-chart__title">{{title}}</h2>
+      }
       <ng-content select="app-metrics-range-selector"></ng-content>
     </div>
-    <mat-spinner *ngIf="isRefreshing$ | async" diameter="20" class="metrics-chart__refreshing"></mat-spinner>
-    <mat-progress-bar *ngIf="isFetching$ | async" class="metrics-chart__loading" color="primary" mode="indeterminate">
-    </mat-progress-bar>
-    <div class="metrics-chart" *ngIf="!(isFetching$ | async)">
-      <div class="metrics-chart" *ngIf="results$ | async as results" [ngSwitch]="chartConfig.chartType">
-        <div class="metrics-chart" *ngIf="results.length; else other_content">
-          <ngx-charts-line-chart *ngSwitchCase="chartTypes.LINE" [animations]="false" [results]="results"
-            [legend]="hasMultipleInstances" [yAxisLabel]="chartConfig.yAxisLabel" [xAxisLabel]="chartConfig.xAxisLabel"
-            [showXAxisLabel]="true" [showYAxisLabel]="true" [xAxis]="true" [yAxis]="true"
-            [autoScale]="chartConfig.autoScale" [yAxisTicks]="chartConfig.yAxisTicks"
-            [yAxisTickFormatting]="chartConfig.yAxisTickFormatting">
-            <ng-template #tooltipTemplate let-model="model">
-              <div class="metrics-chart__tooltip">
-                <div>{{ model.series }} : {{ getTooltipName(model) }}</div>
-                <div class="metrics-chart__tooltip-value">{{ getTooltipValue(model) }}</div>
+    @if (isRefreshing()) {
+      <app-busy class="text-primary metrics-chart__refreshing" size="1.25rem" context="metrics-chart"></app-busy>
+    }
+    @if (isFetching()) {
+      <app-progress-bar class="metrics-chart__loading" color="primary" mode="indeterminate">
+      </app-progress-bar>
+    }
+    @if (!isFetching()) {
+      <div class="metrics-chart">
+        @if (results(); as results) {
+          <div class="metrics-chart">
+            @if (results.length) {
+              <div class="metrics-chart">
+                @switch (chartConfig?.chartType) {
+                  @case (chartTypes.LINE) {
+                    <canvas baseChart
+                      [data]="chartJsData"
+                      [type]="'line'"
+                      [options]="chartOptions">
+                    </canvas>
+                  }
+                  @default {
+                    <span> {{ chartConfig?.chartType }} chart type not found </span>
+                  }
+                }
               </div>
-            </ng-template>            
-            <ng-template #seriesTooltipTemplate let-model="model">
-              <div class="area-tooltip-container">
-                <div *ngFor="let tooltipItem of getSeriesTooltipModel(model)" class="tooltip-item">
-                  <div *ngIf="!tooltipItem.truncated">
-                  <span class="tooltip-item-color" [style.background-color]="tooltipItem.color"></span>
-                  {{ tooltipItem.series }} : {{ getTooltipValue(tooltipItem) }}
-                </div>
-                <div *ngIf="tooltipItem.truncated" class="metrics-chart__tooltip-truncated">
-                  ...
-                </div>
+            } @else {
+              <div class="no-content">No results found
+                @if (!title) {
+                  <div class="no-content__name">
+                    {{ chartConfig?.yAxisLabel }}
+                  </div>
+                }
               </div>
-            </div>
-            </ng-template>            
-          </ngx-charts-line-chart>
-          <span *ngSwitchDefault> {{ chartConfig.chartType }} chart type not found </span>
-        </div>
+            }
+          </div>
+        }
       </div>
-    </div>
+    }
   </div>
-</mat-card>
-<ng-template #other_content>
-  <div class="no-content">No results found
-    <div class="no-content__name" *ngIf="!title">
-      {{ chartConfig.yAxisLabel }}
-    </div>
-  </div>
-</ng-template>
+</app-card>

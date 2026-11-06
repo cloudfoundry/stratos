@@ -1,28 +1,29 @@
-import { ComponentFixture, TestBed, waitForAsync } from '@angular/core/testing';
+import { ComponentFixture, TestBed } from '@angular/core/testing';
+import { provideZonelessChangeDetection } from '@angular/core';
+import { describe, it, expect, beforeEach, afterEach, beforeAll, afterAll, vi } from 'vitest';
 
-import { MDAppModule } from '../../../../../core/src/public-api';
-import {
-  AnalysisReportSelectorComponent,
-} from './../../analysis-report-viewer/analysis-report-selector/analysis-report-selector.component';
+import { BaseTestModules } from '../../../../../core/test-framework/core-test.helper';
 import { AnalysisStatusCellComponent } from './analysis-status-cell.component';
 
 describe('AnalysisStatusCellComponent', () => {
   let component: AnalysisStatusCellComponent;
   let fixture: ComponentFixture<AnalysisStatusCellComponent>;
 
-  beforeEach(waitForAsync(() => {
-    TestBed.configureTestingModule({
-      declarations: [AnalysisStatusCellComponent, AnalysisReportSelectorComponent],
+  beforeEach(async () => {
+    await TestBed.configureTestingModule({
+      providers: [provideZonelessChangeDetection()],
       imports: [
-        MDAppModule,
+        AnalysisStatusCellComponent,
+        ...BaseTestModules,
       ]
-    })
-      .compileComponents();
-  }));
+    }).compileComponents();
+  });
 
   beforeEach(() => {
     fixture = TestBed.createComponent(AnalysisStatusCellComponent);
     component = fixture.componentInstance;
+    // Set required row property (inherited from TableCellCustom),
+    component.row = { status: 'completed' };
     fixture.detectChanges();
   });
 

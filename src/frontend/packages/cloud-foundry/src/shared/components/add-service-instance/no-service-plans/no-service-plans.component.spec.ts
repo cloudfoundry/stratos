@@ -1,4 +1,6 @@
-import { ComponentFixture, TestBed, waitForAsync } from '@angular/core/testing';
+import { ComponentFixture, TestBed } from '@angular/core/testing';
+import { provideZonelessChangeDetection } from '@angular/core';
+import { describe, it, expect, beforeEach, afterEach, beforeAll, afterAll, vi } from 'vitest';
 
 import { NoServicePlansComponent } from './no-service-plans.component';
 
@@ -6,12 +8,17 @@ describe('NoServicePlansComponent', () => {
   let component: NoServicePlansComponent;
   let fixture: ComponentFixture<NoServicePlansComponent>;
 
-  beforeEach(waitForAsync(() => {
+  beforeEach(() => {
     TestBed.configureTestingModule({
-      declarations: [ NoServicePlansComponent ]
+      providers: [provideZonelessChangeDetection()],
+      imports: [
+        NoServicePlansComponent,
+      ],
+      
+      
     })
     .compileComponents();
-  }));
+  });
 
   beforeEach(() => {
     fixture = TestBed.createComponent(NoServicePlansComponent);

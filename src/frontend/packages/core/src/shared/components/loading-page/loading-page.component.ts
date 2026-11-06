@@ -1,13 +1,24 @@
 import { animate, style, transition, trigger } from '@angular/animations';
-import { Component, Input, OnInit } from '@angular/core';
-import { EntitySchema, EntityMonitor, EntityMonitorFactory } from '@stratosui/store';
-import { combineLatest, Observable, of as observableOf } from 'rxjs';
-import { filter, first, map, startWith } from 'rxjs/operators';
+import { CommonModule } from '@angular/common';
+import { Component, Input, OnInit, ChangeDetectionStrategy, computed, inject } from '@angular/core';
+import { BehaviorSubject, Observable } from 'rxjs';
+
+import { StratosBrandingService } from '../../../../../theme/stratos-branding.service';
+
+/** Overlay indicator pool: concentric portal rings or the breathing brand mark. */
+export type LoadingPageVariant = 'rings' | 'logo';
+
+const VARIANT_POOL: readonly LoadingPageVariant[] = ['rings', 'logo'];
 
 @Component({
-  selector: 'app-loading-page',
+selector: 'app-loading-page',
   templateUrl: './loading-page.component.html',
   styleUrls: ['./loading-page.component.scss'],
+  changeDetection: ChangeDetectionStrategy.OnPush,
+  standalone: true,
+  imports: [
+    CommonModule,
+  ],
   animations: [
     trigger(
       'leaveLoaderAnimation', [
@@ -20,62 +31,43 @@ import { filter, first, map, startWith } from 'rxjs/operators';
   ]
 })
 export class LoadingPageComponent implements OnInit {
-
-  constructor(private entityMonitorFactory: EntityMonitorFactory) { }
-
+  // Caller supplies a loading stream directly. The ngrx EntityMonitor-driven
+  // path (entityId/entitySchema → isFetching/isDeleting) was removed: the
+  // detail pages that used it now pass their signal-native isLoading, and the
+  // delete flow navigates away rather than painting a "deleting" overlay here.
   @Input()
-  isLoading: Observable<boolean>;
+  isLoading!: Observable<boolean>;
 
   @Input()
   text = 'Retrieving your data';
 
   @Input()
-  deleteText = 'Deleting data';
-
-  @Input()
   alert = '';
 
+  /** Pin an indicator look; omitted → deterministic pick from the pool
+   *  keyed on `text`, so a given page keeps one look across visits while
+   *  different pages vary. */
   @Input()
-  entityId: string;
+  variant?: LoadingPageVariant;
 
-  @Input()
-  entitySchema: EntitySchema;
+  private branding = inject(StratosBrandingService, { optional: true });
 
-  public isDeleting: Observable<boolean>;
+  protected readonly themeLogo = computed(
+    () => this.branding?.theme()?.branding?.logo || '/core/assets/logo.png',
+  );
 
-  public text$: Observable<string>;
-
-  ngOnInit() {
-    if (this.isLoading) {
-      this.isLoading
-        .pipe(
-          filter(loading => !loading),
-          first()
-        );
-      this.isDeleting = observableOf(false);
-    } else if (this.entityId && this.entitySchema) {
-      this.buildFromMonitor(this.entityMonitorFactory.create(this.entityId, this.entitySchema));
-    } else {
-      this.isLoading = this.isDeleting = observableOf(false);
+  protected resolved(): LoadingPageVariant {
+    if (this.variant) return this.variant;
+    let h = 0;
+    for (let i = 0; i < this.text.length; i++) {
+      h = (h * 31 + this.text.charCodeAt(i)) | 0;
     }
-
-    this.text$ = combineLatest(
-      this.isLoading.pipe(startWith(false)),
-      this.isDeleting.pipe(startWith(false))
-    ).pipe(
-      map(([isLoading, isDeleting]) => {
-        if (isDeleting) {
-          return this.deleteText;
-        } else if (isLoading) {
-          return this.text;
-        }
-        return '';
-      })
-    );
+    return VARIANT_POOL[Math.abs(h) % VARIANT_POOL.length];
   }
 
-  private buildFromMonitor(monitor: EntityMonitor) {
-    this.isDeleting = monitor.isDeletingEntity$;
-    this.isLoading = monitor.isFetchingEntity$;
+  ngOnInit() {
+    if (!this.isLoading) {
+      this.isLoading = new BehaviorSubject(false);
+    }
   }
 }

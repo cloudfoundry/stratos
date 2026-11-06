@@ -1,0 +1,93 @@
+/* Host element */
+:host {
+  display: block;
+}
+
+/* Placeholder text — matches form-field-label's var(--input-placeholder) */
+.select-trigger-placeholder {
+  color: var(--input-placeholder);
+}
+
+/* Selected value text */
+.select-trigger-value {
+  color: var(--input-text);
+}
+
+/* Disabled trigger override */
+.custom-select.disabled .select-trigger {
+  background-color: var(--input-disabled-bg, oklch(96.696% 0.0029 264.54));
+  color: var(--text-muted, oklch(71.366% 0.0192 261.32));
+  border-color: var(--input-border, oklch(87.168% 0.0093 258.34));
+}
+
+/* Invalid trigger border */
+.custom-select.invalid .select-trigger {
+  border-color: var(--color-danger, oklch(63.683% 0.2078 25.33));
+  border-width: 2px;
+}
+
+/* Scrollbar styling for dropdown */
+.select-options::-webkit-scrollbar {
+  width: 8px;
+}
+
+.select-options::-webkit-scrollbar-track {
+  background: var(--scrollbar-track, oklch(95.815% 0 none));
+  border-radius: 4px;
+}
+
+.select-options::-webkit-scrollbar-thumb {
+  background: var(--scrollbar-thumb, oklch(62.675% 0 none));
+  border-radius: 4px;
+}
+
+.select-options::-webkit-scrollbar-thumb:hover {
+  background: var(--scrollbar-thumb-hover, oklch(44.953% 0 none));
+}
+
+/* Dark theme scrollbar */
+.dark-theme .select-options::-webkit-scrollbar-track {
+  background: var(--scrollbar-track, oklch(37.17% 0.0392 257.29));
+}
+
+.dark-theme .select-options::-webkit-scrollbar-thumb {
+  background: var(--scrollbar-thumb, oklch(55.439% 0.0407 257.42));
+}
+
+.dark-theme .select-options::-webkit-scrollbar-thumb:hover {
+  background: var(--scrollbar-thumb-hover, oklch(71.067% 0.0351 256.79));
+}
+
+/* Error message */
+.select-error {
+  margin-top: 4px;
+  padding: 4px 0;
+  font-size: 0.75rem;
+  line-height: 1.25;
+  color: var(--color-danger, oklch(63.683% 0.2078 25.33));
+  animation: slideDown 0.3s ease-out;
+}
+
+.select-error div {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+}
+
+@keyframes slideDown {
+  from {
+    opacity: 0;
+    transform: translateY(-4px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* Reduced motion support */
+@media (prefers-reduced-motion: reduce) {
+  .select-error {
+    animation: none;
+  }
+}

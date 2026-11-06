@@ -1,19 +1,55 @@
-<span *ngIf="!chips || !chips.length">None</span>
-<mat-chip-list class="app-chips" [ngClass]="{'mat-chip-list__stacked': stacked, 'mat-chip-list__rtl': orientation==='rtl'}" *ngIf="chips && chips.length">
-  <mat-chip class="app-chip" *ngFor="let chip of chips | slice:0:limit" [ngClass]="chip.color ? chip.color : ''">
-    <div class="app-chip__container">
-      <a *ngIf="!!chip.url; else notALink" [routerLink]="[chip.url.link]" [queryParams]="chip.url.params">{{chip[displayProperty]}}</a>
-      <ng-template #notALink>
-        <div class="app-chip__label">{{chip[displayProperty]}}</div>
-      </ng-template>
-      <ng-container *ngIf="chip.clearAction && !(chip.hideClearButton$ | async)">
-        <mat-icon *ngIf="!chip.busy || !(chip.busy | async)" (click)="chip.clearAction(chip)" class="app-chip__close">close</mat-icon>
-        <mat-spinner *ngIf="chip.busy && (chip.busy | async)" diameter="15" class="app-chip__busy-spinner"></mat-spinner>
-      </ng-container>
+@if (!chips || !chips.length) {
+  <span class="text-content-muted">None</span>
+}
+@if (chips && chips.length) {
+  <div class="flex flex-wrap gap-2 my-[5px]"
+    [ngClass]="{'flex-col': stacked, 'flex-row-reverse': orientation==='rtl'}"
+    >
+    @for (chip of chips | slice:0:limit; track chip.key ?? chip.value; let i = $index) {
+      <div class="chip app-chip inline-flex items-center gap-2 px-3 py-1 text-sm rounded-full border"
+        [ngClass]="getChipClasses(chip.color)">
+        <div class="flex items-center gap-1">
+          @if (!!chip.url) {
+            <a
+              class="app-chip__link hover:underline"
+              [routerLink]="[chip.url.link]"
+              [queryParams]="chip.url.params">
+              {{getDisplayValue(chip)}}
+            </a>
+          } @else {
+            <div class="flex-1 h-[18px] leading-[18px] break-all">{{getDisplayValue(chip)}}</div>
+          }
+          @if (chip.clearAction && (chip.hideClearButton$ | async) === false) {
+            @if (!chip.busy || (chip.busy | async) === false) {
+              <span role="button" tabindex="0"
+                (click)="chip.clearAction(chip)"
+                (keydown.enter)="chip.clearAction(chip)"
+                (keydown.space)="chip.clearAction(chip); $event.preventDefault()"
+                class="material-icons text-[15px] h-[15px] w-[15px] flex-none ml-[5px] cursor-pointer hover:text-danger">
+                close
+              </span>
+            }
+            @if (chip.busy && (chip.busy | async)) {
+              <div
+                class="flex-none ml-[5px]">
+                <app-busy size="1rem" [context]="chip.value"></app-busy>
+              </div>
+            }
+          }
+        </div>
       </div>
-  </mat-chip>
-  <button mat-button color="primary" class="app-chips__limit" [ngClass]="{'app-chips__show-more': atLowerLimit, 'app-chips__show-less': !atLowerLimit}" *ngIf="chips.length > lowerLimit" (click)="toggleLimit()" appClickStopPropagation>
-    <span *ngIf="atLowerLimit">+{{ chips.length - limit }}</span>
-    <span *ngIf="!atLowerLimit">Show less</span>
-  </button>
-</mat-chip-list>
+    }
+    @if (chips.length > lowerLimit) {
+      <button class="btn btn-sm btn-primary cursor-pointer font-light min-w-0 px-[5px]"
+        (click)="toggleLimit()"
+        appClickStopPropagation>
+        @if (atLowerLimit) {
+          <span>+{{ chips.length - limit }}</span>
+        }
+        @if (!atLowerLimit) {
+          <span>Show less</span>
+        }
+      </button>
+    }
+  </div>
+}

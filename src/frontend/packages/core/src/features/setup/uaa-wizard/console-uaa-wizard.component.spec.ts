@@ -1,10 +1,12 @@
-import { ComponentFixture, TestBed, waitForAsync } from '@angular/core/testing';
+import { ComponentFixture, TestBed } from '@angular/core/testing';
+import { provideZonelessChangeDetection } from '@angular/core';
+import { describe, it, expect, beforeEach, afterEach, beforeAll, afterAll, vi } from 'vitest';
 import { FormsModule, ReactiveFormsModule } from '@angular/forms';
 import { NoopAnimationsModule } from '@angular/platform-browser/animations';
 import { RouterTestingModule } from '@angular/router/testing';
-import { StoreModule } from '@ngrx/store';
 
-import { appReducers } from '../../../../../store/src/reducers.module';
+import { createBasicStoreModule, STORE_TEST_PROVIDERS } from '@test-framework/core-test.helper';
+import { CoreTestingModule } from '@test-framework/core-test.modules';
 import { CoreModule } from '../../../core/core.module';
 import { MDAppModule } from '../../../core/md.module';
 import { CurrentUserPermissionsService } from '../../../core/permissions/current-user-permissions.service';
@@ -18,7 +20,7 @@ describe('ConsoleUaaWizardComponent', () => {
   let component: ConsoleUaaWizardComponent;
   let fixture: ComponentFixture<ConsoleUaaWizardComponent>;
 
-  beforeEach(waitForAsync(() => {
+  beforeEach(() => {
     TestBed.configureTestingModule({
       imports: [
         CoreModule,
@@ -29,16 +31,19 @@ describe('ConsoleUaaWizardComponent', () => {
         PageHeaderModule,
         ReactiveFormsModule,
         MDAppModule,
-        StoreModule.forRoot(appReducers),
+        CoreTestingModule,
+        createBasicStoreModule(),
         NoopAnimationsModule,
       ],
       providers: [
+        ...(STORE_TEST_PROVIDERS || []),
         TabNavService,
-        CurrentUserPermissionsService
+        CurrentUserPermissionsService,
+        provideZonelessChangeDetection(),
       ]
-    })
-      .compileComponents();
-  }));
+    });
+    TestBed.compileComponents();
+  });
 
   beforeEach(() => {
     fixture = TestBed.createComponent(ConsoleUaaWizardComponent);

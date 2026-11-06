@@ -7,8 +7,10 @@ import { MetricsEndpointProvider } from './services/metrics-service';
 // Info for an endpoint that a metrics endpoint provides for
 export interface MetricsEndpointInfo {
   name: string;
-  icon: EndpointIcon;
-  type: string;
+  // name/type are sourced from optional catalog definition metadata, which may be absent
+  // for an unregistered endpoint; the template interpolates them so undefined renders blank.
+  icon: Omit<EndpointIcon, 'name'> & { name?: string };
+  type?: string;
   known: boolean;
   url: string;
   metadata: {
@@ -25,20 +27,22 @@ export function mapMetricsData(ep: MetricsEndpointProvider): MetricsEndpointInfo
 
   // Add all of the known endpoints first
   ep.endpoints.forEach(endpoint => {
-    const catalogEndpoint = entityCatalog.getEndpoint(endpoint.cnsi_type, endpoint.sub_type);
+    const catalogEndpoint = entityCatalog.getEndpoint(endpoint.cnsi_type ?? '', endpoint.sub_type);
 
     data.push({
       known: true,
       name: endpoint.name,
       url: getFullEndpointApiUrl(endpoint),
-      type: catalogEndpoint.definition.label,
+      // An unregistered type has no catalog entry; keep the row, blank the
+      // labelling, rather than hiding a real endpoint.
+      type: catalogEndpoint?.definition?.label,
       icon: {
-        name: catalogEndpoint.definition.icon,
+        name: catalogEndpoint?.definition?.icon,
         font: 'stratos-icons'
       },
       metadata: {
-        metrics_job: endpoint.metadata ? endpoint.metadata.metrics_job : null,
-        metrics_environment: endpoint.metadata ? endpoint.metadata.metrics_environment : null
+        metrics_job: endpoint.metadata ? endpoint.metadata.metrics_job : undefined,
+        metrics_environment: endpoint.metadata ? endpoint.metadata.metrics_environment : undefined
       },
       status: observableOf(StratosStatus.OK)
     });

@@ -1,511 +1,547 @@
 import { TestBed } from '@angular/core/testing';
-import { createBasicStoreModule, createEntityStoreState, TestStoreEntity } from '@stratosui/store/testing';
-import { first, tap } from 'rxjs/operators';
-
-import { PermissionConfig } from '../../../../core/src/core/permissions/current-user-permissions.config';
-import { CurrentUserPermissionsService } from '../../../../core/src/core/permissions/current-user-permissions.service';
-import { StratosScopeStrings } from '../../../../core/src/core/permissions/stratos-user-permissions.checker';
-import { AppTestModule } from '../../../../core/test-framework/core-test.helper';
-import { AppState } from '../../../../store/src/app-state';
-import { EntityCatalogTestModule, TEST_CATALOGUE_ENTITIES } from '../../../../store/src/entity-catalog-test.module';
-import { EntityCatalogEntityConfig } from '../../../../store/src/entity-catalog/entity-catalog.types';
-import { endpointEntityType, stratosEntityFactory } from '../../../../store/src/helpers/stratos-entity-factory';
-import { generateStratosEntities } from '../../../../store/src/stratos-entity-generator';
-import { APIResource } from '../../../../store/src/types/api.types';
-import { EndpointModel } from '../../../../store/src/types/endpoint.types';
-import { BaseEntityValues } from '../../../../store/src/types/entity.types';
-import { PaginationState } from '../../../../store/src/types/pagination.types';
+import { HttpTestingController } from '@angular/common/http/testing';
+import { provideZonelessChangeDetection } from '@angular/core';
+import { describe, it, expect, beforeEach, afterEach, beforeAll, afterAll, vi } from 'vitest';
+import { take, timeout } from 'rxjs/operators';
+import { firstValueFrom } from 'rxjs';
+import { PermissionConfig, CurrentUserPermissionsService, StratosScopeStrings } from '@stratosui/core';
+import { createBasicStoreModule, createEntityStoreState, TestStoreEntity, STORE_TEST_PROVIDERS } from '@stratosui/store/testing';
+import { AppState, EntityCatalogTestModule, TEST_CATALOGUE_ENTITIES, EntityCatalogEntityConfig, endpointEntityType, stratosEntityFactory, generateStratosEntities, APIResource, EndpointModel, BaseEntityValues, EntityCatalogHelper, EntityCatalogHelpers, CurrentUserRolesDataService, SessionUser } from '@stratosui/store';
+import { PaginationEntityTypeState } from '@stratosui/store/types/pagination.types';
 import { CFFeatureFlagTypes, IFeatureFlag } from '../../cf-api.types';
 import { cfEntityFactory } from '../../cf-entity-factory';
 import { generateCFEntities } from '../../cf-entity-generator';
 import { featureFlagEntityType } from '../../cf-entity-types';
 import {
   CfCurrentUserPermissions,
-  cfCurrentUserPermissionsService,
   CfPermissionTypes,
   CfScopeStrings,
+  CfUserPermissionsChecker,
 } from '../../user-permissions/cf-user-permissions-checkers';
+import { CUSTOM_USER_PERMISSION_CHECKERS } from '@stratosui/core';
 
 const ffSchema = cfEntityFactory(featureFlagEntityType);
 
 describe('CurrentUserPermissionsService with CF checker', () => {
   let service: CurrentUserPermissionsService;
+  // The roles slice is no longer part of AppState (it moved to the signal-native
+  // CurrentUserRolesDataService — see beforeEach), but this fixture still emits
+  // the legacy `currentUserRoles` shape to seed that service. Describe it here so
+  // the literal type-checks and the beforeEach reads narrow correctly.
+  interface TestUserRolesFixture {
+    internal: { isAdmin: boolean; scopes: StratosScopeStrings[] };
+    endpoints: { cf: Record<string, any> };
+    state: { initialised: boolean; fetching: boolean; error: null };
+  }
+  type StoreStateWithRoles = Partial<AppState<BaseEntityValues>> & {
+    currentUserRoles: TestUserRolesFixture;
+  };
+  // Data
+  const endpoints: EndpointModel[] = [
+    {
+      guid: '0e934dc8-7ad4-40ff-b85c-53c1b61d2abb',
+      name: 'SCF',
+      cnsi_type: 'cf',
+      api_endpoint: {
+        Scheme: 'https',
+        Opaque: '',
+        User: null,
+        Host: 'api.10.84.93.10.nip.io:8443',
+        Path: '',
+        RawPath: '',
+        ForceQuery: false,
+        RawQuery: '',
+        Fragment: ''
+      },
+      authorization_endpoint: 'https://cf.uaa.10.84.93.10.nip.io:2793',
+      token_endpoint: 'https://cf.uaa.10.84.93.10.nip.io:2793',
+      doppler_logging_endpoint: 'wss://doppler.10.84.93.10.nip.io:4443',
+      skip_ssl_validation: true,
+      user: {
+        guid: '670f4618-525e-4784-a56e-a238a0daf63d',
+        name: 'nathan',
+        admin: false,
+        scopes: [
+          CfScopeStrings.CF_WRITE_SCOPE,
+          StratosScopeStrings.STRATOS_CHANGE_PASSWORD,
+          CfScopeStrings.CF_READ_SCOPE,
+        ]
+      },
+      creator: {
+        name: 'admin',
+        admin: true,
+        system: false,
+      },
+      metricsAvailable: false,
+      connectionStatus: 'connected',
+      system_shared_token: false,
+      sso_allowed: false,
+    },
+    {
+      guid: 'c80420ca-204b-4879-bf69-b6b7a202ad87',
+      name: 'MainSCF',
+      cnsi_type: 'cf',
+      api_endpoint: {
+        Scheme: 'https',
+        Opaque: '',
+        User: null,
+        Host: 'api.10.84.93.55.nip.io:8443',
+        Path: '',
+        RawPath: '',
+        ForceQuery: false,
+        RawQuery: '',
+        Fragment: ''
+      },
+      authorization_endpoint: 'https://cf.uaa.10.84.93.55.nip.io:2793',
+      token_endpoint: 'https://cf.uaa.10.84.93.55.nip.io:2793',
+      doppler_logging_endpoint: 'wss://doppler.10.84.93.55.nip.io:4443',
+      skip_ssl_validation: true,
+      user: {
+        guid: '4389dfd6-6048-4149-8b26-5aa6893ac21d',
+        name: 'admin',
+        admin: true,
+        scopes: [
+          CfScopeStrings.CF_WRITE_SCOPE,
+          StratosScopeStrings.STRATOS_CHANGE_PASSWORD,
+          CfScopeStrings.CF_READ_SCOPE,
+          CfScopeStrings.CF_ADMIN_GROUP,
+          CfScopeStrings.CF_READ_ONLY_ADMIN_GROUP,
+          CfScopeStrings.CF_ADMIN_GLOBAL_AUDITOR_GROUP,
+          StratosScopeStrings.SCIM_READ,
+  ]
+      },
+      creator: {
+        name: 'admin',
+        admin: true,
+        system: false,
+      },
+      metricsAvailable: false,
+      connectionStatus: 'connected',
+      system_shared_token: false,
+      sso_allowed: false,
+    }
+  ];
 
+  const featureFlags1: APIResource<IFeatureFlag>[] = [
+    {
+      entity: {
+        name: 'user_org_creation',
+        enabled: false,
+        error_message: undefined,
+        url: '/v2/config/feature_flags/user_org_creation',
+        cfGuid: '0e934dc8-7ad4-40ff-b85c-53c1b61d2abb',
+        guid: '0e934dc8-7ad4-40ff-b85c-53c1b61d2abb-0'
+      },
+      metadata: {
+        guid: '0e934dc8-7ad4-40ff-b85c-53c1b61d2abb-0',
+        created_at: '',
+        updated_at: '',
+        url: ''
+      }
+    },
+    {
+      entity: {
+        name: 'private_domain_creation',
+        enabled: true,
+        error_message: undefined,
+        url: '/v2/config/feature_flags/private_domain_creation',
+        cfGuid: '0e934dc8-7ad4-40ff-b85c-53c1b61d2abb',
+        guid: '0e934dc8-7ad4-40ff-b85c-53c1b61d2abb-1'
+      },
+      metadata: {
+        guid: '0e934dc8-7ad4-40ff-b85c-53c1b61d2abb-1',
+        created_at: '',
+        updated_at: '',
+        url: ''
+      }
+    }, {
+      entity: {
+        name: 'app_bits_upload',
+        enabled: true,
+        error_message: undefined,
+        url: '/v2/config/feature_flags/app_bits_upload',
+        cfGuid: '0e934dc8-7ad4-40ff-b85c-53c1b61d2abb',
+        guid: '0e934dc8-7ad4-40ff-b85c-53c1b61d2abb-2'
+      },
+      metadata: {
+        guid: '0e934dc8-7ad4-40ff-b85c-53c1b61d2abb-2',
+        created_at: '',
+        updated_at: '',
+        url: ''
+      }
+    }, {
+      entity: {
+        name: 'app_scaling',
+        enabled: true,
+        error_message: undefined,
+        url: '/v2/config/feature_flags/app_scaling',
+        cfGuid: '0e934dc8-7ad4-40ff-b85c-53c1b61d2abb',
+        guid: '0e934dc8-7ad4-40ff-b85c-53c1b61d2abb-3'
+      },
+      metadata: {
+        guid: '0e934dc8-7ad4-40ff-b85c-53c1b61d2abb-3',
+        created_at: '',
+        updated_at: '',
+        url: ''
+      }
+    }, {
+      entity: {
+        name: 'route_creation',
+        enabled: true,
+        error_message: undefined,
+        url: '/v2/config/feature_flags/route_creation',
+        cfGuid: '0e934dc8-7ad4-40ff-b85c-53c1b61d2abb',
+        guid: '0e934dc8-7ad4-40ff-b85c-53c1b61d2abb-4'
+      },
+      metadata: {
+        guid: '0e934dc8-7ad4-40ff-b85c-53c1b61d2abb-4',
+        created_at: '',
+        updated_at: '',
+        url: ''
+      }
+    }, {
+      entity: {
+        name: 'service_instance_creation',
+        enabled: true,
+        error_message: undefined,
+        url: '/v2/config/feature_flags/service_instance_creation',
+        cfGuid: '0e934dc8-7ad4-40ff-b85c-53c1b61d2abb',
+        guid: '0e934dc8-7ad4-40ff-b85c-53c1b61d2abb-5'
+      },
+      metadata: {
+        guid: '0e934dc8-7ad4-40ff-b85c-53c1b61d2abb-5',
+        created_at: '',
+        updated_at: '',
+        url: ''
+      }
+    }, {
+      entity: {
+        name: 'diego_docker',
+        enabled: false,
+        error_message: undefined,
+        url: '/v2/config/feature_flags/diego_docker',
+        cfGuid: '0e934dc8-7ad4-40ff-b85c-53c1b61d2abb',
+        guid: '0e934dc8-7ad4-40ff-b85c-53c1b61d2abb-6'
+      },
+      metadata: {
+        guid: '0e934dc8-7ad4-40ff-b85c-53c1b61d2abb-6',
+        created_at: '',
+        updated_at: '',
+        url: ''
+      }
+    }, {
+      entity: {
+        name: 'set_roles_by_username',
+        enabled: true,
+        error_message: undefined,
+        url: '/v2/config/feature_flags/set_roles_by_username',
+        cfGuid: '0e934dc8-7ad4-40ff-b85c-53c1b61d2abb',
+        guid: '0e934dc8-7ad4-40ff-b85c-53c1b61d2abb-7'
+      },
+      metadata: {
+        guid: '0e934dc8-7ad4-40ff-b85c-53c1b61d2abb-7',
+        created_at: '',
+        updated_at: '',
+        url: ''
+      }
+    }, {
+      entity: {
+        name: 'unset_roles_by_username',
+        enabled: true,
+        error_message: undefined,
+        url: '/v2/config/feature_flags/unset_roles_by_username',
+        cfGuid: '0e934dc8-7ad4-40ff-b85c-53c1b61d2abb',
+        guid: '0e934dc8-7ad4-40ff-b85c-53c1b61d2abb-8'
+      },
+      metadata: {
+        guid: '0e934dc8-7ad4-40ff-b85c-53c1b61d2abb-8',
+        created_at: '',
+        updated_at: '',
+        url: ''
+      }
+    }, {
+      entity: {
+        name: 'env_var_visibility',
+        enabled: true,
+        error_message: undefined,
+        url: '/v2/config/feature_flags/env_var_visibility',
+        cfGuid: '0e934dc8-7ad4-40ff-b85c-53c1b61d2abb',
+        guid: '0e934dc8-7ad4-40ff-b85c-53c1b61d2abb-10'
+      },
+      metadata: {
+        guid: '0e934dc8-7ad4-40ff-b85c-53c1b61d2abb-10',
+        created_at: '',
+        updated_at: '',
+        url: ''
+      }
+    }, {
+      entity: {
+        name: 'space_scoped_private_broker_creation',
+        enabled: true,
+        error_message: undefined,
+        url: '/v2/config/feature_flags/space_scoped_private_broker_creation',
+        cfGuid: '0e934dc8-7ad4-40ff-b85c-53c1b61d2abb',
+        guid: '0e934dc8-7ad4-40ff-b85c-53c1b61d2abb-11'
+      },
+      metadata: {
+        guid: '0e934dc8-7ad4-40ff-b85c-53c1b61d2abb-11',
+        created_at: '',
+        updated_at: '',
+        url: ''
+      }
+    }, {
+      entity: {
+        name: 'space_developer_env_var_visibility',
+        enabled: true,
+        error_message: undefined,
+        url: '/v2/config/feature_flags/space_developer_env_var_visibility',
+        cfGuid: '0e934dc8-7ad4-40ff-b85c-53c1b61d2abb',
+        guid: '0e934dc8-7ad4-40ff-b85c-53c1b61d2abb-12'
+      },
+      metadata: {
+        guid: '0e934dc8-7ad4-40ff-b85c-53c1b61d2abb-12',
+        created_at: '',
+        updated_at: '',
+        url: ''
+      }
+    }
+  ];
+  const featureFlags2: APIResource<IFeatureFlag>[] = [
+    // {
+    //   entity: {
+    //     name: 'user_org_creation',
+    //     enabled: false,
+    //     error_message: null,
+    //     url: '/v2/config/feature_flags/user_org_creation',
+    //     cfGuid: 'c80420ca-204b-4879-bf69-b6b7a202ad87',
+    //     guid: 'c80420ca-204b-4879-bf69-b6b7a202ad87-0'
+    //   },
+    //   metadata: {
+    //     guid: 'c80420ca-204b-4879-bf69-b6b7a202ad87-0',
+    //     created_at: '',
+    //     updated_at: '',
+    //     url: ''
+    //   }
+    // },
+    {
+      entity: {
+        name: 'private_domain_creation',
+        enabled: true,
+        error_message: undefined,
+        url: '/v2/config/feature_flags/private_domain_creation',
+        cfGuid: 'c80420ca-204b-4879-bf69-b6b7a202ad87',
+        guid: 'c80420ca-204b-4879-bf69-b6b7a202ad87-1'
+      },
+      metadata: {
+        guid: 'c80420ca-204b-4879-bf69-b6b7a202ad87-1',
+        created_at: '',
+        updated_at: '',
+        url: ''
+      }
+    },
+    {
+      entity: {
+        name: 'app_bits_upload',
+        enabled: true,
+        error_message: undefined,
+        url: '/v2/config/feature_flags/app_bits_upload',
+        cfGuid: 'c80420ca-204b-4879-bf69-b6b7a202ad87',
+        guid: 'c80420ca-204b-4879-bf69-b6b7a202ad87-2'
+      },
+      metadata: {
+        guid: 'c80420ca-204b-4879-bf69-b6b7a202ad87-2',
+        created_at: '',
+        updated_at: '',
+        url: ''
+      }
+    },
+    {
+      entity: {
+        name: 'app_scaling',
+        enabled: true,
+        error_message: undefined,
+        url: '/v2/config/feature_flags/app_scaling',
+        cfGuid: 'c80420ca-204b-4879-bf69-b6b7a202ad87',
+        guid: 'c80420ca-204b-4879-bf69-b6b7a202ad87-3'
+      },
+      metadata: {
+        guid: 'c80420ca-204b-4879-bf69-b6b7a202ad87-3',
+        created_at: '',
+        updated_at: '',
+        url: ''
+      }
+    },
+    {
+      entity: {
+        name: 'route_creation',
+        enabled: true,
+        error_message: undefined,
+        url: '/v2/config/feature_flags/route_creation',
+        cfGuid: 'c80420ca-204b-4879-bf69-b6b7a202ad87',
+        guid: 'c80420ca-204b-4879-bf69-b6b7a202ad87-4'
+      },
+      metadata: {
+        guid: 'c80420ca-204b-4879-bf69-b6b7a202ad87-4',
+        created_at: '',
+        updated_at: '',
+        url: ''
+      }
+    },
+    {
+      entity: {
+        name: 'service_instance_creation',
+        enabled: true,
+        error_message: undefined,
+        url: '/v2/config/feature_flags/service_instance_creation',
+        cfGuid: 'c80420ca-204b-4879-bf69-b6b7a202ad87',
+        guid: 'c80420ca-204b-4879-bf69-b6b7a202ad87-5'
+      },
+      metadata: {
+        guid: 'c80420ca-204b-4879-bf69-b6b7a202ad87-5',
+        created_at: '',
+        updated_at: '',
+        url: ''
+      }
+    },
+    {
+      entity: {
+        name: 'diego_docker',
+        enabled: true,
+        error_message: undefined,
+        url: '/v2/config/feature_flags/diego_docker',
+        cfGuid: 'c80420ca-204b-4879-bf69-b6b7a202ad87',
+        guid: 'c80420ca-204b-4879-bf69-b6b7a202ad87-6'
+      },
+      metadata: {
+        guid: 'c80420ca-204b-4879-bf69-b6b7a202ad87-6',
+        created_at: '',
+        updated_at: '',
+        url: ''
+      }
+    },
+    {
+      entity: {
+        name: 'set_roles_by_username',
+        enabled: true,
+        error_message: undefined,
+        url: '/v2/config/feature_flags/set_roles_by_username',
+        cfGuid: 'c80420ca-204b-4879-bf69-b6b7a202ad87',
+        guid: 'c80420ca-204b-4879-bf69-b6b7a202ad87-7'
+      },
+      metadata: {
+        guid: 'c80420ca-204b-4879-bf69-b6b7a202ad87-7',
+        created_at: '',
+        updated_at: '',
+        url: ''
+      }
+    },
+    {
+      entity: {
+        name: 'unset_roles_by_username',
+        enabled: true,
+        error_message: undefined,
+        url: '/v2/config/feature_flags/unset_roles_by_username',
+        cfGuid: 'c80420ca-204b-4879-bf69-b6b7a202ad87',
+        guid: 'c80420ca-204b-4879-bf69-b6b7a202ad87-8'
+      },
+      metadata: {
+        guid: 'c80420ca-204b-4879-bf69-b6b7a202ad87-8',
+        created_at: '',
+        updated_at: '',
+        url: ''
+      }
+    },
+    {
+      entity: {
+        name: 'env_var_visibility',
+        enabled: true,
+        error_message: undefined,
+        url: '/v2/config/feature_flags/env_var_visibility',
+        cfGuid: 'c80420ca-204b-4879-bf69-b6b7a202ad87',
+        guid: 'c80420ca-204b-4879-bf69-b6b7a202ad87-10'
+      },
+      metadata: {
+        guid: 'c80420ca-204b-4879-bf69-b6b7a202ad87-10',
+        created_at: '',
+        updated_at: '',
+        url: ''
+      }
+    },
+    {
+      entity: {
+        name: 'space_scoped_private_broker_creation',
+        enabled: true,
+        error_message: undefined,
+        url: '/v2/config/feature_flags/space_scoped_private_broker_creation',
+        cfGuid: 'c80420ca-204b-4879-bf69-b6b7a202ad87',
+        guid: 'c80420ca-204b-4879-bf69-b6b7a202ad87-11'
+      },
+      metadata: {
+        guid: 'c80420ca-204b-4879-bf69-b6b7a202ad87-11',
+        created_at: '',
+        updated_at: '',
+        url: ''
+      }
+    },
+    {
+      entity: {
+        name: 'space_developer_env_var_visibility',
+        enabled: true,
+        error_message: undefined,
+        url: '/v2/config/feature_flags/space_developer_env_var_visibility',
+        cfGuid: 'c80420ca-204b-4879-bf69-b6b7a202ad87',
+        guid: 'c80420ca-204b-4879-bf69-b6b7a202ad87-12'
+      },
+      metadata: {
+        guid: 'c80420ca-204b-4879-bf69-b6b7a202ad87-12',
+        created_at: '',
+        updated_at: '',
+        url: ''
+      }
+    }
+  ];
 
-  function createStoreState(): Partial<AppState<BaseEntityValues>> {
-    // Data
-    const endpoints: EndpointModel[] = [
-      {
-        guid: '0e934dc8-7ad4-40ff-b85c-53c1b61d2abb',
-        name: 'SCF',
-        cnsi_type: 'cf',
-        api_endpoint: {
-          Scheme: 'https',
-          Opaque: '',
-          User: null,
-          Host: 'api.10.84.93.10.nip.io:8443',
-          Path: '',
-          RawPath: '',
-          ForceQuery: false,
-          RawQuery: '',
-          Fragment: ''
-        },
-        authorization_endpoint: 'https://cf.uaa.10.84.93.10.nip.io:2793',
-        token_endpoint: 'https://cf.uaa.10.84.93.10.nip.io:2793',
-        doppler_logging_endpoint: 'wss://doppler.10.84.93.10.nip.io:4443',
-        skip_ssl_validation: true,
-        user: {
-          guid: '670f4618-525e-4784-a56e-a238a0daf63d',
-          name: 'nathan',
-          admin: false,
-          scopes: [
-            CfScopeStrings.CF_WRITE_SCOPE,
-            StratosScopeStrings.STRATOS_CHANGE_PASSWORD,
-            CfScopeStrings.CF_READ_SCOPE,
-          ]
-        },
-        creator: {
-          name: 'admin',
-          admin: true,
-          system: false
-        },
-        metricsAvailable: false,
-        connectionStatus: 'connected',
-        system_shared_token: false,
-        sso_allowed: false
-      },
-      {
-        guid: 'c80420ca-204b-4879-bf69-b6b7a202ad87',
-        name: 'MainSCF',
-        cnsi_type: 'cf',
-        api_endpoint: {
-          Scheme: 'https',
-          Opaque: '',
-          User: null,
-          Host: 'api.10.84.93.55.nip.io:8443',
-          Path: '',
-          RawPath: '',
-          ForceQuery: false,
-          RawQuery: '',
-          Fragment: ''
-        },
-        authorization_endpoint: 'https://cf.uaa.10.84.93.55.nip.io:2793',
-        token_endpoint: 'https://cf.uaa.10.84.93.55.nip.io:2793',
-        doppler_logging_endpoint: 'wss://doppler.10.84.93.55.nip.io:4443',
-        skip_ssl_validation: true,
-        user: {
-          guid: '4389dfd6-6048-4149-8b26-5aa6893ac21d',
-          name: 'admin',
-          admin: true,
-          scopes: [
-            CfScopeStrings.CF_WRITE_SCOPE,
-            StratosScopeStrings.STRATOS_CHANGE_PASSWORD,
-            CfScopeStrings.CF_READ_SCOPE,
-            CfScopeStrings.CF_ADMIN_GROUP,
-            CfScopeStrings.CF_READ_ONLY_ADMIN_GROUP,
-            CfScopeStrings.CF_ADMIN_GLOBAL_AUDITOR_GROUP,
-            StratosScopeStrings.SCIM_READ
-          ]
-        },
-        creator: {
-          name: 'admin',
-          admin: true,
-          system: false
-        },
-        metricsAvailable: false,
-        connectionStatus: 'connected',
-        system_shared_token: false,
-        sso_allowed: false
-      }
-    ];
+  let autoRespond: ReturnType<typeof setInterval>;
 
-    const featureFlags1: APIResource<IFeatureFlag>[] = [
-      {
-        entity: {
-          name: 'user_org_creation',
-          enabled: false,
-          error_message: null,
-          url: '/v2/config/feature_flags/user_org_creation',
-          cfGuid: '0e934dc8-7ad4-40ff-b85c-53c1b61d2abb',
-        },
-        metadata: {
-          guid: '0e934dc8-7ad4-40ff-b85c-53c1b61d2abb-0',
-          created_at: '',
-          updated_at: '',
-          url: ''
-        }
+  /** The /pp/v1/info payload EndpointsDataService parses, from the fixture endpoints. */
+  function systemInfo() {
+    return {
+      endpoints: {
+        cf: endpoints.reduce((acc, endpoint) => ({ ...acc, [endpoint.guid!]: endpoint }), {}),
       },
-      {
-        entity: {
-          name: 'private_domain_creation',
-          enabled: true,
-          error_message: null,
-          url: '/v2/config/feature_flags/private_domain_creation',
-          cfGuid: '0e934dc8-7ad4-40ff-b85c-53c1b61d2abb',
-          guid: '0e934dc8-7ad4-40ff-b85c-53c1b61d2abb-1'
-        },
-        metadata: {
-          guid: '0e934dc8-7ad4-40ff-b85c-53c1b61d2abb-1',
-          created_at: '',
-          updated_at: '',
-          url: ''
-        }
-      }, {
-        entity: {
-          name: 'app_bits_upload',
-          enabled: true,
-          error_message: null,
-          url: '/v2/config/feature_flags/app_bits_upload',
-          cfGuid: '0e934dc8-7ad4-40ff-b85c-53c1b61d2abb',
-          guid: '0e934dc8-7ad4-40ff-b85c-53c1b61d2abb-2'
-        },
-        metadata: {
-          guid: '0e934dc8-7ad4-40ff-b85c-53c1b61d2abb-2',
-          created_at: '',
-          updated_at: '',
-          url: ''
-        }
-      }, {
-        entity: {
-          name: 'app_scaling',
-          enabled: true,
-          error_message: null,
-          url: '/v2/config/feature_flags/app_scaling',
-          cfGuid: '0e934dc8-7ad4-40ff-b85c-53c1b61d2abb',
-          guid: '0e934dc8-7ad4-40ff-b85c-53c1b61d2abb-3'
-        },
-        metadata: {
-          guid: '0e934dc8-7ad4-40ff-b85c-53c1b61d2abb-3',
-          created_at: '',
-          updated_at: '',
-          url: ''
-        }
-      }, {
-        entity: {
-          name: 'route_creation',
-          enabled: true,
-          error_message: null,
-          url: '/v2/config/feature_flags/route_creation',
-          cfGuid: '0e934dc8-7ad4-40ff-b85c-53c1b61d2abb',
-          guid: '0e934dc8-7ad4-40ff-b85c-53c1b61d2abb-4'
-        },
-        metadata: {
-          guid: '0e934dc8-7ad4-40ff-b85c-53c1b61d2abb-4',
-          created_at: '',
-          updated_at: '',
-          url: ''
-        }
-      }, {
-        entity: {
-          name: 'service_instance_creation',
-          enabled: true,
-          error_message: null,
-          url: '/v2/config/feature_flags/service_instance_creation',
-          cfGuid: '0e934dc8-7ad4-40ff-b85c-53c1b61d2abb',
-          guid: '0e934dc8-7ad4-40ff-b85c-53c1b61d2abb-5'
-        },
-        metadata: {
-          guid: '0e934dc8-7ad4-40ff-b85c-53c1b61d2abb-5',
-          created_at: '',
-          updated_at: '',
-          url: ''
-        }
-      }, {
-        entity: {
-          name: 'diego_docker',
-          enabled: false,
-          error_message: null,
-          url: '/v2/config/feature_flags/diego_docker',
-          cfGuid: '0e934dc8-7ad4-40ff-b85c-53c1b61d2abb',
-          guid: '0e934dc8-7ad4-40ff-b85c-53c1b61d2abb-6'
-        },
-        metadata: {
-          guid: '0e934dc8-7ad4-40ff-b85c-53c1b61d2abb-6',
-          created_at: '',
-          updated_at: '',
-          url: ''
-        }
-      }, {
-        entity: {
-          name: 'set_roles_by_username',
-          enabled: true,
-          error_message: null,
-          url: '/v2/config/feature_flags/set_roles_by_username',
-          cfGuid: '0e934dc8-7ad4-40ff-b85c-53c1b61d2abb',
-          guid: '0e934dc8-7ad4-40ff-b85c-53c1b61d2abb-7'
-        },
-        metadata: {
-          guid: '0e934dc8-7ad4-40ff-b85c-53c1b61d2abb-7',
-          created_at: '',
-          updated_at: '',
-          url: ''
-        }
-      }, {
-        entity: {
-          name: 'unset_roles_by_username',
-          enabled: true,
-          error_message: null,
-          url: '/v2/config/feature_flags/unset_roles_by_username',
-          cfGuid: '0e934dc8-7ad4-40ff-b85c-53c1b61d2abb',
-          guid: '0e934dc8-7ad4-40ff-b85c-53c1b61d2abb-8'
-        },
-        metadata: {
-          guid: '0e934dc8-7ad4-40ff-b85c-53c1b61d2abb-8',
-          created_at: '',
-          updated_at: '',
-          url: ''
-        }
-      }, {
-        entity: {
-          name: 'env_var_visibility',
-          enabled: true,
-          error_message: null,
-          url: '/v2/config/feature_flags/env_var_visibility',
-          cfGuid: '0e934dc8-7ad4-40ff-b85c-53c1b61d2abb',
-          guid: '0e934dc8-7ad4-40ff-b85c-53c1b61d2abb-10'
-        },
-        metadata: {
-          guid: '0e934dc8-7ad4-40ff-b85c-53c1b61d2abb-10',
-          created_at: '',
-          updated_at: '',
-          url: ''
-        }
-      }, {
-        entity: {
-          name: 'space_scoped_private_broker_creation',
-          enabled: true,
-          error_message: null,
-          url: '/v2/config/feature_flags/space_scoped_private_broker_creation',
-          cfGuid: '0e934dc8-7ad4-40ff-b85c-53c1b61d2abb',
-          guid: '0e934dc8-7ad4-40ff-b85c-53c1b61d2abb-11'
-        },
-        metadata: {
-          guid: '0e934dc8-7ad4-40ff-b85c-53c1b61d2abb-11',
-          created_at: '',
-          updated_at: '',
-          url: ''
-        }
-      }, {
-        entity: {
-          name: 'space_developer_env_var_visibility',
-          enabled: true,
-          error_message: null,
-          url: '/v2/config/feature_flags/space_developer_env_var_visibility',
-          cfGuid: '0e934dc8-7ad4-40ff-b85c-53c1b61d2abb',
-          guid: '0e934dc8-7ad4-40ff-b85c-53c1b61d2abb-12'
-        },
-        metadata: {
-          guid: '0e934dc8-7ad4-40ff-b85c-53c1b61d2abb-12',
-          created_at: '',
-          updated_at: '',
-          url: ''
-        }
-      }
-    ];
-    const featureFlags2: APIResource<IFeatureFlag>[] = [
-      // {
-      //   entity: {
-      //     name: 'user_org_creation',
-      //     enabled: false,
-      //     error_message: null,
-      //     url: '/v2/config/feature_flags/user_org_creation',
-      //     cfGuid: 'c80420ca-204b-4879-bf69-b6b7a202ad87',
-      //     guid: 'c80420ca-204b-4879-bf69-b6b7a202ad87-0'
-      //   },
-      //   metadata: {
-      //     guid: 'c80420ca-204b-4879-bf69-b6b7a202ad87-0',
-      //     created_at: '',
-      //     updated_at: '',
-      //     url: ''
-      //   }
-      // },
-      {
-        entity: {
-          name: 'private_domain_creation',
-          enabled: true,
-          error_message: null,
-          url: '/v2/config/feature_flags/private_domain_creation',
-          cfGuid: 'c80420ca-204b-4879-bf69-b6b7a202ad87',
-          guid: 'c80420ca-204b-4879-bf69-b6b7a202ad87-1'
-        },
-        metadata: {
-          guid: 'c80420ca-204b-4879-bf69-b6b7a202ad87-1',
-          created_at: '',
-          updated_at: '',
-          url: ''
-        }
+    };
+  }
+
+  /** One page of feature flags for a CF endpoint, in the handler's wire shape. */
+  function featureFlagsPage(cnsiGuid: string) {
+    const resources = [...featureFlags1, ...featureFlags2]
+      .filter(ff => ff.entity.cfGuid === cnsiGuid)
+      .map(ff => ({ ...ff.entity, cnsiGuid }));
+    return {
+      resources,
+      pagination: {
+        totalResults: resources.length,
+        totalPages: 1,
+        next: null,
+        previous: null,
+        first: null,
+        last: null,
       },
-      {
-        entity: {
-          name: 'app_bits_upload',
-          enabled: true,
-          error_message: null,
-          url: '/v2/config/feature_flags/app_bits_upload',
-          cfGuid: 'c80420ca-204b-4879-bf69-b6b7a202ad87',
-          guid: 'c80420ca-204b-4879-bf69-b6b7a202ad87-2'
-        },
-        metadata: {
-          guid: 'c80420ca-204b-4879-bf69-b6b7a202ad87-2',
-          created_at: '',
-          updated_at: '',
-          url: ''
-        }
-      },
-      {
-        entity: {
-          name: 'app_scaling',
-          enabled: true,
-          error_message: null,
-          url: '/v2/config/feature_flags/app_scaling',
-          cfGuid: 'c80420ca-204b-4879-bf69-b6b7a202ad87',
-          guid: 'c80420ca-204b-4879-bf69-b6b7a202ad87-3'
-        },
-        metadata: {
-          guid: 'c80420ca-204b-4879-bf69-b6b7a202ad87-3',
-          created_at: '',
-          updated_at: '',
-          url: ''
-        }
-      },
-      {
-        entity: {
-          name: 'route_creation',
-          enabled: true,
-          error_message: null,
-          url: '/v2/config/feature_flags/route_creation',
-          cfGuid: 'c80420ca-204b-4879-bf69-b6b7a202ad87',
-          guid: 'c80420ca-204b-4879-bf69-b6b7a202ad87-4'
-        },
-        metadata: {
-          guid: 'c80420ca-204b-4879-bf69-b6b7a202ad87-4',
-          created_at: '',
-          updated_at: '',
-          url: ''
-        }
-      },
-      {
-        entity: {
-          name: 'service_instance_creation',
-          enabled: true,
-          error_message: null,
-          url: '/v2/config/feature_flags/service_instance_creation',
-          cfGuid: 'c80420ca-204b-4879-bf69-b6b7a202ad87',
-          guid: 'c80420ca-204b-4879-bf69-b6b7a202ad87-5'
-        },
-        metadata: {
-          guid: 'c80420ca-204b-4879-bf69-b6b7a202ad87-5',
-          created_at: '',
-          updated_at: '',
-          url: ''
-        }
-      },
-      {
-        entity: {
-          name: 'diego_docker',
-          enabled: true,
-          error_message: null,
-          url: '/v2/config/feature_flags/diego_docker',
-          cfGuid: 'c80420ca-204b-4879-bf69-b6b7a202ad87',
-          guid: 'c80420ca-204b-4879-bf69-b6b7a202ad87-6'
-        },
-        metadata: {
-          guid: 'c80420ca-204b-4879-bf69-b6b7a202ad87-6',
-          created_at: '',
-          updated_at: '',
-          url: ''
-        }
-      },
-      {
-        entity: {
-          name: 'set_roles_by_username',
-          enabled: true,
-          error_message: null,
-          url: '/v2/config/feature_flags/set_roles_by_username',
-          cfGuid: 'c80420ca-204b-4879-bf69-b6b7a202ad87',
-          guid: 'c80420ca-204b-4879-bf69-b6b7a202ad87-7'
-        },
-        metadata: {
-          guid: 'c80420ca-204b-4879-bf69-b6b7a202ad87-7',
-          created_at: '',
-          updated_at: '',
-          url: ''
-        }
-      },
-      {
-        entity: {
-          name: 'unset_roles_by_username',
-          enabled: true,
-          error_message: null,
-          url: '/v2/config/feature_flags/unset_roles_by_username',
-          cfGuid: 'c80420ca-204b-4879-bf69-b6b7a202ad87',
-          guid: 'c80420ca-204b-4879-bf69-b6b7a202ad87-8'
-        },
-        metadata: {
-          guid: 'c80420ca-204b-4879-bf69-b6b7a202ad87-8',
-          created_at: '',
-          updated_at: '',
-          url: ''
-        }
-      },
-      {
-        entity: {
-          name: 'env_var_visibility',
-          enabled: true,
-          error_message: null,
-          url: '/v2/config/feature_flags/env_var_visibility',
-          cfGuid: 'c80420ca-204b-4879-bf69-b6b7a202ad87',
-          guid: 'c80420ca-204b-4879-bf69-b6b7a202ad87-10'
-        },
-        metadata: {
-          guid: 'c80420ca-204b-4879-bf69-b6b7a202ad87-10',
-          created_at: '',
-          updated_at: '',
-          url: ''
-        }
-      },
-      {
-        entity: {
-          name: 'space_scoped_private_broker_creation',
-          enabled: true,
-          error_message: null,
-          url: '/v2/config/feature_flags/space_scoped_private_broker_creation',
-          cfGuid: 'c80420ca-204b-4879-bf69-b6b7a202ad87',
-          guid: 'c80420ca-204b-4879-bf69-b6b7a202ad87-11'
-        },
-        metadata: {
-          guid: 'c80420ca-204b-4879-bf69-b6b7a202ad87-11',
-          created_at: '',
-          updated_at: '',
-          url: ''
-        }
-      },
-      {
-        entity: {
-          name: 'space_developer_env_var_visibility',
-          enabled: true,
-          error_message: null,
-          url: '/v2/config/feature_flags/space_developer_env_var_visibility',
-          cfGuid: 'c80420ca-204b-4879-bf69-b6b7a202ad87',
-          guid: 'c80420ca-204b-4879-bf69-b6b7a202ad87-12'
-        },
-        metadata: {
-          guid: 'c80420ca-204b-4879-bf69-b6b7a202ad87-12',
-          created_at: '',
-          updated_at: '',
-          url: ''
-        }
-      }
-    ];
+    };
+  }
+
+  function createStoreState(): StoreStateWithRoles {
 
     // Pagination
-    const pagination: PaginationState = {
+    const pagination = {
       stratosEndpoint: {
         'endpoint-list': {
           currentPage: 1,
           totalResults: 2,
           pageCount: 1,
           ids: {
-            1: endpoints.map(endpoint => endpoint.guid)
+            // strict: every endpoint fixture above declares a literal guid
+            1: endpoints.map(endpoint => endpoint.guid!),
           },
           pageRequests: {
             1: {
@@ -528,10 +564,10 @@ describe('CurrentUserPermissionsService with CF checker', () => {
               string: '',
               items: {}
             },
-            totalResults: 2
+            totalResults: 2,
           },
           maxedState: {},
-          isListPagination: true
+          isListPagination: true,
         }
       },
       cfFeatureFlag: {
@@ -540,7 +576,8 @@ describe('CurrentUserPermissionsService with CF checker', () => {
           currentPage: 1,
           totalResults: 13,
           ids: {
-            1: featureFlags1.map(ff => ff.entity.guid)
+            // strict: every featureFlags1 fixture entity declares a literal guid
+            1: featureFlags1.map(ff => ff.entity.guid!),
           },
           pageRequests: {
             1: {
@@ -557,17 +594,18 @@ describe('CurrentUserPermissionsService with CF checker', () => {
               string: '',
               items: {}
             },
-            totalResults: 13
+            totalResults: 13,
           },
           maxedState: {},
-          isListPagination: false
+          isListPagination: false,
         },
         'endpoint-c80420ca-204b-4879-bf69-b6b7a202ad87': {
           pageCount: 1,
           currentPage: 1,
           totalResults: 13,
           ids: {
-            1: featureFlags2.map(ff => ff.entity.guid)
+            // strict: every featureFlags2 fixture entity declares a literal guid
+            1: featureFlags2.map(ff => ff.entity.guid!),
           },
           pageRequests: {
             1: {
@@ -584,35 +622,40 @@ describe('CurrentUserPermissionsService with CF checker', () => {
               string: '',
               items: {}
             },
-            totalResults: 13
+            totalResults: 13,
           },
           maxedState: {},
-          isListPagination: false
+          isListPagination: false,
         }
       },
+      // No system/metrics paginations are seeded by this fixture; the empty
+      // PaginationEntityTypeState (genuine "nothing paged yet") satisfies the
+      // required BaseEntityValues keys on AppState.pagination.
+      system: {} as PaginationEntityTypeState,
+      metrics: {} as PaginationEntityTypeState,
     };
 
     // User roles
     const initialState: Partial<AppState<BaseEntityValues>> = {
 
     };
-
-
     // Create request and requestData sections
     const entityMap = new Map<EntityCatalogEntityConfig, Array<TestStoreEntity | string>>([
       [
         stratosEntityFactory(endpointEntityType),
         endpoints.map(endpoint => ({
-          guid: endpoint.guid,
-          data: endpoint
-        }))
+          // strict: every endpoint fixture above declares a literal guid
+          guid: endpoint.guid!,
+          data: endpoint,
+        })),
       ],
       [
         ffSchema,
         [...featureFlags1, ...featureFlags2].map(featureFlag => ({
-          guid: featureFlag.entity.guid,
-          data: featureFlag
-        }))
+          // strict: every feature-flag fixture entity declares a literal guid
+          guid: featureFlag.entity.guid!,
+          data: featureFlag,
+        })),
       ]
     ]);
     const requestAndRequestData = createEntityStoreState(entityMap);
@@ -628,8 +671,8 @@ describe('CurrentUserPermissionsService with CF checker', () => {
             // CfScopeStrings.CF_WRITE_SCOPE,
             // CfScopeStrings.CF_READ_SCOPE,
             StratosScopeStrings.STRATOS_CHANGE_PASSWORD,
-            StratosScopeStrings.SCIM_READ
-          ],
+            StratosScopeStrings.SCIM_READ,
+    ],
         },
         endpoints: {
           cf: {
@@ -653,7 +696,7 @@ describe('CurrentUserPermissionsService with CF checker', () => {
                   orgId: 'abc',
                   isManager: true,
                   isAuditor: false,
-                  isDeveloper: true
+                  isDeveloper: true,
                 }
               },
               organizations: {
@@ -675,7 +718,7 @@ describe('CurrentUserPermissionsService with CF checker', () => {
               state: {
                 initialised: true,
                 fetching: false,
-                error: null
+                error: null,
               }
             },
             'c80420ca-204b-4879-bf69-b6b7a202ad87': {
@@ -751,7 +794,7 @@ describe('CurrentUserPermissionsService with CF checker', () => {
               state: {
                 initialised: true,
                 fetching: false,
-                error: null
+                error: null,
               }
             },
             READ_ONLY_ADMIN: {
@@ -779,19 +822,19 @@ describe('CurrentUserPermissionsService with CF checker', () => {
                   orgId: 'abc',
                   isManager: true,
                   isAuditor: false,
-                  isDeveloper: true
+                  isDeveloper: true,
                 },
                 'c6450a21-aa1a-4643-9437-035cc818ea72': {
                   orgId: 'abc',
                   isManager: true,
                   isAuditor: false,
-                  isDeveloper: true
+                  isDeveloper: true,
                 },
                 '86577124-4b64-4ca1-9a78-d904c60505c4': {
                   orgId: 'abc',
                   isManager: true,
                   isAuditor: false,
-                  isDeveloper: true
+                  isDeveloper: true,
                 }
               },
               organizations: {
@@ -827,7 +870,7 @@ describe('CurrentUserPermissionsService with CF checker', () => {
               state: {
                 initialised: true,
                 fetching: false,
-                error: null
+                error: null,
               }
             },
             READ_ONLY_USER: {
@@ -903,7 +946,7 @@ describe('CurrentUserPermissionsService with CF checker', () => {
               state: {
                 initialised: true,
                 fetching: false,
-                error: null
+                error: null,
               }
             }
           },
@@ -911,16 +954,16 @@ describe('CurrentUserPermissionsService with CF checker', () => {
         state: {
           initialised: true,
           fetching: false,
-          error: null
+          error: null,
         }
       },
       requestData: {
         ...initialState.requestData,
-        ...requestAndRequestData.requestData
+        ...requestAndRequestData.requestData,
       },
       pagination: {
         ...initialState.pagination,
-        ...pagination
+        ...pagination,
       },
     };
   }
@@ -928,151 +971,220 @@ describe('CurrentUserPermissionsService with CF checker', () => {
   beforeEach(() => {
     TestBed.configureTestingModule({
       providers: [
-        ...cfCurrentUserPermissionsService
-      ],
-      imports: [
+        CurrentUserPermissionsService,
+        ...STORE_TEST_PROVIDERS,
+        CfUserPermissionsChecker,
         {
-          ngModule: EntityCatalogTestModule,
-          providers: [
-            {
-              provide: TEST_CATALOGUE_ENTITIES, useValue: [
-                ...generateStratosEntities(),
-                generateCFEntities().find(a => a.type === ffSchema.entityType)
-              ]
-            }
+          provide: CUSTOM_USER_PERMISSION_CHECKERS,
+          useFactory: (checker: CfUserPermissionsChecker) => [checker],
+          deps: [CfUserPermissionsChecker]
+        },
+        {
+          provide: TEST_CATALOGUE_ENTITIES,
+          useValue: [
+            ...generateStratosEntities(),
+            ...generateCFEntities(),
           ]
         },
+        provideZonelessChangeDetection(),
+      ],
+      imports: [
         createBasicStoreModule(createStoreState()),
-        AppTestModule,
+        EntityCatalogTestModule,
       ],
 
     });
-    service = TestBed.get(CurrentUserPermissionsService);
+
+    // Initialize EntityCatalogHelper for Angular 20 compatibility
+    const helper = TestBed.inject(EntityCatalogHelper);
+    EntityCatalogHelpers.SetEntityCatalogHelper(helper);
+
+    // Roles are no longer read from the ngrx slice — seed the signal-native
+    // source of truth (favorites/roles island Wave 2) with the same fixture the
+    // store module is built from, so the CF/stratos permission checkers (which
+    // now read via CurrentUserRolesDataService) see the test roles.
+    const roles = createStoreState().currentUserRoles;
+    const rolesData = TestBed.inject(CurrentUserRolesDataService);
+    if (roles?.endpoints?.cf) {
+      rolesData.updateEndpointRoles('cf', () => roles.endpoints.cf);
+    }
+    if (roles?.internal) {
+      // applySessionScopes only reads admin + scopes; guid/name are required by
+      // SessionUser but irrelevant to this test, so they carry stub values.
+      const sessionUser: SessionUser = {
+        admin: roles.internal.isAdmin,
+        scopes: roles.internal.scopes,
+        guid: 'test-user',
+        name: 'test-user',
+      };
+      rolesData.applySessionScopes(sessionUser);
+    }
+
+    service = TestBed.inject(CurrentUserPermissionsService);
+
+    // The permission pipeline is HTTP-backed now: the endpoint list comes from
+    // EndpointsDataService (/pp/v1/info) and each CF endpoint's feature flags
+    // from CnsiFeatureFlagsSource. Both are requested lazily, part way through
+    // a check, so there is no single moment at which every request is already
+    // pending — answer them from the same fixtures the store module is built
+    // from as they arrive. Without this the endpoint list stays empty and the
+    // "all endpoints" checks reduce over nothing.
+    const httpMock = TestBed.inject(HttpTestingController);
+    autoRespond = setInterval(() => {
+      httpMock.match(() => true).forEach(req => {
+        const url = req.request.url;
+        if (url === '/pp/v1/info') {
+          req.flush(systemInfo());
+          return;
+        }
+        const cnsiGuid = url.match(/\/pp\/v1\/cf\/feature_flags\/([^?]+)/)?.[1];
+        if (cnsiGuid) {
+          req.flush(featureFlagsPage(cnsiGuid));
+          return;
+        }
+        req.flush(null, { status: 404, statusText: 'Not Found' });
+      });
+    }, 1);
+  });
+
+  afterEach(() => {
+    clearInterval(autoRespond);
   });
 
   it('should be created', () => {
     expect(service).toBeTruthy();
   });
 
-  it('should allow create application', done => {
-    service.can(CfCurrentUserPermissions.APPLICATION_CREATE).pipe(
-      tap(can => {
-        expect(can).toBe(true);
-        done();
-      }),
-      first()
-    ).subscribe();
+  it('should allow create application', async () => {
+    const can = await firstValueFrom(
+      service.can(CfCurrentUserPermissions.APPLICATION_CREATE).pipe(
+        take(1),
+        timeout(5000)
+      )
+    );
+    expect(can).toBe(true);
   });
 
-  it('should allow create application for single endpoint with access', done => {
-    service.can(CfCurrentUserPermissions.APPLICATION_CREATE, '0e934dc8-7ad4-40ff-b85c-53c1b61d2abb').pipe(
-      tap(can => {
-        expect(can).toBe(true);
-        done();
-      }),
-      first()
-    ).subscribe();
+  it('should allow create application for single endpoint with access', async () => {
+    const can = await firstValueFrom(
+      service.can(CfCurrentUserPermissions.APPLICATION_CREATE, '0e934dc8-7ad4-40ff-b85c-53c1b61d2abb').pipe(
+        take(1),
+        timeout(5000)
+      )
+    );
+    expect(can).toBe(true);
   });
 
-  it('should allow create application for single endpoint with access and org/space', done => {
-    service.can(
-      CfCurrentUserPermissions.APPLICATION_CREATE,
-      'c80420ca-204b-4879-bf69-b6b7a202ad87',
-      '86577124-4b64-4ca1-9a78-d904c60505c4'
-    ).pipe(
-      tap(can => {
-        expect(can).toBe(true);
-        done();
-      }),
-      first()
-    ).subscribe();
+  it('should allow create application for single endpoint with access and org/space', async () => {
+    const can = await firstValueFrom(
+      service.can(
+        CfCurrentUserPermissions.APPLICATION_CREATE,
+        'c80420ca-204b-4879-bf69-b6b7a202ad87',
+        '86577124-4b64-4ca1-9a78-d904c60505c4'
+      ).pipe(
+        take(1),
+        timeout(5000)
+      )
+    );
+    expect(can).toBe(true);
   });
 
-  it('should allow if feature flag', done => {
-    service.can(
-      [new PermissionConfig(CfPermissionTypes.FEATURE_FLAG, CFFeatureFlagTypes.private_domain_creation)]
-    ).pipe(
-      tap(can => {
-        expect(can).toBe(true);
-        done();
-      }),
-      first()
-    ).subscribe();
+  it('should allow if feature flag', async () => {
+    const can = await firstValueFrom(
+      service.can(
+        [new PermissionConfig(CfPermissionTypes.FEATURE_FLAG, CFFeatureFlagTypes.private_domain_creation)]
+      ).pipe(
+        take(1),
+        timeout(5000)
+      )
+    );
+    expect(can).toBe(true);
   });
 
-  it('should allow if feature flag with cf', done => {
-    service.can(
-      [new PermissionConfig(CfPermissionTypes.FEATURE_FLAG, CFFeatureFlagTypes.private_domain_creation)],
-      'c80420ca-204b-4879-bf69-b6b7a202ad87'
-    ).pipe(
-      tap(can => {
-        expect(can).toBe(false);
-        done();
-      }),
-      first()
-    ).subscribe();
+  it('should allow if feature flag with cf', async () => {
+    const can = await firstValueFrom(
+      service.can(
+        [new PermissionConfig(CfPermissionTypes.FEATURE_FLAG, CFFeatureFlagTypes.private_domain_creation)],
+        'c80420ca-204b-4879-bf69-b6b7a202ad87'
+      ).pipe(
+        take(1),
+        timeout(5000)
+      )
+    );
+    expect(can).toBe(true);
   });
 
-  it('should not allow if no feature flag', done => {
-    service.can(
-      [new PermissionConfig(CfPermissionTypes.FEATURE_FLAG, CFFeatureFlagTypes.user_org_creation)],
-      'c80420ca-204b-4879-bf69-b6b7a202ad87'
-    ).pipe(
-      tap(can => {
-        expect(can).toBe(false);
-        done();
-      }),
-      first()
-    ).subscribe();
+  it('should not allow if feature flag is disabled on that cf', async () => {
+    const can = await firstValueFrom(
+      service.can(
+        [new PermissionConfig(CfPermissionTypes.FEATURE_FLAG, CFFeatureFlagTypes.diego_docker)],
+        '0e934dc8-7ad4-40ff-b85c-53c1b61d2abb'
+      ).pipe(
+        take(1),
+        timeout(5000)
+      )
+    );
+    expect(can).toBe(false);
   });
 
-
-  it('should allow if has endpoint scope', done => {
-    service.can(new PermissionConfig(CfPermissionTypes.ENDPOINT_SCOPE, StratosScopeStrings.SCIM_READ), 'c80420ca-204b-4879-bf69-b6b7a202ad87').pipe(
-      tap(can => {
-        expect(can).toBe(true);
-        done();
-      }),
-      first()
-    ).subscribe();
+  it('should not allow if no feature flag', async () => {
+    const can = await firstValueFrom(
+      service.can(
+        [new PermissionConfig(CfPermissionTypes.FEATURE_FLAG, CFFeatureFlagTypes.user_org_creation)],
+        'c80420ca-204b-4879-bf69-b6b7a202ad87'
+      ).pipe(
+        take(1),
+        timeout(5000)
+      )
+    );
+    expect(can).toBe(false);
+  });
+  it('should allow if has endpoint scope', async () => {
+    const can = await firstValueFrom(
+      service.can(new PermissionConfig(CfPermissionTypes.ENDPOINT_SCOPE, StratosScopeStrings.SCIM_READ), 'c80420ca-204b-4879-bf69-b6b7a202ad87').pipe(
+        take(1),
+        timeout(5000)
+      )
+    );
+    expect(can).toBe(true);
   });
 
-  it('should not allow if has endpoint scope', done => {
-    service.can(new PermissionConfig(CfPermissionTypes.ENDPOINT_SCOPE, StratosScopeStrings.SCIM_READ), '0e934dc8-7ad4-40ff-b85c-53c1b61d2abb').pipe(
-      tap(can => {
-        expect(can).toBe(false);
-        done();
-      }),
-      first()
-    ).subscribe();
+  it('should not allow if has endpoint scope', async () => {
+    const can = await firstValueFrom(
+      service.can(new PermissionConfig(CfPermissionTypes.ENDPOINT_SCOPE, StratosScopeStrings.SCIM_READ), '0e934dc8-7ad4-40ff-b85c-53c1b61d2abb').pipe(
+        take(1),
+        timeout(5000)
+      )
+    );
+    expect(can).toBe(false);
   });
 
-  it('should not allow if read only admin', done => {
-    service.can(
-      CfCurrentUserPermissions.APPLICATION_CREATE,
-      'READ_ONLY_ADMIN',
-      'c6450a21-aa1a-4643-9437-035cc818ea72'
-    ).pipe(
-      tap(can => {
-        expect(can).toBe(false);
-        done();
-      }),
-      first()
-    ).subscribe();
+  it('should not allow if read only admin', async () => {
+    const can = await firstValueFrom(
+      service.can(
+        CfCurrentUserPermissions.APPLICATION_CREATE,
+        'READ_ONLY_ADMIN',
+        'c6450a21-aa1a-4643-9437-035cc818ea72'
+      ).pipe(
+        take(1),
+        timeout(5000)
+      )
+    );
+    expect(can).toBe(false);
   });
 
-  it('should not allow if read only user', done => {
-    service.can(
-      CfCurrentUserPermissions.APPLICATION_CREATE,
-      'READ_ONLY_USER',
-      'c6450a21-aa1a-4643-9437-035cc818ea72'
-    ).pipe(
-      tap(can => {
-        expect(can).toBe(false);
-        done();
-      }),
-      first()
-    ).subscribe();
+  it('should not allow if read only user', async () => {
+    const can = await firstValueFrom(
+      service.can(
+        CfCurrentUserPermissions.APPLICATION_CREATE,
+        'READ_ONLY_USER',
+        'c6450a21-aa1a-4643-9437-035cc818ea72'
+      ).pipe(
+        take(1),
+        timeout(5000)
+      )
+    );
+    expect(can).toBe(false);
   });
 
 });

@@ -4,12 +4,12 @@ import (
 	"database/sql"
 	"errors"
 	"fmt"
+	"log/slog"
 	"net/url"
 
 	"github.com/cloudfoundry/stratos/src/jetstream/api"
 	"github.com/cloudfoundry/stratos/src/jetstream/crypto"
 	"github.com/cloudfoundry/stratos/src/jetstream/datastore"
-	log "github.com/sirupsen/logrus"
 )
 
 var listCNSIs = `SELECT guid, name, cnsi_type, api_endpoint, auth_endpoint, token_endpoint, doppler_logging_endpoint, skip_ssl_validation, client_id, client_secret, sso_allowed, sub_type, meta_data, creator, ca_cert
@@ -37,10 +37,10 @@ var saveCNSI = `INSERT INTO cnsis (guid, name, cnsi_type, api_endpoint, auth_end
 var deleteCNSI = `DELETE FROM cnsis WHERE guid = $1`
 
 // Update some of the endpoint metadata
-var updateCNSI = `UPDATE cnsis SET name = $1, skip_ssl_validation = $2, sso_allowed = $3, client_id = $4, client_secret = $5, ca_cert = $6 WHERE guid = $7`
+var updateCNSI = `UPDATE cnsis SET name = $1, skip_ssl_validation = $2, sso_allowed = $3, client_id = $4, client_secret = $5, ca_cert = $6, last_updated = CURRENT_TIMESTAMP WHERE guid = $7`
 
 // Update the metadata
-var updateCNSIMetadata = `UPDATE cnsis SET meta_data = $1 WHERE guid = $2`
+var updateCNSIMetadata = `UPDATE cnsis SET meta_data = $1, last_updated = CURRENT_TIMESTAMP WHERE guid = $2`
 
 var countCNSI = `SELECT COUNT(*) FROM cnsis WHERE guid=$1`
 
@@ -71,12 +71,12 @@ func InitRepositoryProvider(databaseProvider string) {
 
 // List - Returns a list of CNSI Records
 func (p *PostgresCNSIRepository) List(encryptionKey []byte) ([]*api.CNSIRecord, error) {
-	log.Debug("List")
+	slog.Debug("List")
 	rows, err := p.db.Query(listCNSIs)
 	if err != nil {
 		return nil, fmt.Errorf("Unable to retrieve CNSI records: %v", err)
 	}
-	defer rows.Close()
+	defer func() { _ = rows.Close() }()
 
 	var cnsiList []*api.CNSIRecord
 	cnsiList = make([]*api.CNSIRecord, 0)
@@ -139,12 +139,12 @@ func (p *PostgresCNSIRepository) List(encryptionKey []byte) ([]*api.CNSIRecord, 
 
 // ListByUser - Returns a list of CNSIs registered by a user
 func (p *PostgresCNSIRepository) ListByUser(userGUID string) ([]*api.ConnectedEndpoint, error) {
-	log.Debug("ListByUser")
+	slog.Debug("ListByUser", "user", userGUID)
 	rows, err := p.db.Query(listCNSIsByUser, "cnsi", userGUID)
 	if err != nil {
 		return nil, fmt.Errorf("Unable to retrieve CNSI records: %v", err)
 	}
-	defer rows.Close()
+	defer func() { _ = rows.Close() }()
 
 	var clusterList []*api.ConnectedEndpoint
 	clusterList = make([]*api.ConnectedEndpoint, 0)
@@ -198,13 +198,13 @@ func (p *PostgresCNSIRepository) ListByUser(userGUID string) ([]*api.ConnectedEn
 
 // ListByCreator - Returns a list of CNSIs created by a user
 func (p *PostgresCNSIRepository) ListByCreator(userGUID string, encryptionKey []byte) ([]*api.CNSIRecord, error) {
-	log.Debug("ListByCreator")
+	slog.Debug("ListByCreator", "creator", userGUID)
 	return p.listBy(listCNSIsByCreator, userGUID, encryptionKey)
 }
 
 // ListByAPIEndpoint - Returns a a list of CNSIs with the same APIEndpoint
 func (p *PostgresCNSIRepository) ListByAPIEndpoint(endpoint string, encryptionKey []byte) ([]*api.CNSIRecord, error) {
-	log.Debug("listByAPIEndpoint")
+	slog.Debug("listByAPIEndpoint", "apiEndpoint", endpoint)
 	return p.listBy(findCNSIByAPIEndpoint, endpoint, encryptionKey)
 }
 
@@ -214,7 +214,7 @@ func (p *PostgresCNSIRepository) listBy(query string, match string, encryptionKe
 	if err != nil {
 		return nil, fmt.Errorf("Unable to retrieve CNSI records: %v", err)
 	}
-	defer rows.Close()
+	defer func() { _ = rows.Close() }()
 
 	var cnsiList []*api.CNSIRecord
 	cnsiList = make([]*api.CNSIRecord, 0)
@@ -277,13 +277,13 @@ func (p *PostgresCNSIRepository) listBy(query string, match string, encryptionKe
 
 // Find - Returns a single CNSI Record
 func (p *PostgresCNSIRepository) Find(guid string, encryptionKey []byte) (api.CNSIRecord, error) {
-	log.Debug("Find")
+	slog.Debug("Find", "endpoint", guid)
 	return p.findBy(findCNSI, guid, encryptionKey)
 }
 
 // FindByAPIEndpoint - Returns a single CNSI Record
 func (p *PostgresCNSIRepository) FindByAPIEndpoint(endpoint string, encryptionKey []byte) (api.CNSIRecord, error) {
-	log.Debug("FindByAPIEndpoint")
+	slog.Debug("FindByAPIEndpoint", "apiEndpoint", endpoint)
 	return p.findBy(findCNSIByAPIEndpoint, endpoint, encryptionKey)
 }
 
@@ -346,13 +346,13 @@ func (p *PostgresCNSIRepository) findBy(query, match string, encryptionKey []byt
 
 // Save will persist a CNSI Record to a datastore
 func (p *PostgresCNSIRepository) Save(guid string, cnsi api.CNSIRecord, encryptionKey []byte) error {
-	log.Debug("Save")
+	slog.Debug("Save", "endpoint", guid)
 	cipherTextClientSecret, err := crypto.EncryptToken(encryptionKey, cnsi.ClientSecret)
 	if err != nil {
 		return err
 	}
-	if _, err := p.db.Exec(saveCNSI, guid, cnsi.Name, fmt.Sprintf("%s", cnsi.CNSIType),
-		fmt.Sprintf("%s", cnsi.APIEndpoint), cnsi.AuthorizationEndpoint, cnsi.TokenEndpoint, cnsi.DopplerLoggingEndpoint, cnsi.SkipSSLValidation,
+	if _, err := p.db.Exec(saveCNSI, guid, cnsi.Name, cnsi.CNSIType,
+		cnsi.APIEndpoint.String(), cnsi.AuthorizationEndpoint, cnsi.TokenEndpoint, cnsi.DopplerLoggingEndpoint, cnsi.SkipSSLValidation,
 		cnsi.ClientId, cipherTextClientSecret, cnsi.SSOAllowed, cnsi.SubType, cnsi.Metadata, cnsi.Creator, cnsi.CACert); err != nil {
 		return fmt.Errorf("Unable to Save CNSI record: %v", err)
 	}
@@ -362,7 +362,7 @@ func (p *PostgresCNSIRepository) Save(guid string, cnsi api.CNSIRecord, encrypti
 
 // Delete will delete a CNSI Record from the datastore
 func (p *PostgresCNSIRepository) Delete(guid string) error {
-	log.Debug("Delete")
+	slog.Debug("Delete", "endpoint", guid)
 	if _, err := p.db.Exec(deleteCNSI, guid); err != nil {
 		return fmt.Errorf("Unable to Delete CNSI record: %v", err)
 	}
@@ -372,11 +372,11 @@ func (p *PostgresCNSIRepository) Delete(guid string) error {
 
 // Update - Update an endpoint's data
 func (p *PostgresCNSIRepository) Update(endpoint api.CNSIRecord, encryptionKey []byte) error {
-	log.Debug("Update endpoint")
+	slog.Debug("Update endpoint", "endpoint", endpoint.GUID)
 
 	if endpoint.GUID == "" {
 		msg := "Unable to update Endpoint without a valid guid."
-		log.Debug(msg)
+		slog.Debug(msg)
 		return errors.New(msg)
 	}
 
@@ -388,11 +388,14 @@ func (p *PostgresCNSIRepository) Update(endpoint api.CNSIRecord, encryptionKey [
 		return err
 	}
 
-	result, err := p.db.Exec(updateCNSI, endpoint.Name, endpoint.SkipSSLValidation, endpoint.SSOAllowed, endpoint.ClientId, cipherTextClientSecret, endpoint.GUID, endpoint.CACert)
+	// Arg order must match updateCNSI: ... ca_cert = $6 WHERE guid = $7.
+	// These were swapped once (guid landed in ca_cert, WHERE matched the
+	// cert) and every update failed with "no rows were updated".
+	result, err := p.db.Exec(updateCNSI, endpoint.Name, endpoint.SkipSSLValidation, endpoint.SSOAllowed, endpoint.ClientId, cipherTextClientSecret, endpoint.CACert, endpoint.GUID)
 	if err != nil {
-		msg := "Unable to UPDATE endpoint: %v"
-		log.Debugf(msg, err)
-		return fmt.Errorf(msg, err)
+		const msg = "unable to UPDATE endpoint"
+		slog.Debug(msg, "endpoint", endpoint.GUID, "error", err)
+		return fmt.Errorf("%s: %w", msg, err)
 	}
 
 	rowsUpdates, err := result.RowsAffected()
@@ -405,21 +408,22 @@ func (p *PostgresCNSIRepository) Update(endpoint api.CNSIRecord, encryptionKey [
 	}
 
 	if rowsUpdates > 1 {
-		log.Warn("UPDATE endpoint: More than 1 row was updated (expected only 1)")
+		slog.Warn("UPDATE endpoint: more than 1 row was updated (expected only 1)",
+			"endpoint", endpoint.GUID, "rows", rowsUpdates)
 	}
 
-	log.Debug("Endpoint UPDATE complete")
+	slog.Debug("Endpoint UPDATE complete", "endpoint", endpoint.GUID)
 
 	return nil
 }
 
 // UpdateMetadata - Update an endpoint's metadata
 func (p *PostgresCNSIRepository) UpdateMetadata(guid string, metadata string) error {
-	log.Debug("UpdateMetadata")
+	slog.Debug("UpdateMetadata", "endpoint", guid)
 
 	if guid == "" {
 		msg := "Unable to update Endpoint without a valid guid."
-		log.Debug(msg)
+		slog.Debug(msg)
 		return errors.New(msg)
 	}
 
@@ -427,9 +431,9 @@ func (p *PostgresCNSIRepository) UpdateMetadata(guid string, metadata string) er
 
 	result, err := p.db.Exec(updateCNSIMetadata, metadata, guid)
 	if err != nil {
-		msg := "Unable to UPDATE endpoint: %v"
-		log.Debugf(msg, err)
-		return fmt.Errorf(msg, err)
+		const msg = "unable to UPDATE endpoint metadata"
+		slog.Debug(msg, "endpoint", guid, "error", err)
+		return fmt.Errorf("%s: %w", msg, err)
 	}
 
 	rowsUpdates, err := result.RowsAffected()
@@ -442,23 +446,24 @@ func (p *PostgresCNSIRepository) UpdateMetadata(guid string, metadata string) er
 	}
 
 	if rowsUpdates > 1 {
-		log.Warn("UPDATE endpoint: More than 1 row was updated (expected only 1)")
+		slog.Warn("UPDATE endpoint: more than 1 row was updated (expected only 1)",
+			"endpoint", guid, "rows", rowsUpdates)
 	}
 
-	log.Debug("Endpoint UPDATE complete")
+	slog.Debug("Endpoint UPDATE complete", "endpoint", guid)
 
 	return nil
 }
 
 // SaveOrUpdate - Creates or Updates CNSI Record
 func (p *PostgresCNSIRepository) SaveOrUpdate(endpoint api.CNSIRecord, encryptionKey []byte) error {
-	log.Debug("Overwrite CNSI")
+	slog.Debug("Overwrite CNSI", "endpoint", endpoint.GUID)
 
 	// Is there an existing token?
 	var count int
 	err := p.db.QueryRow(countCNSI, endpoint.GUID).Scan(&count)
 	if err != nil {
-		log.Errorf("Unknown error attempting to find CNSI: %v", err)
+		slog.Error("unknown error attempting to find the CNSI", "endpoint", endpoint.GUID, "error", err)
 	}
 
 	switch count {

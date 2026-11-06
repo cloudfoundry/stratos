@@ -1,35 +1,50 @@
-import { ComponentFixture, TestBed, waitForAsync } from '@angular/core/testing';
+import { provideZonelessChangeDetection, signal } from '@angular/core';
+import { ComponentFixture, TestBed } from '@angular/core/testing';
+import { provideRouter } from '@angular/router';
+import { provideHttpClient } from '@angular/common/http';
+import { provideHttpClientTesting } from '@angular/common/http/testing';
+import { NoopAnimationsModule } from '@angular/platform-browser/animations';
+import { describe, it, expect, beforeEach } from 'vitest';
 
-import { AppChipsComponent } from '../../../../../../core/src/shared/components/chips/chips.component';
-import { MetadataCardTestComponents } from '../../../../../../core/test-framework/core-test.helper';
-import { generateCfBaseTestModulesNoShared } from '../../../../../test-framework/cloud-foundry-endpoint-service.helper';
-import { ServicesService } from '../../../../features/service-catalog/services.service';
-import { ServicesServiceMock } from '../../../../features/service-catalog/services.service.mock';
+import { EndpointDataRegistry } from '../../../../services/endpoint-data/endpoint-data.registry';
 import {
-  CompactServiceInstanceCardComponent,
-} from '../compact-service-instance-card/compact-service-instance-card.component';
+  StServiceInstance,
+} from '../../../../services/endpoint-data/stratos-types';
 import { ServiceRecentInstancesCardComponent } from './service-recent-instances-card.component';
+
+class FakeEndpointDataService {
+  private readonly _serviceInstances = signal<StServiceInstance[]>([]);
+  serviceInstances = this._serviceInstances.asReadonly();
+  isLoadingServicesDetails = () => false;
+  servicesDetailsLastFetched = () => new Date();
+  loadServicesDetails = (): Promise<void> => Promise.resolve();
+  setInstances(rows: StServiceInstance[]): void { this._serviceInstances.set(rows); }
+}
+
+class FakeRegistry {
+  acquire(_guid: string): unknown { return new FakeEndpointDataService(); }
+  release(_guid: string): void { /* noop */ }
+}
 
 describe('ServiceRecentInstancesCardComponent', () => {
   let component: ServiceRecentInstancesCardComponent;
   let fixture: ComponentFixture<ServiceRecentInstancesCardComponent>;
 
-  beforeEach(waitForAsync(() => {
-    TestBed.configureTestingModule({
-      declarations: [
+  beforeEach(async () => {
+    await TestBed.configureTestingModule({
+      imports: [
+        NoopAnimationsModule,
         ServiceRecentInstancesCardComponent,
-        MetadataCardTestComponents,
-        CompactServiceInstanceCardComponent,
-        AppChipsComponent
-
       ],
-      imports: generateCfBaseTestModulesNoShared(),
       providers: [
-        { provide: ServicesService, useClass: ServicesServiceMock },
-      ]
-    })
-      .compileComponents();
-  }));
+        provideZonelessChangeDetection(),
+        provideRouter([]),
+        provideHttpClient(),
+        provideHttpClientTesting(),
+        { provide: EndpointDataRegistry, useClass: FakeRegistry },
+      ],
+    }).compileComponents();
+  });
 
   beforeEach(() => {
     fixture = TestBed.createComponent(ServiceRecentInstancesCardComponent);

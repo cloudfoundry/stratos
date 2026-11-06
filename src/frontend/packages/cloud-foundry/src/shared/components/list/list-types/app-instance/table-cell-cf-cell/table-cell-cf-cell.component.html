@@ -1,6 +1,0 @@
-<a [routerLink]="[cellLink]" *ngIf="(cellMetric$ | async) as cellMetric; else loading">
-  {{cellMetric.bosh_job_id}}
-</a>
-<ng-template #loading>
-  <mat-progress-spinner diameter="20" mode="indeterminate"></mat-progress-spinner>
-</ng-template>

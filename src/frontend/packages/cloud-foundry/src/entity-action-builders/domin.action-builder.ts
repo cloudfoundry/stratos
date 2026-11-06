@@ -5,13 +5,13 @@ import { CFBasePipelineRequestActionMeta } from '../cf-entity-generator';
 
 export interface DomainActionBuilders extends OrchestratedActionBuilders {
   get: (
-    guid,
-    endpointGuid
+    guid: string,
+    endpointGuid: string
   ) => FetchDomain;
   getMultiple: (
-    endpointGuid,
-    paginationKey,
-    { flatten }: CFBasePipelineRequestActionMeta
+    endpointGuid: string,
+    paginationKey: string,
+    meta?: CFBasePipelineRequestActionMeta
   ) => FetchAllDomains;
   getOrganizationDomains: (
     orgGuid: string,
@@ -23,20 +23,20 @@ export interface DomainActionBuilders extends OrchestratedActionBuilders {
 
 export const domainActionBuilders: DomainActionBuilders = {
   get: (
-    guid,
-    endpointGuid
+    guid: string,
+    endpointGuid: string
   ) => new FetchDomain(guid, endpointGuid),
   // FIXME: Remove pagination key from get all requests. This might need some investigation regarding places where we use different keys
   // for lists of same type - #STRAT-149
   getMultiple: (
-    endpointGuid,
-    paginationKey,
+    endpointGuid: string,
+    paginationKey: string,
     { flatten }: CFBasePipelineRequestActionMeta = {}
   ) => new FetchAllDomains(endpointGuid, paginationKey, flatten),
   getOrganizationDomains: (
     orgGuid: string,
     endpointGuid: string,
-    paginationKey: string = null,
+    paginationKey: string = '',
     meta: CFBasePipelineRequestActionMeta = {
       includeRelations: [],
       populateMissing: true

@@ -1,107 +1,42 @@
-import { ComponentFixture, fakeAsync, TestBed, tick, waitForAsync } from '@angular/core/testing';
-import { BrowserAnimationsModule, NoopAnimationsModule } from '@angular/platform-browser/animations';
-import { createBasicStoreModule } from '@stratosui/store/testing';
-import { of } from 'rxjs';
-
-import { EntitySchema } from '../../../../../store/src/helpers/entity-schema';
-import { EntityMonitorFactory } from '../../../../../store/src/monitors/entity-monitor.factory.service';
-import { CoreTestingModule } from '../../../../test-framework/core-test.modules';
-import { MDAppModule } from '../../../core/md.module';
-import { SharedModule } from '../../shared.module';
+import { ComponentFixture, TestBed } from '@angular/core/testing';
+import { provideZonelessChangeDetection } from '@angular/core';
+import { NoopAnimationsModule } from '@angular/platform-browser/animations';
+import { describe, it, expect, beforeEach } from 'vitest';
+import { BehaviorSubject } from 'rxjs';
 import { LoadingPageComponent } from './loading-page.component';
-
-class EntityMonitorFactoryMock {
-  monitor = {
-    isDeletingEntity$: of(false),
-    isFetchingEntity$: of(false),
-  };
-
-  create() {
-    return this.monitor;
-  }
-}
 
 describe('LoadingPageComponent', () => {
   let component: LoadingPageComponent;
   let fixture: ComponentFixture<LoadingPageComponent>;
   let element: HTMLElement;
-  let entityFactory: EntityMonitorFactoryMock;
 
-  beforeEach(waitForAsync(() => {
+  beforeEach(() => {
     TestBed.configureTestingModule({
       imports: [
-        MDAppModule,
-        SharedModule,
-        CoreTestingModule,
-        BrowserAnimationsModule,
         NoopAnimationsModule,
-        createBasicStoreModule()
+        LoadingPageComponent,
       ],
       providers: [
-        { provide: EntityMonitorFactory, useClass: EntityMonitorFactoryMock }
+        provideZonelessChangeDetection(),
       ]
     })
       .compileComponents();
-  }));
-
-  beforeEach(() => {
-    fixture = TestBed.createComponent(LoadingPageComponent);
-    entityFactory = TestBed.get(EntityMonitorFactory);
-    component = fixture.componentInstance;
-    fixture.detectChanges();
-    element = fixture.nativeElement;
-  });
-
-  it('should be created', () => {
-    expect(component).toBeTruthy();
-  });
-
-  it('should show custom message', () => {
-    component.isLoading = of(true);
-    component.text = 'Custom message';
-    component.ngOnInit();
-    fixture.detectChanges();
-
-    expect(element.textContent).toContain('Custom message');
-  });
-
-  describe('when deleting', () => {
-    beforeEach(() => {
-      component.isLoading = null;
-      component.entityId = 'id';
-      component.entitySchema = new EntitySchema('schema', 'endpoint');
-      entityFactory.monitor.isDeletingEntity$ = of(true);
-      component.ngOnInit();
-      fixture.detectChanges();
-    });
-
-    it('should show default message', () => {
-      expect(element.textContent).toContain(component.deleteText);
-    });
-
-    it('should show progress bar until is done', () => {
-      const progressBar = element.querySelector('mat-progress-bar');
-      expect(progressBar).toBeTruthy();
-    });
-
-    it('should hide progress bar when is done', fakeAsync(() => {
-      let progressBar = element.querySelector('mat-progress-bar');
-      expect(progressBar).toBeTruthy();
-
-      component.isDeleting = of(false);
-      fixture.detectChanges();
-
-      tick(250);
-
-      progressBar = element.querySelector('mat-progress-bar');
-      expect(progressBar).toBeFalsy();
-    }));
   });
 
   describe('when loading', () => {
-    beforeEach(() => {
-      component.isLoading = of(true);
+    let loadingSubject: BehaviorSubject<boolean>;
+
+    beforeEach(async () => {
+      fixture = TestBed.createComponent(LoadingPageComponent);
+      component = fixture.componentInstance;
+      element = fixture.nativeElement;
+
+      loadingSubject = new BehaviorSubject<boolean>(true);
+      component.isLoading = loadingSubject.asObservable();
       component.ngOnInit();
+
+      fixture.detectChanges();
+      await fixture.whenStable();
       fixture.detectChanges();
     });
 
@@ -109,22 +44,29 @@ describe('LoadingPageComponent', () => {
       expect(element.textContent).toContain(component.text);
     });
 
-    it('should show progress bar until is done', () => {
-      const progressBar = element.querySelector('mat-progress-bar');
-      expect(progressBar).toBeTruthy();
+    it('should show a loading indicator until is done', () => {
+      const indicator = element.querySelector('[data-test="loading-page-indicator"]');
+      expect(indicator).toBeTruthy();
     });
 
-    it('should hide progress bar when is done', fakeAsync(() => {
-      let progressBar = element.querySelector('mat-progress-bar');
-      expect(progressBar).toBeTruthy();
+    it('should hide progress bar when is done', async () => {
+      let indicator = element.querySelector('[data-test="loading-page-indicator"]');
+      expect(indicator).toBeTruthy();
 
-      component.isLoading = of(false);
+      loadingSubject.next(false);
+
+      fixture.detectChanges();
+      await fixture.whenStable();
       fixture.detectChanges();
 
-      tick(250);
+      indicator = element.querySelector('[data-test="loading-page-indicator"]');
+      expect(indicator).toBeFalsy();
+    });
+  });
 
-      progressBar = element.querySelector('mat-progress-bar');
-      expect(progressBar).toBeFalsy();
-    }));
+  it('should be created', () => {
+    fixture = TestBed.createComponent(LoadingPageComponent);
+    component = fixture.componentInstance;
+    expect(component).toBeTruthy();
   });
 });

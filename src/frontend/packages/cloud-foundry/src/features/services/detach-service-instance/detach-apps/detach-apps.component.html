@@ -1,1 +1,36 @@
-<app-list></app-list>
+@if (isLoading()) {
+  <p class="py-4 text-content-2">Loading bound apps…</p>
+} @else if (rows().length === 0) {
+  <p class="py-4 text-content-2">There are no service bindings.</p>
+} @else {
+  <table class="w-full text-left">
+    <thead>
+      <tr class="border-b border-content-2 text-sm uppercase tracking-wide">
+        <th class="w-8 py-2">
+          <input type="checkbox"
+            [checked]="isAllSelected()"
+            (change)="toggleAll()"
+            aria-label="Select all bindings" />
+        </th>
+        <th class="py-2">App Name</th>
+        <th class="py-2">Binding Date</th>
+      </tr>
+    </thead>
+    <tbody>
+      @for (row of rows(); track row.binding.guid) {
+        <tr class="border-b border-content-3 cursor-pointer hover:bg-content-3/40"
+          (click)="toggleRow(row.binding)">
+          <td class="py-2">
+            <input type="checkbox"
+              [checked]="isRowSelected(row.binding)"
+              (click)="$event.stopPropagation()"
+              (change)="toggleRow(row.binding)"
+              [attr.aria-label]="'Select ' + row.appName" />
+          </td>
+          <td class="py-2">{{ row.appName }}</td>
+          <td class="py-2 text-content-2">{{ row.bindingDate }}</td>
+        </tr>
+      }
+    </tbody>
+  </table>
+}

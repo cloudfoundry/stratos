@@ -1,5 +1,7 @@
-<span [ngClass]="(themeService.getTheme() | async).styleName">
+<span [ngClass]="branding.isDarkMode() ? 'dark-theme' : 'default-theme'">
 
   <router-outlet></router-outlet>
-  <div class="user-id" *ngIf="userId$ | async as userId" id="__stratos-userid__">{{userId}}</div>
+  @if (userId$ | async; as userId) {
+    <div class="hidden" id="__stratos-userid__">{{userId}}</div>
+  }
 </span>

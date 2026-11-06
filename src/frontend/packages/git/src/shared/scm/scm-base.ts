@@ -1,10 +1,12 @@
 import { Observable, of } from 'rxjs';
-import { first, map } from 'rxjs/operators';
+import { take, map } from 'rxjs/operators';
+import { toObservable } from '@angular/core/rxjs-interop';
+import { Injector } from '@angular/core';
 
 import { HttpOptions } from '../../../../core/src/core/core.types';
 import { environment } from '../../../../core/src/environments/environment';
 import { EndpointModel } from '../../../../store/src/public-api';
-import { stratosEntityCatalog } from '../../../../store/src/stratos-entity-catalog';
+import { EndpointsDataService } from '../../../../store/src/services/endpoints-data.service';
 
 
 const { proxyAPIVersion } = environment;
@@ -17,65 +19,89 @@ export interface GitApiRequest {
 
 export abstract class BaseSCM {
 
-  public endpointGuid: string;
+  // strict: assigned by every concrete subclass constructor (GitHubSCM,
+  // GitLabSCM) immediately after super().
+  public endpointGuid!: string;
+
+  // W36-B Wave 3: optional EndpointsDataService + Injector. When set
+  // (via the GitSCMService factory) the getEndpoint() bridge reads
+  // from the signal-native service instead of the legacy ngrx
+  // pagination monitor. Subclasses surface these through their
+  // constructors.
+  protected endpointsData?: EndpointsDataService;
+  protected injector?: Injector;
 
   constructor(public publicApiUrl: string) { }
+
+  public setPublicApi(url: string) {
+    this.publicApiUrl = url;
+  }
 
   public getPublicApi(): string {
     return this.publicApiUrl;
   }
 
-  public getAPI(): Observable<GitApiRequest> {
+  public getAPI(options: HttpOptions = new HttpOptions()): Observable<GitApiRequest> {
     return this.getEndpoint(this.endpointGuid).pipe(
       map(endpoint => {
         if (!endpoint) {
           // No endpoint, use the default or overwritten public api associated with this type
           return {
             url: this.getPublicApi(),
-            requestArgs: {}
+            requestArgs: options
           };
         }
         // We have an endpoint so always proxy via backend
         return {
           url: `${commonPrefix}/${endpoint.guid}`,
           requestArgs: {
-            ... new HttpOptions(),
+            ...options,
             headers: {
               'x-cap-no-token': `${!endpoint.user}`
             }
           }
         };
       }),
-      first()
+      take(1)
     );
   }
 
-  protected getEndpoint(endpointGuid: string): Observable<EndpointModel> {
+  protected getEndpoint(endpointGuid: string): Observable<EndpointModel | undefined> {
     if (!endpointGuid) {
-      return of(null);
+      return of(undefined);
     }
-    // Ensure that we have fetched the endpoints before attempting to get the required endpoint.
-    // Why this way instead of just fetching the endpoint directly?
-    // There are cases where we have an endpoint guid but the endpoint won't be in the store (user views an app deployed from private github
-    // endpoint that has since been removed).
-    // Normally we'd get the entity directly and use a waitForEntity here... but that blocks and will fire again if the endpoint is added
-    // We can't just use a entityObs$ because that fires a null for genuine endpoints on refresh
-    return stratosEntityCatalog.endpoint.store.getAll.getPaginationMonitor().currentPage$.pipe(
+    // W36-B Wave 3: source endpoints from EndpointsDataService when
+    // available. Same lookup semantics as the legacy
+    // pagination-monitor read — find by guid in the current map and
+    // tolerate misses (e.g. an app deployed from a since-deleted
+    // private github endpoint). The signal-native projection updates
+    // synchronously, so the take(1) consumer pattern downstream is
+    // unchanged.
+    if (!this.endpointsData || !this.injector) {
+      throw new Error('BaseSCM requires EndpointsDataService + Injector — supply them via the subclass constructor.');
+    }
+    return toObservable(this.endpointsData.endpointsList, { injector: this.injector }).pipe(
       map(endpoints => endpoints?.find(e => e.guid === endpointGuid))
     );
   }
 
-  protected parseErrorAsString(res: any): string {
+  protected parseErrorAsString(res: unknown): string {
     const response = this.parseHttpPipeError(res);
     return response.message || '';
   }
 
-  private parseHttpPipeError(res: any): { message?: string; } {
-    if (!res.status) {
-      return res;
+  private parseHttpPipeError(res: unknown): { message?: string; } {
+    if (typeof res !== 'object' || res === null) {
+      return {};
+    }
+
+    const response = res as { status?: number; json?: () => unknown; message?: string };
+
+    if (!response.status) {
+      return response;
     }
     try {
-      return res.json ? res.json() : res;
+      return response.json ? response.json() as { message?: string } : response;
     } catch (e) {
       console.warn('Failed to parse response body', e);
     }

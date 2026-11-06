@@ -1,15 +1,15 @@
-import { Pipe, PipeTransform } from '@angular/core';
+import { Pipe, PipeTransform, inject } from '@angular/core';
 
 import { UtilsService } from '../../core/utils.service';
 
 @Pipe({
-  name: 'usageBytes'
+name: 'usageBytes',
+standalone: true
 })
 export class UsageBytesPipe implements PipeTransform {
+  private utils = inject(UtilsService);
 
-  constructor(private utils: UtilsService) {}
-
-  transform(mb): string {
-    return this.utils.usageBytes(mb);
+  transform(mb: number | number[]): string {
+    return this.utils.usageBytes(mb as any);
   }
 }

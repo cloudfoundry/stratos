@@ -8,7 +8,7 @@ resources:
 - name: helm-charts-repository
   type: git
   source:
-    branch: master
+    branch: main
     private_key: {{github-private-key}}
     uri: {{release-helm-repo}}
 jobs:

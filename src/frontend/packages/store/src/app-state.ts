@@ -1,17 +1,6 @@
-import { RequestInfoState } from './reducers/api-request-reducer/types';
-import { AuthState } from './reducers/auth.reducer';
-import { ListsState } from './reducers/list.reducer';
-import { ICurrentUserRolesState } from './types/current-user-roles.types';
-import { DashboardState } from './types/dashboard.types';
-import { EndpointState } from './types/endpoint.types';
-import { BaseEntityValues, ExtendedRequestState } from './types/entity.types';
-import { IUserFavoritesGroupsState } from './types/favorite-groups.types';
-import { InternalEventsState } from './types/internal-events.types';
-import { PaginationEntityTypeState } from './types/pagination.types';
-import { IRecentlyVisitedState } from './types/recently-visited.types';
-import { RoutingHistory } from './types/routing.type';
-import { UAASetupState } from './types/uaa-setup.types';
-
+import type { RequestInfoState } from './types/entity-pipeline.types';
+import type { BaseEntityValues, ExtendedRequestState } from './types/entity.types';
+import type { PaginationEntityTypeState } from './types/pagination.types';
 export interface IRequestTypeState {
   [entityKey: string]: any;
 }
@@ -25,19 +14,9 @@ export type BaseRequestDataState = Record<string, IRequestEntityTypeState<any>>;
 export abstract class AppState<
   T extends Record<string, any> = any
   > {
-  auth: AuthState;
-  uaaSetup: UAASetupState;
-  endpoints: EndpointState;
-  pagination: ExtendedRequestState<keyof T, PaginationEntityTypeState>;
-  request: ExtendedRequestState<keyof T, IRequestEntityTypeState<RequestInfoState>>;
-  requestData: T;
-  dashboard: DashboardState;
-  lists: ListsState;
-  routing: RoutingHistory;
-  internalEvents: InternalEventsState;
-  currentUserRoles: ICurrentUserRolesState;
-  userFavoritesGroups: IUserFavoritesGroupsState;
-  recentlyVisited: IRecentlyVisitedState;
+  pagination!: ExtendedRequestState<keyof T, PaginationEntityTypeState>;
+  request!: ExtendedRequestState<keyof T, IRequestEntityTypeState<RequestInfoState>>;
+  requestData!: T;
 }
 
 export interface GeneralRequestDataState {
@@ -47,14 +26,6 @@ export interface GeneralRequestDataState {
 export interface GeneralAppRequestDataState extends BaseEntityValues, GeneralRequestDataState { }
 
 export type EndpointOnlyAppState = AppState<Pick<BaseEntityValues, 'stratosEndpoint'>>;
-export type DashboardOnlyAppState = Pick<AppState, 'dashboard'>;
-export type AuthOnlyAppState = Pick<AppState, 'auth'>;
-export type CurrentUserRolesAppState = Pick<AppState, 'currentUserRoles'>;
-export type UserFavoritesOnlyAppState = Pick<AppState<Pick<BaseEntityValues, 'stratosUserFavorites'>>, 'userFavoritesGroups'>;
-
-export type AppRoutingOnlyAppState = Pick<AppState, 'routing'>;
-
-export type ListsOnlyAppState = Pick<AppState, 'lists'>;
 
 export type DispatchOnlyAppState = unknown;
 

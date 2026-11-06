@@ -1,4 +1,5 @@
-import { Component, Input } from '@angular/core';
+import { CommonModule } from '@angular/common';
+import { ChangeDetectionStrategy, ChangeDetectorRef, Component, Input, inject } from '@angular/core';
 
 export enum BooleanIndicatorType {
   enabledDisabled = 'enabled-disabled',
@@ -7,9 +8,16 @@ export enum BooleanIndicatorType {
   yesNo = 'yes-no',
   trueFalse = 'true-false',
   healthyUnhealthy = 'healthy-unhealthy',
-  succeededFailed = 'success-failed',
-  progressProgress = 'progress-progress'
+  // Value must split into the 'Succeeded'/'Failed' icon-map keys
+  succeededFailed = 'succeeded-failed',
+  progressProgress = 'progress-progress',
+  addRemove = 'add-remove',
+  // Inverted severity: 'No' is the positive/expected state (e.g. node NotReady conditions)
+  noYes = 'no-yes'
 }
+
+// Accepts the enum or its string-literal form, so templates can write e.g. type="yes-no".
+export type BooleanIndicatorTypeValue = BooleanIndicatorType | `${BooleanIndicatorType}`;
 
 interface IBooleanConfig {
   isTrue?: boolean;
@@ -31,10 +39,16 @@ export type booleanStringType = 'True' | 'False' | 'Unknown';
 @Component({
   selector: 'app-boolean-indicator',
   templateUrl: './boolean-indicator.component.html',
-  styleUrls: ['./boolean-indicator.component.scss']
+  standalone: true,
+  imports: [
+    CommonModule
+  ],
+  changeDetection: ChangeDetectionStrategy.OnPush
 })
 export class BooleanIndicatorComponent {
-  public booleanOutput: IBooleanOutput;
+  private cdr = inject(ChangeDetectorRef);
+
+  public booleanOutput!: IBooleanOutput;
   // Invert the text labels with the icons (No text for yes value and vice-versa)
   @Input() inverse = false;
   // Should we use a subtle display - this won't show the No option as danger (typically red)
@@ -46,9 +60,18 @@ export class BooleanIndicatorComponent {
   set subtle(subtle: boolean) {
     this.pSubtle = subtle;
     this.updateBooleanOutput();
+    this.cdr.markForCheck();
   }
 
-  @Input() showText = true;
+  private pShowText = true;
+  @Input()
+  get showText(): boolean {
+    return this.pShowText;
+  }
+  set showText(showText: boolean) {
+    this.pShowText = showText;
+    this.cdr.markForCheck();
+  }
 
   private icons = {
     Yes: 'check_circle',
@@ -69,30 +92,34 @@ export class BooleanIndicatorComponent {
     Progress: 'cached'
   };
 
-  private pType: BooleanIndicatorType;
+  private pType!: BooleanIndicatorTypeValue;
   @Input()
-  get type(): BooleanIndicatorType {
+  get type(): BooleanIndicatorTypeValue {
     return this.pType;
   }
-  set type(type: BooleanIndicatorType) {
+  set type(type: BooleanIndicatorTypeValue) {
     this.pType = type;
     this.updateBooleanOutput();
+    this.cdr.markForCheck();
   }
 
-  private pIsTrue: boolean;
+  // undefined/null render the 'Unknown' indicator (see updateBooleanOutput),
+  // so callers can bind not-yet-loaded data, including `| async` streams.
+  private pIsTrue?: boolean | null;
   @Input()
-  get isTrue(): boolean {
+  get isTrue(): boolean | null | undefined {
     return this.pIsTrue;
   }
-  set isTrue(isTrue: boolean) {
+  set isTrue(isTrue: boolean | null | undefined) {
     this.pIsTrue = isTrue;
     this.updateBooleanOutput();
+    this.cdr.markForCheck();
   }
 
   private updateBooleanOutput() {
     const isUnknown = typeof this.isTrue !== 'boolean';
     this.booleanOutput = this.getIconTextAndSeverity({
-      isTrue: this.isTrue,
+      isTrue: this.isTrue ?? undefined,
       isUnknown,
       inverse: this.inverse,
       subtle: this.subtle
@@ -112,7 +139,7 @@ export class BooleanIndicatorComponent {
     }
     const text = this.getText({ isTrue, inverse });
     return {
-      icon: this.icons[text],
+      icon: (this.icons as any)[text],
       text,
       isTrue: inverse ? !isTrue : isTrue,
       subtle

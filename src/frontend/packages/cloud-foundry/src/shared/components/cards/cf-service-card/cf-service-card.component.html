@@ -1,0 +1,68 @@
+@if (!!offering) {
+  <app-meta-card [clickAction]="!disableCardClick ? goToServiceInstances : undefined"
+    >
+    <app-meta-card-title [noMargin]="true">
+      <div class="flex flex-row justify-between w-full">
+        <app-multiline-title>{{ getDisplayName() }}</app-multiline-title>
+        <app-service-icon [service]="offering"></app-service-icon>
+      </div>
+    </app-meta-card-title>
+    <app-meta-card-item customStyle="long-text-fixed">
+      <app-meta-card-key></app-meta-card-key>
+      <app-meta-card-value>
+        {{ offering.description}}
+      </app-meta-card-value>
+    </app-meta-card-item>
+    <app-meta-card-item>
+      <app-meta-card-key>Broker</app-meta-card-key>
+      <app-meta-card-value>
+        <app-table-cell-service-broker [row]="offering" [config]="brokerNameConfig"></app-table-cell-service-broker>
+      </app-meta-card-value>
+    </app-meta-card-item>
+    <app-meta-card-item>
+      <app-meta-card-key>Scope</app-meta-card-key>
+      <app-meta-card-value>
+        <app-table-cell-service-broker [row]="offering" [config]="brokerScopeConfig"></app-table-cell-service-broker>
+      </app-meta-card-value>
+    </app-meta-card-item>
+    <app-meta-card-item>
+      <app-meta-card-key>Active</app-meta-card-key>
+      <app-meta-card-value>
+        <app-table-cell-service-active [row]="offering"></app-table-cell-service-active>
+      </app-meta-card-value>
+    </app-meta-card-item>
+    <app-meta-card-item>
+      <app-meta-card-key>Bindable</app-meta-card-key>
+      <app-meta-card-value>
+        <app-table-cell-service-bindable [row]="offering"></app-table-cell-service-bindable>
+      </app-meta-card-value>
+    </app-meta-card-item>
+    <app-meta-card-item>
+      <app-meta-card-key>References</app-meta-card-key>
+      <app-meta-card-value>
+        <app-table-cell-service-references [row]="offering">
+        </app-table-cell-service-references>
+      </app-meta-card-value>
+    </app-meta-card-item>
+    @if (providerDisplayName) {
+      <app-meta-card-item>
+        <app-meta-card-key>Provider</app-meta-card-key>
+        <app-meta-card-value>{{ providerDisplayName }}</app-meta-card-value>
+      </app-meta-card-item>
+    }
+    @if (cfOrgSpace.multipleConnectedEndpoints$ | async) {
+      <app-meta-card-item>
+        <app-meta-card-key>CF Endpoint</app-meta-card-key>
+        <app-meta-card-value>
+          <app-table-cell-service-cf-breadcrumbs [row]="offering"></app-table-cell-service-cf-breadcrumbs>
+        </app-meta-card-value>
+      </app-meta-card-item>
+    }
+    <app-meta-card-item customStyle="column">
+      <app-meta-card-key>Tags</app-meta-card-key>
+      <app-meta-card-value>
+        <app-table-cell-service-tags [row]="offering"></app-table-cell-service-tags>
+      </app-meta-card-value>
+    </app-meta-card-item>
+  </app-meta-card>
+}

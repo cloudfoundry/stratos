@@ -1,8 +1,10 @@
 import { DOCUMENT } from '@angular/common';
-import { Inject, Injectable, NgZone } from '@angular/core';
-import { MatDialog } from '@angular/material/dialog';
-import { Store } from '@ngrx/store';
-import { VerifySession, selectDashboardState, DashboardState, AppState, AuthState } from '@stratosui/store';
+import { Injectable, NgZone, inject } from '@angular/core';
+import { toObservable } from '@angular/core/rxjs-interop';
+import { TailwindDialogService } from './shared/services/tailwind-dialog.service';
+import { AuthState } from '@stratosui/store';
+
+import { DashboardState } from './core/dashboard-data.service';
 import { combineLatest, fromEvent, interval, merge, Subscription } from 'rxjs';
 import { tap, withLatestFrom } from 'rxjs/operators';
 
@@ -10,50 +12,65 @@ import { LogOutDialogComponent } from './core/log-out-dialog/log-out-dialog.comp
 import { PageVisible } from './core/page-visible';
 import { CurrentUserPermissionsService } from './core/permissions/current-user-permissions.service';
 import { StratosCurrentUserPermissions } from './core/permissions/stratos-user-permissions.checker';
+import { AuthSignalService } from './core/signals/auth-signal.service';
+import { DashboardSignalService } from './core/signals/dashboard-signal.service';
 
-@Injectable()
+@Injectable({
+  providedIn: 'root'
+})
 export class LoggedInService {
-  constructor(
-    @Inject(DOCUMENT) private document: Document,
-    private store: Store<AppState>,
-    private dialog: MatDialog,
-    private ngZone: NgZone,
-    private currentUserPermissionsService: CurrentUserPermissionsService,
-  ) { }
+  private document = inject<Document>(DOCUMENT);
+  private dialog = inject(TailwindDialogService);
+  private ngZone = inject(NgZone);
+  private currentUserPermissionsService = inject(CurrentUserPermissionsService);
+  private authSignals = inject(AuthSignalService);
+  private dashboardSignals = inject(DashboardSignalService);
 
-  private userInteractionChecker: Subscription;
+  // Bridge signals → observables once at construction time so the
+  // injection context is available for toObservable().
+  private auth$ = toObservable(this.authSignals.auth);
+  private dashboardState$ = toObservable(this.dashboardSignals.dashboard);
 
+  private userInteractionChecker!: Subscription;
   private lastUserInteraction = Date.now();
-  private sessionChecker: Subscription;
+  private sessionChecker!: Subscription;
 
   // Check the session every 5 seconds (Note: this is vey cheap to do unless the session is about to expire)
-  private checkSessionInterval = 5 * 1000;
+  private readonly checkSessionInterval: number = 5 * 1000;
 
   // Warn inactive users 2 minutes before logging them out
-  private warnBeforeLogout = 2 * 60 * 1000;
+  private readonly warnBeforeLogout: number = 2 * 60 * 1000;
 
   // User considered idle if no interaction for 5 minutes
-  private userIdlePeriod = 5 * 60 * 1000;
+  private readonly userIdlePeriod: number = 5 * 60 * 1000;
 
   // Avoid a race condition where the cookie is deleted if the user presses ok just before expiration
-  private autoLogoutDelta = 5 * 1000;
+  private readonly autoLogoutDelta: number = 5 * 1000;
+
   // When we see the following events, we consider the user as active
-  private userActiveEvents = ['keydown', 'DOMMouseScroll', 'mousewheel', 'mousedown', 'touchstart', 'touchmove', 'scroll', 'wheel'];
+  private readonly userActiveEvents = ['keydown', 'DOMMouseScroll', 'mousewheel', 'mousedown', 'touchstart', 'touchmove', 'scroll', 'wheel'];
 
   private activityPromptShown = false;
-
-  private sub: Subscription;
-
+  private sub!: Subscription;
   private destroying = false;
+  private initialized = false;
 
   init() {
+    // Prevent multiple initializations
+    if (this.initialized) {
+      return;
+    }
+    this.initialized = true;
+
     const eventStreams = this.userActiveEvents.map((eventName) => {
-      return fromEvent(document, eventName);
+      return fromEvent(this.document, eventName);
     });
 
-    const auth$ = this.store.select(s => s.auth);
     const canNotLogout$ = this.currentUserPermissionsService.can(StratosCurrentUserPermissions.CAN_NOT_LOGOUT);
-    this.sub = combineLatest([auth$, canNotLogout$]).subscribe(([auth, canNotLogout]) => {
+    this.sub = combineLatest([this.auth$, canNotLogout$]).subscribe(([auth, canNotLogout]) => {
+      if (!auth) {
+        return;
+      }
       if (!canNotLogout && auth.loggedIn && auth.sessionData && auth.sessionData.valid && !auth.error) {
         if (!this.sessionChecker || this.sessionChecker.closed) {
           this.openSessionCheckerPoll();
@@ -83,18 +100,23 @@ export class LoggedInService {
     }
   }
 
-  // Run outside Angular zone for protractor tests to work
-  // See: https://github.com/angular/protractor/blob/master/docs/timeouts.md#waiting-for-angular
+  // Run outside Angular zone to prevent E2E test timeouts
+  // Polling intervals should not block Angular change detection
   private openSessionCheckerPoll() {
     this.closeSessionCheckerPoll();
+    // Ensure interval configuration is valid
+    const intervalTime = this.checkSessionInterval || 5000;
     this.ngZone.runOutsideAngular(() => {
-      this.sessionChecker = interval(this.checkSessionInterval)
+      this.sessionChecker = interval(intervalTime)
         .pipe(
           withLatestFrom(
-            this.store.select(selectDashboardState),
-            this.store.select(s => s.auth)
+            this.dashboardState$,
+            this.auth$
           ),
           tap(([, dashboardState, authState]) => {
+            if (!authState) {
+              return;
+            }
             this.ngZone.run(() => {
               this._checkSession(dashboardState, authState);
             });
@@ -110,7 +132,7 @@ export class LoggedInService {
   }
 
 
-  private _promptInactiveUser(expiryDate) {
+  private _promptInactiveUser(expiryDate: number) {
     this.activityPromptShown = true;
 
     const dialogRef = this.dialog.open(LogOutDialogComponent, {
@@ -118,9 +140,9 @@ export class LoggedInService {
       disableClose: true
     });
 
-    dialogRef.afterClosed().subscribe((verify = false) => {
+    dialogRef.afterClosed().subscribe((verify: boolean = false) => {
       if (verify) {
-        this.store.dispatch(new VerifySession(false, false));
+        this.authSignals.verifySession(false, false);
         this.openSessionCheckerPoll();
       }
       this.activityPromptShown = false;
@@ -129,6 +151,11 @@ export class LoggedInService {
 
   private _checkSession(dashboardState: DashboardState, authState: AuthState) {
     if (this.activityPromptShown || this.destroying) {
+      return;
+    }
+
+    // Guard against undefined authState or sessionData
+    if (!authState || !authState.sessionData || typeof authState.sessionData.sessionExpiresOn !== 'number') {
       return;
     }
 
@@ -142,7 +169,7 @@ export class LoggedInService {
       const userIsActive = idleDelta < this.userIdlePeriod;
       const pageVisible = new PageVisible(document);
       if ((!dashboardState.timeoutSession && pageVisible.isPageVisible()) || userIsActive) {
-        this.store.dispatch(new VerifySession(false, false));
+        this.authSignals.verifySession(false, false);
       } else {
         this._promptInactiveUser(safeExpire);
         this.closeSessionCheckerPoll();

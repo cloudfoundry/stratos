@@ -1,8 +1,9 @@
-@import '../../../../sass/mixins';
+@use '../../../../sass/mixins';
 .page-side-nav {
   $item-header-padding: 20px;
-  $border-color: rgba(0, 0, 0, .1);
-  border-right: 1px solid $border-color;
+  border-right: 1px solid var(--content-border);
+  background-color: var(--content-bg);
+  color: var(--content-text);
   display: flex;
   flex-direction: column;
   position: absolute;
@@ -17,19 +18,31 @@
     font-size: 18px;
     height: 18px;
     width: 18px;
+    margin-right: 10px;
+    flex-shrink: 0;
+    color: var(--content-muted);
   }
   &__item {
     align-items: center;
     border-color: transparent;
+    color: var(--content-text);
     cursor: pointer;
     display: flex;
     font-size: 14px;
-    letter-spacing: .01em;
+    letter-spacing: 0.01em;
     line-height: 18px;
     outline: 0;
     padding: 10px;
     padding-left: $item-header-padding;
     text-decoration: none;
+    &:hover {
+      background-color: var(--table-row-hover);
+    }
+    &--active {
+      background-color: color-mix(in srgb, var(--color-primary) 10%, transparent);
+      color: var(--color-primary);
+      font-weight: 500;
+    }
     mat-icon {
       margin-right: 10px;
       text-align: center;
@@ -38,10 +51,11 @@
   &__item-sep {
     align-items: center;
     border-color: transparent;
+    color: var(--content-muted);
     cursor: default;
     display: flex;
     font-size: 12px;
-    letter-spacing: .01em;
+    letter-spacing: 0.01em;
     line-height: 18px;
     outline: 0;
     padding: 10px;
@@ -50,7 +64,7 @@
     text-transform: uppercase;
   }
   &__items {
-    border-bottom: 1px solid $border-color;
+    border-bottom: 1px solid var(--content-border);
     display: none;
     flex: 1;
     list-style-type: none;
@@ -59,10 +73,10 @@
     padding: 0;
   }
   %base-item-header {
-    border-bottom: 1px solid $border-color;
+    border-bottom: 1px solid var(--content-border);
+    color: var(--content-muted);
     font-weight: bold;
     height: 48px;
-    opacity: .6;
     overflow: hidden;
     padding: 0 $item-header-padding;
     position: relative;

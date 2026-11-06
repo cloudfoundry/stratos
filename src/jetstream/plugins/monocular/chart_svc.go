@@ -1,22 +1,22 @@
 package monocular
 
 import (
-	"errors"
 	"fmt"
+	"log/slog"
 	"net/http"
 	"os"
 	"path"
 
+	"github.com/cloudfoundry/stratos/src/jetstream/api"
 	"github.com/cloudfoundry/stratos/src/jetstream/plugins/monocular/store"
-	"github.com/labstack/echo/v4"
-	log "github.com/sirupsen/logrus"
+	"github.com/labstack/echo/v5"
 )
 
 // Functions to provide a Monocular compatible API with our chart store
 
 // List all helm Charts - gets the latest version for each Chart
-func (m *Monocular) listCharts(c echo.Context) error {
-	log.Debug("List Charts called")
+func (m *Monocular) listCharts(c *echo.Context) error {
+	slog.Debug("listing charts")
 
 	// Check if this is a request for Artifact Hub
 	if handled, err := m.handleArtifactRequest(c, m.fetchChartsFromArtifactHub); handled {
@@ -76,8 +76,8 @@ func (m *Monocular) getChartFromStore(repo, name, version string) (*store.ChartS
 }
 
 // Get the latest version of a given chart
-func (m *Monocular) getChart(c echo.Context) error {
-	log.Debug("Get Chart called")
+func (m *Monocular) getChart(c *echo.Context) error {
+	slog.Debug("getting a chart")
 
 	// Check if this is a request for Artifact Hub
 	if handled, err := m.handleArtifactRequest(c, m.artifactHubGetChart); handled {
@@ -99,8 +99,8 @@ func (m *Monocular) getChart(c echo.Context) error {
 	return c.JSON(200, body)
 }
 
-func (m *Monocular) getIcon(c echo.Context) error {
-	log.Debug("Get Icon called")
+func (m *Monocular) getIcon(c *echo.Context) error {
+	slog.Debug("chart icon requested")
 
 	// Process ArtifactHub request
 	if handled, err := m.handleArtifactRequest(c, m.artifactHubGetIconHandler); handled {
@@ -111,16 +111,13 @@ func (m *Monocular) getIcon(c echo.Context) error {
 	chartName := c.Param("chartName")
 	version := c.Param("version")
 
-	if len(version) == 0 {
-		log.Debugf("Get icon for %s/%s", repo, chartName)
-	} else {
-		log.Debugf("Get icon for %s/%s-%s", repo, chartName, version)
-	}
+	slog.Debug("getting a chart icon", "repository", repo, "chart", chartName, "version", version)
 
 	chart, err := m.getChartFromStore(repo, chartName, version)
 	if err != nil {
-		log.Error("Can not find chart")
-		return errors.New("Error")
+		const msg = "can not find the chart for the requested icon"
+		slog.Error(msg, "repository", repo, "chart", chartName, "version", version, "error", err)
+		return echo.NewHTTPError(http.StatusNotFound, msg)
 	}
 
 	// This will download and cache the icon if it is not already cached - it returns the local file path to the icon file
@@ -128,18 +125,17 @@ func (m *Monocular) getIcon(c echo.Context) error {
 	iconFilePath, _ := m.cacheChartIcon(*chart)
 	if len(iconFilePath) == 0 {
 		// No icon or error downloading
-		http.Redirect(c.Response().Writer, c.Request(), "/core/assets/custom/placeholder.png", http.StatusTemporaryRedirect)
+		http.Redirect(c.Response(), c.Request(), "/core/assets/custom/placeholder.png", http.StatusTemporaryRedirect)
 		return nil
 	}
 
-	c.File(iconFilePath)
-	return nil
+	return api.ServeFile(c, iconFilePath)
 }
 
 // /chartsvc/v1/charts/:repo/:name/versions/:version
 // Get specific chart version
-func (m *Monocular) getChartVersion(c echo.Context) error {
-	log.Debug("getChartAndVersion called")
+func (m *Monocular) getChartVersion(c *echo.Context) error {
+	slog.Debug("getting a specific chart version")
 
 	// Process ArtifactHub request
 	if handled, err := m.handleArtifactRequest(c, m.artifactHubGetChartVersion); handled {
@@ -169,7 +165,7 @@ func (m *Monocular) getChartVersion(c echo.Context) error {
 
 // /chartsvc/v1/charts/:repo/:name/versions
 // Get all chart versions for a given chart
-func (m *Monocular) getChartVersions(c echo.Context) error {
+func (m *Monocular) getChartVersions(c *echo.Context) error {
 
 	// Check if this is a request for Artifact Hub
 	var err error
@@ -207,19 +203,21 @@ func (m *Monocular) getChartVersions(c echo.Context) error {
 }
 
 // Get a file such as the README or valyes for a given chart version
-func (m *Monocular) getChartAndVersionFile(c echo.Context) error {
-	log.Debug("Get Chart file called")
-
+func (m *Monocular) getChartAndVersionFile(c *echo.Context) error {
 	repo := c.Param("repo")
 	chartName := c.Param("name")
 	version := c.Param("version")
 	filename := c.Param("filename")
 
-	if !isPermittedFile(filename) {
+	safeName, ok := permittedFile(filename)
+	if !ok {
+		slog.Debug("refusing to serve a chart file that is not on the permitted list",
+			"repository", repo, "chart", chartName, "version", version, "file", filename)
 		return echo.NewHTTPError(http.StatusNotFound, fmt.Sprintf("Can not find file %s for the specified chart", filename))
 	}
 
-	log.Debugf("Get chart file: %s", filename)
+	slog.Debug("getting a chart file",
+		"repository", repo, "chart", chartName, "version", version, "file", filename)
 
 	chart, err := m.getChartFromStore(repo, chartName, version)
 	if err != nil {
@@ -227,13 +225,13 @@ func (m *Monocular) getChartAndVersionFile(c echo.Context) error {
 	}
 
 	if m.cacheChart(*chart) == nil {
-		return c.File(path.Join(m.getChartCacheFolder(*chart), filename))
+		return api.ServeFile(c, path.Join(m.getChartCacheFolder(*chart), safeName))
 	}
 
 	return echo.NewHTTPError(http.StatusNotFound, fmt.Sprintf("Can not find file %s for the specified chart", filename))
 }
 
-func (m *Monocular) getChartValues(c echo.Context) error {
+func (m *Monocular) getChartValues(c *echo.Context) error {
 	endpointID := c.Param("endpoint")
 	repo := c.Param("repo")
 	chartName := c.Param("name")
@@ -242,14 +240,15 @@ func (m *Monocular) getChartValues(c echo.Context) error {
 	// Built in Monocular
 	if endpointID == "default" {
 		filename := "values.yaml"
-		log.Debugf("Get chart file: %s", filename)
+		slog.Debug("getting the chart values file from the built-in chart store",
+			"repository", repo, "chart", chartName, "version", version, "file", filename)
 		chart, err := m.getChartFromStore(repo, chartName, version)
 		if err != nil {
 			return err
 		}
 
 		if m.cacheChart(*chart) == nil {
-			return c.File(path.Join(m.getChartCacheFolder(*chart), filename))
+			return api.ServeFile(c, path.Join(m.getChartCacheFolder(*chart), filename))
 		}
 		return echo.NewHTTPError(http.StatusNotFound, fmt.Sprintf("Can not find file %s for the specified chart", filename))
 	}

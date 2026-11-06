@@ -1,99 +1,138 @@
-import { AfterContentInit, Component, Input, OnDestroy } from '@angular/core';
-import { UntypedFormControl, UntypedFormGroup } from '@angular/forms';
-import { Store } from '@ngrx/store';
-import { BehaviorSubject, Observable, of as observableOf, Subscription } from 'rxjs';
-
-import { SetCreateServiceInstanceApp } from '../../../../../../cloud-foundry/src/actions/create-service-instance.actions';
-import { CFAppState } from '../../../../../../cloud-foundry/src/cf-app-state';
-import { pathGet, safeUnsubscribe } from '../../../../../../core/src/core/utils.service';
-import { StepOnNextResult } from '../../../../../../core/src/shared/components/stepper/step/step.component';
-import { APIResource } from '../../../../../../store/src/types/api.types';
+import { CommonModule } from '@angular/common';
+import { AfterContentInit, Component, Input, OnDestroy, signal, ChangeDetectionStrategy, inject } from '@angular/core';
+import { ReactiveFormsModule, FormBuilder, FormControl, FormGroup } from '@angular/forms';
+import { Observable, of as observableOf, Subject } from 'rxjs';
+import { takeUntil } from 'rxjs/operators';
+import { CustomFormFieldComponent, MatLabelComponent, CustomSelectComponent, CustomOptionComponent, pathGet, StepOnNextResult } from '@stratosui/core';
+import { APIResource } from '@stratosui/store';
 import { IServicePlan } from '../../../../cf-api-svc.types';
 import { IApp } from '../../../../cf-api.types';
-import { SchemaFormConfig } from '../../schema-form/schema-form.component';
+import { SchemaFormComponent, SchemaFormConfig } from '../../schema-form/schema-form.component';
+import { CsiStateService } from '../csi-state.service';
+
+interface BindAppsForm {
+  apps: FormControl<string | null>;
+}
 
 @Component({
   selector: 'app-bind-apps-step',
   templateUrl: './bind-apps-step.component.html',
-  styleUrls: ['./bind-apps-step.component.scss']
+  host: { class: 'flex-1' },
+  standalone: true,
+  changeDetection: ChangeDetectionStrategy.OnPush,
+  imports: [
+    CommonModule,
+    ReactiveFormsModule,
+    CustomFormFieldComponent,
+    MatLabelComponent,
+    CustomSelectComponent,
+    CustomOptionComponent,
+    SchemaFormComponent
+  ]
 })
 export class BindAppsStepComponent implements OnDestroy, AfterContentInit {
+  private csiState = inject(CsiStateService);
+  private fb = inject(FormBuilder);
+
 
   @Input()
-  boundAppId: string;
+  boundAppId!: string;
 
   @Input()
-  apps$: Observable<APIResource<IApp>[]>;
+  apps$!: Observable<APIResource<IApp>[]>;
 
-  validateSubscription: Subscription;
-  validate = new BehaviorSubject<boolean>(true);
-  serviceInstanceGuid: string;
-  stepperForm: UntypedFormGroup;
+  validate = signal<boolean>(true);
+  serviceInstanceGuid!: string;
+  stepperForm!: FormGroup<BindAppsForm>;
   guideText = 'Specify the application to bind (Optional)';
-  selectedServicePlan: APIResource<IServicePlan>;
-  bindingParams: object = {};
-  schemaFormConfig: SchemaFormConfig;
+  selectedServicePlan!: APIResource<IServicePlan>;
+  bindingParams: Record<string, unknown> = {};
+  // Signal (not a plain field): onEnter is delivered after this component's
+  // activating render (SteppersComponent defers pOnEnter past it), so under
+  // zoneless+OnPush a plain field reassignment there would never reach the
+  // <app-schema-form> input.
+  schemaFormConfig = signal<SchemaFormConfig | undefined>(undefined);
 
-  constructor(
-    private store: Store<CFAppState>,
-  ) {
-    this.stepperForm = new UntypedFormGroup({
-      apps: new UntypedFormControl(''),
+  // Lifecycle management for subscriptions
+  private destroyed$ = new Subject<void>();
+
+  get apps(): FormControl<string | null> {
+    return this.stepperForm.get('apps') as FormControl<string | null>;
+  }
+
+  constructor() {
+    this.stepperForm = this.fb.group<BindAppsForm>({
+      apps: new FormControl<string | null>(null),
     });
   }
 
   private setBoundApp() {
     if (this.boundAppId) {
-      this.stepperForm.controls.apps.setValue(this.boundAppId);
-      this.stepperForm.controls.apps.disable();
+      this.apps.setValue(this.boundAppId);
+      this.apps.disable();
       this.guideText = 'Specify binding params (optional)';
     }
   }
 
   ngAfterContentInit() {
     this.setBoundApp();
+
+    // Validate step based on app selection
+    this.apps.valueChanges.pipe(
+      takeUntil(this.destroyed$)
+    ).subscribe(app => {
+      if (!app) {
+        // If there's no app selected the step will always be valid
+        this.validate.set(true);
+      }
+    });
   }
 
-  onEnter = (selectedServicePlan: APIResource<IServicePlan>) => {
+  onEnter = (selectedServicePlan: APIResource<IServicePlan> | any) => {
     if (selectedServicePlan) {
       // Don't overwrite if it's null (we've returned to this step from the next)
       this.selectedServicePlan = selectedServicePlan;
     }
 
-    // Start
-    this.validateSubscription = this.stepperForm.controls.apps.valueChanges.subscribe(app => {
-      if (!app) {
-        // If there's no app selected the step will always be valid
-        this.validate.next(true);
-      }
-    });
+    // Plan shape is APIResource<IServicePlan> in the legacy ngrx flow and
+    // StServicePlan in the signal-native flow. The schema lives at
+    // `entity.schemas.…` in the former and `schemas.…` in the latter; try
+    // both. When neither has a schema (e.g. a plan with no
+    // service_binding.create parameters) we leave schema undefined and
+    // mark the step valid below — the binding-params editor is optional.
+    const schema =
+      pathGet('entity.schemas.service_binding.create.parameters', this.selectedServicePlan) ??
+      pathGet('schemas.service_binding.create.parameters', this.selectedServicePlan);
 
-    if (!this.schemaFormConfig) {
-      // Create new config
-      this.schemaFormConfig = {
-        schema: pathGet('entity.schemas.service_binding.create.parameters', this.selectedServicePlan),
-      };
-    } else {
-      // Update existing config (retaining any existing config)
-      this.schemaFormConfig = {
-        ...this.schemaFormConfig,
-        initialData: this.bindingParams,
-        schema: pathGet('entity.schemas.service_binding.create.parameters', this.selectedServicePlan)
-      };
+    this.schemaFormConfig.update(cfg => cfg
+      ? { ...cfg, initialData: this.bindingParams, schema }
+      : { schema });
+
+    // Schema-form's pValidChange BehaviorSubject seeds at false and only
+    // flips true once a JSON change or validation pass fires. For plans
+    // with no binding-params schema neither happens, so without this the
+    // Next button would stay disabled forever after picking an app.
+    if (!schema) {
+      this.validate.set(true);
     }
-
   }
 
-  setBindingParams(data) {
+  setBindingParams(data: any) {
     this.bindingParams = data;
   }
 
   setParamValid(valid: boolean) {
-    this.validate.next(valid);
+    // The schema-form wrapper's validChange/pValidChange now signals parse
+    // validity only: true when the JSON editor is empty or contains valid
+    // JSON, false when the user has typed unparseable JSON. We trust that
+    // signal unconditionally — empty params are always parse-valid (true),
+    // so Next is never blocked by an untouched editor. Unparseable JSON
+    // blocks the step regardless of whether the plan has a binding schema.
+    this.validate.set(valid);
   }
 
   submit = (): Observable<StepOnNextResult> => {
-    this.store.dispatch(new SetCreateServiceInstanceApp(this.stepperForm.controls.apps.value, this.bindingParams));
+    this.csiState.setApp(this.apps.value, this.bindingParams);
     return observableOf({
       success: true,
       data: this.selectedServicePlan
@@ -101,7 +140,8 @@ export class BindAppsStepComponent implements OnDestroy, AfterContentInit {
   }
 
   ngOnDestroy(): void {
-    safeUnsubscribe(this.validateSubscription);
+    this.destroyed$.next();
+    this.destroyed$.complete();
   }
 
 }

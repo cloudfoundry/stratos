@@ -1,8 +1,10 @@
-import { AfterViewInit, Component, Input, OnInit } from '@angular/core';
+import { AfterViewInit, Component, Input, OnInit, inject, ChangeDetectionStrategy } from '@angular/core';
 import { combineLatest as observableCombineLatest, Observable } from 'rxjs';
 import { delay, map, startWith } from 'rxjs/operators';
 
 import { EndpointsService } from '../../../core/endpoints.service';
+import { CommonModule } from '@angular/common';
+import { NoContentMessageComponent } from '../no-content-message/no-content-message.component';
 
 export interface EndpointMissingMessageParts {
   firstLine: string;
@@ -17,18 +19,23 @@ export interface EndpointMissingMessageParts {
 @Component({
   selector: 'app-endpoints-missing',
   templateUrl: './endpoints-missing.component.html',
-  styleUrls: ['./endpoints-missing.component.scss']
+  host: { class: 'block relative overflow-visible' },
+  changeDetection: ChangeDetectionStrategy.OnPush,
+  standalone: true,
+  imports: [
+    CommonModule,
+    NoContentMessageComponent
+  ]
 })
 export class EndpointsMissingComponent implements AfterViewInit, OnInit {
 
   @Input() showToolbarHint = true;
   @Input() showDirectToEndpointMessage = true;
 
-  noContent$: Observable<EndpointMissingMessageParts>;
+  noContent$!: Observable<EndpointMissingMessageParts | null>;
 
   protected noneRegisteredText: EndpointMissingMessageParts = {
     firstLine: 'There are no registered endpoints',
-    toolbarLink: null,
     secondLine: {
       text: 'Use the Endpoints view to register'
     },
@@ -45,7 +52,9 @@ export class EndpointsMissingComponent implements AfterViewInit, OnInit {
   protected haveRegistered$: Observable<boolean>;
   protected haveConnected$: Observable<boolean>;
 
-  constructor(public endpointsService: EndpointsService) {
+  public endpointsService = inject(EndpointsService);
+
+  constructor() {
     this.haveRegistered$ = this.endpointsService.haveRegistered$;
     this.haveConnected$ = this.endpointsService.haveConnected$;
   }
@@ -57,13 +66,13 @@ export class EndpointsMissingComponent implements AfterViewInit, OnInit {
     }
   }
   ngAfterViewInit() {
-    this.noContent$ = observableCombineLatest(
+    this.noContent$ = observableCombineLatest([
       this.haveRegistered$,
       this.haveConnected$,
       this.endpointsService.disablePersistenceFeatures$
-    ).pipe(
+    ]).pipe(
       delay(1),
-      map(([hasRegistered, hasConnected, disablePersistenceFeatures]) => {
+      map(([hasRegistered, hasConnected, disablePersistenceFeatures]): EndpointMissingMessageParts | null => {
         if (!hasRegistered) {
           return this.removeAdvice(this.noneRegisteredText, disablePersistenceFeatures);
         }
@@ -71,8 +80,9 @@ export class EndpointsMissingComponent implements AfterViewInit, OnInit {
           return this.removeAdvice(this.noneConnectedText, disablePersistenceFeatures);
         }
         return null;
-      })
-    ).pipe(startWith(null));
+      }),
+      startWith<EndpointMissingMessageParts | null>(null)
+    );
   }
 
   private removeAdvice(messageParts: EndpointMissingMessageParts, disablePersistenceFeatures: boolean) {

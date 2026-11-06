@@ -1,24 +1,35 @@
-import { Component, ComponentFactoryResolver, OnDestroy, OnInit } from '@angular/core';
-import { Edge } from '@swimlane/ngx-graph';
-import { SidePanelService } from 'frontend/packages/core/src/shared/services/side-panel.service';
-import { BehaviorSubject, combineLatest, Observable, Subject, Subscription } from 'rxjs';
-import { distinctUntilChanged, filter, first, map, publishReplay, refCount, startWith } from 'rxjs/operators';
+import { CommonModule } from '@angular/common';
+import {Component, OnDestroy, OnInit, signal, WritableSignal, inject, ChangeDetectionStrategy } from '@angular/core';
+import { toObservable } from '@angular/core/rxjs-interop';
+import { AppProgressBarComponent } from '../../../../../../../core/src/shared/components/progress-bar/app-progress-bar.component';
+import { CustomIconComponent } from '../../../../../../../core/src/shared/components/custom-material/custom-material.component';
+import { CustomTooltipDirective } from '../../../../../../../core/src/shared/components/custom-tooltip/custom-tooltip.directive';
+import { Edge, GraphComponent, LayoutService, NgxGraphZoomOptions } from '@swimlane/ngx-graph';
+import { SidePanelService } from '@stratosui/core';
+import { combineLatest, Observable, Subject, Subscription } from 'rxjs';
+import { take, distinctUntilChanged, filter, map, publishReplay, refCount, startWith } from 'rxjs/operators';
+
+import { PageSubNavComponent } from '../../../../../../../core/src/shared/components/page-sub-nav/page-sub-nav.component';
+import { AnalysisReportRunnerComponent } from '../../../../analysis-report-viewer/analysis-report-runner/analysis-report-runner.component';
+import { AnalysisReportSelectorComponent } from '../../../../analysis-report-viewer/analysis-report-selector/analysis-report-selector.component';
+import { WorkloadLiveReloadComponent } from '../../workload-live-reload/workload-live-reload.component';
 
 import {
-  KubernetesResourceViewerComponent,
-} from '../../../../kubernetes-resource-viewer/kubernetes-resource-viewer.component';
+  KubernetesResourceViewerComponent } from '../../../../kubernetes-resource-viewer/kubernetes-resource-viewer.component';
 import { ResourceAlert, ResourceAlertLevel } from '../../../../services/analysis-report.types';
 import { KubernetesAnalysisService } from '../../../../services/kubernetes.analysis.service';
 import {
+  HelmReleaseGraph,
   HelmReleaseGraphLink,
   HelmReleaseGraphNode,
   HelmReleaseGraphNodeData,
   HelmReleaseResource,
-  HelmReleaseResources,
-} from '../../../workload.types';
+  HelmReleaseResources } from '../../../workload.types';
 import { getIcon } from '../../icon-helper';
 import { HelmReleaseHelperService } from '../helm-release-helper.service';
 
+
+const cssVar = (n: string) => getComputedStyle(document.documentElement).getPropertyValue(n).trim();
 
 interface Colors {
   bg: string;
@@ -47,33 +58,54 @@ interface CustomHelmReleaseGraphNodeData extends HelmReleaseGraphNodeData {
   fill: string;
   text: string;
   icon: any;
-  alerts: [];
-  alertSummary: {};
+  alerts: ResourceAlert[] | null;
+  alertSummary: Record<string, unknown>;
 }
 
 @Component({
   selector: 'app-helm-release-resource-graph',
   templateUrl: './helm-release-resource-graph.component.html',
-  styleUrls: ['./helm-release-resource-graph.component.scss']
+  styleUrls: ['./helm-release-resource-graph.component.scss'],
+  changeDetection: ChangeDetectionStrategy.OnPush,
+  standalone: true,
+  // ngx-graph 12+ declares LayoutService without providedIn and only the
+  // deprecated NgxGraphModule provides it; the standalone GraphComponent
+  // injects it, so the consumer has to supply it.
+  providers: [LayoutService],
+  imports: [
+    CommonModule,
+    AppProgressBarComponent,
+    CustomIconComponent,
+    CustomTooltipDirective,
+    GraphComponent,
+    PageSubNavComponent,
+    AnalysisReportRunnerComponent,
+    AnalysisReportSelectorComponent,
+    WorkloadLiveReloadComponent
+  ]
 })
 export class HelmReleaseResourceGraphComponent implements OnInit, OnDestroy {
 
   // see: https://swimlane.github.io/ngx-graph/#/#quick-start
 
-  public nodes: CustomHelmReleaseGraphNode[] = [];
-  public links: Edge[] = [];
+  // Signals: the view is OnPush under zoneless change detection, so plain
+  // fields written from the socket subscription never re-rendered the graph.
+  public nodes = signal<CustomHelmReleaseGraphNode[]>([]);
+  public links = signal<Edge[]>([]);
 
-  update$: BehaviorSubject<boolean> = new BehaviorSubject(false);
+  private updateSignal: WritableSignal<boolean> = signal<boolean>(false);
+  update$ = toObservable(this.updateSignal);
 
-  fit$: BehaviorSubject<boolean> = new BehaviorSubject(false);
+  // ngx-graph zooms-to-fit on every emission; the options object matches
+  // the [zoomToFit$] input's Observable<NgxGraphZoomOptions> type.
+  private fitSignal: WritableSignal<NgxGraphZoomOptions> = signal<NgxGraphZoomOptions>({});
+  fit$ = toObservable(this.fitSignal);
 
-  public layout = 'dagre';
+  public layout = signal('dagre');
 
   public layoutIndex = 0;
 
-  private graph: Subscription;
-
-  private didInitialFit = false;
+  private graph?: Subscription;
 
   public path: string;
 
@@ -84,13 +116,18 @@ export class HelmReleaseResourceGraphComponent implements OnInit, OnDestroy {
     publishReplay(1),
     refCount()
   );
+  protected helper = inject(HelmReleaseHelperService);
+  public analyzerService = inject(KubernetesAnalysisService);
+  private previewPanel = inject(SidePanelService);
 
-  constructor(
-    private componentFactoryResolver: ComponentFactoryResolver,
-    private helper: HelmReleaseHelperService,
-    public analyzerService: KubernetesAnalysisService,
-    private previewPanel: SidePanelService) {
+
+
+  constructor() {
+
+
     this.path = `${this.helper.namespace}/${this.helper.releaseTitle}`;
+
+
   }
 
   ngOnInit() {
@@ -99,7 +136,7 @@ export class HelmReleaseResourceGraphComponent implements OnInit, OnDestroy {
     this.graph = combineLatest(
       this.helper.fetchReleaseGraph(),
       this.analysisReportUpdated$
-    ).subscribe(([g, report]) => {
+    ).subscribe(([g, report]: [HelmReleaseGraph, any]) => {
       const newNodes: CustomHelmReleaseGraphNode[] = [];
       Object.values(g.nodes).forEach((node: HelmReleaseGraphNode) => {
         const colors = this.getColor(node.data.status);
@@ -118,15 +155,14 @@ export class HelmReleaseResourceGraphComponent implements OnInit, OnDestroy {
             icon,
             alerts: null,
             alertSummary: {}
-          },
-        };
+          } };
 
         // Does this node have any alerts?
         this.applyAlertToNode(newNode, report);
 
         newNodes.push(newNode);
       });
-      this.nodes = newNodes;
+      this.nodes.set(newNodes);
 
       const newLinks: HelmReleaseGraphLink[] = [];
       Object.values(g.links).forEach((link: any) => {
@@ -137,19 +173,14 @@ export class HelmReleaseResourceGraphComponent implements OnInit, OnDestroy {
           target: link.target
         });
       });
-      this.links = newLinks;
-      this.update$.next(true);
-
-      if (!this.didInitialFit) {
-        this.didInitialFit = true;
-        setTimeout(() => this.fitGraph(), 10);
-      }
+      this.links.set(newLinks);
+      this.updateSignal.set(true);
     });
   }
 
-  private applyAlertToNode(newNode, report) {
+  private applyAlertToNode(newNode: CustomHelmReleaseGraphNode, report: any) {
     if (report && report.alerts) {
-      Object.values(report.alerts).forEach((group: ResourceAlert[]) => {
+      Object.values<ResourceAlert[]>(report.alerts).forEach((group: ResourceAlert[]) => {
         group.forEach(alert => {
           if (
             newNode.data.kind.toLowerCase() === alert.kind &&
@@ -157,11 +188,11 @@ export class HelmReleaseResourceGraphComponent implements OnInit, OnDestroy {
             // namespace is undefined, however the only resources we have should be from the correct context
           ) {
             newNode.data.alerts = newNode.data.alerts || [];
-            newNode.data.alerts.push(alert);
+            (newNode.data.alerts as any).push(alert);
             newNode.data.alertSummary = newNode.data.alertSummary || {};
-            if (alert.level > newNode.data.alertSummary.level || !newNode.data.alertSummary.level) {
-              newNode.data.alertSummary.color = this.alertLevelToColor(alert.level);
-              newNode.data.alertSummary.level = alert.level;
+            if (alert.level > (newNode.data.alertSummary as any).level || !(newNode.data.alertSummary as any).level) {
+              (newNode.data.alertSummary as any).color = this.alertLevelToColor(alert.level);
+              (newNode.data.alertSummary as any).level = alert.level;
             }
           }
         });
@@ -170,14 +201,13 @@ export class HelmReleaseResourceGraphComponent implements OnInit, OnDestroy {
   }
 
   private alertLevelToColor(level: ResourceAlertLevel) {
-    // These colours need to come from theme - #420
     switch (level) {
       case ResourceAlertLevel.Info:
-        return '#42a5f5';
+        return cssVar('--color-info');
       case ResourceAlertLevel.Warning:
-        return '#ff9800';
+        return cssVar('--color-warning');
       case ResourceAlertLevel.Error:
-        return '#f44336';
+        return cssVar('--color-danger');
     }
   }
 
@@ -189,7 +219,7 @@ export class HelmReleaseResourceGraphComponent implements OnInit, OnDestroy {
 
   // Open side panel when node is clicked
   public onNodeClick(node: CustomHelmReleaseGraphNode) {
-    this.analysisReportUpdated$.pipe(first()).subscribe(analysis => {
+    this.analysisReportUpdated$.pipe(take(1)).subscribe((analysis: any) => {
       this.previewPanel.show(
         KubernetesResourceViewerComponent,
         {
@@ -197,15 +227,14 @@ export class HelmReleaseResourceGraphComponent implements OnInit, OnDestroy {
           resource$: this.getResource(node),
           analysis,
           resourceKind: node.data.kind
-        },
-        this.componentFactoryResolver
+        }
       );
     });
 
   }
 
   public fitGraph() {
-    this.fit$.next(true);
+    this.fitSignal.set({});
   }
 
   public toggleLayout() {
@@ -214,49 +243,49 @@ export class HelmReleaseResourceGraphComponent implements OnInit, OnDestroy {
       this.layoutIndex = 0;
     }
 
-    this.layout = layouts[this.layoutIndex];
+    this.layout.set(layouts[this.layoutIndex]);
   }
 
   private getColor(status: string): Colors {
     switch (status) {
       case 'error':
         return {
-          bg: 'red',
+          bg: cssVar('--color-danger'),
           fg: 'white'
         };
       case 'ok':
         return {
-          bg: 'green',
+          bg: cssVar('--color-success'),
           fg: 'white'
         };
       case 'warn':
         return {
-          bg: 'orange',
+          bg: cssVar('--color-warning'),
           fg: 'white'
         };
       default:
         return {
-          bg: '#5a9cb0',
+          bg: cssVar('--content-muted'),
           fg: 'white'
         };
     }
   }
 
-  private getResource(node: CustomHelmReleaseGraphNode): Observable<HelmReleaseResource> {
+  private getResource(node: CustomHelmReleaseGraphNode): Observable<HelmReleaseResource | undefined> {
     return this.helper.fetchReleaseResources().pipe(
-      filter(r => !!r),
-      map((r: HelmReleaseResources) => Object.values(r.data).find((res) =>
+      filter((r: any) => !!r),
+      map((r: HelmReleaseResources) => Object.values(r.data).find((res: any) =>
         res.metadata.name === node.label && res.kind === node.data.kind
       )),
-      first(),
+      take(1),
     );
   }
 
-  public analysisChanged(report) {
+  public analysisChanged(report: any) {
     if (report === null) {
       this.analysisReportUpdated.next(null);
     } else {
-      this.analyzerService.getByID(this.helper.endpointGuid, report.id).subscribe(results => {
+      this.analyzerService.getByID(this.helper.endpointGuid, report.id).subscribe((results: any) => {
         this.analysisReportUpdated.next(results);
       });
     }

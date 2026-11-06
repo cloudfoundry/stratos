@@ -1,0 +1,27 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema",
+  "title": "Stratos Application Builder Options",
+  "description": "Build an Angular application with Stratos pre-build processing",
+  "type": "object",
+  "allOf": [
+    {
+      "$comment": "Inherit all options from Angular's application builder",
+      "$ref": "node_modules/@angular-devkit/build-angular/src/builders/application/schema.json"
+    },
+    {
+      "properties": {
+        "preBuildScript": {
+          "type": "string",
+          "description": "Path to pre-build orchestrator script (default: build/build-orchestrator.js)",
+          "default": "build/build-orchestrator.js"
+        },
+        "skipPreBuild": {
+          "type": "boolean",
+          "description": "Skip pre-build processing for testing or debugging",
+          "default": false
+        }
+      }
+    }
+  ],
+  "additionalProperties": true
+}

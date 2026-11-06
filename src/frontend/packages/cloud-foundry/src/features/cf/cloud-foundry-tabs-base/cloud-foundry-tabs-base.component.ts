@@ -1,29 +1,43 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, OnInit, ChangeDetectionStrategy, inject } from '@angular/core';
+import { CommonModule } from '@angular/common';
+import { RouterModule } from '@angular/router';
 import { Observable, of as observableOf } from 'rxjs';
-import { first, map, startWith } from 'rxjs/operators';
+import { take, map, startWith } from 'rxjs/operators';
 
-import { EndpointsService } from '../../../../../core/src/core/endpoints.service';
 import {
+  EndpointsService,
   getActionsFromExtensions,
   getTabsFromExtensions,
   StratosActionMetadata,
   StratosActionType,
   StratosTabType,
-} from '../../../../../core/src/core/extension/extension-service';
-import { CurrentUserPermissionsService } from '../../../../../core/src/core/permissions/current-user-permissions.service';
-import { environment } from '../../../../../core/src/environments/environment.prod';
-import { IPageSideNavTab } from '../../../../../core/src/features/dashboard/page-side-nav/page-side-nav.component';
-import { UserFavoriteEndpoint } from '../../../../../store/src/types/user-favorites.types';
-import { UserFavoriteManager } from '../../../../../store/src/user-favorite-manager';
+  CurrentUserPermissionsService,
+  environment,
+  IPageSideNavTab,
+  PageHeaderComponent,
+  LoadingPageComponent
+} from '@stratosui/core';
+import { UserFavoriteEndpoint, UserFavoriteManager } from '@stratosui/store';
 import { CfCurrentUserPermissions } from '../../../user-permissions/cf-user-permissions-checkers';
 import { CloudFoundryEndpointService } from '../services/cloud-foundry-endpoint.service';
 
 @Component({
   selector: 'app-cloud-foundry-tabs-base',
   templateUrl: './cloud-foundry-tabs-base.component.html',
-  styleUrls: ['./cloud-foundry-tabs-base.component.scss']
+  host: { class: 'flex flex-col flex-1 min-h-0 overflow-hidden' },
+  standalone: true,
+  changeDetection: ChangeDetectionStrategy.OnPush,
+  imports: [
+    CommonModule,
+    RouterModule,
+    PageHeaderComponent,
+    LoadingPageComponent
+  ]
 })
 export class CloudFoundryTabsBaseComponent implements OnInit {
+  cfEndpointService = inject(CloudFoundryEndpointService);
+  private currentUserPermissionsService = inject(CurrentUserPermissionsService);
+
   static firehose = 'firehose';
   static users = 'users';
   static cells = 'cells';
@@ -33,22 +47,23 @@ export class CloudFoundryTabsBaseComponent implements OnInit {
   // Used to hide tab that is not yet implemented when in production
   isDevEnvironment = !environment.production;
 
-  isFetching$: Observable<boolean>;
+  isFetching$!: Observable<boolean>;
 
-  public canAddOrg$: Observable<boolean>;
+  public canAddOrg$!: Observable<boolean>;
   public tabsHeader = 'Cloud Foundry';
   public extensionActions: StratosActionMetadata[] = getActionsFromExtensions(StratosActionType.CloudFoundry);
 
-  public favorite$: Observable<UserFavoriteEndpoint>;
+  // null when the endpoint has no cnsi_type/guid (getFavoriteEndpointFromEntity);
+  // the template binds via `| async`, which already yields null.
+  public favorite$: Observable<UserFavoriteEndpoint | null>;
 
-  constructor(
-    public cfEndpointService: CloudFoundryEndpointService,
-    private currentUserPermissionsService: CurrentUserPermissionsService,
-    endpointsService: EndpointsService,
-    userFavoriteManager: UserFavoriteManager
-  ) {
+  constructor() {
+    const cfEndpointService = this.cfEndpointService;
+    const endpointsService = inject(EndpointsService);
+    const userFavoriteManager = inject(UserFavoriteManager);
+
     this.favorite$ = endpointsService.endpoints$.pipe(
-      first(),
+      take(1),
       map(endpoints => endpoints[this.cfEndpointService.cfGuid]),
       map(endpoint => userFavoriteManager.getFavoriteEndpointFromEntity(endpoint))
     );
@@ -70,6 +85,9 @@ export class CloudFoundryTabsBaseComponent implements OnInit {
     this.tabLinks = [
       { link: 'summary', label: 'Summary', icon: 'cloud_foundry', iconFont: 'stratos-icons' },
       { link: 'organizations', label: 'Organizations', icon: 'organization', iconFont: 'stratos-icons' },
+      { link: 'applications', label: 'Applications', icon: 'apps' },
+      { link: 'marketplace', label: 'Marketplace', icon: 'store' },
+      { link: 'services', label: 'Services', icon: 'service', iconFont: 'stratos-icons' },
       {
         link: CloudFoundryTabsBaseComponent.cells,
         label: 'Cells',

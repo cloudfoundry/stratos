@@ -1,6 +1,4 @@
-import { IRequestEntityTypeState } from '../../store/src/app-state';
-import { APIResource } from '../../store/src/types/api.types';
-import { BaseEntityValues } from '../../store/src/types/entity.types';
+import { IRequestEntityTypeState, APIResource, BaseEntityValues } from '@stratosui/store';
 import {
   IService,
   IServiceBinding,
@@ -35,7 +33,6 @@ export const domainEntityType = 'domain';
 export const organizationEntityType = 'organization';
 export const quotaDefinitionEntityType = 'quota_definition';
 export const cfEventEntityType = 'cloudFoundryEvent';
-export const cfInfoEntityType = 'cloudFoundryInfo';
 export const cfUserEntityType = 'user';
 export const appSummaryEntityType = 'applicationSummary';
 export const appStatsEntityType = 'applicationStats';

@@ -27,7 +27,7 @@ func Up20190930092500(txn *sql.Tx) error {
 		// MYSQL
 		dropTrigger = "DROP TRIGGER IF EXISTS update_last_updated;"
 		// Ignore error - most likely permission bug issue on Mysql
-		txn.Exec(dropTrigger)
+		_, _ = txn.Exec(dropTrigger)
 		return nil
 	}
 

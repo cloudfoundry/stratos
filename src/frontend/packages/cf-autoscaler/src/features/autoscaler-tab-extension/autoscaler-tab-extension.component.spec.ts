@@ -1,67 +1,78 @@
 import { DatePipe } from '@angular/common';
-import { ComponentFixture, TestBed, waitForAsync } from '@angular/core/testing';
+import { provideHttpClient } from '@angular/common/http';
+import { HttpTestingController, provideHttpClientTesting } from '@angular/common/http/testing';
+import { CUSTOM_ELEMENTS_SCHEMA, importProvidersFrom } from '@angular/core';
+import { ComponentFixture, TestBed } from '@angular/core/testing';
+import { provideZonelessChangeDetection } from '@angular/core';
 import { NoopAnimationsModule } from '@angular/platform-browser/animations';
-import { RouterTestingModule } from '@angular/router/testing';
-import { createEmptyStoreModule } from '@stratosui/store/testing';
-import { NgxChartsModule } from '@swimlane/ngx-charts';
+import { provideRouter } from '@angular/router';
+import { describe, it, expect, beforeEach, afterAll, afterEach } from 'vitest';
 
-import { ApplicationService } from '../../../../cloud-foundry/src/features/applications/application.service';
-import {
-  CardAppInstancesComponent,
-} from '../../../../cloud-foundry/src/shared/components/cards/card-app-instances/card-app-instances.component';
-import {
-  CardAppUsageComponent,
-} from '../../../../cloud-foundry/src/shared/components/cards/card-app-usage/card-app-usage.component';
-import {
-  RunningInstancesComponent,
-} from '../../../../cloud-foundry/src/shared/components/running-instances/running-instances.component';
-import {
-  cfCurrentUserPermissionsService,
-} from '../../../../cloud-foundry/src/user-permissions/cf-user-permissions-checkers';
-import { ApplicationServiceMock } from '../../../../cloud-foundry/test-framework/application-service-helper';
-import { CoreModule } from '../../../../core/src/core/core.module';
-import { SharedModule } from '../../../../core/src/shared/shared.module';
-import { TabNavService } from '../../../../core/src/tab-nav.service';
+import { ApplicationService } from '@stratosui/cloud-foundry';
+import { ApplicationServiceMock } from '@test-framework/cf';
+import { CoreModule, TabNavService } from '@stratosui/core';
+import { generateBaseTestStoreModules } from '@test-framework/core-test.helper';
 import { CfAutoscalerTestingModule } from '../../cf-autoscaler-testing.module';
-import { CardAutoscalerDefaultComponent } from '../../shared/card-autoscaler-default/card-autoscaler-default.component';
 import { AutoscalerTabExtensionComponent } from './autoscaler-tab-extension.component';
 
+// FWT-959 wave-3 (A-effects-cleanup): the component used to chain
+// EntityServiceFactory.create + Store.dispatch for policy / metric /
+// detach / RouterNav. With the @ngrx surface gone, the spec mocks are
+// trimmed to the bare TestBed harness — autoscaler I/O is now plain
+// HttpClient via the signal-native data services, so the existing
+// HttpTestingController drain in afterEach() catches every dispatched
+// request without per-action mock plumbing.
 describe('AutoscalerTabExtensionComponent', () => {
   let component: AutoscalerTabExtensionComponent;
   let fixture: ComponentFixture<AutoscalerTabExtensionComponent>;
 
-  beforeEach(waitForAsync(() => {
+  beforeEach(() => {
     TestBed.configureTestingModule({
-      declarations: [
-        AutoscalerTabExtensionComponent,
-        CardAutoscalerDefaultComponent,
-        CardAppInstancesComponent,
-        CardAppUsageComponent,
-        RunningInstancesComponent
-      ],
       imports: [
-        CfAutoscalerTestingModule,
-        NoopAnimationsModule,
-        createEmptyStoreModule(),
-        CoreModule,
-        SharedModule,
-        NgxChartsModule,
-        RouterTestingModule,
+        AutoscalerTabExtensionComponent,
       ],
       providers: [
+        importProvidersFrom(
+          CfAutoscalerTestingModule,
+          ...generateBaseTestStoreModules(),
+          CoreModule,
+          NoopAnimationsModule
+        ),
+        provideRouter([]),
         DatePipe,
         { provide: ApplicationService, useClass: ApplicationServiceMock },
         TabNavService,
-        ...cfCurrentUserPermissionsService
-      ]
+        provideZonelessChangeDetection(),
+        provideHttpClient(),
+        provideHttpClientTesting(),
+      ],
+      schemas: [CUSTOM_ELEMENTS_SCHEMA]
     })
       .compileComponents();
-  }));
+  });
 
   beforeEach(() => {
     fixture = TestBed.createComponent(AutoscalerTabExtensionComponent);
     component = fixture.componentInstance;
     fixture.detectChanges();
+  });
+
+  afterEach(() => {
+    // Drain every autoscaler HTTP request fired by ngOnInit (info,
+    // policy, scaling-history) so the HttpTestingController doesn't
+    // leave them hanging. Each is replied with a benign payload —
+    // info gets a real shape, the others are flushed to defaults.
+    const httpMock = TestBed.inject(HttpTestingController);
+    httpMock.match(() => true).forEach(req => {
+      if (req.request.url.endsWith('/info')) {
+        req.flush({ name: 'as', build: '3.0.0', support: '', description: '' });
+      } else if (req.request.url.endsWith('/policy')) {
+        req.flush('Not Found', { status: 404, statusText: 'Not Found' });
+      } else {
+        req.flush({ resources: [], total_results: 0, total_pages: 0 });
+      }
+    });
+    httpMock.verify();
   });
 
   it('should be created', () => {

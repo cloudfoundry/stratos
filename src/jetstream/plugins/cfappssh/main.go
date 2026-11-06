@@ -4,7 +4,7 @@ import (
 	"errors"
 
 	"github.com/cloudfoundry/stratos/src/jetstream/api"
-	"github.com/labstack/echo/v4"
+	"github.com/labstack/echo/v5"
 )
 
 // Module init will register plugin

@@ -1,46 +1,96 @@
 <app-page-header [endpointIds$]="allEndpointIds$">
   <h1>Home</h1>
-  <div class="page-header-right">
-    <div *ngIf="layouts$ | async as layouts">
-      <mat-menu #appMenu="matMenu" xPosition="before">
-        <div *ngFor="let layout of layouts">
-          <button *ngIf="layout" (click)="onChangeLayout(layout)" mat-menu-item class="layout-menu">
-            <div [ngClass]="{'layout-menu__tick' : layout.id === layoutID}" class="layout-menu__label">
-              {{ layout.title }}</div>
-            <mat-icon [ngClass]="{'layout-menu__tick' : layout.id === layoutID}" class="layout-menu__icon">done
-            </mat-icon>
+  <div class="page-header-right flex items-center">
+    <div class="inline-flex items-center rounded-lg border border-content-border bg-content-bg p-1 shadow-sm">
+      <!-- Only the mode buttons carry the group role; the sort toggle shares the
+           pill visually but is not one of the "which endpoints" choices. -->
+      <div class="flex items-center" role="group" aria-label="Which endpoints to show">
+        @for (mode of showModes; track mode.value) {
+          <button type="button"
+            class="px-3 py-1 text-sm font-medium rounded-md transition-colors duration-200"
+            [class.bg-primary]="resolvedShowMode() === mode.value"
+            [class.text-white]="resolvedShowMode() === mode.value"
+            [class.text-content-text]="resolvedShowMode() !== mode.value"
+            [class.hover:bg-content-secondary]="resolvedShowMode() !== mode.value"
+            (click)="setShowMode(mode.value)"
+            [attr.aria-pressed]="resolvedShowMode() === mode.value">
+            {{ mode.label }}
           </button>
-          <div *ngIf="!layout" class="layout-menu__sep"></div>
-        </div>
-        <div class="layout-menu__sep"></div>
-        <button (click)="toggleShowAllEndpoints()" mat-menu-item class="layout-menu">
-          <div class="layout-menu__label">Show all endpoints</div>
-          <mat-icon [ngClass]="{'layout-menu__tick' : showAllEndpoints}" class="layout-menu__icon">done</mat-icon>
-        </button>
-      </mat-menu>
-      <button mat-button [matMenuTriggerFor]="appMenu">
-        <mat-icon>view_week</mat-icon>
-        <mat-icon>arrow_drop_down</mat-icon>
+        }
+      </div>
+      <span class="self-stretch border-l border-content-border mx-1" aria-hidden="true"></span>
+      <button type="button" (click)="toggleSortDirection()"
+        [title]="sortDirection() === 'asc' ? 'Sorted by endpoint name, A→Z' : 'Sorted by endpoint name, Z→A'"
+        [attr.aria-label]="sortDirection() === 'asc' ? 'Sorted by endpoint name, ascending' : 'Sorted by endpoint name, descending'"
+        class="px-2 py-1 rounded-md text-content-muted hover:bg-content-secondary transition-colors duration-200">
+        <span class="material-icons text-base leading-5 block" [class.rotate-180]="sortDirection() === 'asc'">sort</span>
       </button>
+    </div>
+    <!-- Divider between the endpoint controls and the layout menu. A 1px rule
+         rather than a "|" glyph, so its height and weight don't ride on the
+         header font — same idiom as the pill's own internal separator. -->
+    <span class="mx-3 h-6 border-l border-content-border" aria-hidden="true"></span>
+    <div class="relative inline-block">
+      <div class="dropdown">
+        <button class="btn btn-secondary flex items-center space-x-1"
+          type="button" title="Card layout" aria-label="Card layout"
+          [attr.aria-expanded]="layoutMenuOpen()"
+          (click)="layoutMenuOpen.set(!layoutMenuOpen())">
+          <span class="material-icons">view_week</span>
+          <span class="material-icons">arrow_drop_down</span>
+        </button>
+        <div class="dropdown-menu layout-dropdown__panel absolute right-0 mt-2 w-56 rounded-md z-50"
+          [class.hidden]="!layoutMenuOpen()">
+          <div class="py-1">
+            @for (layout of layouts; track layout?.id ?? $index) {
+                <div>
+                  @if (layout) {
+                    <button (click)="onChangeLayout(layout); layoutMenuOpen.set(false)"
+                      class="layout-dropdown__option"
+                      [attr.aria-current]="layout.id === layoutID">
+                      <span>{{ layout.title }}</span>
+                      <!-- Hidden from assistive tech: the tick is only faded out
+                           for unselected layouts, so its "done" ligature would
+                           otherwise be read as part of every option's name.
+                           aria-current carries the selection instead. -->
+                      <span class="material-icons text-brand-600" aria-hidden="true"
+                        [class.opacity-100]="layout.id === layoutID"
+                      [class.opacity-0]="layout.id !== layoutID">done</span>
+                    </button>
+                  }
+                  @if (!layout) {
+                    <div class="layout-dropdown__divider"></div>
+                  }
+                </div>
+              }
+          </div>
+        </div>
+      </div>
     </div>
   </div>
 </app-page-header>
-<div class="home-page" *ngIf="haveThingsToShow$ | async ; else noEndpoints">
-  <div class="home-page__list" [ngClass]="{'home-page__list-2': columns === 2, 'home-page__list-3': columns === 3}"
-    #endpointsPanel>
-    <div *ngFor="let ep of endpoints$ | async" class="home-page__card" #endpointCard>
-      <app-home-page-endpoint-card (loaded)="cardLoaded()" [layout]="layout$ | async" [endpoint]="ep">
-      </app-home-page-endpoint-card>
+<app-home-url-banner></app-home-url-banner>
+@if (haveThingsToShow()) {
+  <div class="p-6">
+    <div class="home-grid"
+      [class.columns-1]="columns === 1"
+      [class.columns-2]="columns === 2"
+      [class.columns-3]="columns === 3">
+      @for (ep of endpoints(); track ep?.guid ?? $index) {
+        <div class="home-grid-item" [style.grid-column]="'span ' + getEffectiveSpan(ep)">
+          <app-home-page-endpoint-card [layout]="layout()" [endpoint]="ep">
+          </app-home-page-endpoint-card>
+        </div>
+      }
     </div>
   </div>
-</div>
-<ng-template #noEndpoints>
-  <div class="home-page" *ngIf="haveRegistered$ | async; else noneRegistered">
-    <app-no-content-message [icon]="noneAvailableMsg.icon" [firstLine]="noneAvailableMsg.firstLine"
+} @else {
+  @if (haveRegistered()) {
+    <div class="p-6">
+      <app-no-content-message [icon]="noneAvailableMsg.icon" [firstLine]="noneAvailableMsg.firstLine"
       [secondLine]="noneAvailableMsg.secondLine"></app-no-content-message>
-  </div>
-</ng-template>
-
-<ng-template #noneRegistered>
-  <app-endpoints-missing class="home-page" [showToolbarHint]="false"></app-endpoints-missing>
-</ng-template>
+    </div>
+  } @else {
+    <app-endpoints-missing class="p-6" [showToolbarHint]="false"></app-endpoints-missing>
+  }
+}

@@ -7,7 +7,7 @@ import (
 	"reflect"
 
 	"github.com/cloudfoundry/stratos/src/jetstream/api/config"
-	"gopkg.in/yaml.v2"
+	"go.yaml.in/yaml/v4"
 )
 
 type KubeConfigClusterDetail struct {
@@ -145,7 +145,7 @@ func (k *KubeConfigFile) GetUserForCluster(clusterEndpoint string) (*KubeConfigU
 func ParseKubeConfig(kubeConfigData []byte) (*KubeConfigFile, error) {
 
 	kubeConfig := &KubeConfigFile{}
-	err := yaml.Unmarshal(kubeConfigData, &kubeConfig)
+	err := yaml.Load(kubeConfigData, &kubeConfig)
 	if err != nil {
 		return nil, err
 	}
@@ -160,7 +160,7 @@ func UnMarshalHelper(values map[string]interface{}, intf interface{}) error {
 
 	value := reflect.ValueOf(intf)
 
-	if value.Kind() != reflect.Ptr {
+	if value.Kind() != reflect.Pointer {
 		return errors.New("config: must provide pointer to struct value")
 	}
 

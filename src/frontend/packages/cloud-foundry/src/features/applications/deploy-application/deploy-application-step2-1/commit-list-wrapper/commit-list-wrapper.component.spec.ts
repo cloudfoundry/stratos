@@ -1,51 +1,40 @@
-import { CommonModule, DatePipe } from '@angular/common';
-import { HttpBackend, HttpClient, HttpClientModule } from '@angular/common/http';
-import { HttpClientTestingModule, HttpTestingController } from '@angular/common/http/testing';
+import { describe, it, expect, beforeEach } from 'vitest';
+import { DatePipe } from '@angular/common';
 import { ComponentFixture, TestBed } from '@angular/core/testing';
-import { Store } from '@ngrx/store';
+import { provideZonelessChangeDetection } from '@angular/core';
+import { provideHttpClient } from '@angular/common/http';
+import { provideHttpClientTesting } from '@angular/common/http/testing';
 
-import { CoreModule } from '../../../../../../../core/src/core/core.module';
-import { SharedModule } from '../../../../../../../core/src/shared/shared.module';
-import { getGitHubAPIURL, GITHUB_API_URL } from '../../../../../../../git/src/shared/github.helpers';
-import { generateCfStoreModules } from '../../../../../../test-framework/cloud-foundry-endpoint-service.helper';
-import { SetAppSourceDetails } from '../../../../../actions/deploy-applications.actions';
-import { CommitListWrapperComponent } from './commit-list-wrapper.component';
+import { getGitHubAPIURL, GITHUB_API_URL, GitSCMService } from '@stratosui/git';
+import { STORE_TEST_PROVIDERS } from '@stratosui/store/testing';
+import { CfDeployAppDataService } from '../../../../../services/domain-data/cf-deploy-app-data.service';
+import { CommitListWrapperComponent } from "./commit-list-wrapper.component";
 
 describe('CommitListWrapperComponent', () => {
   let component: CommitListWrapperComponent;
   let fixture: ComponentFixture<CommitListWrapperComponent>;
 
-  beforeEach(() => {
-    // const store = generateCfTopLevelStoreEntities() as CFAppState;
-    TestBed.configureTestingModule({
-      declarations: [CommitListWrapperComponent],
+  beforeEach(async () => {
+    await TestBed.configureTestingModule({
       imports: [
-        ...generateCfStoreModules(),
-        CommonModule,
-        CoreModule,
-        SharedModule,
-        HttpClientModule,
-        HttpClientTestingModule
+        CommitListWrapperComponent,
       ],
       providers: [
+        ...STORE_TEST_PROVIDERS,
+        provideHttpClient(),
+        provideHttpClientTesting(),
+        provideZonelessChangeDetection(),
         DatePipe,
+        GitSCMService,
         { provide: GITHUB_API_URL, useFactory: getGitHubAPIURL },
-        HttpClient,
-        {
-          provide: HttpBackend,
-          useClass: HttpTestingController
-        }
       ]
-    })
-      .compileComponents();
-    const store = TestBed.get(Store);
-    store.dispatch(new SetAppSourceDetails({
-      id: 'id',
-      name: 'name'
-    }));
-  });
+    }).compileComponents();
 
-  beforeEach(() => {
+    TestBed.inject(CfDeployAppDataService).setSourceType({
+      id: 'id',
+      name: 'name',
+    });
+
     fixture = TestBed.createComponent(CommitListWrapperComponent);
     component = fixture.componentInstance;
     fixture.detectChanges();

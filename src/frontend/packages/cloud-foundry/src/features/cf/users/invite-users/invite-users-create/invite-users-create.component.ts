@@ -1,23 +1,24 @@
-import { Component, OnInit } from '@angular/core';
-import { Store } from '@ngrx/store';
-import { BehaviorSubject, Observable, of as observableOf } from 'rxjs';
+import { CommonModule } from '@angular/common';
+import { Component, computed, Input, OnDestroy, OnInit, Signal, signal, ChangeDetectionStrategy, inject } from '@angular/core';
+import { FormsModule } from '@angular/forms';
+import { toObservable } from '@angular/core/rxjs-interop';
+import { Router } from '@angular/router';
+import { firstValueFrom, Observable } from 'rxjs';
 import { map } from 'rxjs/operators';
 
 import {
+  SignalStepHandle,
   StackedInputActionResult,
-} from '../../../../../../../core/src/shared/components/stacked-input-actions/stacked-input-action/stacked-input-action.component';
-import {
+  StackedInputActionsComponent,
   StackedInputActionsState,
   StackedInputActionsUpdate,
-} from '../../../../../../../core/src/shared/components/stacked-input-actions/stacked-input-actions.component';
-import { StepOnNextFunction } from '../../../../../../../core/src/shared/components/stepper/step/step.component';
-import { ClearPaginationOfType } from '../../../../../../../store/src/actions/pagination.actions';
-import { APIResource } from '../../../../../../../store/src/types/api.types';
-import { IOrganization, ISpace } from '../../../../../cf-api.types';
-import { CFAppState } from '../../../../../cf-app-state';
-import { cfEntityCatalog } from '../../../../../cf-entity-catalog';
-import { cfUserEntityType } from '../../../../../cf-entity-types';
-import { CFEntityConfig } from '../../../../../cf-types';
+  StepOnNextFunction,
+} from '@stratosui/core';
+import { CfUsersPagedDataService } from '../../../../../shared/data-services/cf-users-paged-data.service';
+import { OrgDataRegistry } from '../../../../../services/endpoint-data/org-data.registry';
+import { OrgDataService } from '../../../../../services/endpoint-data/org-data.service';
+import { SpaceDataRegistry } from '../../../../../services/endpoint-data/space-data.registry';
+import { SpaceDataService } from '../../../../../services/endpoint-data/space-data.service';
 import { SpaceUserRoleNames } from '../../../../../store/types/cf-user.types';
 import { UserRoleLabels } from '../../../../../store/types/users-roles.types';
 import { ActiveRouteCfOrgSpace } from '../../../cf-page.types';
@@ -26,27 +27,62 @@ import { UserInviteSendSpaceRoles, UserInviteService } from '../../../user-invit
 @Component({
   selector: 'app-invite-users-create',
   templateUrl: './invite-users-create.component.html',
-  styleUrls: ['./invite-users-create.component.scss']
+  styleUrls: ['./invite-users-create.component.scss'],
+  standalone: true,
+  changeDetection: ChangeDetectionStrategy.OnPush,
+  imports: [
+    CommonModule,
+    FormsModule,
+    StackedInputActionsComponent
+  ]
 })
-export class InviteUsersCreateComponent implements OnInit {
+export class InviteUsersCreateComponent implements OnInit, OnDestroy {
+  private usersData = inject(CfUsersPagedDataService);
+  private activeRouteCfOrgSpace = inject(ActiveRouteCfOrgSpace);
+  private userInviteService = inject(UserInviteService);
+  private router = inject(Router);
+  private orgRegistry = inject(OrgDataRegistry);
+  private spaceRegistry = inject(SpaceDataRegistry);
 
+
+  public stepValid = signal<boolean>(false);
   public valid$: Observable<boolean>;
-  public stepValid = new BehaviorSubject<boolean>(false);
-  public stateIn = new BehaviorSubject<StackedInputActionsState[]>([]);
-  public org$: Observable<APIResource<IOrganization>>;
-  public space$: Observable<APIResource<ISpace>>;
+
+  /** FWT-957: post-success navigation target supplied by parent. */
+  @Input() redirectUrl!: string;
+
+  /**
+   * FWT-957: signal-native step handle. Reuses the existing onNext side
+   * effects (per-user state updates, pagination clear) by awaiting the
+   * same observable, then navigates to the parent-supplied redirectUrl
+   * unless the top-level invite call errored. Partial-failure semantics
+   * are preserved: when any user succeeds the redirect still happens.
+   */
+  signalHandle: SignalStepHandle = {
+    valid: this.stepValid.asReadonly(),
+    submit: async () => {
+      const res = await firstValueFrom(this.runInvite());
+      if (res.error) {
+        throw new Error(res.errorMessage || 'Failed to invite users');
+      }
+      await this.router.navigateByUrl(this.redirectUrl);
+    },
+  };
+  public stateIn = signal<StackedInputActionsState[]>([]);
+  public stateIn$: Observable<StackedInputActionsState[]>;
+  public orgName!: Signal<string>;
+  public spaceName!: Signal<string>;
+  private orgData?: OrgDataService;
+  private spaceData?: SpaceDataService;
   public madeChanges = false;
   public isSpace = false;
   public spaceRole: UserInviteSendSpaceRoles = UserInviteSendSpaceRoles.auditor;
   public spaceRoles: { label: string, value: UserInviteSendSpaceRoles }[] = [];
-  private users: StackedInputActionsUpdate;
+  private users!: StackedInputActionsUpdate;
 
-  constructor(
-    private store: Store<CFAppState>,
-    private activeRouteCfOrgSpace: ActiveRouteCfOrgSpace,
-    private userInviteService: UserInviteService
-  ) {
-    this.valid$ = this.stepValid.asObservable();
+  constructor() {
+    this.valid$ = toObservable(this.stepValid);
+    this.stateIn$ = toObservable(this.stateIn);
     this.spaceRoles.push(
       {
         label: UserRoleLabels.space.short[SpaceUserRoleNames.AUDITOR],
@@ -62,29 +98,55 @@ export class InviteUsersCreateComponent implements OnInit {
 
   stateOut(users: StackedInputActionsUpdate) {
     this.users = users;
-    this.stepValid.next(users.valid);
+    this.stepValid.set(users.valid);
   }
 
   ngOnInit() {
     this.isSpace = !!this.activeRouteCfOrgSpace.spaceGuid;
-    this.org$ = cfEntityCatalog.org.store.getEntityService(
+
+    // Signal-native org/space name reads via the data registries — replaces
+    // the legacy cfEntityCatalog.{org,space}.store.getEntityService chain.
+    this.orgData = this.orgRegistry.acquire(
+      this.activeRouteCfOrgSpace.cfGuid,
       this.activeRouteCfOrgSpace.orgGuid,
-      this.activeRouteCfOrgSpace.cfGuid,
-      { includeRelations: [], populateMissing: false }
-    ).waitForEntity$.pipe(
-      map(entity => entity.entity)
     );
-    this.space$ = this.isSpace ? cfEntityCatalog.space.store.getEntityService(
-      this.activeRouteCfOrgSpace.spaceGuid,
-      this.activeRouteCfOrgSpace.cfGuid,
-      { includeRelations: [], populateMissing: false }
-    ).waitForEntity$.pipe(
-      map(entity => entity.entity)
-    ) : observableOf(null);
+    this.orgData.load().subscribe();
+    this.orgName = computed(() => this.orgData?.org()?.name ?? '');
+
+    if (this.isSpace) {
+      this.spaceData = this.spaceRegistry.acquire(
+        this.activeRouteCfOrgSpace.cfGuid,
+        this.activeRouteCfOrgSpace.spaceGuid,
+      );
+      this.spaceData.load().subscribe();
+      this.spaceName = computed(() => this.spaceData?.space()?.name ?? '');
+    } else {
+      this.spaceName = computed(() => '');
+    }
   }
 
-  onNext: StepOnNextFunction = () => {
+  ngOnDestroy() {
+    if (this.orgData) {
+      this.orgRegistry.release(
+        this.activeRouteCfOrgSpace.cfGuid,
+        this.activeRouteCfOrgSpace.orgGuid,
+      );
+    }
+    if (this.spaceData) {
+      this.spaceRegistry.release(
+        this.activeRouteCfOrgSpace.cfGuid,
+        this.activeRouteCfOrgSpace.spaceGuid,
+      );
+    }
+  }
 
+  /**
+   * FWT-957 helper: runs the invite request and applies per-user state
+   * updates / madeChanges side effects. Returns the invite response so
+   * both the legacy onNext map and the new SignalStepHandle.submit path
+   * can branch on res.error uniformly.
+   */
+  private runInvite() {
     // Mark all as processing
     const processingState: StackedInputActionsState[] = [];
     Object.keys(this.users.values).forEach(key => {
@@ -93,7 +155,7 @@ export class InviteUsersCreateComponent implements OnInit {
         result: StackedInputActionResult.PROCESSING,
       });
     });
-    this.stateIn.next(processingState);
+    this.stateIn.set(processingState);
 
     // Kick off the invites
     return this.userInviteService.invite(
@@ -104,8 +166,9 @@ export class InviteUsersCreateComponent implements OnInit {
       Object.values(this.users.values)).pipe(
         map(res => {
           if (!res.error && res.failed_invites.length === 0) {
-            // Success! Clear all paginations of type users such that lists can be refetched with new user.s
-            this.store.dispatch(new ClearPaginationOfType(new CFEntityConfig(cfUserEntityType)));
+            // Success! Mark the signal-native user cache stale so the user
+            // list re-drains with the newly invited users on next read.
+            this.usersData.markStale(this.activeRouteCfOrgSpace.cfGuid);
           } else if (res.failed_invites.length > 0) {
             // One or more failed. Push failures back into components
             const newState: StackedInputActionsState[] = [];
@@ -138,18 +201,21 @@ export class InviteUsersCreateComponent implements OnInit {
               });
             });
             // We've just come from a valid state, so form should be valid again
-            this.stepValid.next(true);
-            this.stateIn.next(newState);
+            this.stepValid.set(true);
+            this.stateIn.set(newState);
             res.errorMessage = 'Failed to invite one or more users. Please address per user message and try again';
           }
           return res;
         }),
-        map(res => ({
-          success: !res.error,
-          message: res.errorMessage,
-          redirect: !res.error
-        })),
       );
   }
+
+  onNext: StepOnNextFunction = () => this.runInvite().pipe(
+    map(res => ({
+      success: !res.error,
+      message: res.errorMessage,
+      redirect: !res.error
+    })),
+  );
 
 }

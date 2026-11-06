@@ -5,33 +5,32 @@ import (
 	"errors"
 	"fmt"
 	"io"
-	"io/ioutil"
+	"log/slog"
 	"net/http"
 	"os"
-	"path/filepath"
 
-	"github.com/labstack/echo/v4"
-	log "github.com/sirupsen/logrus"
+	"github.com/labstack/echo/v5"
 )
 
 const idHeaderName = "X-Stratos-Analaysis-ID"
 
-func (a *Analyzer) run(ec echo.Context) error {
+func (a *Analyzer) run(ec *echo.Context) error {
 	err := a.doRun(ec)
 	if err != nil {
-		log.Error(err)
+		slog.Error("the analysis run request failed", "analyzer", ec.Param("analyzer"), "error", err)
 	}
 	return err
 }
 
-func (a *Analyzer) doRun(ec echo.Context) error {
-
-	log.Debug("Run analyzer!")
+func (a *Analyzer) doRun(ec *echo.Context) error {
 
 	engine := ec.Param("analyzer")
+	slog.Debug("running an analyzer", "analyzer", engine)
+
 	if len(engine) == 0 {
-		log.Warn("No analyzer")
-		return errors.New("No analyzer specified")
+		const msg = "no analyzer specified"
+		slog.Warn(msg)
+		return errors.New(msg)
 	}
 
 	// ID is username/endpoint/id
@@ -40,17 +39,25 @@ func (a *Analyzer) doRun(ec echo.Context) error {
 		return errors.New("Mising ID header")
 	}
 
-	folder := filepath.Join(a.reportsDir, id)
-	if os.MkdirAll(folder, os.ModePerm) != nil {
-		return errors.New("Could not create folder for analysis report")
+	// The ID header is "user/endpoint/id" — a nested but local path. Reject
+	// any value that would escape reportsDir (e.g. "../../etc"). This also
+	// confines job.Folder, which the analyzers write reports into.
+	folder, err := jobFolder(a.reportsDir, id)
+	if err != nil {
+		return errors.New("Invalid ID header")
+	}
+	if err := os.MkdirAll(folder, os.ModePerm); err != nil {
+		const msg = "could not create the folder for the analysis report"
+		slog.Error(msg, "folder", folder, "error", err)
+		return errors.New(msg)
 	}
 
 	tempFiles := make([]string, 0)
 	reader, err := ec.Request().MultipartReader()
 	if err != nil {
-		log.Error("Could not parse request")
-		log.Error(err)
-		return errors.New("Failed to parse request payload")
+		const msg = "could not parse the request payload"
+		slog.Error(msg, "analyzer", engine, "error", err)
+		return errors.New(msg)
 	}
 
 	job := AnalysisJob{}
@@ -62,14 +69,16 @@ func (a *Analyzer) doRun(ec echo.Context) error {
 			break
 		}
 		if err != nil {
-			log.Error("Unexpected error when retrieving a part of the message")
-			return errors.New("Unexpected error when retrieving a part of the message")
+			const msg = "unexpected error when retrieving a part of the message"
+			slog.Error(msg, "analyzer", engine, "error", err)
+			return fmt.Errorf("%s: %w", msg, err)
 		}
-		defer part.Close()
-		fileBytes, err := ioutil.ReadAll(part)
+		defer func() { _ = part.Close() }()
+		fileBytes, err := io.ReadAll(part)
 		if err != nil {
-			log.Error("Failed to read content of the part")
-			return errors.New("Failed to read content of the part")
+			const msg = "failed to read the content of a part of the message"
+			slog.Error(msg, "analyzer", engine, "error", err)
+			return fmt.Errorf("%s: %w", msg, err)
 		}
 		filename := part.Header.Get("Content-ID")
 
@@ -83,12 +92,25 @@ func (a *Analyzer) doRun(ec echo.Context) error {
 			if err = json.Unmarshal(fileBytes, &params); err != nil {
 				return fmt.Errorf("Can not parse parameters: %v", err)
 			}
+			// Validate attacker-controlled fields at the HTTP boundary before
+			// any value flows into shell scripts or exec.Command (FWT-923).
+			if err = validateNamespace(params.Namespace); err != nil {
+				return fmt.Errorf("invalid job parameter: %v", err)
+			}
 			job.Config = &params
 		default:
-			fullpath := filepath.Join(folder, filename)
-			if err = ioutil.WriteFile(fullpath, fileBytes, os.ModePerm); err != nil {
-				log.Error("Could not write data for: %s", filename)
-				return fmt.Errorf("Could not write file data for: %s", filename)
+			// Reject multipart parts whose Content-ID header attempts path
+			// traversal (e.g. "../../etc/cron.d/evil"). Default Go
+			// filepath.Join does not reject `..` in the second argument —
+			// validateContentID does, and returns a path confined to folder.
+			fullpath, err := validateContentID(filename, folder)
+			if err != nil {
+				return fmt.Errorf("invalid multipart filename: %v", err)
+			}
+			if err = os.WriteFile(fullpath, fileBytes, os.ModePerm); err != nil {
+				const msg = "could not write the file data"
+				slog.Error(msg, "file", filename, "path", fullpath, "error", err)
+				return fmt.Errorf("%s: %s", msg, filename)
 			}
 			if filename == "kubeconfig" {
 				job.KubeConfigPath = fullpath
@@ -102,6 +124,7 @@ func (a *Analyzer) doRun(ec echo.Context) error {
 	}
 
 	job.Folder = folder
+	job.Base = a.reportsDir
 	job.TempFiles = tempFiles
 
 	// Store the job so we track which jobs are running
@@ -123,7 +146,7 @@ func (a *Analyzer) doRun(ec echo.Context) error {
 
 	if err != nil {
 		job.Status = "error"
-		log.Error("Error running analyzer: %s", err)
+		slog.Error("error running the analyzer", "analyzer", engine, "job", job.ID, "error", err)
 	}
 
 	return ec.JSON(http.StatusOK, job)

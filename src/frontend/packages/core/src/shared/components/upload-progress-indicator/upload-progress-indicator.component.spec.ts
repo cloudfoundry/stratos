@@ -1,4 +1,8 @@
-import { ComponentFixture, TestBed, waitForAsync } from '@angular/core/testing';
+import { ComponentFixture, TestBed } from '@angular/core/testing';
+import { provideZonelessChangeDetection } from '@angular/core';
+import { provideHttpClient } from '@angular/common/http';
+import { provideHttpClientTesting } from '@angular/common/http/testing';
+import { describe, it, expect, beforeEach, afterEach, beforeAll, afterAll, vi } from 'vitest';
 
 import { UploadProgressIndicatorComponent } from './upload-progress-indicator.component';
 import { MDAppModule } from '../../../core/md.module';
@@ -9,17 +13,22 @@ describe('UploadProgressIndicatorComponent', () => {
   let component: UploadProgressIndicatorComponent;
   let fixture: ComponentFixture<UploadProgressIndicatorComponent>;
 
-  beforeEach(waitForAsync(() => {
+  beforeEach(() => {
     TestBed.configureTestingModule({
-      declarations: [ UploadProgressIndicatorComponent ],
+      providers: [
+        provideHttpClient(),
+        provideHttpClientTesting(),
+        provideZonelessChangeDetection()
+      ],
       imports: [
+        UploadProgressIndicatorComponent,
         MDAppModule,
         CommonModule,
         CoreModule,
       ]
-    })
-    .compileComponents();
-  }));
+    });
+    TestBed.compileComponents();
+  });
 
   beforeEach(() => {
     fixture = TestBed.createComponent(UploadProgressIndicatorComponent);

@@ -1,70 +1,65 @@
-import { ComponentFixture, TestBed, waitForAsync } from '@angular/core/testing';
-import { NoopAnimationsModule } from '@angular/platform-browser/animations';
+import { ComponentFixture, TestBed } from '@angular/core/testing';
+import { provideZonelessChangeDetection } from '@angular/core';
+import { provideRouter } from '@angular/router';
+import { describe, it, expect } from 'vitest';
 
-import { CoreModule } from '../../../../../../core/src/core/core.module';
-import { UtilsService } from '../../../../../../core/src/core/utils.service';
-import {
-  ApplicationStateIconComponent,
-} from '../../../../../../core/src/shared/components/application-state/application-state-icon/application-state-icon.component';
-import {
-  ApplicationStateIconPipe,
-} from '../../../../../../core/src/shared/components/application-state/application-state-icon/application-state-icon.pipe';
-import {
-  ApplicationStateComponent,
-} from '../../../../../../core/src/shared/components/application-state/application-state.component';
-import { CardStatusComponent } from '../../../../../../core/src/shared/components/cards/card-status/card-status.component';
-import {
-  CopyToClipboardComponent,
-} from '../../../../../../core/src/shared/components/copy-to-clipboard/copy-to-clipboard.component';
-import { MetadataItemComponent } from '../../../../../../core/src/shared/components/metadata-item/metadata-item.component';
-import { UptimePipe } from '../../../../../../core/src/shared/pipes/uptime.pipe';
-import { ApplicationServiceMock } from '../../../../../test-framework/application-service-helper';
-import { generateCfStoreModules } from '../../../../../test-framework/cloud-foundry-endpoint-service.helper';
-import { ApplicationMonitorService } from '../../../../features/applications/application-monitor.service';
-import { ApplicationService } from '../../../../features/applications/application.service';
-import { ApplicationStateService } from '../../../services/application-state.service';
-import { CardAppStatusComponent } from '../card-app-status/card-app-status.component';
-import { CardAppUptimeComponent } from './card-app-uptime.component';
+import { AppDetailDataService } from '../../../../features/applications/app-detail-data.service';
+import { CardAppUptimeComponent } from "./card-app-uptime.component";
+
+function makeDataServiceStub(running: boolean, stats: any[] = []) {
+  return {
+    running: () => running,
+    stats: () => stats,
+  };
+}
 
 describe('CardAppUptimeComponent', () => {
   let component: CardAppUptimeComponent;
   let fixture: ComponentFixture<CardAppUptimeComponent>;
 
-  beforeEach(waitForAsync(() => {
+  function setUp(running: boolean, stats: any[] = []) {
     TestBed.configureTestingModule({
-      declarations: [
-        CardAppUptimeComponent,
-        CardAppStatusComponent,
-        CardStatusComponent,
-        ApplicationStateComponent,
-        ApplicationStateIconComponent,
-        ApplicationStateIconPipe,
-        UptimePipe,
-        MetadataItemComponent,
-        CopyToClipboardComponent,
-      ],
-      imports: [
-        ...generateCfStoreModules(),
-        CoreModule,
-        NoopAnimationsModule,
-      ],
+      imports: [CardAppUptimeComponent],
       providers: [
-        { provide: ApplicationService, useClass: ApplicationServiceMock },
-        ApplicationStateService,
-        UtilsService,
-        ApplicationMonitorService,
-      ]
-    })
-      .compileComponents();
-  }));
-
-  beforeEach(() => {
+        provideZonelessChangeDetection(),
+        provideRouter([]),
+        { provide: AppDetailDataService, useValue: makeDataServiceStub(running, stats) },
+      ],
+    });
     fixture = TestBed.createComponent(CardAppUptimeComponent);
     component = fixture.componentInstance;
     fixture.detectChanges();
+  }
+
+  it('renders the not-running state when the app is stopped', () => {
+    setUp(false);
+    expect(fixture.nativeElement.textContent).toContain('not running');
   });
 
-  it('should create', () => {
-    expect(component).toBeTruthy();
+  it('renders max uptime when one instance is running', () => {
+    setUp(true, [{ index: 0, state: 'RUNNING', uptime: 3600 }]);
+    expect(component.appData().maxUptime).toBe(3600);
+    expect(component.appData().runningCount).toBe(1);
+  });
+
+  it('renders min/avg detail when more than one instance is running', () => {
+    setUp(true, [
+      { index: 0, state: 'RUNNING', uptime: 1000 },
+      { index: 1, state: 'RUNNING', uptime: 3000 },
+    ]);
+    const data = component.appData();
+    expect(data.maxUptime).toBe(3000);
+    expect(data.minUptime).toBe(1000);
+    expect(data.averageUptime).toBe(2000);
+    expect(data.runningCount).toBe(2);
+  });
+
+  it('ignores non-RUNNING instances in the aggregates', () => {
+    setUp(true, [
+      { index: 0, state: 'RUNNING', uptime: 500 },
+      { index: 1, state: 'CRASHED', uptime: 0 },
+    ]);
+    expect(component.appData().runningCount).toBe(1);
+    expect(component.appData().maxUptime).toBe(500);
   });
 });

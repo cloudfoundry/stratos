@@ -1,10 +1,9 @@
 package main
 
 import (
+	"log/slog"
 	"os/exec"
 	"strings"
-
-	log "github.com/sirupsen/logrus"
 
 	"github.com/cloudfoundry/stratos/src/jetstream/api"
 	goosedbversion "github.com/cloudfoundry/stratos/src/jetstream/repository/goose-db-version"
@@ -14,7 +13,7 @@ func (p *portalProxy) StoreDiagnostics() {
 
 	diagnostics := &api.Diagnostics{}
 
-	log.Info("Storing Diagnostics")
+	slog.Info("Storing Diagnostics")
 
 	// Git Client Version
 	cmdName := "git"

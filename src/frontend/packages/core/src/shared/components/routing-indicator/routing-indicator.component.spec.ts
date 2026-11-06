@@ -1,27 +1,34 @@
-import { ComponentFixture, TestBed, waitForAsync } from '@angular/core/testing';
+import { ComponentFixture, TestBed } from '@angular/core/testing';
+import { provideZonelessChangeDetection } from '@angular/core';
+import { provideHttpClient } from '@angular/common/http';
+import { provideHttpClientTesting } from '@angular/common/http/testing';
+import { describe, it, expect, beforeEach, afterEach, beforeAll, afterAll, vi } from 'vitest';
 
 import { RoutingIndicatorComponent } from './routing-indicator.component';
 import { CoreModule } from '../../../core/core.module';
-import { MatProgressBarModule } from '@angular/material/progress-bar';
+import { ProgressBarComponent } from '../progress-bar/progress-bar.component';
 import { RouterTestingModule } from '@angular/router/testing';
 
 describe('RoutingIndicatorComponent', () => {
   let component: RoutingIndicatorComponent;
   let fixture: ComponentFixture<RoutingIndicatorComponent>;
 
-  beforeEach(waitForAsync(() => {
+  beforeEach(() => {
     TestBed.configureTestingModule({
-      declarations: [
-        RoutingIndicatorComponent
+      providers: [
+        provideZonelessChangeDetection(),
+        provideHttpClient(),
+        provideHttpClientTesting(),
       ],
       imports: [
+        RoutingIndicatorComponent,
         RouterTestingModule,
         CoreModule,
-        MatProgressBarModule
+        ProgressBarComponent,
       ]
-    })
-      .compileComponents();
-  }));
+    });
+      TestBed.compileComponents();
+  });
 
   beforeEach(() => {
     fixture = TestBed.createComponent(RoutingIndicatorComponent);

@@ -1,40 +1,66 @@
-import { ComponentFixture, TestBed, waitForAsync } from '@angular/core/testing';
+import { ComponentFixture, TestBed } from '@angular/core/testing';
+import { importProvidersFrom, provideZonelessChangeDetection } from '@angular/core';
+import { provideHttpClient } from '@angular/common/http';
+import { provideHttpClientTesting } from '@angular/common/http/testing';
+import { provideRouter } from '@angular/router';
+import { provideNoopAnimations } from '@angular/platform-browser/animations';
+import { describe, it, expect, beforeEach } from 'vitest';
 
-import { CFBaseTestModules } from '../../../../../test-framework/cf-test-helper';
 import {
-  CloudFoundryEventsListComponent,
-} from '../../../../shared/components/cloud-foundry-events-list/cloud-foundry-events-list.component';
-import { CfUserService } from '../../../../shared/data-services/cf-user.service';
+  TEST_CATALOGUE_ENTITIES,
+  generateStratosEntities,
+  EntityCatalogTestModule,
+  EntityCatalogHelper,
+  EntityCatalogHelpers
+} from '@stratosui/store';
+import { STORE_TEST_PROVIDERS, testSCFEndpointGuid, populateStoreWithTestEndpoint } from '@stratosui/store/testing';
+import { generateCFEntities, generateTestCfEndpointServiceProvider } from '@test-framework/cf';
 import { ActiveRouteCfOrgSpace } from '../../cf-page.types';
-import { CloudFoundryEndpointService } from '../../services/cloud-foundry-endpoint.service';
 import { CloudFoundryEventsComponent } from './cloud-foundry-events.component';
 
 describe('CloudFoundryEventsComponent', () => {
   let component: CloudFoundryEventsComponent;
   let fixture: ComponentFixture<CloudFoundryEventsComponent>;
 
-  beforeEach(waitForAsync(() => {
-    TestBed.configureTestingModule({
-      declarations: [
+  beforeEach(async () => {
+    await TestBed.configureTestingModule({
+      imports: [
         CloudFoundryEventsComponent,
-        CloudFoundryEventsListComponent
-
       ],
-      imports: [...CFBaseTestModules],
       providers: [
-        CloudFoundryEndpointService,
-        CfUserService, {
+        provideZonelessChangeDetection(),
+        provideRouter([]),
+        provideHttpClient(),
+        provideHttpClientTesting(),
+        provideNoopAnimations(),
+        ...STORE_TEST_PROVIDERS,
+        importProvidersFrom(
+          EntityCatalogTestModule
+        ),
+        {
+          provide: TEST_CATALOGUE_ENTITIES,
+          useValue: [
+            ...generateStratosEntities(),
+            ...generateCFEntities()
+          ]
+        },
+        ...generateTestCfEndpointServiceProvider(testSCFEndpointGuid),
+        {
           provide: ActiveRouteCfOrgSpace,
           useValue: {
-            cfGuid: 'cfGuid',
-            orgGuid: 'orgGuid',
-            spaceGuid: 'spaceGuid'
+            cfGuid: testSCFEndpointGuid,
+            orgGuid: testSCFEndpointGuid,
+            spaceGuid: testSCFEndpointGuid
           }
-        }
+        },
       ]
-    })
-      .compileComponents();
-  }));
+    }).compileComponents();
+
+    const entityCatalogHelper = TestBed.inject(EntityCatalogHelper);
+    EntityCatalogHelpers.SetEntityCatalogHelper(entityCatalogHelper);
+
+    populateStoreWithTestEndpoint();
+  });
 
   beforeEach(() => {
     fixture = TestBed.createComponent(CloudFoundryEventsComponent);

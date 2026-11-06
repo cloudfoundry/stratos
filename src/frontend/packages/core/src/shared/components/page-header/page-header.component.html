@@ -1,95 +1,254 @@
 <ng-template #pageHeaderTmpl>
-  <div class="page-header__outer">
-    <div class="page-header__inner">
+  <div class="page-header-outer bg-header-bg text-header-text">
+    <div class="page-header-inner">
       <div class="page-header">
-        <div>
-          <mat-toolbar class="page-header__toolbar">
-            <div *ngIf="isMobile$ | async" class="page-header__nav-toggle-wrapper">
-              <button mat-icon-button *ngIf="!hideSideNavButton" (click)="toggleSidenav()">
-                <mat-icon class="page-header__nav-toggle">menu</mat-icon>
-              </button>
+        <div class="page-header-toolbar flex items-center justify-between px-6 py-4">
+          <!-- Mobile menu toggle -->
+          @if (isMobile$ | async) {
+            <div class="page-header-nav-toggle-wrapper">
+              @if (!hideSideNavButton) {
+                <button
+                  class="p-2 text-header-text hover:bg-white/10 rounded-md transition-colors"
+                  matTooltip="Toggle menu"
+                  aria-label="Toggle menu"
+                  (click)="toggleSidenav()">
+                  <span class="material-icons">menu</span>
+                </button>
+              }
             </div>
-            <div class="page-header__left">
-              <div class="page-header__breadcrumbs" *ngIf="breadcrumbDefinitions">
-                <ng-container *ngFor="let breadcrumbDef of breadcrumbDefinitions">
-                  <span class="page-header__breadcrumb page-header__breadcrumb-link" *ngIf="breadcrumbDef.routerLink"
+          }
+
+          <!-- Left content -->
+          <div class="page-header-left flex items-center space-x-4">
+            <!-- Breadcrumbs -->
+            @if (breadcrumbDefinitions) {
+              <div class="page-header-breadcrumbs flex items-center space-x-2">
+                @for (breadcrumbDef of breadcrumbDefinitions; track $index) {
+                  @if (breadcrumbDef.routerLink) {
+                    <span class="page-header-breadcrumb text-header-text opacity-80 hover:opacity-100 cursor-pointer"
                     [routerLink]="breadcrumbDef.routerLink">{{ breadcrumbDef.value }}</span>
-                  <span class="page-header__breadcrumb"
-                    *ngIf="!breadcrumbDef.routerLink">{{ breadcrumbDef.value }}</span>
-                  <mat-icon class="page-header__breadcrumb-separator">chevron_right</mat-icon>
-                </ng-container>
+                  }
+                  @if (!breadcrumbDef.routerLink) {
+                    <span class="page-header-breadcrumb text-header-text opacity-60"
+                    >{{ breadcrumbDef.value }}</span>
+                  }
+                  <span class="material-icons text-header-text opacity-50 text-sm">chevron_right</span>
+                }
               </div>
-              <ng-content></ng-content>
-              <app-entity-favorite-star class="page-header__favorite" *ngIf="pFavorite" [favorite]="pFavorite">
+            }
+
+            <!-- Page content -->
+            <ng-content></ng-content>
+
+            <!-- Favorite star -->
+            @if (pFavorite) {
+              <app-entity-favorite-star class="page-header-favorite"
+                [favorite]="pFavorite">
               </app-entity-favorite-star>
+            }
+
+            <!-- Documentation split control. The anchor opens the docs; the
+                 caret chooses tab vs popup. Named target so repeat clicks reuse
+                 one window rather than piling up; deliberately no rel="noopener"
+                 — severing the opener also severs the reuse. Popup mode is
+                 intercepted in the handler. See #5690. -->
+            @if (documentationUrl(); as docsUrl) {
+              <div class="page-header-documentation flex items-center text-header-text">
+                <a class="page-header-documentation-link pl-1.5 pr-0 py-1.5 hover:bg-white/10 rounded-l-md transition-colors"
+                  [href]="docsUrl"
+                  target="stratos-docs"
+                  (click)="openDocumentation($event, docsUrl)"
+                  [matTooltip]="documentationTooltip()"
+                  [attr.aria-label]="documentationTooltip()">
+                  <span class="material-icons text-base leading-5 block">menu_book</span>
+                </a>
+                <button type="button"
+                  class="page-header-documentation-toggle pl-1 pr-1.5 py-1.5 hover:bg-white/10 rounded-r-md transition-colors"
+                  (click)="toggleDocumentationTarget()"
+                  [matTooltip]="documentationTargetTooltip()"
+                  [attr.aria-label]="documentationTargetTooltip()">
+                  <span class="flex items-center gap-0.5 opacity-80">
+                    <span class="text-xs leading-5">{{ documentationTargetLabel() }}</span>
+                    <!-- Static rotate glyph: signals the word toggles, without a
+                         caret's implication that a menu will open. -->
+                    <span class="material-icons text-[13px] leading-5">autorenew</span>
+                  </span>
+                </button>
+              </div>
+            }
+          </div>
+
+          <!-- Right content -->
+          <div class="page-header-right flex items-center gap-3">
+            <!-- Extension buttons -->
+            <div #extensionRef>
+              @if (actionsKey) {
+                <app-extension-buttons [type]="actionsKey"></app-extension-buttons>
+              }
             </div>
-            <div class="page-header__filler"></div>
-            <div class="page-header__right">
-              <div #extensionRef>
-                <app-extension-buttons *ngIf="actionsKey" [type]="actionsKey"></app-extension-buttons>
-              </div>
-              <div #ref>
-                <ng-content select=".page-header-right"></ng-content>
-              </div>
-              <span class="page-header__divider" *ngIf="
-            (extensionRef.children[0] && extensionRef.children[0].children && extensionRef.children[0].children.length > 0) ||
-            (ref.children[0] && ref.children[0] && ref.children[0].children && ref.children[0].children.length > 0)
-          ">
+
+            <!-- Custom content -->
+            <div #ref>
+              <ng-content select=".page-header-right"></ng-content>
+            </div>
+
+            <!-- Divider -->
+            @if ((extensionRef.children[0] && extensionRef.children[0].children && extensionRef.children[0].children.length > 0) ||
+              (ref.children[0] && ref.children[0] && ref.children[0].children && ref.children[0].children.length > 0)) {
+              <span class="page-header-divider text-white/30"
+                >
                 |
               </span>
-              <button *ngIf="showHistory" class="page-header__menu-button" mat-icon-button
-                [matMenuTriggerFor]="history">
-                <mat-icon class="page-header__nav-toggle">schedule</mat-icon>
-              </button>
-              <mat-menu #history="matMenu" [overlapTrigger]="false" class="page-header__menu">
-                <div class="page-header__history">
-                  <h3 class="page-header__history-title">Recent Activity</h3>
-                  <app-recent-entities mode="menu" class="page-header__history-list" history="true">
-                  </app-recent-entities>
-                </div>
-              </mat-menu>
-              <button *ngIf="(events$ | async).length > 0" routerLink="/events" mat-icon-button
-                class="page-header__notification-button">
-                <mat-icon matBadgeColor="warn" [matBadge]="(unreadEventCount$ | async) || ''"
-                  class="page-header__notifications-button">
-                  notifications
-                </mat-icon>
-              </button>
-            <button id="userMenu" *ngIf="!hideMenu && !environment.hideUserMenu" class="page-header__menu-button page-header__usermenu"
-                mat-icon-button [matMenuTriggerFor]="menu">
-                <app-user-avatar color="header" [allowGravatar]="allowGravatar$ | async" [user]="user$ | async">
-                </app-user-avatar>
-              </button>
-              <mat-menu #menu="matMenu" [overlapTrigger]="false" class="page-header__menu">
-                <div class="page-header__menu-inner">
-                  <div class="page-header__username">
-                    <app-user-avatar [allowGravatar]="allowGravatar$ | async" [user]="user$ | async"></app-user-avatar>
-                    <div class="page-header__username-text">
-                      <div>{{ username$ | async }}</div>
+            }
+
+            <!-- Theme toggle -->
+            <app-theme-toggle></app-theme-toggle>
+
+            <!-- Copy UAA token button -->
+            @if (!hideMenu && !logoutOnly && !environment.hideUserMenu) {
+              <div class="relative">
+                <button class="page-header-menu-button p-2 text-header-text hover:bg-white/10 rounded-md transition-colors"
+                  (click)="toggleTokenMenu()"
+                  matTooltip="Copy UAA tokens"
+                  aria-label="Copy UAA tokens">
+                  <span class="material-icons">vpn_key</span>
+                </button>
+                @if (isTokenMenuOpen) {
+                  <div
+                    class="absolute right-0 top-full mt-2 bg-content-bg rounded-lg shadow-lg border border-content-border z-50">
+                    <div class="page-header-token p-4 w-64">
+                      <h3 class="page-header-token-title text-lg font-semibold text-content-text mb-3">UAA Tokens</h3>
+                      <div class="space-y-2">
+                        <button class="w-full text-left px-3 py-2 text-sm text-content-text hover:bg-content-secondary rounded-md transition-colors border border-content-border"
+                          (click)="copyToken(authToken$, 'Auth token'); closeTokenMenu()">
+                          Copy Auth Token
+                        </button>
+                        <button class="w-full text-left px-3 py-2 text-sm text-content-text hover:bg-content-secondary rounded-md transition-colors border border-content-border"
+                          (click)="copyToken(refreshToken$, 'Refresh token'); closeTokenMenu()">
+                          Copy Refresh Token
+                        </button>
+                      </div>
+                      <div class="mt-3 pt-3 border-t border-content-border">
+                        <div class="text-xs font-medium text-content-muted mb-1">Token expiry</div>
+                        <div class="text-sm text-content-text break-words">{{ (tokenExpiry$ | async) | date:'medium' }}</div>
+                      </div>
                     </div>
                   </div>
-                  <div *ngIf="!logoutOnly">
-                    <button mat-menu-item routerLink="/about">
-                      <span>About</span>
-                    </button>
-                    <button mat-menu-item routerLink="/user-profile">
-                      <span>Profile</span>
-                    </button>
-                    <button mat-menu-item routerLink="/api-keys" *ngIf="canAPIKeys$ | async">
-                      <span>API Keys</span>
-                    </button>
-                    <div class="page-header__menu-separator" *ngIf="canLogout$ | async"></div>
+                }
+              </div>
+            }
+
+            <!-- History button -->
+            @if (showHistory) {
+              <div class="relative">
+                <button class="page-header-menu-button p-2 text-header-text hover:bg-white/10 rounded-md transition-colors"
+                  matTooltip="Recent activity"
+                  aria-label="Recent activity"
+                  (click)="toggleHistoryMenu()">
+                  <span class="material-icons">schedule</span>
+                </button>
+                <!-- History dropdown menu -->
+                @if (isHistoryMenuOpen) {
+                  <div
+                    class="absolute right-0 top-full mt-2 bg-content-bg rounded-lg shadow-lg border border-content-border z-50">
+                    <div class="page-header-history p-4 w-80">
+                      <h3 class="page-header-history-title text-lg font-semibold text-content-text mb-4">Recent Activity</h3>
+                      <app-recent-entities mode="menu" class="page-header-history-list" [history]="true">
+                      </app-recent-entities>
+                    </div>
                   </div>
-                  <button mat-menu-item (click)="logout()" *ngIf="canLogout$ | async">
-                    <span>Logout</span>
-                  </button>
-                </div>
-              </mat-menu>
-            </div>
-          </mat-toolbar>
+                }
+              </div>
+            }
+
+            <!-- Notifications button -->
+            @if (((events$ | async) || []).length > 0) {
+              <button
+                routerLink="/events"
+                matTooltip="Notifications"
+                aria-label="Notifications"
+                class="page-header-notification-button relative p-2 text-header-text hover:bg-white/10 rounded-md transition-colors">
+                <span class="material-icons">notifications</span>
+                @if ((unreadEventCount$ | async); as count) {
+                  <span
+                    class="absolute -top-1 -right-1 bg-danger-shade-500 text-white text-xs rounded-full min-w-[1.25rem] h-5 flex items-center justify-center px-1">
+                    {{ count }}
+                  </span>
+                }
+              </button>
+            }
+
+            <!-- User menu -->
+            @if (!hideMenu && !environment.hideUserMenu) {
+              <div class="relative">
+                <button id="userMenu"
+                  class="page-header-menu-button page-header-usermenu p-2 hover:bg-white/10 rounded-md transition-colors"
+                  matTooltip="User menu"
+                  aria-label="User menu"
+                  (click)="toggleUserMenu()">
+                  <app-user-avatar color="header" [allowGravatar]="allowGravatar$ | async" [user]="user$ | async">
+                  </app-user-avatar>
+                </button>
+                <!-- User dropdown menu -->
+                @if (isUserMenuOpen) {
+                  <div
+                    class="absolute right-0 top-full mt-2 bg-content-bg rounded-lg shadow-lg border border-content-border z-50">
+                    <div class="page-header-menu-inner p-4 w-64">
+                      <!-- User info -->
+                      <div class="page-header-username flex items-center space-x-3 pb-4 border-b border-content-border mb-4">
+                        <app-user-avatar [allowGravatar]="allowGravatar$ | async" [user]="user$ | async"></app-user-avatar>
+                        <div class="page-header-username-text">
+                          <div class="font-medium text-content-text">{{ username$ | async }}</div>
+                        </div>
+                      </div>
+                      <!-- Menu items -->
+                      @if (!logoutOnly) {
+                        <div class="space-y-1">
+                          <button class="w-full text-left px-3 py-2 text-sm text-content-text hover:bg-content-secondary rounded-md transition-colors"
+                            routerLink="/about"
+                            (click)="closeUserMenu()">
+                            <span>About</span>
+                          </button>
+                          <button class="w-full text-left px-3 py-2 text-sm text-content-text hover:bg-content-secondary rounded-md transition-colors"
+                            routerLink="/user-profile"
+                            (click)="closeUserMenu()">
+                            <span>Profile</span>
+                          </button>
+                          @if (canAPIKeys$ | async) {
+                            <button class="w-full text-left px-3 py-2 text-sm text-content-text hover:bg-content-secondary rounded-md transition-colors"
+                              routerLink="/api-keys"
+                              (click)="closeUserMenu()"
+                              >
+                              <span>API Keys</span>
+                            </button>
+                          }
+                          @if (canLogout$ | async) {
+                            <div class="page-header-menu-separator border-t border-content-border my-2"></div>
+                          }
+                        </div>
+                      }
+                      @if (canLogout$ | async) {
+                        <button class="w-full text-left px-3 py-2 text-sm text-content-text hover:bg-content-secondary rounded-md transition-colors"
+                          (click)="logout(); closeUserMenu()"
+                          >
+                          <span>Logout</span>
+                        </button>
+                      }
+                    </div>
+                  </div>
+                }
+              </div>
+            }
+          </div>
         </div>
-        <app-page-header-events *ngIf="!hideEndpointErrors" class="header-events" [endpointIds$]="endpointIds$">
-        </app-page-header-events>
+
+        <!-- Header events -->
+        @if (!hideEndpointErrors) {
+          <app-page-header-events
+            class="header-events"
+            [endpointIds$]="endpointIds$">
+          </app-page-header-events>
+        }
       </div>
     </div>
   </div>

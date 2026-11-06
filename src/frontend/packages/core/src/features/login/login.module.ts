@@ -8,9 +8,7 @@ import { LogoutPageComponent } from './logout-page/logout-page.component';
 @NgModule({
   imports: [
     CoreModule,
-    SharedModule
-  ],
-  declarations: [
+    SharedModule,
     LoginPageComponent,
     LogoutPageComponent
   ]

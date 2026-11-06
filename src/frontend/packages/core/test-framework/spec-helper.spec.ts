@@ -1,5 +1,6 @@
 import { APP_BASE_HREF } from '@angular/common';
 import { TestBed } from '@angular/core/testing';
+import { describe, it, expect, beforeEach, afterEach, beforeAll, afterAll, vi } from 'vitest';
 
 /**
  * The ngx Charts lobrary needs APP_BASE_HREF - so we will provide it through
@@ -13,8 +14,8 @@ beforeEach(() => {
 });
 
 /**
- * Bump up the Jasmine timeout from 5 seconds
+ * Bump up the default test timeout from 5 seconds
  */
 beforeAll(() => {
-  jasmine.DEFAULT_TIMEOUT_INTERVAL = 10000;
+  vi.setConfig({ testTimeout: 10000 });
 });

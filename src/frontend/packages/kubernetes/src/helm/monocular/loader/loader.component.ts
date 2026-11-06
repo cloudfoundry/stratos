@@ -1,13 +1,15 @@
-import { Component } from '@angular/core';
+import { ChangeDetectionStrategy, Component, Input} from '@angular/core';
+import { AppBusyComponent } from '@stratosui/core';
+
 
 @Component({
+  changeDetection: ChangeDetectionStrategy.OnPush,
   selector: 'app-loader',
   templateUrl: './loader.component.html',
-  styleUrls: ['./loader.component.scss'],
-  /* tslint:disable-next-line:no-inputs-metadata-property */
-  inputs: ['loading']
+  standalone: true,
+  imports: [AppBusyComponent]
 })
 export class LoaderComponent {
   // Show the loader or the content
-  public loading = false;
+  @Input() public loading = false;
 }

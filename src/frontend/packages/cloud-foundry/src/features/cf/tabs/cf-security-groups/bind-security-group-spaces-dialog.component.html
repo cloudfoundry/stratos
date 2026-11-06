@@ -1,0 +1,74 @@
+<div class="p-6 flex flex-col gap-4 min-w-[420px]">
+  <!-- Dialog header -->
+  <h2 id="bind-security-group-spaces-dialog-title" class="text-lg font-semibold text-content-text" data-dialog-drag-handle>
+    Bind security group to spaces
+  </h2>
+  <div class="text-sm text-content-muted">
+    Select the spaces to bind the
+    <span class="font-medium text-content-text">{{ data.sgName }}</span> security group to.
+  </div>
+
+  <!-- Lifecycle toggle -->
+  <div class="flex items-center gap-2 text-sm" role="radiogroup" aria-label="Lifecycle">
+    <span class="text-content-muted">Lifecycle:</span>
+    <button
+      type="button"
+      role="radio"
+      data-test="bind-sg-lifecycle-running"
+      [attr.aria-checked]="lifecycle() === 'running'"
+      class="px-3 py-1 rounded border"
+      [class.bg-primary]="lifecycle() === 'running'"
+      [class.text-white]="lifecycle() === 'running'"
+      (click)="setLifecycle('running')"
+    >Running</button>
+    <button
+      type="button"
+      role="radio"
+      data-test="bind-sg-lifecycle-staging"
+      [attr.aria-checked]="lifecycle() === 'staging'"
+      class="px-3 py-1 rounded border"
+      [class.bg-primary]="lifecycle() === 'staging'"
+      [class.text-white]="lifecycle() === 'staging'"
+      (click)="setLifecycle('staging')"
+    >Staging</button>
+  </div>
+
+  <!-- Space picker -->
+  <section class="flex flex-col gap-1 border-t pt-3 max-h-[45vh] overflow-y-auto" aria-label="Spaces">
+    @if (loading() && spaces().length === 0) {
+      <div class="text-sm text-content-muted py-2">Loading spaces…</div>
+    } @else if (spaces().length === 0) {
+      <div class="text-sm text-content-muted py-2">There are no spaces in this Cloud Foundry.</div>
+    } @else {
+      @for (space of spaces(); track space.guid) {
+        <label class="flex items-center gap-2 py-1 cursor-pointer text-sm">
+          <input
+            type="checkbox"
+            [attr.data-test]="'bind-sg-space-' + space.guid"
+            [checked]="isSelected(space.guid)"
+            (change)="toggle(space.guid)"
+          />
+          <span class="text-content-text">{{ space.name }}</span>
+        </label>
+      }
+    }
+  </section>
+
+  <!-- Actions -->
+  <div class="flex justify-end items-center gap-2 pt-2 border-t">
+    <span class="text-sm text-content-muted mr-auto">{{ selectedCount() }} selected</span>
+    <button
+      type="button"
+      class="px-4 py-2 text-sm rounded border"
+      [disabled]="submitting()"
+      (click)="cancel()"
+    >Cancel</button>
+    <button
+      type="button"
+      data-test="bind-security-group-spaces-submit"
+      class="px-4 py-2 text-sm rounded bg-primary text-white disabled:opacity-50"
+      [disabled]="!canSubmit()"
+      (click)="submit()"
+    >Bind</button>
+  </div>
+</div>

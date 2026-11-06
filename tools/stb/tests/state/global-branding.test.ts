@@ -1,0 +1,33 @@
+import { describe, it, expect } from 'vitest';
+import { mergeScenes } from '@/state/global-branding';
+import type { BrandingModel } from '@/metadata/types';
+
+const login: BrandingModel = { scene: 'login', nodes: [
+  { snapshotId: 'auth.login.sign-in', role: 'button', name: 'Sign in', description: 'b',
+    facets: { text: { color: { literal: { l: 0.5, c: 0.1, h: 250 } } } } },
+] };
+const apps: BrandingModel = { scene: 'app-list', nodes: [
+  { snapshotId: 'cf.applications.heading', role: 'heading', name: 'Heading', description: 'h',
+    facets: { content: { text: 'Applications' } } },
+] };
+
+describe('mergeScenes', () => {
+  it('flattens scenes into scene-tagged NavNodes', () => {
+    const merged = mergeScenes([{ scene: 'login', model: login }, { scene: 'app-list', model: apps }]);
+    expect(merged).toHaveLength(2);
+    expect(merged.find((n) => n.snapshotId === 'cf.applications.heading')?.scene).toBe('app-list');
+    expect(merged.find((n) => n.snapshotId === 'auth.login.sign-in')?.scene).toBe('login');
+  });
+  it('returns [] for no scenes', () => {
+    expect(mergeScenes([])).toEqual([]);
+  });
+  it('propagates facets from the source node to the merged NavNode', () => {
+    const withFacets: BrandingModel = { scene: 'login', nodes: [
+      { snapshotId: 'auth.login.logo', role: 'img', name: 'Logo', description: '',
+        facets: { content: { text: 'X' } } },
+    ] };
+    const merged = mergeScenes([{ scene: 'login', model: withFacets }]);
+    expect(merged).toHaveLength(1);
+    expect(merged.find((n) => n.snapshotId === 'auth.login.logo')?.facets).toEqual({ content: { text: 'X' } });
+  });
+});

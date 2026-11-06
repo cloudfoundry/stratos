@@ -1,4 +1,6 @@
-import { ComponentFixture, TestBed, waitForAsync } from '@angular/core/testing';
+import { ComponentFixture, TestBed } from '@angular/core/testing';
+import { provideZonelessChangeDetection } from '@angular/core';
+import { describe, it, expect, beforeEach, afterEach, beforeAll, afterAll, vi } from 'vitest';
 
 import { CoreModule } from '../../../../../core/src/core/core.module';
 import { MDAppModule } from '../../../../../core/src/core/md.module';
@@ -12,16 +14,19 @@ describe('CliInfoComponent', () => {
   let component: CliInfoComponent;
   let fixture: ComponentFixture<CliInfoComponent>;
 
-  beforeEach(waitForAsync(() => {
+  beforeEach(() => {
     TestBed.configureTestingModule({
-      declarations: [CliInfoComponent, CodeBlockComponent, CopyToClipboardComponent],
+      providers: [provideZonelessChangeDetection()],
       imports: [
         CoreModule,
         MDAppModule,
-      ]
+        CliInfoComponent,
+        CodeBlockComponent,
+        CopyToClipboardComponent,
+    ]
     })
       .compileComponents();
-  }));
+  });
 
   beforeEach(() => {
     fixture = TestBed.createComponent(CliInfoComponent);

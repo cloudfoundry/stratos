@@ -6,7 +6,7 @@ import (
 	"bufio"
 	"errors"
 	"fmt"
-	"io/ioutil"
+	"log/slog"
 	"net/url"
 	"os"
 	"path/filepath"
@@ -14,11 +14,8 @@ import (
 	"strconv"
 	"strings"
 
-	"github.com/govau/cf-common/env"
-	log "github.com/sirupsen/logrus"
+	"github.com/cloudfoundry/stratos/src/jetstream/api/env"
 )
-
-const secretsDir = "/etc/secrets"
 
 // APIKeysConfigValue - special type for configuring whether API keys feature is enabled
 type APIKeysConfigValue string
@@ -108,7 +105,7 @@ var urlType *url.URL
 func Load(intf interface{}, envLookup env.Lookup) error {
 	value := reflect.ValueOf(intf)
 
-	if value.Kind() != reflect.Ptr {
+	if value.Kind() != reflect.Pointer {
 		return errors.New("config: must provide pointer to struct value")
 	}
 
@@ -190,11 +187,12 @@ func SetStructFieldValue(value reflect.Value, field reflect.Value, val string) e
 	case reflect.String:
 		apiKeysConfigType := reflect.TypeOf((*APIKeysConfigValue)(nil)).Elem()
 		userEndpointsConfigType := reflect.TypeOf((*UserEndpointsConfigValue)(nil)).Elem()
-		if typ == apiKeysConfigType {
+		switch typ {
+		case apiKeysConfigType:
 			newVal, err = parseAPIKeysConfigValue(val)
-		} else if typ == userEndpointsConfigType {
+		case userEndpointsConfigType:
 			newVal, err = parseUserEndpointsConfigValue(val)
-		} else {
+		default:
 			newVal = val
 		}
 	default:
@@ -218,13 +216,13 @@ func SetStructFieldValue(value reflect.Value, field reflect.Value, val string) e
 // in /etc/secrets/hello-there
 func NewSecretsDirLookup(secretsDir string) env.Lookup {
 	return func(name string) (string, bool) {
-		name = strings.ToLower(strings.Replace(name, "_", "-", -1))
+		name = strings.ToLower(strings.ReplaceAll(name, "_", "-"))
 		filename := filepath.Join(secretsDir, name)
 
 		if _, err := os.Stat(filename); err == nil {
-			contents, err := ioutil.ReadFile(filename)
+			contents, err := os.ReadFile(filename)
 			if err != nil {
-				log.Warnf("Error reading secrets file: %s, %s", filename, err)
+				slog.Warn("error reading secrets file", "file", filename, "error", err)
 				return "", false
 			}
 			return strings.TrimSpace(string(contents)), true
@@ -232,20 +230,6 @@ func NewSecretsDirLookup(secretsDir string) env.Lookup {
 		// File does not exist
 		return "", false
 	}
-}
-
-type notFoundErr string
-
-func isNotFoundErr(err error) bool {
-	if err == nil {
-		return false
-	}
-	_, ok := err.(notFoundErr)
-	return ok
-}
-
-func (n notFoundErr) Error() string {
-	return fmt.Sprintf("could not find secret file: %s", string(n))
 }
 
 // NewConfigFileLookup - Load the configuration values in the specified config file if it exists
@@ -258,10 +242,12 @@ func NewConfigFileLookup(path string) env.Lookup {
 
 	file, err := os.Open(path)
 	if err != nil {
-		log.Warn("Error reading configuration file, ignoring this file: ", err)
+		slog.Warn("error reading configuration file, ignoring it", "path", path, "error", err)
 		return env.NoopLookup
 	}
-	defer file.Close()
+	defer func() {
+		_ = file.Close()
+	}()
 
 	loadedConfig := make(map[string]string)
 	scanner := bufio.NewScanner(file)
@@ -282,7 +268,7 @@ func NewConfigFileLookup(path string) env.Lookup {
 		return env.NoopLookup
 	}
 
-	log.Debugf("Loaded configuration from file: %s", path)
+	slog.Debug("loaded configuration from file", "path", path)
 
 	return func(k string) (string, bool) {
 		v, ok := loadedConfig[k]

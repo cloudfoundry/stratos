@@ -1,42 +1,46 @@
-import { Component, OnInit } from '@angular/core';
-import { Observable } from 'rxjs';
-import { map, startWith } from 'rxjs/operators';
+import { Component, inject, ChangeDetectionStrategy, computed } from '@angular/core';
+import { CommonModule } from '@angular/common';
+import { RouterLink } from '@angular/router';
 
-import {
-  ApplicationMonitorService,
-} from '../../../../../../cloud-foundry/src/features/applications/application-monitor.service';
-import { ApplicationService } from '../../../../../../cloud-foundry/src/features/applications/application.service';
+import { AppDetailDataService } from '../../../../../../cloud-foundry/src/features/applications/app-detail-data.service';
+import { UptimePipe } from '../../../../../../core/src/shared/pipes/uptime.pipe';
+import { MetadataItemComponent } from '../../../../../../core/src/shared/components/metadata-item/metadata-item.component';
 
 @Component({
   selector: 'app-card-app-uptime',
   templateUrl: './card-app-uptime.component.html',
-  styleUrls: ['./card-app-uptime.component.scss']
+  styleUrls: ['./card-app-uptime.component.scss'],
+  changeDetection: ChangeDetectionStrategy.OnPush,
+  standalone: true,
+  imports: [
+    CommonModule,
+    RouterLink,
+    UptimePipe,
+    MetadataItemComponent
+  ]
 })
-export class CardAppUptimeComponent implements OnInit {
+export class CardAppUptimeComponent {
+  data = inject(AppDetailDataService);
 
-  constructor(public appService: ApplicationService, private appMonitor: ApplicationMonitorService) { }
+  // Per-instance uptime aggregates derived from V3 stats. Each running
+  // instance carries its own uptime (seconds since start); the card
+  // shows max prominently, plus min/avg when more than one instance is
+  // running.
+  readonly running = computed(() => this.data.running());
 
-  appData$: Observable<{
-    maxUptime: number,
-    minUptime: number,
-    averageUptime: number,
-    runningCount: number
-  }>;
-
-  ngOnInit() {
-    this.appData$ = this.appMonitor.appMonitor$.pipe(
-      map(monitor => ({
-        maxUptime: monitor.max.uptime,
-        minUptime: monitor.min.uptime,
-        averageUptime: monitor.avg.uptime,
-        runningCount: monitor.running
-      })),
-      startWith({
-        maxUptime: 0,
-        minUptime: 0,
-        averageUptime: 0,
-        runningCount: 0
-      })
-    );
-  }
+  readonly appData = computed(() => {
+    const stats = this.data.stats();
+    const runningInstances = stats.filter(s => s.state === 'RUNNING');
+    if (runningInstances.length === 0) {
+      return { maxUptime: 0, minUptime: 0, averageUptime: 0, runningCount: 0 };
+    }
+    const uptimes = runningInstances.map(s => s.uptime ?? 0);
+    const sum = uptimes.reduce((a, b) => a + b, 0);
+    return {
+      maxUptime: Math.max(...uptimes),
+      minUptime: Math.min(...uptimes),
+      averageUptime: Math.round(sum / runningInstances.length),
+      runningCount: runningInstances.length,
+    };
+  });
 }

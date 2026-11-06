@@ -1,13 +1,15 @@
 <app-page-header>
   <h1>AutoScaler Scaling Events: {{ applicationName$ | async }} </h1>
   <div class="page-header-right">
-    <button mat-icon-button mat-button routerLink="{{parentUrl}}">
-      <mat-icon>clear</mat-icon>
+    <button class="btn btn-icon" routerLink="{{parentUrl}}" aria-label="Close">
+      <app-custom-icon>clear</app-custom-icon>
     </button>
   </div>
 </app-page-header>
 <div class="autoscaler-metric-page">
-  <div class="events-tab">
-    <app-list></app-list>
+  <div class="events-tab flex flex-col flex-1 min-h-0">
+    @if (listConfig(); as cfg) {
+      <app-signal-list [config]="cfg" />
+    }
   </div>
 </div>

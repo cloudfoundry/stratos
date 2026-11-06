@@ -1,0 +1,49 @@
+import { Directive, ElementRef, Input, OnChanges, SimpleChanges, Renderer2, inject } from '@angular/core';
+
+@Directive({
+selector: '[appTableCellStatus]',
+standalone: true
+})
+export class TableCellStatusDirective implements OnChanges {
+
+  @Input() appTableCellStatus!: string;
+
+  private readonly el: ElementRef;
+  private readonly renderer: Renderer2;
+
+  constructor() {
+    const el = inject(ElementRef);
+    const renderer = inject(Renderer2);
+
+    this.el = el;
+    this.renderer = renderer;
+  }
+
+  ngOnChanges(changes: SimpleChanges) {
+    const change = changes.appTableCellStatus;
+    const oldClass = this.classForStatus(change.previousValue);
+    const newClass = this.classForStatus(change.currentValue);
+
+    if (!change.firstChange && change.previousValue && oldClass) {
+      this.renderer.removeClass(this.el.nativeElement, oldClass);
+    }
+    if (newClass) {
+      this.renderer.addClass(this.el.nativeElement, newClass);
+    }
+  }
+
+  private classForStatus(status: string): string {
+    switch (status) {
+      case 'ok':
+        return 'text-success';
+      case 'warning':
+        return 'text-warning';
+      case 'error':
+        return 'text-danger';
+      case 'tentative':
+        return 'text-tentative';
+      default:
+        return '';
+    }
+  }
+}

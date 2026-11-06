@@ -1,9 +1,0 @@
-<ng-container *ngIf="errors.length; else noErrors">
-  <div *ngFor="let error of errors" class="pressure">
-    <mat-icon class="pressure__icon">info</mat-icon>
-    {{ error }}
-  </div>
-</ng-container>
-<ng-template #noErrors>
-  None
-</ng-template>
