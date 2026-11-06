@@ -1,13 +1,13 @@
 <div>
 
-  @if (currentVersion) {
+  @if (currentVersion(); as currentVersion) {
     <app-chart-details-usage [chart]=chart() [currentVersion]=currentVersion.attributes.version>
     </app-chart-details-usage>
   }
 
   <app-card class="overflow-auto block mb-8 max-w-[260px]">
     <div>
-      <app-chart-details-versions [versions]="versions()" [currentVersion]=currentVersion></app-chart-details-versions>
+      <app-chart-details-versions [versions]="versions()" [currentVersion]=currentVersion()></app-chart-details-versions>
     </div>
     @if (chart().attributes.home) {
       <div>
@@ -43,7 +43,7 @@
         <div class="text-sm">This chart contains a values schema</div>
       </div>
     }
-    @if (currentVersion) {
+    @if (currentVersion(); as currentVersion) {
       <div>
         <h1 class="text-base">Chart</h1>
         @for (url of currentVersion.attributes.urls; track url) {

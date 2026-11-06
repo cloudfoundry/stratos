@@ -1,4 +1,4 @@
-import { ChangeDetectionStrategy, Component, Input, OnInit, computed, inject, input, output } from '@angular/core';
+import { ChangeDetectionStrategy, Component, OnInit, computed, effect, inject, input, linkedSignal, output } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { Router, RouterModule } from '@angular/router';
 import { Observable, map } from 'rxjs';
@@ -101,20 +101,26 @@ export class SideNavComponent implements OnInit {
     const cs = inject(CustomizationService);
 
     this.customizations = cs.get();
+
+    // Tell the host each time the bound mode changes.
+    let boundMode = true;
+    effect(() => {
+      const mode = this.iconMode();
+      if (mode !== boundMode) {
+        boundMode = mode;
+        this.changedMode.emit(void 0);
+      }
+    });
   }
-  @Input() set iconMode(isIconMode: boolean) {
-    if (isIconMode !== this.isIconMode) {
-      this.isIconMode = isIconMode;
-      this.changedMode.emit(void 0);
-    }
-  }
-  get iconMode() {
-    return this.isIconMode;
-  }
+
+  // Icons only, as the dashboard binds it.
+  readonly iconMode = input(true);
+  // The mode shown: the bound one, except that a fixed side nav starts in
+  // icon mode whatever is bound (ngOnInit).
+  readonly isIconMode = linkedSignal(() => this.iconMode());
 
   readonly tabs = input<SideNavItem[]>([]);
   readonly changedMode = output();
-  private isIconMode = true;
 
   public toggleSidenav() {
     this.dashboardData.toggleSideNav();
@@ -128,7 +134,7 @@ export class SideNavComponent implements OnInit {
   ngOnInit() {
     // Default to icon mode if the environment specifies a fixed side nav
     if (environment.fixedSideNav) {
-      this.isIconMode = true;
+      this.isIconMode.set(true);
       this.tooltipDelay = 2000;
     }
 

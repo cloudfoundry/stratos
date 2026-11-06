@@ -95,7 +95,7 @@
           name="createSystemEndpoint"
           formControlName="createSystemEndpointField"
           (change)="toggleCreateSystemEndpoint()"
-          [ngClass]="{ hide: fixedUrl, show: !fixedUrl }"
+          [ngClass]="{ hide: fixedUrl(), show: !fixedUrl() }"
           >Create a system endpoint (visible to all users)
         </app-checkbox>
       }

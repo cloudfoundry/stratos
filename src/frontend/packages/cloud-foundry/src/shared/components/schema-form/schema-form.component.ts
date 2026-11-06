@@ -1,5 +1,5 @@
 
-import { ChangeDetectionStrategy, Component, DestroyRef, Input, computed, inject, signal, effect, output } from '@angular/core';
+import { ChangeDetectionStrategy, Component, DestroyRef, computed, inject, input, signal, effect, output, untracked } from '@angular/core';
 import {
   MonacoEditorComponent,
   MonacoEditorOptions,
@@ -18,7 +18,7 @@ export interface SchemaFormValidationError {
 
 export class SchemaFormConfig {
   // Optional: the broker may not supply a schema for the plan — the form
-  // then falls back to the raw JSON editor (see the `config` setter).
+  // then falls back to the raw JSON editor (see `applyConfig`).
   schema?: object;
   initialData?: object;
 }
@@ -47,8 +47,10 @@ export class SchemaFormComponent {
   private readonly snackBar = inject(TailwindSnackBarService);
   private schema: object | undefined;
 
-  @Input()
-  set config(config: SchemaFormConfig | undefined) {
+  // Applied by applyConfig, from the first effect in the constructor.
+  readonly config = input<SchemaFormConfig>();
+
+  private applyConfig(config: SchemaFormConfig | undefined) {
     // Skip if no config... or schema is the same (avoids losing existing data in form)
     if (!config || (config.schema && config.schema === this.schema)) {
       return;
@@ -146,6 +148,12 @@ export class SchemaFormComponent {
   }
 
   constructor() {
+    // Ahead of the two effects below, so they emit the data and validity the
+    // config leaves behind, not the empty state before it.
+    effect(() => {
+      const config = this.config();
+      untracked(() => this.applyConfig(config));
+    });
     effect(() => this.dataChange.emit(this.data()));
     effect(() => this.validChange.emit(this.parseValid()));
     inject(DestroyRef).onDestroy(() => { this._destroyed = true; });

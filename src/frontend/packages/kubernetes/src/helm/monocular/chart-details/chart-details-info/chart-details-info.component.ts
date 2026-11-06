@@ -1,5 +1,5 @@
 
-import { Component, Input, OnInit, inject, ChangeDetectionStrategy, signal, input } from '@angular/core';
+import { Component, OnInit, effect, inject, ChangeDetectionStrategy, signal, input, untracked } from '@angular/core';
 import { CardWrapperComponent, UrlPartsPipe } from '@stratosui/core';
 import { of } from 'rxjs';
 import { take, catchError,  } from 'rxjs/operators';
@@ -30,20 +30,21 @@ export class ChartDetailsInfoComponent implements OnInit {
   readonly versions = signal<ChartVersion[]>([]);
   readonly schema = signal<unknown>(null);
 
-  private pCurrentVersion!: ChartVersion;
-
-  get currentVersion(): ChartVersion {
-    return this.pCurrentVersion;
-  }
-
-  @Input() set currentVersion(version: ChartVersion) {
-    this.pCurrentVersion = version;
-    if (version) {
-      this.getSchema(this.pCurrentVersion, this.chart());
-    }
-  }
+  // Its one host (chart-details) binds it inside @if (currentVersion()).
+  readonly currentVersion = input.required<ChartVersion>();
 
   private chartsService = inject(ChartsService);
+
+  constructor() {
+    // Load the values schema of each version shown. Only a new version loads
+    // it again, so the chart is read untracked.
+    effect(() => {
+      const version = this.currentVersion();
+      if (version) {
+        untracked(() => this.getSchema(version, this.chart()));
+      }
+    });
+  }
 
   ngOnInit() {
     this.loadVersions(this.chart());
