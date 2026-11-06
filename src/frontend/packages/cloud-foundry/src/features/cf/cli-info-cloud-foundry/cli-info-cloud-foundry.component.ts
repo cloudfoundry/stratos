@@ -6,7 +6,7 @@ import { Router } from '@angular/router';
 import { CustomTooltipDirective } from '@stratosui/core';
 import { RoutingHistoryService } from '@stratosui/store';
 import { BehaviorSubject, combineLatest, Observable, of as observableOf } from 'rxjs';
-import { take, map } from 'rxjs/operators';
+import { filter, take, map } from 'rxjs/operators';
 
 import { PageHeaderComponent } from '../../../../../core/src/shared/components/page-header/page-header.component';
 import { IHeaderBreadcrumb } from '../../../../../core/src/shared/components/page-header/page-header.types';
@@ -131,12 +131,15 @@ export class CliInfoCloudFoundryComponent implements OnInit {
   private setupObservables() {
     const { orgGuid, spaceGuid } = this.activeRouteCfOrgSpace;
     // V3-native org + space snapshots from the OrgDataService /
-    // SpaceDataService signals.
+    // SpaceDataService signals. Each signal is empty until its request
+    // returns, and the context below is taken once, so wait for the value:
+    // otherwise a page opened by its address shows placeholders for names
+    // the route has.
     const org$ = orgGuid && this.cfOrgService
-      ? toObservable(this.cfOrgService.orgDataService.org, { injector: this.injector })
+      ? toObservable(this.cfOrgService.orgDataService.org, { injector: this.injector }).pipe(filter(org => !!org))
       : observableOf(null);
     const space$ = spaceGuid && this.cfSpaceService
-      ? toObservable(this.cfSpaceService.spaceDataService.space, { injector: this.injector })
+      ? toObservable(this.cfSpaceService.spaceDataService.space, { injector: this.injector }).pipe(filter(space => !!space))
       : observableOf(null);
     this.endpointOrgSpace$ = combineLatest([
       this.cfEndpointService.endpoint$,
