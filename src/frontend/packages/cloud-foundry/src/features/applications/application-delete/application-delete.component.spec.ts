@@ -125,6 +125,33 @@ describe('ApplicationDeleteComponent', () => {
     expect(component).toBeTruthy();
   });
 
+  describe('opening step', () => {
+    const text = (f: ComponentFixture<ApplicationDeleteComponent>) => (f.nativeElement as HTMLElement).textContent ?? '';
+    const activeStepTitle = (f: ComponentFixture<ApplicationDeleteComponent>) =>
+      (f.nativeElement as HTMLElement).querySelector('.steppers-header--active')?.textContent?.trim();
+
+    it('opens on Routes when the routes arrive after the page has rendered', async () => {
+      let routesArrive!: (routes: unknown[]) => void;
+      const routes = new Promise<unknown[]>(resolve => { routesArrive = resolve; });
+      stubSignalConfig.fetchAppRoutes.mockReturnValue(routes);
+      const slow = TestBed.createComponent(ApplicationDeleteComponent);
+      await slow.whenStable();
+      expect(text(slow)).not.toContain('Please confirm');
+
+      routesArrive([{ guid: 'r1', url: 'app.example.com' }]);
+      await routes;
+      await slow.whenStable();
+      expect(activeStepTitle(slow)).toContain('Routes');
+      expect(text(slow)).toContain('Please select any attached application routes');
+      expect(text(slow)).not.toContain('Please confirm');
+    });
+
+    it('opens on Confirm when the application has no routes or bindings', async () => {
+      await fixture.whenStable();
+      expect(text(fixture)).toContain('Please confirm');
+    });
+  });
+
   it('confirm step submit stashes selections in AppDeleteSelectionService', async () => {
     component.selectedRoutes = [{ guid: 'r-1' } as any, { guid: 'r-2' } as any];
     component.selectedServiceBindings = [{ guid: 'b-1' } as any];
