@@ -18,7 +18,7 @@
         <h4>Scaling the Application</h4>
         <app-cli-command name="Instances" msg="To change the number of application instances:" syntax="cf scale &quot;{{context.appName || '[app name]'}}&quot; -i [N]">
         </app-cli-command>
-        <app-cli-command name="Memory" msg="To change the memory allocated to application instances:" syntax="cf scale &quot;{{context.appName || '[app name]'}}&quot; -i -m [N]">
+        <app-cli-command name="Memory" msg="To change the memory allocated to application instances:" syntax="cf scale &quot;{{context.appName || '[app name]'}}&quot; -m [N]M">
         </app-cli-command>
       </app-cli-info>
     }
