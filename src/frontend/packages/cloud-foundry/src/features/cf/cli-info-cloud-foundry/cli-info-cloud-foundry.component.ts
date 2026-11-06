@@ -54,8 +54,10 @@ export class CliInfoCloudFoundryComponent implements OnInit {
   private routingHistory = inject(RoutingHistoryService);
   activeRouteCfOrgSpace = inject(ActiveRouteCfOrgSpace);
   private cfEndpointService = inject(CloudFoundryEndpointService);
-  private cfOrgService = inject(CloudFoundryOrganizationService, { optional: true });
-  private cfSpaceService = inject(CloudFoundrySpaceService, { optional: true });
+  // Both services request their organization or space when they are built,
+  // so each is asked for only on a route that names one.
+  private cfOrgService = this.activeRouteCfOrgSpace.orgGuid ? inject(CloudFoundryOrganizationService) : null;
+  private cfSpaceService = this.activeRouteCfOrgSpace.spaceGuid ? inject(CloudFoundrySpaceService) : null;
   private injector = inject(Injector);
 
 
