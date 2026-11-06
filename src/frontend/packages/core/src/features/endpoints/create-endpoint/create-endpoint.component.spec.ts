@@ -23,6 +23,11 @@ import { CreateEndpointComponent } from './create-endpoint.component';
 describe('CreateEndpointComponent', () => {
   let component: CreateEndpointComponent;
   let fixture: ComponentFixture<CreateEndpointComponent>;
+
+  // Replaces the `step1` view query with a stand-in for the hosted form.
+  const stubStep1 = (stub: object) => {
+    (component as unknown as { step1: () => unknown }).step1 = () => stub;
+  };
   let registerHandle: { close: ReturnType<typeof vi.fn> };
 
   beforeEach(async () => {
@@ -95,18 +100,21 @@ describe('CreateEndpointComponent', () => {
     });
 
     it('closes the dialog, reporting the registration, when Register finishes the form', async () => {
-      component.step1 = {
+      stubStep1({
         onNext: () => of({ success: true, redirect: true }),
-      } as unknown as CreateEndpointCfStep1Component;
+      });
       await component.step1StepHandle.submit!();
       expect(registerHandle.close).toHaveBeenCalledWith(true);
     });
   });
 
   it('labels the last button Close when not connecting', async () => {
+    // Stands in for the Connect step's form, which is not rendered yet.
+    const connect = signal<{ doConnectSignal: () => boolean } | undefined>(undefined);
+    (component as unknown as { _connect: unknown })._connect = connect;
     const label = () => component.connectStepHandle.finishButtonText!();
     expect(label()).toBe('Close');
-    component['_connect'].set({ doConnectSignal: signal(true) } as never);
+    connect.set({ doConnectSignal: () => true });
     expect(label()).toBe('Connect');
   });
 
@@ -118,9 +126,9 @@ describe('CreateEndpointComponent', () => {
       vi.spyOn(TestBed.inject(ConfirmationDialogService), 'openWithCancel');
       unregister = vi.fn().mockResolvedValue({ error: false });
       vi.spyOn(TestBed.inject(EndpointsSignalConfigService), 'unregister').mockImplementation(unregister as never);
-      component.step1 = {
+      stubStep1({
         onNext: () => of({ success: true, data: { guid: 'new-guid', type: 'metrics', name: 'my-metrics' } }),
-      } as unknown as CreateEndpointCfStep1Component;
+      });
       await component.step1StepHandle.submit!();
     });
 
@@ -152,9 +160,9 @@ describe('CreateEndpointComponent', () => {
   // which hid an error placed under the form.
   it('shows a failed connect once, in the stepper', async () => {
     const error = vi.spyOn(TestBed.inject(TailwindSnackBarService), 'error');
-    component.step1 = {
+    stubStep1({
       onNext: () => of({ success: true, data: { guid: 'new-guid', type: 'metrics', name: 'my-metrics' } }),
-    } as unknown as CreateEndpointCfStep1Component;
+    });
     await component.step1StepHandle.submit!();
     component['step1Valid'].set(true);
     await fixture.whenStable();
@@ -188,7 +196,6 @@ describe('CreateEndpointComponent', () => {
       .componentInstance as CreateEndpointCfStep1Component;
     real.registerForm.controls.nameField.setValue('my-metrics');
     real.registerForm.controls.urlField.setValue('metrics.example.com');
-    component.step1 = real;
     await component.step1StepHandle.submit!();
     expect(config.register).toHaveBeenCalledWith(expect.objectContaining({ endpoint: 'https://metrics.example.com' }));
     const steppers = fixture.debugElement.query(By.directive(SteppersComponent)).componentInstance as SteppersComponent;
@@ -208,7 +215,6 @@ describe('CreateEndpointComponent', () => {
         .componentInstance as CreateEndpointCfStep1Component;
       real.registerForm.controls.nameField.setValue('my-metrics');
       real.registerForm.controls.urlField.setValue('metrics.example.com');
-      component.step1 = real;
       await component.step1StepHandle.submit!();
       const steppers = fixture.debugElement.query(By.directive(SteppersComponent)).componentInstance as SteppersComponent;
       steppers.setActive(1);

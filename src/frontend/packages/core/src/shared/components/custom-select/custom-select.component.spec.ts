@@ -60,13 +60,11 @@ describe('CustomSelectComponent with object-valued options', () => {
   it('displayText is always a string, even before content capture', () => {
     const fixture = TestBed.createComponent(ObjectValueHostComponent);
     fixture.detectChanges();
-    const options = fixture.debugElement.children[0].componentInstance.options as { displayText: unknown }[] | undefined;
-    // Access via the select's ContentChildren once rendered.
+    // Access via the select's projected options once rendered.
     const select = fixture.debugElement.children[0].componentInstance as CustomSelectComponent;
-    (select as any).options.forEach((opt: CustomOptionComponent) => {
+    select.options().forEach((opt: CustomOptionComponent) => {
       expect(typeof opt.displayText).toBe('string');
     });
-    void options;
   });
 
   it('opens without throwing when options carry object values', () => {
@@ -86,7 +84,7 @@ describe('CustomSelectComponent with object-valued options', () => {
     const fixture = TestBed.createComponent(EmptyTextObjectValueHostComponent);
     fixture.detectChanges();
     const select = fixture.debugElement.children[0].componentInstance as CustomSelectComponent;
-    (select as any).options.forEach((opt: CustomOptionComponent) => {
+    select.options().forEach((opt: CustomOptionComponent) => {
       expect(typeof opt.displayText).toBe('string');
     });
     const trigger: HTMLElement = fixture.nativeElement.querySelector('[role="combobox"]');

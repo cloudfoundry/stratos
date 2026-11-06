@@ -200,7 +200,7 @@ describe('HomePageComponent', () => {
 
       const headerDe = fixture.debugElement.query(By.directive(PageHeaderComponent));
       const header = headerDe.componentInstance as PageHeaderComponent;
-      const view = headerDe.injector.get(ViewContainerRef).createEmbeddedView(header.pageHeaderTmpl);
+      const view = headerDe.injector.get(ViewContainerRef).createEmbeddedView(header.pageHeaderTmpl());
       view.detectChanges();
 
       const root = view.rootNodes.find((n: Node) => n instanceof HTMLElement) as HTMLElement;

@@ -73,6 +73,12 @@ describe('DeployApplicationComponent', () => {
     // Don't call detectChanges() to avoid rendering child components
   });
 
+  // Stands in for a step's view query: these tests do not render the
+  // wizard, so the queries would otherwise stay empty.
+  const stubStep = (query: string, child: object) => {
+    (component as any)[query] = () => child;
+  };
+
   it('should create', () => {
     expect(component).toBeTruthy();
   });
@@ -84,10 +90,10 @@ describe('DeployApplicationComponent', () => {
   // forwards via `step2_2Handle.onEnter` — which the stepper fires
   // on activation, after step 2's submit has already run.
   //
-  // Earlier versions of this test forwarded via the @ViewChild setter
-  // and asserted `step2_2Ref = mock` *after* submit. That order never
-  // occurs in real Angular: @ViewChild for projected content fires at
-  // parent view-init, before any submit. The old test silently passed
+  // Earlier versions of this test forwarded when the child was wired
+  // and wired the mock *after* submit. That order never occurs in real
+  // Angular: the view query for projected content resolves at parent
+  // view-init, before any submit. The old test silently passed
   // against broken production code because it mocked an order the
   // framework never produces. See KS doc
   // 2026-05-26-deploy-application-ngrx-removal for the postmortem.
@@ -96,18 +102,19 @@ describe('DeployApplicationComponent', () => {
     const mockStep2 = { onNext: vi.fn().mockReturnValue(of({ success: true, data: fakeFileInfo })) };
     const mockStep2_2 = { onEnter: vi.fn(), valid$: of(true) };
 
-    // ViewChild fires at parent view-init before any step submit. The
-    // setter must NOT forward at this point — pendingFsFileInfo is
-    // still undefined, so a forward here would prime the deployer
-    // with garbage and the file-upload path's readyFilter would never
-    // open the deploy WebSocket.
-    (component as any).step2_2Ref = mockStep2_2;
+    // The view query resolves at parent view-init before any step
+    // submit. Wiring the child must NOT forward at this point —
+    // pendingFsFileInfo is still undefined, so a forward here would
+    // prime the deployer with garbage and the file-upload path's
+    // readyFilter would never open the deploy WebSocket.
+    stubStep('step2_2', mockStep2_2);
+    (component as any).wireStep2_2(mockStep2_2);
     expect(mockStep2_2.onEnter).not.toHaveBeenCalled();
 
     // Step 2 submits — handle.submit captures result.data into
     // pendingFsFileInfo, mirroring the legacy `enterData` channel
     // the framework no longer provides for signal-handle steps.
-    (component as any)._step2 = mockStep2;
+    stubStep('step2', mockStep2);
     await component.step2Handle.submit!();
     expect((component as any).pendingFsFileInfo).toBe(fakeFileInfo);
 
@@ -125,8 +132,8 @@ describe('DeployApplicationComponent', () => {
   it('hands the upload deployer to every entry of the deploy step', async () => {
     const deployer = {};
     const mockStep3 = { onEnter: vi.fn() };
-    (component as any)._step2_2 = { onNext: vi.fn().mockReturnValue(of({ success: true, data: deployer })) };
-    (component as any)._step3 = mockStep3;
+    stubStep('step2_2', { onNext: vi.fn().mockReturnValue(of({ success: true, data: deployer })) });
+    stubStep('step3', mockStep3);
     await component.step2_2Handle.submit!();
 
     component.step3Handle.onEnter!();
@@ -135,7 +142,7 @@ describe('DeployApplicationComponent', () => {
     expect(mockStep3.onEnter).toHaveBeenNthCalledWith(2, deployer);
 
     // Back to the source step, which now saves a git source
-    (component as any)._step2 = { onNext: vi.fn().mockReturnValue(of({ success: true, data: undefined })) };
+    stubStep('step2', { onNext: vi.fn().mockReturnValue(of({ success: true, data: undefined })) });
     await component.step2Handle.submit!();
     component.step3Handle.onEnter!();
     expect(mockStep3.onEnter).toHaveBeenLastCalledWith(undefined);
@@ -144,7 +151,7 @@ describe('DeployApplicationComponent', () => {
   // Previous from the deploy step leads back to the overrides, whose Next
   // then starts another deploy
   it('labels the overrides Next "Deploy again" once a deploy has started', () => {
-    (component as any)._step3 = { onEnter: vi.fn() };
+    stubStep('step3', { onEnter: vi.fn() });
     expect(component.step4Handle.nextButtonText!()).toBe('Deploy');
 
     component.step3Handle.onEnter!();
@@ -153,18 +160,19 @@ describe('DeployApplicationComponent', () => {
 
   // Regression guard for the "Source Config shows no options / Next disabled"
   // bug. step2_1 (the git commit picker) is rendered via [hidden], so its
-  // @ViewChild fires at parent view-init — before step 2 has saved any
-  // git source. Building the commit list there (the old `v.onEnter()` in the
-  // setter) ran against an empty applicationSource and never resolved a
+  // view query resolves at parent view-init — before step 2 has saved any
+  // git source. Building the commit list there (the old `v.onEnter()` at
+  // wiring time) ran against an empty applicationSource and never resolved a
   // project/branch. The build must instead happen on step activation via
   // step2_1Handle.onEnter, which the stepper fires after step 2's submit.
-  it('builds the commit list on step2_1 activation (handle.onEnter), not at ViewChild init', () => {
+  it('builds the commit list on step2_1 activation (handle.onEnter), not when the child is wired', () => {
     const mockStep2_1 = { onEnter: vi.fn(), onLeave: vi.fn(), validate: of(false) };
 
-    // ViewChild fires at parent view-init. The setter must NOT call
-    // onEnter here — applicationSource has no git details yet, so the
-    // commit list would build empty (the reported bug).
-    (component as any).step2_1Ref = mockStep2_1;
+    // The view query resolves at parent view-init. Wiring the child must
+    // NOT call onEnter here — applicationSource has no git details yet, so
+    // the commit list would build empty (the reported bug).
+    stubStep('step2_1', mockStep2_1);
+    (component as any).wireStep2_1(mockStep2_1);
     expect(mockStep2_1.onEnter).not.toHaveBeenCalled();
 
     // Stepper navigates into Source Config → fires handle.onEnter →

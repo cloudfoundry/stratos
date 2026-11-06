@@ -111,7 +111,8 @@ describe('EditQuotaStepComponent', () => {
       error: { errors: [{ code: 10008, title: 'CF-UnprocessableEntity', detail: 'Quota Definition name must be unique' }] },
       status: 422, statusText: 'Unprocessable Entity',
     })));
-    component.form = new MockQuotaDefinitionFormComponent() as unknown as QuotaDefinitionFormComponent;
+    const form = new MockQuotaDefinitionFormComponent() as unknown as QuotaDefinitionFormComponent;
+    (component as unknown as { form: () => QuotaDefinitionFormComponent }).form = () => form;
 
     await expect(component.signalHandle.submit!()).rejects.toThrow('Failed to update quota: Quota Definition name must be unique');
   });
