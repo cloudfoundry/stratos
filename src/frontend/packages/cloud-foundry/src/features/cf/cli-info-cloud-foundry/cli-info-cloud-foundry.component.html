@@ -17,13 +17,13 @@
       </app-cli-command>
       <app-cli-command
         *appCfUserPermission="permsOrgEdit;endpointGuid:activeRouteCfOrgSpace.cfGuid;organizationGuid:activeRouteCfOrgSpace.orgGuid"
-        name="Rename" msg="To rename an org:" syntax="cf rename-org {{context.orgName || '[organization name]'}} [name]">
+        name="Rename" msg="To rename an org:" syntax="cf rename-org &quot;{{context.orgName || '[organization name]'}}&quot; &quot;[name]&quot;">
       </app-cli-command>
       <app-cli-command name="Information" msg="To fetch org information:"
-        syntax="cf org {{context.orgName || '[organization name]'}}">
+        syntax="cf org &quot;{{context.orgName || '[organization name]'}}&quot;">
       </app-cli-command>
       <app-cli-command name="Users" msg="List each org role's users:"
-        syntax="cf org-users {{context.orgName || '[organization name]'}}">
+        syntax="cf org-users &quot;{{context.orgName || '[organization name]'}}&quot;">
       </app-cli-command>
       <br>
         <h4>Space Commands</h4>
@@ -31,13 +31,13 @@
         </app-cli-command>
         <app-cli-command
           *appCfUserPermission="permsSpaceEdit;endpointGuid:activeRouteCfOrgSpace.cfGuid;organizationGuid:orgGuid;spaceGuid:spaceGuid"
-          name="Rename" msg="To rename a space:" syntax="cf rename-space {{context.spaceName || '[space name]'}} [name]">
+          name="Rename" msg="To rename a space:" syntax="cf rename-space &quot;{{context.spaceName || '[space name]'}}&quot; &quot;[name]&quot;">
         </app-cli-command>
         <app-cli-command name="Information" msg="To fetch space information:"
-          syntax="cf space {{context.spaceName || '[space name]'}}">
+          syntax="cf space &quot;{{context.spaceName || '[space name]'}}&quot;">
         </app-cli-command>
         <app-cli-command name="Users" msg="List each space role's users:"
-          syntax="cf space-users {{context.spaceName || '[space name]'}}">
+          syntax="cf space-users &quot;{{context.spaceName || '[space name]'}}&quot;">
         </app-cli-command>
       </app-cli-info>
     }

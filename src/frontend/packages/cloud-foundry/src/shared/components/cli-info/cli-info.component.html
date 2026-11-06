@@ -17,11 +17,12 @@
         }
         <p>Output</p>
         <app-code-block codeBlockStyle="pre" [hideCopy]="true">
+          <!-- Kept flush left: a pre shows the template's indentation. -->
           <pre>API endpoint: <b>{{context().apiEndpoint || '[Cloud Foundry API endpoint]'}}</b>
-          Email> {{context().username || '[username]'}}
-          Password> [password]
-          Authenticating...
-          <b>OK</b></pre>
+Email: {{context().username || '[username]'}}
+Password: [password]
+Authenticating...
+<b>OK</b></pre>
         </app-code-block>
         <p>4. Target an org and space</p>
         <app-code-block>cf target -o "{{context().orgName || '[organization name]'}}" -s "{{context().spaceName || '[space name]'}}"
