@@ -1,13 +1,13 @@
 import {
   ChangeDetectionStrategy,
   Component,
-  Input,
   ContentChildren,
   QueryList,
   AfterContentInit,
   ViewChild,
   TemplateRef,
   input,
+  model,
   output
 } from "@angular/core";
 import { NgTemplateOutlet } from "@angular/common";
@@ -42,18 +42,18 @@ export class CustomTabComponent {
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class CustomTabGroupComponent implements AfterContentInit {
-  @Input() selectedIndex = 0;
+  // A model: selecting a tab sets it and emits selectedIndexChange.
+  readonly selectedIndex = model(0);
   readonly backgroundColor = input("primary");
   readonly color = input("primary");
 
-  readonly selectedIndexChange = output<number>();
   readonly selectedTabChange = output<MatTabChangeEvent>();
 
   // strict: @ContentChildren is populated by Angular before ngAfterContentInit
   @ContentChildren(CustomTabComponent) tabs!: QueryList<CustomTabComponent>;
 
   ngAfterContentInit() {
-    this.selectTab(this.selectedIndex);
+    this.selectTab(this.selectedIndex());
   }
 
   selectTab(index: number) {
@@ -66,8 +66,7 @@ export class CustomTabGroupComponent implements AfterContentInit {
       tab.isActive = i === index;
     });
 
-    this.selectedIndex = index;
-    this.selectedIndexChange.emit(index);
+    this.selectedIndex.set(index);
     this.selectedTabChange.emit({
       index: index,
       tab: newTab,

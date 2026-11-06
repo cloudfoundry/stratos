@@ -1,7 +1,6 @@
 import { CommonModule } from '@angular/common';
-import { ChangeDetectionStrategy, Component, inject, Input, signal  } from '@angular/core';
+import { ChangeDetectionStrategy, Component, computed, inject } from '@angular/core';
 import { toObservable } from '@angular/core/rxjs-interop';
-import { EndpointModel } from '@stratosui/store';
 import { combineLatest, Observable } from 'rxjs';
 import { distinctUntilChanged, filter, map, shareReplay } from 'rxjs/operators';
 
@@ -31,9 +30,8 @@ export class MetricsEndpointDetailsComponent extends EndpointListDetailsComponen
 
   data$: Observable<MetricsDetailsInfo>;
 
-  // The guid of the metrics endpoint that this row shows; unset until the row Input arrives
-  private _guid = signal<string | undefined>(undefined);
-  public guid = this._guid.asReadonly();
+  // The guid of the metrics endpoint that this row shows
+  public guid = computed<string | undefined>(() => this.row().guid);
   public guid$: Observable<string | undefined>;
 
   private metricsService = inject(MetricsService);
@@ -46,7 +44,7 @@ export class MetricsEndpointDetailsComponent extends EndpointListDetailsComponen
       distinctUntilChanged()
     );
 
-    this.guid$ = toObservable(this._guid);
+    this.guid$ = toObservable(this.guid);
     const guid$ = this.guid$.pipe(
       filter(guid => !!guid),
       distinctUntilChanged()
@@ -80,11 +78,5 @@ export class MetricsEndpointDetailsComponent extends EndpointListDetailsComponen
       warning: known === 0,
       plural: hasStratosData ? parsed.length !== 1 : known !== 1,
     };
-  }
-
-  @Input()
-  set row(data: EndpointModel) {
-    super.row = data;
-    this._guid.set(data.guid);
   }
 }

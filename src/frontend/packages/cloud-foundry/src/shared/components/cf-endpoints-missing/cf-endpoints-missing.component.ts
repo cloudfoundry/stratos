@@ -1,4 +1,4 @@
-import { Component, ChangeDetectionStrategy, inject } from '@angular/core';
+import { Component, ChangeDetectionStrategy, inject, input } from '@angular/core';
 import { AsyncPipe } from '@angular/common';
 
 import {
@@ -32,7 +32,8 @@ export class CfEndpointsMissingComponent extends EndpointsMissingComponent {
     },
   };
 
-  showToolbarHint = false;
+  // Redeclares the base class input to change its default.
+  readonly showToolbarHint = input(false);
   showNoConnected = true;
 
   constructor() {

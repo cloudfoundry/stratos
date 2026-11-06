@@ -1,4 +1,4 @@
-import { ChangeDetectionStrategy, Component, Input, input, output } from '@angular/core';
+import { ChangeDetectionStrategy, Component, effect, input, output, untracked } from '@angular/core';
 import { isValid, isBefore, isEqual } from 'date-fns';
 
 import { DateTimeComponent } from '../date-time/date-time.component';
@@ -23,14 +23,30 @@ export class StartEndDateComponent {
     this.isValid.emit(this.validValue);
   }
 
-  // Accepts null/undefined so callers can bind not-yet-chosen range values
-  @Input()
-  set start(start: Date | null | undefined) {
+  // The dates a parent binds. They accept null/undefined so callers can bind
+  // not-yet-chosen range values. The dates the two fields hold are startValue
+  // and endValue.
+  readonly start = input<Date | null | undefined>();
+  readonly end = input<Date | null | undefined>();
+
+  constructor() {
+    // A bound date is taken up the same way as one picked in a field.
+    effect(() => {
+      const start = this.start();
+      untracked(() => this.setStart(start));
+    });
+    effect(() => {
+      const end = this.end();
+      untracked(() => this.setEnd(end));
+    });
+  }
+
+  setStart(start: Date | null | undefined) {
     this.valid = true;
     if (start && isValid(start)) {
       const clone = new Date(start);
       this.startValue = clone;
-      if (!this.pValidate(start, this.end)) {
+      if (!this.pValidate(start, this.endValue)) {
         this.valid = false;
       } else {
         this.emitChanges();
@@ -38,26 +54,17 @@ export class StartEndDateComponent {
     }
   }
 
-  get start(): Date | undefined {
-    return this.startValue;
-  }
-
-  @Input()
-  set end(end: Date | null | undefined) {
+  setEnd(end: Date | null | undefined) {
     this.valid = true;
     if (end && isValid(end)) {
       const clone = new Date(end);
       this.endValue = clone;
-      if (!this.pValidate(this.start, end)) {
+      if (!this.pValidate(this.startValue, end)) {
         this.valid = false;
       } else {
         this.emitChanges();
       }
     }
-  }
-
-  get end(): Date | undefined {
-    return this.endValue;
   }
   public readonly endChange = output<Date>();
   public readonly startChange = output<Date>();
@@ -68,8 +75,8 @@ export class StartEndDateComponent {
   public validMessage: string | null = null;
 
   // Undefined until a valid date is set — validators see undefined for a missing date
-  private startValue?: Date;
-  private endValue?: Date;
+  protected startValue?: Date;
+  protected endValue?: Date;
 
   private lastValidStartValue?: Date;
   private lastValidEndValue?: Date;

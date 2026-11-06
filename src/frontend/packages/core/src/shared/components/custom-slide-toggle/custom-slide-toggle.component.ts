@@ -1,4 +1,4 @@
-import { ChangeDetectionStrategy, Component, Input, forwardRef, input, output, ChangeDetectorRef, inject } from '@angular/core';
+import { ChangeDetectionStrategy, Component, forwardRef, input, model, output } from '@angular/core';
 import { ControlValueAccessor, NG_VALUE_ACCESSOR, FormsModule } from '@angular/forms';
 
 
@@ -25,10 +25,10 @@ export interface MatSlideToggleChange {
   ]
 })
 export class CustomSlideToggleComponent implements ControlValueAccessor {
-  private readonly cdr = inject(ChangeDetectorRef);
-
-  @Input() disabled = false;
-  @Input() checked = false;
+  // Models: a parent binds them, and the control writes them too (a click,
+  // or the form through the value accessor).
+  readonly disabled = model(false);
+  readonly checked = model(false);
   readonly value = input<any>();
   readonly name = input<string>();
   readonly id = input<string>();
@@ -45,25 +45,23 @@ export class CustomSlideToggleComponent implements ControlValueAccessor {
   private _onTouched = () => {};
 
   toggle() {
-    if (this.disabled) return;
+    if (this.disabled()) return;
 
-    this.checked = !this.checked;
+    const checked = !this.checked();
+    this.checked.set(checked);
 
-    this._onChange(this.checked);
+    this._onChange(checked);
     this._onTouched();
 
     this.change.emit({
       source: this,
-      checked: this.checked
+      checked
     });
   }
 
   // ControlValueAccessor implementation
-  // The form calls these from code, not through a binding, so under OnPush
-  // the view must be marked for check.
   writeValue(value: boolean): void {
-    this.checked = value;
-    this.cdr.markForCheck();
+    this.checked.set(value);
   }
 
   registerOnChange(fn: any): void {
@@ -75,7 +73,6 @@ export class CustomSlideToggleComponent implements ControlValueAccessor {
   }
 
   setDisabledState(isDisabled: boolean): void {
-    this.disabled = isDisabled;
-    this.cdr.markForCheck();
+    this.disabled.set(isDisabled);
   }
 }

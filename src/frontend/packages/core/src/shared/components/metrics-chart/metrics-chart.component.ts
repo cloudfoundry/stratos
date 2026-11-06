@@ -167,7 +167,7 @@ export class MetricsChartComponent implements OnInit, OnDestroy, AfterContentIni
 
   ngAfterContentInit() {
     if (this.timeRangeSelector) {
-      this.timeRangeSelector.baseRequest = this.metricsConfig().request;
+      this.timeRangeSelector.start(this.metricsConfig().request);
       this.timeRangeSelector.request.pipe(takeUntilDestroyed(this.destroyRef)).subscribe((req: MetricsRequest) => {
         this.requestSignal.set(req);
       });

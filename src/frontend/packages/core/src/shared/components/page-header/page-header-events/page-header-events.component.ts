@@ -1,5 +1,5 @@
 import { CommonModule } from '@angular/common';
-import { ChangeDetectionStrategy, Component, Input, OnInit, inject, input } from '@angular/core';
+import { ChangeDetectionStrategy, Component, OnInit, inject, input } from '@angular/core';
 import { ActivatedRoute, RouterModule } from '@angular/router';
 import { combineLatest, Observable, of as observableOf } from 'rxjs';
 import { take, map, shareReplay, share } from 'rxjs/operators';
@@ -22,8 +22,7 @@ export class PageHeaderEventsComponent implements OnInit {
   private activatedRoute = inject(ActivatedRoute);
   private eventService = inject(GlobalEventService);
 
-  @Input()
-  public endpointIds$?: Observable<string[]>;
+  public readonly endpointIds$ = input<Observable<string[]>>();
   public readonly simpleErrorMessage = input(false);
 
   public errorMessage$!: Observable<string>;
@@ -49,13 +48,12 @@ export class PageHeaderEventsComponent implements OnInit {
   ngOnInit() {
     this.endpointId = this.activatedRoute.snapshot.params && this.activatedRoute.snapshot.params.endpointId ?
       this.activatedRoute.snapshot.params.endpointId : null;
-    if (!this.endpointIds$ && this.endpointId) {
-      this.endpointIds$ = observableOf([this.endpointId]);
-    }
-    if (this.endpointIds$) {
+    // Without bound ids, an endpoint page watches its own endpoint.
+    const endpointIds$ = this.endpointIds$() ?? (this.endpointId ? observableOf([this.endpointId as string]) : undefined);
+    if (endpointIds$) {
       this.events$ = combineLatest([
         this.eventService.events$,
-        this.endpointIds$,
+        endpointIds$,
       ]).pipe(
         map(([events, endpointIds]) => {
           const filteredEvents = events.filter(event => {

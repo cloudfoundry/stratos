@@ -174,7 +174,7 @@ export class KubeConfigAuthHelper {
           authValues: fb.group(user._authData.values)
         });
 
-        ref.instance.formGroup = form;
+        ref.setInput('formGroup', form);
 
         // Allow the auth form to supply body content if it needs to
         const endpointFormInstance = ref.instance as any;

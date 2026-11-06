@@ -1,4 +1,4 @@
-import { ChangeDetectionStrategy, Component, Input, computed, inject, signal } from '@angular/core';
+import { ChangeDetectionStrategy, Component, computed, inject } from '@angular/core';
 import { CustomTooltipDirective } from '../../custom-tooltip/custom-tooltip.directive';
 import { RouterModule } from '@angular/router';
 import { entityCatalog, EndpointModel, EndpointsDataService } from '@stratosui/store';
@@ -25,7 +25,10 @@ export interface RowWithEndpointId {
 export class TableCellEndpointNameComponent extends TableCellCustom<EndpointModel | RowWithEndpointId>  {
 
   private endpointsData = inject(EndpointsDataService);
-  private endpointId = signal<string | undefined>(undefined);
+  private readonly endpointId = computed<string | undefined>(() => {
+    const row = this.row() as any;
+    return row['endpointId'] || row['guid'];
+  });
 
   // Built once and keyed on the row's id, so a new row swaps the id instead
   // of adding another endpoint watcher that lives until the cell is destroyed.
@@ -42,11 +45,4 @@ export class TableCellEndpointNameComponent extends TableCellCustom<EndpointMode
       link: EndpointsService.getLinkForEndpoint(data)
     };
   });
-
-  @Input()
-  set row(row: EndpointModel | RowWithEndpointId) {
-    super.row = row;
-    /* tslint:disable-next-line:no-string-literal */
-    this.endpointId.set((row as any)['endpointId'] || (row as any)['guid']);
-  }
 }

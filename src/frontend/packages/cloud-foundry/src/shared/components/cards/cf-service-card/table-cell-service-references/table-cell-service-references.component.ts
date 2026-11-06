@@ -1,4 +1,4 @@
-import { Component, Input, ChangeDetectionStrategy } from "@angular/core";
+import { Component, ChangeDetectionStrategy } from "@angular/core";
 
 import {
   ClickStopPropagationDirective,
@@ -15,14 +15,6 @@ import { StServiceOffering } from "../../../../../services/endpoint-data/stratos
   imports: [ClickStopPropagationDirective],
 })
 export class TableCellServiceReferencesComponent extends TableCellCustom<StServiceOffering> {
-  @Input()
-  set row(offering: StServiceOffering) {
-    super.row = offering;
-  }
-  get row(): StServiceOffering {
-    return super.row;
-  }
-
   // brokerCatalogMetadata carries the docs/support URL extras that the
   // V2 marketplace read from a JSON-encoded `entity.extra` string.
   // Backend decodes the JSON to a map already; consumers read keys
@@ -33,7 +25,7 @@ export class TableCellServiceReferencesComponent extends TableCellCustom<StServi
     return !!this.getDocumentationUrl();
   }
   getDocumentationUrl(): string | undefined {
-    return this.row?.brokerCatalogMetadata?.documentationUrl as
+    return this.row()?.brokerCatalogMetadata?.documentationUrl as
       | string
       | undefined;
   }
@@ -42,6 +34,6 @@ export class TableCellServiceReferencesComponent extends TableCellCustom<StServi
     return !!this.getSupportUrl();
   }
   getSupportUrl(): string | undefined {
-    return this.row?.brokerCatalogMetadata?.supportUrl as string | undefined;
+    return this.row()?.brokerCatalogMetadata?.supportUrl as string | undefined;
   }
 }

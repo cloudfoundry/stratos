@@ -3,7 +3,6 @@ import {
   ChangeDetectionStrategy, AfterContentInit,
   Component,
   ElementRef,
-  Input,
   OnDestroy,
   OnInit,
   ViewChild,
@@ -74,7 +73,7 @@ export class StackedInputActionComponent implements OnInit, OnDestroy, AfterCont
       uniqueError: 'Email is not unique'
     }
   };
-  @Input() stateIn$!: Observable<StackedInputActionsState | null>;
+  readonly stateIn$ = input.required<Observable<StackedInputActionsState | null>>();
   readonly position = input<number>(0);
   readonly showRemove = input(false);
   readonly key = input<number>(0);
@@ -112,7 +111,7 @@ export class StackedInputActionComponent implements OnInit, OnDestroy, AfterCont
     }));
 
     // Handle change of state from outside
-    this.subs.push(this.stateIn$.subscribe(this.handleStateIn.bind(this)));
+    this.subs.push(this.stateIn$().subscribe(this.handleStateIn.bind(this)));
   }
 
   ngOnDestroy(): void {

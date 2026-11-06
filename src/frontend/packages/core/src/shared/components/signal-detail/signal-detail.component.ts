@@ -1,4 +1,4 @@
-import { ChangeDetectionStrategy, Component, Input, Signal, inject } from '@angular/core';
+import { ChangeDetectionStrategy, Component, Signal, inject, input } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { RouterModule } from '@angular/router';
 import { TailwindSnackBarService } from '../../services/tailwind-snackbar.service';
@@ -78,7 +78,7 @@ export interface SignalDetailConfig {
   host: { class: 'block' }
 })
 export class SignalDetailComponent {
-  @Input({ required: true }) config!: SignalDetailConfig;
+  readonly config = input.required<SignalDetailConfig>();
 
   private snackBar = inject(TailwindSnackBarService);
 
@@ -87,17 +87,17 @@ export class SignalDetailComponent {
   // signals without sprinkling optional-chains through the markup.
 
   breadcrumbs(): readonly SignalDetailBreadcrumb[] {
-    return this.config.breadcrumbs?.() ?? [];
+    return this.config().breadcrumbs?.() ?? [];
   }
 
   status(): SignalDetailStatus | undefined {
-    return this.config.status?.();
+    return this.config().status?.();
   }
 
   // Header actions ------------------------------------------------------
 
   visibleHeaderActions(): readonly SignalDetailHeaderAction[] {
-    const all = this.config.headerActions;
+    const all = this.config().headerActions;
     if (!all || all.length === 0) return [];
     return all.filter(a => (a.visible ? a.visible() : true));
   }
@@ -140,7 +140,7 @@ export class SignalDetailComponent {
   // Tabs ---------------------------------------------------------------
 
   visibleTabs(): readonly SignalDetailTab[] {
-    const all = this.config.tabs?.() ?? [];
+    const all = this.config().tabs?.() ?? [];
     return all.filter(t => (t.hidden ? !t.hidden() : true));
   }
 
@@ -163,17 +163,17 @@ export class SignalDetailComponent {
   // Loading / error ----------------------------------------------------
 
   isLoading(): boolean {
-    return !!this.config.loading?.();
+    return !!this.config().loading?.();
   }
 
   errorMessage(): string {
-    const err = this.config.error?.();
+    const err = this.config().error?.();
     if (err == null) return '';
     return extractHttpErrorMessage(err);
   }
 
   hasError(): boolean {
-    return this.config.error?.() != null;
+    return this.config().error?.() != null;
   }
 
   // Toolbar visibility ------------------------------------------------

@@ -1,5 +1,5 @@
 import { CommonModule } from '@angular/common';
-import { ChangeDetectionStrategy, Component, Input, Signal, computed, effect, inject, signal } from '@angular/core';
+import { ChangeDetectionStrategy, Component, Signal, computed, effect, inject, untracked } from '@angular/core';
 import { ChartConfiguration, TooltipItem } from 'chart.js';
 import { BaseChartDirective } from 'ng2-charts';
 
@@ -54,28 +54,46 @@ export class AppAutoscalerMetricChartCardComponent extends CardCell<APIResource<
     domain: ['#01579b']
   };
 
-  public paramsMetricsEnd: number = (new Date()).getTime();
-  public paramsMetricsStart: number = this.paramsMetricsEnd - 30 * 60 * 1000;
-  public paramsMetrics: AutoscalerMetricQueryParams = {
-    'start-time': this.paramsMetricsStart + '000000',
-    'end-time': this.paramsMetricsEnd + '000000',
+  // The row's trigger, once the row carries the time window its metrics are
+  // queried for; null before that. Everything down to `metricType` follows it.
+  private readonly currentTrigger = computed<AppScalingTrigger | null>(() => {
+    const row = this.row();
+    return row?.entity?.query?.params ? row.entity : null;
+  });
+
+  // Without a window on the row: the last 30 minutes, counted from creation.
+  private readonly defaultMetricsEnd = (new Date()).getTime();
+  public readonly paramsMetricsEnd = computed<number>(() => {
+    const params = this.currentTrigger()?.query?.params;
+    return params ? params.end * 1000 : this.defaultMetricsEnd;
+  });
+  public readonly paramsMetricsStart = computed<number>(() => {
+    const params = this.currentTrigger()?.query?.params;
+    return params ? params.start * 1000 : this.defaultMetricsEnd - 30 * 60 * 1000;
+  });
+  public readonly paramsMetrics = computed<AutoscalerMetricQueryParams>(() => ({
+    'start-time': this.paramsMetricsStart() + '000000',
+    'end-time': this.paramsMetricsEnd() + '000000',
     page: '1',
     'results-per-page': '10000000',
     'order-direction': 'asc'
-  };
+  }));
 
-  public metricType!: string;
+  public readonly appAutoscalerAppMetricLegend = computed<{
+    legendValue: AppAutoscalerMetricDataPoint[], legendColor: AppAutoscalerMetricLegend[]
+  }>(() => {
+    const trigger = this.currentTrigger();
+    return trigger ? this.getLegend2(trigger) : { legendValue: [], legendColor: [] };
+  });
 
-  // Signal-native row binding. The legacy component computed
-  // `metricData$` as an Observable wired to the @ngrx store; we now
-  // recompute the formatted metric local form from the signal-native
-  // AutoscalerMetricDataService whenever the row binding settles and
-  // the underlying metrics signal changes.
-  private rowSignal = signal<APIResource<AppScalingTrigger> | null>(null);
-  private currentTrigger = signal<AppScalingTrigger | null>(null);
+  public readonly metricType = computed<string>(() =>
+    this.currentTrigger() ? AutoscalerConstants.getMetricFromMetricId(this.row().metadata.guid) : '');
 
+  // The legacy component computed `metricData$` as an Observable wired to
+  // the @ngrx store; we now recompute the formatted metric local form from
+  // the signal-native AutoscalerMetricDataService whenever the row changes
+  // and the underlying metrics signal changes.
   public metricData!: Signal<APIResource<AppAutoscalerMetricDataLocal>[] | null>;
-  public appAutoscalerAppMetricLegend!: { legendValue: AppAutoscalerMetricDataPoint[], legendColor: AppAutoscalerMetricLegend[] };
 
   // Doughnut gauge showing the latest metric reading against the chart
   // maximum, coloured by trigger state — the same fields the legacy
@@ -89,21 +107,23 @@ export class AppAutoscalerMetricChartCardComponent extends CardCell<APIResource<
     // Recompute the formatted chart-shape from the data service's raw
     // resources whenever the row settles or new metrics arrive.
     this.metricData = computed(() => {
-      const row = this.rowSignal();
+      const row = this.row();
       const trigger = this.currentTrigger();
-      if (!row || !trigger || !this.metricType) {
+      const metricType = this.metricType();
+      if (!row || !trigger || !metricType) {
         return null;
       }
+      const paramsMetrics = this.paramsMetrics();
       const raw = this.metricService.metrics(
         this.appService.cfGuid,
         this.appService.appGuid,
-        this.metricType,
+        metricType,
       )();
       const local = buildMetricData(
-        this.metricType,
+        metricType,
         { resources: raw, total_results: raw.length, total_pages: 1, prev_url: '', next_url: '' },
-        parseInt(this.paramsMetrics['start-time'] ?? '0', 10),
-        parseInt(this.paramsMetrics['end-time'] ?? '0', 10),
+        parseInt(paramsMetrics['start-time'] ?? '0', 10),
+        parseInt(paramsMetrics['end-time'] ?? '0', 10),
         false,
         trigger,
       );
@@ -121,7 +141,7 @@ export class AppAutoscalerMetricChartCardComponent extends CardCell<APIResource<
       const value = Number(entity.latest.target[0]?.value ?? 0);
       const color = String(entity.latest.colorTarget[0]?.value ?? 'rgba(0,0,0,0.2)');
       return {
-        labels: [this.metricType, ''],
+        labels: [this.metricType(), ''],
         datasets: [{
           data: [value, Math.max(entity.chartMaxValue - value, 0)],
           backgroundColor: [color, 'rgba(0, 0, 0, 0.1)'],
@@ -155,39 +175,25 @@ export class AppAutoscalerMetricChartCardComponent extends CardCell<APIResource<
       };
     });
 
-    // Whenever the row binding settles, fire the load() against the
-    // data service. Effect runs in injection context (constructor)
-    // satisfying Angular's signal-effect requirement.
+    // Whenever a row with a time window arrives, fire the load() against
+    // the data service. load() runs untracked: the effect must depend on the
+    // row alone, not on the state load() reads and writes.
     effect(() => {
-      const row = this.rowSignal();
-      if (!row || !row.entity || !row.entity.query || !row.entity.query.params) {
+      // Read the row itself so that every new row reloads, as the setter did,
+      // also when its window and metric are unchanged.
+      this.row();
+      if (!this.currentTrigger()) {
         return;
       }
-      void this.metricService.load(
+      const metricType = this.metricType();
+      const paramsMetrics = this.paramsMetrics();
+      untracked(() => void this.metricService.load(
         this.appService.cfGuid,
         this.appService.appGuid,
-        this.metricType,
-        this.paramsMetrics,
-      );
+        metricType,
+        paramsMetrics,
+      ));
     });
-  }
-
-  @Input()
-  set row(row: APIResource<AppScalingTrigger>) {
-    super.row = row;
-    if (row && row.entity && row.entity.query && row.entity.query.params) {
-      this.paramsMetricsStart = row.entity.query.params.start * 1000;
-      this.paramsMetricsEnd = row.entity.query.params.end * 1000;
-      this.paramsMetrics = {
-        ...this.paramsMetrics,
-        'start-time': this.paramsMetricsStart + '000000',
-        'end-time': this.paramsMetricsEnd + '000000',
-      };
-      this.appAutoscalerAppMetricLegend = this.getLegend2(row.entity);
-      this.metricType = AutoscalerConstants.getMetricFromMetricId(row.metadata.guid);
-      this.currentTrigger.set(row.entity);
-    }
-    this.rowSignal.set(row);
   }
 
   getLegend2(trigger: AppScalingTrigger) {

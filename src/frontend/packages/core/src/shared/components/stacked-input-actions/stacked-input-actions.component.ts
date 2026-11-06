@@ -89,7 +89,7 @@ export class StackedInputActionsComponent implements OnInit, OnDestroy {
 
     // Track how we push state into the component using signals
     const stateInSignal = signal<StackedInputActionsState | null>(null);
-    stackedAction.stateIn$ = toObservable(stateInSignal, { injector: this.injector });
+    componentRef.setInput('stateIn$', toObservable(stateInSignal, { injector: this.injector }));
 
     // Track them all together in one pot
     this.components[stackedAction.key()] = {

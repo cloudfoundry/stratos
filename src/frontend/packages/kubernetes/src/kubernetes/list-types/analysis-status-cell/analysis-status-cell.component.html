@@ -1,16 +1,16 @@
-@if (row.status === 'running') {
+@if (row().status === 'running') {
   <div class="flex items-center">
     <app-busy class="text-primary" size="1.25rem" context="analysis"></app-busy> Running
   </div>
 }
-@if (row.status === 'completed') {
+@if (row().status === 'completed') {
   <div>Completed</div>
 }
-@if (row.status === 'error') {
+@if (row().status === 'error') {
   <div class="flex items-center">
     <div>Error</div>
-    @if (row.error) {
-      <span class="material-icons text-warning cursor-help text-xl size-5 ml-2" matTooltip="{{ row.error }}">warning</span>
+    @if (row().error) {
+      <span class="material-icons text-warning cursor-help text-xl size-5 ml-2" matTooltip="{{ row().error }}">warning</span>
     }
   </div>
 }

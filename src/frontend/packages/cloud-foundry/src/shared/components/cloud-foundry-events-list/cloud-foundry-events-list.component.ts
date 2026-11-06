@@ -126,7 +126,7 @@ export class CloudFoundryEventsListComponent implements OnInit, OnChanges {
     });
   }
 
-  // @Input() values are not bound at constructor time. Building the
+  // Input values are not bound at constructor time. Building the
   // listConfig here (with inputs guaranteed bound) lets us conditionally
   // include the Org / Space dropdowns only on the foundation-wide page
   // (no scope inputs). The sub-pages pin scope via basePredicate; adding

@@ -1,7 +1,7 @@
 <div class="custom-slide-toggle-wrapper">
   <div class="custom-slide-toggle"
-    [class.disabled]="disabled"
-    [class.checked]="checked"
+    [class.disabled]="disabled()"
+    [class.checked]="checked()"
     [class.invalid]="invalid()"
     [attr.aria-invalid]="invalid() || null"
     [attr.aria-describedby]="invalid() && errorMessage() ? 'error-' + (id() || name()) : null">
@@ -18,15 +18,15 @@
       }
 
       <div class="slide-toggle-bar" role="switch" tabindex="0"
-        [attr.aria-checked]="checked"
+        [attr.aria-checked]="checked()"
         (click)="toggle()"
         (keydown.enter)="toggle()"
         (keydown.space)="toggle(); $event.preventDefault()">
         <input
           type="checkbox"
           class="slide-toggle-input"
-          [checked]="checked"
-          [disabled]="disabled"
+          [checked]="checked()"
+          [disabled]="disabled()"
           [attr.name]="name() ?? null"
           [attr.id]="id() ?? null"
           [required]="required()"

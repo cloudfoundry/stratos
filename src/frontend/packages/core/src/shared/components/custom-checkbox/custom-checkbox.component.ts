@@ -1,5 +1,5 @@
 
-import { ChangeDetectionStrategy, Component, Input, forwardRef, input, output, ChangeDetectorRef, inject } from '@angular/core';
+import { ChangeDetectionStrategy, Component, forwardRef, input, model, output } from '@angular/core';
 import { ControlValueAccessor, NG_VALUE_ACCESSOR } from '@angular/forms';
 
 export interface MatCheckboxChange {
@@ -23,11 +23,11 @@ export interface MatCheckboxChange {
   ]
 })
 export class CustomCheckboxComponent implements ControlValueAccessor {
-  private readonly cdr = inject(ChangeDetectorRef);
-
-  @Input() disabled = false;
-  @Input() indeterminate = false;
-  @Input() checked = false;
+  // Models: a parent binds them, and the control writes them too (a click,
+  // or the form through the value accessor).
+  readonly disabled = model(false);
+  readonly indeterminate = model(false);
+  readonly checked = model(false);
   readonly value = input<any>();
   readonly name = input<string>();
   readonly id = input<string>();
@@ -39,33 +39,29 @@ export class CustomCheckboxComponent implements ControlValueAccessor {
 
   // eslint-disable-next-line @angular-eslint/no-output-native -- intentional Material API parity: drop-in for mat-checkbox which emits (change)
   readonly change = output<MatCheckboxChange>();
-  readonly indeterminateChange = output<boolean>();
 
   private _onChange = (_value: any) => {};
   private _onTouched = () => {};
 
   toggle() {
-    if (this.disabled) return;
-    
-    this.checked = !this.checked;
-    this.indeterminate = false;
-    
-    this._onChange(this.checked);
+    if (this.disabled()) return;
+
+    const checked = !this.checked();
+    this.checked.set(checked);
+    this.indeterminate.set(false);
+
+    this._onChange(checked);
     this._onTouched();
-    
+
     this.change.emit({
       source: this,
-      checked: this.checked
+      checked
     });
-    
-    this.indeterminateChange.emit(this.indeterminate);
   }
 
-  // ControlValueAccessor implementation. The form calls these from code, not
-  // through a binding, so under OnPush the view must be marked for check.
+  // ControlValueAccessor implementation
   writeValue(value: boolean): void {
-    this.checked = value;
-    this.cdr.markForCheck();
+    this.checked.set(value);
   }
 
   registerOnChange(fn: any): void {
@@ -77,7 +73,6 @@ export class CustomCheckboxComponent implements ControlValueAccessor {
   }
 
   setDisabledState(isDisabled: boolean): void {
-    this.disabled = isDisabled;
-    this.cdr.markForCheck();
+    this.disabled.set(isDisabled);
   }
 }

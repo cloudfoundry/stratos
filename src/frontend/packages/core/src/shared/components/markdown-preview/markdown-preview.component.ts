@@ -1,6 +1,6 @@
 
 import { HttpClient, HttpResponse } from '@angular/common/http';
-import { ChangeDetectionStrategy, Component, ElementRef, Input, ViewChild, inject, signal } from '@angular/core';
+import { ChangeDetectionStrategy, Component, ElementRef, ViewChild, effect, inject, input, signal, untracked } from '@angular/core';
 import { DomSanitizer } from '@angular/platform-browser';
 
 import { PreviewableComponent } from '../../previewable-component';
@@ -32,8 +32,18 @@ export class MarkdownPreviewComponent implements PreviewableComponent {
   readonly title = signal<string | null>('');
   readonly unavailable = signal(false);
 
-  @Input()
-  set documentUrl(value: string) {
+  // For a host that binds the document. The side panel passes it to
+  // setProps() instead.
+  readonly documentUrl = input<string>();
+
+  constructor() {
+    effect(() => {
+      const url = this.documentUrl();
+      untracked(() => this.showDocument(url));
+    });
+  }
+
+  private showDocument(value: string | undefined) {
     if (value && this._documentUrl !== value) {
       this._documentUrl = value;
       this.title.set(null);
@@ -55,7 +65,7 @@ export class MarkdownPreviewComponent implements PreviewableComponent {
   }
 
   setProps(props: { [key: string]: any, }) {
-    this.documentUrl = props.documentUrl;
+    this.showDocument(props.documentUrl);
   }
 
   private loadDocument() {

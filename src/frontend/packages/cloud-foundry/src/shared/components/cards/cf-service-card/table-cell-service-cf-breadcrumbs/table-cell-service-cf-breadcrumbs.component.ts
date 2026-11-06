@@ -1,4 +1,4 @@
-import { Component, Input, inject, ChangeDetectionStrategy } from '@angular/core';
+import { Component, computed, inject, untracked, ChangeDetectionStrategy } from '@angular/core';
 
 import { EndpointsSignalService, TableCellCustom } from '@stratosui/core';
 import { CfCurrentUserRolesSignalService } from '../../../../../user-permissions/cf-current-user-roles-signal.service';
@@ -17,22 +17,16 @@ import { CfOrgSpaceLinksComponent } from '../../../../components/cf-org-space-li
 })
 export class TableCellServiceCfBreadcrumbsComponent extends TableCellCustom<StServiceOffering> {
 
-  cfOrgSpace!: CfOrgSpaceLabelService;
   private endpoints = inject(EndpointsSignalService);
   private cfRoles = inject(CfCurrentUserRolesSignalService);
 
-  @Input()
-  set row(offering: StServiceOffering) {
-    super.row = offering;
-    if (!offering || !!this.cfOrgSpace) {
-      return;
-    }
-    this.cfOrgSpace = new CfOrgSpaceLabelService(this.endpoints, this.cfRoles, offering.cnsiGuid);
-  }
-
-  constructor() {
-    super();
-  }
+  // One label service per endpoint; built untracked so that it depends on
+  // the row's endpoint alone.
+  private readonly cnsiGuid = computed(() => this.row()?.cnsiGuid);
+  readonly cfOrgSpace = computed(() => {
+    const cnsiGuid = this.cnsiGuid();
+    return untracked(() => new CfOrgSpaceLabelService(this.endpoints, this.cfRoles, cnsiGuid));
+  });
 
   getSpaceBreadcrumbs = () => ({ breadcrumbs: 'services-wall' });
 }

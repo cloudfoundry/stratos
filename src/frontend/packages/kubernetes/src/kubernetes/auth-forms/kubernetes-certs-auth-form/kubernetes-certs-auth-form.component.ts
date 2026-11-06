@@ -1,4 +1,4 @@
-import { ChangeDetectionStrategy, Component, Input} from '@angular/core';
+import { ChangeDetectionStrategy, Component, input } from '@angular/core';
 import { FormControl, FormGroup, ReactiveFormsModule } from '@angular/forms';
 
 import { FileInputComponent } from '../../../../../core/src/shared/components/file-input/file-input.component';
@@ -23,7 +23,8 @@ interface CertsAuthForm {
   ]
 })
 export class KubernetesCertsAuthFormComponent implements IEndpointAuthComponent {
-  @Input() formGroup!: FormGroup<CertsAuthForm>; // strict: required @Input (IAuthForm contract), assigned by the auth-form host
+  // Set by the host that creates the form (IAuthForm contract)
+  readonly formGroup = input.required<FormGroup<CertsAuthForm>>();
 
 
   public getValues(values: EndpointAuthValues): EndpointAuthValues {

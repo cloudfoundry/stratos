@@ -1,4 +1,4 @@
-import { ChangeDetectionStrategy, Component, Input, Directive, booleanAttribute, input, model, output } from '@angular/core';
+import { ChangeDetectionStrategy, Component, Directive, booleanAttribute, input, model } from '@angular/core';
 
 // Custom Icon Component
 @Component({
@@ -108,19 +108,17 @@ export class MatDatepickerDirective {
 // Custom Datepicker Component (Basic)
 @Component({
   selector: 'mat-datepicker',
-  template: '<input type="date" class="custom-datepicker" [value]="selected" (change)="onDateChange($event)">',
+  template: '<input type="date" class="custom-datepicker" [value]="selected()" (change)="onDateChange($event)">',
   styleUrls: ['./custom-material.component.scss'],
   standalone: true,
   changeDetection: ChangeDetectionStrategy.OnPush
 })
 export class CustomDatepickerComponent {
-  @Input() selected!: Date;
-  readonly selectedChange = output<Date>();
+  // A model: picking a date sets it and emits selectedChange.
+  readonly selected = model<Date>();
 
   onDateChange(event: any) {
-    const date = new Date(event.target.value);
-    this.selected = date;
-    this.selectedChange.emit(date);
+    this.selected.set(new Date(event.target.value));
   }
 }
 

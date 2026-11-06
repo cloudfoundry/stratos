@@ -125,13 +125,13 @@ export class CustomFormFieldComponent
       this.placeholder = this.selectComponent.placeholder() || "";
       this.isRequired = this.selectComponent.required();
       this.inputId =
-        this.selectComponent.id ||
+        this.selectComponent.id() ||
         this.selectComponent.name() ||
         `form-field-${Math.random().toString(36).substr(2, 9)}`;
 
       // Set select id if not present
-      if (!this.selectComponent.id) {
-        this.selectComponent.id = this.inputId;
+      if (!this.selectComponent.id()) {
+        this.selectComponent.id.set(this.inputId);
       }
 
       // Monitor select value changes
@@ -139,18 +139,18 @@ export class CustomFormFieldComponent
         .pipe(takeUntil(this.destroy$))
         .subscribe(() => {
           this.hasValue =
-            this.selectComponent.value != null &&
-            (Array.isArray(this.selectComponent.value)
-              ? this.selectComponent.value.length > 0
+            this.selectComponent.selectedValue != null &&
+            (Array.isArray(this.selectComponent.selectedValue)
+              ? this.selectComponent.selectedValue.length > 0
               : true);
           this.cdr.detectChanges();
         });
 
       // Initial value check
       this.hasValue =
-        this.selectComponent.value != null &&
-        (Array.isArray(this.selectComponent.value)
-          ? this.selectComponent.value.length > 0
+        this.selectComponent.selectedValue != null &&
+        (Array.isArray(this.selectComponent.selectedValue)
+          ? this.selectComponent.selectedValue.length > 0
           : true);
     }
     // Handle native input/textarea/select elements

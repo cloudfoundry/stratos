@@ -1,10 +1,10 @@
 <div class="custom-checkbox-wrapper">
   <div class="custom-checkbox" role="checkbox"
-    [attr.aria-checked]="indeterminate ? 'mixed' : checked"
-    [attr.tabindex]="disabled ? -1 : 0"
-    [class.disabled]="disabled"
-    [class.checked]="checked"
-    [class.indeterminate]="indeterminate"
+    [attr.aria-checked]="indeterminate() ? 'mixed' : checked()"
+    [attr.tabindex]="disabled() ? -1 : 0"
+    [class.disabled]="disabled()"
+    [class.checked]="checked()"
+    [class.indeterminate]="indeterminate()"
     [class.invalid]="invalid()"
     [class.color-primary]="color() === 'primary'"
     [class.color-accent]="color() === 'accent'"
@@ -19,8 +19,8 @@
       <input type="checkbox"
         [attr.id]="id() ?? null"
         [attr.name]="name() ?? null"
-        [checked]="checked"
-        [disabled]="disabled"
+        [checked]="checked()"
+        [disabled]="disabled()"
         [required]="required()"
         [value]="value()"
         class="checkbox-input"
@@ -29,16 +29,16 @@
 
       <div class="checkbox-frame">
         <svg class="checkbox-checkmark"
-          [class.indeterminate]="indeterminate"
+          [class.indeterminate]="indeterminate()"
           viewBox="0 0 24 24"
           width="16"
           height="16">
-          @if (!indeterminate) {
+          @if (!indeterminate()) {
             <path
               class="checkmark-path"
               d="M9,16.17L4.83,12l-1.42,1.41L9,19L21,7l-1.41-1.41L9,16.17z"/>
           }
-          @if (indeterminate) {
+          @if (indeterminate()) {
             <path
               class="indeterminate-path"
               d="M19,13H5V11H19V13Z"/>
