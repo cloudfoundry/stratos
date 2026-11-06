@@ -1,5 +1,5 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
-import { ApplicationRef, provideZonelessChangeDetection, QueryList } from '@angular/core';
+import { ApplicationRef, provideZonelessChangeDetection } from '@angular/core';
 import { describe, it, expect, beforeEach, afterEach, vi } from 'vitest';
 import { NoopAnimationsModule } from '@angular/platform-browser/animations';
 import { MetricQueryConfig, MetricQueryType, MetricsRequest } from '@stratosui/store';
@@ -90,9 +90,8 @@ describe('MetricsParentRangeSelectorComponent', () => {
       chart.applyRequest.mockImplementation((req: MetricsRequest) => chart.currentRequest = req);
       return chart;
     });
-    const list = new QueryList<MetricsChartComponent>();
-    list.reset(charts as unknown as MetricsChartComponent[]);
-    (component as unknown as { metricsCharts: QueryList<MetricsChartComponent> }).metricsCharts = list;
+    (component as unknown as { metricsCharts: () => MetricsChartComponent[] }).metricsCharts =
+      () => charts as unknown as MetricsChartComponent[];
 
     // No timer has run: the first request has to come from choosing the
     // window, not from the first 10 s poll.

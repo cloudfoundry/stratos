@@ -335,7 +335,7 @@ describe('InstancesAccordionComponent', () => {
     };
 
     const queriedCharts = (component: InstancesAccordionComponent): InstanceUsageChartComponent[] =>
-      ((component as any).charts as { toArray(): InstanceUsageChartComponent[] }).toArray();
+      [...((component as any).charts as () => readonly InstanceUsageChartComponent[])()];
 
     it('activating seeds the shared set with the AND of the per-metric sets', async () => {
       const { localFixture, localComponent } = await buildWithChartStub();

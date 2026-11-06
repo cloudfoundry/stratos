@@ -47,7 +47,7 @@ describe('CreateSpaceQuotaStepComponent', () => {
   });
   // app-form-field shows a field's <app-error> text as its error line.
   it('says a taken space quota name exists', async () => {
-    component.form.allQuotas = ['taken'];
+    component.form().allQuotas = ['taken'];
     const host: HTMLElement = fixture.nativeElement;
     const input = host.querySelector<HTMLInputElement>('input[formcontrolname="name"]')!;
     input.value = 'taken';

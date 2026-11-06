@@ -503,16 +503,16 @@ describe('DeployApplicationStep2Component', () => {
     });
 
     it('wires applyGithubEnterpriseAndToken to the sourceSelectionForm valueChanges stream', () => {
-      // Mock the NgForm ViewChild with a Subject so we can emit form values
+      // Mock the NgForm view query with a Subject so we can emit form values
       // without standing up the full template-driven reactive form. Also mock
       // setupForGit's other upstream collaborators just enough to reach the
       // suggestedRepos$ assignment where the tap callback is registered.
       const valueChanges = new Subject<Record<string, string | undefined>>();
       (component as unknown as {
-        sourceSelectionForm: { valueChanges: Subject<Record<string, string | undefined>> };
-      }).sourceSelectionForm = {
+        sourceSelectionForm: () => { valueChanges: Subject<Record<string, string | undefined>> };
+      }).sourceSelectionForm = () => ({
         valueChanges,
-      };
+      });
       // updateSuggestedRepositories is called inside switchMap; stub it to
       // return an empty result so the pipe completes without network work.
       vi.spyOn(

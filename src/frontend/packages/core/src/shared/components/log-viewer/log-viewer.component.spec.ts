@@ -50,7 +50,7 @@ describe('LogViewerComponent', () => {
   beforeEach(async () => {
     fixture = TestBed.createComponent(TestHostComponent);
     component = fixture.componentInstance;
-    contentEl = component.logViewer.content.nativeElement as HTMLDivElement;
+    contentEl = component.logViewer.content().nativeElement as HTMLDivElement;
     stream = new Subject();
     await show(stream);
   });

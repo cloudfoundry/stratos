@@ -62,7 +62,7 @@ describe('CreateQuotaStepComponent', () => {
   // app-form-field shows a field's <app-error> text as its error line.
   it('says a taken quota name exists', async () => {
     await fixture.whenStable();
-    component.form.allQuotas = ['taken'];
+    component.form().allQuotas = ['taken'];
     const host: HTMLElement = fixture.nativeElement;
     const input = host.querySelector<HTMLInputElement>('input[formcontrolname="name"]')!;
     input.value = 'taken';
