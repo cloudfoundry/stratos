@@ -1,4 +1,4 @@
-import { ChangeDetectionStrategy, Component, forwardRef, ContentChildren, QueryList, AfterContentInit, effect, input, model, output, untracked } from '@angular/core';
+import { ChangeDetectionStrategy, Component, forwardRef, AfterContentInit, effect, input, model, output, untracked, contentChildren } from '@angular/core';
 import { ControlValueAccessor, NG_VALUE_ACCESSOR } from '@angular/forms';
 
 
@@ -83,7 +83,7 @@ export class CustomButtonToggleGroupComponent implements ControlValueAccessor, A
   readonly change = output<MatButtonToggleChange>();
 
   // strict: @ContentChildren is populated by Angular before ngAfterContentInit
-  @ContentChildren(CustomButtonToggleComponent) toggles!: QueryList<CustomButtonToggleComponent>;
+  readonly toggles = contentChildren(CustomButtonToggleComponent);
 
   selectedValues: any[] = [];
 
@@ -91,7 +91,7 @@ export class CustomButtonToggleGroupComponent implements ControlValueAccessor, A
   private _onTouched = () => {};
 
   ngAfterContentInit() {
-    this.toggles.forEach(toggle => {
+    this.toggles().forEach(toggle => {
       toggle.change.subscribe(selectedToggle => {
         this.selectToggle(selectedToggle);
       });
@@ -131,11 +131,12 @@ export class CustomButtonToggleGroupComponent implements ControlValueAccessor, A
   }
 
   private updateToggles() {
-    if (!this.toggles) {
+    const toggles = this.toggles();
+    if (!toggles) {
       // writeValue can run before content children are resolved
       return;
     }
-    this.toggles.forEach(toggle => {
+    toggles.forEach(toggle => {
       toggle.setState(this.selectedValues.includes(toggle.value()), toggle.disabled());
     });
   }
@@ -163,8 +164,9 @@ export class CustomButtonToggleGroupComponent implements ControlValueAccessor, A
 
   setDisabledState(isDisabled: boolean): void {
     this.disabled.set(isDisabled);
-    if (this.toggles) {
-      this.toggles.forEach(toggle => {
+    const toggles = this.toggles();
+    if (toggles) {
+      toggles.forEach(toggle => {
         toggle.setState(toggle.checked(), isDisabled);
       });
     }

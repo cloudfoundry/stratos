@@ -427,12 +427,12 @@
           <span class="text-base">{{ config().emptyMessage ?? 'There are no items' }}</span>
         </div>
       }
-    } @else if (config().viewMode && config().viewMode!() === 'card' && cardTemplate) {
+    } @else if (config().viewMode && config().viewMode!() === 'card' && cardTemplate()) {
       <div data-test="card-grid"
            class="grid gap-3 p-3" [style.grid-template-columns]="cardGridColumns()">
         @for (row of config().pagedItems(); track trackByRow($index, row)) {
           <div data-test="card-projected">
-            <ng-container *ngTemplateOutlet="cardTemplate; context: { $implicit: row }"></ng-container>
+            <ng-container *ngTemplateOutlet="cardTemplate(); context: { $implicit: row }"></ng-container>
           </div>
         }
       </div>

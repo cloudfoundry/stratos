@@ -1,5 +1,5 @@
 
-import { ChangeDetectionStrategy, Component, ComponentRef, OnDestroy, OnInit, ViewChild, ViewContainerRef, effect, inject, input, output, untracked } from '@angular/core';
+import { ChangeDetectionStrategy, Component, ComponentRef, OnDestroy, OnInit, ViewContainerRef, effect, inject, input, output, untracked, viewChild } from '@angular/core';
 import { ReactiveFormsModule, Validators, FormBuilder, FormControl, FormGroup, AbstractControl } from '@angular/forms';
 import { CustomFormFieldComponent } from '../../../shared/components/custom-form-field/custom-form-field.component';
 import { CustomCheckboxComponent } from '../../../shared/components/custom-checkbox/custom-checkbox.component';
@@ -97,8 +97,7 @@ export class ConnectEndpointComponent implements OnInit, OnDestroy {
   readonly authType = output<EndpointAuthTypeConfig>();
 
   // Component reference for the dynamically created auth form
-  @ViewChild('authForm', { read: ViewContainerRef, static: true })
-  public container!: ViewContainerRef;
+  public readonly container = viewChild('authForm', { read: ViewContainerRef });
 
   public endpointForm!: FormGroup<EndpointForm>;
 
@@ -123,7 +122,7 @@ export class ConnectEndpointComponent implements OnInit, OnDestroy {
     safeUnsubscribe(...this.subs);
     this.subs = [];
     this.authFormComponentRef?.destroy();
-    this.container?.clear();
+    this.container()?.clear();
   }
 
   private init(config: ConnectEndpointConfig) {
@@ -228,7 +227,8 @@ export class ConnectEndpointComponent implements OnInit, OnDestroy {
 
   // Dynamically create the component for the selected auth type
   createComponent(authType: EndpointAuthTypeConfig) {
-    if (!authType.component || !this.container) {
+    const container = this.container();
+    if (!authType.component || !container) {
       return;
     }
 
@@ -236,7 +236,7 @@ export class ConnectEndpointComponent implements OnInit, OnDestroy {
       this.authFormComponentRef.destroy();
     }
 
-    this.authFormComponentRef = this.container.createComponent<IAuthForm>(authType.component);
+    this.authFormComponentRef = container.createComponent<IAuthForm>(authType.component);
     this.authFormComponentRef.setInput('formGroup', this.endpointForm);
     // Only some auth forms have a `config` input. Auth types without a config
     // (e.g. the generic Bearer/Token entries) must not replace its `{}`

@@ -1,5 +1,5 @@
 import { CommonModule } from '@angular/common';
-import { Component, OnInit, ViewChild, ChangeDetectionStrategy, inject, signal } from '@angular/core';
+import { Component, OnInit, ChangeDetectionStrategy, inject, signal, viewChild } from '@angular/core';
 import { ActivatedRoute, RouterModule } from '@angular/router';
 import { NEVER, Observable, Subject } from 'rxjs';
 import websocketConnect, { normalClosureMessage } from 'rxjs-websockets';
@@ -49,7 +49,7 @@ export class SshApplicationComponent implements OnInit {
 
   // strict: populated by Angular's @ViewChild query (static query resolves
   // before ngOnInit).
-  @ViewChild('sshViewer', { static: true }) sshViewer!: SshViewerComponent;
+  readonly sshViewer = viewChild.required<SshViewerComponent>('sshViewer');
 
   private getBreadcrumbs(
     application: IApp,

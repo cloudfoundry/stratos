@@ -1,4 +1,4 @@
-import { AfterViewInit, ChangeDetectionStrategy, Component, DestroyRef, ElementRef, ViewChild, inject, signal } from '@angular/core';
+import { AfterViewInit, ChangeDetectionStrategy, Component, DestroyRef, ElementRef, inject, signal, viewChild } from '@angular/core';
 
 /**
  * A scroll area with the edge fades the lists use (signal-list): a shade at
@@ -28,7 +28,7 @@ import { AfterViewInit, ChangeDetectionStrategy, Component, DestroyRef, ElementR
   `,
 })
 export class ScrollFadeComponent implements AfterViewInit {
-  @ViewChild('body', { static: true }) private body!: ElementRef<HTMLElement>;
+  private readonly body = viewChild.required<ElementRef<HTMLElement>>('body');
 
   readonly canScrollDown = signal(false);
   readonly canScrollRight = signal(false);
@@ -36,7 +36,7 @@ export class ScrollFadeComponent implements AfterViewInit {
   private readonly destroyRef = inject(DestroyRef);
 
   ngAfterViewInit(): void {
-    const el = this.body.nativeElement;
+    const el = this.body().nativeElement;
     const measure = () => {
       // 2px tolerance, as in signal-list: sizes round to integers while the
       // scroll position is fractional.

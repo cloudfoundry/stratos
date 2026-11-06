@@ -1,4 +1,4 @@
-import { ChangeDetectionStrategy, ChangeDetectorRef, Component, ComponentRef, Injector, OnDestroy, OnInit, ViewChild, ViewContainerRef, signal, Signal, inject, input, output } from '@angular/core';
+import { ChangeDetectionStrategy, ChangeDetectorRef, Component, ComponentRef, Injector, OnDestroy, OnInit, ViewContainerRef, signal, Signal, inject, input, output, viewChild } from '@angular/core';
 import { Observable, Unsubscribable } from 'rxjs';
 import { toObservable } from '@angular/core/rxjs-interop';
 
@@ -44,8 +44,7 @@ export class StackedInputActionsComponent implements OnInit, OnDestroy {
 
   readonly stateOut = output<StackedInputActionsUpdate>();
 
-  @ViewChild('inputs', { read: ViewContainerRef, static: true })
-  inputs!: ViewContainerRef;
+  readonly inputs = viewChild.required('inputs', { read: ViewContainerRef });
 
   // True while any row is PROCESSING; a signal so the stateIn$ push
   // re-renders the OnPush "Add another" button.
@@ -64,13 +63,13 @@ export class StackedInputActionsComponent implements OnInit, OnDestroy {
   private subs: Unsubscribable[] = [];
 
   addComponent(): void {
-    const componentRef = this.inputs.createComponent(StackedInputActionComponent);
+    const componentRef = this.inputs().createComponent(StackedInputActionComponent);
 
     const stackedAction = componentRef.instance;
     // Track a unique key for the component and it's position in the stack.
     // Inputs go through setInput so the OnPush component is marked for check.
     componentRef.setInput('key', this.count++);
-    componentRef.setInput('position', this.inputs.length - 1);
+    componentRef.setInput('position', this.inputs().length - 1);
     componentRef.setInput('config', this.stackedActionConfig());
     // Handle when the component wants to be removed
     this.subs.push(stackedAction.remove.subscribe(() => {
@@ -125,7 +124,7 @@ export class StackedInputActionsComponent implements OnInit, OnDestroy {
   removeComponent(stackedAction: StackedInputActionComponent): void {
     // Remove the visual component
     const componentRef = this.components[stackedAction.key()].componentRef;
-    this.inputs.remove(this.inputs.indexOf(componentRef.hostView));
+    this.inputs().remove(this.inputs().indexOf(componentRef.hostView));
     // Remove the tracked component
     delete this.components[stackedAction.key()];
     // Update all components with their new position
@@ -136,7 +135,7 @@ export class StackedInputActionsComponent implements OnInit, OnDestroy {
   private updatePositions(): void {
     // Ensure all components know which position they are and whether they can be removed or not.
     // Integer-like keys iterate in ascending order, which matches view insertion order.
-    const componentCount = this.inputs.length;
+    const componentCount = this.inputs().length;
     Object.values(this.components).forEach((component, position) => {
       component.componentRef.setInput('position', position);
       component.componentRef.setInput('showRemove', componentCount > 1);
@@ -170,8 +169,9 @@ export class StackedInputActionsComponent implements OnInit, OnDestroy {
   }
 
   ngOnDestroy(): void {
-    if (this.inputs) {
-      this.inputs.clear();
+    const inputs = this.inputs();
+    if (inputs) {
+      inputs.clear();
     }
     safeUnsubscribe(...this.subs);
   }

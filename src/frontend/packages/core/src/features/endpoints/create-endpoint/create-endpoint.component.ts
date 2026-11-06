@@ -7,12 +7,12 @@ import {
   ComponentRef,
   OnDestroy,
   OnInit,
-  ViewChild,
   ViewContainerRef,
   computed,
   inject,
   signal,
-  input
+  input,
+  viewChild
 } from '@angular/core';
 import { ActivatedRoute, Router } from '@angular/router';
 import { entityCatalog } from '@stratosui/store';
@@ -53,7 +53,7 @@ export class CreateEndpointComponent implements OnInit, AfterViewInit, OnDestroy
   showConnectStep: boolean;
 
   component: any;
-  @ViewChild('customComponentContainer', { read: ViewContainerRef, static: true }) customComponentContainer!: ViewContainerRef;
+  readonly customComponentContainer = viewChild.required('customComponentContainer', { read: ViewContainerRef });
   componentRef!: ComponentRef<any>;
 
   // FWT-959 Part 2 (Partition A) — SignalStepHandle wiring for the inline
@@ -64,17 +64,11 @@ export class CreateEndpointComponent implements OnInit, AfterViewInit, OnDestroy
   // handles below only drive the inline flow (Register, plus Connect for
   // types that can connect) rendered when no custom registrationComponent
   // is wired up.
-  @ViewChild('step1', { static: false }) step1?: CreateEndpointCfStep1Component;
+  readonly step1 = viewChild<CreateEndpointCfStep1Component>('step1');
 
-  // Signal-backed (not a plain field): the connect step is instantiated
-  // lazily on activation, and the handle computeds below dereference it.
-  // A computed whose first evaluation sees an undefined plain field
-  // captures zero signal dependencies and never re-evaluates.
-  private _connect = signal<CreateEndpointConnectComponent | undefined>(undefined);
-  @ViewChild('connect', { static: false })
-  set connectRef(v: CreateEndpointConnectComponent | undefined) {
-    this._connect.set(v);
-  }
+  // The connect step is absent until its @if block renders. The handle
+  // computeds below read this query, so they re-evaluate when it appears.
+  private readonly _connect = viewChild<CreateEndpointConnectComponent>('connect');
 
   private router = inject(Router);
   private cdr = inject(ChangeDetectorRef);
@@ -107,14 +101,15 @@ export class CreateEndpointComponent implements OnInit, AfterViewInit, OnDestroy
     submit: async () => {
       // Delegate to the existing onNext to preserve all of its
       // side-effects (snackbar, dup-endpoint warning, store dispatch).
-      const result = await firstValueFrom(this.step1!.onNext(0, {} as any));
+      const result = await firstValueFrom(this.step1()!.onNext(0, {} as any));
       if (!result.success) {
         throw new Error(result.message || 'Failed to register endpoint');
       }
       this.registered.set(true);
       // As registered: registration adds https:// to a bare host.
-      this.address.set(normalizeUrl(this.step1?.registerForm?.getRawValue().urlField ?? ''));
-      this.caCert.set(this.step1?.registeredCaCert?.() ?? '');
+      const step1 = this.step1();
+      this.address.set(normalizeUrl(step1?.registerForm?.getRawValue().urlField ?? ''));
+      this.caCert.set(step1?.registeredCaCert?.() ?? '');
       // `redirect: true` (only emitted when finalStep is set, i.e. when
       // there's no connect step) means the form is done.
       if (result.redirect) {
@@ -147,7 +142,7 @@ export class CreateEndpointComponent implements OnInit, AfterViewInit, OnDestroy
     onEnter: (data) => {
       // Registration result routed from step1's submit via the stepper's
       // enterData channel. Delivery is deferred past the activating
-      // render, so the ViewChild is set by now.
+      // render, so the query is resolved by now.
       if (data) {
         this._connect()?.onEnter(data as any);
       }
@@ -181,12 +176,12 @@ export class CreateEndpointComponent implements OnInit, AfterViewInit, OnDestroy
   }
 
   ngOnInit() {
-    this.customComponentContainer.clear();
+    this.customComponentContainer().clear();
     if (this.componentRef) {
       this.componentRef.destroy();
     }
     if (this.component) {
-      this.componentRef = this.customComponentContainer.createComponent(this.component);
+      this.componentRef = this.customComponentContainer().createComponent(this.component);
     }
   }
 
@@ -196,10 +191,11 @@ export class CreateEndpointComponent implements OnInit, AfterViewInit, OnDestroy
     // when the inline wizard is rendered (i.e. no custom registration
     // component took over). `validate` is constructed lazily in
     // step1.ngAfterContentInit, so wait one microtask before subscribing.
-    if (this.step1) {
+    if (this.step1()) {
       queueMicrotask(() => {
-        if (this.step1?.validate) {
-          this.step1ValidateSub = this.step1.validate.subscribe(v => {
+        const step1 = this.step1();
+        if (step1?.validate) {
+          this.step1ValidateSub = step1.validate.subscribe(v => {
             this.step1Valid.set(!!v);
             this.cdr.markForCheck();
           });

@@ -1,6 +1,6 @@
 import { CommonModule } from '@angular/common';
 import { HttpClient } from '@angular/common/http';
-import { AfterViewInit, Component, ElementRef, OnDestroy, OnInit, Renderer2, ViewChild, effect, input, signal, inject, untracked, ChangeDetectionStrategy } from '@angular/core';
+import { AfterViewInit, Component, ElementRef, OnDestroy, OnInit, Renderer2, effect, input, signal, inject, untracked, ChangeDetectionStrategy, viewChild } from '@angular/core';
 import { toObservable } from '@angular/core/rxjs-interop';
 import { FormsModule } from '@angular/forms';
 import * as yaml from 'js-yaml';
@@ -136,9 +136,9 @@ export class ChartValuesEditorComponent implements OnInit, OnDestroy, AfterViewI
   private codeOnEnter!: string;
 
   // Reference to the editor, so we can adjust its size to fit
-  @ViewChild('monacoEditor', { read: ElementRef, static: false }) monacoEditor!: ElementRef; // strict: @ViewChild populated by Angular after view init
+  readonly monacoEditor = viewChild.required('monacoEditor', { read: ElementRef }); // strict: @ViewChild populated by Angular after view init
 
-  @ViewChild('schemaForm', { static: false }) schemaForm: any;
+  readonly schemaForm = viewChild<any>('schemaForm');
 
   // Confirmation dialog - copy values
   overwriteValuesConfirmation = new ConfirmationDialogConfig(
@@ -343,8 +343,9 @@ export class ChartValuesEditorComponent implements OnInit, OnDestroy, AfterViewI
     h = h - TOOLBAR_HEIGHT;
 
     // Set the Monaco editor to the same size as the container
-    this.renderer.setStyle(this.monacoEditor.nativeElement, 'width', `${w}px`);
-    this.renderer.setStyle(this.monacoEditor.nativeElement, 'height', `${h}px`);
+    const monacoEditor = this.monacoEditor();
+    this.renderer.setStyle(monacoEditor.nativeElement, 'width', `${w}px`);
+    this.renderer.setStyle(monacoEditor.nativeElement, 'height', `${h}px`);
 
     // Ask Monaco to layout again with its new size
     this.editor.layout();

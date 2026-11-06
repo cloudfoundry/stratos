@@ -1,5 +1,5 @@
 import { CommonModule } from '@angular/common';
-import { ChangeDetectionStrategy, Component, ElementRef, ViewChild, input, linkedSignal } from '@angular/core';
+import { ChangeDetectionStrategy, Component, ElementRef, input, linkedSignal, viewChild } from '@angular/core';
 import { CustomTooltipDirective } from '../custom-tooltip/custom-tooltip.directive';
 import { BaseChartDirective } from 'ng2-charts';
 
@@ -63,7 +63,7 @@ export class SimpleUsageChartComponent {
     }
   };
 
-  @ViewChild('colors', { static: true }) colorsElement!: ElementRef;
+  readonly colorsElement = viewChild.required<ElementRef>('colors');
 
   readonly chartTitle = input('Usage');
 
@@ -147,7 +147,7 @@ export class SimpleUsageChartComponent {
 
   private getColor(classSelector: string) {
     return window.getComputedStyle(
-      this.colorsElement.nativeElement.getElementsByClassName(
+      this.colorsElement().nativeElement.getElementsByClassName(
         classSelector
       )[0]
     ).backgroundColor;

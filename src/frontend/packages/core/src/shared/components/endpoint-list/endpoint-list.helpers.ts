@@ -6,7 +6,7 @@ import { TableCellCustom } from '../signal-list/cell-base';
 interface EndpointDetailsContainerRefs {
   componentRef: ComponentRef<EndpointListDetailsComponent>;
   component: EndpointListDetailsComponent | null;
-  endpointDetails: ViewContainerRef;
+  endpointDetails: ViewContainerRef | undefined;
 }
 
 export abstract class EndpointListDetailsComponent extends TableCellCustom<EndpointModel> {

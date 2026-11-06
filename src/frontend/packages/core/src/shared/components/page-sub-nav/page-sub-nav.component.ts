@@ -1,6 +1,6 @@
 import { TemplatePortal } from '@angular/cdk/portal';
 
-import { AfterViewInit, Component, OnDestroy, TemplateRef, ViewChild, ViewContainerRef, effect, inject, input, ChangeDetectionStrategy } from '@angular/core';
+import { AfterViewInit, Component, OnDestroy, TemplateRef, ViewContainerRef, effect, inject, input, ChangeDetectionStrategy, viewChild } from '@angular/core';
 
 import { TabNavService } from '../../../tab-nav.service';
 import { IHeaderBreadcrumbLink } from '../page-header/page-header.types';
@@ -19,7 +19,7 @@ export class PageSubNavComponent implements AfterViewInit, OnDestroy {
 
   readonly breadcrumbs = input<IHeaderBreadcrumbLink[]>();
 
-  @ViewChild('subNavTmpl', { static: true }) subNavTmpl!: TemplateRef<any>;
+  readonly subNavTmpl = viewChild.required<TemplateRef<any>>('subNavTmpl');
 
   constructor() {
     // Publish the breadcrumbs to the dashboard. Most sub-navs bind none and
@@ -33,7 +33,7 @@ export class PageSubNavComponent implements AfterViewInit, OnDestroy {
   }
 
   ngAfterViewInit() {
-    const portal = new TemplatePortal(this.subNavTmpl, this.viewContainerRef, {});
+    const portal = new TemplatePortal(this.subNavTmpl(), this.viewContainerRef, {});
     this.tabNavService.setSubNav(portal);
   }
   ngOnDestroy() {

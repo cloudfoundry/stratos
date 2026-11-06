@@ -1,5 +1,5 @@
 <div class="monitor-icon">
-  @if (currentState | async; as state) {
+  @if (state$ | async; as state) {
     <div>
       @if (state.error) {
         <app-custom-icon class="monitor-icon__error">error</app-custom-icon>

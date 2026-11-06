@@ -3,13 +3,12 @@ import {
   ChangeDetectionStrategy,
   Component,
   OnDestroy,
-  QueryList,
   Signal,
-  ViewChildren,
   WritableSignal,
   computed,
   inject,
   signal,
+  viewChildren
 } from '@angular/core';
 import { Router } from '@angular/router';
 
@@ -102,7 +101,7 @@ export class InstancesAccordionComponent implements OnDestroy {
   readonly unifiedHidden = signal<ReadonlySet<number>>(new Set());
 
   /** The three live usage charts (CPU/Mem/Disk); read to seed the shared set. */
-  @ViewChildren(InstanceUsageChartComponent) private charts!: QueryList<InstanceUsageChartComponent>;
+  private readonly charts = viewChildren(InstanceUsageChartComponent);
 
   /** Loading map projected for the signal-list framework. */
   private readonly _isAnyLoading: Signal<boolean> = computed(() => this.dataService.loading().stats);
@@ -220,7 +219,7 @@ export class InstancesAccordionComponent implements OnDestroy {
       this.allActive.set(false);
       return;
     }
-    const sets = this.charts ? this.charts.map(c => c.hiddenInstances()) : [];
+    const sets = this.charts().map(c => c.hiddenInstances());
     const seed = sets.length
       ? [...sets[0]].filter(i => sets.every(s => s.has(i)))
       : [];

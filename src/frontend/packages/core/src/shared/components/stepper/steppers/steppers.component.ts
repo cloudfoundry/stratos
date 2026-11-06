@@ -1,4 +1,4 @@
-import { ChangeDetectionStrategy, ChangeDetectorRef, AfterContentInit, Component, ContentChildren, ElementRef, Injector, OnDestroy, OnInit, QueryList, TemplateRef, ViewEncapsulation, afterNextRender, effect, inject, signal, untracked, input, viewChild } from '@angular/core';
+import { ChangeDetectionStrategy, ChangeDetectorRef, AfterContentInit, Component, ElementRef, Injector, OnDestroy, OnInit, TemplateRef, ViewEncapsulation, afterNextRender, effect, inject, signal, untracked, input, viewChild, contentChildren } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { ActivatedRoute, Router, RouterModule } from '@angular/router';
 import { ErrorPiece, RoutingHistoryService } from '@stratosui/store';
@@ -45,7 +45,7 @@ export class SteppersComponent implements OnInit, AfterContentInit, OnDestroy {
   private nextSub!: Subscription;
   cancel$: Observable<string>;
 
-  @ContentChildren(StepComponent) stepComponents!: QueryList<StepComponent>;
+  readonly stepComponents = contentChildren(StepComponent);
 
   readonly cancel = input<string>();
   // When true the Cancel button does a full-page load to `cancel` instead of a
@@ -178,7 +178,7 @@ export class SteppersComponent implements OnInit, AfterContentInit, OnDestroy {
   }
 
   ngAfterContentInit() {
-    this.allSteps = this.stepComponents.toArray();
+    this.allSteps = [...this.stepComponents()];
     this.contentSteps.set(this.allSteps);
 
     this.allSteps.forEach((step => {

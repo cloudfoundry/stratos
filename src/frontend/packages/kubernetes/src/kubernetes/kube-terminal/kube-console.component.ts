@@ -1,5 +1,5 @@
 import { AsyncPipe } from '@angular/common';
-import {Component, OnInit, ViewChild, inject, signal, ChangeDetectionStrategy } from '@angular/core';
+import {Component, OnInit, inject, signal, ChangeDetectionStrategy, viewChild} from '@angular/core';
 import { ActivatedRoute, RouterLink } from '@angular/router';
 import { CustomTooltipDirective } from '@stratosui/core';
 import { EMPTY, NEVER, Observable, Subject } from 'rxjs';
@@ -62,7 +62,7 @@ export class KubeConsoleComponent implements OnInit {
 
   public breadcrumbs$!: Observable<IHeaderBreadcrumb[]>; // strict: assigned in ngOnInit when an endpoint guid is available
 
-  @ViewChild('sshViewer', { static: false }) sshViewer!: SshViewerComponent; // strict: @ViewChild populated after view init
+  readonly sshViewer = viewChild.required<SshViewerComponent>('sshViewer'); // strict: @ViewChild populated after view init
   public kubeEndpointService = inject(KubernetesEndpointService);
 
   ngOnInit() {
@@ -89,7 +89,7 @@ export class KubeConsoleComponent implements OnInit {
         tap(() => this.connectionStatus.next(1)),
         switchMap(getResponse => getResponse(this.sshInput)),
         catchError((e: Error): Observable<never> => {
-          if (e.message !== normalClosureMessage && !this.sshViewer.isConnected()) {
+          if (e.message !== normalClosureMessage && !this.sshViewer().isConnected()) {
             this.errorMessage.set('Error launching Kubernetes Terminal');
           }
           return EMPTY;

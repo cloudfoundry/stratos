@@ -3,10 +3,10 @@ import {
   Component,
   ElementRef,
   OnDestroy,
-  ViewChild,
   computed,
   inject,
-  input
+  input,
+  viewChild
 } from '@angular/core';
 import { toObservable, toSignal } from '@angular/core/rxjs-interop';
 import { FormsModule } from '@angular/forms';
@@ -79,7 +79,8 @@ export class CardAppInstancesComponent implements OnDestroy {
 
   readonly busy = input<any>();
 
-  @ViewChild('instanceField', { static: true }) instanceField!: ElementRef;
+  // Optional: the field sits in a conditional block of the template.
+  readonly instanceField = viewChild<ElementRef>('instanceField');
 
   // ---------------------------------------------------------------------------
   // Signal-native reads
@@ -149,7 +150,7 @@ export class CardAppInstancesComponent implements OnDestroy {
     setTimeout(() => {
       // ngIf-style structural switch may keep the input out of the DOM
       // until the next CD cycle on first edit click; guard the focus.
-      this.instanceField?.nativeElement?.focus();
+      this.instanceField()?.nativeElement?.focus();
     }, 0);
   }
 

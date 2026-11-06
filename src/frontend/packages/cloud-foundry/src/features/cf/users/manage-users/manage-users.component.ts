@@ -8,7 +8,7 @@ import {
   inject,
   OnDestroy,
   signal,
-  ViewChild,
+  viewChild
 } from '@angular/core';
 import { ActivatedRoute, Router } from '@angular/router';
 import { firstValueFrom, forkJoin, of, Subscription } from 'rxjs';
@@ -109,9 +109,11 @@ export class UsersRolesComponent implements AfterViewInit, OnDestroy {
   // Cross-step state lives in the signal-native CfUsersRolesDataService
   // (setUsers / executeChanges / etc.) — no parent-owned signal
   // coordination needed beyond `applyStartedSignal`.
-  @ViewChild('setUsers', { static: false }) setUsers?: ManageUsersSetUsernamesComponent;
-  @ViewChild('modify', { static: false }) modify!: UsersRolesModifyComponent;
-  @ViewChild('confirm', { static: false }) confirm!: UsersRolesConfirmComponent;
+  readonly setUsers = viewChild<ManageUsersSetUsernamesComponent>('setUsers');
+  // Both sit in the template's @else branch, so neither exists while the
+  // "no users" message is shown.
+  readonly modify = viewChild<UsersRolesModifyComponent>('modify');
+  readonly confirm = viewChild<UsersRolesConfirmComponent>('confirm');
 
   private setUsersValid = signal<boolean>(false);
   private setUsersBlocked = signal<boolean>(false);
@@ -127,7 +129,7 @@ export class UsersRolesComponent implements AfterViewInit, OnDestroy {
       // setUsers.onNext returns of({ success: true }) after seeding the
       // wizard service with the picked users — we wait for it so the
       // service is primed before the modify step's onEnter runs.
-      const result = await firstValueFrom(this.setUsers!.onNext(0, null as any));
+      const result = await firstValueFrom(this.setUsers()!.onNext(0, null as any));
       if (!result.success) {
         throw new Error(result.message || 'Failed to set usernames');
       }
@@ -137,10 +139,10 @@ export class UsersRolesComponent implements AfterViewInit, OnDestroy {
   modifyStepHandle: SignalStepHandle = {
     valid: this.modifyValid.asReadonly(),
     blocked: this.modifyBlocked.asReadonly(),
-    onEnter: () => this.modify?.onEnter(),
-    onLeave: (isNext?: boolean) => this.modify?.onLeave(!!isNext),
+    onEnter: () => this.modify()?.onEnter(),
+    onLeave: (isNext?: boolean) => this.modify()?.onLeave(!!isNext),
     submit: async () => {
-      const result = await firstValueFrom(this.modify.onNext());
+      const result = await firstValueFrom(this.modify()!.onNext());
       if (!result.success) {
         throw new Error('Failed to update roles');
       }
@@ -153,7 +155,7 @@ export class UsersRolesComponent implements AfterViewInit, OnDestroy {
     disablePrevious: computed(() => this.applyStartedSignal()),
     destructiveStep: computed(() => !this.applyStartedSignal()),
     finishButtonText: computed(() => this.applyStartedSignal() ? 'Close' : 'Apply'),
-    onEnter: () => this.confirm?.onEnter(),
+    onEnter: () => this.confirm()?.onEnter(),
     submit: async () => {
       // Two-click apply semantic.
       // First click dispatches the changes and returns ignoreSuccess so
@@ -217,29 +219,31 @@ export class UsersRolesComponent implements AfterViewInit, OnDestroy {
   ngAfterViewInit(): void {
     // Bridge child Observable surfaces into the local signals the handles
     // read so the stepper re-evaluates blocked/valid reactively.
-    if (this.setUsers) {
+    const setUsers = this.setUsers();
+    if (setUsers) {
       this.bridgeSubs.push(
-        this.setUsers.valid$.subscribe(v => {
+        setUsers.valid$.subscribe(v => {
           this.setUsersValid.set(!!v);
           this.cdr.markForCheck();
         }),
       );
       this.bridgeSubs.push(
-        this.setUsers.blocked$.subscribe(v => {
+        setUsers.blocked$.subscribe(v => {
           this.setUsersBlocked.set(!!v);
           this.cdr.markForCheck();
         }),
       );
     }
-    if (this.modify) {
+    const modify = this.modify();
+    if (modify) {
       this.bridgeSubs.push(
-        this.modify.valid$.subscribe(v => {
+        modify.valid$.subscribe(v => {
           this.modifyValid.set(!!v);
           this.cdr.markForCheck();
         }),
       );
       this.bridgeSubs.push(
-        this.modify.blocked$.subscribe(v => {
+        modify.blocked$.subscribe(v => {
           this.modifyBlocked.set(!!v);
           this.cdr.markForCheck();
         }),

@@ -1,5 +1,5 @@
 import { AsyncPipe, CommonModule, TitleCasePipe } from '@angular/common';
-import { ChangeDetectionStrategy, Component, Injector, OnDestroy, ViewChild, ViewContainerRef, effect, inject, runInInjectionContext, signal } from '@angular/core';
+import { ChangeDetectionStrategy, Component, Injector, OnDestroy, ViewContainerRef, effect, inject, runInInjectionContext, signal, viewChild } from '@angular/core';
 import { ReactiveFormsModule, FormControl, FormGroup, Validators } from '@angular/forms';
 import { CustomFormFieldComponent } from '@stratosui/core';
 import { CustomSelectComponent, CustomOptionComponent } from '@stratosui/core';
@@ -91,8 +91,7 @@ export class SelectPlanStepComponent implements OnDestroy {
     filter((status): status is StratosStatus => status !== null),
   );
   cSIHelperService!: CreateServiceInstanceHelper;
-  @ViewChild('noplans', { read: ViewContainerRef, static: true })
-  noPlansDiv!: ViewContainerRef;
+  readonly noPlansDiv = viewChild.required('noplans', { read: ViewContainerRef });
 
   validate = signal<boolean>(false);
   subscription!: Subscription;
@@ -235,10 +234,10 @@ export class SelectPlanStepComponent implements OnDestroy {
   }
 
   private createNoPlansComponent() {
-    return this.noPlansDiv.createComponent(NoServicePlansComponent);
+    return this.noPlansDiv().createComponent(NoServicePlansComponent);
   }
   private clearNoPlans() {
-    return this.noPlansDiv.clear();
+    return this.noPlansDiv().clear();
   }
 
 }

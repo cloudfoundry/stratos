@@ -8,7 +8,7 @@ import {
   OnDestroy,
   OnInit,
   signal,
-  ViewChild,
+  viewChild
 } from '@angular/core';
 import { toSignal } from '@angular/core/rxjs-interop';
 import {
@@ -83,8 +83,8 @@ export class CreateReleaseComponent implements OnInit, OnDestroy {
   details!: FormGroup<CreateReleaseForm>; // strict: assigned in setupDetailsStep() from the constructor
   namespaces$!: Observable<string[]>; // strict: assigned in setupDetailsStep() from the constructor
 
-  @ViewChild('releaseNameInputField', { static: true }) releaseNameInputField!: ElementRef; // strict: @ViewChild populated by Angular
-  @ViewChild('editor', { static: true }) editor!: ChartValuesEditorComponent; // strict: @ViewChild populated by Angular
+  readonly releaseNameInputField = viewChild.required<ElementRef>('releaseNameInputField'); // strict: @ViewChild populated by Angular
+  readonly editor = viewChild.required<ChartValuesEditorComponent>('editor'); // strict: @ViewChild populated by Angular
 
   private subs: Subscription[] = [];
   private createdNamespace = false;
@@ -248,7 +248,7 @@ export class CreateReleaseComponent implements OnInit, OnDestroy {
       finishButtonText: signal('Install').asReadonly(),
       onEnter: () => {
         // Resize the editor when the step becomes visible.
-        this.editor.resizeEditor();
+        this.editor().resizeEditor();
       },
       submit: async () => {
         const result = await firstValueFrom(this.submit$());
@@ -277,7 +277,7 @@ export class CreateReleaseComponent implements OnInit, OnDestroy {
       if (ep.length > 1) {
         this.details.controls.endpoint.setValue(ep[0].guid, { onlySelf: true });
         setTimeout(() => {
-          this.releaseNameInputField.nativeElement.focus();
+          this.releaseNameInputField().nativeElement.focus();
         }, 1);
       }
     });
@@ -323,7 +323,7 @@ export class CreateReleaseComponent implements OnInit, OnDestroy {
       endpoint: formValue.endpoint ?? '',
       releaseName: formValue.releaseName || '',
       releaseNamespace: formValue.releaseNamespace || '',
-      values: JSON.stringify(this.editor.getValues()),
+      values: JSON.stringify(this.editor().getValues()),
       chart: {
         name: this.route.snapshot.params.name,
         repo: this.route.snapshot.params.repo,

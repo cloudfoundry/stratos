@@ -1,6 +1,6 @@
 import { A11yModule } from '@angular/cdk/a11y';
 import { CommonModule } from '@angular/common';
-import { ChangeDetectionStrategy, ChangeDetectorRef, Component, ComponentRef, HostListener, Injector, OnDestroy, OnInit, Type, ViewChild, ViewContainerRef, computed, inject, reflectComponentType, signal, output } from '@angular/core';
+import { ChangeDetectionStrategy, ChangeDetectorRef, Component, ComponentRef, HostListener, Injector, OnDestroy, OnInit, Type, ViewContainerRef, computed, inject, reflectComponentType, signal, output, viewChild } from '@angular/core';
 import { toObservable } from '@angular/core/rxjs-interop';
 import { ActivatedRoute, ActivatedRouteSnapshot, Params } from '@angular/router';
 import { of } from 'rxjs';
@@ -42,9 +42,10 @@ export class EndpointRegisterModalComponent extends BaseEndpointTileManager impl
   // says so and closes the dialog.
   readonly endpointRegistered = output<void>();
 
-  @ViewChild('endpointFormContainer', { read: ViewContainerRef, static: false })
-  // strict: ViewChild populated by Angular before loadEndpointRegistrationComponent runs.
-  endpointFormContainer!: ViewContainerRef;
+  // Inside @if (selectedEndpointInfo()), so absent until a tile is selected:
+  // onTileSelected renders that block before loadEndpointRegistrationComponent
+  // reads this.
+  readonly endpointFormContainer = viewChild('endpointFormContainer', { read: ViewContainerRef });
 
   readonly selectedEndpointInfo = signal<ITileConfig<ICreateEndpointTilesData> | null>(null);
   componentRef: ComponentRef<any> | null = null;
@@ -85,7 +86,7 @@ export class EndpointRegisterModalComponent extends BaseEndpointTileManager impl
     if (isCreateEndpointTile(tile)) {
       this.selectedEndpointInfo.set(tile);
       // Render the @if(selectedEndpointInfo()) branch synchronously so the
-      // #endpointFormContainer ViewChild is available, then load the
+      // #endpointFormContainer query is resolved, then load the
       // registration component in the same task (no empty-form blink).
       this.cdr.detectChanges();
       this.loadEndpointRegistrationComponent(tile);
@@ -93,7 +94,8 @@ export class EndpointRegisterModalComponent extends BaseEndpointTileManager impl
   }
 
   private loadEndpointRegistrationComponent(tile: ITileConfig<ICreateEndpointTilesData>) {
-    if (!this.endpointFormContainer) {
+    const endpointFormContainer = this.endpointFormContainer();
+    if (!endpointFormContainer) {
       console.error('endpointFormContainer not available');
       return;
     }
@@ -102,7 +104,7 @@ export class EndpointRegisterModalComponent extends BaseEndpointTileManager impl
     }
 
     // Clear previous component
-    this.endpointFormContainer.clear();
+    endpointFormContainer.clear();
     if (this.componentRef) {
       this.componentRef.destroy();
     }
@@ -130,6 +132,11 @@ export class EndpointRegisterModalComponent extends BaseEndpointTileManager impl
   // on the /endpoints/new pages; inside the dialog they get a stand-in route,
   // and the handle they close the dialog with.
   private createRegistrationComponent(component: Type<any>, epType: string, epSubType: string) {
+    const endpointFormContainer = this.endpointFormContainer();
+    if (!endpointFormContainer) {
+      // Back on the tile selection before a lazily loaded form arrived.
+      return;
+    }
     const params: Params = {
       type: epType,
       subtype: epSubType
@@ -161,7 +168,7 @@ export class EndpointRegisterModalComponent extends BaseEndpointTileManager impl
       parent: this.injector
     });
 
-    this.componentRef = this.endpointFormContainer.createComponent(component, { index: 0, injector });
+    this.componentRef = endpointFormContainer.createComponent(component, { index: 0, injector });
     // Suppress any nested <app-page-header> — we're inside the modal which
     // has its own header. Two nested page-headers clobber the TabNavService
     // pageHeader signal on modal close. setInput, not a field write: the
@@ -175,8 +182,9 @@ export class EndpointRegisterModalComponent extends BaseEndpointTileManager impl
     this.selectedEndpointInfo.set(null);
 
     // Clear the form component
-    if (this.endpointFormContainer) {
-      this.endpointFormContainer.clear();
+    const endpointFormContainer = this.endpointFormContainer();
+    if (endpointFormContainer) {
+      endpointFormContainer.clear();
     }
     if (this.componentRef) {
       this.componentRef.destroy();

@@ -8,12 +8,14 @@ import {
   OnDestroy,
   OnInit,
   Signal,
-  ViewChild,
   computed,
   effect,
   inject,
   runInInjectionContext,
   signal,
+  untracked,
+  viewChild,
+  afterRenderEffect,
 } from '@angular/core';
 import { toObservable } from '@angular/core/rxjs-interop';
 import { ActivatedRoute } from '@angular/router';
@@ -179,30 +181,30 @@ export class AddServiceInstanceComponent implements OnInit, OnDestroy {
   // The steppers component renders only the active step's content
   // template at any given time (steppers.component.html line 71:
   // `<span *ngTemplateOutlet="steps[currentIndex].content">`), so child
-  // components are instantiated lazily on activation. We use ViewChild
-  // *setters* so the bridge subscription is wired the moment the child
-  // becomes available — and torn down when the user navigates away.
-  // This is the only pattern that consistently works for lazily-
-  // instantiated step children under OnPush + zoneless change detection.
+  // components are instantiated lazily on activation. Each child is a
+  // signal view query; an effect on the query wires the bridge
+  // subscription when the child becomes available and tears it down when
+  // the user navigates away.
   //
   // Mode branching (showSelectCf, showSelectService, showBindApp) is
   // already gated by @if blocks in the template so the per-step
   // handles only need to express validity / blocked / submit — no
   // skipIf is needed.
-  // The four child refs that drive a `valid: computed(() => !!this._ref?.validate())`
-  // handle predicate live in WritableSignals, not plain fields. Plain fields
-  // don't notify the computed when reassigned, so the steppers component's
-  // initial valid() read (before the lazy ViewChild for the next step has
-  // fired) memoizes the computed with zero signal dependencies — and never
-  // re-runs even after the child's validate flips. _selectCF and
-  // _specifyDetails stay plain because their handles use a bridged signal
-  // pattern (subscribe-to-validate inside the setter), not a computed wrap.
-  private _selectCF?: CreateApplicationStep1Component;
-  private _selectService = signal<SelectServiceComponent | undefined>(undefined);
-  private _selectPlan = signal<SelectPlanStepComponent | undefined>(undefined);
-  private _bindApp = signal<BindAppsStepComponent | undefined>(undefined);
-  private _specifyDetails?: SpecifyDetailsStepComponent;
-  private _supd = signal<SpecifyUserProvidedDetailsComponent | undefined>(undefined);
+  // The child refs are signal queries, so a handle predicate such as
+  // `valid: computed(() => !!this._ref()?.validate())` follows the ref as
+  // well as the child's validate. A plain field would not notify the
+  // computed: the stepper's first valid() read (before the lazy child of a
+  // later step exists) would memoize it with no dependencies for good.
+  private readonly _selectCF = viewChild<CreateApplicationStep1Component>('selectCF');
+  private readonly _selectService = viewChild<SelectServiceComponent>('selectService');
+  // onEnter delivery is owned by selectPlanHandle.onEnter — the stepper
+  // defers pOnEnter past the activating render, so the query has resolved
+  // by the time the handle body dereferences it.
+  private readonly _selectPlan = viewChild<SelectPlanStepComponent>('selectPlan');
+  private readonly _bindApp = viewChild<BindAppsStepComponent>('bindApp');
+  private readonly _specifyDetails = viewChild<SpecifyDetailsStepComponent>('specifyDetails');
+  // supd.validate is already a signal — no bridge needed beyond the query.
+  private readonly _supd = viewChild<SpecifyUserProvidedDetailsComponent>('supd');
 
   private selectCFValid = signal<boolean>(false);
   private selectServiceFetching = signal<boolean>(false);
@@ -225,94 +227,73 @@ export class AddServiceInstanceComponent implements OnInit, OnDestroy {
   // signal-handle submit() drops the `data` channel, so we capture the
   // plan here and forward it on activation of each downstream step.
   private selectedPlan?: unknown;
-  // Pending onEnter targets — set in upstream step submit()s, consumed
-  // by downstream ViewChild setters. Mirrors the legacy framework call:
-  // "after upstream onNext succeeds, call downstream.onEnter(data)" —
-  // signal-handle submit() drops that wiring so we replicate it here.
-  // Without this, ViewChild setters firing on first construction would
-  // call downstream onEnter() with stale/missing context (e.g. before
-  // the user has actually selected a plan). Cross-step onEnter delivery
-  // is owned by `signalHandle.onEnter` — the framework routes the prior
-  // step's `submit()` return-value `data` field through `pOnEnter` into
-  // the next handle's onEnter, so the legacy pendingX-flag pattern is
-  // unnecessary.
+  // Cross-step onEnter delivery is owned by `signalHandle.onEnter` — the
+  // framework routes the prior step's `submit()` return-value `data` field
+  // through `pOnEnter` into the next handle's onEnter.
 
-  @ViewChild('selectCF', { static: false })
-  set selectCFRef(v: CreateApplicationStep1Component | undefined) {
-    this._selectCF = v;
-    this.selectCFSub?.unsubscribe();
-    this.selectCFSub = undefined;
-    if (v) {
-      // Replicate the legacy [onEnter]="resetStoreData" — clears stale
-      // service-instance state when the user re-enters the CF step.
-      this.resetStoreData();
-      this.selectCFSub = v.validate.subscribe(valid => {
-        this.selectCFValid.set(!!valid);
-        this.cdr.markForCheck();
-      });
-    } else {
-      this.selectCFValid.set(false);
-    }
-  }
+  // The bridges run after render: a step's child creates its streams in
+  // its own init hooks, which run after this component's effects.
+  // Bridges the CF step's validity into selectCFValid while that step is
+  // rendered.
+  private readonly selectCFBridge = afterRenderEffect(() => {
+    const v = this._selectCF();
+    untracked(() => {
+      this.selectCFSub?.unsubscribe();
+      this.selectCFSub = undefined;
+      if (v) {
+        // Replicate the legacy [onEnter]="resetStoreData" — clears stale
+        // service-instance state when the user re-enters the CF step.
+        this.resetStoreData();
+        this.selectCFSub = v.validate.subscribe(valid => {
+          this.selectCFValid.set(!!valid);
+          this.cdr.markForCheck();
+        });
+      } else {
+        this.selectCFValid.set(false);
+      }
+    });
+  });
 
-  @ViewChild('selectService', { static: false })
-  set selectServiceRef(v: SelectServiceComponent | undefined) {
-    this._selectService.set(v);
-    this.selectServiceFetchSub?.unsubscribe();
-    this.selectServiceFetchSub = undefined;
-    if (v) {
-      // SelectService.validate is already a Signal — handle reads it
-      // directly. We only bridge isFetching$ for the blocked predicate.
-      this.selectServiceFetchSub = v.isFetching$.subscribe(b => {
-        this.selectServiceFetching.set(!!b);
-        this.cdr.markForCheck();
-      });
-    } else {
-      this.selectServiceFetching.set(false);
-    }
-  }
+  // SelectService.validate is already a Signal — the handle reads it
+  // directly. Only isFetching$ is bridged, for the blocked predicate.
+  private readonly selectServiceBridge = afterRenderEffect(() => {
+    const v = this._selectService();
+    untracked(() => {
+      this.selectServiceFetchSub?.unsubscribe();
+      this.selectServiceFetchSub = undefined;
+      if (v) {
+        this.selectServiceFetchSub = v.isFetching$.subscribe(b => {
+          this.selectServiceFetching.set(!!b);
+          this.cdr.markForCheck();
+        });
+      } else {
+        this.selectServiceFetching.set(false);
+      }
+    });
+  });
 
-  @ViewChild('selectPlan', { static: false })
-  set selectPlanRef(v: SelectPlanStepComponent | undefined) {
-    this._selectPlan.set(v);
-    // onEnter delivery is owned by selectPlanHandle.onEnter — the stepper
-    // defers pOnEnter past the activating render, so the ViewChild is set
-    // by the time the handle body dereferences it.
-  }
-
-  @ViewChild('bindApp', { static: false })
-  set bindAppRef(v: BindAppsStepComponent | undefined) {
-    this._bindApp.set(v);
-  }
-
-  @ViewChild('specifyDetails', { static: false })
-  set specifyDetailsRef(v: SpecifyDetailsStepComponent | undefined) {
-    this._specifyDetails = v;
-    this.specifyDetailsValidSub?.unsubscribe();
-    this.specifyDetailsInitSub?.unsubscribe();
-    this.specifyDetailsValidSub = undefined;
-    this.specifyDetailsInitSub = undefined;
-    if (v) {
-      this.specifyDetailsValidSub = v.validate.subscribe(valid => {
-        this.specifyDetailsValid.set(!!valid);
-        this.cdr.markForCheck();
-      });
-      this.specifyDetailsInitSub = v.serviceInstancesInit$.subscribe(init => {
-        this.specifyDetailsInit.set(!!init);
-        this.cdr.markForCheck();
-      });
-    } else {
-      this.specifyDetailsValid.set(false);
-      this.specifyDetailsInit.set(true);
-    }
-  }
-
-  @ViewChild('supd', { static: false })
-  set supdRef(v: SpecifyUserProvidedDetailsComponent | undefined) {
-    this._supd.set(v);
-    // supd.validate is already a signal — no bridge needed beyond the
-    // ViewChild capture for submit().
-  }
+  private readonly specifyDetailsBridge = afterRenderEffect(() => {
+    const v = this._specifyDetails();
+    untracked(() => {
+      this.specifyDetailsValidSub?.unsubscribe();
+      this.specifyDetailsInitSub?.unsubscribe();
+      this.specifyDetailsValidSub = undefined;
+      this.specifyDetailsInitSub = undefined;
+      if (v) {
+        this.specifyDetailsValidSub = v.validate.subscribe(valid => {
+          this.specifyDetailsValid.set(!!valid);
+          this.cdr.markForCheck();
+        });
+        this.specifyDetailsInitSub = v.serviceInstancesInit$.subscribe(init => {
+          this.specifyDetailsInit.set(!!init);
+          this.cdr.markForCheck();
+        });
+      } else {
+        this.specifyDetailsValid.set(false);
+        this.specifyDetailsInit.set(true);
+      }
+    });
+  });
 
   selectCFHandle: SignalStepHandle = {
     valid: this.selectCFValid.asReadonly(),
@@ -327,8 +308,8 @@ export class AddServiceInstanceComponent implements OnInit, OnDestroy {
 
   selectServiceHandle: SignalStepHandle = {
     // SelectService exposes validate as a signal directly. The wrapping
-    // computed reads `this._selectService()` (signal call) so reassigning
-    // the ref via the ViewChild setter triggers re-evaluation.
+    // computed reads `this._selectService()` (the query signal), so it
+    // re-evaluates when the child appears.
     valid: computed(() => !!this._selectService()?.validate()),
     blocked: this.selectServiceFetching.asReadonly(),
     submit: async () => {
@@ -377,9 +358,9 @@ export class AddServiceInstanceComponent implements OnInit, OnDestroy {
     blocked: this.specifyDetailsInit.asReadonly(),
     cancelButtonText: signal('Cancel ').asReadonly(),
     nextButtonText: signal('Create ').asReadonly(),
-    onEnter: (plan) => this._specifyDetails?.onEnter(plan as any),
+    onEnter: (plan) => this._specifyDetails()?.onEnter(plan as any),
     submit: async () => {
-      const result = await firstValueFrom(this._specifyDetails!.onNext());
+      const result = await firstValueFrom(this._specifyDetails()!.onNext());
       if (!result.success) {
         throw new Error(result.message || 'Failed to create service instance');
       }

@@ -1,5 +1,5 @@
 import { CommonModule } from '@angular/common';
-import { ChangeDetectionStrategy, Component, ComponentRef, OnDestroy, OnInit, ViewChild, ViewContainerRef, ChangeDetectorRef, computed, effect, inject, input, untracked } from '@angular/core';
+import { ChangeDetectionStrategy, Component, ComponentRef, OnDestroy, OnInit, ViewContainerRef, ChangeDetectorRef, computed, effect, inject, input, untracked, viewChild } from '@angular/core';
 import { CustomTooltipDirective } from '../../custom-tooltip/custom-tooltip.directive';
 import { RouterModule } from '@angular/router';
 import { toObservable } from '@angular/core/rxjs-interop';
@@ -124,12 +124,10 @@ export class EndpointCardComponent extends CardCell<EndpointModel> implements On
   // The endpoint type's own details component, created into #endpointDetails
   // by updateInnerComponent().
   component: EndpointListDetailsComponent | null = null;
-  private endpointDetails!: ViewContainerRef;
-  // Resolved at creation, before the row is bound: the effect in the
-  // constructor fills the container once both are there.
-  @ViewChild('endpointDetails', { read: ViewContainerRef, static: true }) set content(content: ViewContainerRef) {
-    this.endpointDetails = content;
-  }
+  // In the card's own template, so it is resolved when the view is created,
+  // before the row is bound: the effect in the constructor fills the
+  // container on its first run.
+  private readonly endpointDetails = viewChild('endpointDetails', { read: ViewContainerRef });
 
   // V2 BaseEndpointsDataSource was deleted in W12 — the kubernetes
   // card consumer never bound [dataSource] and the V2 endpoints list
@@ -172,12 +170,13 @@ export class EndpointCardComponent extends CardCell<EndpointModel> implements On
     this.endpointListHelper.destroyEndpointDetails({
       componentRef: this.componentRef,
       component: this.component,
-      endpointDetails: this.endpointDetails
+      endpointDetails: this.endpointDetails()
     });
   }
 
   private updateInnerComponent(row: EndpointModel, entity: StratosCatalogEndpointEntity | undefined) {
-    if (!this.endpointDetails || !row || !entity) {
+    const endpointDetails = this.endpointDetails();
+    if (!endpointDetails || !row || !entity) {
       return;
     }
     const e = entity.definition;
@@ -187,7 +186,7 @@ export class EndpointCardComponent extends CardCell<EndpointModel> implements On
 
     if (!this.component) {
       const res =
-        this.endpointListHelper.createEndpointDetails(e.listDetailsComponent, this.endpointDetails);
+        this.endpointListHelper.createEndpointDetails(e.listDetailsComponent, endpointDetails);
       this.componentRef = res.componentRef;
       this.component = res.component;
     }

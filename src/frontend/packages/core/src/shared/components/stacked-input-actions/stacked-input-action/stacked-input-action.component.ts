@@ -5,11 +5,11 @@ import {
   ElementRef,
   OnDestroy,
   OnInit,
-  ViewChild,
   computed,
   input,
   signal,
-  output
+  output,
+  viewChild
 } from '@angular/core';
 import { ReactiveFormsModule, Validators, FormControl, AbstractControl } from '@angular/forms';
 import { CustomFormFieldComponent, AppErrorComponent, AppInputDirective } from '../../../components/custom-form-field/custom-form-field.component';
@@ -83,7 +83,7 @@ export class StackedInputActionComponent implements OnInit, OnDestroy, AfterCont
   readonly stateOut = output<StackedInputActionUpdate>();
   readonly remove = output<void>();
 
-  @ViewChild('inputElement', { static: true }) inputElement!: ElementRef;
+  readonly inputElement = viewChild.required<ElementRef>('inputElement');
 
   public result = StackedInputActionResult;
   public textFormControl = new FormControl<string | null>('', [Validators.required, this.uniqueValidator.bind(this)]);
@@ -119,7 +119,7 @@ export class StackedInputActionComponent implements OnInit, OnDestroy, AfterCont
   }
 
   ngAfterContentInit() {
-    this.inputElement.nativeElement.focus();
+    this.inputElement().nativeElement.focus();
   }
 
   uniqueValidator(control: AbstractControl) {

@@ -1,5 +1,5 @@
 import { CommonModule } from '@angular/common';
-import { ChangeDetectionStrategy, AfterViewInit, Component, ComponentRef, OnChanges, OnDestroy, OnInit, SimpleChanges, ViewChild, ViewContainerRef, effect, signal, inject, output, input, untracked } from '@angular/core';
+import { ChangeDetectionStrategy, AfterViewInit, Component, ComponentRef, OnChanges, OnDestroy, OnInit, SimpleChanges, ViewContainerRef, effect, signal, inject, output, input, untracked, viewChild } from '@angular/core';
 import { toObservable } from '@angular/core/rxjs-interop';
 import { RouterModule } from '@angular/router';
 import { combineLatest, Observable, of, Subscription } from 'rxjs';
@@ -65,7 +65,7 @@ export class HomePageEndpointCardComponent implements OnInit, OnChanges, OnDestr
 
 
 
-  @ViewChild('customCard', { read: ViewContainerRef, static: true }) customCard!: ViewContainerRef;
+  readonly customCard = viewChild.required('customCard', { read: ViewContainerRef });
 
   readonly endpoint = input.required<EndpointModel>();
 
@@ -173,7 +173,7 @@ export class HomePageEndpointCardComponent implements OnInit, OnChanges, OnDestr
 
   private initCard() {
     // customCard resolves in ngOnInit; the ngOnChanges path can fire earlier
-    if (this.cardCreated || this.disconnected || !this.customCard) {
+    if (this.cardCreated || this.disconnected || !this.customCard()) {
       return;
     }
     this.cardCreated = true;
@@ -299,7 +299,7 @@ export class HomePageEndpointCardComponent implements OnInit, OnChanges, OnDestr
   }
 
   async createCard(endpointEntity: any) {
-    this.customCard.clear();
+    this.customCard().clear();
 
     let component: any;
     if (!endpointEntity) {
@@ -308,7 +308,7 @@ export class HomePageEndpointCardComponent implements OnInit, OnChanges, OnDestr
       component = await endpointEntity.definition.homeCard.component();
     }
 
-    this.ref = this.customCard.createComponent(component);
+    this.ref = this.customCard().createComponent(component);
     this.ref.setInput('endpoint', this.endpoint());
     this.ref.setInput('layout', this.pLayout);
     this.loadCardIfReady();

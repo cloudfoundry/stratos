@@ -1,14 +1,13 @@
 import {
   ChangeDetectionStrategy,
   Component,
-  ContentChildren,
-  QueryList,
   AfterContentInit,
-  ViewChild,
   TemplateRef,
   input,
   model,
-  output
+  output,
+  viewChild,
+  contentChildren
 } from "@angular/core";
 import { NgTemplateOutlet } from "@angular/common";
 
@@ -28,7 +27,7 @@ export class CustomTabComponent {
   readonly disabled = input(false);
   readonly textLabel = input("");
 
-  @ViewChild(TemplateRef, { static: true }) content!: TemplateRef<any>;
+  readonly content = viewChild.required(TemplateRef);
 
   isActive = false;
 }
@@ -50,19 +49,19 @@ export class CustomTabGroupComponent implements AfterContentInit {
   readonly selectedTabChange = output<MatTabChangeEvent>();
 
   // strict: @ContentChildren is populated by Angular before ngAfterContentInit
-  @ContentChildren(CustomTabComponent) tabs!: QueryList<CustomTabComponent>;
+  readonly tabs = contentChildren(CustomTabComponent);
 
   ngAfterContentInit() {
     this.selectTab(this.selectedIndex());
   }
 
   selectTab(index: number) {
-    if (index < 0 || index >= this.tabs.length) return;
+    if (index < 0 || index >= this.tabs().length) return;
 
-    const newTab = this.tabs.toArray()[index];
+    const newTab = this.tabs()[index];
     if (newTab.disabled()) return;
 
-    this.tabs.forEach((tab, i) => {
+    this.tabs().forEach((tab, i) => {
       tab.isActive = i === index;
     });
 
@@ -74,7 +73,7 @@ export class CustomTabGroupComponent implements AfterContentInit {
   }
 
   getTabsArray() {
-    return this.tabs ? this.tabs.toArray() : [];
+    return this.tabs();
   }
 
   getActiveTab() {

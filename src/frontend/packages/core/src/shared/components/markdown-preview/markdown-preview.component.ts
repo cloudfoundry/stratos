@@ -1,6 +1,6 @@
 
 import { HttpClient, HttpResponse } from '@angular/common/http';
-import { ChangeDetectionStrategy, Component, ElementRef, ViewChild, effect, inject, input, signal, untracked } from '@angular/core';
+import { ChangeDetectionStrategy, Component, ElementRef, effect, inject, input, signal, untracked, viewChild } from '@angular/core';
 import { DomSanitizer } from '@angular/platform-browser';
 
 import { PreviewableComponent } from '../../previewable-component';
@@ -52,8 +52,9 @@ export class MarkdownPreviewComponent implements PreviewableComponent {
     }
   }
 
-  // strict: static @ViewChild is available from ngOnInit onward
-  @ViewChild('markdown', { static: true }) public markdown!: ElementRef;
+  // strict: the target is in the component's own template, so the query is
+  // resolved from ngOnInit onward
+  public readonly markdown = viewChild.required<ElementRef>('markdown');
 
   private parseInline(tokens: any[]): string {
     return tokens.map((token: any) => {
@@ -108,7 +109,7 @@ export class MarkdownPreviewComponent implements PreviewableComponent {
 
   public markdownRendered() {
     // Find the page title and move it to the header
-    const h1 = this.markdown.nativeElement.getElementsByTagName('h1');
+    const h1 = this.markdown().nativeElement.getElementsByTagName('h1');
     if (this.title() === null) {
       if (h1.length > 0) {
         window.setTimeout(() => {

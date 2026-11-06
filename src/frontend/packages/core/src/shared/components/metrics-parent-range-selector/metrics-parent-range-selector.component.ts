@@ -1,5 +1,5 @@
 
-import { ChangeDetectionStrategy, AfterContentInit, Component, ContentChildren, OnDestroy, QueryList, inject } from '@angular/core';
+import { ChangeDetectionStrategy, AfterContentInit, Component, OnDestroy, inject, contentChildren } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { CardWrapperComponent } from '../cards/card/card.component';
 import { CustomFormFieldComponent } from '../custom-form-field/custom-form-field.component';
@@ -34,21 +34,21 @@ export class MetricsParentRangeSelectorComponent implements AfterContentInit, On
 
   private requestSub!: Subscription;
 
-  @ContentChildren(MetricsChartComponent)
-  private metricsCharts!: QueryList<MetricsChartComponent>;
+  private readonly metricsCharts = contentChildren(MetricsChartComponent);
 
   public rangeTypes = MetricQueryType;
 
   ngAfterContentInit() {
-    if (!this.metricsCharts || !this.metricsCharts.first) {
+    const metricsCharts = this.metricsCharts();
+    if (!metricsCharts || !metricsCharts.at(0)!) {
       return;
     }
-    const baseRequest = this.metricsCharts.first.metricsConfig().request;
+    const baseRequest = metricsCharts.at(0)!.metricsConfig().request;
     // Subscribe before init(): init() commits the first windowed request at
     // once, on a plain Subject, and the charts must not miss it.
     this.requestSub = this.rangeSelectorManager.request$.subscribe(next => {
       if (next) {
-        this.metricsCharts.forEach(chart => {
+        this.metricsCharts().forEach(chart => {
           const oldRequest = chart.currentRequest;
           chart.applyRequest({
             ...oldRequest,

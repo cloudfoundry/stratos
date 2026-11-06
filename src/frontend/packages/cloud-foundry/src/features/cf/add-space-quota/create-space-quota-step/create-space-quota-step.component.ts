@@ -1,4 +1,4 @@
-import { AfterViewInit, ChangeDetectionStrategy, Component, OnDestroy, ViewChild, inject, signal, input } from '@angular/core';
+import { AfterViewInit, ChangeDetectionStrategy, Component, OnDestroy, inject, signal, input, viewChild } from '@angular/core';
 import { ActivatedRoute, Router } from '@angular/router';
 import { firstValueFrom, Subscription } from 'rxjs';
 
@@ -31,8 +31,7 @@ export class CreateSpaceQuotaStepComponent implements AfterViewInit, OnDestroy {
   cfGuid: string;
   orgGuid: string;
 
-  @ViewChild('form', { static: true })
-  form!: SpaceQuotaDefinitionFormComponent;
+  readonly form = viewChild.required<SpaceQuotaDefinitionFormComponent>('form');
 
   /** FWT-957: post-success navigation target supplied by parent. */
   // The one host stepper binds where to go on success.
@@ -44,7 +43,7 @@ export class CreateSpaceQuotaStepComponent implements AfterViewInit, OnDestroy {
   signalHandle: SignalStepHandle = {
     valid: this.validSignal.asReadonly(),
     submit: async () => {
-      const formValues = this.form.formGroup.getRawValue();
+      const formValues = this.form().formGroup.getRawValue();
       const body = formToSpaceQuotaCreateBody(formValues, this.orgGuid);
       try {
         await firstValueFrom(this.quotaData.createSpaceQuota(this.cfGuid, body));
@@ -62,10 +61,11 @@ export class CreateSpaceQuotaStepComponent implements AfterViewInit, OnDestroy {
   }
 
   ngAfterViewInit() {
-    if (this.form?.formGroup) {
-      this.validSignal.set(this.form.formGroup.valid);
-      this.formStatusSub = this.form.formGroup.statusChanges.subscribe(
-        () => this.validSignal.set(this.form.formGroup.valid)
+    const form = this.form();
+    if (form?.formGroup) {
+      this.validSignal.set(form.formGroup.valid);
+      this.formStatusSub = form.formGroup.statusChanges.subscribe(
+        () => this.validSignal.set(this.form().formGroup.valid)
       );
     }
   }

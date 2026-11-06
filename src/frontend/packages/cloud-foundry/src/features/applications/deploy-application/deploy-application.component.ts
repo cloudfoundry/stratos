@@ -4,10 +4,12 @@ import {
   Component,
   OnDestroy,
   OnInit,
-  ViewChild,
   computed,
   inject,
   signal,
+  untracked,
+  viewChild,
+  afterRenderEffect,
 } from '@angular/core';
 import { toObservable } from '@angular/core/rxjs-interop';
 import { ErrorStateMatcher, ShowOnDirtyErrorStateMatcher } from '@stratosui/core';
@@ -91,9 +93,10 @@ export class DeployApplicationComponent implements OnInit, OnDestroy {
   // The steppers component renders only the active step's content
   // template at any given time (steppers.component.html line 71:
   // `<span *ngTemplateOutlet="steps[currentIndex].content">`), so child
-  // components are instantiated lazily on activation. We use ViewChild
-  // *setters* so the bridge subscription is wired the moment the child
-  // becomes available — and torn down when the user navigates away.
+  // components are instantiated lazily on activation. An effect on each
+  // view query calls its `wireStep...` method, so the bridge subscription
+  // is wired the moment the child becomes available — and torn down (the
+  // effect's cleanup) when the user navigates away.
   //
   // Step 1 (Cloud Foundry) is conditionally rendered via @if (!appGuid)
   // — a true template guard — so its handle never wires up when the
@@ -102,12 +105,12 @@ export class DeployApplicationComponent implements OnInit, OnDestroy {
   // visibility; the legacy [skip]="step2_2.skip$ | async" binding on
   // step2_2 was a no-op (the child has no skip$ field) and has been
   // removed in the migration.
-  private _step1?: CreateApplicationStep1Component;
-  private _step2?: DeployApplicationStep2Component;
-  private _step2_1?: DeployApplicationStep21Component;
-  private _step2_2?: DeployApplicationStepSourceUploadComponent;
-  private _step4?: DeployApplicationOptionsStepComponent;
-  private _step3?: DeployApplicationStep3Component;
+  private readonly step1 = viewChild<CreateApplicationStep1Component>('step1');
+  private readonly step2 = viewChild<DeployApplicationStep2Component>('step2');
+  private readonly step2_1 = viewChild<DeployApplicationStep21Component>('step2_1');
+  private readonly step2_2 = viewChild<DeployApplicationStepSourceUploadComponent>('step2_2');
+  private readonly step4 = viewChild<DeployApplicationOptionsStepComponent>('step4');
+  private readonly step3 = viewChild<DeployApplicationStep3Component>('step3');
 
   private step1Valid = signal<boolean>(false);
   private step2Valid = signal<boolean>(false);
@@ -117,15 +120,6 @@ export class DeployApplicationComponent implements OnInit, OnDestroy {
   private step3Valid = signal<boolean>(false);
   private step3Closeable = signal<boolean>(false);
   private step3DisablePrevious = signal<boolean>(true);
-
-  private step1Sub?: Subscription;
-  private step2Sub?: Subscription;
-  private step2_1Sub?: Subscription;
-  private step2_2Sub?: Subscription;
-  private step4Sub?: Subscription;
-  private step3ValidSub?: Subscription;
-  private step3CloseableSub?: Subscription;
-  private step3DisablePrevSub?: Subscription;
 
   // Carries the deployer instance forward from step2_2 (source-upload)
   // to step3 (deploy progress). The legacy stepper relayed this via
@@ -144,133 +138,126 @@ export class DeployApplicationComponent implements OnInit, OnDestroy {
 
   private isLoadingSignal = this.cfOrgSpaceService.isLoading;
 
-  @ViewChild('step1', { static: false })
-  set step1Ref(v: CreateApplicationStep1Component | undefined) {
-    this._step1 = v;
-    this.step1Sub?.unsubscribe();
-    this.step1Sub = undefined;
-    if (v) {
-      this.step1Sub = v.validate.subscribe(valid => {
-        this.step1Valid.set(!!valid);
-        this.cdr.markForCheck();
+  // Calls `wire` with a step's child whenever its view query changes, after
+  // dropping the subscription made for the previous child.
+  private bridge<T>(query: () => T | undefined, wire: (child: T | undefined) => Subscription | undefined) {
+    // After render: a step's child creates its streams in its own init
+    // hooks, which run after this component's effects.
+    return afterRenderEffect(onCleanup => {
+      const child = query();
+      untracked(() => {
+        const sub = wire(child);
+        onCleanup(() => sub?.unsubscribe());
       });
-    } else {
+    });
+  }
+
+  private readonly step1Bridge = this.bridge(this.step1, v => this.wireStep1(v));
+  private readonly step2Bridge = this.bridge(this.step2, v => this.wireStep2(v));
+  private readonly step2_1Bridge = this.bridge(this.step2_1, v => this.wireStep2_1(v));
+  private readonly step2_2Bridge = this.bridge(this.step2_2, v => this.wireStep2_2(v));
+  private readonly step4Bridge = this.bridge(this.step4, v => this.wireStep4(v));
+  private readonly step3Bridge = this.bridge(this.step3, v => this.wireStep3(v));
+
+  private wireStep1(v: CreateApplicationStep1Component | undefined): Subscription | undefined {
+    if (!v) {
       this.step1Valid.set(false);
+      return undefined;
     }
+    return v.validate.subscribe(valid => {
+      this.step1Valid.set(!!valid);
+      this.cdr.markForCheck();
+    });
   }
 
-  @ViewChild('step2', { static: false })
-  set step2Ref(v: DeployApplicationStep2Component | undefined) {
-    this._step2 = v;
-    this.step2Sub?.unsubscribe();
-    this.step2Sub = undefined;
-    if (v) {
-      this.step2Sub = v.validate.subscribe(valid => {
-        this.step2Valid.set(!!valid);
-        this.cdr.markForCheck();
-      });
-    } else {
+  private wireStep2(v: DeployApplicationStep2Component | undefined): Subscription | undefined {
+    if (!v) {
       this.step2Valid.set(false);
+      return undefined;
     }
+    return v.validate.subscribe(valid => {
+      this.step2Valid.set(!!valid);
+      this.cdr.markForCheck();
+    });
   }
 
-  @ViewChild('step2_1', { static: false })
-  set step2_1Ref(v: DeployApplicationStep21Component | undefined) {
-    this._step2_1 = v;
-    this.step2_1Sub?.unsubscribe();
-    this.step2_1Sub = undefined;
-    if (v) {
-      // Subscription wiring only. The activation-time `onEnter` call (which
-      // builds the commit list from the git source populated by step 2's
-      // submit) lives on `step2_1Handle.onEnter` — see the `step2_2Ref`
-      // comment for why the ViewChild-time call is the wrong hook: step 2_1
-      // is rendered via `[hidden]` and so is instantiated up-front, before
-      // step 2 has saved any gitDetails. Calling `v.onEnter()` here ran the
-      // commit-list wrapper with an empty applicationSource, so it never
-      // resolved a project/branch — leaving "Source Config" with no options
-      // and the Next button disabled.
-      this.step2_1Sub = v.validate.subscribe(valid => {
-        this.step2_1Valid.set(!!valid);
-        this.cdr.markForCheck();
-      });
-    } else {
+  private wireStep2_1(v: DeployApplicationStep21Component | undefined): Subscription | undefined {
+    if (!v) {
       this.step2_1Valid.set(false);
+      return undefined;
     }
+    // Subscription wiring only. The activation-time `onEnter` call (which
+    // builds the commit list from the git source populated by step 2's
+    // submit) lives on `step2_1Handle.onEnter` — see the `wireStep2_2`
+    // comment for why wiring time is the wrong hook: step 2_1 is rendered
+    // via `[hidden]` and so is instantiated up-front, before step 2 has
+    // saved any gitDetails. Calling `v.onEnter()` here ran the commit-list
+    // wrapper with an empty applicationSource, so it never resolved a
+    // project/branch — leaving "Source Config" with no options and the Next
+    // button disabled.
+    return v.validate.subscribe(valid => {
+      this.step2_1Valid.set(!!valid);
+      this.cdr.markForCheck();
+    });
   }
 
-  @ViewChild('step2_2', { static: false })
-  set step2_2Ref(v: DeployApplicationStepSourceUploadComponent | undefined) {
-    this._step2_2 = v;
-    this.step2_2Sub?.unsubscribe();
-    this.step2_2Sub = undefined;
-    if (v) {
-      // Subscription wiring only. The activation-time `onEnter` call that
-      // primes `deployer.fsFileInfo` lives on `step2_2Handle.onEnter` — it
-      // fires when the stepper navigates *into* this step, after step 2's
-      // submit has populated `pendingFsFileInfo`. Calling `v.onEnter` here
-      // (on view-init) would run with `pendingFsFileInfo === undefined`
-      // because `<app-step [hidden]>` keeps step 2_2 instantiated up-front,
-      // so the setter fires before step 2 ever submits.
-      this.step2_2Sub = v.valid$.subscribe(valid => {
-        this.step2_2Valid.set(!!valid);
-        this.cdr.markForCheck();
-      });
-    } else {
+  private wireStep2_2(v: DeployApplicationStepSourceUploadComponent | undefined): Subscription | undefined {
+    if (!v) {
       this.step2_2Valid.set(false);
+      return undefined;
     }
+    // Subscription wiring only. The activation-time `onEnter` call that
+    // primes `deployer.fsFileInfo` lives on `step2_2Handle.onEnter` — it
+    // fires when the stepper navigates *into* this step, after step 2's
+    // submit has populated `pendingFsFileInfo`. Calling `v.onEnter` here
+    // (on view-init) would run with `pendingFsFileInfo === undefined`
+    // because `<app-step [hidden]>` keeps step 2_2 instantiated up-front,
+    // so this runs before step 2 ever submits.
+    return v.valid$.subscribe(valid => {
+      this.step2_2Valid.set(!!valid);
+      this.cdr.markForCheck();
+    });
   }
 
-  @ViewChild('step4', { static: false })
-  set step4Ref(v: DeployApplicationOptionsStepComponent | undefined) {
-    this._step4 = v;
-    this.step4Sub?.unsubscribe();
-    this.step4Sub = undefined;
-    if (v) {
-      // Replicate the legacy [onEnter]="step4.onEnter" — the options step
-      // re-evaluates its form on entry (resets / merges manifest-derived
-      // defaults). The framework would normally pass deployer info as
-      // `data` — see comment on step2_2 for why we pass undefined.
-      v.onEnter(undefined);
-      this.step4Sub = v.valid$.subscribe(valid => {
-        this.step4Valid.set(!!valid);
-        this.cdr.markForCheck();
-      });
-    } else {
+  private wireStep4(v: DeployApplicationOptionsStepComponent | undefined): Subscription | undefined {
+    if (!v) {
       this.step4Valid.set(false);
+      return undefined;
     }
+    // Replicate the legacy [onEnter]="step4.onEnter" — the options step
+    // re-evaluates its form on entry (resets / merges manifest-derived
+    // defaults). The framework would normally pass deployer info as
+    // `data` — see comment on step2_2 for why we pass undefined.
+    v.onEnter(undefined);
+    return v.valid$.subscribe(valid => {
+      this.step4Valid.set(!!valid);
+      this.cdr.markForCheck();
+    });
   }
 
-  @ViewChild('step3', { static: false })
-  set step3Ref(v: DeployApplicationStep3Component | undefined) {
-    this._step3 = v;
-    this.step3ValidSub?.unsubscribe();
-    this.step3CloseableSub?.unsubscribe();
-    this.step3DisablePrevSub?.unsubscribe();
-    this.step3ValidSub = undefined;
-    this.step3CloseableSub = undefined;
-    this.step3DisablePrevSub = undefined;
-    if (v) {
-      // Subscription wiring only. The activation-time `onEnter` call that
-      // forwards `pendingDeployer` lives on `step3Handle.onEnter` — see the
-      // `step2_2Ref` comment above for why the ViewChild-time call was the
-      // wrong hook.
-      this.step3ValidSub = v.valid$.subscribe(valid => {
-        this.step3Valid.set(!!valid);
-        this.cdr.markForCheck();
-      });
-      this.step3CloseableSub = v.closeable$.subscribe(c => {
-        this.step3Closeable.set(!!c);
-        this.cdr.markForCheck();
-      });
-      this.step3DisablePrevSub = v.disablePrevious$.subscribe(d => {
-        this.step3DisablePrevious.set(!!d);
-        this.cdr.markForCheck();
-      });
-    } else {
+  private wireStep3(v: DeployApplicationStep3Component | undefined): Subscription | undefined {
+    if (!v) {
       this.step3Valid.set(false);
       this.step3Closeable.set(false);
       this.step3DisablePrevious.set(true);
+      return undefined;
     }
+    // Subscription wiring only. The activation-time `onEnter` call that
+    // forwards `pendingDeployer` lives on `step3Handle.onEnter` — see the
+    // `wireStep2_2` comment above for why wiring time was the wrong hook.
+    const sub = v.valid$.subscribe(valid => {
+      this.step3Valid.set(!!valid);
+      this.cdr.markForCheck();
+    });
+    sub.add(v.closeable$.subscribe(c => {
+      this.step3Closeable.set(!!c);
+      this.cdr.markForCheck();
+    }));
+    sub.add(v.disablePrevious$.subscribe(d => {
+      this.step3DisablePrevious.set(!!d);
+      this.cdr.markForCheck();
+    }));
+    return sub;
   }
 
   step1Handle: SignalStepHandle = {
@@ -291,7 +278,7 @@ export class DeployApplicationComponent implements OnInit, OnDestroy {
   step2Handle: SignalStepHandle = {
     valid: this.step2Valid.asReadonly(),
     submit: async () => {
-      const result = await firstValueFrom(this._step2!.onNext(0, null as any));
+      const result = await firstValueFrom(this.step2()!.onNext(0, null as any));
       if (!result.success) {
         throw new Error(result.message || 'Failed to save source type');
       }
@@ -312,10 +299,10 @@ export class DeployApplicationComponent implements OnInit, OnDestroy {
     // saved — the commit-list wrapper resolves project/branch from
     // applicationSource, which is empty until then. Re-entries after a
     // Previous click also rebuild against the latest selection.
-    onEnter: () => this._step2_1?.onEnter(),
-    onLeave: () => this._step2_1?.onLeave(),
+    onEnter: () => this.step2_1()?.onEnter(),
+    onLeave: () => this.step2_1()?.onLeave(),
     submit: async () => {
-      const result = await firstValueFrom(this._step2_1!.onNext(0, null as any));
+      const result = await firstValueFrom(this.step2_1()!.onNext(0, null as any));
       if (!result.success) {
         throw new Error(result.message || 'Failed to save source config');
       }
@@ -327,15 +314,15 @@ export class DeployApplicationComponent implements OnInit, OnDestroy {
     // Activation-time hand-off of step 2's captured FileScannerInfo into
     // the source-upload component. Has to run on each entry (not just on
     // ViewChild init) so re-entries after a Previous click also re-prime
-    // the freshly-constructed deployer. See `step2_2Ref` comment for the
+    // the freshly-constructed deployer. See `wireStep2_2` comment for the
     // ViewChild-fires-once trap this avoids.
     onEnter: () => {
-      this._step2_2?.onEnter(this.pendingFsFileInfo as any);
+      this.step2_2()?.onEnter(this.pendingFsFileInfo as any);
       this.pendingFsFileInfo = undefined;
     },
-    onLeave: (isNext?: boolean) => this._step2_2?.onLeave(!!isNext),
+    onLeave: (isNext?: boolean) => this.step2_2()?.onLeave(!!isNext),
     submit: async () => {
-      const result = await firstValueFrom(this._step2_2!.onNext(0, null as any));
+      const result = await firstValueFrom(this.step2_2()!.onNext(0, null as any));
       if (!result.success) {
         throw new Error(result.message || 'Failed to upload source');
       }
@@ -350,7 +337,7 @@ export class DeployApplicationComponent implements OnInit, OnDestroy {
     valid: this.step4Valid.asReadonly(),
     nextButtonText: this.deployButtonTextSignal.asReadonly(),
     submit: async () => {
-      const result = await firstValueFrom(this._step4!.onNext(0, null as any));
+      const result = await firstValueFrom(this.step4()!.onNext(0, null as any));
       if (!result.success) {
         throw new Error(result.message || 'Failed to save deploy options');
       }
@@ -370,7 +357,7 @@ export class DeployApplicationComponent implements OnInit, OnDestroy {
     // deploys again.
     onEnter: () => {
       this.deployButtonTextSignal.set('Deploy again');
-      this._step3?.onEnter(this.pendingDeployer as any);
+      this.step3()?.onEnter(this.pendingDeployer as any);
     },
     canClose: this.step3Closeable.asReadonly(),
     disablePrevious: this.step3DisablePrevious.asReadonly(),
@@ -381,7 +368,7 @@ export class DeployApplicationComponent implements OnInit, OnDestroy {
     cancelButtonText: signal('Close').asReadonly(),
     finishButtonText: signal('Go to App Summary').asReadonly(),
     submit: async () => {
-      const result = await firstValueFrom(this._step3!.onNext(0, null as any));
+      const result = await firstValueFrom(this.step3()!.onNext(0, null as any));
       if (!result.success) {
         throw new Error(result.message || 'Deploy failed');
       }
@@ -409,14 +396,6 @@ export class DeployApplicationComponent implements OnInit, OnDestroy {
 
   ngOnDestroy(): void {
     this.initCfOrgSpaceService.forEach(p => p.unsubscribe());
-    this.step1Sub?.unsubscribe();
-    this.step2Sub?.unsubscribe();
-    this.step2_1Sub?.unsubscribe();
-    this.step2_2Sub?.unsubscribe();
-    this.step4Sub?.unsubscribe();
-    this.step3ValidSub?.unsubscribe();
-    this.step3CloseableSub?.unsubscribe();
-    this.step3DisablePrevSub?.unsubscribe();
   }
 
   ngOnInit(): void {

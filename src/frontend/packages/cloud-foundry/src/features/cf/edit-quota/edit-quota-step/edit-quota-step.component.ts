@@ -1,6 +1,6 @@
-import { ChangeDetectionStrategy, Component, OnDestroy, Signal, ViewChild, computed, inject, signal, input } from '@angular/core';
+import { ChangeDetectionStrategy, Component, Signal, computed, inject, signal, input, untracked, viewChild, afterRenderEffect } from '@angular/core';
 import { ActivatedRoute, Router } from '@angular/router';
-import { firstValueFrom, Subscription } from 'rxjs';
+import { firstValueFrom } from 'rxjs';
 
 import { SignalStepHandle } from '@stratosui/core';
 import { QuotaDataService, SignalSource } from '../../../../services/endpoint-data/quota-data.service';
@@ -24,7 +24,7 @@ import { leadError } from '@stratosui/store';
     QuotaDefinitionFormComponent
 ]
 })
-export class EditQuotaStepComponent implements OnDestroy {
+export class EditQuotaStepComponent {
   private activatedRoute = inject(ActivatedRoute);
   private router = inject(Router);
   private quotaData = inject(QuotaDataService);
@@ -39,31 +39,33 @@ export class EditQuotaStepComponent implements OnDestroy {
   readonly redirectUrl = input.required<string>();
 
   private validSignal = signal(false);
-  private formStatusSub?: Subscription;
-  private _form?: QuotaDefinitionFormComponent;
+  // The form sits inside an @if, so it exists only once the quota has loaded.
+  readonly form = viewChild<QuotaDefinitionFormComponent>('form');
 
-  @ViewChild('form', { static: false })
-  set form(value: QuotaDefinitionFormComponent) {
-    this._form = value;
-    this.formStatusSub?.unsubscribe();
-    if (value?.formGroup) {
-      this.validSignal.set(value.formGroup.valid && value.formGroup.dirty);
-      this.formStatusSub = value.formGroup.statusChanges.subscribe(
-        () => this.validSignal.set(value.formGroup.valid && value.formGroup.dirty)
+  // The bridges run after render: a step's child creates its streams in
+  // its own init hooks, which run after this component's effects.
+  private readonly formStatus = afterRenderEffect(onCleanup => {
+    const form = this.form();
+    untracked(() => {
+      if (!form?.formGroup) {
+        return;
+      }
+      this.validSignal.set(form.formGroup.valid && form.formGroup.dirty);
+      const sub = form.formGroup.statusChanges.subscribe(
+        () => this.validSignal.set(form.formGroup.valid && form.formGroup.dirty)
       );
-    }
-  }
-  get form(): QuotaDefinitionFormComponent | undefined {
-    return this._form;
-  }
+      onCleanup(() => sub.unsubscribe());
+    });
+  });
 
   signalHandle: SignalStepHandle = {
     valid: this.validSignal.asReadonly(),
     submit: async () => {
-      if (!this.form) {
+      const form = this.form();
+      if (!form) {
         throw new Error('Quota definition form is not available');
       }
-      const formValues = this.form.formGroup.getRawValue();
+      const formValues = form.formGroup.getRawValue();
       const body = formToOrgQuotaWriteBody(formValues);
       try {
         await firstValueFrom(this.quotaData.updateOrgQuota(this.cfGuid, this.quotaGuid, body));
@@ -81,9 +83,5 @@ export class EditQuotaStepComponent implements OnDestroy {
 
     this.source = this.quotaData.orgQuota(this.cfGuid, this.quotaGuid);
     this.quota = computed(() => this.source.value());
-  }
-
-  ngOnDestroy() {
-    this.formStatusSub?.unsubscribe();
   }
 }

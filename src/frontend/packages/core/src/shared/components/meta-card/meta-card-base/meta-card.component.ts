@@ -1,5 +1,5 @@
 import { CommonModule } from '@angular/common';
-import { ChangeDetectionStrategy, Component, ContentChild, HostListener, computed, contentChildren, signal, input, linkedSignal } from '@angular/core';
+import { ChangeDetectionStrategy, Component, HostListener, computed, contentChild, contentChildren, signal, input, linkedSignal } from '@angular/core';
 import { combineLatest, Observable, of as observableOf, of } from 'rxjs';
 import { map } from 'rxjs/operators';
 
@@ -42,8 +42,8 @@ export class MetaCardComponent {
   // @if waiting on async data) re-render this OnPush view.
   readonly metaItems = contentChildren(MetaCardItemComponent);
 
-  @ContentChild(MetaCardTitleComponent, { static: true })
-  title!: MetaCardTitleComponent;
+  // Optional: a card without a title renders no header.
+  readonly title = contentChild(MetaCardTitleComponent);
 
   readonly status$ = input<Observable<StratosStatus>>();
 

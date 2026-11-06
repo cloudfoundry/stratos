@@ -4,8 +4,8 @@ import {
   computed,
   inject,
   signal,
-  ViewChild,
   WritableSignal,
+  viewChild
 } from '@angular/core';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { ActivatedRoute, Router } from '@angular/router';
@@ -64,7 +64,7 @@ import { HelmReleaseVersionsSignalConfigService } from './helm-release-versions-
 })
 export class UpgradeReleaseComponent {
 
-  @ViewChild('editor', { static: true }) editor!: ChartValuesEditorComponent; // strict: @ViewChild populated by Angular
+  readonly editor = viewChild.required<ChartValuesEditorComponent>('editor'); // strict: @ViewChild populated by Angular
 
   public cancelUrl;
   // Signal-native list config for the version picker; undefined until the
@@ -109,7 +109,7 @@ export class UpgradeReleaseComponent {
     valid: signal(true).asReadonly(),
     finishButtonText: signal('Upgrade').asReadonly(),
     onEnter: () => {
-      this.editor.resizeEditor();
+      this.editor().resizeEditor();
     },
     submit: async () => {
       // showAdvancedOptions branching from the legacy doUpgrade is preserved
@@ -238,7 +238,7 @@ export class UpgradeReleaseComponent {
   // KubeHelmDataService rather than the ngrx upgrade action.
   private doUpgrade$(): Observable<{ success: boolean; message?: string }> {
     const values: HelmUpgradePayload = {
-      values: JSON.stringify(this.editor.getValues()),
+      values: JSON.stringify(this.editor().getValues()),
       restartPods: false,
       chart: {
         name: this.version.relationships.chart.data.name,

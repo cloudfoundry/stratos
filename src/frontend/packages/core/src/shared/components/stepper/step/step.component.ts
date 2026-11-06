@@ -1,4 +1,4 @@
-import { ChangeDetectionStrategy, Component, Signal, TemplateRef, ViewChild, input, output } from '@angular/core';
+import { ChangeDetectionStrategy, Component, Signal, TemplateRef, input, output, viewChild } from '@angular/core';
 import { from, Observable, of as observableOf } from 'rxjs';
 
 import { StepperRedirectPayload } from '../stepper.types';
@@ -185,8 +185,7 @@ export class StepComponent {
     return this.signalHandle()?.destructiveStep?.() ?? this.destructiveStep();
   }
 
-  @ViewChild(TemplateRef, { static: true })
-  content!: TemplateRef<any>;
+  readonly content = viewChild.required(TemplateRef);
 
   // When `signalHandle.skipIf` is set, prefer the signal read so admin-only
   // / conditional steps flip without consumers needing to wire boolean
