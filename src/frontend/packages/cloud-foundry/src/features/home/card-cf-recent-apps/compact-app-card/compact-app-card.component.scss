@@ -43,19 +43,14 @@
       color: rgb(96 165 250); // blue-400
     }
   }
+  // The date's color is the theme's muted text color, set in the template.
   &__updated {
-    color: rgba(0, 0, 0, 0.6);
     white-space: nowrap;
     margin-left: auto;
     padding-left: 8px;
-
-    :host-context(.dark) & {
-      color: rgba(255, 255, 255, 0.6);
-    }
   }
   &__subtle {
     font-size: 12px;
-    opacity: 0.7;
   }
 }
 

@@ -5,7 +5,7 @@
       <a [routerLink]="['/applications', endpointGuid(), app.metadata.guid]" [queryParams]="bcType">{{ app.entity.name }}</a>
     </div>
     @if (showDate()) {
-      <div [ngClass]="{'compact-app-card__subtle': dateMode() === 'subtle'}" class="compact-app-card__updated">{{ app.metadata.updated_at | date:'medium' }}</div>
+      <div [ngClass]="{'compact-app-card__subtle': dateMode() === 'subtle'}" class="compact-app-card__updated text-content-muted">{{ app.metadata.updated_at | date:'medium' }}</div>
     }
   </div>
 } @else {
