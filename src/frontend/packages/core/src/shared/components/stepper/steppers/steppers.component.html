@@ -18,23 +18,23 @@
                 class="steppers-header flex items-center shrink-0 min-w-0"
              [ngClass]="{
                'steppers-header--active': step.active,
-               'steppers-header--busy': step.blocked || step.showBusy
+               'steppers-header--busy': step.effectiveBlocked || step.effectiveShowBusy
              }">
                 @if (steps.length !== 1) {
                   <ng-template #headerBody>
                     <!-- Step indicator -->
                     <div class="steppers-header-indicator relative flex items-center justify-center shrink-0">
                       <!-- Loading spinner -->
-                      @if ((step.blocked || step.showBusy)) {
+                      @if ((step.effectiveBlocked || step.effectiveShowBusy)) {
                         <app-busy class="text-primary" size="2rem" context="stepper"></app-busy>
                       } @else {
-                        <app-dot-content [disabled]="step.skip"
+                        <app-dot-content [disabled]="step.effectiveSkip"
                           class="w-8 h-8 rounded-full flex items-center justify-center text-sm font-medium transition-colors steppers-header-indicator-content"
                                  [ngClass]="{
                                    'steppers-header-indicator-content--active': step.active,
                                    'steppers-header-indicator-content--complete': step.complete,
                                    'steppers-header-indicator-content--inactive': !step.active && !step.complete,
-                                   'steppers-header-indicator-content--skip': step.skip
+                                   'steppers-header-indicator-content--skip': step.effectiveSkip
                                  }">
                           @if (step.complete) {
                             <span class="material-icons text-sm">{{ this.getIconLigature() }}</span>
@@ -52,12 +52,12 @@
                     'steppers-header-text--active': step.active,
                     'steppers-header-text--complete': step.complete,
                     'steppers-header-text--inactive': !step.active && !step.complete,
-                    'steppers-header-text--skip': step.skip
+                    'steppers-header-text--skip': step.effectiveSkip
                   }">
                       {{ step.title }}
                     </span>
                   </ng-template>
-                  @if (step.complete && !steps[currentIndex()].disablePrevious && !steps[currentIndex()].hidePrevious) {
+                  @if (step.complete && !steps[currentIndex()].effectiveDisablePrevious && !steps[currentIndex()].hidePrevious) {
                     <button type="button" class="steppers-header-inner flex items-center min-w-0 cursor-pointer"
                       [attr.aria-label]="step.title + ', completed'" (click)="goTo(i)">
                       <ng-container *ngTemplateOutlet="headerBody"></ng-container>
@@ -100,7 +100,7 @@
               <button id="stepper_previous"
                 class="btn btn-secondary"
                 (click)="goPrevious()"
-                [disabled]="!canGoto(currentIndex() - 1) || steps[currentIndex()].disablePrevious">
+                [disabled]="!canGoto(currentIndex() - 1) || steps[currentIndex()].effectiveDisablePrevious">
                 Previous
               </button>
             }
@@ -109,7 +109,7 @@
                where justify-between has nothing to spread. -->
           <div class="steppers-navigation-right ml-auto flex items-center space-x-3">
             <!-- Cancel button -->
-            @if (!steps[currentIndex()].hideCloseButton && (cancel() || cancelAction())) {
+            @if (!steps[currentIndex()].effectiveHideCloseButton && (cancel() || cancelAction())) {
               <button id="stepper_cancel"
                 class="btn btn-secondary"
                 [routerLink]="cancelReload() || cancelAction() ? null : (cancel$ | async)"
@@ -125,12 +125,12 @@
                 class="steppers-navigation-right-next btn flex items-center space-x-2"
                 [attr.aria-describedby]="stepError() ? 'stepper_error' : null"
                   [ngClass]="{
-                    'btn-danger': steps[currentIndex()].destructiveStep,
-                    'btn-primary': !steps[currentIndex()].destructiveStep
+                    'btn-danger': steps[currentIndex()].effectiveDestructiveStep,
+                    'btn-primary': !steps[currentIndex()].effectiveDestructiveStep
                   }"
                 type="submit"
                 (click)="goNext()"
-                [disabled]="steps[currentIndex()].busy || steps[currentIndex()].blocked || !canGoNext(currentIndex())">
+                [disabled]="steps[currentIndex()].busy || steps[currentIndex()].effectiveBlocked || !canGoNext(currentIndex())">
                 <!-- Loading spinner -->
                 @if (showNextButtonProgress) {
                   <app-busy class="text-white" size="1.25rem" context="stepper-next"></app-busy>
