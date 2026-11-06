@@ -2,80 +2,81 @@
   <app-page-header>
     <h1>Delete application</h1>
   </app-page-header>
-  <app-steppers [cancel]="cancelUrl">
-    <!-- Steps are always rendered so the stepper captures them at
-         AfterContentInit (its @ContentChildren is a one-shot snapshot
-         and doesn't listen for dynamic additions). We toggle [hidden]
-         on each step — the stepper subscribes to onHidden changes and
-         re-filters its visible step list reactively. -->
-    <app-step title="Routes" [hidden]="!routesLoaded() || appRoutes().length === 0" [signalHandle]="routesStepHandle">
-      <div class="flex flex-col w-full">
-        <p>Please select any attached application routes you would like to delete.</p>
-        <div class="mt-3 rounded border border-content-border p-4">
-          <h2 class="text-xl font-semibold text-content-text m-0">{{ appName() || 'Application' }}</h2>
-          <h3 class="text-sm font-medium text-content-muted mt-2 mb-1 uppercase tracking-wide">Routes</h3>
-          <app-routes-picker
-            class="w-full"
-            [routes]="appRoutes()"
-            (selectedChange)="setSelectedRoutes($event)">
-          </app-routes-picker>
-        </div>
-      </div>
-    </app-step>
-    <app-step title="Service Instances" [hidden]="!bindingsLoaded() || appBindings().length === 0" [signalHandle]="bindingsStepHandle">
-      <div class="flex flex-col w-full">
-        <p>Please select any attached application service instances you would like to unbind.</p>
-        <div class="mt-3 rounded border border-content-border p-4">
-          <h2 class="text-xl font-semibold text-content-text m-0">{{ appName() || 'Application' }}</h2>
-          <h3 class="text-sm font-medium text-content-muted mt-2 mb-1 uppercase tracking-wide">Service Instances</h3>
-          <app-service-bindings-picker
-            class="w-full"
-            [bindings]="appBindings()"
-            (selectedChange)="setSelectedServiceBindings($event)">
-          </app-service-bindings-picker>
-        </div>
-      </div>
-    </app-step>
-    <app-step title="Confirm" class="flex flex-col w-full" [signalHandle]="confirmStepHandle">
-      <div class="flex flex-col w-full">
-        <p>Please confirm that you would like to delete the following application@if ((selectedRoutes && selectedRoutes.length) || (selectedServiceBindings && selectedServiceBindings.length)) {
-          <span
-            >
-          and related entities</span>
-        }:</p>
-        <div class="mt-3 rounded border border-content-border p-4">
-          <div class="flex items-baseline gap-x-2 flex-wrap text-base text-content-text">
-            <strong class="text-lg">{{ appName() || 'Application' }}</strong>
-            <span class="text-content-muted">on</span>
-            <strong>{{ endpointName() }}</strong>
-            <span class="text-content-muted">/</span>
-            <strong>{{ orgName() }}</strong>
-            <span class="text-content-muted">/</span>
-            <strong>{{ spaceName() }}</strong>
+  @if (relatedLoaded()) {
+    <app-steppers [cancel]="cancelUrl">
+      <!-- The wizard waits for the routes and bindings, so that it starts on
+           the first step that has something to show. Every step is always
+           rendered (the stepper reads its steps once); [hidden] drops a step
+           with nothing to pick. -->
+      <app-step title="Routes" [hidden]="appRoutes().length === 0" [signalHandle]="routesStepHandle">
+        <div class="flex flex-col w-full">
+          <p>Please select any attached application routes you would like to delete.</p>
+          <div class="mt-3 rounded border border-content-border p-4">
+            <h2 class="text-xl font-semibold text-content-text m-0">{{ appName() || 'Application' }}</h2>
+            <h3 class="text-sm font-medium text-content-muted mt-2 mb-1 uppercase tracking-wide">Routes</h3>
+            <app-routes-picker
+              class="w-full"
+              [routes]="appRoutes()"
+              (selectedChange)="setSelectedRoutes($event)">
+            </app-routes-picker>
           </div>
-          @if (selectedRoutes && selectedRoutes.length) {
-            <h3 class="text-sm font-medium text-content-muted mt-3 mb-1 uppercase tracking-wide">Routes</h3>
-            <ul class="list-disc list-inside m-0">
-              @for (route of selectedRoutes; track route.guid) {
-                <li data-test="confirm-route">{{ route.url }}</li>
-              }
-            </ul>
-          }
-          @if (selectedServiceBindings && selectedServiceBindings.length) {
-            <h3 class="text-sm font-medium text-content-muted mt-3 mb-1 uppercase tracking-wide">Service Instances</h3>
-            <ul class="list-disc list-inside m-0">
-              @for (binding of selectedServiceBindings; track binding.guid) {
-                <li data-test="confirm-binding">
-                  {{ binding.serviceInstance.name }}
-                  @if (binding.serviceInstance.type) {
-                    <span class="text-content-muted"> ({{ binding.serviceInstance.type }})</span>
-                  }
-                </li>
-              }
-            </ul>
-          }
         </div>
-      </div>
-    </app-step>
-  </app-steppers>
+      </app-step>
+      <app-step title="Service Instances" [hidden]="appBindings().length === 0" [signalHandle]="bindingsStepHandle">
+        <div class="flex flex-col w-full">
+          <p>Please select any attached application service instances you would like to unbind.</p>
+          <div class="mt-3 rounded border border-content-border p-4">
+            <h2 class="text-xl font-semibold text-content-text m-0">{{ appName() || 'Application' }}</h2>
+            <h3 class="text-sm font-medium text-content-muted mt-2 mb-1 uppercase tracking-wide">Service Instances</h3>
+            <app-service-bindings-picker
+              class="w-full"
+              [bindings]="appBindings()"
+              (selectedChange)="setSelectedServiceBindings($event)">
+            </app-service-bindings-picker>
+          </div>
+        </div>
+      </app-step>
+      <app-step title="Confirm" class="flex flex-col w-full" [signalHandle]="confirmStepHandle">
+        <div class="flex flex-col w-full">
+          <p>Please confirm that you would like to delete the following application@if ((selectedRoutes && selectedRoutes.length) || (selectedServiceBindings && selectedServiceBindings.length)) {
+            <span
+              >
+            and related entities</span>
+          }:</p>
+          <div class="mt-3 rounded border border-content-border p-4">
+            <div class="flex items-baseline gap-x-2 flex-wrap text-base text-content-text">
+              <strong class="text-lg">{{ appName() || 'Application' }}</strong>
+              <span class="text-content-muted">on</span>
+              <strong>{{ endpointName() }}</strong>
+              <span class="text-content-muted">/</span>
+              <strong>{{ orgName() }}</strong>
+              <span class="text-content-muted">/</span>
+              <strong>{{ spaceName() }}</strong>
+            </div>
+            @if (selectedRoutes && selectedRoutes.length) {
+              <h3 class="text-sm font-medium text-content-muted mt-3 mb-1 uppercase tracking-wide">Routes</h3>
+              <ul class="list-disc list-inside m-0">
+                @for (route of selectedRoutes; track route.guid) {
+                  <li data-test="confirm-route">{{ route.url }}</li>
+                }
+              </ul>
+            }
+            @if (selectedServiceBindings && selectedServiceBindings.length) {
+              <h3 class="text-sm font-medium text-content-muted mt-3 mb-1 uppercase tracking-wide">Service Instances</h3>
+              <ul class="list-disc list-inside m-0">
+                @for (binding of selectedServiceBindings; track binding.guid) {
+                  <li data-test="confirm-binding">
+                    {{ binding.serviceInstance.name }}
+                    @if (binding.serviceInstance.type) {
+                      <span class="text-content-muted"> ({{ binding.serviceInstance.type }})</span>
+                    }
+                  </li>
+                }
+              </ul>
+            }
+          </div>
+        </div>
+      </app-step>
+    </app-steppers>
+  }
 </app-loading-page>
