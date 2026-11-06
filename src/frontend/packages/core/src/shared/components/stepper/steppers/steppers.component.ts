@@ -74,7 +74,7 @@ export class SteppersComponent implements OnInit, AfterContentInit, OnDestroy {
   allSteps: StepComponent[] = [];
   showNextButtonProgress = false;
 
-  hiddenSubs: Unsubscribable[] = [];
+  stepSubs: Unsubscribable[] = [];
 
   stepValidateSub: Subscription | null = null;
 
@@ -92,11 +92,10 @@ export class SteppersComponent implements OnInit, AfterContentInit, OnDestroy {
   // to it (or move on from it) once steps are shown again.
   private parkedStep?: StepComponent;
 
-  // A legacy [hidden] change re-filters through hiddenChange, but a
-  // signalHandle.hidden change emits nothing. Reading `hidden` here tracks
-  // each handle's signal, so the step list re-filters when one flips.
+  // Reading `effectiveHidden` here tracks each step's [hidden] input and
+  // its handle's hidden signal, so the step list re-filters when either flips.
   private readonly signalHiddenSync = effect(() => {
-    const visible = this.contentSteps().filter(step => !step.hidden);
+    const visible = this.contentSteps().filter(step => !step.effectiveHidden);
     untracked(() => {
       if (visible.length !== this.steps.length || visible.some((step, i) => step !== this.steps[i])) {
         this.filterSteps();
@@ -114,7 +113,7 @@ export class SteppersComponent implements OnInit, AfterContentInit, OnDestroy {
   private readonly firstStepEntry = effect(() => {
     const index = this.startIndex();
     const step = this.visibleSteps()[index];
-    if (!step || step.blocked) {
+    if (!step || step.effectiveBlocked) {
       return;
     }
     untracked(() => {
@@ -174,7 +173,7 @@ export class SteppersComponent implements OnInit, AfterContentInit, OnDestroy {
   ngOnInit() { }
 
   ngOnDestroy() {
-    this.hiddenSubs.forEach(sub => sub.unsubscribe());
+    this.stepSubs.forEach(sub => sub.unsubscribe());
     this.unsubscribeNext();
   }
 
@@ -183,29 +182,13 @@ export class SteppersComponent implements OnInit, AfterContentInit, OnDestroy {
     this.contentSteps.set(this.allSteps);
 
     this.allSteps.forEach((step => {
-      this.hiddenSubs.push(step.hiddenChange.subscribe((_hidden) => {
-        this.filterSteps();
-      }));
-      // Listen for validation/canClose/disablePrevious changes to trigger
-      // change detection. Under OnPush + zoneless CD, setting an @Input on
-      // a child step (e.g. via an async pipe in the grandparent template)
-      // only marks that child dirty — it does not re-run the stepper's own
-      // template bindings that read from `this.steps[i].canClose` etc.
-      // Without these markForCheck calls the Previous/Close button
-      // disabled state stays frozen at the initial bind state.
-      this.hiddenSubs.push(step.validChange.subscribe(() => {
-        this.cdr.markForCheck();
-      }));
-      // busy gates the Next/Apply [disabled] binding; its mutations (e.g.
-      // the destructive-entry delay timer in StepComponent.pOnEnter) happen
-      // outside this component's CD scope. See StepComponent.busy.
-      this.hiddenSubs.push(step.busyChange.subscribe(() => {
-        this.cdr.markForCheck();
-      }));
-      this.hiddenSubs.push(step.canCloseChange.subscribe(() => {
-        this.cdr.markForCheck();
-      }));
-      this.hiddenSubs.push(step.disablePreviousChange.subscribe(() => {
+      // A step's inputs (hidden, valid, canClose, disablePrevious, ...) are
+      // signals: the template bindings and signalHiddenSync that read them
+      // follow a change by themselves. busy is a plain field, so it needs
+      // this: it gates the Next/Apply [disabled] binding, and its mutations
+      // (e.g. the destructive-entry delay timer in StepComponent.pOnEnter)
+      // happen outside this component's CD scope. See StepComponent.busy.
+      this.stepSubs.push(step.busyChange.subscribe(() => {
         this.cdr.markForCheck();
       }));
     }));
@@ -216,7 +199,7 @@ export class SteppersComponent implements OnInit, AfterContentInit, OnDestroy {
     const parked = this.parkedStep;
     const current = parked ?? this.steps[this.currentIndex()];
     this.parkedStep = undefined;
-    this.steps = this.allSteps.filter((step => !step.hidden));
+    this.steps = this.allSteps.filter((step => !step.effectiveHidden));
     // Showing or hiding a step before the current one moves it in the
     // list. Follow it, so the index keeps pointing at the step the user is
     // on (the one marked active) instead of at its neighbour or past the end.
@@ -350,7 +333,7 @@ export class SteppersComponent implements OnInit, AfterContentInit, OnDestroy {
   goNextIfAllowed(): void {
     const index = this.currentIndex();
     const step = this.steps[index];
-    if (step && !step.hideNextButton && !step.busy && !step.blocked && this.canGoNext(index)) {
+    if (step && !step.hideNextButton && !step.busy && !step.effectiveBlocked && this.canGoNext(index)) {
       this.goNext();
     }
   }
@@ -464,7 +447,7 @@ export class SteppersComponent implements OnInit, AfterContentInit, OnDestroy {
     // Candidate step index
     index = Math.min(index, this.steps.length - 1);
     // Create list of all not skipped stepped. Any candidate step to go to should exist in here
-    const nonSkipSteps = this.steps.filter(step => !step.skip);
+    const nonSkipSteps = this.steps.filter(step => !step.effectiveSkip);
     // Iterate through steps until we find a valid one
     while (true) {
       // Can this step be activated (exists in nonSkippedSteps)?
@@ -487,7 +470,7 @@ export class SteppersComponent implements OnInit, AfterContentInit, OnDestroy {
       return true;
     }
     const step = this.steps[this.currentIndex()];
-    if (!step || step.busy || step.disablePrevious || step.skip) {
+    if (!step || step.busy || step.effectiveDisablePrevious || step.effectiveSkip) {
       return false;
     }
     if (index === this.currentIndex()) {
@@ -501,7 +484,7 @@ export class SteppersComponent implements OnInit, AfterContentInit, OnDestroy {
     } else if (step.error) {
       return false;
     }
-    if (step.valid) {
+    if (step.effectiveValid) {
       return true;
     } else {
       return false;
@@ -511,7 +494,7 @@ export class SteppersComponent implements OnInit, AfterContentInit, OnDestroy {
   canGoNext(index: number) {
     if (
       !this.steps[index] ||
-      !this.steps[index].valid ||
+      !this.steps[index].effectiveValid ||
       this.steps[index].busy
     ) {
       return false;
@@ -522,7 +505,7 @@ export class SteppersComponent implements OnInit, AfterContentInit, OnDestroy {
   canCancel(index: number) {
     if (
       !this.steps[index] ||
-      !this.steps[index].canClose
+      !this.steps[index].effectiveCanClose
     ) {
       return false;
     }
@@ -535,12 +518,12 @@ export class SteppersComponent implements OnInit, AfterContentInit, OnDestroy {
 
   getNextButtonText(currentIndex: number): string {
     return currentIndex + 1 < this.steps.length ?
-      this.steps[currentIndex].nextButtonText :
-      this.steps[currentIndex].finishButtonText;
+      this.steps[currentIndex].effectiveNextButtonText :
+      this.steps[currentIndex].effectiveFinishButtonText;
   }
 
   getCancelButtonText(currentIndex: number): string {
-    return this.steps[currentIndex].cancelButtonText;
+    return this.steps[currentIndex].effectiveCancelButtonText;
   }
 
   onCancel(index: number) {
