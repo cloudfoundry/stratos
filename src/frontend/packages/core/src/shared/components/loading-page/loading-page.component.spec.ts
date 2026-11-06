@@ -33,7 +33,6 @@ describe('LoadingPageComponent', () => {
 
       loadingSubject = new BehaviorSubject<boolean>(true);
       fixture.componentRef.setInput('isLoading', loadingSubject.asObservable());
-      component.ngOnInit();
 
       await fixture.whenStable();
     });

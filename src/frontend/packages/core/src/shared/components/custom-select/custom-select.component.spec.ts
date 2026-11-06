@@ -1,6 +1,7 @@
-import { Component } from '@angular/core';
+import { Component, signal } from '@angular/core';
 import { provideZonelessChangeDetection } from '@angular/core';
 import { TestBed } from '@angular/core/testing';
+import { FormControl, ReactiveFormsModule } from '@angular/forms';
 import { describe, it, expect, beforeEach, vi, onTestFinished } from 'vitest';
 
 import { CustomOptionComponent, CustomSelectComponent } from './custom-select.component';
@@ -270,5 +271,56 @@ describe('CustomSelectComponent roles and states', () => {
     const a = await render();
     const b = await render();
     expect(a.listbox.id).not.toBe(b.listbox.id);
+  });
+});
+
+// The select takes its value from a bound [value] or from a form control.
+@Component({
+  standalone: true,
+  imports: [CustomSelectComponent, CustomOptionComponent, ReactiveFormsModule],
+  template: `
+    <app-select data-test="bound" [value]="bound()">
+      <app-option value="a">A</app-option>
+      <app-option value="b">B</app-option>
+    </app-select>
+    <app-select data-test="form" [formControl]="control">
+      <app-option value="a">A</app-option>
+      <app-option value="b">B</app-option>
+    </app-select>
+  `,
+})
+class ValueSourceHostComponent {
+  bound = signal<string | undefined>('a');
+  control = new FormControl('b');
+}
+
+describe('CustomSelectComponent value sources', () => {
+  async function render() {
+    TestBed.configureTestingModule({ providers: [provideZonelessChangeDetection()] });
+    const fixture = TestBed.createComponent(ValueSourceHostComponent);
+    await fixture.whenStable();
+    const selected = (name: string) => Array.from(
+      (fixture.nativeElement as HTMLElement).querySelectorAll(`[data-test="${name}"] [role="option"]`)
+    ).filter(o => o.getAttribute('aria-selected') === 'true').map(o => o.textContent?.trim());
+    return { fixture, selected };
+  }
+
+  it('follows a bound value, also when it changes or is cleared later', async () => {
+    const { fixture, selected } = await render();
+    expect(selected('bound')).toEqual(['A']);
+
+    fixture.componentInstance.bound.set('b');
+    await fixture.whenStable();
+    expect(selected('bound')).toEqual(['B']);
+
+    fixture.componentInstance.bound.set(undefined);
+    await fixture.whenStable();
+    expect(selected('bound')).toEqual([]);
+  });
+
+  // With no [value] bound the input is undefined, which is not a value to show.
+  it('keeps the value a form control wrote when no value is bound', async () => {
+    const { selected } = await render();
+    expect(selected('form')).toEqual(['B']);
   });
 });

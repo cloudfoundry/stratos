@@ -11,10 +11,10 @@ describe('GitEndpointDetailsComponent', () => {
   let fixture: ComponentFixture<GitEndpointDetailsComponent>;
 
   const show = async (userName: string) => {
-    component.row = {
+    fixture.componentRef.setInput('row', {
       guid: 'gh-1', name: 'GitHub', cnsi_type: 'git', sub_type: GIT_ENDPOINT_SUB_TYPES.GITHUB,
       user: { guid: 'u', name: userName, admin: false },
-    } as EndpointModel;
+    } as EndpointModel);
     await fixture.whenStable();
     return fixture.nativeElement as HTMLElement;
   };
@@ -32,11 +32,16 @@ describe('GitEndpointDetailsComponent', () => {
   beforeEach(async () => {
     fixture = TestBed.createComponent(GitEndpointDetailsComponent);
     component = fixture.componentInstance;
+    fixture.componentRef.setInput('row', { guid: 'gh-1', name: 'GitHub', cnsi_type: 'git' } as EndpointModel);
     await fixture.whenStable();
   });
 
   it('should create', () => {
     expect(component).toBeTruthy();
+  });
+
+  it('shows a dash when the endpoint has no user', () => {
+    expect((fixture.nativeElement as HTMLElement).textContent?.trim()).toBe('-');
   });
 
   it('shows a GitHub user with their avatar', async () => {

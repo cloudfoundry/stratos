@@ -33,7 +33,7 @@ describe('KubernetesSATokenAuthFormComponent', () => {
         token: '',
       }),
     });
-    component.formGroup = form;
+    fixture.componentRef.setInput('formGroup', form);
     fixture.detectChanges();
   });
 

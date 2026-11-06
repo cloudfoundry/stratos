@@ -32,7 +32,7 @@ describe('KubernetesGKEAuthFormComponent', () => {
         gkeconfig: ''
       }),
     });
-    component.formGroup = form;
+    fixture.componentRef.setInput('formGroup', form);
     fixture.detectChanges();
   });
 

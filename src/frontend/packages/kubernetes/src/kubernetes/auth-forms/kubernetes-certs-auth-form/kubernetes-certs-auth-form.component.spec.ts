@@ -35,7 +35,7 @@ describe('KubernetesCertsAuthFormComponent', () => {
         certKey: ''
       }),
     });
-    component.formGroup = form;
+    fixture.componentRef.setInput('formGroup', form);
 
     fixture.detectChanges();
   });

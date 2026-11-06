@@ -84,12 +84,13 @@ describe('TableCellServiceBrokerComponent', () => {
   });
 
   it('should create', async () => {
+    fixture.componentRef.setInput('row', { guid: 'svc-0', cnsiGuid: 'cnsi-1', name: 'svc', createdAt: '' });
     await fixture.whenStable();
     expect(component).toBeTruthy();
   });
 
   it('resolves broker via ServiceCatalogDataService when row is assigned', async () => {
-    component.config = { mode: TableCellServiceBrokerComponentMode.NAME };
+    fixture.componentRef.setInput('config', { mode: TableCellServiceBrokerComponentMode.NAME });
     const offering: StServiceOffering = {
       guid: 'svc-1',
       cnsiGuid: 'cnsi-1',
@@ -97,7 +98,7 @@ describe('TableCellServiceBrokerComponent', () => {
       broker: { guid: 'broker-7' },
       createdAt: '2026-01-01T00:00:00Z',
     };
-    component.row = offering;
+    fixture.componentRef.setInput('row', offering);
     await fixture.whenStable();
 
     expect(lastBrokerLookup).toEqual({ cnsiGuid: 'cnsi-1', brokerGuid: 'broker-7' });
@@ -106,14 +107,14 @@ describe('TableCellServiceBrokerComponent', () => {
 
   it('renders the space link once the broker and its space land', async () => {
     lateBroker = signal<StServiceBroker | null>(null);
-    component.config = { mode: TableCellServiceBrokerComponentMode.SCOPE };
-    component.row = {
+    fixture.componentRef.setInput('config', { mode: TableCellServiceBrokerComponentMode.SCOPE });
+    fixture.componentRef.setInput('row', {
       guid: 'svc-1',
       cnsiGuid: 'cnsi-1',
       name: 'svc',
       broker: { guid: 'broker-7' },
       createdAt: '2026-01-01T00:00:00Z',
-    };
+    });
     await fixture.whenStable();
     const host: HTMLElement = fixture.nativeElement;
     expect(host.textContent?.trim()).toBe('-');
@@ -159,14 +160,14 @@ describe('TableCellServiceBrokerComponent', () => {
       updatedAt: '',
     });
     lateBroker = signal<StServiceBroker | null>(inSpace('space-a'));
-    component.config = { mode: TableCellServiceBrokerComponentMode.SCOPE };
-    component.row = {
+    fixture.componentRef.setInput('config', { mode: TableCellServiceBrokerComponentMode.SCOPE });
+    fixture.componentRef.setInput('row', {
       guid: 'svc-1',
       cnsiGuid: 'cnsi-1',
       name: 'svc',
       broker: { guid: 'broker-7' },
       createdAt: '2026-01-01T00:00:00Z',
-    };
+    });
     await fixture.whenStable();
     expect(spaceStub.loads).toEqual([{ key: 'cnsi-1/space-a', closed: false }]);
 

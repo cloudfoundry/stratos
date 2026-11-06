@@ -30,10 +30,10 @@ describe('BackupConnectionCellComponent', () => {
   beforeEach(() => {
     fixture = TestBed.createComponent(BackupConnectionCellComponent);
     component = fixture.componentInstance;
-    component.row = {
+    fixture.componentRef.setInput('row', {
       guid: 'test',
       cnsi_type: 'metrics',
-    } as EndpointModel;
+    } as EndpointModel);
     component.service.initialize([{
       guid: 'test'
     } as EndpointModel]);

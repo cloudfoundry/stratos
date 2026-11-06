@@ -25,7 +25,7 @@ describe('RoleTristateCheckboxComponent', () => {
 
     const checkbox = fixture.debugElement.query(By.css('app-checkbox'));
     expect(checkbox).toBeTruthy();
-    expect(checkbox.componentInstance.indeterminate).toBe(true);
+    expect(checkbox.componentInstance.indeterminate()).toBe(true);
   });
 
   it('emits true when an unchecked box is clicked', async () => {

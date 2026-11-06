@@ -34,13 +34,13 @@ describe('BackupCheckboxCellComponent', () => {
   beforeEach(() => {
     fixture = TestBed.createComponent(BackupCheckboxCellComponent);
     component = fixture.componentInstance;
-    component.config = {
+    fixture.componentRef.setInput('config', {
       type: BackupEndpointTypes.ENDPOINT,
-    };
-    component.row = {
+    });
+    fixture.componentRef.setInput('row', {
       guid: 'test',
       cnsi_type: 'metrics',
-    } as EndpointModel;
+    } as EndpointModel);
     component.service.initialize([{
       guid: 'test'
     } as EndpointModel]);

@@ -21,7 +21,7 @@ describe('TableCellServiceReferencesComponent', () => {
 
     fixture = TestBed.createComponent(TableCellServiceReferencesComponent);
     component = fixture.componentInstance;
-    // Don't call detectChanges() since the component needs input data
+    fixture.componentRef.setInput('row', { guid: 'svc-1' });
   });
 
   it('should create', () => {

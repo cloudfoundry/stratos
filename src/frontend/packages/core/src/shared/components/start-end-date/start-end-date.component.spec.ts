@@ -48,36 +48,43 @@ describe('StartEndDateComponent', () => {
     }
   });
 
-  it('should show message if invalid', () => {
+  // The inputs are taken up by effects, so each test lets them run.
+  it('should show message if invalid', async () => {
     fixture.componentRef.setInput('end', parseISO('2019-01-01T03:00:00.000Z'));
     fixture.componentRef.setInput('start', parseISO('2019-01-02T03:00:00.000Z'));
+    await fixture.whenStable();
 
     expect(component.validMessage).toEqual('Start date must be before end date.');
   });
 
-  it('should emit changes if valid dates', () => {
+  it('should emit changes if valid dates', async () => {
     vi.spyOn(component.startChange, 'emit');
     vi.spyOn(component.endChange, 'emit');
     fixture.componentRef.setInput('start', parseISO('2019-01-01T03:00:00.000Z'));
     fixture.componentRef.setInput('end', parseISO('2019-01-03T03:00:00.000Z'));
+    await fixture.whenStable();
     fixture.componentRef.setInput('start', parseISO('2019-01-02T03:00:00.000Z'));
     fixture.componentRef.setInput('end', parseISO('2019-01-04T03:00:00.000Z'));
+    await fixture.whenStable();
 
     expect(component.startChange.emit).toHaveBeenCalled();
     expect(component.endChange.emit).toHaveBeenCalled();
   });
 
-  it('should be able to use custom validate method', () => {
+  it('should be able to use custom validate method', async () => {
     const customValidate = vi.fn().mockReturnValue(null);
+    const start = parseISO('2019-01-02T03:00:00.000Z');
     fixture.componentRef.setInput('validate', customValidate);
-    fixture.componentRef.setInput('start', parseISO('2019-01-02T03:00:00.000Z'));
+    fixture.componentRef.setInput('start', start);
+    await fixture.whenStable();
 
-    expect(customValidate).toHaveBeenCalledWith(component.start, undefined);
+    expect(customValidate).toHaveBeenCalledWith(start, undefined);
   });
 
-  it('should validate dates by default', () => {
+  it('should validate dates by default', async () => {
     fixture.componentRef.setInput('start', parseISO('2019-01-01T03:00:00.000Z'));
     fixture.componentRef.setInput('end', parseISO('2019-01-02T03:00:00.000Z'));
+    await fixture.whenStable();
     expect(component.valid).toBeTruthy();
   });
 });

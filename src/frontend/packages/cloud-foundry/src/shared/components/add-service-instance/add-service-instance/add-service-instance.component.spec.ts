@@ -182,8 +182,9 @@ describe('AddServiceInstanceComponent', () => {
   describe('supdHandle.submit', () => {
     async function stepResult(childResult: object) {
       (component as any).supdRef = { validate: signal(true), onNext: () => of(childResult) } as any;
-      const step = TestBed.createComponent(StepComponent).componentInstance;
-      step.signalHandle = component.supdHandle;
+      const stepRef = TestBed.createComponent(StepComponent).componentRef;
+      stepRef.setInput('signalHandle', component.supdHandle);
+      const step = stepRef.instance;
       return firstValueFrom(step.invokeNext(0));
     }
 

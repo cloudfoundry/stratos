@@ -116,8 +116,9 @@ describe('RouteServiceComponent — bind patches the binding from the response',
   it('gives the stepper an error page\'s heading when the bind fails', async () => {
     const page = readFileSync(join(import.meta.dirname, '../../../../../store/src/testdata/upstream-errors/nginx-502.body'), 'utf8');
     component.selectedSiGuid.set('si-1');
-    const step = TestBed.createComponent(StepComponent).componentInstance;
-    step.signalHandle = component.bindStepHandle;
+    const stepRef = TestBed.createComponent(StepComponent).componentRef;
+    stepRef.setInput('signalHandle', component.bindStepHandle);
+    const step = stepRef.instance;
     const done = firstValueFrom(step.invokeNext(0));
     http.expectOne(r => r.method === 'POST' && r.url === '/pp/v1/cf/service_route_bindings/cf-1')
       .flush(page, { status: 502, statusText: 'Bad Gateway' });

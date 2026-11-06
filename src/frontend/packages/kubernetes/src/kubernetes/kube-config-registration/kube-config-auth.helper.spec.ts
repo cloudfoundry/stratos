@@ -1,4 +1,4 @@
-import { Component, EnvironmentInjector, Injector, OnDestroy } from '@angular/core';
+import { Component, EnvironmentInjector, Injector, OnDestroy, input } from '@angular/core';
 import { TestBed } from '@angular/core/testing';
 import { FormBuilder, UntypedFormGroup } from '@angular/forms';
 import { describe, it, expect, beforeEach } from 'vitest';
@@ -12,7 +12,7 @@ let destroyed = 0;
 // An auth form that offers body content but fails to build its values.
 @Component({ selector: 'app-failing-auth-form', template: '', standalone: true })
 class FailingAuthFormComponent implements IAuthForm, OnDestroy {
-  formGroup = new UntypedFormGroup({});
+  readonly formGroup = input.required<UntypedFormGroup>();
   getBody() { return ''; }
   getValues(): never { throw new Error('bad values'); }
   ngOnDestroy() { destroyed += 1; }

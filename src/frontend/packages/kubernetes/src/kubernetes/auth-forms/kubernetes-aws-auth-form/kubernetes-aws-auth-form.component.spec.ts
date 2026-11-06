@@ -35,7 +35,7 @@ describe('KubernetesAWSAuthFormComponent', () => {
         secret_key: ''
       }),
     });
-    component.formGroup = form;
+    fixture.componentRef.setInput('formGroup', form);
     fixture.detectChanges();
   });
 

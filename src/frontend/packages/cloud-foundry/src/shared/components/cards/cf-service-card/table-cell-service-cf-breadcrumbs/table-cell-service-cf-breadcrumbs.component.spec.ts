@@ -26,9 +26,9 @@ describe('TableCellServiceCfBreadcrumbsComponent', () => {
 
     fixture = TestBed.createComponent(TableCellServiceCfBreadcrumbsComponent);
     component = fixture.componentInstance;
-    // The cell only ever renders with an offering bound; its row setter builds
-    // the org/space label service the links child reads from.
-    component.row = { cnsiGuid: 'cf-guid' } as StServiceOffering;
+    // The cell only ever renders with an offering bound; the org/space label
+    // service the links child reads from is built from the row.
+    fixture.componentRef.setInput('row', { cnsiGuid: 'cf-guid' } as StServiceOffering);
     await fixture.whenStable();
   });
 
