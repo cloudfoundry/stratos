@@ -1,9 +1,10 @@
 import { CommonModule } from '@angular/common';
 import { Component, OnInit, ChangeDetectionStrategy, inject } from '@angular/core';
+import { RouterLink } from '@angular/router';
 import { BehaviorSubject, combineLatest, from, Observable } from 'rxjs';
 import { take, filter, map } from 'rxjs/operators';
 
-import { IHeaderBreadcrumb, PageHeaderComponent } from '@stratosui/core';
+import { CustomTooltipDirective, IHeaderBreadcrumb, PageHeaderComponent } from '@stratosui/core';
 import { EndpointModel, EndpointsDataService, getFullEndpointApiUrl } from '@stratosui/store';
 import { ApplicationService } from '@stratosui/cloud-foundry';
 import { CliCommandComponent } from '../../../shared/components/cli-info/cli-command/cli-command.component';
@@ -16,6 +17,8 @@ import { CFAppCLIInfoContext, CliInfoComponent } from '../../../shared/component
   changeDetection: ChangeDetectionStrategy.OnPush,
   imports: [
     CommonModule,
+    RouterLink,
+    CustomTooltipDirective,
     PageHeaderComponent,
     CliInfoComponent,
     CliCommandComponent
@@ -37,6 +40,8 @@ export class CliInfoApplicationComponent implements OnInit {
 
   public context$!: Observable<CFAppCLIInfoContext>;
   public breadcrumbs$!: Observable<IHeaderBreadcrumb[]>;
+  // Where the close button goes: the application this page was opened from.
+  public appLink = ['/applications', this.applicationService.cfGuid, this.applicationService.appGuid];
 
   constructor() {
     this.breadcrumbs$ = new BehaviorSubject<IHeaderBreadcrumb[]>([]);
