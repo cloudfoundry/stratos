@@ -8,9 +8,13 @@
         <span>1. Download and install the CLI - </span>
         <a href="https://github.com/cloudfoundry/cli#downloads" rel="noopener noreferrer" target="_blank">see here</a>
         <p>2. Set the api endpoint</p>
-        <app-code-block>cf api {{context().apiEndpoint || '[Cloud Foundry API endpoint]'}}</app-code-block>
+        <app-code-block>cf api {{context().apiEndpoint || '[Cloud Foundry API endpoint]'}}{{context().skipSslValidation ? ' --skip-ssl-validation' : ''}}</app-code-block>
         <p>3. Login</p>
         <app-code-block>cf login</app-code-block>
+        @if (context().ssoAllowed) {
+          <p>Or, to log in with single sign-on:</p>
+          <app-code-block>cf login --sso</app-code-block>
+        }
         <p>Output</p>
         <app-code-block codeBlockStyle="pre" [hideCopy]="true">
           <pre>API endpoint: <b>{{context().apiEndpoint || '[Cloud Foundry API endpoint]'}}</b>

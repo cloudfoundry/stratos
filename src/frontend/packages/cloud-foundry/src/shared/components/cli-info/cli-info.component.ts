@@ -9,6 +9,11 @@ export interface CFAppCLIInfoContext {
   orgName: string;
   apiEndpoint: string;
   username: string;
+  // The endpoint is registered with certificate validation skipped, so the
+  // CLI needs the same flag to reach it.
+  skipSslValidation: boolean;
+  // The endpoint is registered as allowing single sign-on.
+  ssoAllowed: boolean;
 }
 
 @Component({

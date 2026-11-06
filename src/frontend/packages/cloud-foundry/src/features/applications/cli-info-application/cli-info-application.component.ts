@@ -73,7 +73,9 @@ export class CliInfoApplicationComponent implements OnInit {
         spaceName: space.name,
         orgName: org.name,
         apiEndpoint: getFullEndpointApiUrl(ep),
-        username: ep.user ? ep.user.name : ''
+        username: ep.user ? ep.user.name : '',
+        skipSslValidation: !!ep.skip_ssl_validation,
+        ssoAllowed: !!ep.sso_allowed
       })),
       take(1)
     );
