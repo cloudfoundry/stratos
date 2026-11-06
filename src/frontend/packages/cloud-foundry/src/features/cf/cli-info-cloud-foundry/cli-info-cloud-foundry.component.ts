@@ -151,7 +151,9 @@ export class CliInfoCloudFoundryComponent implements OnInit {
           orgName: org ? org.name : '',
           spaceName: space ? space.name : '',
           apiEndpoint: getFullEndpointApiUrl(cf.entity),
-          username: cf.entity.user ? cf.entity.user.name : ''
+          username: cf.entity.user ? cf.entity.user.name : '',
+          skipSslValidation: !!cf.entity.skip_ssl_validation,
+          ssoAllowed: !!cf.entity.sso_allowed
         };
       }),
       take(1)
