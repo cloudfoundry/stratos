@@ -1,6 +1,7 @@
 <div class="flex flex-row items-center" [class.h-\[25px\]]="!hideIcon()">
   @if (!hideIcon()) {
-    <app-application-state-icon class="pr-[5px]" [status]="status$ | async "></app-application-state-icon>
+    <!-- The label beside it says the state; the icon's own name would be read twice. -->
+    <app-application-state-icon class="pr-[5px]" aria-hidden="true" [status]="status$ | async "></app-application-state-icon>
   }
   <span class="overflow-hidden text-ellipsis">{{ label$ | async }}</span>
   @if (!initialStateOnly() && (subLabel$ | async); as subLabel) {
