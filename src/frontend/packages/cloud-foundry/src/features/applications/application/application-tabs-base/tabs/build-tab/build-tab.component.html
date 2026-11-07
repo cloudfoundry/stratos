@@ -135,13 +135,6 @@
                   —
                 }
               </app-metadata-item>
-              @if (data.org()) {
-                <app-metadata-item icon="keyboard" label="CLI Info" class="mt-6">
-                  <a [routerLink]="['/applications/' + applicationService.cfGuid + '/' + detail.app.guid + '/cli']"
-                    >View</a
-                  >
-                </app-metadata-item>
-              }
             </div>
           </div>
         </app-tile>
