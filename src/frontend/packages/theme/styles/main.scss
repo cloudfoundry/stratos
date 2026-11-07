@@ -445,7 +445,11 @@ router-outlet + * {
 
   /* Info Button */
   .btn-info {
-    @apply text-white shadow-sm;
+    @apply shadow-sm;
+    /* Info shares the primary blue by default, so it takes the text color
+       made for it: white on the light-mode blue (5.2:1), dark on the lighter
+       dark-mode blue, where white was 2.5:1 (now 7.0:1). */
+    color: var(--color-on-primary);
     background-color: var(--color-info);
 
     &:hover:not(:disabled) {
