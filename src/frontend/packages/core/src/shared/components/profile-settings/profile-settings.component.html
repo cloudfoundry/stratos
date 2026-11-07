@@ -6,7 +6,7 @@
           <app-slide-toggle [checked]="enableGravatar === 'true'" (change)="updateGravatarEnabled(enableGravatar)">
             <div class="user-profile__option-header">Use Gravatar for user icon</div>
           </app-slide-toggle>
-          <div class="user-profile__option-subtext">Use image from Gravatar for the user profile icon when email
+          <div class="user-profile__option-subtext text-content-muted">Use image from Gravatar for the user profile icon when email
           address is available</div>
         </div>
       }
@@ -29,7 +29,7 @@
             }
           </div>
         </app-slide-toggle>
-        <div class="user-profile__option-subtext">Disable automatic logout if you are inactive
+        <div class="user-profile__option-subtext text-content-muted">Disable automatic logout if you are inactive
         for a long period of time. Disabling session timeout is considered a security risk.</div>
       </div>
     </div>
@@ -50,7 +50,7 @@
             }
           </div>
         </app-slide-toggle>
-        <div class="user-profile__option-subtext">Disable automatically refreshing data throughout the
+        <div class="user-profile__option-subtext text-content-muted">Disable automatically refreshing data throughout the
           application. Disabling
         polling may result in some pages showing out-of-date information.</div>
       </div>

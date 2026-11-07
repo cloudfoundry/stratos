@@ -68,6 +68,13 @@ describe('CreateEndpointConnectComponent', () => {
     expect(component).toBeTruthy();
   });
 
+  // #4166: the hint was the muted color at opacity 0.5, about 2:1 in light mode.
+  it('shows the connect-later hint in the muted text color', () => {
+    const hint = fixture.nativeElement.querySelector('.connect__subtext') as HTMLElement;
+    expect(hint?.textContent).toContain('You may connect this endpoint at a later date');
+    expect(hint.classList).toContain('text-content-muted');
+  });
+
   // Previous back to the register step and Next again enters this step again
   it('ends the previous connect when the step is entered again', () => {
     const destroy = vi.spyOn(ConnectEndpointService.prototype, 'destroy');
