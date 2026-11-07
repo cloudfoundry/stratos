@@ -28,7 +28,13 @@ Authenticating...
         <app-code-block>cf target -o "{{context().orgName || '[organization name]'}}" -s "{{context().spaceName || '[space name]'}}"
         </app-code-block>
       </div>
-      <ng-content></ng-content>
+      @for (section of sections(); track section.tab) {
+        <br>
+        <h4>{{ section.label }}</h4>
+        @for (command of section.commands; track command.name) {
+          <app-cli-command [name]="command.name" [msg]="command.msg" [syntax]="command.syntax(context())"></app-cli-command>
+        }
+      }
     </div>
   </div>
 }

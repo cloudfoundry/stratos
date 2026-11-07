@@ -14,13 +14,15 @@ import { getFullEndpointApiUrl } from '../../../../../store/src/endpoint-utils';
 import { EntityInfo } from '../../../../../store/src/types/api.types';
 import { EndpointModel } from '../../../../../store/src/types/endpoint.types';
 import { StOrgDetail, StSpace } from '../../../services/endpoint-data/stratos-types';
-import { CliCommandComponent } from '../../../shared/components/cli-info/cli-command/cli-command.component';
+import {
+  CLOUD_FOUNDRY_CLI_COMMANDS,
+  ORGANIZATION_CLI_COMMANDS,
+  SPACE_CLI_COMMANDS,
+} from '../../../shared/components/cli-info/cli-commands';
 import { CFAppCLIInfoContext, CliInfoComponent } from '../../../shared/components/cli-info/cli-info.component';
-import { CfUserPermissionDirective } from '../../../shared/directives/cf-user-permission/cf-user-permission.directive';
 import {
   CloudFoundryUserProvidedServicesService,
 } from '../../../shared/services/cloud-foundry-user-provided-services.service';
-import { CfCurrentUserPermissions, CfUserPermissionsChecker } from '../../../user-permissions/cf-user-permissions-checkers';
 import { ActiveRouteCfOrgSpace } from '../cf-page.types';
 import { getActiveRouteCfOrgSpaceProvider } from '../cf.helpers';
 import { CloudFoundryEndpointService } from '../services/cloud-foundry-endpoint.service';
@@ -38,8 +40,6 @@ import { CloudFoundrySpaceService } from '../services/cloud-foundry-space.servic
     CustomTooltipDirective,
     PageHeaderComponent,
     CliInfoComponent,
-    CliCommandComponent,
-    CfUserPermissionDirective
   ],
   providers: [
     getActiveRouteCfOrgSpaceProvider,
@@ -60,12 +60,11 @@ export class CliInfoCloudFoundryComponent implements OnInit {
   private cfSpaceService = this.activeRouteCfOrgSpace.spaceGuid ? inject(CloudFoundrySpaceService) : null;
   private injector = inject(Injector);
 
-
-  permsOrgEdit = CfCurrentUserPermissions.ORGANIZATION_EDIT;
-  permsSpaceEdit = CfCurrentUserPermissions.SPACE_EDIT;
-
-  orgGuid!: string;
-  spaceGuid!: string;
+  // The commands of this level: the page serves a Cloud Foundry, an
+  // organization or a space, by what the route names.
+  readonly sections = this.activeRouteCfOrgSpace.spaceGuid ? SPACE_CLI_COMMANDS
+    : this.activeRouteCfOrgSpace.orgGuid ? ORGANIZATION_CLI_COMMANDS
+    : CLOUD_FOUNDRY_CLI_COMMANDS;
 
   cfEndpointEntityService: any;
   public previousUrl!: string;
@@ -84,13 +83,7 @@ export class CliInfoCloudFoundryComponent implements OnInit {
   ]>;
 
   constructor() {
-    const activeRouteCfOrgSpace = this.activeRouteCfOrgSpace;
-
     this.breadcrumbs$ = new BehaviorSubject<IHeaderBreadcrumb[]>([]);
-    if (activeRouteCfOrgSpace.orgGuid) {
-      this.orgGuid = activeRouteCfOrgSpace.orgGuid;
-      this.spaceGuid = activeRouteCfOrgSpace.spaceGuid || CfUserPermissionsChecker.ALL_SPACES;
-    }
   }
 
   ngOnInit() {

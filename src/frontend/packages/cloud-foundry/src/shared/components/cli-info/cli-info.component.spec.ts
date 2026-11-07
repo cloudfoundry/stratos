@@ -8,6 +8,7 @@ import { CodeBlockComponent } from '../../../../../core/src/shared/components/co
 import {
   CopyToClipboardComponent,
 } from '../../../../../core/src/shared/components/copy-to-clipboard/copy-to-clipboard.component';
+import { APPLICATION_CLI_COMMANDS } from './cli-commands';
 import { CliInfoComponent } from './cli-info.component';
 
 describe('CliInfoComponent', () => {
@@ -38,10 +39,13 @@ describe('CliInfoComponent', () => {
     ssoAllowed: false,
   };
 
-  async function render(overrides: Partial<typeof context> = {}): Promise<string> {
+  async function render(overrides: Partial<typeof context> = {}, sections?: typeof APPLICATION_CLI_COMMANDS): Promise<string> {
     fixture = TestBed.createComponent(CliInfoComponent);
     component = fixture.componentInstance;
     fixture.componentRef.setInput('context', { ...context, ...overrides });
+    if (sections) {
+      fixture.componentRef.setInput('sections', sections);
+    }
     await fixture.whenStable();
     return (fixture.nativeElement as HTMLElement).textContent ?? '';
   }
@@ -72,5 +76,21 @@ describe('CliInfoComponent', () => {
     // Each prompt starts its own line, flush with the first line of the sample.
     expect(text).toContain('\nEmail: user\nPassword: [password]\n');
     expect(text).not.toContain('Email>');
+  });
+
+  // #6126: the level's commands come from the shared per-tab lists, grouped by tab.
+  it('renders the given command sections grouped under their tab names', async () => {
+    const text = await render({}, APPLICATION_CLI_COMMANDS);
+    const headings = Array.from((fixture.nativeElement as HTMLElement).querySelectorAll('h4')).map(h => h.textContent?.trim());
+    expect(headings).toEqual(['Getting Started', 'Summary', 'Log Stream', 'Revisions', 'Routes', 'Variables', 'Services', 'Events']);
+    expect(text).toContain('To show the application environment variables:');
+    expect(text).toContain('cf env "app"');
+    expect(text).toContain('cf scale "app" -m [N]M');
+  });
+
+  it('renders only Getting Started when no sections are given', async () => {
+    await render();
+    const headings = Array.from((fixture.nativeElement as HTMLElement).querySelectorAll('h4')).map(h => h.textContent?.trim());
+    expect(headings).toEqual(['Getting Started']);
   });
 });

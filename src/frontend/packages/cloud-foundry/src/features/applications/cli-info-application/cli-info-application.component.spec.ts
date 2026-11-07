@@ -76,6 +76,13 @@ describe('CliInfoApplicationComponent', () => {
     expect(text()).toContain('cf restart "my app"');
   });
 
+  // #6126: the commands are grouped by the application's tabs, from the shared list.
+  it('groups the commands by tab', () => {
+    const headings = Array.from((fixture.nativeElement as HTMLElement).querySelectorAll('h4')).map(h => h.textContent?.trim());
+    expect(headings).toEqual(['Getting Started', 'Summary', 'Log Stream', 'Revisions', 'Routes', 'Variables', 'Services', 'Events']);
+    expect(text()).toContain('cf env "my app"');
+  });
+
   it('scales memory with -m and a unit, without -i', () => {
     expect(text()).toContain('cf scale "my app" -m [N]M');
     expect(text()).not.toContain('-i -m');
