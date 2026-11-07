@@ -86,6 +86,7 @@ export class VariableEditDialogComponent {
     tabSize: 2,
     // Larger than Monaco's compact default so values stay easy to read.
     fontSize: 16,
+    ariaLabel: 'Value',
   };
 
   /** Captured Monaco wrapper component (undefined until editorInit fires;
