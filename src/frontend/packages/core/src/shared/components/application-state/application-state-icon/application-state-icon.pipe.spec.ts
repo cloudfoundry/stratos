@@ -27,6 +27,18 @@ describe('ApplicationStateIconPipe', () => {
     expect(pipe.transform('tentative', 'icon')).toBe('lens');
   });
 
+  it('names each state for assistive technology', () => {
+    expect(pipe.transform('STARTED', 'label')).toBe('Started');
+    expect(pipe.transform('STOPPED', 'label')).toBe('Stopped');
+    expect(pipe.transform('ok', 'label')).toBe('OK');
+    expect(pipe.transform('tentative', 'label')).toBe('Tentative');
+    expect(pipe.transform('incomplete', 'label')).toBe('Incomplete');
+    expect(pipe.transform('warning', 'label')).toBe('Warning');
+    expect(pipe.transform('error', 'label')).toBe('Error');
+    expect(pipe.transform('deleted', 'label')).toBe('Deleted');
+    expect(pipe.transform('busy', 'label')).toBe('Busy');
+  });
+
   it('should return empty if not a valid status', () => {
     expect(pipe.transform('invalid')).toBe('');
   });

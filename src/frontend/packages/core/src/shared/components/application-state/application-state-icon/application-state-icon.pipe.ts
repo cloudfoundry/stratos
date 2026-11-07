@@ -12,6 +12,9 @@ export class ApplicationStateIconPipe implements PipeTransform {
         return cssClass;
       case 'icon':
         return icon;
+      case 'label':
+        // The state's name for assistive technology: 'STARTED' -> 'Started', 'ok' -> 'OK'.
+        return value === 'ok' ? 'OK' : value.charAt(0).toUpperCase() + value.slice(1).toLowerCase();
       default:
         return '';
     }
