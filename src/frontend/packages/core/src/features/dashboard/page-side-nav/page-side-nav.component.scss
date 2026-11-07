@@ -31,7 +31,7 @@
     font-size: 14px;
     letter-spacing: 0.01em;
     line-height: 18px;
-    outline: 0;
+    // Keyboard focus shows the global :focus-visible outline.
     padding: 10px;
     padding-left: $item-header-padding;
     text-decoration: none;
