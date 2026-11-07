@@ -1,6 +1,7 @@
 import {
   ChangeDetectionStrategy, AfterViewInit,
   Component,
+  computed,
   effect,
   ElementRef,
   forwardRef,
@@ -8,6 +9,7 @@ import {
   OnDestroy,
   input,
   output,
+  signal,
   viewChild
 } from '@angular/core';
 import { ControlValueAccessor, NG_VALUE_ACCESSOR } from '@angular/forms';
@@ -33,10 +35,46 @@ export interface MonacoEditorOptions {
   [key: string]: any;
 }
 
+type MonacoApi = Awaited<ReturnType<typeof loadMonacoEditor>>;
+
+// "Tab moves focus", page-wide like Monaco's own toggle, which it replaces:
+// Monaco keeps that state where no editor API can read it, so a hint could
+// not follow it. Monaco's key is Ctrl+M, or Ctrl+Shift+M on macOS; Ctrl+M is
+// Enter in a terminal, so Ctrl+Shift+M is the key everywhere, the SSH
+// terminal's too.
+const tabMovesFocus = signal(false);
+let monacoApi: MonacoApi | undefined;
+let nextHintId = 0;
+
+export function toggleTabMovesFocus(): void {
+  tabMovesFocus.update(v => !v);
+  monacoApi?.editor.getEditors().forEach(e => e.updateOptions({ tabFocusMode: tabMovesFocus() }));
+}
+
+function addTabFocusKey(monaco: MonacoApi): void {
+  if (monacoApi) {
+    return;
+  }
+  monacoApi = monaco;
+  const { KeyMod, KeyCode } = monaco;
+  const mac = /Mac|iP(hone|ad|od)/.test(navigator.platform);
+  monaco.editor.registerCommand('stratos.toggleTabMovesFocus', toggleTabMovesFocus);
+  monaco.editor.addKeybindingRules([
+    {
+      keybinding: mac ? KeyMod.WinCtrl | KeyMod.Shift | KeyCode.KeyM : KeyMod.CtrlCmd | KeyCode.KeyM,
+      command: '-editor.action.toggleTabFocusMode',
+    },
+    {
+      keybinding: (mac ? KeyMod.WinCtrl : KeyMod.CtrlCmd) | KeyMod.Shift | KeyCode.KeyM,
+      command: 'stratos.toggleTabMovesFocus',
+    },
+  ]);
+}
+
 @Component({
   selector: 'app-monaco-editor',
   templateUrl: './monaco-editor.component.html',
-  host: { class: 'block w-full h-full' },
+  host: { class: 'relative block w-full h-full' },
   standalone: true,
   changeDetection: ChangeDetectionStrategy.OnPush,
   providers: [
@@ -57,9 +95,17 @@ export class MonacoEditorComponent implements AfterViewInit, OnDestroy, ControlV
   // consumers without a CVA binding have no other change signal.
   readonly valueChange = output<string>();
 
+  // Tab indents. The hint names the key that makes Tab leave the editor
+  // (WCAG 2.1.2); it is the editor's description and shows while focused.
+  readonly hintId = `monaco-tab-hint-${nextHintId++}`;
+  readonly focused = signal(false);
+  readonly tabHint = computed(() => tabMovesFocus()
+    ? 'Tab moves focus. Press Ctrl+Shift+M so Tab indents.'
+    : 'Tab indents. Press Ctrl+Shift+M so Tab moves focus.');
+
   private branding = inject(StratosBrandingService);
   private editor: import('monaco-editor').editor.IStandaloneCodeEditor | undefined;
-  private monaco: Awaited<ReturnType<typeof loadMonacoEditor>> | undefined;
+  private monaco: MonacoApi | undefined;
 
   constructor() {
     // Monaco's theme is process-global (monaco.editor.setTheme), so one
@@ -113,6 +159,7 @@ export class MonacoEditorComponent implements AfterViewInit, OnDestroy, ControlV
       theme: this.options().theme || (this.branding.isDarkMode() ? 'vs-dark' : 'vs'),
       automaticLayout: false,
       readOnly: this.disabled,
+      tabFocusMode: tabMovesFocus(),
       ...this.options(),
     };
 
@@ -149,8 +196,14 @@ export class MonacoEditorComponent implements AfterViewInit, OnDestroy, ControlV
 
     // Listen for blur events
     editor.onDidBlurEditorText(() => {
+      this.focused.set(false);
       this.onTouched();
     });
+    editor.onDidFocusEditorText(() => this.focused.set(true));
+
+    addTabFocusKey(monaco);
+    this.editorContainer().nativeElement.querySelector('[role="textbox"], textarea')
+      ?.setAttribute('aria-describedby', this.hintId);
 
     // Setup resize observer if automaticLayout is false
     if (this.options().automaticLayout === false) {
