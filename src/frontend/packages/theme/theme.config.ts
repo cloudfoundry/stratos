@@ -64,13 +64,13 @@ export interface StratosTheme {
 // Light theme (default) — values must match :root in main.scss
 export const defaultTheme: StratosTheme = {
   colors: {
-    primary: '#3b82f6',
-    secondary: '#60a5fa',
-    accent: '#60a5fa',
+    primary: '#2563eb',
+    secondary: '#2563eb',
+    accent: '#2563eb',
     success: '#22c55e',
     warning: '#f59e0b',
     danger: '#ef4444',
-    info: '#3b82f6',
+    info: '#2563eb',
   },
   navigation: {
     background: '#1e293b',
@@ -114,13 +114,13 @@ export const defaultTheme: StratosTheme = {
 // Dark theme
 export const darkTheme: StratosTheme = {
   colors: {
-    primary: '#3b82f6',
+    primary: '#60a5fa',
     secondary: '#06b6d4',
     accent: '#f59e0b',
     success: '#10b981',
     warning: '#f59e0b',
     danger: '#ef4444',
-    info: '#3b82f6',
+    info: '#60a5fa',
   },
   navigation: {
     background: '#1e293b',
