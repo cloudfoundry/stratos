@@ -844,6 +844,27 @@ body.modal-open {
     color: var(--color-secondary);
   }
 
+  /* Status colors as text: the brand success/warning/danger/info values are
+     tuned for badges and buttons and fall short of 4.5:1 as text (green
+     2.3:1, amber 2.2:1, red 3.8:1 on white). The status text tokens pass in
+     both modes, so the text utilities use those; bg-*, border-* keep the
+     brand values. */
+  .text-success {
+    color: var(--success-text);
+  }
+
+  .text-warning {
+    color: var(--warning-text);
+  }
+
+  .text-danger {
+    color: var(--danger-text);
+  }
+
+  .text-info {
+    color: var(--info-text);
+  }
+
   .bg-primary {
     background-color: var(--color-primary);
   }
