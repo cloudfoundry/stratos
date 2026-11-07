@@ -293,7 +293,7 @@
           [attr.data-test]="act.dataTest ?? ('header-action-' + act.label)"
           [class]="'flex items-center gap-1 px-3 py-1 text-sm border rounded disabled:opacity-40 disabled:cursor-not-allowed ' +
             (act.primary
-              ? 'border-primary-shade-700 bg-primary text-white hover:bg-primary-shade-700'
+              ? 'border-primary-shade-700 bg-primary text-on-primary hover:bg-primary-shade-700'
               : 'border-content-border bg-content-bg text-content-text hover:bg-content-secondary')">
           @if (act.icon) {
             <span aria-hidden="true" class="material-icons text-base leading-5">{{ act.icon }}</span>
@@ -408,7 +408,7 @@
         }
         @if (config().onRefresh) {
           <button type="button" data-test="empty-error-retry"
-                  class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded font-semibold text-sm bg-primary text-white hover:bg-primary/90 transition-all duration-150"
+                  class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded font-semibold text-sm bg-primary text-on-primary hover:bg-primary/90 transition-all duration-150"
                   (click)="invokeRefresh()">
             <span aria-hidden="true" class="material-icons text-base leading-none">refresh</span>
             Retry

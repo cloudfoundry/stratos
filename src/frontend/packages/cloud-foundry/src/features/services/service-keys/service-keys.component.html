@@ -12,7 +12,7 @@
       [value]="newKeyName()" (input)="newKeyName.set($any($event.target).value)"
       (keydown.enter)="createKey()" [disabled]="creating()" />
     <button type="button"
-      class="inline-flex items-center gap-2 rounded bg-primary px-3 py-1.5 text-sm text-white disabled:opacity-50"
+      class="inline-flex items-center gap-2 rounded bg-primary px-3 py-1.5 text-sm text-on-primary disabled:opacity-50"
       [disabled]="creating() || !newKeyName().trim()" (click)="createKey()">
       @if (creating()) {
         <app-busy size="1rem" context="service-keys"></app-busy>
