@@ -154,6 +154,15 @@
   --info-text: oklch(42.445% 0.1809 265.64);
   --info-border: oklch(80.907% 0.0956 251.81);
 
+  /* Status icons. An icon needs 3:1 against the card (WCAG 1.4.11), not
+     the 4.5:1 of text, so it keeps its hue: the brand green and amber are
+     2.3:1 and 2.2:1 on white, these are 3.2:1. */
+  --success-icon: oklch(62.7% 0.194 149.214);
+  --warning-icon: oklch(66.6% 0.179 58.318);
+  --danger-icon: var(--color-danger);
+  --info-icon: var(--color-info);
+  --tentative-icon: oklch(55.439% 0.0407 257.42);
+
   /* Shadow system */
   --shadow-sm: 0 1px 2px 0 rgba(0, 0, 0, 0.05);
   --shadow-md: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
@@ -251,6 +260,13 @@
   --info-bg: oklch(37.906% 0.1378 265.52);
   --info-text: oklch(80.907% 0.0956 251.81);
   --info-border: oklch(62.308% 0.188 259.81);
+
+  /* Status icons: the dark brand colors pass 3:1 on the dark card. */
+  --success-icon: var(--color-success);
+  --warning-icon: var(--color-warning);
+  --danger-icon: var(--color-danger);
+  --info-icon: var(--color-info);
+  --tentative-icon: oklch(71.366% 0.0192 261.32);
 
   /* Shadow system - enhanced for dark theme */
   --shadow-sm: 0 1px 2px 0 rgba(0, 0, 0, 0.3);
@@ -871,6 +887,18 @@ body.modal-open {
 
   .text-info {
     color: var(--info-text);
+  }
+
+  /* The same classes on an icon (the application state icon, status
+     indicators) take the icon tokens: 3:1 is enough for an icon, and the
+     text tokens' dark shades turned amber into brown. Two classes' worth
+     of specificity outranks the single class above. */
+  :is(app-custom-icon, .material-icons, .icon) {
+    &.text-success { color: var(--success-icon); }
+    &.text-warning { color: var(--warning-icon); }
+    &.text-danger { color: var(--danger-icon); }
+    &.text-info { color: var(--info-icon); }
+    &.text-tentative { color: var(--tentative-icon); }
   }
 
   .bg-primary {
