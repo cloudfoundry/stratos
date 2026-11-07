@@ -16,7 +16,7 @@ import { CfCurrentUserPermissions } from '../../../user-permissions/cf-user-perm
 import { CfUserPermissionDirective } from '../../directives/cf-user-permission/cf-user-permission.directive';
 import { AppApplicationActionsService } from '../../services/application-actions.service';
 import { AppLifecycleProgressService } from '../app-lifecycle-progress/app-lifecycle-progress.service';
-import { APPLICATION_CLI_COMMANDS, commandsForTab } from '../cli-info/cli-commands';
+import { APPLICATION_CLI_COMMANDS, CliCommandNames, commandsForTab } from '../cli-info/cli-commands';
 import { CliMenuComponent } from '../cli-menu/cli-menu.component';
 
 /**
@@ -73,11 +73,11 @@ export class AppApplicationActionBarComponent implements OnInit, OnDestroy {
     this.applicationService.application$,
     this.applicationService.appOrg$,
     this.applicationService.appSpace$,
-  ]).pipe(map(([app, org, space]) => ({
+  ]).pipe(map(([app, org, space]): CliCommandNames => ({
     appName: app?.app?.entity?.name,
     orgName: org?.name ?? '',
     spaceName: space?.name ?? '',
-  }))), { initialValue: { orgName: '', spaceName: '' } });
+  }))), { initialValue: { orgName: '', spaceName: '' } as CliCommandNames });
   readonly cliAllLink = ['/applications', this.applicationService.cfGuid, this.applicationService.appGuid, 'cli'];
 
   ngOnInit(): void {
