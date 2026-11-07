@@ -88,7 +88,6 @@ describe('CFHomeCardComponent', () => {
 class StubRecentAppsComponent {
   @Input() allApps$!: Observable<any[]>;
   @Input() hideWhenEmpty = false;
-  @Input() noStats = false;
   @Input() dateMode!: string;
   @Input() showDate = true;
   @Input() maxRows = 10;

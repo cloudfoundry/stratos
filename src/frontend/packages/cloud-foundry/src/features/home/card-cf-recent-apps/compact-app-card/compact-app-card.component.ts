@@ -34,8 +34,6 @@ export class CompactAppCardComponent {
 
   readonly showDate = input(true);
   readonly dateMode = input<string>();
-  // Show the status from whatever stats are already cached; fetch none.
-  readonly noStats = input(false);
 
   // The org/space summary pages don't pass an endpoint; take it from the route.
   readonly endpointGuid = computed(() => this.endpoint() || this.activeRouteCfOrgSpace?.cfGuid);
@@ -67,7 +65,7 @@ export class CompactAppCardComponent {
     // the card a newly started app.
     effect(() => {
       const stats = this.stats();
-      if (stats && !this.noStats() && this.app().entity.state === 'STARTED') {
+      if (stats && this.app().entity.state === 'STARTED') {
         untracked(() => stats.load().subscribe());
       }
     });

@@ -86,15 +86,6 @@ describe('CardCfRecentAppsComponent stats requests', () => {
     expect(statsRequests()).toEqual(['/pp/v1/cf/app-stats/ep-1/a-started']);
   });
 
-  it('makes no stats requests with noStats', async () => {
-    fixture.componentRef.setInput('endpoint', 'ep-1');
-    fixture.componentRef.setInput('noStats', true);
-    fixture.componentRef.setInput('allApps$', observableOf([app('a-started', 'STARTED')]));
-    await fixture.whenStable();
-    expect(statsRequests()).toEqual([]);
-    expect(fixture.nativeElement.textContent).toContain('a-started');
-  });
-
   it('renders placeholder rows, with no stats requests, in placeholderMode', async () => {
     fixture.componentRef.setInput('placeholderMode', true);
     fixture.componentRef.setInput('maxRows', 3);

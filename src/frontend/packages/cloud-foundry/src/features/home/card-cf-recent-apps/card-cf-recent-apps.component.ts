@@ -53,7 +53,6 @@ export class CardCfRecentAppsComponent implements OnInit {
   readonly showDate = input(true);
   readonly dateMode = input<string>();
   // Passed to each row: show cached stats only, fetch none.
-  readonly noStats = input(false);
   readonly placeholderMode = input(false);
   readonly hideWhenEmpty = input(false);
   readonly maxRows = input(RECENT_ITEMS_COUNT);

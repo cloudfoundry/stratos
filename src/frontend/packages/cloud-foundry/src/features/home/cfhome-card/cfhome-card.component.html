@@ -18,7 +18,7 @@
   <app-tile-group class="tile-group-1-cols">
     <app-tile>
       @if (cardLoaded() && recentAppsRows() > 0) {
-        <app-card-cf-recent-apps [hideWhenEmpty]="true" [noStats]="true"
+        <app-card-cf-recent-apps [hideWhenEmpty]="true"
           dateMode="subtle" [showDate]="true" [maxRows]="recentAppsRows()" mode="plain"
           [endpoint]="guid()" [allApps$]="allApps$">
         </app-card-cf-recent-apps>
