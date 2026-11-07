@@ -14,6 +14,7 @@ vi.mock('xterm', () => ({
   Terminal: class {
     loadAddon() { }
     open() { }
+    attachCustomKeyEventHandler() { }
     onKey() { }
     onResize() { }
     focus() { }

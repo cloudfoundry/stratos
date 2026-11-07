@@ -46,6 +46,16 @@ export class SshViewerComponent implements OnInit, OnDestroy {
   // A progress window title from the backend, e.g. while a pod starts.
   public readonly message = signal('');
 
+  // Tab goes to the shell. Ctrl+Shift+M, the code editors' key too, makes
+  // Tab move focus instead; once the session has ended Tab always leaves
+  // (WCAG 2.1.2). Ctrl+M cannot be used: it is Enter in a terminal.
+  public readonly tabMovesFocus = signal(false);
+  public readonly tabHint = computed(() => !this.isConnected() ? '' : this.tabMovesFocus()
+    ? 'Tab moves focus. Press Ctrl+Shift+M so Tab goes to the shell.'
+    : 'Tab goes to the shell. Press Ctrl+Shift+M so Tab moves focus.');
+  public readonly statusText = computed(() => this.error()
+    ?? (!this.isConnected() && !this.attemptingConnection() ? 'Disconnected' : ''));
+
   readonly container = viewChild.required<ElementRef>('terminal');
   private xterm!: Terminal;
 
@@ -85,6 +95,9 @@ export class SshViewerComponent implements OnInit, OnDestroy {
     this.xterm = new Terminal();
     this.xterm.loadAddon(this.xtermFitAddon);
     this.xterm.open(this.container().nativeElement);
+    this.xterm.textarea?.setAttribute('aria-describedby', 'ssh-tab-hint');
+    // false: xterm leaves the key to the browser, so Tab moves focus.
+    this.xterm.attachCustomKeyEventHandler(e => this.handleKey(e));
     this.resize();
 
     this.xterm.onKey(e => {
@@ -100,6 +113,18 @@ export class SshViewerComponent implements OnInit, OnDestroy {
     });
 
     this.reconnect();
+  }
+
+  handleKey(e: KeyboardEvent): boolean {
+    if (e.ctrlKey && e.shiftKey && e.code === 'KeyM') {
+      // Chrome opens its profile menu on Ctrl+Shift+M otherwise.
+      e.preventDefault();
+      if (e.type === 'keydown') {
+        this.tabMovesFocus.update(v => !v);
+      }
+      return false;
+    }
+    return !(e.key === 'Tab' && (this.tabMovesFocus() || !this.isConnected()));
   }
 
   public resize() {
