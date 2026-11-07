@@ -121,6 +121,29 @@ describe('CompactAppCardComponent status (#6021)', () => {
     await fixture.whenStable();
     expect(fixture.componentInstance.appStatus()).toBe(StratosStatus.TENTATIVE);
   });
+
+  it('shows a loading placeholder, not a state icon, while a started app\'s stats load', async () => {
+    stats.stats.set([]);
+    stats.lastFetched.set(null);
+    fixture.componentRef.setInput('app', app('STARTED'));
+    await fixture.whenStable();
+    const el: HTMLElement = fixture.nativeElement;
+    expect(el.querySelector('[role="img"][aria-label="Loading state"]')).not.toBeNull();
+    expect(el.querySelector('app-application-state-icon')).toBeNull();
+
+    stats.stats.set([{ state: 'RUNNING' }]);
+    stats.lastFetched.set(new Date());
+    await fixture.whenStable();
+    expect(el.querySelector('[aria-label="Loading state"]')).toBeNull();
+    expect(el.querySelector('app-application-state-icon')).not.toBeNull();
+  });
+
+  it('shows no loading placeholder for a stopped app, which has no stats', async () => {
+    stats.lastFetched.set(null);
+    fixture.componentRef.setInput('app', app('STOPPED'));
+    await fixture.whenStable();
+    expect(fixture.nativeElement.querySelector('[aria-label="Loading state"]')).toBeNull();
+  });
 });
 
 describe('CompactAppCardComponent date (#4166)', () => {
