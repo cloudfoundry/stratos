@@ -310,7 +310,7 @@ export class StratosBrandingService {
   }
 
   private applyTheme(theme: StratosTheme) {
-    console.log('[StratosBrandingService] Applying theme:', theme);
+    this.debugLog('Applying theme:', theme);
     const root = document.documentElement;
 
     // Apply brand colors
@@ -396,7 +396,7 @@ export class StratosBrandingService {
   // =========================================================================
 
   setThemeMode(mode: ThemeMode) {
-    console.log('[StratosBrandingService] Setting theme mode to:', mode);
+    this.debugLog('Setting theme mode to:', mode);
     this._themeMode.set(mode);
     this.saveThemeModeToStorage(mode);
     this.applyThemeMode(mode);
@@ -461,6 +461,14 @@ export class StratosBrandingService {
     ) as Record<string, string>;
   }
 
+  // Theme and mode changes are logged only when the config's debug.logThemeChanges
+  // is set, so an operator can follow their colors without a dev build.
+  private debugLog(message: string, detail: unknown) {
+    if (this._config().debug?.logThemeChanges) {
+      console.log(`[StratosBrandingService] ${message}`, detail);
+    }
+  }
+
   private resolveThemeMode(mode: ThemeMode): boolean {
     if (mode === 'system') {
       return this.getSystemThemePreference();
@@ -473,7 +481,7 @@ export class StratosBrandingService {
   }
 
   private onSystemThemeChange(event: MediaQueryListEvent) {
-    console.log('[StratosBrandingService] System theme changed to:', event.matches ? 'dark' : 'light');
+    this.debugLog('System theme changed to:', event.matches ? 'dark' : 'light');
     // Only update if current mode is 'system'
     if (this._themeMode() === 'system') {
       this.applyThemeMode('system');

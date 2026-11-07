@@ -102,7 +102,8 @@ from these locations in order:
     "additionalInfo": "Version 5.0"
   },
   "debug": {
-    "showAllMenuItemsToggle": false
+    "showAllMenuItemsToggle": false,
+    "logThemeChanges": false
   },
   "defaults": {
     "themeMode": "light",
@@ -172,6 +173,7 @@ from these locations in order:
 | `defaults.viewMode` | `table`/`cards` | No | Default list view mode |
 | `defaults.sortDirection` | `asc`/`desc` | No | Default sort direction |
 | `debug.showAllMenuItemsToggle` | boolean | No | Debug: render the side-nav "Show all menu items" checkbox that reveals nav entries hidden by endpoint/persistence rules. Off by default |
+| `debug.logThemeChanges` | boolean | No | Debug: log each theme and mode change, with the theme applied, to the browser console. Off by default |
 
 ## Service API Summary
 

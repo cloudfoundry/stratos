@@ -148,6 +148,24 @@ describe('StratosBrandingService', () => {
       expect(cssVar('--header-bg')).toBe(darkTheme.layout.headerBackground);
     });
 
+    it('does not log a mode change to the console unless debug.logThemeChanges is set', async () => {
+      http.expectOne('/assets/company-config.json').flush(branded);
+      await settle();
+      service.activateUserPreferences();
+      const log = vi.spyOn(console, 'log').mockImplementation(() => undefined);
+
+      service.setThemeMode('dark');
+      service.setThemeMode('light');
+      expect(log).not.toHaveBeenCalled();
+
+      service.setCompanyConfig({ debug: { logThemeChanges: true } });
+      log.mockClear();
+      service.setThemeMode('dark');
+      expect(log).toHaveBeenCalledWith('[StratosBrandingService] Setting theme mode to:', 'dark');
+      expect(log).toHaveBeenCalledWith('[StratosBrandingService] Applying theme:', service.theme());
+      log.mockRestore();
+    });
+
     it('leaves dark mode untouched when the config has the default colors', async () => {
       http.expectOne('/assets/company-config.json').flush(null, notFound);
       await settle();

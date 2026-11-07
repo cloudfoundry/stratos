@@ -388,6 +388,9 @@ interface CompanyConfig {
     // nav entries hidden by endpoint/persistence rules. A debugging
     // affordance — off by default.
     showAllMenuItemsToggle?: boolean;
+    // Log each theme and mode change, with the theme applied, to the
+    // browser console. Off by default.
+    logThemeChanges?: boolean;
   };
   defaults?: {
     themeMode?: 'light' | 'dark' | 'system';
