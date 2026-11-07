@@ -5,8 +5,7 @@
         <p>Use the Cloud Foundry CLI to execute commands directly against a Cloud Foundry instance.</p>
         <h4>Getting Started</h4>
         <p>Before starting follow these steps:</p>
-        <span>1. Download and install the CLI - </span>
-        <a href="https://github.com/cloudfoundry/cli#downloads" rel="noopener noreferrer" target="_blank">see here</a>
+        <p>1. <a href="https://github.com/cloudfoundry/cli#downloads" rel="noopener noreferrer" target="_blank">Download and install the Cloud Foundry CLI</a></p>
         <p>2. Set the api endpoint</p>
         <app-code-block>cf api {{context().apiEndpoint || '[Cloud Foundry API endpoint]'}}{{context().skipSslValidation ? ' --skip-ssl-validation' : ''}}</app-code-block>
         <p>3. Login</p>
