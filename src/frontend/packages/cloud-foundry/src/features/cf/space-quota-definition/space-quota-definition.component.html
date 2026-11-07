@@ -32,16 +32,16 @@
 @if (spaceQuotaDefinition(); as quotaDefinition) {
   <div class="space-quota-definition-page">
     <app-loading-page [isLoading]="detailsLoading$" text="Retrieving details">
-      <div class="text-sm opacity-60">Name</div>
+      <div class="text-sm text-content-muted">Name</div>
       <h2 class="m-0">{{ quotaDefinition.name }}</h2>
       <div class="flex my-2">
-        <div class="mr-[10px] opacity-60">Non Basic Services Allowed:</div>
+        <div class="mr-[10px] text-content-muted">Non Basic Services Allowed:</div>
         <app-boolean-indicator [isTrue]="quotaDefinition.paidServicesAllowed" type="yes-no" [subtle]="true">
         </app-boolean-indicator>
       </div>
       <app-tile-grid [fit]="true">
         <h3 class="my-[10px]">Quota Limits</h3>
-        <h4 class="my-[10px] opacity-60">Memory</h4>
+        <h4 class="my-[10px] text-content-muted">Memory</h4>
         <app-tile-group class="tile-group-2-cols">
           <app-tile>
             <app-card-number-metric [labelAtTop]="true" icon="memory" label="Maximum Memory Usage" units="mb"
@@ -54,7 +54,7 @@
             </app-card-number-metric>
           </app-tile>
         </app-tile-group>
-        <h4 class="my-[10px] opacity-60">Application</h4>
+        <h4 class="my-[10px] text-content-muted">Application</h4>
         <app-tile-group class="tile-group-2-cols">
           <app-tile>
             <app-card-number-metric [labelAtTop]="true" icon="application_instance" iconFont="stratos-icons" label="Maximum Application Instances"
@@ -67,7 +67,7 @@
             </app-card-number-metric>
           </app-tile>
         </app-tile-group>
-        <h4 class="my-[10px] opacity-60">Service</h4>
+        <h4 class="my-[10px] text-content-muted">Service</h4>
         <app-tile-group class="tile-group-2-cols">
           <app-tile>
             <app-card-number-metric [labelAtTop]="true" icon="service" iconFont="stratos-icons" label="Maximum Services"
@@ -80,7 +80,7 @@
             </app-card-number-metric>
           </app-tile>
         </app-tile-group>
-        <h4 class="my-[10px] opacity-60">Routes</h4>
+        <h4 class="my-[10px] text-content-muted">Routes</h4>
         <app-tile-group class="tile-group-2-cols">
           <app-tile>
             <app-card-number-metric [labelAtTop]="true" icon="route" iconFont="stratos-icons" label="Maximum Routes"
