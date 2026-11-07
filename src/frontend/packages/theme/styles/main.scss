@@ -488,6 +488,14 @@ router-outlet + * {
   .btn-icon {
     @extend %btn-icon-base;
     @apply w-9 h-9 min-w-[36px] min-h-[36px];
+  }
+
+  /* A plain icon button draws the icon in the text color on the card. A filled
+     variant (btn-info, btn-danger…) keeps its own icon color and hover: this
+     rule comes after the variants in the same layer and would otherwise win,
+     drawing a dark icon on the filled background. :where keeps the
+     specificity at one class. */
+  .btn-icon:not(:where(.btn-primary, .btn-success, .btn-warning, .btn-danger, .btn-info)) {
     color: var(--content-text);
 
     &:hover:not(:disabled) {
