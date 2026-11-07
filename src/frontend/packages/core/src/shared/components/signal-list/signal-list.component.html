@@ -649,7 +649,10 @@
         <thead class="sticky top-0 bg-content-secondary z-10 border-b border-content-border">
           <tr>
             @if (favoriteColumn() || actionsColumn()) {
-              <th class="text-left px-3 py-2 font-semibold text-sm text-content-text whitespace-nowrap"></th>
+              <th class="text-left px-3 py-2 font-semibold text-sm text-content-text whitespace-nowrap">
+                <!-- The star and kebab cells need no visible label; the header still names the column. -->
+                <span class="sr-only">{{ favoriteColumn() ? (actionsColumn() ? 'Favorite and actions' : 'Favorite') : 'Actions' }}</span>
+              </th>
             }
             @for (col of config().columns; track col.key) {
               @if (col.kind !== 'favorite' && col.kind !== 'actions') {
