@@ -50,13 +50,6 @@
     cursor: help;
     display: flex;
   }
-  &__type {
-    $type-height: 20px;
-    font-size: 13px;
-    line-height: $type-height;
-    margin-top: -($type-height - 2px);
-    opacity: 0.6;
-  }
   &__panel {
     display: flex;
     :first-child {
