@@ -68,6 +68,7 @@ export interface CompanyConfig {
   // Debug affordances — troubleshooting UI kept out of normal deployments
   debug?: {
     showAllMenuItemsToggle?: boolean; // Reveal the side-nav "Show all menu items" checkbox
+    logThemeChanges?: boolean; // Log each theme and mode change to the browser console
   };
 
   // Deployment defaults — overridden by user/page preferences once set
