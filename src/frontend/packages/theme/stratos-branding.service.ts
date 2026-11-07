@@ -431,6 +431,7 @@ export class StratosBrandingService {
     // Merge custom branding/login overrides (these persist across mode switches)
     const theme: StratosTheme = {
       ...baseTheme,
+      colors: { ...baseTheme.colors, ...this.configuredColors('theme') },
       branding: this._customBranding
         ? { ...baseTheme.branding, ...this._customBranding }
         : baseTheme.branding,
@@ -438,9 +439,26 @@ export class StratosBrandingService {
         ? { ...baseTheme.login, ...this._customLogin }
         : baseTheme.login,
     };
+    // The config has one set of navigation and layout colors and no dark
+    // variants, so they apply in light mode only; the brand colors above
+    // apply in both.
+    if (!isDark) {
+      theme.navigation = { ...baseTheme.navigation, ...this.configuredColors('navigation') };
+      theme.layout = { ...baseTheme.layout, ...this.configuredColors('layout') };
+    }
 
     this._theme.set(theme);
     this.applyTheme(theme);
+  }
+
+  // The colors of one config section that the operator set: those that differ
+  // from the default config, whose values are the light theme's.
+  private configuredColors(section: 'theme' | 'navigation' | 'layout'): Record<string, string> {
+    const configured: Record<string, string | undefined> = this._config()[section] ?? {};
+    const defaults: Record<string, string | undefined> = defaultCompanyConfig[section];
+    return Object.fromEntries(
+      Object.entries(configured).filter(([key, value]) => value && value !== defaults[key])
+    ) as Record<string, string>;
   }
 
   private resolveThemeMode(mode: ThemeMode): boolean {
