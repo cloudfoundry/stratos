@@ -4,7 +4,7 @@ import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 
 import { StratosBrandingService } from '../../../../../theme/stratos-branding.service';
 import { loadMonacoEditor } from '../../../monaco-loader';
-import { MonacoEditorComponent } from './monaco-editor.component';
+import { MonacoEditorComponent, toggleTabMovesFocus } from './monaco-editor.component';
 
 // Resolves to the window.monaco mock installed by test-setup
 declare const monaco: typeof import('monaco-editor');
@@ -19,6 +19,8 @@ function createEditorStub() {
   const model = {};
   let value = '';
   let onContentChange: () => void = () => {};
+  let onFocus: () => void = () => {};
+  let onBlur: () => void = () => {};
   const stub = {
     getValue: () => value,
     setValue: (v: string) => { value = v; },
@@ -27,11 +29,17 @@ function createEditorStub() {
     focus: () => {},
     dispose: () => {},
     onDidChangeModelContent: (cb: () => void) => { onContentChange = cb; return { dispose: () => {} }; },
-    onDidBlurEditorText: () => ({ dispose: () => {} }),
+    onDidBlurEditorText: (cb: () => void) => { onBlur = cb; return { dispose: () => {} }; },
+    onDidFocusEditorText: (cb: () => void) => { onFocus = cb; return { dispose: () => {} }; },
     setModel: () => {},
     getModel: () => model,
   };
-  return { stub, model, type: (v: string) => { value = v; onContentChange(); } };
+  return {
+    stub, model,
+    type: (v: string) => { value = v; onContentChange(); },
+    focus: () => onFocus(),
+    blur: () => onBlur(),
+  };
 }
 
 describe('MonacoEditorComponent', () => {
@@ -105,6 +113,39 @@ describe('MonacoEditorComponent', () => {
     fixture.componentInstance.setLanguage('json');
 
     expect(setModelLanguage).toHaveBeenCalledWith(model, 'json');
+  });
+
+  it('names the key that makes Tab leave the editor, shown while focused', async () => {
+    const editor = createEditorStub();
+    vi.spyOn(monaco.editor, 'create').mockImplementation((el: HTMLElement) => {
+      el.innerHTML = '<div role="textbox"></div>';
+      return editor.stub as any;
+    });
+
+    const fixture = TestBed.createComponent(MonacoEditorComponent);
+    await fixture.whenStable();
+    await fixture.componentInstance.ngAfterViewInit();
+    await fixture.whenStable();
+
+    const el: HTMLElement = fixture.nativeElement;
+    const hint = el.querySelector<HTMLElement>(`#${fixture.componentInstance.hintId}`)!;
+    expect(el.querySelector('[role="textbox"]')!.getAttribute('aria-describedby')).toBe(hint.id);
+    expect(hint.textContent).toContain('Tab indents. Press Ctrl+Shift+M so Tab moves focus.');
+    expect(hint.classList).toContain('sr-only');
+
+    editor.focus();
+    await fixture.whenStable();
+    expect(hint.classList).not.toContain('sr-only');
+
+    // Ctrl+Shift+M runs this; the state is page-wide, so put it back.
+    toggleTabMovesFocus();
+    await fixture.whenStable();
+    expect(hint.textContent).toContain('Tab moves focus. Press Ctrl+Shift+M so Tab indents.');
+    toggleTabMovesFocus();
+
+    editor.blur();
+    await fixture.whenStable();
+    expect(hint.classList).toContain('sr-only');
   });
 
   it('setLanguage is a no-op before the editor exists', () => {
