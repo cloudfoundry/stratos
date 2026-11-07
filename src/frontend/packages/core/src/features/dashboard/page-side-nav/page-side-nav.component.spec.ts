@@ -62,6 +62,21 @@ describe('PageSideNavComponent', () => {
     expect(gated()).toBeNull();
   });
 
+  it('leaves the tabs in the page Tab order, one stop per tab', async () => {
+    fixture.componentRef.setInput('tabs', [
+      { link: 'summary', label: 'Summary' },
+      { label: 'Settings' },
+      { link: 'variables', label: 'Variables' },
+    ]);
+    await fixture.whenStable();
+    const el: HTMLElement = fixture.nativeElement;
+
+    // A positive tabindex puts an item ahead of the whole page, and a
+    // focusable <li> is a stop where Enter does nothing.
+    expect(el.querySelectorAll('[tabindex]')).toHaveLength(0);
+    expect(el.querySelectorAll('a')).toHaveLength(2);
+  });
+
   it('keeps the tabs it shows until a list of another length arrives', async () => {
     fixture.componentRef.setInput('tabs', [{ link: 'summary', label: 'Summary' }]);
     await fixture.whenStable();

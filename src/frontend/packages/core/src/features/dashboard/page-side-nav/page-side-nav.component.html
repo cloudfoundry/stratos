@@ -9,7 +9,7 @@
   </div>
   <ul class="page-side-nav__items">
     @for (tab of shownTabs(); track tab.link || tab.label) {
-      <li tabindex="1">
+      <li>
         @if (tab && !tab.link) {
           <div class="page-side-nav__item-sep">{{ tab?.label }}</div>
         }
