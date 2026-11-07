@@ -1,7 +1,7 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { provideZonelessChangeDetection } from '@angular/core';
 import { describe, it, expect, beforeEach } from 'vitest';
-import { Subject } from 'rxjs';
+import { Subject, of } from 'rxjs';
 import { STORE_TEST_PROVIDERS, BASE_TEST_PROVIDERS } from "@test-framework/core-test.helper";
 
 import { BaseTestModulesNoShared } from "@test-framework/core-test.helper";
@@ -75,6 +75,16 @@ describe('PageSideNavComponent', () => {
     // focusable <li> is a stop where Enter does nothing.
     expect(el.querySelectorAll('[tabindex]')).toHaveLength(0);
     expect(el.querySelectorAll('a')).toHaveLength(2);
+  });
+
+  it('draws no list item for a hidden tab', async () => {
+    fixture.componentRef.setInput('tabs', [
+      { link: 'summary', label: 'Summary' },
+      { link: 'variables', label: 'Variables', hidden$: of(true) },
+    ]);
+    await fixture.whenStable();
+
+    expect(fixture.nativeElement.querySelectorAll('li')).toHaveLength(1);
   });
 
   it('keeps the tabs it shows until a list of another length arrives', async () => {
