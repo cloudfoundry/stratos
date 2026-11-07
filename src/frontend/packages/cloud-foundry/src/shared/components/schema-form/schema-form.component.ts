@@ -88,6 +88,7 @@ export class SchemaFormComponent {
     hideCursorInOverviewRuler: true,
     overviewRulerBorder: false,
     renderLineHighlight: 'none',
+    ariaLabel: 'Parameters (JSON)',
   };
 
   cleanSchema: object | null | undefined;
