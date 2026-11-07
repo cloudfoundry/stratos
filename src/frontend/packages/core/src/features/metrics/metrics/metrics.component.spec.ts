@@ -2,6 +2,7 @@ import { provideHttpClient } from '@angular/common/http';
 import { provideHttpClientTesting } from '@angular/common/http/testing';
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { provideZonelessChangeDetection } from '@angular/core';
+import { By } from '@angular/platform-browser';
 import { NoopAnimationsModule } from '@angular/platform-browser/animations';
 import { RouterTestingModule } from '@angular/router/testing';
 import { describe, it, expect, beforeEach, vi } from 'vitest';
@@ -13,6 +14,7 @@ import { CoreModule } from '../../../core/core.module';
 import { SharedModule } from '../../../shared/shared.module';
 import { TabNavService } from '../../../tab-nav.service';
 import { CurrentUserPermissionsService } from '../../../core/permissions/current-user-permissions.service';
+import { PageHeaderComponent } from '../../../shared/components/page-header/page-header.component';
 import { MetricsEndpointProvider, MetricsService } from '../services/metrics-service';
 import { MetricsComponent } from './metrics.component';
 
@@ -74,6 +76,18 @@ describe('MetricsComponent', () => {
 
   it('should create', () => {
     expect(component).toBeTruthy();
+  });
+
+  // The endpoint name in the page header is the page heading (WCAG 1.3.1).
+  it('puts the page title in a heading', async () => {
+    await fixture.whenStable();
+    // The header renders through a portal; instantiate its template to see the projected title.
+    const header: PageHeaderComponent = fixture.debugElement.query(By.directive(PageHeaderComponent)).componentInstance;
+    const headerView = header.pageHeaderTmpl().createEmbeddedView({});
+    headerView.detectChanges();
+    const h1 = headerView.rootNodes.map((node: Node) => (node as HTMLElement).querySelector?.('h1')).find(Boolean);
+    expect(h1).toBeTruthy();
+    headerView.destroy();
   });
 
   it('draws an endpoint icon in the font it names', async () => {

@@ -1,5 +1,6 @@
 <ng-template>
-  <div class="meta-card__title" [ngClass]="{'meta-card__title-nomargin': !!noMargin()}">
+  <!-- A heading, at the level of the other card titles (app-card-title), so the card's name is in the outline. -->
+  <h3 class="meta-card__title" [ngClass]="{'meta-card__title-nomargin': !!noMargin()}">
     <ng-content></ng-content>
-  </div>
+  </h3>
 </ng-template>

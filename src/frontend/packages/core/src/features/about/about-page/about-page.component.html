@@ -1,4 +1,4 @@
-<app-page-header [showUnderFlow]="true">About</app-page-header>
+<app-page-header [showUnderFlow]="true"><h1>About</h1></app-page-header>
 
 <template #aboutInfoContainer></template>
 <template #supportInfoContainer></template>
@@ -25,7 +25,7 @@
 
           <!-- Frontend -->
           <div class="p-5">
-            <div class="text-xs font-semibold text-content-muted uppercase tracking-wider mb-3">Frontend</div>
+            <h2 class="text-xs font-semibold text-content-muted uppercase tracking-wider mb-3">Frontend</h2>
             <dl class="text-sm space-y-2">
               <div class="flex gap-2">
                 <dt class="text-content-muted w-20 shrink-0">Version</dt>
@@ -64,7 +64,7 @@
 
           <!-- Backend -->
           <div class="p-5">
-            <div class="text-xs font-semibold text-content-muted uppercase tracking-wider mb-3">Backend</div>
+            <h2 class="text-xs font-semibold text-content-muted uppercase tracking-wider mb-3">Backend</h2>
             <dl class="text-sm space-y-2">
               <div class="flex gap-2">
                 <dt class="text-content-muted w-20 shrink-0">Version</dt>
@@ -114,7 +114,7 @@
 
       <!-- Col 3: User / Login info — top aligned, centered -->
       <div class="p-6 flex flex-col items-center justify-start text-center gap-2 min-w-[120px]">
-        <div class="text-xs font-semibold text-content-muted uppercase tracking-wider">Signed in as</div>
+        <h2 class="text-xs font-semibold text-content-muted uppercase tracking-wider">Signed in as</h2>
         <div class="font-medium text-content-text text-base">{{ session.user?.name }}</div>
         @if ((this.userIsAdmin$ | async)) {
           <span class="text-xs bg-warning-shade-100 text-warning-shade-700 dark:bg-warning-shade-900/30 dark:text-warning-shade-300 px-2 py-0.5 rounded-full">Admin</span>
