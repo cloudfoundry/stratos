@@ -1,4 +1,5 @@
-<nav class="page-side-nav" [ngClass]="{'page-side-nav__desktop': (isMobile$ | async) === false}">
+<nav class="page-side-nav" [ngClass]="{'page-side-nav__desktop': (isMobile$ | async) === false}"
+  [attr.aria-label]="header() || null">
   <div class="page-side-nav__items-header">
     {{ header() }}
   </div>
@@ -20,7 +21,7 @@
           <a class="page-side-nav__item"
             [attr.data-test]="'page-tab-' + tab.label"
             [routerLink]="[tab.link]" queryParamsHandling="preserve"
-            [routerLinkActive]="['page-side-nav__item--active']">
+            [routerLinkActive]="['page-side-nav__item--active']" ariaCurrentWhenActive="page">
             @if (tab.icon) {
               <app-custom-icon class="page-side-nav__icon" [fontSet]="tab.iconFont">{{ tab.icon }}
               </app-custom-icon>
