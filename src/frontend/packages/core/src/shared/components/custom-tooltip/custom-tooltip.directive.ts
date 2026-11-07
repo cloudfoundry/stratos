@@ -1,5 +1,5 @@
 import {
-  Directive, ElementRef, Renderer2, OnChanges, OnDestroy, HostListener, SecurityContext, inject, numberAttribute, input
+  Directive, ElementRef, Renderer2, OnChanges, OnDestroy, HostListener, SecurityContext, inject, numberAttribute, booleanAttribute, input
 } from '@angular/core';
 import { DomSanitizer } from '@angular/platform-browser';
 
@@ -26,6 +26,9 @@ export class CustomTooltipDirective implements OnChanges, OnDestroy {
   readonly showDelay = input<number, unknown>(250, { alias: "matTooltipShowDelay", transform: numberAttribute });
   readonly hideDelay = input<number, unknown>(100, { alias: "matTooltipHideDelay", transform: numberAttribute });
   readonly disabled = input<boolean>(false, { alias: "matTooltipDisabled" });
+  // For a tooltip that repeats the host's own text: show it only while that
+  // text is cut off (an ellipsis or a line clamp), not when it is all there.
+  readonly onlyWhenTruncated = input<boolean, unknown>(false, { alias: "matTooltipOnlyWhenTruncated", transform: booleanAttribute });
 
   private tooltipElement: HTMLElement | null = null;
   private readonly tooltipId = `custom-tooltip-${nextId++}`;
@@ -131,12 +134,20 @@ export class CustomTooltipDirective implements OnChanges, OnDestroy {
     this.clearTimeouts();
     // Already showing (pointer back on the host, focus while hovered):
     // keep it rather than rebuilding it after another show delay
-    if (this.tooltipElement || !this.canShow()) {
+    if (this.tooltipElement || !this.canShow() || (this.onlyWhenTruncated() && !this.isTruncated())) {
       return;
     }
     this.showTimeout = setTimeout(() => {
       this.showTooltip();
     }, this.showDelay());
+  }
+
+  // Content wider or taller than its box is clipped: the host or an element
+  // inside it (such as a line-clamped title) holds more than it shows.
+  private isTruncated(): boolean {
+    const host: HTMLElement = this.elementRef.nativeElement;
+    return [host, ...Array.from(host.querySelectorAll<HTMLElement>('*'))]
+      .some(el => el.scrollWidth > el.clientWidth || el.scrollHeight > el.clientHeight);
   }
 
   private scheduleHide() {

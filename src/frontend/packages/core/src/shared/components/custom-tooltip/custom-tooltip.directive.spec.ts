@@ -311,3 +311,55 @@ describe('CustomTooltipDirective keyboard and screen reader support', () => {
     expect(tip()).toBeNull();
   });
 });
+
+@Component({
+  imports: [CustomTooltipDirective],
+  template: `<div matTooltip="a long endpoint name" matTooltipOnlyWhenTruncated><div class="clip">a long endpoint name</div></div>`
+})
+class TruncatedHostComponent {}
+
+// A tooltip that repeats a title is only useful when the title is cut off.
+describe('CustomTooltipDirective matTooltipOnlyWhenTruncated', () => {
+  let fixture: ComponentFixture<TruncatedHostComponent>;
+  let directive: CustomTooltipDirective;
+  let clip: HTMLElement;
+
+  // The test DOM does no layout, so give the clipping element its sizes.
+  function sizeClip(scrollWidth: number, clientWidth: number) {
+    Object.defineProperty(clip, 'scrollWidth', { configurable: true, value: scrollWidth });
+    Object.defineProperty(clip, 'clientWidth', { configurable: true, value: clientWidth });
+  }
+
+  beforeEach(async () => {
+    TestBed.configureTestingModule({
+      providers: [provideZonelessChangeDetection()],
+      imports: [TruncatedHostComponent],
+    }).compileComponents();
+    fixture = TestBed.createComponent(TruncatedHostComponent);
+    await fixture.whenStable();
+    vi.useFakeTimers();
+    const el = fixture.debugElement.query(By.directive(CustomTooltipDirective));
+    directive = el.injector.get(CustomTooltipDirective);
+    clip = fixture.nativeElement.querySelector('.clip');
+  });
+
+  afterEach(() => {
+    vi.clearAllTimers();
+    vi.useRealTimers();
+    document.querySelectorAll('.custom-tooltip').forEach(n => n.remove());
+  });
+
+  it('does not show when the text fits', () => {
+    sizeClip(91, 91);
+    directive.onMouseEnter(new MouseEvent('mouseenter'));
+    vi.advanceTimersByTime(300);
+    expect(document.body.querySelector('.custom-tooltip')).toBeNull();
+  });
+
+  it('shows when the text is cut off', () => {
+    sizeClip(240, 91);
+    directive.onMouseEnter(new MouseEvent('mouseenter'));
+    vi.advanceTimersByTime(300);
+    expect(document.body.querySelector('.custom-tooltip')?.textContent).toBe('a long endpoint name');
+  });
+});
