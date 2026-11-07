@@ -149,3 +149,10 @@ $app-header-height: 56px;
   }
 
 }
+
+// The skip link shows only while focused; a plain outline, since the
+// Tailwind ring utilities compute to a transparent box-shadow (#4167).
+.skip-link:focus-visible {
+  outline: 2px solid var(--color-primary);
+  outline-offset: 2px;
+}
