@@ -200,4 +200,24 @@ describe('HomePageEndpointCardComponent', () => {
     card.destroy();
     getEndpoint.mockRestore();
   });
+
+  // The header opens the endpoint's page: a link, so the keyboard reaches it
+  // (#4168, WCAG 2.1.1), not a div with a routerLink.
+  it('makes the header of a reachable endpoint a link to its page', async () => {
+    const getEndpoint = vi.spyOn(entityCatalog, 'getEndpoint').mockReturnValue({
+      definition: { label: 'Test type', unConnectable: true, logoUrl: '', icon: 'meter', iconFont: 'stratos-icons' },
+    } as never);
+    const getFavorite = vi.spyOn(userFavoriteManager, 'getFavoriteEndpointFromEntity')
+      .mockReturnValue({ getLink: () => '/endpoints/g' } as never);
+    const card = TestBed.createComponent(HomePageEndpointCardComponent);
+    card.componentRef.setInput('endpoint', { cnsi_type: 'test-type', guid: 'g', name: 'Lab CF' } as EndpointModel);
+    await card.whenStable();
+
+    const link = card.nativeElement.querySelector('.card-header a') as HTMLAnchorElement;
+    expect(link?.getAttribute('href')).toBe('/endpoints/g');
+    expect(link.textContent).toContain('Lab CF');
+    card.destroy();
+    getFavorite.mockRestore();
+    getEndpoint.mockRestore();
+  });
 });

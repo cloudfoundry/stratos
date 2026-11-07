@@ -2,7 +2,9 @@
   @if (endpoint() && definition) {
     <div class="card-header border-b card-header-border">
       <div class="flex items-center justify-between w-full">
-        <div class="flex items-center space-x-4" [class.cursor-pointer]="!disconnected" [routerLink]="disconnected ? null : link">
+        <!-- A link (not a div with routerLink) so the keyboard reaches it; without a link it renders no href. -->
+        <a class="flex items-center space-x-4 no-underline text-inherit rounded-md focus:outline-none focus-visible:ring-2 focus-visible:ring-primary"
+          [class.cursor-pointer]="!disconnected" [routerLink]="disconnected ? null : link">
           <div class="shrink-0 h-12 w-12 flex items-center justify-center">
             @if (definition.logoUrl) {
               <img class="h-12 w-12 object-contain" [src]="definition.logoUrl" alt="" />
@@ -20,7 +22,7 @@
             </h2>
             <div class="text-sm card-subtitle mt-1">{{ definition.label }}</div>
           </div>
-        </div>
+        </a>
         <div class="flex items-center space-x-2">
           @if ((status$ | async); as status) {
             <div>
