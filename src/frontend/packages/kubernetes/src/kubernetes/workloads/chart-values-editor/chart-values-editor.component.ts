@@ -113,6 +113,7 @@ export class ChartValuesEditorComponent implements OnInit, OnDestroy, AfterViewI
     automaticLayout: false, // We will resize the editor to fit the available space
     contextmenu: false, // Turn off the right-click context menu
     tabSize: 2,
+    ariaLabel: 'Values (YAML)',
   };
 
   // Monaco editor
