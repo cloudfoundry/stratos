@@ -7,3 +7,6 @@
 - The browser console no longer logs the whole theme on every theme change
   and mode switch. Set `debug.logThemeChanges` in `company-config.json` to
   turn those logs on.
+- The browser console says once, at startup, which company config was
+  applied: `company-config.json`, the environment file, or the built-in
+  defaults.

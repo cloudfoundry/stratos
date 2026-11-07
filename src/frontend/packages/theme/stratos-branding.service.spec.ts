@@ -78,6 +78,24 @@ describe('StratosBrandingService', () => {
 
       expect(service.getCompanyName()).toBe('Stratos');
     });
+
+    it('says which config it applied', async () => {
+      const info = vi.spyOn(console, 'info').mockImplementation(() => undefined);
+      http.expectOne('/assets/company-config.json').flush(withName('Acme'));
+      await settle();
+      expect(info).toHaveBeenCalledWith('[StratosBrandingService] Company config loaded from /assets/company-config.json');
+      info.mockRestore();
+    });
+
+    it('says when it fell back to the built-in config', async () => {
+      const info = vi.spyOn(console, 'info').mockImplementation(() => undefined);
+      http.expectOne('/assets/company-config.json').flush(null, notFound);
+      await settle();
+      http.expectOne('/assets/config/company.json').flush(null, notFound);
+      await settle();
+      expect(info).toHaveBeenCalledWith('[StratosBrandingService] Company config: using the built-in defaults');
+      info.mockRestore();
+    });
   });
 
   describe('configured colors across theme modes (#6138)', () => {
