@@ -1,5 +1,5 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
-import { provideZonelessChangeDetection } from '@angular/core';
+import { EmbeddedViewRef, provideZonelessChangeDetection } from '@angular/core';
 import { provideHttpClient } from '@angular/common/http';
 import { provideHttpClientTesting, HttpTestingController } from '@angular/common/http/testing';
 import { describe, it, expect, beforeEach, afterEach, vi } from 'vitest';
@@ -299,6 +299,55 @@ describe('PageHeaderComponent', () => {
 
       expect(writeTextMock).toHaveBeenCalledWith('auth-123');
       expect(snackSpy).toHaveBeenCalledWith('Failed to copy Auth token', 'Close');
+    });
+  });
+
+  // The user menu is a disclosure (#4170, WCAG 4.1.2): a named button that
+  // says whether its panel is open, and Escape closes the panel.
+  describe('user menu', () => {
+    let host: HTMLElement;
+    let view: EmbeddedViewRef<unknown>;
+
+    const button = () => host.querySelector('#userMenu') as HTMLButtonElement;
+    const panel = () => host.querySelector('#userMenuPanel');
+
+    beforeEach(() => {
+      // The header renders through a portal; instantiate its template directly.
+      view = component.pageHeaderTmpl().createEmbeddedView({});
+      view.detectChanges();
+      host = document.createElement('div');
+      view.rootNodes.forEach((node: Node) => host.appendChild(node));
+      document.body.appendChild(host);
+    });
+
+    afterEach(() => {
+      view.destroy();
+      host.remove();
+      TestBed.inject(HttpTestingController).match(() => true);
+    });
+
+    it('is a named button that reports its closed panel', () => {
+      expect(button().getAttribute('aria-label')).toBe('User menu');
+      expect(button().getAttribute('aria-expanded')).toBe('false');
+      expect(button().getAttribute('aria-controls')).toBe('userMenuPanel');
+      expect(panel()).toBeNull();
+    });
+
+    it('reports the panel open once toggled', () => {
+      button().click();
+      view.detectChanges();
+      expect(button().getAttribute('aria-expanded')).toBe('true');
+      expect(panel()).toBeTruthy();
+    });
+
+    it('closes the panel on Escape and puts focus back on the button', () => {
+      button().click();
+      view.detectChanges();
+      document.dispatchEvent(new KeyboardEvent('keydown', { key: 'Escape', bubbles: true }));
+      view.detectChanges();
+      expect(button().getAttribute('aria-expanded')).toBe('false');
+      expect(panel()).toBeNull();
+      expect(document.activeElement).toBe(button());
     });
   });
 });
