@@ -1,7 +1,7 @@
 <div class="dashboard-outer h-screen min-h-0 flex flex-col overflow-hidden bg-app-bg text-app-text">
   <!-- First Tab stop: skips the side nav and header (WCAG 2.4.1). Visible only while focused. -->
   <a href="#main-content" (click)="skipToContent($event)"
-    class="sr-only focus:not-sr-only focus:fixed focus:top-2 focus:left-2 focus:z-[100] focus:px-4 focus:py-2 focus:rounded-md focus:bg-content-bg focus:text-content-text focus:outline-none focus:ring-2 focus:ring-primary">
+    class="skip-link sr-only focus:not-sr-only focus:fixed focus:top-2 focus:left-2 focus:z-[100] focus:px-4 focus:py-2 focus:rounded-md focus:bg-content-bg focus:text-content-text">
     Skip to main content
   </a>
   <!-- Main layout container -->

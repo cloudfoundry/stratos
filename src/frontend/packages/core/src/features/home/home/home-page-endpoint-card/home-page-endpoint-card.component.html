@@ -3,7 +3,7 @@
     <div class="card-header border-b card-header-border">
       <div class="flex items-center justify-between w-full">
         <!-- A link (not a div with routerLink) so the keyboard reaches it; without a link it renders no href. -->
-        <a class="flex items-center space-x-4 no-underline text-inherit rounded-md focus:outline-none focus-visible:ring-2 focus-visible:ring-primary"
+        <a class="card-header-link flex items-center space-x-4 no-underline text-inherit rounded-md"
           [class.cursor-pointer]="!disconnected" [routerLink]="disconnected ? null : link">
           <div class="shrink-0 h-12 w-12 flex items-center justify-center">
             @if (definition.logoUrl) {
