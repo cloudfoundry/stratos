@@ -51,13 +51,13 @@ Set by the theme service and used for primary interactive elements.
 
 | Variable | Light | Dark | Usage |
 |----------|-------|------|-------|
-| `--color-primary` | `#3b82f6` | `#60a5fa` | Buttons, links, active states |
-| `--color-secondary` | `#60a5fa` | `#38bdf8` | Secondary actions |
-| `--color-accent` | `#60a5fa` | `#38bdf8` | Accents, highlights |
+| `--color-primary` | `#2563eb` | `#60a5fa` | Buttons, links, active states (4.5:1 as text on the content background) |
+| `--color-secondary` | `#2563eb` | `#38bdf8` | Secondary actions |
+| `--color-accent` | `#2563eb` | `#38bdf8` | Accents, highlights, table links |
 | `--color-success` | `#22c55e` | `#4ade80` | Success states, running apps |
 | `--color-warning` | `#f59e0b` | `#fbbf24` | Warning badges |
 | `--color-danger` | `#ef4444` | `#f87171` | Errors, delete actions |
-| `--color-info` | `#3b82f6` | `#60a5fa` | Info badges |
+| `--color-info` | `#2563eb` | `#60a5fa` | Info badges |
 
 ### Navigation
 
