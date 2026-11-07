@@ -31,7 +31,8 @@
     }
 
     &.selected {
-      @apply text-white z-10;
+      @apply z-10;
+      color: var(--color-on-primary);
       background-color: var(--color-primary);
       border-color: var(--color-primary);
 

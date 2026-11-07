@@ -171,6 +171,7 @@
   --color-warning: oklch(83.686% 0.1644 84.43);
   --color-danger: oklch(71.063% 0.1661 22.22);
   --color-info: oklch(71.374% 0.1434 254.62);
+  --color-on-primary: oklch(20.768% 0.0398 265.75);
 
   /* Navigation colors - dark theme */
   --nav-bg: oklch(20.768% 0.0398 265.75);
@@ -332,7 +333,8 @@ router-outlet + * {
 
   /* Primary Button */
   .btn-primary {
-    @apply text-white shadow-sm;
+    @apply shadow-sm;
+    color: var(--color-on-primary);
     background-color: var(--color-primary);
 
     &:hover:not(:disabled) {
@@ -461,7 +463,8 @@ router-outlet + * {
 
     &:hover:not(:disabled) {
       background-color: var(--color-primary);
-      @apply text-white shadow-sm;
+      color: var(--color-on-primary);
+      @apply shadow-sm;
     }
   }
 

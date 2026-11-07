@@ -58,7 +58,7 @@ const ACTION_BASE =
 
 /** Variant-specific Tailwind additions. */
 const VARIANT_CLASSES: Record<NonNullable<ListSubNavAction['variant']>, string> = {
-  primary:     'bg-primary text-white hover:bg-primary/90',
+  primary:     'bg-primary text-on-primary hover:bg-primary/90',
   destructive: 'bg-danger text-white hover:bg-danger/90 border border-danger',
   default:     'border border-content-border bg-content-bg text-content-text hover:bg-content-secondary',
 };
@@ -156,7 +156,7 @@ const VARIANT_CLASSES: Record<NonNullable<ListSubNavAction['variant']>, string> 
               [disabled]="isAddDisabled()"
               (click)="add.invoke()"
               class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded font-semibold text-sm
-                     bg-primary text-white hover:bg-primary/90 transition-all duration-150
+                     bg-primary text-on-primary hover:bg-primary/90 transition-all duration-150
                      disabled:opacity-50 disabled:cursor-not-allowed">
               <span class="material-icons text-base leading-5">{{ add.icon ?? 'add' }}</span>
               <span>{{ add.label }}</span>

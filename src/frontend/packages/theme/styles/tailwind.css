@@ -197,6 +197,8 @@
   --color-danger:    oklch(63.683% 0.2078 25.33);
   --color-info:      oklch(54.615% 0.2152 262.88);
   --color-error:     oklch(63.683% 0.2078 25.33);
+  /* Text drawn on --color-primary; dark mode's lighter primary needs dark text. */
+  --color-on-primary: oklch(100% 0 none);
 
   /* ─── Color: neutral status ─── */
   /* tentative — gray for "uncertain / initialising" status icons. Not theme-shifted. */
