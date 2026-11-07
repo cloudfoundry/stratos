@@ -88,6 +88,15 @@ describe('CliInfoComponent', () => {
     expect(text).toContain('cf scale "app" -m [N]M');
   });
 
+  // The download link read "see here", which says nothing out of context
+  // (WCAG 2.4.4): the step itself is the link text.
+  it('names the CLI download link by its purpose', async () => {
+    const text = await render();
+    const link = (fixture.nativeElement as HTMLElement).querySelector('a[href^="https://github.com/cloudfoundry/cli"]');
+    expect(link?.textContent?.trim()).toBe('Download and install the Cloud Foundry CLI');
+    expect(text).not.toContain('see here');
+  });
+
   it('renders only Getting Started when no sections are given', async () => {
     await render();
     const headings = Array.from((fixture.nativeElement as HTMLElement).querySelectorAll('h4')).map(h => h.textContent?.trim());

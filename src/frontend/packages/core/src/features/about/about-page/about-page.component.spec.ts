@@ -1,11 +1,14 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
-import { provideZonelessChangeDetection } from '@angular/core';
+import { provideZonelessChangeDetection, signal } from '@angular/core';
 import { describe, it, expect, beforeEach, vi } from 'vitest';
 import { NoopAnimationsModule } from '@angular/platform-browser/animations';
 import { RouterTestingModule } from '@angular/router/testing';
 import { createBasicStoreModule, STORE_TEST_PROVIDERS, CoreTestingModule } from '@test-framework';
 
+import { By } from '@angular/platform-browser';
 import { CurrentUserPermissionsService } from '../../../core/permissions/current-user-permissions.service';
+import { AuthSignalService } from '../../../core/signals/auth-signal.service';
+import { PageHeaderComponent } from '../../../shared/components/page-header/page-header.component';
 import { TabNavService } from '../../../tab-nav.service';
 import { AboutPageComponent } from './about-page.component';
 
@@ -27,6 +30,8 @@ describe('AboutPageComponent', () => {
         CurrentUserPermissionsService,
         ...STORE_TEST_PROVIDERS,
         provideZonelessChangeDetection(),
+        // The page renders its body once a session is known.
+        { provide: AuthSignalService, useValue: { sessionData: signal({ valid: true, user: { name: 'tester', admin: false }, version: { proxy_version: '1.0.0' } }) } },
       ]
     }).compileComponents();
   });
@@ -39,6 +44,22 @@ describe('AboutPageComponent', () => {
 
   it('should create', () => {
     expect(component).toBeTruthy();
+  });
+
+  // The page title and the section labels looked like headings but were
+  // plain text (WCAG 1.3.1).
+  it('has a page heading and a heading per section', async () => {
+    await fixture.whenStable();
+    const root = fixture.nativeElement as HTMLElement;
+    // The header renders through a portal; instantiate its template to see the projected title.
+    const header: PageHeaderComponent = fixture.debugElement.query(By.directive(PageHeaderComponent)).componentInstance;
+    const headerView = header.pageHeaderTmpl().createEmbeddedView({});
+    headerView.detectChanges();
+    const h1 = headerView.rootNodes.map((node: Node) => (node as HTMLElement).querySelector?.('h1')).find(Boolean);
+    expect(h1?.textContent?.trim()).toBe('About');
+    headerView.destroy();
+    const sections = Array.from(root.querySelectorAll('h2')).map(h => h.textContent?.trim());
+    expect(sections).toEqual(['Frontend', 'Backend', 'Signed in as']);
   });
 
   it('should expose buildInfo from BUILD_INFO token', () => {
