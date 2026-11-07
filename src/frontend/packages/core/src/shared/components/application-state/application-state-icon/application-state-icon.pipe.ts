@@ -37,7 +37,9 @@ export class ApplicationStateIconPipe implements PipeTransform {
       case 'ok':
         return this.result(args, value, 'text-success', 'lens');
       case 'tentative':
-        return this.result(args, value, 'text-tentative', 'lens');
+        // Hollow, so it differs from the filled ok circle by shape and not
+        // by color alone (WCAG 1.4.1).
+        return this.result(args, value, 'text-tentative', 'radio_button_unchecked');
       case 'incomplete':
         return this.result(args, value, 'text-tentative', 'broken_image');
       case 'warning':
