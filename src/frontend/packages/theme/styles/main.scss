@@ -110,7 +110,7 @@
   --input-bg: oklch(100% 0 none);
   --input-border: oklch(87.168% 0.0093 258.34);
   --input-text: oklch(27.95% 0.0368 260.03);
-  --input-placeholder: oklch(71.366% 0.0192 261.32);
+  --input-placeholder: oklch(55.439% 0.0407 257.42);
   --input-focus-border: var(--color-primary);
   --input-disabled-bg: oklch(96.696% 0.0029 264.54);
 
@@ -135,7 +135,7 @@
   --step-inactive-bg: oklch(92.758% 0.0058 264.53);
   --step-inactive-text: oklch(44.611% 0.0263 256.8);
   --step-skip-bg: oklch(96.696% 0.0029 264.54);
-  --step-skip-text: oklch(71.366% 0.0192 261.32);
+  --step-skip-text: oklch(44.611% 0.0263 256.8);
 
   /* Status and state colors */
   --success-bg: oklch(96.241% 0.0434 156.74);
@@ -207,7 +207,7 @@
   --input-bg: oklch(27.95% 0.0368 260.03);
   --input-border: oklch(44.553% 0.0374 257.28);
   --input-text: oklch(96.826% 0.0069 247.9);
-  --input-placeholder: oklch(55.439% 0.0407 257.42);
+  --input-placeholder: oklch(71.067% 0.0351 256.79);
   --input-focus-border: var(--color-primary);
   --input-disabled-bg: oklch(20.768% 0.0398 265.75);
 
@@ -232,7 +232,7 @@
   --step-inactive-bg: oklch(37.17% 0.0392 257.29);
   --step-inactive-text: oklch(86.898% 0.0198 252.89);
   --step-skip-bg: oklch(27.95% 0.0368 260.03);
-  --step-skip-text: oklch(55.439% 0.0407 257.42);
+  --step-skip-text: oklch(71.067% 0.0351 256.79);
 
   /* Status and state colors - dark theme with WCAG AA compliance */
   --success-bg: oklch(39.253% 0.0896 152.54);
@@ -539,8 +539,7 @@ router-outlet + * {
     color: var(--input-text);
 
     &::placeholder {
-      color: var(--content-muted);
-      opacity: 0.7;
+      color: var(--input-placeholder);
     }
 
     &:focus {
