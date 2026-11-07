@@ -18,6 +18,22 @@
   h4 { @apply text-base font-semibold; }
 }
 
+/* Keyboard focus. One default for every element the keyboard reaches. It is
+ * in @layer base so an element that draws its own ring (`focus:outline-none
+ * focus:ring-*`) keeps it: utilities win over base. `--focus-ring` lets a
+ * surface pick an outline color that contrasts with it; the header and the
+ * side nav set it through the same classes that paint their background.
+ * 2px solid with a 2px offset satisfies WCAG 2.4.7 and the 2.4.11 minimum
+ * area and contrast against the surfaces the tokens cover. */
+@layer base {
+  :focus-visible {
+    outline: 2px solid var(--focus-ring, var(--color-primary));
+    outline-offset: 2px;
+  }
+  .bg-header-bg { --focus-ring: var(--header-text); }
+  .bg-nav-bg { --focus-ring: var(--nav-text); }
+}
+
 /* Icon font styles - supports both material-icons and custom icon fonts.
  * In @layer base so text-size utilities (@layer utilities) can override
  * the default 24px glyph size; unlayered these rules would beat every

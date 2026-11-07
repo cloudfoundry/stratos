@@ -81,10 +81,8 @@
   &-pointer {
     cursor: pointer;
   }
-
-  &:focus {
-    outline: 0;
-  }
+  // A card with a click action takes focus (tabindex 0) and shows the global
+  // :focus-visible outline.
 }
 
 .meta-card__plain {
