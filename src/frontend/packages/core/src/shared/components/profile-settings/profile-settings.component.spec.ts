@@ -46,4 +46,14 @@ describe('ProfileSettingsComponent', () => {
   it('should create', () => {
     expect(component).toBeTruthy();
   });
+
+  // #4166: the option subtexts were body text at opacity 0.6 (4.04:1 in light mode).
+  it('shows the option subtext in the muted text color', async () => {
+    await fixture.whenStable();
+    const subtexts = Array.from(fixture.nativeElement.querySelectorAll('.user-profile__option-subtext')) as HTMLElement[];
+    expect(subtexts.map(s => s.textContent)).toContainEqual(expect.stringContaining('Disable automatic logout'));
+    for (const subtext of subtexts) {
+      expect(subtext.classList).toContain('text-content-muted');
+    }
+  });
 });

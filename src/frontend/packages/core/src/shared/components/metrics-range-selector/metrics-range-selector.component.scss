@@ -62,7 +62,6 @@
   &__selected-range-dates {
     display: none;
     font-size: 14px;
-    opacity: 0.6;
     padding-left: 10px;
 
     @include mixins.breakpoint(tablet) {

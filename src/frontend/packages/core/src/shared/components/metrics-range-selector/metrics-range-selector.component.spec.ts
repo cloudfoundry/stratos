@@ -1,5 +1,5 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
-import { provideZonelessChangeDetection } from '@angular/core';
+import { ChangeDetectorRef, provideZonelessChangeDetection } from '@angular/core';
 import { describe, it, expect, beforeEach, afterEach, beforeAll, afterAll, vi } from 'vitest';
 import { NoopAnimationsModule } from '@angular/platform-browser/animations';
 import { createBasicStoreModule, STORE_TEST_PROVIDERS } from "@test-framework/core-test.helper";
@@ -79,5 +79,18 @@ describe('MetricsRangeSelectorComponent', () => {
     await fixture.whenStable();
 
     expect(component.rangeSelectorManager.pollInterval).toBe(2000);
+  });
+
+  // #4166: the committed range dates were body text at opacity 0.6 (4.04:1 in light mode).
+  it('shows the committed range dates in the muted text color', async () => {
+    const manager = component.rangeSelectorManager;
+    manager.selectedTimeRangeValue = { queryType: MetricQueryType.RANGE_QUERY } as ITimeRange;
+    manager.committedStartEnd = [new Date(2026, 5, 1, 9, 0), new Date(2026, 5, 2, 9, 0)];
+    // OnPush: the manager's fields are plain properties, so mark the view before checking it.
+    fixture.debugElement.injector.get(ChangeDetectorRef).markForCheck();
+    await fixture.whenStable();
+    const dates = (fixture.nativeElement as HTMLElement).querySelector('.metrics-range-selector__selected-range-dates');
+    expect(dates?.textContent).toContain('2026');
+    expect(dates!.classList).toContain('text-content-muted');
   });
 });
