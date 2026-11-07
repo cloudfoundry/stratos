@@ -60,10 +60,10 @@ describe('CloudFoundryOrganizationSummaryComponent', () => {
     deleteOrg: async (_cnsiGuid: string, _orgGuid: string) => {}
   };
 
+  // An organization page's route names no space.
   const mockActiveRoute = {
     cfGuid: 'cf-guid',
     orgGuid: 'org-guid',
-    spaceGuid: 'space-guid'
   };
 
   beforeEach(() => {

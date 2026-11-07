@@ -28,6 +28,8 @@ describe('CloudFoundryOrganizationBaseComponent', () => {
   const mockOrgService = {
     cfGuid: 'cf-guid',
     orgGuid: 'org-guid',
+    // The CF CLI menu reads the organization's name from here.
+    orgDataService: { org: signal({ name: 'test-org' }) },
     org$: of({
       entity: {
         entity: {
@@ -59,10 +61,10 @@ describe('CloudFoundryOrganizationBaseComponent', () => {
     })
   };
 
+  // An organization page's route names no space.
   const mockActiveRoute = {
     cfGuid: 'cf-guid',
     orgGuid: 'org-guid',
-    spaceGuid: 'space-guid'
   };
 
   // Minimal OrgDataService stand-in: only the methods the base component

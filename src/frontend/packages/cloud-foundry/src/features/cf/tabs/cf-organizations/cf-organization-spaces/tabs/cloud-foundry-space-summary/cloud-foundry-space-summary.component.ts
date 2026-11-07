@@ -26,6 +26,7 @@ import { CfUserPermissionDirective } from '../../../../../../../shared/directive
 import { CardCfSpaceDetailsComponent } from '../../../../../../../shared/components/cards/card-cf-space-details/card-cf-space-details.component';
 import { PollingIndicatorComponent } from '../../../../../../../../../core/src/shared/components/polling-indicator/polling-indicator.component';
 import { unknownHowOf, unknownOutcomeMessage } from '../../../../../../../services/async-jobs/unknown-outcome-message';
+import { CfCliMenuComponent } from '../../../../../../../shared/components/cli-menu/cf-cli-menu.component';
 
 @Component({
   selector: 'app-cloud-foundry-space-summary',
@@ -37,6 +38,7 @@ import { unknownHowOf, unknownOutcomeMessage } from '../../../../../../../servic
     RouterModule,
     CustomTooltipDirective,
     PageSubNavComponent,
+    CfCliMenuComponent,
     TileGridComponent,
     TileGroupComponent,
     TileComponent,

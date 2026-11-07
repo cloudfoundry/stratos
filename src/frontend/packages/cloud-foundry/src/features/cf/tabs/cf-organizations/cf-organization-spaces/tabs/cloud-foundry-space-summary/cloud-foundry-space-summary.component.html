@@ -10,11 +10,7 @@
     (click)="deleteSpaceWarn()" matTooltip="Delete Space">
     <span class="material-icons">delete</span>
   </button>
-  <button class="btn btn-icon" name="cli"
-    routerLink="/cloud-foundry/{{cfEndpointService.cfGuid}}/organizations/{{cfOrgService.orgGuid}}/spaces/{{cfSpaceService.spaceGuid}}/cli"
-    matTooltip="CLI Info">
-    <span class="material-icons">keyboard</span>
-  </button>
+  <app-cf-cli-menu tab="summary"></app-cf-cli-menu>
   <app-polling-indicator class="ml-auto"
     [manualPoll]="(cfSpaceService.loadingApps$ | async) === false"
     [isPolling]="(cfSpaceService.loadingApps$ | async) ?? false"

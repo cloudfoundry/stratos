@@ -25,6 +25,7 @@ import { CardCfRecentAppsComponent } from '../../../../home/card-cf-recent-apps/
 import { CfUserPermissionDirective } from '../../../../../shared/directives/cf-user-permission/cf-user-permission.directive';
 import { PollingIndicatorComponent } from '../../../../../../../core/src/shared/components/polling-indicator/polling-indicator.component';
 import { unknownHowOf, unknownOutcomeMessage } from '../../../../../services/async-jobs/unknown-outcome-message';
+import { CfCliMenuComponent } from '../../../../../shared/components/cli-menu/cf-cli-menu.component';
 
 @Component({
   selector: 'app-cloud-foundry-organization-summary',
@@ -36,6 +37,7 @@ import { unknownHowOf, unknownOutcomeMessage } from '../../../../../services/asy
     CustomTooltipDirective,
     RouterModule,
     PageSubNavComponent,
+    CfCliMenuComponent,
     TileGridComponent,
     TileGroupComponent,
     TileComponent,

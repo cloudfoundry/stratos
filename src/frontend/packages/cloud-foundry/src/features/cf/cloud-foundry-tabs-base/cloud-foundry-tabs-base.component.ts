@@ -15,9 +15,12 @@ import {
   environment,
   IPageSideNavTab,
   PageHeaderComponent,
+  PageSubNavComponent,
   LoadingPageComponent
 } from '@stratosui/core';
 import { UserFavoriteEndpoint, UserFavoriteManager } from '@stratosui/store';
+
+import { CfCliMenuComponent } from '../../../shared/components/cli-menu/cf-cli-menu.component';
 import { CfCurrentUserPermissions } from '../../../user-permissions/cf-user-permissions-checkers';
 import { CloudFoundryEndpointService } from '../services/cloud-foundry-endpoint.service';
 
@@ -31,7 +34,9 @@ import { CloudFoundryEndpointService } from '../services/cloud-foundry-endpoint.
     CommonModule,
     RouterModule,
     PageHeaderComponent,
-    LoadingPageComponent
+    PageSubNavComponent,
+    LoadingPageComponent,
+    CfCliMenuComponent,
   ]
 })
 export class CloudFoundryTabsBaseComponent implements OnInit {

@@ -2,6 +2,10 @@
   [favorite]="favorite()">
   <h1>{{ orgDataService.org()?.name }}</h1>
 </app-page-header>
+<!-- Every tab offers the CF CLI menu; a tab with its own sub-nav (Summary) shows that one instead. -->
+<app-page-sub-nav>
+  <app-cf-cli-menu></app-cf-cli-menu>
+</app-page-sub-nav>
 <app-loading-page [isLoading]="isLoading$"
   [text]="'Retrieving organization'">
   <router-outlet></router-outlet>

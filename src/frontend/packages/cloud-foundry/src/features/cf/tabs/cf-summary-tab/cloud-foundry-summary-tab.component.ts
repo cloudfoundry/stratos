@@ -19,6 +19,7 @@ import { CardCfInfoComponent } from '../../../../shared/components/cards/card-cf
 import { CardCfRecentAppsComponent } from '../../../home/card-cf-recent-apps/card-cf-recent-apps.component';
 import { PollingIndicatorComponent } from '../../../../../../core/src/shared/components/polling-indicator/polling-indicator.component';
 import { EndpointDataRegistry } from '../../../../services/endpoint-data/endpoint-data.registry';
+import { CfCliMenuComponent } from '../../../../shared/components/cli-menu/cf-cli-menu.component';
 
 @Component({
   selector: 'app-cloud-foundry-summary-tab',
@@ -29,6 +30,7 @@ import { EndpointDataRegistry } from '../../../../services/endpoint-data/endpoin
     CommonModule,
     RouterModule,
     PageSubNavComponent,
+    CfCliMenuComponent,
     TileGridComponent,
     TileGroupComponent,
     TileComponent,

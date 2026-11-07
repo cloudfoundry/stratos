@@ -1,3 +1,4 @@
+import { TemplatePortal } from '@angular/cdk/portal';
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { importProvidersFrom, provideZonelessChangeDetection } from '@angular/core';
 import { provideHttpClient } from '@angular/common/http';
@@ -59,6 +60,17 @@ describe('CloudFoundryTabsBaseComponent', () => {
 
   it('should create', () => {
     expect(component).toBeTruthy();
+  });
+
+  // #6126: every tab offers the CF CLI menu in the sub-nav row.
+  it('puts the CF CLI menu in the sub-nav row', async () => {
+    await fixture.whenStable();
+    const portal = TestBed.inject(TabNavService).tabSubNav() as TemplatePortal;
+    expect(portal).toBeTruthy();
+    const view = portal.viewContainerRef.createEmbeddedView(portal.templateRef);
+    view.detectChanges();
+    const row = view.rootNodes.find((n: Node) => n instanceof HTMLElement) as HTMLElement;
+    expect(row.querySelector('button[aria-label="CF CLI"]')).toBeTruthy();
   });
 
   afterAll(() => { });
