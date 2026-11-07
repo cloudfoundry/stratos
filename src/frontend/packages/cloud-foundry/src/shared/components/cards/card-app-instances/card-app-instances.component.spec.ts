@@ -97,6 +97,17 @@ async function setup(opts: DataStubOpts & { showActions?: boolean; canEdit?: boo
 }
 
 describe('CardAppInstancesComponent', () => {
+  // The icon buttons had no text (WCAG 1.3.1 / 4.1.2): each is named.
+  it('names its icon buttons', async () => {
+    const { fixture } = await setup({ showActions: true });
+    const labels = () => Array.from(fixture.nativeElement.querySelectorAll('button') as NodeListOf<HTMLButtonElement>)
+      .map(b => b.getAttribute('aria-label'));
+    expect(labels()).toEqual(['Edit instance count', 'Decrease instances', 'Increase instances']);
+    (fixture.nativeElement.querySelector('button[aria-label="Edit instance count"]') as HTMLButtonElement).click();
+    await fixture.whenStable();
+    expect(labels()).toEqual(['Cancel', 'Save']);
+  });
+
   it('creates', async () => {
     const { fixture } = await setup();
     expect(fixture.componentInstance).toBeTruthy();

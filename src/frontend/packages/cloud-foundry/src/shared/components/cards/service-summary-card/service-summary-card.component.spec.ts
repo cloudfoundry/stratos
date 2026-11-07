@@ -50,6 +50,14 @@ describe('ServiceSummaryCardComponent', () => {
     expect(component).toBeTruthy();
   });
 
+  // The documentation link showed only an icon (WCAG 2.4.4): it is named.
+  it('names the documentation link', async () => {
+    fixture.componentRef.setInput('offering', offeringFixture);
+    await fixture.whenStable();
+    const link = fixture.nativeElement.querySelector('a[href="https://example.com/docs"]') as HTMLAnchorElement;
+    expect(link.getAttribute('aria-label')).toBe('Documentation');
+  });
+
   it('renders the offering description and tags when an offering is bound', async () => {
     fixture.componentRef.setInput('offering', offeringFixture);
     await fixture.whenStable();

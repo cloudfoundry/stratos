@@ -1,7 +1,8 @@
+<!-- The icon link repeats the text link beside it, so it is decoration: out of the tab order and the accessibility tree. -->
 <div class="service-card__links">
   @if (hasDocumentationUrl()) {
     <div class="service-card__link">
-      <a class="service-card__icon-link" [href]="getDocumentationUrl()" target="_blank" appClickStopPropagation>
+      <a class="service-card__icon-link" [href]="getDocumentationUrl()" target="_blank" aria-hidden="true" tabindex="-1" appClickStopPropagation>
         <span class="material-icons">launch</span>
       </a>
       <a [href]="getDocumentationUrl()" target="_blank" appClickStopPropagation>Docs</a>
@@ -9,11 +10,10 @@
   }
   @if (hasSupportUrl()) {
     <div class="service-card__link">
-      <a class="service-card__icon-link" [href]="getSupportUrl()" target="_blank" appClickStopPropagation>
+      <a class="service-card__icon-link" [href]="getSupportUrl()" target="_blank" aria-hidden="true" tabindex="-1" appClickStopPropagation>
         <span class="material-icons">launch</span>
       </a>
       <a [href]="getSupportUrl()" target="_blank" appClickStopPropagation>Support</a>
     </div>
   }
 </div>
-<!-- <div *ngIf="!hasDocumentationUrl() && !hasSupportUrl()">-</div> -->
