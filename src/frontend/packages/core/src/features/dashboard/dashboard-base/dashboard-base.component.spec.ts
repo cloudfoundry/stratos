@@ -1,6 +1,6 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { provideZonelessChangeDetection } from '@angular/core';
-import { describe, it, expect, beforeEach, vi } from 'vitest';
+import { afterEach, describe, it, expect, beforeEach, vi } from 'vitest';
 import { EntityCatalogHelper, EntityCatalogHelpers } from '@stratosui/store';
 import { BaseTestModulesNoShared, STORE_TEST_PROVIDERS, BASE_TEST_PROVIDERS } from '@test-framework/core-test.helper';
 import { PageHeaderService } from '../../../core/page-header-service/page-header.service';
@@ -79,6 +79,42 @@ describe('DashboardBaseComponent', () => {
       TestBed.inject(SidePanelService).open();
       await fixture.whenStable();
       expect(panel().hasAttribute('inert')).toBe(false);
+    });
+  });
+
+  // WCAG 2.4.1 Bypass Blocks (#4176): the first Tab stop skips the side nav
+  // and header and lands on the page content.
+  describe('skip link', () => {
+    const root = (): HTMLElement => fixture.nativeElement;
+    const focusable = 'a[href], button:not([disabled]), [tabindex]:not([tabindex="-1"])';
+
+    beforeEach(async () => {
+      document.body.appendChild(root());
+      fixture.detectChanges();
+      await fixture.whenStable();
+    });
+
+    afterEach(() => {
+      root().remove();
+    });
+
+    it('is the first focusable element and names the page content', () => {
+      const first = root().querySelector(focusable) as HTMLAnchorElement;
+      expect(first?.textContent?.trim()).toBe('Skip to main content');
+      expect(first.getAttribute('href')).toBe('#main-content');
+    });
+
+    it('targets a main landmark that wraps the routed page and can take focus', () => {
+      const main = root().querySelector('main#main-content') as HTMLElement;
+      expect(main).toBeTruthy();
+      expect(main.getAttribute('tabindex')).toBe('-1');
+      expect(main.querySelector('router-outlet')).toBeTruthy();
+    });
+
+    it('moves focus to the main landmark when used', () => {
+      const link = root().querySelector('a[href="#main-content"]') as HTMLAnchorElement;
+      link.click();
+      expect(document.activeElement).toBe(root().querySelector('main#main-content'));
     });
   });
 });
