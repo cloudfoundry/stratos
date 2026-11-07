@@ -9,12 +9,14 @@
   </div>
   <ul class="page-side-nav__items">
     @for (tab of shownTabs(); track tab.link || tab.label) {
-      <li>
-        @if (tab && !tab.link) {
+      @if (tab && !tab.link) {
+        <li>
           <div class="page-side-nav__item-sep">{{ tab?.label }}</div>
-        }
-        <!-- null = the gate has not answered yet; keep the tab out until it does. -->
-        @if (tab && tab.link && (tab.hidden$ | async) === false) {
+        </li>
+      }
+      <!-- null = the gate has not answered yet; keep the tab out until it does. -->
+      @if (tab && tab.link && (tab.hidden$ | async) === false) {
+        <li>
           <a class="page-side-nav__item"
             [attr.data-test]="'page-tab-' + tab.label"
             [routerLink]="[tab.link]" queryParamsHandling="preserve"
@@ -28,8 +30,8 @@
             }
             <span>{{ tab?.label }}</span>
           </a>
-        }
-      </li>
+        </li>
+      }
     }
   </ul>
 </nav>
