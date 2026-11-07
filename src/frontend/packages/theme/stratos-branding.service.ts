@@ -199,6 +199,7 @@ export class StratosBrandingService {
       const config = await firstValueFrom(this.http.get<CompanyConfig>('/assets/company-config.json'));
       if (config) {
         this.setCompanyConfig(config);
+        console.info('[StratosBrandingService] Company config loaded from /assets/company-config.json');
         return;
       }
     } catch (_error) {
@@ -210,6 +211,7 @@ export class StratosBrandingService {
       const envConfig = await firstValueFrom(this.http.get<CompanyConfig>('/assets/config/company.json'));
       if (envConfig) {
         this.setCompanyConfig(envConfig);
+        console.info('[StratosBrandingService] Company config loaded from /assets/config/company.json');
         return;
       }
     } catch (_error) {
@@ -219,6 +221,7 @@ export class StratosBrandingService {
     // Fallback to default
     this._config.set(defaultCompanyConfig);
     this.applyConfigToTheme(defaultCompanyConfig);
+    console.info('[StratosBrandingService] Company config: using the built-in defaults');
   }
 
   setCompanyConfig(config: Partial<CompanyConfig>) {
