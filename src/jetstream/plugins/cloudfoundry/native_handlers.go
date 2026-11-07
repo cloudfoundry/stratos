@@ -623,9 +623,26 @@ func (c *CloudFoundrySpecification) getNativeApps(ctx *echo.Context) error {
 		if err != nil {
 			return err
 		}
+		// A V3 app has no instance count; it is on the web process. Without
+		// it every row reads 0 instances, which the home page showed as
+		// "Deployed, No Instances". One /v3/processes call covers the page;
+		// on failure the rows go out without it, as the default path does.
+		appGUIDs := make([]string, 0, len(raw.Resources))
+		for _, r := range raw.Resources {
+			appGUIDs = append(appGUIDs, r.GUID)
+		}
+		processes, _ := fetchWebProcessesForApps(ctx, cfClient, appGUIDs)
 		apps := make([]StApp, 0, len(raw.Resources))
 		for _, r := range raw.Resources {
-			apps = append(apps, toStApp(r, cnsiGUID))
+			s := toStApp(r, cnsiGUID)
+			if proc, ok := processes[r.GUID]; ok {
+				mem := proc.MemoryInMB
+				disk := proc.DiskInMB
+				s.Memory = &mem
+				s.DiskQuota = &disk
+				s.Instances = proc.Instances
+			}
+			apps = append(apps, s)
 		}
 		return ctx.JSON(http.StatusOK, StAppsResponse{Resources: apps, TotalResults: raw.Pagination.TotalResults})
 
