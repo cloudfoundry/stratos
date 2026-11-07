@@ -9,11 +9,7 @@
     (click)="deleteOrgWarn()" matTooltip="Delete Organization">
     <span class="material-icons">delete</span>
   </button>
-  <button class="btn btn-icon" name="cli"
-    routerLink="/cloud-foundry/{{cfEndpointService.cfGuid}}/organizations/{{cfOrgService.orgGuid}}/cli"
-    matTooltip="CLI Info">
-    <span class="material-icons">keyboard</span>
-  </button>
+  <app-cf-cli-menu tab="summary"></app-cf-cli-menu>
   <app-polling-indicator class="ml-auto"
     [manualPoll]="(cfOrgService.loadingApps$ | async) === false"
     [isPolling]="(cfOrgService.loadingApps$ | async) ?? false"

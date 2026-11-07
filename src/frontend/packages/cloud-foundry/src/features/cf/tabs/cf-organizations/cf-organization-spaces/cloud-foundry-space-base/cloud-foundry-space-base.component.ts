@@ -17,6 +17,8 @@ import { IPageSideNavTab } from '../../../../../../../../core/src/features/dashb
 import { PageHeaderComponent } from '../../../../../../../../core/src/shared/components/page-header/page-header.component';
 import { IHeaderBreadcrumb } from '../../../../../../../../core/src/shared/components/page-header/page-header.types';
 import { LoadingPageComponent } from '../../../../../../../../core/src/shared/components/loading-page/loading-page.component';
+import { PageSubNavComponent } from '../../../../../../../../core/src/shared/components/page-sub-nav/page-sub-nav.component';
+import { CfCliMenuComponent } from '../../../../../../shared/components/cli-menu/cf-cli-menu.component';
 import { UserFavorite } from '../../../../../../../../store/src/types/user-favorites.types';
 import { UserFavoriteManager } from '../../../../../../../../store/src/user-favorite-manager';
 import { spaceEntityType } from '../../../../../../cf-entity-types';
@@ -42,7 +44,9 @@ import { CloudFoundrySpaceService } from '../../../../services/cloud-foundry-spa
     CommonModule,
     RouterModule,
     PageHeaderComponent,
-    LoadingPageComponent
+    PageSubNavComponent,
+    LoadingPageComponent,
+    CfCliMenuComponent,
   ],
   providers: [
     getActiveRouteCfOrgSpaceProvider,

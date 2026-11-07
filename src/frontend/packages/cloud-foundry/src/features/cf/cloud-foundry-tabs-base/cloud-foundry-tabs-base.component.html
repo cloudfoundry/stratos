@@ -1,6 +1,10 @@
 <app-page-header class="flex-none" [tabs]="tabLinks" [tabsHeader]="tabsHeader" [favorite]="favorite$ | async">
   <h1>{{ cfEndpointService.endpoint()?.entity?.name }}</h1>
 </app-page-header>
+<!-- Every tab offers the CF CLI menu; a tab with its own sub-nav (Summary) shows that one instead. -->
+<app-page-sub-nav>
+  <app-cf-cli-menu></app-cf-cli-menu>
+</app-page-sub-nav>
 <app-loading-page class="flex flex-col flex-1 min-h-0 overflow-hidden" [isLoading]="isFetching$" [text]="'Retrieving Cloud Foundry details'">
   <router-outlet></router-outlet>
 </app-loading-page>

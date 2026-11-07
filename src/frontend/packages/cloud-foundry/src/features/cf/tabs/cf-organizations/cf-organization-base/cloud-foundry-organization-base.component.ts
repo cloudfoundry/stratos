@@ -18,6 +18,8 @@ import { IPageSideNavTab } from '../../../../../../../core/src/features/dashboar
 import { IHeaderBreadcrumb } from '../../../../../../../core/src/shared/components/page-header/page-header.types';
 import { PageHeaderComponent } from '../../../../../../../core/src/shared/components/page-header/page-header.component';
 import { LoadingPageComponent } from '../../../../../../../core/src/shared/components/loading-page/loading-page.component';
+import { PageSubNavComponent } from '../../../../../../../core/src/shared/components/page-sub-nav/page-sub-nav.component';
+import { CfCliMenuComponent } from '../../../../../shared/components/cli-menu/cf-cli-menu.component';
 import { IFavoriteMetadata, UserFavorite } from '../../../../../../../store/src/types/user-favorites.types';
 import { UserFavoriteManager } from '../../../../../../../store/src/user-favorite-manager';
 import { organizationEntityType } from '../../../../../cf-entity-types';
@@ -54,7 +56,9 @@ import { CloudFoundryOrganizationService } from '../../../services/cloud-foundry
     CommonModule,
     RouterModule,
     PageHeaderComponent,
-    LoadingPageComponent
+    PageSubNavComponent,
+    LoadingPageComponent,
+    CfCliMenuComponent,
   ]
 })
 export class CloudFoundryOrganizationBaseComponent implements OnInit {
