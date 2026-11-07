@@ -1,0 +1,32 @@
+<div class="relative inline-block">
+  <button class="btn btn-secondary flex items-center gap-1" type="button" name="cf-cli"
+    aria-label="CF CLI" aria-haspopup="menu" [attr.aria-expanded]="open()"
+    matTooltip="cf CLI commands for this tab" (click)="toggle()">
+    <span class="material-icons" aria-hidden="true">terminal</span>
+    <span>CF CLI</span>
+    <span class="material-icons" aria-hidden="true">{{ open() ? 'expand_less' : 'expand_more' }}</span>
+  </button>
+  @if (open()) {
+    <div class="absolute right-0 top-full mt-1 bg-content-bg rounded-md shadow-lg border border-content-border z-50 min-w-[20rem] max-w-[90vw]">
+      <div class="py-1" role="menu" aria-label="CF CLI">
+        @for (command of commands(); track command.name) {
+          <button role="menuitem" type="button"
+            class="w-full text-left px-4 py-2 text-sm text-content-text hover:bg-content-secondary flex items-center justify-between gap-3"
+            [matTooltip]="command.msg" (click)="copy(command)">
+            <span class="sr-only">Copy </span>
+            <code class="cli-menu__label font-mono whitespace-nowrap">{{ command.syntax(context()) }}</code>
+            <span class="material-icons text-base text-content-muted" aria-hidden="true">content_copy</span>
+          </button>
+        }
+        @if (commands().length) {
+          <div class="border-t border-content-border my-1" role="separator"></div>
+        }
+        <a role="menuitem" [routerLink]="allLink()" (click)="close()"
+          class="w-full text-left px-4 py-2 text-sm text-content-text hover:bg-content-secondary flex items-center justify-between gap-3 no-underline">
+          <span class="cli-menu__label">CF CLI All</span>
+          <span class="material-icons text-base text-content-muted" aria-hidden="true">chevron_right</span>
+        </a>
+      </div>
+    </div>
+  }
+</div>
