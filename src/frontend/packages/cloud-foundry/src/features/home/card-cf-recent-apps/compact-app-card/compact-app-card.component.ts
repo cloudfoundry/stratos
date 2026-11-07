@@ -60,6 +60,13 @@ export class CompactAppCardComponent {
 
   readonly appStatus = computed(() => this.applicationState().indicator);
 
+  // A started app's state is not known until its stats arrive; until then
+  // the card shows that it is loading rather than a guess.
+  readonly statsLoading = computed(() => {
+    const stats = this.stats();
+    return !!stats && this.app()?.entity?.state === 'STARTED' && stats.lastFetched() === null;
+  });
+
   constructor() {
     // Only a started app has instance stats. Re-runs when a refresh hands
     // the card a newly started app.
