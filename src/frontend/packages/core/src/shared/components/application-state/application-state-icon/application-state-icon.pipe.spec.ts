@@ -24,7 +24,16 @@ describe('ApplicationStateIconPipe', () => {
   });
 
   it('should return icon name', () => {
-    expect(pipe.transform('tentative', 'icon')).toBe('lens');
+    expect(pipe.transform('tentative', 'icon')).toBe('radio_button_unchecked');
+  });
+
+  // WCAG 1.4.1: a state must not differ from another by color alone, so
+  // each status the console shows has its own glyph. Running (ok) is a
+  // filled circle, tentative a hollow one.
+  it('gives each status its own glyph', () => {
+    const statuses = ['ok', 'tentative', 'incomplete', 'warning', 'error', 'busy', 'deleted'];
+    const glyphs = statuses.map(status => pipe.transform(status, 'icon'));
+    expect(new Set(glyphs).size).toBe(statuses.length);
   });
 
   it('names each state for assistive technology', () => {
