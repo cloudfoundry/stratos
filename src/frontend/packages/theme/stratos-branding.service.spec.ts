@@ -3,8 +3,10 @@ import { HttpTestingController, provideHttpClientTesting } from '@angular/common
 import { TestBed } from '@angular/core/testing';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 
+import { BUILD_INFO } from '../core/src/environments/build-info';
 import { CompanyConfig } from './company-config.interface';
 import { StratosBrandingService } from './stratos-branding.service';
+import { darkTheme } from './theme.config';
 
 describe('StratosBrandingService', () => {
   afterEach(() => {
@@ -75,6 +77,90 @@ describe('StratosBrandingService', () => {
       await settle();
 
       expect(service.getCompanyName()).toBe('Stratos');
+    });
+  });
+
+  describe('configured colors across theme modes (#6138)', () => {
+    const settle = () => new Promise(resolve => setTimeout(resolve));
+    const notFound = { status: 404, statusText: 'Not Found' };
+    // The operator's file: brand colors, a navigation color and a header
+    // color, all different from the defaults.
+    const branded = {
+      theme: { primary: '#ff00ff' },
+      navigation: { background: '#800080' },
+      layout: { headerBackground: '#ffe0ff' },
+    } as Partial<CompanyConfig>;
+    const cssVar = (name: string) => document.documentElement.style.getPropertyValue(name);
+
+    let service: StratosBrandingService;
+    let http: HttpTestingController;
+
+    beforeEach(() => {
+      localStorage.clear();
+      localStorage.setItem('stratos-app-version', BUILD_INFO.version);
+      TestBed.configureTestingModule({
+        providers: [provideHttpClient(), provideHttpClientTesting()],
+      });
+      service = TestBed.inject(StratosBrandingService);
+      http = TestBed.inject(HttpTestingController);
+    });
+
+    afterEach(() => {
+      http.verify();
+      localStorage.clear();
+      document.documentElement.classList.remove('dark');
+      document.body.classList.remove('dark-theme');
+    });
+
+    it('keeps the configured colors through a light, dark, light switch', async () => {
+      http.expectOne('/assets/company-config.json').flush(branded);
+      await settle();
+      service.activateUserPreferences();
+
+      service.setThemeMode('dark');
+      service.setThemeMode('light');
+
+      expect(cssVar('--color-primary')).toBe('#ff00ff');
+      expect(cssVar('--nav-bg')).toBe('#800080');
+      expect(cssVar('--header-bg')).toBe('#ffe0ff');
+    });
+
+    it('keeps the configured colors when the preferences activate after the config has loaded', async () => {
+      http.expectOne('/assets/company-config.json').flush(branded);
+      await settle();
+
+      service.activateUserPreferences();
+
+      expect(cssVar('--color-primary')).toBe('#ff00ff');
+      expect(cssVar('--nav-bg')).toBe('#800080');
+      expect(cssVar('--header-bg')).toBe('#ffe0ff');
+    });
+
+    it('carries the brand colors into dark mode and leaves its surfaces to the dark theme', async () => {
+      http.expectOne('/assets/company-config.json').flush(branded);
+      await settle();
+      service.activateUserPreferences();
+
+      service.setThemeMode('dark');
+
+      expect(cssVar('--color-primary')).toBe('#ff00ff');
+      expect(cssVar('--nav-bg')).toBe(darkTheme.navigation.background);
+      expect(cssVar('--header-bg')).toBe(darkTheme.layout.headerBackground);
+    });
+
+    it('leaves dark mode untouched when the config has the default colors', async () => {
+      http.expectOne('/assets/company-config.json').flush(null, notFound);
+      await settle();
+      http.expectOne('/assets/config/company.json').flush(null, notFound);
+      await settle();
+      service.activateUserPreferences();
+
+      service.setThemeMode('dark');
+
+      expect(cssVar('--color-primary')).toBe(darkTheme.colors.primary);
+      expect(cssVar('--color-secondary')).toBe(darkTheme.colors.secondary);
+      expect(cssVar('--nav-text')).toBe(darkTheme.navigation.text);
+      expect(cssVar('--header-bg')).toBe(darkTheme.layout.headerBackground);
     });
   });
 });
