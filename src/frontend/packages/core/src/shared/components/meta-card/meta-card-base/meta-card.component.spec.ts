@@ -184,6 +184,15 @@ describe('MetaCardComponent', () => {
     expect(element.querySelector('app-entity-favorite-star')).toBeTruthy();
   });
 
+  // The card title looked like a heading but was a div (WCAG 1.3.1); it is a
+  // heading at the level of the other card titles.
+  it('renders its title as a heading', async () => {
+    await fixture.whenStable();
+    const title = element.querySelector('.meta-card__title') as HTMLElement;
+    expect(title.tagName).toBe('H3');
+    expect(title.textContent?.trim()).toBe('Title');
+  });
+
   it('should show app state icon if status', async () => {
     expect(element.querySelector('app-application-state-icon')).toBeFalsy();
 
