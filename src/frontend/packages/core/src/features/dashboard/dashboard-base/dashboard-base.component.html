@@ -1,4 +1,9 @@
 <div class="dashboard-outer h-screen min-h-0 flex flex-col overflow-hidden bg-app-bg text-app-text">
+  <!-- First Tab stop: skips the side nav and header (WCAG 2.4.1). Visible only while focused. -->
+  <a href="#main-content" (click)="skipToContent($event)"
+    class="sr-only focus:not-sr-only focus:fixed focus:top-2 focus:left-2 focus:z-[100] focus:px-4 focus:py-2 focus:rounded-md focus:bg-content-bg focus:text-content-text focus:outline-none focus:ring-2 focus:ring-primary">
+    Skip to main content
+  </a>
   <!-- Main layout container -->
   <div class="dashboard flex flex-row h-full min-h-0 w-full overflow-hidden"
     style="display: flex !important; flex-direction: row !important; width: 100% !important; height: 100vh !important;">
@@ -81,13 +86,14 @@
 
             <!-- Main page content -->
             <div class="relative flex-1 flex flex-col min-h-0 overflow-hidden">
-              <div #content class="flex-1 flex flex-col min-h-0 overflow-x-hidden overflow-y-auto bg-content-bg text-content-text"
+              <main #content id="main-content" tabindex="-1"
+                class="flex-1 flex flex-col min-h-0 overflow-x-hidden overflow-y-auto bg-content-bg text-content-text outline-none"
                 [ngClass]="{'p-6': (noMargin$ | async) === false, 'p-0': noMargin$ | async}"
                 (scroll)="onContentScroll($event)">
                 <div class="flex-1 flex flex-col min-h-0">
                   <router-outlet></router-outlet>
                 </div>
-              </div>
+              </main>
               <div class="absolute bottom-0 inset-x-0 h-16 pointer-events-none z-50 bg-gradient-to-t from-black/25 dark:from-black/50 to-transparent transition-opacity duration-200"
                 [class.opacity-0]="!showScrollShadow()"></div>
             </div>

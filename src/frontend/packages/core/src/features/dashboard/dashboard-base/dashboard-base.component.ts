@@ -183,6 +183,13 @@ export class DashboardBaseComponent implements OnInit, OnDestroy, AfterViewInit 
     this.updateScrollShadow(el);
   }
 
+  // The skip link focuses the main landmark itself; the default fragment
+  // navigation would go through the router and leave focus on the link.
+  skipToContent(event: Event) {
+    event.preventDefault();
+    this.content()?.nativeElement.focus();
+  }
+
   private updateScrollShadow(el?: HTMLElement) {
     if (!el) {
       el = this.content()?.nativeElement;
