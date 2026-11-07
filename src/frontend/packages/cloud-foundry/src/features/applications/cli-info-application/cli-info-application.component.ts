@@ -7,7 +7,7 @@ import { take, filter, map } from 'rxjs/operators';
 import { CustomTooltipDirective, IHeaderBreadcrumb, PageHeaderComponent } from '@stratosui/core';
 import { EndpointModel, EndpointsDataService, getFullEndpointApiUrl } from '@stratosui/store';
 import { ApplicationService } from '@stratosui/cloud-foundry';
-import { CliCommandComponent } from '../../../shared/components/cli-info/cli-command/cli-command.component';
+import { APPLICATION_CLI_COMMANDS } from '../../../shared/components/cli-info/cli-commands';
 import { CFAppCLIInfoContext, CliInfoComponent } from '../../../shared/components/cli-info/cli-info.component';
 
 @Component({
@@ -21,12 +21,13 @@ import { CFAppCLIInfoContext, CliInfoComponent } from '../../../shared/component
     CustomTooltipDirective,
     PageHeaderComponent,
     CliInfoComponent,
-    CliCommandComponent
   ]
 })
 export class CliInfoApplicationComponent implements OnInit {
   private applicationService = inject(ApplicationService);
   private endpointsData = inject(EndpointsDataService);
+
+  readonly sections = APPLICATION_CLI_COMMANDS;
 
 
   // Retained for backward compatibility with downstream consumers/tests

@@ -2,6 +2,9 @@ import { Component, ChangeDetectionStrategy, input } from '@angular/core';
 
 import { CodeBlockComponent } from '@stratosui/core';
 
+import { CliCommandComponent } from './cli-command/cli-command.component';
+import { CliTabCommands } from './cli-commands';
+
 // Context used in the CLI Info template
 export interface CFAppCLIInfoContext {
   appName?: string;
@@ -22,10 +25,13 @@ export interface CFAppCLIInfoContext {
   standalone: true,
   changeDetection: ChangeDetectionStrategy.OnPush,
   imports: [
-    CodeBlockComponent
-]
+    CodeBlockComponent,
+    CliCommandComponent,
+  ]
 })
 export class CliInfoComponent {
   readonly context = input.required<CFAppCLIInfoContext>();
+  // The level's commands, one section per tab, shown after Getting Started.
+  readonly sections = input<CliTabCommands[]>([]);
 }
 

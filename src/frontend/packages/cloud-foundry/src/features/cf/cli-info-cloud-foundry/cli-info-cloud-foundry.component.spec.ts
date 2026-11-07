@@ -26,6 +26,7 @@ describe('CliInfoCloudFoundryComponent', () => {
   let fixture: ComponentFixture<CliInfoCloudFoundryComponent>;
 
   const cfRoute = { cfGuid: 'test-guid' };
+  const orgRoute = { cfGuid: 'test-guid', orgGuid: 'org-guid' };
   const spaceRoute = { cfGuid: 'test-guid', orgGuid: 'org-guid', spaceGuid: 'space-guid' };
 
   const mockEndpointService = {
@@ -121,17 +122,37 @@ describe('CliInfoCloudFoundryComponent', () => {
 
     expect(orgServiceFactory).not.toHaveBeenCalled();
     expect(spaceServiceFactory).not.toHaveBeenCalled();
-    expect(text).toContain('cf org "[organization name]"');
+    expect(text).toContain('cf target -o "[organization name]" -s "[space name]"');
   });
 
-  it('quotes the organization and space names in every command', async () => {
-    const text = await create(spaceRoute);
+  // #6126: each level shows its own commands, grouped by the tabs of its page.
+  it('shows the Cloud Foundry commands on a Cloud Foundry route', async () => {
+    const text = await create(cfRoute);
+    const headings = Array.from((fixture.nativeElement as HTMLElement).querySelectorAll('h4')).map(h => h.textContent?.trim());
+
+    expect(headings).toContain('Feature Flags');
+    expect(text).toContain('cf create-org [name]');
+    expect(text).not.toContain('cf space-users');
+    expect(text).not.toContain('cf org "');
+  });
+
+  it('shows the organization commands with the name quoted on an organization route', async () => {
+    const text = await create(orgRoute);
 
     expect(text).toContain('cf org "my org"');
     expect(text).toContain('cf org-users "my org"');
+    expect(text).toContain('cf create-space [name] -o "my org"');
+    expect(text).not.toContain('cf space-users');
+  });
+
+  it('shows the space commands with the names quoted on a space route', async () => {
+    const text = await create(spaceRoute);
+
     expect(text).toContain('cf space "my space"');
     // space-users takes the organization as well as the space.
     expect(text).toContain('cf space-users "my org" "my space"');
+    expect(text).toContain('cf set-space-role [user] "my org" "my space" [role]');
+    expect(text).not.toContain('cf org-users');
   });
 
   it('waits for the organization and space to load before filling in their names', async () => {
