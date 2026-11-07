@@ -28,25 +28,22 @@
       @if (recentEntities && recentEntities.length > 0) {
         <div class="recent-entities">
           @for (countedEntity of recentEntities; track countedEntity) {
-            <div [routerLink]="countedEntity.entity.routerLink" [ngClass]="{clickable: !!countedEntity.entity.routerLink}"
-              class="recent-entity">
+            <!-- The row is the link (not a div with a routerLink) so the keyboard reaches it;
+                 an entity without a route renders no href. -->
+            <a [routerLink]="countedEntity.entity.routerLink || null" [ngClass]="{clickable: !!countedEntity.entity.routerLink}"
+              class="recent-entity no-underline text-inherit">
               @if (countedEntity.icon) {
                 <div class="recent-entity__icon-container">
                   <app-custom-icon class="recent-entity__icon" [fontSet]="countedEntity.iconFont">{{ countedEntity.icon }}</app-custom-icon>
                 </div>
               }
               <div>
-                @if (countedEntity.entity.routerLink; as routerLink) {
-                  <a class="recent-entity--name">{{
-                  countedEntity.entity.name }}</a>
-                } @else {
-                  <div class="recent-entity--name">{{ countedEntity.entity.name }}</div>
-                }
+                <div class="recent-entity--name">{{ countedEntity.entity.name }}</div>
                 <div class="type-info text-content-muted">
                   <span>{{ countedEntity.subText$ | async }}</span>
                 </div>
               </div>
-            </div>
+            </a>
           }
         </div>
       }
