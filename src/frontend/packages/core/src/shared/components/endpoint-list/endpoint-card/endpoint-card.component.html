@@ -31,10 +31,10 @@
         @if (endpointLink()) {
           <!-- stopPropagation: the card's own routerLink would navigate again -->
           <a class="endpoint-card__title-link block hover:underline" [routerLink]="endpointLink()" (click)="$event.stopPropagation()">
-            <app-multiline-title [matTooltip]="row().name">{{ row().name }}</app-multiline-title>
+            <app-multiline-title [matTooltip]="row().name" matTooltipOnlyWhenTruncated>{{ row().name }}</app-multiline-title>
           </a>
         } @else {
-          <app-multiline-title [matTooltip]="row().name">{{ row().name }}</app-multiline-title>
+          <app-multiline-title [matTooltip]="row().name" matTooltipOnlyWhenTruncated>{{ row().name }}</app-multiline-title>
         }
         <div class="endpoint-card__title-subtext">
           {{!catalogEntity ? 'Unknown' : catalogEntity.definition.label}}

@@ -16,7 +16,7 @@
             <h2 class="text-lg font-semibold card-title truncate">
               @if (endpoint()) {
                 <div>
-                  <app-multiline-title [matTooltip]="endpoint().name">{{ endpoint().name }}</app-multiline-title>
+                  <app-multiline-title [matTooltip]="endpoint().name" matTooltipOnlyWhenTruncated>{{ endpoint().name }}</app-multiline-title>
                 </div>
               }
             </h2>
