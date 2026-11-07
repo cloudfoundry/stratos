@@ -7,7 +7,7 @@
     <span class="material-icons" aria-hidden="true">{{ open() ? 'expand_less' : 'expand_more' }}</span>
   </button>
   @if (open()) {
-    <div class="absolute right-0 top-full mt-1 bg-content-bg rounded-md shadow-lg border border-content-border z-50 min-w-[20rem] max-w-[90vw]">
+    <div class="absolute left-0 top-full mt-1 bg-content-bg rounded-md shadow-lg border border-content-border z-50 min-w-[20rem] max-w-[90vw]">
       <div class="py-1" role="menu" aria-label="CF CLI">
         @for (command of commands(); track command.name) {
           <button role="menuitem" type="button"
