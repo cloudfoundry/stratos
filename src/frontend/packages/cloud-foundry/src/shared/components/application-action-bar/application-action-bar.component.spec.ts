@@ -123,6 +123,25 @@ describe('AppApplicationActionBarComponent', () => {
     fixture.detectChanges();
   }
 
+  // #6126: every application tab offers the CF CLI menu beside the actions.
+  it('offers the CF CLI menu, with CF CLI All leading to the application\'s CLI page', async () => {
+    await setUp({
+      applicationState$: new BehaviorSubject({
+        label: 'Running', indicator: null, actions: { restart: true, stop: true, start: false, restage: true },
+      }).asObservable(),
+    });
+
+    const root: HTMLElement = fixture.nativeElement;
+    const trigger = root.querySelector('button[aria-label="CF CLI"]') as HTMLButtonElement;
+    expect(trigger).toBeTruthy();
+    trigger.click();
+    await fixture.whenStable();
+    const all = root.querySelector('a[role="menuitem"]') as HTMLAnchorElement;
+    expect(all?.textContent).toContain('CF CLI All');
+    // setUp blanks the mock's cfGuid for the permission directive, so only the tail is fixed.
+    expect(all.getAttribute('href')).toMatch(/^\/applications\/.*\/mockAppGuid\/cli$/);
+  });
+
   it('renders restart/stop/restage buttons when app is started', async () => {
     await setUp({
       applicationState$: new BehaviorSubject({

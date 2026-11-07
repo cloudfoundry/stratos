@@ -1,6 +1,9 @@
 import { CommonModule } from '@angular/common';
-import { ChangeDetectionStrategy, Component, ElementRef, OnDestroy, OnInit, inject } from '@angular/core';
+import { ChangeDetectionStrategy, Component, ElementRef, OnDestroy, OnInit, computed, inject } from '@angular/core';
+import { toSignal } from '@angular/core/rxjs-interop';
 import { RouterModule } from '@angular/router';
+import { combineLatest } from 'rxjs';
+import { map } from 'rxjs/operators';
 
 import {
   PageSubNavComponent,
@@ -8,10 +11,13 @@ import {
 } from '@stratosui/core';
 
 import { ApplicationService } from '../../../features/applications/application.service';
+import { activeTabKey } from '../../active-tab-key';
 import { CfCurrentUserPermissions } from '../../../user-permissions/cf-user-permissions-checkers';
 import { CfUserPermissionDirective } from '../../directives/cf-user-permission/cf-user-permission.directive';
 import { AppApplicationActionsService } from '../../services/application-actions.service';
 import { AppLifecycleProgressService } from '../app-lifecycle-progress/app-lifecycle-progress.service';
+import { APPLICATION_CLI_COMMANDS, commandsForTab } from '../cli-info/cli-commands';
+import { CliMenuComponent } from '../cli-menu/cli-menu.component';
 
 /**
  * AppApplicationActionBarComponent
@@ -38,6 +44,7 @@ import { AppLifecycleProgressService } from '../app-lifecycle-progress/app-lifec
     PageSubNavComponent,
     PageSubNavSectionComponent,
     CfUserPermissionDirective,
+    CliMenuComponent,
   ],
   // AppApplicationActionsService is now provided at ApplicationTabsBaseComponent
   // level so the BuildTab status card can read its inFlight signal too (for
@@ -58,6 +65,20 @@ export class AppApplicationActionBarComponent implements OnInit, OnDestroy {
   // the bar appears with the rest of the page header.
   get isBusy(): boolean { return this.actions.inFlight(); }
   manageAppPermission = CfCurrentUserPermissions.APPLICATION_MANAGE;
+
+  // The CF CLI menu: the commands of the open tab, with the names filled in.
+  private activeTab = activeTabKey();
+  readonly cliCommands = computed(() => commandsForTab(APPLICATION_CLI_COMMANDS, this.activeTab()));
+  readonly cliNames = toSignal(combineLatest([
+    this.applicationService.application$,
+    this.applicationService.appOrg$,
+    this.applicationService.appSpace$,
+  ]).pipe(map(([app, org, space]) => ({
+    appName: app?.app?.entity?.name,
+    orgName: org?.name ?? '',
+    spaceName: space?.name ?? '',
+  }))), { initialValue: { orgName: '', spaceName: '' } });
+  readonly cliAllLink = ['/applications', this.applicationService.cfGuid, this.applicationService.appGuid, 'cli'];
 
   ngOnInit(): void {
     this.progressSvc.setAnchor(this.host);

@@ -1,11 +1,15 @@
 import { CFAppCLIInfoContext } from './cli-info.component';
 
+// The names a command fills in. The CLI Info context carries them, and a
+// tabbed page can give just these.
+export type CliCommandNames = Pick<CFAppCLIInfoContext, 'appName' | 'orgName' | 'spaceName'>;
+
 // One cf CLI command, with the names filled in from the page's context.
 export interface CliCommand {
   name: string;
   // What the command does, as a sentence ending in a colon.
   msg: string;
-  syntax: (context: CFAppCLIInfoContext) => string;
+  syntax: (names: CliCommandNames) => string;
 }
 
 // The commands that match one tab of a tabbed page. `tab` is the tab's route
@@ -23,9 +27,9 @@ export function commandsForTab(list: CliTabCommands[], tab: string | null): CliC
 
 // Names are quoted so a name with a space in it stays one argument. The
 // placeholders stand in until the page knows the name.
-const app = (c: CFAppCLIInfoContext) => `"${c.appName || '[app name]'}"`;
-const org = (c: CFAppCLIInfoContext) => `"${c.orgName || '[organization name]'}"`;
-const space = (c: CFAppCLIInfoContext) => `"${c.spaceName || '[space name]'}"`;
+const app = (c: CliCommandNames) => `"${c.appName || '[app name]'}"`;
+const org = (c: CliCommandNames) => `"${c.orgName || '[organization name]'}"`;
+const space = (c: CliCommandNames) => `"${c.spaceName || '[space name]'}"`;
 
 export const APPLICATION_CLI_COMMANDS: CliTabCommands[] = [
   {

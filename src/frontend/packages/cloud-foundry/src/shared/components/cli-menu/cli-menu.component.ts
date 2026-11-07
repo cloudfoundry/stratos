@@ -3,8 +3,7 @@ import { RouterLink } from '@angular/router';
 
 import { CustomTooltipDirective, TailwindSnackBarService } from '@stratosui/core';
 
-import { CliCommand } from '../cli-info/cli-commands';
-import { CFAppCLIInfoContext } from '../cli-info/cli-info.component';
+import { CliCommand, CliCommandNames } from '../cli-info/cli-commands';
 
 // The CF CLI menu of a tab: the cf commands that match the tab, each copied
 // to the clipboard when chosen, and CF CLI All, which opens the level's
@@ -21,7 +20,7 @@ export class CliMenuComponent {
   private snackBar = inject(TailwindSnackBarService);
 
   readonly commands = input.required<CliCommand[]>();
-  readonly context = input.required<CFAppCLIInfoContext>();
+  readonly context = input.required<CliCommandNames>();
   readonly allLink = input.required<string | any[]>();
 
   readonly open = signal(false);
