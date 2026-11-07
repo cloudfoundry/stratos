@@ -18,7 +18,7 @@
           @if (apps.length > 0) {
             <div class="recent-apps-card__scroller custom-scrollbar">
               @for (app of apps; track app.metadata.guid) {
-                <app-compact-app-card [showDate]="showDate()" [dateMode]="dateMode()" [endpoint]="endpoint()" [noStats]="noStats()" [app]="app"></app-compact-app-card>
+                <app-compact-app-card [showDate]="showDate()" [dateMode]="dateMode()" [endpoint]="endpoint()" [app]="app"></app-compact-app-card>
               }
             </div>
           }
