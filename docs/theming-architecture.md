@@ -123,7 +123,7 @@ Controls content areas, cards, and panels within the page.
 | `--input-bg` | `#ffffff` | `#1e293b` | Input background |
 | `--input-border` | `#d1d5db` | `#475569` | Input border |
 | `--input-text` | `#1e293b` | `#f1f5f9` | Input text |
-| `--input-placeholder` | `#9ca3af` | `#64748b` | Placeholder text |
+| `--input-placeholder` | `#64748b` | `#94a3b8` | Placeholder text (4.5:1 on the input background) |
 | `--input-focus-border` | `var(--color-primary)` | `var(--color-primary)` | Focus ring |
 | `--input-disabled-bg` | `#f3f4f6` | `#0f172a` | Disabled state |
 
