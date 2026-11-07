@@ -1,7 +1,7 @@
 import { Portal, TemplatePortal } from '@angular/cdk/portal';
 import { CommonModule } from '@angular/common';
 import { HttpClient } from '@angular/common/http';
-import { ChangeDetectionStrategy, AfterViewInit, Component, OnDestroy, TemplateRef, ViewContainerRef, computed, effect, inject, input, linkedSignal, signal, untracked, viewChild } from '@angular/core';
+import { ChangeDetectionStrategy, AfterViewInit, Component, HostListener, OnDestroy, TemplateRef, ViewContainerRef, computed, effect, inject, input, linkedSignal, signal, untracked, viewChild } from '@angular/core';
 import { RouterModule, ActivatedRoute, Router } from '@angular/router';
 import { toObservable, takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import {
@@ -411,6 +411,18 @@ export class PageHeaderComponent implements OnDestroy, AfterViewInit {
 
   closeUserMenu() {
     this.isUserMenuOpen = false;
+  }
+
+  // Escape closes the user menu and returns focus to its button, as a
+  // disclosure does; the panel otherwise stays until the button is used.
+  @HostListener('document:keydown.escape')
+  onEscape() {
+    if (!this.isUserMenuOpen) {
+      return;
+    }
+    this.closeUserMenu();
+    // The header renders through a portal, outside this component's view.
+    document.getElementById('userMenu')?.focus();
   }
 
   closeHistoryMenu() {

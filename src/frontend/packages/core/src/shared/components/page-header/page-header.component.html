@@ -173,13 +173,15 @@
                   class="page-header-menu-button page-header-usermenu p-2 hover:bg-white/10 rounded-md transition-colors"
                   matTooltip="User menu"
                   aria-label="User menu"
+                  aria-controls="userMenuPanel"
+                  [attr.aria-expanded]="isUserMenuOpen"
                   (click)="toggleUserMenu()">
                   <app-user-avatar color="header" [allowGravatar]="allowGravatar$ | async" [user]="user$ | async">
                   </app-user-avatar>
                 </button>
                 <!-- User dropdown menu -->
                 @if (isUserMenuOpen) {
-                  <div
+                  <div id="userMenuPanel"
                     class="absolute right-0 top-full mt-2 bg-content-bg rounded-lg shadow-lg border border-content-border z-50">
                     <div class="page-header-menu-inner p-4 w-64">
                       <!-- User info -->
