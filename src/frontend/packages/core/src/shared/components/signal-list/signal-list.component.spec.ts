@@ -76,6 +76,25 @@ describe('SignalListComponent', () => {
     expect(await columns('40rem')).toBe('repeat(auto-fill, minmax(40rem, 1fr))');
   });
 
+  // The star / kebab column had an empty header cell (WCAG 1.3.1); it is
+  // named for assistive technology only, since the cells need no visible label.
+  it('names the control column header for screen readers', async () => {
+    const headerText = async (columns: SignalListConfig<{ name: string }>['columns']) => {
+      const fixture = TestBed.createComponent(Host);
+      fixture.componentInstance.config = { ...fixture.componentInstance.config, columns };
+      await fixture.whenStable();
+      const th = fixture.nativeElement.querySelector('thead th') as HTMLElement;
+      expect(th.querySelector('.sr-only')).not.toBeNull();
+      return th.textContent?.trim();
+    };
+    const name = { header: 'Name', render: (r: { name: string }) => r.name };
+    const favorite = { header: '', kind: 'favorite' as const, render: () => '', favorite: { keys: signal(new Set<string>()), toggle: () => {} } };
+    const actions = { header: '', kind: 'actions' as const, render: () => '', actions: () => [{ label: 'Delete', invoke: () => {} }] };
+    expect(await headerText([name, favorite])).toBe('Favorite');
+    expect(await headerText([name, actions])).toBe('Actions');
+    expect(await headerText([name, favorite, actions])).toBe('Favorite and actions');
+  });
+
   it('row-action menu items expose data-test hooks (label default, dataTest override)', async () => {
     const fixture = TestBed.createComponent(Host);
     fixture.componentInstance.config = {
