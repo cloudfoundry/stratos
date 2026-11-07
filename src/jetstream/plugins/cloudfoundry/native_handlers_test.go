@@ -1516,3 +1516,64 @@ func TestToStApp_LabelsOnlyWhenPresent(t *testing.T) {
 	}}, "cnsi-1")
 	assert.Equal(t, map[string]string{"team": "platform", "empty": ""}, labelled.Labels)
 }
+
+// TestGetNativeApps_RecentFillsInstancesFromWebProcess covers the home
+// page's recent-apps list. A V3 app carries no instance count, so the
+// count comes from the web process; without it every app read as having
+// 0 instances, which the frontend shows as "Deployed, No Instances".
+func TestGetNativeApps_RecentFillsInstancesFromWebProcess(t *testing.T) {
+	ts := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		w.Header().Set("Content-Type", "application/json")
+		switch r.URL.Path {
+		case "/v3":
+			w.Write([]byte(`{"links":{}}`))
+		case "/v3/apps":
+			json.NewEncoder(w).Encode(map[string]interface{}{
+				"pagination": map[string]interface{}{"total_results": 2, "total_pages": 1},
+				"resources": []map[string]interface{}{
+					{"guid": "app-1", "name": "App One", "state": "STARTED",
+						"created_at": "2024-01-01T00:00:00Z", "updated_at": "2024-01-02T00:00:00Z"},
+					{"guid": "app-2", "name": "App Two", "state": "STOPPED",
+						"created_at": "2024-01-03T00:00:00Z", "updated_at": "2024-01-04T00:00:00Z"},
+				},
+			})
+		case "/v3/processes":
+			assert.Equal(t, "web", r.URL.Query().Get("types"))
+			json.NewEncoder(w).Encode(map[string]interface{}{
+				"pagination": map[string]interface{}{"total_results": 1, "total_pages": 1},
+				"resources": []map[string]interface{}{
+					{"guid": "proc-1", "type": "web", "instances": 2, "memory_in_mb": 64, "disk_in_mb": 128,
+						"relationships": map[string]interface{}{"app": map[string]interface{}{"data": map[string]interface{}{"guid": "app-1"}}}},
+				},
+			})
+		default:
+			http.NotFound(w, r)
+		}
+	}))
+	defer ts.Close()
+
+	e := echo.New()
+	req := httptest.NewRequest(http.MethodGet, "/pp/v1/cf/apps/test-cnsi?return=recent", nil)
+	rec := httptest.NewRecorder()
+	ctx := e.NewContext(req, rec)
+	ctx.SetPathValues(echo.PathValues{{Name: "cnsiGuid", Value: "test-cnsi"}})
+
+	plugin := &CloudFoundrySpecification{
+		testProxy: &mockNativeCFProxy{
+			userID:      "user-1",
+			cnsiRecord:  api.CNSIRecord{GUID: "test-cnsi", APIEndpoint: mustParseURL(ts.URL)},
+			tokenRecord: api.TokenRecord{AuthToken: "test-token"},
+		},
+	}
+
+	require.NoError(t, plugin.getNativeApps(ctx))
+	assert.Equal(t, http.StatusOK, rec.Code)
+
+	var resp StAppsResponse
+	require.NoError(t, json.NewDecoder(rec.Body).Decode(&resp))
+	require.Len(t, resp.Resources, 2)
+	assert.Equal(t, 2, resp.Resources[0].Instances, "app-1 takes its web process's instance count")
+	require.NotNil(t, resp.Resources[0].Memory)
+	assert.Equal(t, 64, *resp.Resources[0].Memory)
+	assert.Equal(t, 0, resp.Resources[1].Instances, "app-2 has no web process")
+}
