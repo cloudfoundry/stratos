@@ -34,24 +34,24 @@
   @if (canEdit()) {
     @if (showActions() && !isEditing) {
       <div class="absolute top-4 right-4 flex gap-1 text-right">
-        <button (click)="edit()" class="btn btn-icon" [disabled]="isUpdating()">
-          <span class="material-icons">edit</span>
+        <button (click)="edit()" class="btn btn-icon" aria-label="Edit instance count" [disabled]="isUpdating()">
+          <span class="material-icons" aria-hidden="true">edit</span>
         </button>
-        <button (click)="scaleDown()" class="btn btn-icon" [disabled]="isUpdating()">
-          <span class="material-icons">remove_circle_outline</span>
+        <button (click)="scaleDown()" class="btn btn-icon" aria-label="Decrease instances" [disabled]="isUpdating()">
+          <span class="material-icons" aria-hidden="true">remove_circle_outline</span>
         </button>
-        <button (click)="scaleUp()" class="btn btn-icon" [disabled]="isUpdating()">
-          <span class="material-icons">add_circle_outline</span>
+        <button (click)="scaleUp()" class="btn btn-icon" aria-label="Increase instances" [disabled]="isUpdating()">
+          <span class="material-icons" aria-hidden="true">add_circle_outline</span>
         </button>
       </div>
     }
     @if (showActions() && isEditing) {
       <div class="absolute top-4 right-4 flex gap-1 text-right">
-        <button (click)="finishEdit(false)" class="btn btn-icon" [disabled]="isUpdating()">
-          <span class="material-icons">clear</span>
+        <button (click)="finishEdit(false)" class="btn btn-icon" aria-label="Cancel" [disabled]="isUpdating()">
+          <span class="material-icons" aria-hidden="true">clear</span>
         </button>
-        <button (click)="finishEdit(true)" class="btn btn-icon" [disabled]="isUpdating()">
-          <span class="material-icons">done</span>
+        <button (click)="finishEdit(true)" class="btn btn-icon" aria-label="Save" [disabled]="isUpdating()">
+          <span class="material-icons" aria-hidden="true">done</span>
         </button>
       </div>
     }
