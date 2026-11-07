@@ -11,6 +11,7 @@ vi.mock('xterm', () => ({
   Terminal: class {
     loadAddon() { }
     open() { }
+    attachCustomKeyEventHandler() { }
     onKey() { }
     onResize() { }
     focus() { }
@@ -136,6 +137,32 @@ describe('SshViewerComponent', () => {
       fixture.componentRef.setInput('errorMessage', 'Error connecting to web socket');
       await fixture.whenStable();
       expect(text()).toContain('Error connecting to web socket');
+    });
+
+    // true: xterm takes the key for the shell; false: the browser moves focus.
+    it('gives Tab to the shell until Ctrl+Shift+M, and always lets it leave after the session', async () => {
+      const key = (type: string, init: KeyboardEventInit) => new KeyboardEvent(type, init);
+      const hint = (): string => fixture.nativeElement.querySelector('#ssh-tab-hint').textContent;
+      status.next(1);
+      await fixture.whenStable();
+      expect(component.handleKey(key('keydown', { key: 'Tab' }))).toBe(true);
+      expect(hint()).toContain('Tab goes to the shell. Press Ctrl+Shift+M so Tab moves focus.');
+
+      const toggle = key('keydown', { key: 'M', code: 'KeyM', ctrlKey: true, shiftKey: true, cancelable: true });
+      expect(component.handleKey(toggle)).toBe(false);
+      expect(toggle.defaultPrevented).toBe(true);
+      await fixture.whenStable();
+      expect(component.handleKey(key('keydown', { key: 'Tab', shiftKey: true }))).toBe(false);
+      expect(hint()).toContain('Tab moves focus. Press Ctrl+Shift+M so Tab goes to the shell.');
+
+      component.handleKey(key('keydown', { key: 'M', code: 'KeyM', ctrlKey: true, shiftKey: true }));
+      expect(component.handleKey(key('keydown', { key: 'Tab' }))).toBe(true);
+
+      status.next(0);
+      stream.complete();
+      await fixture.whenStable();
+      expect(component.handleKey(key('keydown', { key: 'Tab' }))).toBe(false);
+      expect(fixture.nativeElement.querySelector('[role="status"]').textContent).toContain('Disconnected');
     });
 
     it('clears the progress bar once connected', async () => {

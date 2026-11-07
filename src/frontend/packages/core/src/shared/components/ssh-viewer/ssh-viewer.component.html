@@ -26,4 +26,6 @@
   <div class="ssh-terminal" #container [ngClass]="{'ssh-terminal-disconnected': !isConnected()}">
     <div id="terminal" #terminal></div>
   </div>
+  <p id="ssh-tab-hint" class="ssh-viewer__hint" aria-live="polite">{{ tabHint() }}</p>
+  <p class="sr-only" role="status">{{ statusText() }}</p>
 </div>
