@@ -21,6 +21,15 @@ export class PageSubNavComponent implements AfterViewInit, OnDestroy {
 
   readonly subNavTmpl = viewChild.required<TemplateRef<any>>('subNavTmpl');
 
+  // Who had the row before this sub-nav, to hand it back in ngOnDestroy: a
+  // tabbed page can hold a sub-nav for every tab while a tab that brings its
+  // own shows that one instead. Read here, before the breadcrumbs effect
+  // below publishes this sub-nav's own.
+  private previousPortal = this.tabNavService.tabSubNav();
+  private previousBreadcrumbs = this.tabNavService.tabSubNavBreadcrumbs();
+  // Set in ngAfterViewInit, read in ngOnDestroy.
+  private myPortal?: TemplatePortal;
+
   constructor() {
     // Publish the breadcrumbs to the dashboard. Most sub-navs bind none and
     // publish nothing.
@@ -33,10 +42,21 @@ export class PageSubNavComponent implements AfterViewInit, OnDestroy {
   }
 
   ngAfterViewInit() {
-    const portal = new TemplatePortal(this.subNavTmpl(), this.viewContainerRef, {});
-    this.tabNavService.setSubNav(portal);
+    this.myPortal = new TemplatePortal(this.subNavTmpl(), this.viewContainerRef, {});
+    this.tabNavService.setSubNav(this.myPortal);
   }
+
   ngOnDestroy() {
-    this.tabNavService.clearSubNav();
+    // Only act if the row is still ours; a later sub-nav that took it over
+    // and is still alive keeps it.
+    if (this.tabNavService.tabSubNav() !== this.myPortal) {
+      return;
+    }
+    if (this.previousPortal) {
+      this.tabNavService.setSubNav(this.previousPortal);
+      this.tabNavService.setSubNavBreadcrumbs(this.previousBreadcrumbs);
+    } else {
+      this.tabNavService.clearSubNav();
+    }
   }
 }

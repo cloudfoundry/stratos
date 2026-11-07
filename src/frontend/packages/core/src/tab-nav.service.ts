@@ -49,7 +49,7 @@ export class TabNavService {
     this._tabSubNav.set(portal);
   }
 
-  public setSubNavBreadcrumbs(breadcrumbs: IHeaderBreadcrumbLink[]) {
+  public setSubNavBreadcrumbs(breadcrumbs: IHeaderBreadcrumbLink[] | undefined) {
     this._tabSubNavBreadcrumbs.set(breadcrumbs);
   }
 
