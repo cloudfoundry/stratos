@@ -65,6 +65,7 @@ export class AppStageRowComponent {
   classes(s: DisplayStage): string {
     if (s.status === 'done') return 'text-success';
     if (s.status === 'now')  return 'text-warning font-bold animate-pulse';
-    return 'text-content-muted';
+    // Muted gray is under 4.5:1 on the row's warning tint in both modes.
+    return 'text-[var(--warning-text)]';
   }
 }

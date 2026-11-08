@@ -309,6 +309,11 @@ describe('SignalListComponent', () => {
     const lines = [...fixture.nativeElement.querySelectorAll('[data-test="errors"] > div')]
       .map((d: Element) => d.textContent!.trim());
     expect(lines).toEqual(['prod-cf: failed to load', 'cnsi-gone: failed to load']);
+    // The fixed red shades are 4.4:1 and do not follow dark mode (#4166);
+    // the theme's alert tokens do both.
+    const banner: HTMLElement = fixture.nativeElement.querySelector('[data-test="errors"]');
+    expect(banner.className).toContain('bg-[var(--danger-bg)]');
+    expect(banner.className).toContain('text-[var(--danger-text)]');
   });
 
   it('shows the failed-load reason from errorDetail and follows its changes', async () => {
