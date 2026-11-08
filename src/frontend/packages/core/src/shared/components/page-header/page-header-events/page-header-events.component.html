@@ -18,8 +18,10 @@
       @if (endpointId) {
         <a class="text-primary hover:underline font-medium text-sm shrink-0 self-center" [routerLink]="['/errors/', endpointId]">view details</a>
       }
-      <app-custom-icon class="cursor-pointer text-danger-shade-500 hover:text-danger-shade-800 shrink-0 self-center"
-        (click)="markEventsAsRead()">clear</app-custom-icon>
+      <button type="button" class="cursor-pointer text-danger-shade-500 hover:text-danger-shade-800 shrink-0 self-center flex"
+        aria-label="Dismiss" (click)="markEventsAsRead()">
+        <app-custom-icon>clear</app-custom-icon>
+      </button>
     </div>
   </div>
 }

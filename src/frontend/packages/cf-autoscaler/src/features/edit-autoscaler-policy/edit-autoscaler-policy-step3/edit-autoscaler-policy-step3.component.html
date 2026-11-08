@@ -197,18 +197,18 @@
               </div>
               <div class="card-actions flex justify-end space-x-2 p-4 border-t">
                 @if (editIndex !== index) {
-                  <button id="autoscaler-policy-edit-edit" (click)="editRecurringSchedule(index)"
+                  <button aria-label="Edit" id="autoscaler-policy-edit-edit" (click)="editRecurringSchedule(index)"
                     [disabled]="editIndex !== -1" class="btn-icon" title="Edit">
                     <span class="material-icons">edit</span>
                   </button>
                 }
                 @if (editIndex===index) {
-                  <button id="autoscaler-policy-edit-done" (click)="finishRecurringSchedule()"
+                  <button aria-label="Done" id="autoscaler-policy-edit-done" (click)="finishRecurringSchedule()"
                     [disabled]="editRecurringScheduleForm.invalid" class="btn-icon text-success" title="Done">
                     <span class="material-icons">done</span>
                   </button>
                 }
-                <button id="autoscaler-policy-edit-delete" (click)="removeRecurringSchedule(index)"
+                <button aria-label="Delete" id="autoscaler-policy-edit-delete" (click)="removeRecurringSchedule(index)"
                   class="btn-icon text-danger" title="Delete">
                   <span class="material-icons">delete</span>
                 </button>

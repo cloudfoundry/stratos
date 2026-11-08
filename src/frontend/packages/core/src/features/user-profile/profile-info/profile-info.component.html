@@ -2,7 +2,7 @@
   <h1>User Profile</h1>
   <div class="page-header-right">
     @if (canEdit$ | async) {
-      <button class="btn-icon" name="edit" routerLink="/user-profile/edit" title="Edit">
+      <button aria-label="Edit" class="btn-icon" name="edit" routerLink="/user-profile/edit" title="Edit">
         <span class="material-icons">edit</span>
       </button>
     }

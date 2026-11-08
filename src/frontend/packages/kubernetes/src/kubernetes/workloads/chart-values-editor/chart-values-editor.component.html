@@ -56,7 +56,7 @@
 
     <div class="flex">
       @if (mode === 'editor') {
-        <button class="btn btn-toggle"
+        <button type="button" aria-label="Line numbers" [attr.aria-pressed]="lineNumbers" class="btn btn-toggle"
           [class.btn-toggle-active]="lineNumbers"
           (click)="toggleLineNumbers()"
           >
@@ -64,7 +64,7 @@
         </button>
       }
       @if (mode === 'editor') {
-        <button class="btn btn-toggle"
+        <button type="button" aria-label="Minimap" [attr.aria-pressed]="minimap" class="btn btn-toggle"
           [class.btn-toggle-active]="minimap"
           (click)="toggleMinimap()"
           >

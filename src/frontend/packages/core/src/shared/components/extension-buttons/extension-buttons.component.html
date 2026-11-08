@@ -1,6 +1,6 @@
 @for (button of extensionActions; track button) {
   @if (button.visible$ | async) {
-    <button class="btn btn-icon" type="button" [routerLink]="button.link" matTooltip="{{ button.label }}">
+    <button [attr.aria-label]="button.label" class="btn btn-icon" type="button" [routerLink]="button.link" matTooltip="{{ button.label }}">
       <app-custom-icon>{{ button.icon }}</app-custom-icon>
     </button>
   }

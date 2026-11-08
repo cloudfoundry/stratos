@@ -144,7 +144,7 @@ export class CustomDatepickerInputComponent {
 // Custom Datepicker Toggle Component
 @Component({
   selector: 'mat-datepicker-toggle',
-  template: '<button class="custom-datepicker-toggle" (click)="toggle()"><app-custom-icon>calendar_today</app-custom-icon></button>',
+  template: '<button class="custom-datepicker-toggle" type="button" aria-label="Open calendar" (click)="toggle()"><app-custom-icon>calendar_today</app-custom-icon></button>',
   styleUrls: ['./custom-material.component.scss'],
   standalone: true,
   imports: [CustomIconComponent],
