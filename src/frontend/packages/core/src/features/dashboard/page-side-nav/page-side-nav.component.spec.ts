@@ -136,6 +136,17 @@ describe('PageSideNavComponent', () => {
     expect(isOpen()).toBe(false);
   });
 
+  it('names each tab without its icon text', async () => {
+    fixture.componentRef.setInput('tabs', [
+      { link: 'summary', label: 'Summary', icon: 'cloud_foundry' },
+      { link: 'events', label: 'Events' },
+    ]);
+    await fixture.whenStable();
+    const icons = fixture.nativeElement.querySelectorAll('a app-custom-icon');
+    expect(icons).toHaveLength(2);
+    icons.forEach((icon: Element) => expect(icon.getAttribute('aria-hidden')).toBe('true'));
+  });
+
   it('marks the current page tab for assistive technology', async () => {
     const router = TestBed.inject(Router);
     router.resetConfig([{ path: '**', children: [] }]);
