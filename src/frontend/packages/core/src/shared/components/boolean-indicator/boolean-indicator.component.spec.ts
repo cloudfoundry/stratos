@@ -36,6 +36,19 @@ describe('BooleanIndicatorComponent', () => {
     expect(element.textContent).toContain('Enabled');
   });
 
+  // Without its text the icon is the only answer, so it names it; with the
+  // text beside it, the icon is decoration.
+  it('names the icon only when the text is hidden', async () => {
+    const icon = () => element.querySelector('.material-icons')!;
+    expect(icon().getAttribute('aria-hidden')).toBe('true');
+
+    fixture.componentRef.setInput('showText', false);
+    await fixture.whenStable();
+    expect(icon().getAttribute('role')).toBe('img');
+    expect(icon().getAttribute('aria-label')).toBe('Enabled');
+    expect(icon().hasAttribute('aria-hidden')).toBe(false);
+  });
+
   it('should hide text if set', async () => {
     fixture.componentRef.setInput('showText', false);
     await fixture.whenStable();

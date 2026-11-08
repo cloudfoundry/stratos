@@ -4,7 +4,8 @@
     <div class="home-shortcut__items">
       @for (shortcut of shortcuts(); track shortcut.title) {
         <div class="home-shortcut__item">
-          <div class="home-shortcut__icon"><app-custom-icon [routerLink]="shortcut.link" [fontSet]="shortcut.iconFont">{{ shortcut.icon }}</app-custom-icon></div>
+          <!-- The icon repeats the link beside it: clickable, but no Tab stop of its own. -->
+          <div class="home-shortcut__icon"><a [routerLink]="shortcut.link" tabindex="-1" aria-hidden="true"><app-custom-icon [fontSet]="shortcut.iconFont">{{ shortcut.icon }}</app-custom-icon></a></div>
           <div><a [routerLink]="shortcut.link">{{ shortcut.title }}</a></div>
         </div>
       }

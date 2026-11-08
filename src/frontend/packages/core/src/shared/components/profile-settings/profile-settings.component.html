@@ -22,7 +22,7 @@
           <div class="user-profile__option-header">Disable session timeout
             @if (timeoutSession === 'false') {
               <app-custom-icon
-                matTooltip="Session timeout is disabled, you are now at a greater security risk." matTooltipPosition="right"
+                matTooltip="Session timeout is disabled, you are now at a greater security risk." ariaLabel="Session timeout is disabled, you are now at a greater security risk." matTooltipPosition="right"
                 class="user-profile__option-warning-icon" inline="true">
                 warning
               </app-custom-icon>
@@ -43,7 +43,7 @@
           <div class="user-profile__option-header">Disable polling
             @if (pollingEnabled === 'false') {
               <app-custom-icon #tooltip="matTooltip"
-                matTooltip="Polling is disabled, some pages may not automatically update." matTooltipPosition="right"
+                matTooltip="Polling is disabled, some pages may not automatically update." ariaLabel="Polling is disabled, some pages may not automatically update." matTooltipPosition="right"
                 class="user-profile__option-warning-icon" inline="true">
                 warning
               </app-custom-icon>

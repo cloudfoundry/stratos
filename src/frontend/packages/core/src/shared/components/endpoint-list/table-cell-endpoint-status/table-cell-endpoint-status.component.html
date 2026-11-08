@@ -6,7 +6,7 @@
           <span class="mr-2">(local)</span>
         }</span>
       }
-      <app-custom-icon fontSet="stratos-icons">endpoints_connected</app-custom-icon>
+      <app-custom-icon fontSet="stratos-icons" [ariaLabel]="showLabel() ? '' : 'Connected'">endpoints_connected</app-custom-icon>
     }
     @if (status === 'disconnected') {
       @if (showLabel()) {
@@ -14,7 +14,7 @@
           <span class="mr-2">(local)</span>
         }</span>
       }
-      <app-custom-icon fontSet="stratos-icons">endpoints_disconnected</app-custom-icon>
+      <app-custom-icon fontSet="stratos-icons" [ariaLabel]="showLabel() ? '' : 'Disconnected'">endpoints_disconnected</app-custom-icon>
     }
     @if (status === 'expired') {
       @if (showLabel()) {
@@ -24,7 +24,7 @@
       }
       <!-- No dedicated "expired" glyph exists in the stratos-icons font;
            reuse endpoints_disconnected rather than add a new font entry. -->
-      <app-custom-icon fontSet="stratos-icons" class="text-warning-shade-600 dark:text-warning-shade-300">endpoints_disconnected</app-custom-icon>
+      <app-custom-icon fontSet="stratos-icons" class="text-warning-shade-600 dark:text-warning-shade-300" [ariaLabel]="showLabel() ? '' : 'Expired'">endpoints_disconnected</app-custom-icon>
     }
     @if (status === 'connecting') {
       @if (showLabel()) {
@@ -42,7 +42,7 @@
       @if (showLabel()) {
         <span class="mr-2">Unknown </span>
       }
-      <app-custom-icon>help_outline</app-custom-icon>
+      <app-custom-icon [ariaLabel]="showLabel() ? '' : 'Unknown'">help_outline</app-custom-icon>
     }
   } @else {
     @if (row().endpoint_metadata?.status; as status) {
@@ -50,7 +50,7 @@
         @if (showLabel()) {
           <span class="mr-2">{{ syncLabel }}</span>
         }
-        <app-custom-icon>cloud_done</app-custom-icon>
+        <app-custom-icon [ariaLabel]="showLabel() ? '' : syncLabel">cloud_done</app-custom-icon>
       }
       @if (status === 'Synchronizing') {
         @if (showLabel()) {
@@ -62,13 +62,13 @@
         @if (showLabel()) {
           <span class="mr-2">{{ syncLabel }}</span>
         }
-        <app-custom-icon>hourglass_empty</app-custom-icon>
+        <app-custom-icon [ariaLabel]="showLabel() ? '' : syncLabel">hourglass_empty</app-custom-icon>
       }
       @if (status === 'Failed') {
         @if (showLabel()) {
           <span class="mr-2">{{ syncLabel }}</span>
         }
-        <app-custom-icon>sync_problem</app-custom-icon>
+        <app-custom-icon [ariaLabel]="showLabel() ? '' : syncLabel">sync_problem</app-custom-icon>
       }
     } @else {
       {{ noSyncStatus }}

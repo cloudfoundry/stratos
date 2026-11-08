@@ -3,11 +3,16 @@ import { ChangeDetectionStrategy, Component, Directive, booleanAttribute, input,
 // Custom Icon Component
 @Component({
   selector: 'app-custom-icon',
-  template: `<i [class]="(fontSet() || 'material-icons') + ' custom-icon'" [class.inline]="inline()" [attr.aria-label]="ariaLabel()"><ng-content></ng-content></i>`,
+  template: `<i [class]="(fontSet() || 'material-icons') + ' custom-icon'" [class.inline]="inline()" [attr.role]="ariaLabel() ? 'img' : null" [attr.aria-label]="ariaLabel() || null"><ng-content></ng-content></i>`,
   styleUrls: ['./custom-material.component.scss'],
   standalone: true,
   changeDetection: ChangeDetectionStrategy.OnPush,
-  host: { '[class.custom-icon-inline]': 'inline()' }
+  // The glyph is a ligature ("mode_edit"); unlabelled, it is decoration and
+  // stays out of the name of whatever holds it. A label makes it an image.
+  host: {
+    '[class.custom-icon-inline]': 'inline()',
+    '[attr.aria-hidden]': "ariaLabel() ? null : 'true'",
+  }
 })
 export class CustomIconComponent {
   // Undefined falls back to material-icons so callers can bind optional fonts
@@ -16,7 +21,8 @@ export class CustomIconComponent {
   readonly svgIcon = input('');
   // Attribute form (inline / inline="true") coerces like mat-icon did
   readonly inline = input(false, { transform: booleanAttribute });
-  readonly ariaLabel = input('');
+  // Empty, null or undefined: no label, so the icon is decoration.
+  readonly ariaLabel = input<string | null | undefined>('');
 }
 
 // Custom Spinner Component

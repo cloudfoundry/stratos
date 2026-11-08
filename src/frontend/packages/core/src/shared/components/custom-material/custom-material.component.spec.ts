@@ -29,6 +29,19 @@ describe('CustomIconComponent', () => {
     expect(host.classList).not.toContain('custom-icon-inline');
   });
 
+  // The glyph is a ligature: without this a screen reader reads "mode_edit"
+  // into the name of whatever holds the icon.
+  it('hides itself from assistive technology unless it is given a label', async () => {
+    const plain = await render();
+    expect(plain.getAttribute('aria-hidden')).toBe('true');
+    expect(plain.querySelector('i')!.hasAttribute('role')).toBe(false);
+
+    const labelled = await render({ ariaLabel: 'Warning' });
+    expect(labelled.hasAttribute('aria-hidden')).toBe(false);
+    expect(labelled.querySelector('i')!.getAttribute('role')).toBe('img');
+    expect(labelled.querySelector('i')!.getAttribute('aria-label')).toBe('Warning');
+  });
+
   it('draws the glyph in the font it is given', async () => {
     const host = await render({ fontSet: 'stratos-icons' });
     expect(host.querySelector('i')!.classList).toContain('stratos-icons');

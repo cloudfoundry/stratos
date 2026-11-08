@@ -35,6 +35,7 @@ describe('ApplicationStateIconComponent', () => {
     await fixture.whenStable();
     const icon = fixture.nativeElement.querySelector('[role="img"]') as HTMLElement;
     expect(icon.getAttribute('aria-label')).toBe('Started');
+    expect(icon.closest('[aria-hidden="true"]')).toBeNull();
   });
 
   it('is no image while it has no state', async () => {

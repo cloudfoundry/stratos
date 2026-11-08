@@ -37,7 +37,7 @@
                                    'steppers-header-indicator-content--skip': step.effectiveSkip
                                  }">
                           @if (step.complete) {
-                            <span class="material-icons text-sm">{{ this.getIconLigature() }}</span>
+                            <span class="material-icons text-sm" role="img" aria-label="Complete">{{ this.getIconLigature() }}</span>
                           }
                           @if (!step.complete) {
                             <div>{{ i + 1 }}</div>

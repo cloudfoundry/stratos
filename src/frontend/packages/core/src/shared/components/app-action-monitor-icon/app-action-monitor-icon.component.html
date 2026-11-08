@@ -2,13 +2,13 @@
   @if (state$ | async; as state) {
     <div>
       @if (state.error) {
-        <app-custom-icon class="monitor-icon__error">error</app-custom-icon>
+        <app-custom-icon class="monitor-icon__error" ariaLabel="Failed">error</app-custom-icon>
       }
       @if (!state.error && state.busy) {
         <app-busy class="text-primary" size="1.25rem" context="action-monitor"></app-busy>
       }
       @if (!state.error && !state.busy && state.completed) {
-        <app-custom-icon class="monitor-icon__done">done</app-custom-icon>
+        <app-custom-icon class="monitor-icon__done" ariaLabel="Done">done</app-custom-icon>
       }
     </div>
   }

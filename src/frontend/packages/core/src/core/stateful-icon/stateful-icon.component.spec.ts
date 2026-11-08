@@ -43,6 +43,13 @@ describe('StatefulIconComponent', () => {
     expect(element.textContent).toContain('done');
   });
 
+  // The icon is the only sign of the state, so it is an image with a name.
+  it('names the state for assistive technology', async () => {
+    fixture.componentRef.setInput('state', StratosStatus.ERROR);
+    await fixture.whenStable();
+    expect(element.querySelector('[role="img"]')?.getAttribute('aria-label')).toBe('Error');
+  });
+
   it('should show spinner if state key is busy', async () => {
     fixture.componentRef.setInput('state', StratosStatus.BUSY);
     await fixture.whenStable();
