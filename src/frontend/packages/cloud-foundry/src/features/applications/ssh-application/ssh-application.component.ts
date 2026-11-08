@@ -95,7 +95,9 @@ export class SshApplicationComponent implements OnInit {
         tap(() => this.connectionStatus.next(1)),
         switchMap((getResponse: any): any[] => getResponse(this.sshInput)),
         catchError((e: Error): any[] => {
-          if (e.message !== normalClosureMessage) {
+          // `exit` closes an open session without a normal closure; only a
+          // socket that never opened is a connect error.
+          if (e.message !== normalClosureMessage && !this.sshViewer().isConnected()) {
             this.errorMessage.set('Error connecting to web socket');
           }
           return [];
