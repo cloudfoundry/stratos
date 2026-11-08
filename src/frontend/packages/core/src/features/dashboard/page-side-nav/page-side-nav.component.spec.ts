@@ -88,6 +88,54 @@ describe('PageSideNavComponent', () => {
     expect(fixture.nativeElement.querySelectorAll('li')).toHaveLength(1);
   });
 
+  // Below the desktop width the tabs fold into a dropdown, which opened
+  // on hover only.
+  it('opens the compact tab list from a button, and Escape closes it', async () => {
+    TestBed.inject(Router).resetConfig([{ path: '**', children: [] }]);
+    fixture.componentRef.setInput('tabs', [
+      { link: 'summary', label: 'Summary' },
+      { link: 'variables', label: 'Variables' },
+    ]);
+    await fixture.whenStable();
+    const el: HTMLElement = fixture.nativeElement;
+    const button = el.querySelector<HTMLButtonElement>('button.page-side-nav__items-compact-header')!;
+    const list = el.querySelector('ul')!;
+    const isOpen = () => list.classList.contains('page-side-nav__items--open');
+
+    expect(button.getAttribute('aria-expanded')).toBe('false');
+    expect(button.getAttribute('aria-controls')).toBe(list.id);
+    expect(button.querySelector('app-custom-icon')?.getAttribute('aria-hidden')).toBe('true');
+
+    button.click();
+    await fixture.whenStable();
+    expect(button.getAttribute('aria-expanded')).toBe('true');
+    expect(isOpen()).toBe(true);
+
+    el.querySelector<HTMLElement>('[data-test="page-tab-Variables"]')!.focus();
+    el.querySelector('nav')!.dispatchEvent(new KeyboardEvent('keydown', { key: 'Escape', bubbles: true }));
+    await fixture.whenStable();
+    expect(isOpen()).toBe(false);
+    expect(document.activeElement).toBe(button);
+
+    // Choosing a tab closes the list.
+    button.click();
+    await fixture.whenStable();
+    el.querySelector<HTMLElement>('[data-test="page-tab-Summary"]')!.click();
+    await fixture.whenStable();
+    expect(isOpen()).toBe(false);
+
+    // Tabbing out of the nav closes the list, which would cover the page.
+    button.click();
+    await fixture.whenStable();
+    const nav = el.querySelector('nav')!;
+    nav.dispatchEvent(new FocusEvent('focusout', { relatedTarget: list.querySelector('a'), bubbles: true }));
+    await fixture.whenStable();
+    expect(isOpen()).toBe(true);
+    nav.dispatchEvent(new FocusEvent('focusout', { relatedTarget: document.body, bubbles: true }));
+    await fixture.whenStable();
+    expect(isOpen()).toBe(false);
+  });
+
   it('marks the current page tab for assistive technology', async () => {
     const router = TestBed.inject(Router);
     router.resetConfig([{ path: '**', children: [] }]);
