@@ -23,6 +23,19 @@ describe('AppStageRowComponent', () => {
     expect(html).toContain('○');   // pending placeholder (of=3, only 2 received)
   });
 
+  // The row sits on the warning tint; muted gray is 4.3:1 on it in light
+  // mode and 3.5:1 in dark (#4166), so a pending stage takes the tint's text.
+  it('draws pending stages in a color that reads on the row', () => {
+    fixture.componentRef.setInput('stages', [
+      { code: 'STAGING', label: 'Staging', index: 1, of: 2, enteredAt: new Date().toISOString() },
+    ]);
+    fixture.detectChanges();
+    const spans: HTMLElement[] = [...fixture.nativeElement.querySelectorAll('span')];
+    const pending = spans.find(s => s.textContent!.includes('○'))!;
+    expect(pending.className).toContain('text-[var(--warning-text)]');
+    expect(fixture.nativeElement.innerHTML).not.toContain('text-content-muted');
+  });
+
   it('hides when stages is empty', () => {
     fixture.componentRef.setInput('stages', []);
     fixture.detectChanges();

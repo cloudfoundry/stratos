@@ -67,4 +67,30 @@ describe('PageHeaderEventsComponent dismiss', () => {
     button!.click();
     expect(updateEventReadState).toHaveBeenCalledWith(event, true);
   });
+
+  // In dark mode the fixed danger shades put the banner text at 2.2-4.4:1
+  // (#4166). The theme's alert tokens change with the mode; the link takes
+  // the alert text color (the link blue is under 4.5:1 on the alert tint).
+  it('draws the banner in the theme alert colors', async () => {
+    TestBed.configureTestingModule({
+      imports: [PageHeaderEventsComponent],
+      providers: [
+        provideZonelessChangeDetection(),
+        provideRouter([]),
+        { provide: ActivatedRoute, useValue: { snapshot: { params: {} } } },
+        { provide: GlobalEventService, useValue: {
+          events$: of([{ key: `${endpointEventKey}-ep-1`, endpointId: 'ep-1', endpointName: 'one', detail: 'HTTP 502', message: 'down', read: false }]),
+          updateEventReadState: vi.fn(),
+        } },
+      ],
+    });
+    const fixture = TestBed.createComponent(PageHeaderEventsComponent);
+    fixture.componentRef.setInput('endpointIds$', of(['ep-1']));
+    await fixture.whenStable();
+    const el: HTMLElement = fixture.nativeElement;
+    const banner = el.querySelector('h3')!.closest('.rounded-md')!;
+    expect(banner.className).toContain('bg-[var(--danger-bg)]');
+    expect(banner.className).toContain('text-[var(--danger-text)]');
+    expect(el.innerHTML).not.toMatch(/text-danger-shade-|text-primary/);
+  });
 });

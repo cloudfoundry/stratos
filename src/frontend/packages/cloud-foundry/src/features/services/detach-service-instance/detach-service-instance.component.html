@@ -28,8 +28,8 @@
                       'bg-content-3 text-content-1': row.status === 'pending',
                       'bg-info-subtle text-info-strong animate-pulse': row.status === 'busy',
                       'bg-success-subtle text-success-strong': row.status === 'success',
-                      'bg-warning-shade-100 text-warning-shade-700': row.status === 'unknown',
-                      'bg-danger-shade-50 text-danger-shade-700': row.status === 'error'
+                      'bg-[var(--warning-bg)] text-[var(--warning-text)]': row.status === 'unknown',
+                      'bg-[var(--danger-bg)] text-[var(--danger-text)]': row.status === 'error'
                     }"
                     [attr.aria-label]="row.status"
                     [attr.title]="row.errorMessage || row.status">

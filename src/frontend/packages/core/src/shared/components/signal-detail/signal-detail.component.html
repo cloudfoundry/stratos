@@ -72,7 +72,7 @@
       </div>
     } @else if (hasError()) {
       <div data-test="signal-detail-error"
-           class="m-4 p-3 rounded border border-danger-shade-300 bg-danger-shade-50 dark:bg-danger-shade-900/20 dark:border-danger-shade-700 text-danger-shade-700 dark:text-danger-shade-200 text-sm">
+           class="m-4 p-3 rounded border border-[var(--danger-border)] bg-[var(--danger-bg)] text-[var(--danger-text)] text-sm">
         {{ errorMessage() }}
       </div>
     } @else {
