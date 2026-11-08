@@ -370,7 +370,7 @@
           [attr.data-test]="act.dataTest ?? ('bulk-action-' + act.label)"
           [class]="'flex items-center gap-1 px-3 py-1 text-sm border rounded disabled:opacity-40 disabled:cursor-not-allowed ' +
             (act.danger
-              ? 'border-danger bg-danger text-white hover:bg-danger/90'
+              ? 'border-danger bg-danger text-on-danger hover:bg-danger/90'
               : 'border-content-border bg-content-bg text-content-text hover:bg-content-secondary')">
           @if (act.icon) {
             <span aria-hidden="true" class="material-icons text-base leading-5">{{ act.icon }}</span>

@@ -200,3 +200,35 @@ describe('StratosBrandingService', () => {
     });
   });
 });
+
+// White on the default status colors is 2.2-3.8:1 (#4166). Each status color
+// carries a text color that reads on it, chosen for whatever color is set,
+// including a company's own.
+describe('StratosBrandingService text on status colors', () => {
+  const cssVar = (name: string) => document.documentElement.style.getPropertyValue(name);
+  const DARK = '#0f172a';
+
+  beforeEach(() => {
+    TestBed.configureTestingModule({ providers: [provideHttpClient(), provideHttpClientTesting()] });
+  });
+
+  it('picks dark text on the light default colors', () => {
+    const service = TestBed.inject(StratosBrandingService);
+    service.setTheme({ colors: { ...service.getTheme().colors, success: '#22c55e', warning: '#f59e0b', danger: '#ef4444' } });
+    expect(cssVar('--color-on-success')).toBe(DARK);
+    expect(cssVar('--color-on-warning')).toBe(DARK);
+    expect(cssVar('--color-on-danger')).toBe(DARK);
+  });
+
+  it('picks white text on a dark brand color', () => {
+    const service = TestBed.inject(StratosBrandingService);
+    service.setTheme({ colors: { ...service.getTheme().colors, danger: '#991b1b' } });
+    expect(cssVar('--color-on-danger')).toBe('#ffffff');
+  });
+
+  it('leaves the stylesheet default for a color it cannot read', () => {
+    const service = TestBed.inject(StratosBrandingService);
+    service.setTheme({ colors: { ...service.getTheme().colors, danger: 'rebeccapurple' } });
+    expect(cssVar('--color-on-danger')).toBe('');
+  });
+});
