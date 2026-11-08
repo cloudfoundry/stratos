@@ -31,5 +31,11 @@
   &__icon {
     margin-right: 8px;
     width: 24px;
+
+    // The icon's link keeps the icon's own color, not the link blue.
+    a {
+      color: inherit;
+      display: flex;
+    }
   }
 }

@@ -55,6 +55,20 @@ describe('TableCellEndpointStatusComponent', () => {
 
     const icon = compiled.querySelector('app-custom-icon');
     expect(icon?.textContent?.trim()).toBe('endpoints_disconnected');
+    // The word is shown, so the icon is decoration.
+    expect(icon?.getAttribute('aria-hidden')).toBe('true');
+  });
+
+  // Without the word, the icon is the only sign of the status.
+  it('names the status on the icon when the label is hidden', async () => {
+    fixture.componentRef.setInput('config', { showLabel: false });
+    fixture.componentRef.setInput('row', {
+      guid: 'test-guid', cnsi_type: 'cf', name: 'Test Endpoint', connectionStatus: 'expired',
+    } as EndpointModel);
+    await fixture.whenStable();
+
+    const img = (fixture.nativeElement as HTMLElement).querySelector('[role="img"]');
+    expect(img?.getAttribute('aria-label')).toBe('Expired');
   });
 
   // A failed connect leaves the endpoint Disconnected; the card says why the

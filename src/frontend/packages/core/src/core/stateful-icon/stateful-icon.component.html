@@ -1,7 +1,7 @@
 @if (selectedState() || state() === allStateKeys.BUSY) {
   <div class="flex items-center justify-center leading-6 h-6 w-6">
     @if (state() !== allStateKeys.BUSY) {
-      <app-custom-icon [inline]="inline()"
+      <app-custom-icon [inline]="inline()" [ariaLabel]="selectedStateLabel"
         [ngClass]="{'warning': state() === allStateKeys.WARNING, 'error': state() === allStateKeys.ERROR, 'ok': state() === allStateKeys.OK }"
         >
       {{ selectedStateIcon }}</app-custom-icon>

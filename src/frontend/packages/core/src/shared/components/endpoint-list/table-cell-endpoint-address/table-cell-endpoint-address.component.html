@@ -5,7 +5,7 @@
     </app-copy-to-clipboard>
     @if (isDuplicate$() | async) {
       <span class="material-icons text-warning-shade-600 dark:text-warning-shade-300 ml-1 text-base leading-none"
-        matTooltip="Another endpoint is registered at this URL">warning</span>
+        matTooltip="Another endpoint is registered at this URL" role="img" aria-label="Another endpoint is registered at this URL">warning</span>
     }
   </div>
 }

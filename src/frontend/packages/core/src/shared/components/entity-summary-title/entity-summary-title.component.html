@@ -12,7 +12,7 @@
       <div class="flex items-baseline">
         <h1 class="m-0">{{ title() }} </h1>
         @if (info()) {
-          <app-custom-icon class="text-xl ml-[10px] opacity-40" matTooltip="{{ info() }}">
+          <app-custom-icon class="text-xl ml-[10px] opacity-40" matTooltip="{{ info() }}" [ariaLabel]="info()">
           info</app-custom-icon>
         }
       </div>

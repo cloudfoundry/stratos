@@ -1,6 +1,6 @@
 @let label = status() | applicationStateIcon:'label';
 <div class="flex flex-row">
   <!-- The icon stands alone in some places (the recent apps card), so it is an image named after the state. -->
-  <app-custom-icon [ngClass]="status() | applicationStateIcon:'class'" [attr.role]="label ? 'img' : null"
-    [attr.aria-label]="label || null">{{status() | applicationStateIcon:'icon'}}</app-custom-icon>
+  <app-custom-icon [ngClass]="status() | applicationStateIcon:'class'"
+    [ariaLabel]="label || ''">{{status() | applicationStateIcon:'icon'}}</app-custom-icon>
 </div>

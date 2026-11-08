@@ -7,6 +7,8 @@ import { AppBusyComponent } from '../../shared/components/busy-indicator/busy-in
 
 interface IconDefinition {
   icon: string;
+  // The icon is the only sign of the state; this is its spoken name.
+  label: string;
   color: 'primary' | 'secondary' | 'warn';
 }
 
@@ -38,14 +40,17 @@ export class StatefulIconComponent {
   } = {
       [StratosStatus.OK]: {
         icon: 'done',
+        label: 'Done',
         color: 'primary'
       },
       [StratosStatus.ERROR]: {
         icon: 'error',
+        label: 'Error',
         color: 'warn'
       },
       [StratosStatus.WARNING]: {
         icon: 'warning',
+        label: 'Warning',
         color: 'warn'
       }
     };
@@ -59,5 +64,10 @@ export class StatefulIconComponent {
   get selectedStateIcon(): string {
     const selected = this.selectedState();
     return selected && 'icon' in selected ? selected.icon : '';
+  }
+
+  get selectedStateLabel(): string {
+    const selected = this.selectedState();
+    return selected && 'label' in selected ? selected.label : '';
   }
 }

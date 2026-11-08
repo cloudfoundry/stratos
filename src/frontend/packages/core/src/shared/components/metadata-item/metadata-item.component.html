@@ -3,7 +3,7 @@
     <app-custom-icon class="metadata-item__icon" [fontSet]="iconFont()" [ngClass]="{'metadata-item__icon_spacer': (icon() === '-')}">{{ icon() }}</app-custom-icon>
   }
   @if (icon() && tooltip()) {
-    <app-custom-icon matTooltip="{{ tooltip() }}" [fontSet]="iconFont()" class="metadata-item__icon" [ngClass]="{'metadata-item__icon_spacer': (icon() === '-')}">{{ icon() }}</app-custom-icon>
+    <app-custom-icon matTooltip="{{ tooltip() }}" [ariaLabel]="tooltip()" [fontSet]="iconFont()" class="metadata-item__icon" [ngClass]="{'metadata-item__icon_spacer': (icon() === '-')}">{{ icon() }}</app-custom-icon>
   }
   <div class="metadata-item__content" [ngClass]="{'metadata-item__content-label-only': metadataValue.childNodes.length === 0}">
     @if (label()) {
