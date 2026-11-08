@@ -1,12 +1,12 @@
 @if ((isBusy$ | async) === false || false) {
   <app-page-sub-nav>
     <button class="btn btn-danger" name="delete" (click)="deleteRelease()" title="Delete">
-      <span class="material-icons">delete</span>
+      <span aria-hidden="true" class="material-icons">delete</span>
       <span>Delete</span>
     </button>
     @if (canUpgrade$ | async) {
       <button class="btn btn-primary" name="upgrade" [routerLink]="['../upgrade']" title="Upgrade">
-        <span class="material-icons">vertical_align_top</span>
+        <span aria-hidden="true" class="material-icons">vertical_align_top</span>
         <span>Upgrade</span>
       </button>
     }

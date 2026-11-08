@@ -2,12 +2,12 @@
   <button aria-label="Edit Organization" class="btn btn-icon" name="edit-org" data-test="org-edit" *appCfUserPermission="permsOrgEdit;endpointGuid:cfEndpointService.cfGuid"
     routerLink="/cloud-foundry/{{cfEndpointService.cfGuid}}/organizations/{{cfOrgService.orgGuid}}/edit-org"
     matTooltip="Edit Organization">
-    <span class="material-icons">mode_edit</span>
+    <span aria-hidden="true" class="material-icons">mode_edit</span>
   </button>
   <button aria-label="Delete Organization" class="btn btn-icon" name="delete" data-test="org-delete"
     *appCfUserPermission="permsOrgDelete;endpointGuid:cfOrgService.cfGuid;organizationGuid:cfOrgService.orgGuid;"
     (click)="deleteOrgWarn()" matTooltip="Delete Organization">
-    <span class="material-icons">delete</span>
+    <span aria-hidden="true" class="material-icons">delete</span>
   </button>
   <app-cf-cli-menu tab="summary"></app-cf-cli-menu>
   <app-polling-indicator class="ml-auto"

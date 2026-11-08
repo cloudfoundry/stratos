@@ -12,7 +12,7 @@
                   matTooltip="Toggle menu"
                   aria-label="Toggle menu"
                   (click)="toggleSidenav()">
-                  <span class="material-icons">menu</span>
+                  <span aria-hidden="true" class="material-icons">menu</span>
                 </button>
               }
             </div>
@@ -48,7 +48,7 @@
                   (click)="openDocumentation($event, docsUrl)"
                   [matTooltip]="documentationTooltip()"
                   [attr.aria-label]="documentationTooltip()">
-                  <span class="material-icons text-base leading-5 block">menu_book</span>
+                  <span aria-hidden="true" class="material-icons text-base leading-5 block">menu_book</span>
                 </a>
                 <button type="button"
                   class="page-header-documentation-toggle pl-1 pr-1.5 py-1.5 hover:bg-white/10 rounded-r-md transition-colors"
@@ -59,7 +59,7 @@
                     <span class="text-xs leading-5">{{ documentationTargetLabel() }}</span>
                     <!-- Static rotate glyph: signals the word toggles, without a
                          caret's implication that a menu will open. -->
-                    <span class="material-icons text-[13px] leading-5">autorenew</span>
+                    <span aria-hidden="true" class="material-icons text-[13px] leading-5">autorenew</span>
                   </span>
                 </button>
               </div>
@@ -99,7 +99,7 @@
                   (click)="toggleTokenMenu()"
                   matTooltip="Copy UAA tokens"
                   aria-label="Copy UAA tokens">
-                  <span class="material-icons">vpn_key</span>
+                  <span aria-hidden="true" class="material-icons">vpn_key</span>
                 </button>
                 @if (isTokenMenuOpen) {
                   <div
@@ -133,7 +133,7 @@
                   matTooltip="Recent activity"
                   aria-label="Recent activity"
                   (click)="toggleHistoryMenu()">
-                  <span class="material-icons">schedule</span>
+                  <span aria-hidden="true" class="material-icons">schedule</span>
                 </button>
                 <!-- History dropdown menu -->
                 @if (isHistoryMenuOpen) {
@@ -156,7 +156,7 @@
                 matTooltip="Notifications"
                 aria-label="Notifications"
                 class="page-header-notification-button relative p-2 text-header-text hover:bg-white/10 rounded-md transition-colors">
-                <span class="material-icons">notifications</span>
+                <span aria-hidden="true" class="material-icons">notifications</span>
                 @if ((unreadEventCount$ | async); as count) {
                   <span
                     class="absolute -top-1 -right-1 bg-danger-shade-500 text-white text-xs rounded-full min-w-[1.25rem] h-5 flex items-center justify-center px-1">

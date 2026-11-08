@@ -135,7 +135,7 @@
     @if ((this.userIsAdmin$ | async)) {
       <div class="border-t border-content-border bg-[var(--warning-bg)] px-6 py-3 flex items-center justify-end gap-4">
         <div class="flex items-center gap-2 text-sm text-warning">
-          <span class="material-icons text-base">security</span>
+          <span aria-hidden="true" class="material-icons text-base">security</span>
           <span>You have administrative privileges</span>
         </div>
         <button [routerLink]="['diagnostics']" class="btn btn-primary btn-sm">View Diagnostics</button>

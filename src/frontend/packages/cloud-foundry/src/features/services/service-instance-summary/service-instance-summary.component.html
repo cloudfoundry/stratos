@@ -5,14 +5,14 @@
       @if (canShare()) {
         <button type="button" data-test="share-service-instance-action"
           (click)="openShareToSpaces()" class="btn btn-secondary btn-sm">
-          <span class="material-icons text-base align-middle">share</span>
+          <span aria-hidden="true" class="material-icons text-base align-middle">share</span>
           Share to spaces
         </button>
       }
       @for (a of actions(); track a.label) {
         <button type="button" (click)="runAction(a)"
           [class]="a.danger ? 'btn btn-secondary btn-sm text-danger' : 'btn btn-secondary btn-sm'">
-          <span class="material-icons text-base align-middle">{{ a.icon }}</span>
+          <span aria-hidden="true" class="material-icons text-base align-middle">{{ a.icon }}</span>
           {{ a.label }}
         </button>
       }
@@ -82,7 +82,7 @@
                 <app-meta-card-key>Dashboard</app-meta-card-key>
                 <app-meta-card-value>
                   <a aria-label="Open dashboard" [href]="v.dashboardUrl" target="_blank" rel="noopener" class="text-accent">
-                    <span class="material-icons align-middle">launch</span>
+                    <span aria-hidden="true" class="material-icons align-middle">launch</span>
                   </a>
                 </app-meta-card-value>
               </app-meta-card-item>

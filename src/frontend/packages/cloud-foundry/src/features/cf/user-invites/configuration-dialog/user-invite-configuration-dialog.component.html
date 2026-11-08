@@ -23,7 +23,7 @@
           [type]="!showSecret() ? 'password' : 'text'" autocomplete="new-password">
         <button class="btn-icon" (click)="toggleShowSecret()" [attr.aria-label]="'Hide Secret'"
           [attr.aria-pressed]="!showSecret()" type='button'>
-          <i class="material-icons">{{!showSecret() ? 'visibility_off' : 'visibility'}}</i>
+          <i aria-hidden="true" class="material-icons">{{!showSecret() ? 'visibility_off' : 'visibility'}}</i>
         </button>
       </div>
     </div>

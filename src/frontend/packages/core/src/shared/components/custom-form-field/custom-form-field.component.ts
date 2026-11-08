@@ -386,7 +386,7 @@ export class CustomFormFieldComponent
 
 @Component({
   selector: "mat-icon",
-  template: '<i class="material-icons"><ng-content></ng-content></i>',
+  template: '<i class="material-icons" aria-hidden="true"><ng-content></ng-content></i>',
   styleUrls: ["./custom-form-field.component.scss"],
   changeDetection: ChangeDetectionStrategy.OnPush,
   standalone: true,

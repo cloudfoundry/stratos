@@ -34,12 +34,12 @@
   <div class="flex-1 min-h-0 flex flex-col">
     <div class="flex items-end my-1">
       <button type="button" aria-label="Filters" [attr.aria-expanded]="!collapsed()" class="btn btn-ghost mr-2.5" (click)="collapsed.set(!collapsed())">
-        <span class="material-icons">filter_list</span>
+        <span aria-hidden="true" class="material-icons">filter_list</span>
         @if (collapsed()) {
-          <span class="material-icons">chevron_right</span>
+          <span aria-hidden="true" class="material-icons">chevron_right</span>
         }
         @if (!collapsed()) {
-          <span class="material-icons">chevron_left</span>
+          <span aria-hidden="true" class="material-icons">chevron_left</span>
         }
       </button>
       @if (filteredRepo) {
@@ -48,7 +48,7 @@
           <span>{{filteredRepo}}</span>
           <button type="button" aria-label="Clear repository filter" (click)="filterCharts()"
             class="ml-1 hover:bg-brand-200 dark:hover:bg-brand-800 rounded-full p-0.5">
-            <span class="material-icons text-base">cancel</span>
+            <span aria-hidden="true" class="material-icons text-base">cancel</span>
           </button>
         </div>
       }

@@ -22,7 +22,7 @@
             @if (!service.unparsableFileContent && (service.validDb$ | async) === false) {
               <div class="alert alert-warning">
                 <div class="flex items-start space-x-3">
-                  <span class="material-icons text-warning-shade-600 mt-0.5">warning</span>
+                  <span aria-hidden="true" class="material-icons text-warning-shade-600 mt-0.5">warning</span>
                   <div class="flex-1">
                     <p class="text-warning-shade-800 mb-3">
                       The database version of <app-product-name></app-product-name>
@@ -40,7 +40,7 @@
             @if (!!service.unparsableFileContent) {
               <div class="alert alert-danger">
                 <div class="flex items-start space-x-3">
-                  <span class="material-icons text-danger-shade-600 mt-0.5">warning</span>
+                  <span aria-hidden="true" class="material-icons text-danger-shade-600 mt-0.5">warning</span>
                   <div class="flex-1">
                     <p class="text-danger-shade-800">
                       Unable to parse file contents. Reason:&nbsp;

@@ -49,19 +49,19 @@
                         <div class="pr-1">
                           @switch (issue.level) {
                             @case (0) {
-                              <span class="material-icons text-success">check_circle</span>
+                              <span class="material-icons text-success" role="img" aria-label="OK">check_circle</span>
                             }
                             @case (1) {
-                              <span class="material-icons text-info">info</span>
+                              <span class="material-icons text-info" role="img" aria-label="Info">info</span>
                             }
                             @case (2) {
-                              <span class="material-icons text-warning">warning</span>
+                              <span class="material-icons text-warning" role="img" aria-label="Warning">warning</span>
                             }
                             @case (3) {
-                              <span class="material-icons text-danger">error</span>
+                              <span class="material-icons text-danger" role="img" aria-label="Error">error</span>
                             }
                             @default {
-                              <span class="material-icons text-tentative">help_outline</span>
+                              <span class="material-icons text-tentative" role="img" aria-label="Unknown">help_outline</span>
                             }
                           }
                         </div>

@@ -2,7 +2,7 @@
   <h1>Edit Application: {{ (applicationService.application$ | async)?.app?.entity?.name }} </h1>
   <div class="page-header-right">
     <button aria-label="Close" class="btn btn-icon" routerLink="/applications/{{applicationService.cfGuid}}/{{applicationService.appGuid}}">
-      <span class="material-icons">clear</span>
+      <span aria-hidden="true" class="material-icons">clear</span>
     </button>
   </div>
 </app-page-header>

@@ -21,7 +21,7 @@ import { EndpointModel, formatDuplicateUrlEndpointsMessage } from '@stratosui/st
   template: `
     @if (sharedUrlMessage$ | async; as sharedUrlMsg) {
       <div class="mx-4 mt-3 mb-2 px-3 py-2 rounded border flex items-start gap-2 text-sm bg-[var(--info-bg)] border-[var(--info-border)] text-[var(--info-text)]">
-        <span class="material-icons text-base leading-5">info</span>
+        <span class="material-icons text-base leading-5" aria-hidden="true">info</span>
         <span>
           <div>{{ sharedUrlMsg }}</div>
           <div>

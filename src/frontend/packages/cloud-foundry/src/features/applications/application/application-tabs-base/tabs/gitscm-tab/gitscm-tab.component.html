@@ -35,7 +35,7 @@
                       @if (isHead() === false) {
                         <div class="flex flex-row">
                           <div>
-                            <span class="material-icons text-warning">warning</span>
+                            <span aria-hidden="true" class="material-icons text-warning">warning</span>
                           </div>
                           <div class="pl-6">
                             The
@@ -79,6 +79,8 @@
                           <span
                             class="material-icons text-[18px] h-[18px] leading-[18px] ml-[5px] mr-0 w-[18px]"
                             title="Private Repo"
+                            role="img"
+                            aria-label="Private repository"
                           >
                             lock</span
                           >
