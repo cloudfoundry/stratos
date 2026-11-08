@@ -73,6 +73,9 @@
     margin: 0;
     overflow: auto;
     padding: 0;
+    &--open {
+      display: block;
+    }
   }
   %base-item-header {
     border-bottom: 1px solid var(--content-border);
@@ -93,12 +96,21 @@
   &__items-compact-header {
     @extend %base-item-header;
     align-items: baseline;
+    background: none;
+    border-width: 0 0 1px;
+    border-style: solid;
+    border-color: var(--content-border);
     cursor: pointer;
+    font-family: inherit;
+    font-size: inherit;
+    text-align: left;
+    width: 100%;
     display: flex;
     flex-direction: column;
     justify-content: center;
   }
   &__items-compact-tab-label {
+    display: block;
     font-weight: bold;
   }
   &__items-compact-dropdown {

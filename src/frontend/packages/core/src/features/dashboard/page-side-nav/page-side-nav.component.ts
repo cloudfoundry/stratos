@@ -1,6 +1,6 @@
 import { CommonModule } from '@angular/common';
 import { HttpClient } from '@angular/common/http';
-import { ChangeDetectionStrategy, Component, OnInit, inject, input, linkedSignal, untracked } from '@angular/core';
+import { ChangeDetectionStrategy, Component, ElementRef, OnInit, inject, input, linkedSignal, signal, untracked, viewChild } from '@angular/core';
 import { toObservable } from '@angular/core/rxjs-interop';
 import { ActivatedRoute, RouterModule } from '@angular/router';
 import { Observable, of } from 'rxjs';
@@ -28,7 +28,11 @@ export interface IPageSideNavTab extends StratosTabMetadata {
     RouterModule,
     CustomIconComponent
   ],
-  changeDetection: ChangeDetectionStrategy.OnPush
+  changeDetection: ChangeDetectionStrategy.OnPush,
+  host: {
+    '(keydown.escape)': 'close()',
+    '(focusout)': 'onFocusOut($event)',
+  },
 })
 export class PageSideNavComponent implements OnInit {
   tabNavService = inject(TabNavService);
@@ -67,6 +71,25 @@ export class PageSideNavComponent implements OnInit {
   public activeTab$!: Observable<string>;
   public breadcrumbs$!: Observable<IBreadcrumb[]>;
   public isMobile$: Observable<boolean>;
+  // The compact dropdown, opened by its button as well as by hover.
+  public readonly open = signal(false);
+  private readonly compactToggle = viewChild.required<ElementRef<HTMLButtonElement>>('compactToggle');
+  private readonly el = inject<ElementRef<HTMLElement>>(ElementRef);
+
+  close() {
+    if (this.open()) {
+      this.open.set(false);
+      this.compactToggle().nativeElement.focus();
+    }
+  }
+
+  // Focus leaving the nav closes the list, which would cover the page.
+  onFocusOut(e: FocusEvent) {
+    if (!this.el.nativeElement.contains(e.relatedTarget as Node | null)) {
+      this.open.set(false);
+    }
+  }
+
   constructor() {
     this.isMobile$ = toObservable(this.dashboardSignals.isMobile);
   }
