@@ -32,7 +32,7 @@
       <div class="relative" #menuContainer>
         <button class="btn btn-secondary" (click)="toggleMenu()" #menuTrigger>
           <span>Values</span>
-          <span class="material-icons">arrow_drop_down</span>
+          <span aria-hidden="true" class="material-icons">arrow_drop_down</span>
         </button>
         @if (menuOpen) {
           <div class="absolute top-full right-0 bg-content-bg border border-content-border rounded-md shadow-lg z-10 min-w-48"
@@ -60,7 +60,7 @@
           [class.btn-toggle-active]="lineNumbers"
           (click)="toggleLineNumbers()"
           >
-          <span class="material-icons">format_list_numbered</span>
+          <span aria-hidden="true" class="material-icons">format_list_numbered</span>
         </button>
       }
       @if (mode === 'editor') {
@@ -68,7 +68,7 @@
           [class.btn-toggle-active]="minimap"
           (click)="toggleMinimap()"
           >
-          <span class="material-icons">map</span>
+          <span aria-hidden="true" class="material-icons">map</span>
         </button>
       }
     </div>
@@ -79,7 +79,7 @@
       <div class="absolute inset-0 flex items-center justify-center opacity-70 z-[100]">
         <div class="flex flex-row">
           <div>
-            <span class="material-icons text-[32px] h-8 w-8 mr-3 text-warning-shade-600">warning</span>
+            <span aria-hidden="true" class="material-icons text-[32px] h-8 w-8 mr-3 text-warning-shade-600">warning</span>
           </div>
           <div class="leading-6">
             <div>Error - YAML is not valid</div>

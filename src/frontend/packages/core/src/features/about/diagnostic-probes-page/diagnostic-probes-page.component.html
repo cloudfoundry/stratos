@@ -28,7 +28,7 @@
             <app-busy size="1rem"></app-busy>
             Probing…
           } @else {
-            <span class="material-icons text-base leading-none">network_check</span>
+            <span aria-hidden="true" class="material-icons text-base leading-none">network_check</span>
             Probe URI limit
           }
         </button>
@@ -55,7 +55,7 @@
           @switch (verdict(r)) {
             @case ('lower') {
               <div data-test="probe-verdict-lower" class="text-danger">
-                <span class="material-icons text-base leading-none align-text-bottom">warning</span>
+                <span class="material-icons text-base leading-none align-text-bottom" aria-hidden="true">warning</span>
                 Configured budget exceeds what this chain accepts — set
                 <span class="font-mono">STRATOS_CF_GUID_CHUNK={{ r.recommendedChunk }}</span> or lower.
               </div>
@@ -68,7 +68,7 @@
             }
             @case ('ok') {
               <div data-test="probe-verdict-ok" class="text-success">
-                <span class="material-icons text-base leading-none align-text-bottom">check_circle</span>
+                <span class="material-icons text-base leading-none align-text-bottom" aria-hidden="true">check_circle</span>
                 Configured budget fits this chain.
               </div>
             }

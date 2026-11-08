@@ -23,7 +23,7 @@
         [title]="sortDirection() === 'asc' ? 'Sorted by endpoint name, A→Z' : 'Sorted by endpoint name, Z→A'"
         [attr.aria-label]="sortDirection() === 'asc' ? 'Sorted by endpoint name, ascending' : 'Sorted by endpoint name, descending'"
         class="px-2 py-1 rounded-md text-content-muted hover:bg-content-secondary transition-colors duration-200">
-        <span class="material-icons text-base leading-5 block" [class.rotate-180]="sortDirection() === 'asc'">sort</span>
+        <span aria-hidden="true" class="material-icons text-base leading-5 block" [class.rotate-180]="sortDirection() === 'asc'">sort</span>
       </button>
     </div>
     <!-- Divider between the endpoint controls and the layout menu. A 1px rule
@@ -37,8 +37,8 @@
           [attr.aria-expanded]="layoutMenuOpen()"
           (keydown.escape)="onLayoutMenuEscape($event, layoutTrigger)"
           (click)="layoutMenuOpen.set(!layoutMenuOpen())">
-          <span class="material-icons">view_week</span>
-          <span class="material-icons">arrow_drop_down</span>
+          <span aria-hidden="true" class="material-icons">view_week</span>
+          <span aria-hidden="true" class="material-icons">arrow_drop_down</span>
         </button>
         <div class="dropdown-menu layout-dropdown__panel absolute right-0 mt-2 w-56 rounded-md z-50"
           [class.hidden]="!layoutMenuOpen()">

@@ -12,7 +12,7 @@
       <div class="shrink-0 inline-flex items-center justify-center w-10 h-10 p-2 fav-card__icon-bg rounded-lg">
         @if (icon(); as icon) {
           @if (icon.icon) {
-            <span class="fav-card__icon text-xl leading-none"
+            <span aria-hidden="true" class="fav-card__icon text-xl leading-none"
               [ngClass]="icon.iconFont === 'stratos-icons' ? 'stratos-icons' : 'material-icons'">{{ icon.icon }}</span>
           }
         }

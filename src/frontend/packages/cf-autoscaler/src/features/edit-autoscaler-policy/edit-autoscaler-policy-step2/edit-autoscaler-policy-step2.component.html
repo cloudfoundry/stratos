@@ -153,18 +153,18 @@
                 @if (editIndex !== index) {
                   <button aria-label="Edit" id="autoscaler-policy-edit-edit" (click)="editTrigger(index)"
                     [disabled]="editIndex !== -1" class="btn-icon" title="Edit">
-                    <span class="material-icons">edit</span>
+                    <span aria-hidden="true" class="material-icons">edit</span>
                   </button>
                 }
                 @if (editIndex === index) {
                   <button aria-label="Done" id="autoscaler-policy-edit-done" (click)="finishTrigger()"
                     [disabled]="editTriggerForm.invalid" class="btn-icon text-success" title="Done">
-                    <span class="material-icons">done</span>
+                    <span aria-hidden="true" class="material-icons">done</span>
                   </button>
                 }
                 <button aria-label="Delete" id="autoscaler-policy-edit-delete" (click)="removeTrigger(index)"
                   class="btn-icon text-danger" title="Delete">
-                  <span class="material-icons">delete</span>
+                  <span aria-hidden="true" class="material-icons">delete</span>
                 </button>
               </div>
             </div>

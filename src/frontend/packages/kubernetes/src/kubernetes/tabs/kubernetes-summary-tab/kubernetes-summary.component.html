@@ -2,13 +2,13 @@
   <app-page-sub-nav>
     @if (kubeEndpointService.kubeDashboardConfigured$ | async) {
       <button [routerLink]="dashboardLink" class="btn btn-primary">
-        <span class="material-icons">dashboard</span>
+        <span aria-hidden="true" class="material-icons">dashboard</span>
         <span class="ml-1">View Dashboard</span>
       </button>
     }
     @if (kubeEndpointService.kubeTerminalEnabled$ | async) {
       <button [routerLink]="kubeTerminalLink" class="btn btn-primary">
-        <span class="material-icons stratos-icons">terminal</span>
+        <span aria-hidden="true" class="material-icons stratos-icons">terminal</span>
         <span class="ml-1">Open Terminal</span>
       </button>
     }
@@ -40,7 +40,7 @@
         </app-tile-grid>
         @if (failureReason(); as reason) {
           <div data-test="cluster-load-failure" class="flex items-start gap-1.5 ml-3 mb-2 text-sm text-danger-shade-700">
-            <span class="material-icons text-base leading-5">error_outline</span>
+            <span aria-hidden="true" class="material-icons text-base leading-5">error_outline</span>
             <span class="break-words">Failed to load some cluster details: {{ reason }}</span>
           </div>
         }

@@ -42,13 +42,13 @@
               <app-metadata-item icon="folder" label="Folders">{{ source.folders }}</app-metadata-item>
               @if (!!source.manifestFile) {
                 <div class="items-center flex mb-3">
-                  <span class="material-icons">done</span>
+                  <span aria-hidden="true" class="material-icons">done</span>
                   <span>Manifest file detected</span>
                 </div>
               }
               @if (!!source.cfIgnoreFile) {
                 <div class="items-center flex mb-3">
-                  <span class="material-icons">done</span>
+                  <span aria-hidden="true" class="material-icons">done</span>
                   <span>.cfignore file was detected and applied ({{source.excludes.length}} files excluded)</span>
                 </div>
               }

@@ -17,13 +17,13 @@
               class="inline-flex items-center justify-center p-0.5 text-success hover:text-success/80"
               (mousedown)="$event.preventDefault()"
               (click)="$event.stopPropagation(); saveEdit(row)">
-              <span class="material-icons text-base leading-none">done</span>
+              <span aria-hidden="true" class="material-icons text-base leading-none">done</span>
             </button>
             <button aria-label="Cancel" id="kube-config-name-edit-cancel" type="button" title="Cancel"
               class="inline-flex items-center justify-center p-0.5 text-content-muted hover:text-content-text"
               (mousedown)="$event.preventDefault()"
               (click)="$event.stopPropagation(); cancelEdit()">
-              <span class="material-icons text-base leading-none">clear</span>
+              <span aria-hidden="true" class="material-icons text-base leading-none">clear</span>
             </button>
           </div>
         } @else {
@@ -32,7 +32,7 @@
             <button aria-label="Edit name" type="button" title="Edit name"
               class="inline-flex items-center justify-center p-0.5 text-content-muted hover:text-accent opacity-60 hover:opacity-100"
               (click)="$event.stopPropagation(); startEdit(row)">
-              <span class="material-icons text-base leading-none">edit</span>
+              <span aria-hidden="true" class="material-icons text-base leading-none">edit</span>
             </button>
           </div>
         }

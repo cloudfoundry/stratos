@@ -4,12 +4,12 @@
     <span>
       @if (expanded) {
         <button aria-label="Collapse" (click)="toggle()" class="btn-icon" title="Collapse">
-          <span class="material-icons">expand_less</span>
+          <span aria-hidden="true" class="material-icons">expand_less</span>
         </button>
       }
       @if (!expanded) {
         <button aria-label="Expand" (click)="toggle()" class="btn-icon" title="Expand">
-          <span class="material-icons">expand_more</span>
+          <span aria-hidden="true" class="material-icons">expand_more</span>
         </button>
       }
     </span>

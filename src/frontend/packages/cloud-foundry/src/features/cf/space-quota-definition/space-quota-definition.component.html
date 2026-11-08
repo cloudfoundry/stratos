@@ -5,10 +5,10 @@
       <div class="page-header-right">
         <button aria-label="Apply to spaces" class="btn btn-icon" name="apply-to-spaces" data-test="space-quota-apply-to-spaces"
           (click)="openApplyToSpaces()" matTooltip="Apply to spaces">
-          <span class="material-icons">playlist_add_check</span>
+          <span aria-hidden="true" class="material-icons">playlist_add_check</span>
         </button>
         <button aria-label="Edit" class="btn btn-icon" name="edit" [routerLink]="editLink()" [queryParams]="editParams" matTooltip="Edit">
-          <span class="material-icons">edit</span>
+          <span aria-hidden="true" class="material-icons">edit</span>
         </button>
       </div>
     }
@@ -20,10 +20,10 @@
     @if (canEditQuota()) {
       <button aria-label="Apply to spaces" class="btn btn-icon" name="apply-to-spaces" data-test="space-quota-apply-to-spaces"
         (click)="openApplyToSpaces()" matTooltip="Apply to spaces">
-        <span class="material-icons">playlist_add_check</span>
+        <span aria-hidden="true" class="material-icons">playlist_add_check</span>
       </button>
       <button aria-label="Edit" class="btn btn-icon" name="edit" [routerLink]="editLink()" [queryParams]="editParams" matTooltip="Edit">
-        <span class="material-icons">edit</span>
+        <span aria-hidden="true" class="material-icons">edit</span>
       </button>
     }
   </app-page-sub-nav>

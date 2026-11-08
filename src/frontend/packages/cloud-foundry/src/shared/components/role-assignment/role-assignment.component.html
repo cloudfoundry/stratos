@@ -64,7 +64,7 @@
       [attr.aria-pressed]="viewMode() === 'split'"
       class="role-assignment__view-toggle flex items-center gap-1.5 px-2 py-1 text-xs rounded border border-content-border bg-content-bg text-content-text hover:bg-primary-50"
     >
-      <span class="material-icons text-base leading-5">{{ viewMode() === 'accordion' ? 'view_column' : 'view_agenda' }}</span>
+      <span aria-hidden="true" class="material-icons text-base leading-5">{{ viewMode() === 'accordion' ? 'view_column' : 'view_agenda' }}</span>
       {{ viewMode() === 'accordion' ? 'Two-pane' : 'Stacked' }}
     </button>
   </div>

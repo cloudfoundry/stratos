@@ -3,12 +3,12 @@
     *appCfUserPermission="permsSpaceEdit;endpointGuid:cfOrgService.cfGuid;organizationGuid:cfOrgService.orgGuid;spaceGuid:cfSpaceService.spaceGuid"
     routerLink="/cloud-foundry/{{cfEndpointService.cfGuid}}/organizations/{{cfSpaceService.orgGuid}}/spaces/{{cfSpaceService.spaceGuid}}/edit-space"
     matTooltip="Edit Space">
-    <span class="material-icons">edit</span>
+    <span aria-hidden="true" class="material-icons">edit</span>
   </button>
   <button aria-label="Delete Space" class="btn btn-icon" name="delete" data-test="space-delete"
     *appCfUserPermission="permsSpaceDelete;endpointGuid:cfOrgService.cfGuid;organizationGuid:cfOrgService.orgGuid;"
     (click)="deleteSpaceWarn()" matTooltip="Delete Space">
-    <span class="material-icons">delete</span>
+    <span aria-hidden="true" class="material-icons">delete</span>
   </button>
   <app-cf-cli-menu tab="summary"></app-cf-cli-menu>
   <app-polling-indicator class="ml-auto"

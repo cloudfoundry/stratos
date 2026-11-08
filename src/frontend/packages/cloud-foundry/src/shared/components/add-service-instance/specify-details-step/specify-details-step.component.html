@@ -35,7 +35,7 @@
               {{tag}}
               @if (tagsRemovable) {
                 <button type="button" (click)="removeTag(tag)" [attr.aria-label]="'Remove tag ' + tag" class="ml-2 text-content-muted hover:text-content-text focus:outline-none">
-                  <span class="material-icons text-sm">cancel</span>
+                  <span aria-hidden="true" class="material-icons text-sm">cancel</span>
                 </button>
               }
             </span>

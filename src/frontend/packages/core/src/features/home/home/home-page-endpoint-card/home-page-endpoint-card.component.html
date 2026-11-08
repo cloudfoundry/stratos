@@ -46,7 +46,7 @@
   <div class="card-body p-0">
     @if (disconnected) {
       <div class="p-6 flex flex-col items-center justify-center text-center space-y-3">
-        <span class="material-icons text-4xl sidebar-muted-text">cloud_off</span>
+        <span aria-hidden="true" class="material-icons text-4xl sidebar-muted-text">cloud_off</span>
         <div class="font-medium">Disconnected</div>
         <button class="btn btn-primary" (click)="connect()">Connect</button>
       </div>

@@ -113,18 +113,18 @@
                 @if (editIndex !== index) {
                   <button aria-label="Edit" id="autoscaler-policy-edit-edit" (click)="editSpecificDate(index)"
                     [disabled]="editIndex !== -1" class="btn-icon" title="Edit">
-                    <span class="material-icons">edit</span>
+                    <span aria-hidden="true" class="material-icons">edit</span>
                   </button>
                 }
                 @if (editIndex === index) {
                   <button aria-label="Done" id="autoscaler-policy-edit-done" (click)="finishSpecificDate()"
                     [disabled]="editSpecificDateForm.invalid" class="btn-icon text-success" title="Done">
-                    <span class="material-icons">done</span>
+                    <span aria-hidden="true" class="material-icons">done</span>
                   </button>
                 }
                 <button aria-label="Delete" id="autoscaler-policy-edit-delete" (click)="removeSpecificDate(index)"
                   class="btn-icon text-danger" title="Delete">
-                  <span class="material-icons">delete</span>
+                  <span aria-hidden="true" class="material-icons">delete</span>
                 </button>
               </div>
             </div>

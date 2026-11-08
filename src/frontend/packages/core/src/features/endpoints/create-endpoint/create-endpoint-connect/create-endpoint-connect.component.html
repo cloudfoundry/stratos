@@ -51,7 +51,7 @@
     @if (connectService(); as cs) {
       @if (!!(cs.connectingError$ | async) && (cs.isBusy$ | async) === false && stillConnected()) {
         <div class="flex items-center gap-2 text-xs text-content-muted">
-          <span class="material-icons text-base">info</span>
+          <span aria-hidden="true" class="material-icons text-base">info</span>
           <span>Your existing connection is unaffected and remains active.</span>
         </div>
       }

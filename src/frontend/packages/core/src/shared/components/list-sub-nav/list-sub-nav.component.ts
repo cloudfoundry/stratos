@@ -141,7 +141,7 @@ const VARIANT_CLASSES: Record<NonNullable<ListSubNavAction['variant']>, string> 
                 [title]="actionTitle(action)"
                 [class]="actionClasses(action)">
                 @if (action.icon) {
-                  <span class="material-icons text-base leading-5">{{ action.icon }}</span>
+                  <span class="material-icons text-base leading-5" aria-hidden="true">{{ action.icon }}</span>
                 }
                 <span>{{ action.label }}</span>
               </button>
@@ -158,7 +158,7 @@ const VARIANT_CLASSES: Record<NonNullable<ListSubNavAction['variant']>, string> 
               class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded font-semibold text-sm
                      bg-primary text-on-primary hover:bg-primary/90 transition-all duration-150
                      disabled:opacity-50 disabled:cursor-not-allowed">
-              <span class="material-icons text-base leading-5">{{ add.icon ?? 'add' }}</span>
+              <span class="material-icons text-base leading-5" aria-hidden="true">{{ add.icon ?? 'add' }}</span>
               <span>{{ add.label }}</span>
             </button>
           }

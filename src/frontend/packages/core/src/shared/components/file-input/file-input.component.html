@@ -16,13 +16,13 @@
           <button aria-label="Clear file" class="btn btn-sm btn-secondary ml-1 flex-none leading-[inherit] min-w-[auto] px-1" type="button"
             [disabled]="disabled()" (click)="clearFile($event)"
             title="Clear file">
-            <span class="material-icons text-sm">close</span>
+            <span aria-hidden="true" class="material-icons text-sm">close</span>
           </button>
         }
         <button aria-label="Browse for file" class="btn btn-sm btn-secondary ml-1 flex-none leading-[inherit] min-w-[auto] px-1" type="button"
           [disabled]="disabled()" (click)="selectFile($event)"
           title="Browse for file">
-          <span class="material-icons text-sm">more_horiz</span>
+          <span aria-hidden="true" class="material-icons text-sm">more_horiz</span>
         </button>
       </div>
     </div>
