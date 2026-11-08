@@ -13,13 +13,13 @@
           [disabled]="disabled()"
           (change)="onPathInput($event)" />
         @if (fileCount) {
-          <button class="btn btn-sm btn-secondary ml-1 flex-none leading-[inherit] min-w-[auto] px-1" type="button"
+          <button aria-label="Clear file" class="btn btn-sm btn-secondary ml-1 flex-none leading-[inherit] min-w-[auto] px-1" type="button"
             [disabled]="disabled()" (click)="clearFile($event)"
             title="Clear file">
             <span class="material-icons text-sm">close</span>
           </button>
         }
-        <button class="btn btn-sm btn-secondary ml-1 flex-none leading-[inherit] min-w-[auto] px-1" type="button"
+        <button aria-label="Browse for file" class="btn btn-sm btn-secondary ml-1 flex-none leading-[inherit] min-w-[auto] px-1" type="button"
           [disabled]="disabled()" (click)="selectFile($event)"
           title="Browse for file">
           <span class="material-icons text-sm">more_horiz</span>

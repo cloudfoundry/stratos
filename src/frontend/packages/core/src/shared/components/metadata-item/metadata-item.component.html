@@ -19,6 +19,7 @@
             role="button"
             tabindex="0"
             [title]="copied() ? 'Copied' : 'Copy to clipboard'"
+            [attr.aria-label]="copied() ? 'Copied' : 'Copy to clipboard'"
             (click)="copyToClipboard()"
             (keydown.enter)="copyToClipboard()"
             (keydown.space)="copyToClipboard(); $event.preventDefault()">{{ copied() ? 'check_circle' : 'content_copy' }}</span>

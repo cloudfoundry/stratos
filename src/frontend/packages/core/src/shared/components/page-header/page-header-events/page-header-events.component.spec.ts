@@ -1,9 +1,11 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { provideZonelessChangeDetection } from '@angular/core';
 import { NoopAnimationsModule } from '@angular/platform-browser/animations';
-import { ActivatedRoute } from '@angular/router';
-import { describe, it, expect, beforeEach } from 'vitest';
+import { ActivatedRoute, provideRouter } from '@angular/router';
+import { of } from 'rxjs';
+import { describe, it, expect, beforeEach, vi } from 'vitest';
 
+import { endpointEventKey, GlobalEventService } from '../../../global-events.service';
 import { PageHeaderEventsComponent } from './page-header-events.component';
 
 describe('PageHeaderEventsComponent', () => {
@@ -38,5 +40,31 @@ describe('PageHeaderEventsComponent', () => {
 
   it('should create', () => {
     expect(component).toBeTruthy();
+  });
+});
+
+describe('PageHeaderEventsComponent dismiss', () => {
+  // The banner's dismiss control was a clickable icon: no Tab stop, and its
+  // only name was the glyph text "clear".
+  it('dismisses the error from a named button', async () => {
+    const event = { key: `${endpointEventKey}-ep-1`, endpointId: 'ep-1', message: 'Endpoint down', read: false };
+    const updateEventReadState = vi.fn();
+    TestBed.configureTestingModule({
+      imports: [PageHeaderEventsComponent],
+      providers: [
+        provideZonelessChangeDetection(),
+        provideRouter([]),
+        { provide: ActivatedRoute, useValue: { snapshot: { params: {} } } },
+        { provide: GlobalEventService, useValue: { events$: of([event]), updateEventReadState } },
+      ],
+    });
+    const fixture = TestBed.createComponent(PageHeaderEventsComponent);
+    fixture.componentRef.setInput('endpointIds$', of(['ep-1']));
+    await fixture.whenStable();
+
+    const button = (fixture.nativeElement as HTMLElement).querySelector<HTMLButtonElement>('button[aria-label="Dismiss"]');
+    expect(button).not.toBeNull();
+    button!.click();
+    expect(updateEventReadState).toHaveBeenCalledWith(event, true);
   });
 });

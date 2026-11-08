@@ -3,7 +3,7 @@
     <h1>{{ errorDetails.endpoint?.name }} — Errors</h1>
     <div class="page-header-right">
       <span>
-        <button class="btn btn-icon" type="button" title="Close" [routerLink]="back$ | async" [queryParams]="backParams$ | async">
+        <button aria-label="Close" class="btn btn-icon" type="button" title="Close" [routerLink]="back$ | async" [queryParams]="backParams$ | async">
           <app-custom-icon>close</app-custom-icon>
         </button>
       </span>

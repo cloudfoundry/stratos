@@ -3,11 +3,11 @@
     <h1>{{ spaceQuotaDefinition()?.name }}</h1>
     @if (canEditQuota()) {
       <div class="page-header-right">
-        <button class="btn btn-icon" name="apply-to-spaces" data-test="space-quota-apply-to-spaces"
+        <button aria-label="Apply to spaces" class="btn btn-icon" name="apply-to-spaces" data-test="space-quota-apply-to-spaces"
           (click)="openApplyToSpaces()" matTooltip="Apply to spaces">
           <span class="material-icons">playlist_add_check</span>
         </button>
-        <button class="btn btn-icon" name="edit" [routerLink]="editLink()" [queryParams]="editParams" matTooltip="Edit">
+        <button aria-label="Edit" class="btn btn-icon" name="edit" [routerLink]="editLink()" [queryParams]="editParams" matTooltip="Edit">
           <span class="material-icons">edit</span>
         </button>
       </div>
@@ -18,11 +18,11 @@
 @if (!isOrg) {
   <app-page-sub-nav>
     @if (canEditQuota()) {
-      <button class="btn btn-icon" name="apply-to-spaces" data-test="space-quota-apply-to-spaces"
+      <button aria-label="Apply to spaces" class="btn btn-icon" name="apply-to-spaces" data-test="space-quota-apply-to-spaces"
         (click)="openApplyToSpaces()" matTooltip="Apply to spaces">
         <span class="material-icons">playlist_add_check</span>
       </button>
-      <button class="btn btn-icon" name="edit" [routerLink]="editLink()" [queryParams]="editParams" matTooltip="Edit">
+      <button aria-label="Edit" class="btn btn-icon" name="edit" [routerLink]="editLink()" [queryParams]="editParams" matTooltip="Edit">
         <span class="material-icons">edit</span>
       </button>
     }

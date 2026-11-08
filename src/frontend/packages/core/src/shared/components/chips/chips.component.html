@@ -21,7 +21,7 @@
           }
           @if (chip.clearAction && (chip.hideClearButton$ | async) === false) {
             @if (!chip.busy || (chip.busy | async) === false) {
-              <span role="button" tabindex="0"
+              <span role="button" tabindex="0" [attr.aria-label]="'Remove ' + getDisplayValue(chip)"
                 (click)="chip.clearAction(chip)"
                 (keydown.enter)="chip.clearAction(chip)"
                 (keydown.space)="chip.clearAction(chip); $event.preventDefault()"
