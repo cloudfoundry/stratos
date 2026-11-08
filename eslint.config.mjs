@@ -151,6 +151,8 @@ export default tseslint.config(
       "@angular-eslint/template/alt-text": "warn",
       "@angular-eslint/template/label-has-associated-control": "warn",
       "@angular-eslint/template/elements-content": "warn",
+      // Icon ligature text read into names (WCAG 2.5.3, 4.1.2).
+      "stratos/icon-accessible-name": "error",
     },
   },
   // e2e specs get only the drift guards (#5619), not the app ruleset: the
