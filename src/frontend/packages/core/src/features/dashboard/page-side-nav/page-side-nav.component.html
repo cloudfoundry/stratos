@@ -26,11 +26,11 @@
             [routerLinkActive]="['page-side-nav__item--active']" ariaCurrentWhenActive="page"
             (click)="open.set(false)">
             @if (tab.icon) {
-              <app-custom-icon class="page-side-nav__icon" [fontSet]="tab.iconFont">{{ tab.icon }}
+              <app-custom-icon class="page-side-nav__icon" [fontSet]="tab.iconFont" aria-hidden="true">{{ tab.icon }}
               </app-custom-icon>
             }
             @if (!tab.icon) {
-              <app-custom-icon class="page-side-nav__icon"></app-custom-icon>
+              <app-custom-icon class="page-side-nav__icon" aria-hidden="true"></app-custom-icon>
             }
             <span>{{ tab?.label }}</span>
           </a>
