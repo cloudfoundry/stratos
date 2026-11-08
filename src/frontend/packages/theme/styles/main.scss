@@ -388,7 +388,8 @@ router-outlet + * {
 
   /* Success Button */
   .btn-success {
-    @apply text-white shadow-sm;
+    @apply shadow-sm;
+    color: var(--color-on-success);
     background-color: var(--color-success);
 
     &:hover:not(:disabled) {
@@ -404,7 +405,8 @@ router-outlet + * {
 
   /* Warning Button */
   .btn-warning {
-    @apply text-white shadow-sm;
+    @apply shadow-sm;
+    color: var(--color-on-warning);
     background-color: var(--color-warning);
 
     &:hover:not(:disabled) {
@@ -420,7 +422,8 @@ router-outlet + * {
 
   /* Danger Button */
   .btn-danger {
-    @apply text-white shadow-sm;
+    @apply shadow-sm;
+    color: var(--color-on-danger);
     background-color: var(--color-danger);
 
     &:hover:not(:disabled) {
