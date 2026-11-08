@@ -45,6 +45,12 @@ describe('SideNavComponent', () => {
     expect(component).toBeTruthy();
   });
 
+  // Pages also have a named page-tab nav; each landmark needs its own name.
+  it('names its navigation landmark', () => {
+    const nav = (fixture.nativeElement as HTMLElement).querySelector('nav')!;
+    expect(nav.getAttribute('aria-label')).toBe('Main');
+  });
+
   it('shows icons only until told otherwise, and says when the mode changes', async () => {
     const changedMode = vi.fn();
     component.changedMode.subscribe(changedMode);
