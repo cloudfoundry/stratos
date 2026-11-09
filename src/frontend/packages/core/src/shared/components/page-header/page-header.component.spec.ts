@@ -349,5 +349,54 @@ describe('PageHeaderComponent', () => {
       expect(panel()).toBeNull();
       expect(document.activeElement).toBe(button());
     });
+
+  });
+
+  // The token and history panels follow the user menu's disclosure pattern.
+  describe.each([
+    { name: 'token menu', buttonId: 'tokenMenu', panelId: 'tokenMenuPanel', label: 'Copy UAA tokens' },
+    { name: 'history menu', buttonId: 'historyMenu', panelId: 'historyMenuPanel', label: 'Recent activity' },
+  ])('$name', ({ buttonId, panelId, label }) => {
+    let host: HTMLElement;
+    let view: EmbeddedViewRef<unknown>;
+
+    const button = () => host.querySelector(`#${buttonId}`) as HTMLButtonElement;
+    const panel = () => host.querySelector(`#${panelId}`);
+
+    beforeEach(() => {
+      view = component.pageHeaderTmpl().createEmbeddedView({});
+      view.detectChanges();
+      host = document.createElement('div');
+      view.rootNodes.forEach((node: Node) => host.appendChild(node));
+      document.body.appendChild(host);
+    });
+
+    afterEach(() => {
+      view.destroy();
+      host.remove();
+      TestBed.inject(HttpTestingController).match(() => true);
+    });
+
+    it('is a named button that reports its panel open or closed', () => {
+      expect(button().getAttribute('aria-label')).toBe(label);
+      expect(button().getAttribute('aria-expanded')).toBe('false');
+      expect(button().getAttribute('aria-controls')).toBe(panelId);
+      expect(panel()).toBeNull();
+
+      button().click();
+      view.detectChanges();
+      expect(button().getAttribute('aria-expanded')).toBe('true');
+      expect(panel()).toBeTruthy();
+    });
+
+    it('closes the panel on Escape and puts focus back on the button', () => {
+      button().click();
+      view.detectChanges();
+      document.dispatchEvent(new KeyboardEvent('keydown', { key: 'Escape', bubbles: true }));
+      view.detectChanges();
+      expect(button().getAttribute('aria-expanded')).toBe('false');
+      expect(panel()).toBeNull();
+      expect(document.activeElement).toBe(button());
+    });
   });
 });

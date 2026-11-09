@@ -95,14 +95,17 @@
             <!-- Copy UAA token button -->
             @if (!hideMenu() && !logoutOnly() && !environment.hideUserMenu) {
               <div class="relative">
-                <button class="page-header-menu-button p-2 text-header-text hover:bg-white/10 rounded-md transition-colors"
+                <button id="tokenMenu"
+                  class="page-header-menu-button p-2 text-header-text hover:bg-white/10 rounded-md transition-colors"
                   (click)="toggleTokenMenu()"
                   matTooltip="Copy UAA tokens"
-                  aria-label="Copy UAA tokens">
+                  aria-label="Copy UAA tokens"
+                  aria-controls="tokenMenuPanel"
+                  [attr.aria-expanded]="isTokenMenuOpen">
                   <span aria-hidden="true" class="material-icons">vpn_key</span>
                 </button>
                 @if (isTokenMenuOpen) {
-                  <div
+                  <div id="tokenMenuPanel"
                     class="absolute right-0 top-full mt-2 bg-content-bg rounded-lg shadow-lg border border-content-border z-50">
                     <div class="page-header-token p-4 w-64">
                       <h3 class="page-header-token-title text-lg font-semibold text-content-text mb-3">UAA Tokens</h3>
@@ -129,15 +132,18 @@
             <!-- History button -->
             @if (historyVisible()) {
               <div class="relative">
-                <button class="page-header-menu-button p-2 text-header-text hover:bg-white/10 rounded-md transition-colors"
+                <button id="historyMenu"
+                  class="page-header-menu-button p-2 text-header-text hover:bg-white/10 rounded-md transition-colors"
                   matTooltip="Recent activity"
                   aria-label="Recent activity"
+                  aria-controls="historyMenuPanel"
+                  [attr.aria-expanded]="isHistoryMenuOpen"
                   (click)="toggleHistoryMenu()">
                   <span aria-hidden="true" class="material-icons">schedule</span>
                 </button>
                 <!-- History dropdown menu -->
                 @if (isHistoryMenuOpen) {
-                  <div
+                  <div id="historyMenuPanel"
                     class="absolute right-0 top-full mt-2 bg-content-bg rounded-lg shadow-lg border border-content-border z-50">
                     <div class="page-header-history p-4 w-80">
                       <h3 class="page-header-history-title text-lg font-semibold text-content-text mb-4">Recent Activity</h3>
