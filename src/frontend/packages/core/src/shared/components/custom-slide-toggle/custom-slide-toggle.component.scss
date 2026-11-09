@@ -78,11 +78,17 @@
   }
 }
 
+/* Invisible, but it covers the bar so clicks and focus land on the real
+   control. */
 .slide-toggle-input {
   position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  margin: 0;
   opacity: 0;
-  width: 0;
-  height: 0;
+  cursor: pointer;
+  z-index: 1;
 }
 
 .slide-toggle-thumb-container {

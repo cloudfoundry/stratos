@@ -55,3 +55,42 @@ describe('CustomSlideToggleComponent as a form control', () => {
     expect(toggle().classList).not.toContain('checked');
   });
 });
+
+// The switch was a div with role, tabindex and handlers wrapping the real
+// checkbox: two interactive elements for one control (axe
+// nested-interactive, WCAG 4.1.2). The input is now the switch.
+describe('CustomSlideToggleComponent as a switch', () => {
+  async function setup() {
+    TestBed.configureTestingModule({
+      imports: [HostComponent],
+      providers: [provideZonelessChangeDetection()],
+    });
+    const fixture = TestBed.createComponent(HostComponent);
+    fixture.componentInstance.control.enable();
+    await fixture.whenStable();
+    const root = fixture.nativeElement as HTMLElement;
+    const input = () => root.querySelector('input') as HTMLInputElement;
+    return { fixture, root, input, control: fixture.componentInstance.control };
+  }
+
+  it('is one switch, the checkbox itself, named by its label', async () => {
+    const { root, input } = await setup();
+    expect(root.querySelectorAll('[role="switch"]').length).toBe(1);
+    expect(input().getAttribute('role')).toBe('switch');
+    expect(root.querySelectorAll('[tabindex]').length).toBe(0);
+    expect(input().labels?.[0]?.textContent).toContain('Use it');
+  });
+
+  it('toggles once per click and on Enter', async () => {
+    const { fixture, input, control } = await setup();
+    input().click();
+    await fixture.whenStable();
+    expect(control.value).toBe(true);
+    expect(input().checked).toBe(true);
+
+    input().dispatchEvent(new KeyboardEvent('keydown', { key: 'Enter', bubbles: true }));
+    await fixture.whenStable();
+    expect(control.value).toBe(false);
+    expect(input().checked).toBe(false);
+  });
+});

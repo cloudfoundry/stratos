@@ -17,13 +17,12 @@
         </span>
       }
 
-      <div class="slide-toggle-bar" role="switch" tabindex="0"
-        [attr.aria-checked]="checked()"
-        (click)="toggle()"
-        (keydown.enter)="toggle()"
-        (keydown.space)="toggle(); $event.preventDefault()">
+      <!-- The input is the switch: one focusable control, named by the label
+           around it. Space toggles it natively; Enter is kept for parity. -->
+      <div class="slide-toggle-bar">
         <input
           type="checkbox"
+          role="switch"
           class="slide-toggle-input"
           [checked]="checked()"
           [disabled]="disabled()"
@@ -31,6 +30,7 @@
           [attr.id]="id() ?? null"
           [required]="required()"
           (change)="toggle()"
+          (keydown.enter)="toggle()"
           />
         <div class="slide-toggle-thumb-container">
           <div class="slide-toggle-thumb"></div>
