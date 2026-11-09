@@ -7,6 +7,7 @@ import { KUBERNETES_ENDPOINT_TYPE } from './kubernetes/kubernetes-entity-factory
 const customRoutes: Routes = [
   {
     path: 'workloads',
+    title: 'Workloads',
     loadChildren: () => import('./kubernetes/workloads/workloads.routes').then(m => m.WORKLOADS_ROUTES),
     data: {
       reuseRoute: true,
@@ -21,6 +22,7 @@ const customRoutes: Routes = [
   },
   {
     path: 'kubernetes',
+    title: 'Kubernetes',
     loadChildren: () => import('./kubernetes/kubernetes.routes').then(m => m.KUBERNETES_ROUTES),
     data: {
       stratosNavigation: {
@@ -34,6 +36,7 @@ const customRoutes: Routes = [
   },
   {
     path: 'monocular',
+    title: 'Helm',
     loadChildren: () => import('./helm/helm.routes').then(m => m.HELM_ROUTES),
     data: {
       reuseRoute: true,

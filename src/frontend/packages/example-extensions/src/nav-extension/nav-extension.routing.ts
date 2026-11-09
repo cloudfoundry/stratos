@@ -4,6 +4,7 @@ import { ExampleComponent } from './example-component/example.component';
 
 const routes: Routes = [{
   path: '',
+  title: 'Example Navigation Extension',
   component: ExampleComponent,
 }];
 

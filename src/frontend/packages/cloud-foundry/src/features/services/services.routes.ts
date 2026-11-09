@@ -1,4 +1,5 @@
 import { Routes } from '@angular/router';
+import { serviceInstanceTitle } from '../../route-titles';
 
 import {
   AddServiceInstanceBaseStepComponent,
@@ -19,6 +20,7 @@ export const SERVICES_ROUTES: Routes = [
   },
   {
     path: 'new',
+    title: 'Choose Service Type',
     component: AddServiceInstanceBaseStepComponent
   },
   {
@@ -27,14 +29,17 @@ export const SERVICES_ROUTES: Routes = [
   },
   {
     path: ':type/:endpointId/:serviceInstanceId/edit',
+    title: serviceInstanceTitle('Edit'),
     component: AddServiceInstanceComponent
   },
   {
     path: ':type/:endpointId/:serviceInstanceId/detach',
+    title: serviceInstanceTitle('Detach'),
     component: DetachServiceInstanceComponent
   },
   {
     path: ':type/:endpointId/:serviceInstanceId/keys',
+    title: serviceInstanceTitle('Service Keys'),
     component: ServiceKeysComponent
   },
   {
@@ -45,6 +50,7 @@ export const SERVICES_ROUTES: Routes = [
   // literal `route-service/...` route so its `:type` segment cannot shadow it.
   {
     path: ':type/:endpointId/:serviceInstanceId',
+    title: serviceInstanceTitle(),
     component: ServiceInstanceSummaryComponent
   }
 ];

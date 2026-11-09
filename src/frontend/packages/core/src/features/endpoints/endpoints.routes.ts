@@ -25,31 +25,38 @@ export const ENDPOINTS_ROUTES: Routes = [
   },
   {
     path: 'new',
+    title: 'Register Endpoint',
     component: CreateEndpointBaseStepComponent
   },
   {
     path: 'new/:type/:subtype',
+    title: 'Register Endpoint',
     component: CreateEndpointComponent
   },
   {
     path: 'new/:type',
+    title: 'Register Endpoint',
     component: CreateEndpointComponent
   },
   {
     path: 'edit/:id',
+    title: 'Edit Endpoint',
     component: EditEndpointComponent,
     canActivate: [canEditEndpointGuard]
   },
   {
     path: 'backup-restore',
+    title: 'Backup/Restore Endpoints',
     component: BackupRestoreEndpointsComponent
   },
   {
     path: 'backup-restore/backup',
+    title: 'Backup Endpoints',
     component: BackupEndpointsComponent
   },
   {
     path: 'backup-restore/restore',
+    title: 'Restore Endpoints',
     component: RestoreEndpointsComponent
   },
   {
