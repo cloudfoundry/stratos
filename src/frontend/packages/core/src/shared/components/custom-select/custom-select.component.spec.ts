@@ -224,6 +224,21 @@ describe('CustomSelectComponent accessible name', () => {
 })
 class AuthTypeHostComponent {}
 
+// The deploy page's Organization select, inactive until a Cloud Foundry is
+// chosen.
+@Component({
+  standalone: true,
+  imports: [CustomSelectComponent, CustomOptionComponent],
+  template: `
+    <app-select placeholder="Organization" [disabled]="disabled()">
+      <app-option value="a">Org A</app-option>
+    </app-select>
+  `,
+})
+class DisabledHostComponent {
+  disabled = signal(true);
+}
+
 describe('CustomSelectComponent roles and states', () => {
   beforeEach(() => {
     TestBed.configureTestingModule({
@@ -263,6 +278,19 @@ describe('CustomSelectComponent roles and states', () => {
     (options()[1].querySelector('.custom-option-content') as HTMLElement).click();
     await fixture.whenStable();
     expect(options().map(o => o.getAttribute('aria-selected'))).toEqual(['false', 'true', 'false']);
+  });
+
+  // The inactive select only looked disabled (faded, no pointer events);
+  // assistive tech was not told (WCAG 4.1.2).
+  it('tells assistive tech when it is disabled', async () => {
+    const fixture = TestBed.createComponent(DisabledHostComponent);
+    await fixture.whenStable();
+    const trigger = () => (fixture.nativeElement as HTMLElement).querySelector('[role="combobox"]') as HTMLElement;
+    expect(trigger().getAttribute('aria-disabled')).toBe('true');
+
+    fixture.componentInstance.disabled.set(false);
+    await fixture.whenStable();
+    expect(trigger().hasAttribute('aria-disabled')).toBe(false);
   });
 
   it('keeps list ids apart when selects have no id or name', async () => {
