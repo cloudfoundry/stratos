@@ -10,7 +10,7 @@ import {
 import { provideCharts, withDefaultRegisterables } from "ng2-charts";
 import { BrowserModule } from "@angular/platform-browser";
 import { BrowserAnimationsModule } from "@angular/platform-browser/animations";
-import { RouteReuseStrategy } from "@angular/router";
+import { RouteReuseStrategy, TitleStrategy } from "@angular/router";
 import { getGitHubAPIURL, GITHUB_API_URL } from "@stratosui/git";
 import {
   EntityCatalogModule,
@@ -39,6 +39,7 @@ import { SetupModule } from "./features/setup/setup.module";
 import { DashboardDataService } from "./core/dashboard-data.service";
 import { LoggedInService } from "./logged-in.service";
 import { CustomReuseStrategy } from "./route-reuse-stragegy";
+import { BrandedTitleStrategy } from "./title-strategy";
 import { GlobalEventService } from "./shared/global-events.service";
 import { SidePanelService } from "./shared/services/side-panel.service";
 import { SharedModule } from "./shared/shared.module";
@@ -109,6 +110,7 @@ import { cfApiInterceptor } from "@stratosui/cloud-foundry";
     SidePanelService,
     { provide: GITHUB_API_URL, useFactory: getGitHubAPIURL },
     { provide: RouteReuseStrategy, useClass: CustomReuseStrategy },
+    { provide: TitleStrategy, useClass: BrandedTitleStrategy },
     CurrentUserPermissionsService,
     provideCharts(withDefaultRegisterables()),
     // HTTP Client with functional interceptors (Angular 20 pattern)
