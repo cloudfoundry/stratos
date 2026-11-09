@@ -411,10 +411,9 @@ export class StratosBrandingService {
     root.style.setProperty('--shadow-lg', isDark ? '0 10px 15px -3px rgba(0,0,0,0.5)' : '0 10px 15px -3px rgba(0,0,0,0.1)');
   }
 
+  // The document title is the router's: BrandedTitleStrategy (core) composes
+  // the page title with the brand and follows theme() changes.
   private updateBranding(theme: StratosTheme) {
-    // Update page title
-    document.title = theme.branding.displayName || theme.branding.companyName;
-
     // Update favicon - use logo if no specific favicon is provided
     const faviconUrl = theme.branding.favicon || theme.branding.logo;
     const favicon = document.querySelector('link[rel="icon"]') as HTMLLinkElement;
