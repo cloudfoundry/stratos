@@ -12,6 +12,7 @@
     [attr.aria-label]="ariaLabel() || placeholder() || null"
     [class.border-primary]="isOpen"
     [attr.aria-expanded]="isOpen"
+    [attr.aria-disabled]="disabled() || null"
     aria-haspopup="listbox"
     [attr.aria-controls]="listboxId"
     (click)="toggle()"
