@@ -1,4 +1,6 @@
 import { Routes } from '@angular/router';
+import { tabTitle } from '@stratosui/core';
+import { kubeEndpointTitle, nodeTitle, podTitle } from './route-titles';
 
 import { KubeConsoleComponent } from './kube-terminal/kube-console.component';
 import {
@@ -34,18 +36,22 @@ export const KUBERNETES_ROUTES: Routes = [{
 },
 {
   path: ':endpointId/nodes/:nodeName/pods/:namespace/:podName',
+  title: podTitle,
   component: PodMetricsComponent,
 },
 {
   path: ':endpointId/pods/:namespace/:podName',
+  title: podTitle,
   component: PodMetricsComponent,
 },
 {
   path: ':endpointId/namespaces/:namespaceName/pods/:podName',
+  title: podTitle,
   component: PodMetricsComponent
 },
 {
   path: ':endpointId/nodes/:nodeName',
+  title: nodeTitle,
   component: KubernetesNodeComponent,
   children: [
     {
@@ -55,20 +61,24 @@ export const KUBERNETES_ROUTES: Routes = [{
     },
     {
       path: 'summary',
+      title: tabTitle('Summary'),
       component: KubernetesNodeSummaryComponent
     },
     {
       path: 'pods',
+      title: tabTitle('Pods'),
       component: KubernetesNodePodsComponent
     },
     {
       path: 'metrics',
+      title: tabTitle('Metrics'),
       component: KubernetesNodeMetricsComponent
     }
   ]
 },
 {
   path: ':endpointId',
+  title: kubeEndpointTitle,
   component: KubernetesTabBaseComponent,
   children: [
     {
@@ -78,30 +88,37 @@ export const KUBERNETES_ROUTES: Routes = [{
     },
     {
       path: 'summary',
+      title: tabTitle('Summary'),
       component: KubernetesSummaryTabComponent
     },
     {
       path: 'nodes',
+      title: tabTitle('Nodes'),
       component: KubernetesNodesTabComponent
     },
     {
       path: 'namespaces',
+      title: tabTitle('Namespaces'),
       component: KubernetesNamespacesTabComponent
     },
     {
       path: 'analysis',
+      title: tabTitle('Analysis'),
       component: KubernetesAnalysisTabComponent
     },
     {
       path: 'analysis/report/:id',
+      title: tabTitle('Analysis Report'),
       component: KubernetesAnalysisReportComponent
     },
     {
       path: 'analysis/info',
+      title: tabTitle('Analysis Info'),
       component: KubernetesAnalysisInfoComponent
     },
     {
       path: 'resource/namespace/:namespaceName/analysis',
+      title: tabTitle('Namespace Analysis'),
       pathMatch: 'full',
       component: KubernetesNamespaceAnalysisReportComponent
     },
@@ -114,6 +131,7 @@ export const KUBERNETES_ROUTES: Routes = [{
 },
 {
   path: ':endpointId/dashboard',
+  title: 'Dashboard',
   component: KubernetesDashboardTabComponent,
   data: {
     uiNoMargin: true
@@ -130,10 +148,12 @@ export const KUBERNETES_ROUTES: Routes = [{
 },
 {
   path: ':endpointId/dashboard-config',
+  title: 'Dashboard Configuration',
   component: KubedashConfigurationComponent,
 },
 {
   path: ':endpointId/terminal',
+  title: 'Kubernetes Terminal',
   component: KubeConsoleComponent,
   data: {
     uiNoMargin: true

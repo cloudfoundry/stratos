@@ -1,4 +1,6 @@
 import { Routes } from '@angular/router';
+import { tabTitle } from '@stratosui/core';
+import { cellTitle, cfEndpointTitle, orgQuotaTitle, orgTitle, spaceQuotaTitle, spaceTitle } from '../../route-titles';
 
 import { dynamicExtensionRoutesGuard } from '../../../../core/src/core/extension/dynamic-extension-routes';
 import { StratosActionType } from '../../../../core/src/core/extension/extension-service';
@@ -100,26 +102,31 @@ import { UsersRolesComponent } from './users/manage-users/manage-users.component
 const usersRoles: Routes = [
   {
     path: 'users/manage',
+    title: tabTitle('Manage Users'),
     component: UsersRolesComponent,
     pathMatch: 'full'
   },
   {
     path: 'organizations/:orgId/users/manage',
+    title: tabTitle('Manage Users'),
     component: UsersRolesComponent,
     pathMatch: 'full'
   },
   {
     path: 'organizations/:orgId/users/invite',
+    title: tabTitle('Invite Users'),
     component: InviteUsersComponent,
     pathMatch: 'full'
   },
   {
     path: 'organizations/:orgId/spaces/:spaceId/users/manage',
+    title: tabTitle('Manage Users'),
     component: UsersRolesComponent,
     pathMatch: 'full'
   },
   {
     path: 'organizations/:orgId/spaces/:spaceId/users/invite',
+    title: tabTitle('Invite Users'),
     component: InviteUsersComponent,
     pathMatch: 'full'
   },
@@ -131,21 +138,26 @@ export const CLOUD_FOUNDRY_SECTION_ROUTES: Routes = [{
 },
 {
   path: ':endpointId',
+  title: cfEndpointTitle,
   children: [
     {
       path: 'add-org',
+      title: tabTitle('Create Organization'),
       component: AddOrganizationComponent
     },
     {
       path: 'organizations/:orgId/add-space',
+      title: tabTitle('Create Space'),
       component: AddSpaceComponent
     },
     {
       path: 'add-quota',
+      title: tabTitle('Create Quota'),
       component: AddQuotaComponent
     },
     {
       path: 'organizations/:orgId/add-space-quota',
+      title: tabTitle('Create Space Quota'),
       component: AddSpaceQuotaComponent
     },
     ...usersRoles,
@@ -158,23 +170,28 @@ export const CLOUD_FOUNDRY_SECTION_ROUTES: Routes = [{
         // to get the CF side navigation. See the tabs block below.
         {
           path: 'organizations/:orgId/edit-org',
+          title: tabTitle('Edit Organization'),
           component: EditOrganizationComponent
         },
         {
           path: 'organizations/:orgId/spaces/:spaceId/edit-space',
+          title: tabTitle('Edit Space'),
           component: EditSpaceComponent
         },
         {
           path: 'cli',
+          title: tabTitle('CF CLI All'),
           component: CliInfoCloudFoundryComponent,
         },
         {
           path: 'organizations/:orgId/cli',
+          title: tabTitle('CF CLI All'),
           component: CliInfoCloudFoundryComponent,
           pathMatch: 'full'
         },
         {
           path: 'organizations/:orgId/spaces/:spaceId/cli',
+          title: tabTitle('CF CLI All'),
           component: CliInfoCloudFoundryComponent,
           pathMatch: 'full'
         },
@@ -192,78 +209,97 @@ export const CLOUD_FOUNDRY_SECTION_ROUTES: Routes = [{
             },
             {
               path: 'summary',
+              title: tabTitle('Summary'),
               component: CloudFoundrySummaryTabComponent
             },
             {
               path: 'organizations',
+              title: tabTitle('Organizations'),
               component: CloudFoundryOrganizationsSignalComponent,
             },
             {
               path: 'applications',
+              title: tabTitle('Applications'),
               component: CloudFoundryApplicationsSignalComponent,
             },
             {
               path: 'marketplace',
+              title: tabTitle('Marketplace'),
               component: CloudFoundryMarketplaceSignalComponent,
             },
             {
               path: 'services',
+              title: tabTitle('Services'),
               component: CloudFoundryServicesSignalComponent,
             },
             {
               path: 'users',
+              title: tabTitle('Users'),
               component: CloudFoundryUsersComponent
             },
             {
               path: 'cells',
+              title: tabTitle('Cells'),
               component: CloudFoundryCellsSignalComponent
             },
             {
               path: 'firehose',
+              title: tabTitle('Firehose'),
               component: CloudFoundryFirehoseComponent
             },
             {
               path: 'feature-flags',
+              title: tabTitle('Feature Flags'),
               component: CloudFoundryFeatureFlagsComponent
             },
             {
               path: 'build-packs',
+              title: tabTitle('Build Packs'),
               component: CloudFoundryBuildPacksComponent
             },
             {
               path: 'stacks',
+              title: tabTitle('Stacks'),
               component: CloudFoundryStacksComponent
             },
             {
               path: 'security-groups',
+              title: tabTitle('Security Groups'),
               component: CloudFoundrySecurityGroupsComponent
             },
             {
               path: 'routes',
+              title: tabTitle('Routes'),
               component: CloudFoundryRoutesSignalComponent
             },
             {
               path: 'quota-definitions',
+              title: tabTitle('Organization Quotas'),
               component: CloudFoundryQuotasComponent
             },
             {
               path: 'quota-definitions/:quotaId',
+              title: orgQuotaTitle,
               component: QuotaDefinitionComponent
             },
             {
               path: 'quota-definitions/:quotaId/edit-quota',
+              title: tabTitle('Edit Quota'),
               component: EditQuotaComponent
             },
             {
               path: 'organizations/:orgId/space-quota-definitions/:quotaId',
+              title: spaceQuotaTitle,
               component: SpaceQuotaDefinitionComponent
             },
             {
               path: 'organizations/:orgId/space-quota-definitions/:quotaId/edit-space-quota',
+              title: tabTitle('Edit Space Quota'),
               component: EditSpaceQuotaComponent
             },
             {
               path: 'events',
+              title: tabTitle('Events'),
               component: CloudFoundryEventsComponent
             },
             {
@@ -282,6 +318,7 @@ export const CLOUD_FOUNDRY_SECTION_ROUTES: Routes = [{
           children: [
             {
               path: 'cells/:cellId',
+              title: cellTitle,
               component: CloudFoundryCellBaseComponent,
               children: [
                 {
@@ -291,20 +328,24 @@ export const CLOUD_FOUNDRY_SECTION_ROUTES: Routes = [{
                 },
                 {
                   path: 'summary',
+                  title: tabTitle('Summary'),
                   component: CloudFoundryCellSummaryComponent
                 },
                 {
                   path: 'charts',
+                  title: tabTitle('Metrics'),
                   component: CloudFoundryCellChartsComponent
                 },
                 {
                   path: 'apps',
+                  title: tabTitle('App Instances'),
                   component: CloudFoundryCellAppsComponent
                 }
               ]
             },
             {
               path: 'organizations/:orgId',
+              title: orgTitle,
               component: CloudFoundryOrganizationBaseComponent,
               data: {
                 extensionsActionsKey: StratosActionType.CloudFoundryOrg
@@ -317,26 +358,32 @@ export const CLOUD_FOUNDRY_SECTION_ROUTES: Routes = [{
                 },
                 {
                   path: 'summary',
+                  title: tabTitle('Summary'),
                   component: CloudFoundryOrganizationSummaryComponent
                 },
                 {
                   path: 'spaces',
+                  title: tabTitle('Spaces'),
                   component: CloudFoundryOrganizationSpacesSignalComponent,
                 },
                 {
                   path: 'users',
+                  title: tabTitle('Users'),
                   component: CloudFoundryOrganizationUsersComponent
                 },
                 {
                   path: 'quota',
+                  title: tabTitle('Quota'),
                   component: QuotaDefinitionComponent
                 },
                 {
                   path: 'space-quota-definitions',
+                  title: tabTitle('Space Quotas'),
                   component: CloudFoundryOrganizationSpaceQuotasComponent
                 },
                 {
                   path: 'events',
+                  title: tabTitle('Events'),
                   component: CloudFoundryOrganizationEventsComponent
                 },
                 {
@@ -351,6 +398,7 @@ export const CLOUD_FOUNDRY_SECTION_ROUTES: Routes = [{
             },
             {
               path: 'organizations/:orgId/spaces/:spaceId',
+              title: spaceTitle,
               data: {
                 extensionsActionsKey: StratosActionType.CloudFoundrySpace
               },
@@ -363,38 +411,47 @@ export const CLOUD_FOUNDRY_SECTION_ROUTES: Routes = [{
                 },
                 {
                   path: 'summary',
+                  title: tabTitle('Summary'),
                   component: CloudFoundrySpaceSummaryComponent
                 },
                 {
                   path: 'apps',
+                  title: tabTitle('Applications'),
                   component: CloudFoundrySpaceAppsSignalComponent
                 },
                 {
                   path: 'service-instances',
+                  title: tabTitle('Services'),
                   component: CloudFoundrySpaceServiceInstancesSignalComponent
                 },
                 {
                   path: 'user-service-instances',
+                  title: tabTitle('User Services'),
                   component: CloudFoundrySpaceUserServiceInstancesSignalComponent
                 },
                 {
                   path: 'routes',
+                  title: tabTitle('Routes'),
                   component: CloudFoundrySpaceRoutesSignalComponent
                 },
                 {
                   path: 'users',
+                  title: tabTitle('Users'),
                   component: CloudFoundrySpaceUsersComponent
                 },
                 {
                   path: 'quota',
+                  title: tabTitle('Quota'),
                   component: QuotaDefinitionComponent
                 },
                 {
                   path: 'space-quota',
+                  title: tabTitle('Space Quota'),
                   component: SpaceQuotaDefinitionComponent
                 },
                 {
                   path: 'events',
+                  title: tabTitle('Events'),
                   component: CloudFoundrySpaceEventsComponent
                 },
                 {

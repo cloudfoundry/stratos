@@ -1,4 +1,6 @@
 import { Routes } from '@angular/router';
+import { tabTitle } from '@stratosui/core';
+import { serviceOfferingTitle } from '../../route-titles';
 
 import {
   AddServiceInstanceComponent,
@@ -13,14 +15,17 @@ import { ServiceTabsBaseComponent } from './service-tabs-base/service-tabs-base.
 export const SERVICE_CATALOG_ROUTES: Routes = [
   {
     path: '',
+    title: 'Services Marketplace',
     component: ServiceCatalogPageComponent,
   },
   {
     path: ':endpointId/:serviceId/create',
+    title: serviceOfferingTitle('Create Service Instance'),
     component: AddServiceInstanceComponent,
   },
   {
     path: ':endpointId/:serviceId',
+    title: serviceOfferingTitle(),
     component: ServiceBaseComponent,
     children: [
       {
@@ -34,18 +39,22 @@ export const SERVICE_CATALOG_ROUTES: Routes = [
           },
           {
             path: 'summary',
+            title: tabTitle('Summary'),
             component: ServiceSummaryComponent
           },
           {
             path: 'plans',
+            title: tabTitle('Plans'),
             component: ServicePlansComponent
           },
           {
             path: 'instances',
+            title: tabTitle('Instances'),
             component: ServiceInstancesComponent
           },
           {
             path: 'plans',
+            title: tabTitle('Plans'),
             component: ServicePlansComponent
           }
         ]

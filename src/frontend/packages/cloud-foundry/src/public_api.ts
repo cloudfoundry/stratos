@@ -137,3 +137,5 @@ export type {
   DiagnosticsQueryOptions,
   DiagnosticsSnapshotEnvelope,
 } from './services/diagnostics/diagnostics.types';
+
+export { appTitle } from './route-titles';
