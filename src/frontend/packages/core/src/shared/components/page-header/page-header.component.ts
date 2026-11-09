@@ -413,16 +413,23 @@ export class PageHeaderComponent implements OnDestroy, AfterViewInit {
     this.isUserMenuOpen = false;
   }
 
-  // Escape closes the user menu and returns focus to its button, as a
-  // disclosure does; the panel otherwise stays until the button is used.
+  // Escape closes the open panel (user, token or history) and returns focus
+  // to its button, as a disclosure does; a panel otherwise stays until its
+  // button is used.
   @HostListener('document:keydown.escape')
   onEscape() {
-    if (!this.isUserMenuOpen) {
+    const open = this.isUserMenuOpen ? 'userMenu'
+      : this.isTokenMenuOpen ? 'tokenMenu'
+      : this.isHistoryMenuOpen ? 'historyMenu'
+      : null;
+    if (!open) {
       return;
     }
     this.closeUserMenu();
+    this.closeTokenMenu();
+    this.closeHistoryMenu();
     // The header renders through a portal, outside this component's view.
-    document.getElementById('userMenu')?.focus();
+    document.getElementById(open)?.focus();
   }
 
   closeHistoryMenu() {
