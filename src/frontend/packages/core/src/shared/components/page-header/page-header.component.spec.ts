@@ -3,6 +3,7 @@ import { EmbeddedViewRef, provideZonelessChangeDetection } from '@angular/core';
 import { provideHttpClient } from '@angular/common/http';
 import { provideHttpClientTesting, HttpTestingController } from '@angular/common/http/testing';
 import { describe, it, expect, beforeEach, afterEach, vi } from 'vitest';
+import { of } from 'rxjs';
 import { ActivatedRoute } from '@angular/router';
 import { RouterTestingModule } from '@angular/router/testing';
 import { CommonModule } from '@angular/common';
@@ -350,6 +351,14 @@ describe('PageHeaderComponent', () => {
       expect(document.activeElement).toBe(button());
     });
 
+    // Items that go to a route are links, not buttons (a11y spec §3).
+    it('offers About, Profile and API Keys as links', () => {
+      button().click();
+      view.detectChanges();
+      const links = Array.from(panel()!.querySelectorAll('a[href]')).map(a => a.textContent?.trim());
+      expect(links).toEqual(['About', 'Profile']);
+      expect(panel()!.querySelectorAll('button[routerlink]').length).toBe(0);
+    });
   });
 
   // The token and history panels follow the user menu's disclosure pattern.
@@ -397,6 +406,37 @@ describe('PageHeaderComponent', () => {
       expect(button().getAttribute('aria-expanded')).toBe('false');
       expect(panel()).toBeNull();
       expect(document.activeElement).toBe(button());
+    });
+  });
+
+  // Notifications goes to a route, so it is a link, and its name carries the
+  // unread count that sighted users see on the badge (a11y spec §3).
+  describe('notifications', () => {
+    let host: HTMLElement;
+    let view: EmbeddedViewRef<unknown>;
+
+    beforeEach(() => {
+      component.events$ = of([{ read: false }, { read: true }, { read: false }] as any);
+      component.unreadEventCount$ = of(2);
+      view = component.pageHeaderTmpl().createEmbeddedView({});
+      view.detectChanges();
+      host = document.createElement('div');
+      view.rootNodes.forEach((node: Node) => host.appendChild(node));
+      document.body.appendChild(host);
+    });
+
+    afterEach(() => {
+      view.destroy();
+      host.remove();
+      TestBed.inject(HttpTestingController).match(() => true);
+    });
+
+    it('is a link to the events page named with the unread count', () => {
+      const link = host.querySelector('a.page-header-notification-button') as HTMLAnchorElement;
+      expect(link).toBeTruthy();
+      expect(link.getAttribute('href')).toBe('/events');
+      expect(link.getAttribute('aria-label')).toBe('Notifications, 2 unread');
+      expect(host.querySelector('button.page-header-notification-button')).toBeNull();
     });
   });
 });

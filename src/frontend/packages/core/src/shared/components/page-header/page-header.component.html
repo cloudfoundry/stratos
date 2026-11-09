@@ -157,19 +157,21 @@
 
             <!-- Notifications button -->
             @if (((events$ | async) || []).length > 0) {
-              <button
+              @let unread = (unreadEventCount$ | async) ?? 0;
+              <!-- A link, since it goes to a route; its name carries the badge's count. -->
+              <a
                 routerLink="/events"
                 matTooltip="Notifications"
-                aria-label="Notifications"
-                class="page-header-notification-button relative p-2 text-header-text hover:bg-white/10 rounded-md transition-colors">
+                [attr.aria-label]="unread ? 'Notifications, ' + unread + ' unread' : 'Notifications'"
+                class="page-header-notification-button relative block p-2 text-header-text hover:bg-white/10 rounded-md transition-colors">
                 <span aria-hidden="true" class="material-icons">notifications</span>
-                @if ((unreadEventCount$ | async); as count) {
-                  <span
+                @if (unread) {
+                  <span aria-hidden="true"
                     class="absolute -top-1 -right-1 bg-danger-shade-600 text-white text-xs rounded-full min-w-[1.25rem] h-5 flex items-center justify-center px-1">
-                    {{ count }}
+                    {{ unread }}
                   </span>
                 }
-              </button>
+              </a>
             }
 
             <!-- User menu -->
@@ -200,23 +202,23 @@
                       <!-- Menu items -->
                       @if (!logoutOnly()) {
                         <div class="space-y-1">
-                          <button class="w-full text-left px-3 py-2 text-sm text-content-text hover:bg-content-secondary rounded-md transition-colors"
+                          <a class="block px-3 py-2 text-sm text-content-text hover:bg-content-secondary rounded-md transition-colors"
                             routerLink="/about"
                             (click)="closeUserMenu()">
                             <span>About</span>
-                          </button>
-                          <button class="w-full text-left px-3 py-2 text-sm text-content-text hover:bg-content-secondary rounded-md transition-colors"
+                          </a>
+                          <a class="block px-3 py-2 text-sm text-content-text hover:bg-content-secondary rounded-md transition-colors"
                             routerLink="/user-profile"
                             (click)="closeUserMenu()">
                             <span>Profile</span>
-                          </button>
+                          </a>
                           @if (canAPIKeys$ | async) {
-                            <button class="w-full text-left px-3 py-2 text-sm text-content-text hover:bg-content-secondary rounded-md transition-colors"
+                            <a class="block px-3 py-2 text-sm text-content-text hover:bg-content-secondary rounded-md transition-colors"
                               routerLink="/api-keys"
                               (click)="closeUserMenu()"
                               >
                               <span>API Keys</span>
-                            </button>
+                            </a>
                           }
                           @if (canLogout$ | async) {
                             <div class="page-header-menu-separator border-t border-content-border my-2"></div>
