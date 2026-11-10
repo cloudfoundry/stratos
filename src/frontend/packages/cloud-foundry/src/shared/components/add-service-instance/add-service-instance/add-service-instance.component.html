@@ -1,5 +1,5 @@
 <app-page-header>
-  {{ title$ | async }}
+  {{ title() }}
 </app-page-header>
 @if (initialisedService(); as inited) {
   <ng-template #contextSummaryTpl>

@@ -104,10 +104,9 @@ export class AddServiceInstanceComponent implements OnInit, OnDestroy {
   marketPlaceMode!: boolean;
   cSIHelperService!: CreateServiceInstanceHelper;
   // Use signal for imperative title updates without change detection errors
-  private _title = signal<string>('');
-  title$ = toObservable(this._title);
+  readonly title = signal('');
   // Service offering name resolved by the helper, used both for the
-  // page title and the stepper context summary. Updated alongside _title.
+  // page title and the stepper context summary. Updated alongside title.
   private _serviceName = signal<string>('');
   // Stepper context summary parts — "what am I creating, where" — surfaced
   // above the step headers via the new <app-steppers [contextSummary]>.
@@ -477,7 +476,7 @@ export class AddServiceInstanceComponent implements OnInit, OnDestroy {
         this.servicesWallCreateInstance = true;
         // setTimeout pushes the title update past the current change
         // detection cycle to avoid ExpressionChangedAfterItHasBeenChecked.
-        setTimeout(() => this._title.set('Create Service Instance'), 0);
+        setTimeout(() => this.title.set('Create Service Instance'), 0);
       }
       this._initialisedService.set(ok);
       this.cdr.markForCheck();
@@ -671,7 +670,7 @@ export class AddServiceInstanceComponent implements OnInit, OnDestroy {
     // setTimeout pushes the title update past the current change
     // detection cycle to avoid ExpressionChangedAfterItHasBeenChecked.
     setTimeout(() => {
-      this._title.set(`Create and/or Bind Service Instance to '${app.name || 'Application'}'`);
+      this.title.set(`Create and/or Bind Service Instance to '${app.name || 'Application'}'`);
     }, 0);
   }
 
@@ -698,7 +697,7 @@ export class AddServiceInstanceComponent implements OnInit, OnDestroy {
 
     if (this.serviceType === this.serviceTypes.USER_SERVICE) {
       this.serviceInstanceId = serviceInstanceId;
-      setTimeout(() => this._title.set('Edit User Provided Service Instance'), 0);
+      setTimeout(() => this.title.set('Edit User Provided Service Instance'), 0);
       return true;
     }
 
@@ -786,7 +785,7 @@ export class AddServiceInstanceComponent implements OnInit, OnDestroy {
       this.csiState.setServicePlan(si.servicePlan.guid);
     }
     setTimeout(() => {
-      this._title.set(`Edit Service Instance: ${si.name}`);
+      this.title.set(`Edit Service Instance: ${si.name}`);
     }, 0);
   }
 
@@ -852,7 +851,7 @@ export class AddServiceInstanceComponent implements OnInit, OnDestroy {
     ).subscribe(label => {
       const title = `Create Instance: ${label || 'Service'}`;
       setTimeout(() => {
-        this._title.set(title);
+        this.title.set(title);
         this._serviceName.set(label || '');
       }, 0);
     });

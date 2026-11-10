@@ -2,11 +2,12 @@ import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { importProvidersFrom, provideZonelessChangeDetection, signal } from '@angular/core';
 import { provideHttpClient } from '@angular/common/http';
 import { provideHttpClientTesting } from '@angular/common/http/testing';
+import { By } from '@angular/platform-browser';
 import { provideRouter } from '@angular/router';
 import { describe, it, expect, beforeEach } from 'vitest';
 import { firstValueFrom, of } from 'rxjs';
 import { STORE_TEST_PROVIDERS } from '@stratosui/store/testing';
-import { StepComponent, TabNavService } from '@stratosui/core';
+import { PageHeaderComponent, StepComponent, TabNavService } from '@stratosui/core';
 import { generateCfBaseTestModulesNoShared } from '@test-framework/cf';
 import { CfOrgSpaceDataService } from '../../../data-services/cf-org-space-service.service';
 import { CloudFoundryService } from '../../../data-services/cloud-foundry.service';
@@ -43,6 +44,18 @@ describe('AddServiceInstanceComponent', () => {
 
   it('should create', () => {
     expect(component).toBeTruthy();
+  });
+
+  it('shows the title it is given in the page header', async () => {
+    component.title.set('Edit Service Instance: my-db');
+    await fixture.whenStable();
+    // The header renders through a portal; instantiate its template directly.
+    const header = fixture.debugElement.query(By.directive(PageHeaderComponent)).componentInstance as PageHeaderComponent;
+    const view = header.pageHeaderTmpl().createEmbeddedView({});
+    view.detectChanges();
+    const text = view.rootNodes.map((node: Node) => node.textContent).join('');
+    view.destroy();
+    expect(text).toContain('Edit Service Instance: my-db');
   });
 
   // Stands a stub in for one of the wizard's child view queries. The stub
