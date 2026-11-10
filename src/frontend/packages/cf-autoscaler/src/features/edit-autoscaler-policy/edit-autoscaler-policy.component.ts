@@ -1,4 +1,3 @@
-import { CommonModule } from '@angular/common';
 import {
   ChangeDetectionStrategy,
   ChangeDetectorRef,
@@ -13,10 +12,10 @@ import {
 } from '@angular/core';
 import { ActivatedRoute, Router, RouterModule } from '@angular/router';
 import { ErrorStateMatcher, ShowOnDirtyErrorStateMatcher } from '@stratosui/core';
-import { Observable, firstValueFrom } from 'rxjs';
-import { map, shareReplay } from 'rxjs/operators';
+import { firstValueFrom } from 'rxjs';
 
 import { ApplicationService } from '@stratosui/cloud-foundry';
+import { AppDetailDataService } from '../../../../cloud-foundry/src/features/applications/app-detail-data.service';
 import {
   CustomIconComponent,
   PageHeaderComponent,
@@ -40,7 +39,6 @@ import { EditAutoscalerPolicyService } from './edit-autoscaler-policy-service';
   ],
   standalone: true,
   imports: [
-    CommonModule,
     RouterModule,
     CustomIconComponent,
     PageHeaderComponent,
@@ -54,13 +52,13 @@ import { EditAutoscalerPolicyService } from './edit-autoscaler-policy-service';
 })
 export class EditAutoscalerPolicyComponent implements OnInit {
   applicationService = inject(ApplicationService);
+  readonly detail = inject(AppDetailDataService);
   private route = inject(ActivatedRoute);
   private cdr = inject(ChangeDetectorRef);
   private router = inject(Router);
 
 
   parentUrl: string;
-  applicationName$!: Observable<string | null>;
   isCreate = false;
 
   // FWT-959 Part 2 (Partition C): SignalStepHandle wiring for the 4-step
@@ -210,10 +208,6 @@ export class EditAutoscalerPolicyComponent implements OnInit {
   }
 
   ngOnInit() {
-    this.applicationName$ = this.applicationService.app$.pipe(
-      map(({ entity }) => entity ? entity.entity.name : null),
-      shareReplay({ bufferSize: 1, refCount: true })
-    );
     this.isCreate = this.route.snapshot.queryParams.create;
     this.cdr.markForCheck();
   }
