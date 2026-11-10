@@ -36,6 +36,8 @@ function makeDataStub(opts: DataStubOpts = {}) {
 
   return {
     app: appSig.asReadonly(),
+    org: signal({ guid: 'org-1' }).asReadonly(),
+    space: signal({ guid: 'space-1' }).asReadonly(),
     stats: statsSig.asReadonly(),
     state: computed(() => ({ label: stateLabel, indicator: null, actions: {} })),
     running: computed(() => stateLabel === 'STARTED'),
@@ -51,8 +53,6 @@ function makeAppServiceStub() {
   return {
     cfGuid: 'cf-1',
     appGuid: 'app-1',
-    appOrg$: of({ guid: 'org-1' }),
-    appSpace$: of({ guid: 'space-1' }),
   };
 }
 
