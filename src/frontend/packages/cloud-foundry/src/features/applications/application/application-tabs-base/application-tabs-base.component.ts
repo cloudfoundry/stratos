@@ -1,10 +1,8 @@
-import { CommonModule } from '@angular/common';
-import { Component, EffectRef, Injector, OnDestroy, OnInit, ChangeDetectionStrategy, effect, inject, runInInjectionContext, signal } from '@angular/core';
+import { Component, EffectRef, Injector, OnDestroy, OnInit, ChangeDetectionStrategy, computed, effect, inject, runInInjectionContext, signal } from '@angular/core';
 import { toObservable } from '@angular/core/rxjs-interop';
 import { Router, RouterModule } from '@angular/router';
 import { GitSCMService, GitSCMType } from '@stratosui/git';
-import { combineLatest as observableCombineLatest, Observable, Subscription } from 'rxjs';
-import { take, filter, map, startWith, switchMap, withLatestFrom } from 'rxjs/operators';
+import { filter, map, switchMap } from 'rxjs/operators';
 
 import {
   EndpointsService,
@@ -14,7 +12,6 @@ import {
   StratosActionType,
   StratosTabType,
   CurrentUserPermissionsService,
-  safeUnsubscribe,
   IPageSideNavTab,
   LoadingPageComponent,
   PageHeaderComponent,
@@ -31,7 +28,6 @@ import {
   CF_ENDPOINT_TYPE,
   ApplicationService,
   CfCurrentUserPermissions,
-  ApplicationStateData
 } from '@stratosui/cloud-foundry';
 import { CfEndpointsDataService } from '../../../../services/domain-data/cf-endpoints-data.service';
 import { StOrg, StSpace } from '../../../../services/endpoint-data/stratos-types';
@@ -51,7 +47,6 @@ import { AppDetailDataService } from '../../app-detail-data.service';
   standalone: true,
   changeDetection: ChangeDetectionStrategy.OnPush,
   imports: [
-    CommonModule,
     RouterModule,
     LoadingPageComponent,
     PageHeaderComponent,
@@ -66,13 +61,41 @@ export class ApplicationTabsBaseComponent implements OnInit, OnDestroy {
   private userFavoriteManager = inject(UserFavoriteManager);
   private cfEndpoints = inject(CfEndpointsDataService);
   private lifecycleProgress = inject(AppLifecycleProgressService);
-  private detail = inject(AppDetailDataService);
+  readonly detail = inject(AppDetailDataService);
   private injector = inject(Injector);
   private errorRedirectEffect?: EffectRef;
-  public appState$!: Observable<ApplicationStateData>;
-  public favorite$: Observable<any>;
 
-  isBusyUpdating$!: Observable<{ updating: boolean; }>;
+  // The endpoint id comes from the PAGE context (applicationService.cfGuid),
+  // NOT the row's stamped cfGuid: rows can be mis-stamped when Stratos
+  // endpoints share one CAPI, which would render the star on the wrong
+  // endpoint (the cross-endpoint favourite leak). getFavoriteFromEntity
+  // takes the id explicitly. Null until the entity is fully hydrated.
+  readonly favorite = computed(() => {
+    const app = this.detail.app();
+    return app?.entity?.cfGuid
+      ? this.userFavoriteManager.getFavoriteFromEntity<IFavoriteMetadata>(
+        applicationEntityType, CF_ENDPOINT_TYPE, this.applicationService.cfGuid, app)
+      : null;
+  });
+
+  // Null until the endpoint entry, org and space have all loaded:
+  // getBreadcrumbs reads .name off each.
+  readonly breadcrumbs = computed((): IHeaderBreadcrumb[] | null => {
+    const app = this.detail.app()?.entity;
+    const endpoint = app?.cfGuid ? this.cfEndpoints.all()?.[app.cfGuid] : undefined;
+    const org = this.detail.org();
+    const space = this.detail.space();
+    return app && endpoint && org && space ? this.getBreadcrumbs(app, endpoint, org, space) : null;
+  });
+
+  // The full-page "Retrieving application" overlay is for the INITIAL load
+  // only. Lifecycle actions (restage/start/stop/restart) refresh the app
+  // entity on success, which flips the loading flag true again — but the app
+  // is already on screen and the Status card (stage-row progress) + the
+  // snackbar convey the action's progress/result in place. Gating on "app
+  // not yet present" stops those refreshes from blanking the whole page with
+  // the spinner (the restage repaint regression).
+  readonly isFetching = computed(() => this.detail.loading().app && !this.detail.app());
 
   public extensionActions: StratosActionMetadata[] = getActionsFromExtensions(StratosActionType.Application);
 
@@ -80,50 +103,12 @@ export class ApplicationTabsBaseComponent implements OnInit, OnDestroy {
     const applicationService = this.applicationService;
     const scmService = inject(GitSCMService);
 
-    // Initialize favorite$ after applicationService is available.
-    // Filter for a fully-hydrated entity (inner entity present). The endpoint
-    // id comes from the PAGE context (applicationService.cfGuid), NOT the row's
-    // stamped cfGuid: rows can be mis-stamped when Stratos endpoints share one
-    // CAPI, which would render the star on the wrong endpoint (the cross-
-    // endpoint favourite leak). getFavoriteFromEntity takes the id explicitly.
-    this.favorite$ = this.applicationService.app$.pipe(
-      filter(info => !!info?.entity?.entity?.cfGuid),
-      map(info => this.userFavoriteManager.getFavoriteFromEntity<IFavoriteMetadata>(
-        applicationEntityType, CF_ENDPOINT_TYPE, this.applicationService.cfGuid, info.entity))
-    );
-    const endpoints$ = toObservable(this.cfEndpoints.all);
-    this.breadcrumbs$ = applicationService.waitForAppEntity$.pipe(
-      withLatestFrom(
-        endpoints$,
-        applicationService.appOrg$,
-        applicationService.appSpace$
-      ),
-      // Skip emissions where the endpoint entry, org, or space hasn't loaded
-      // yet — getBreadcrumbs reads .name off each and throws on undefined.
-      // Without this guard, ngrx state churn during refreshes (or a slow
-      // endpoint reducer hydrating after waitForAppEntity$ already replayed)
-      // produces console TypeErrors on every navigation.
-      filter(([app, endpoints, org, space]) => {
-        const cfGuid = app.entity.entity.cfGuid;
-        return !!cfGuid && !!endpoints?.[cfGuid] && !!org && !!space;
-      }),
-      map(([app, endpoints, org, space]) => {
-        // strict: the filter above guarantees cfGuid, the endpoint entry,
-        // org and space are all present on emissions that reach here.
-        const cfGuid = app.entity.entity.cfGuid!;
-        return this.getBreadcrumbs(
-          app.entity.entity,
-          endpoints![cfGuid],
-          org!,
-          space!
-        );
-      }),
-      take(1)
-    );
-
-    const appDoesNotHaveEnvVars$ = this.applicationService.appSpace$.pipe(
+    // can() is a stream (permissions are a later step), so the space is
+    // bridged for it; the tab contract takes hidden$ as an Observable.
+    const appDoesNotHaveEnvVars$ = toObservable(this.detail.space).pipe(
+      filter((space): space is StSpace => !!space),
       switchMap(space => this.currentUserPermissionsService.can(CfCurrentUserPermissions.APPLICATION_VIEW_ENV_VARS,
-        this.applicationService.cfGuid, space?.guid)
+        this.applicationService.cfGuid, space.guid)
       ),
       map(can => !can),
     );
@@ -158,35 +143,29 @@ export class ApplicationTabsBaseComponent implements OnInit, OnDestroy {
     });
 
     // Ensure Git SCM tab gets updated if the app is redeployed from a different SCM Type
-    this.stratosProjectSub = this.applicationService.applicationStratProject$
-      .subscribe(stratProject => {
-        if (
-          stratProject &&
-          stratProject.deploySource &&
-          (stratProject.deploySource.type === 'github' || stratProject.deploySource.type === 'gitscm')
-        ) {
-          const gitscm = stratProject.deploySource.scm || stratProject.deploySource.type;
-          const scm = scmService.getSCM(gitscm as GitSCMType, stratProject.deploySource.endpointGuid);
-          const iconInfo = scm.getIcon();
-          // Add tab or update existing tab
-          const tab = this.tabLinks().find(t => t.link === 'gitscm');
-          if (!tab) {
-            this.tabLinks.update(tabs => [...tabs, { link: 'gitscm', label: scm.getLabel(), iconFont: iconInfo.fontName, icon: iconInfo.iconName }]);
-          } else {
-            tab.label = scm.getLabel();
-            tab.iconFont = iconInfo.fontName;
-            tab.icon = iconInfo.iconName;
-          }
-          this.tabLinks.update(tabs => [...tabs]);
+    effect(() => {
+      const stratProject = this.detail.stratosProject();
+      if (
+        stratProject &&
+        stratProject.deploySource &&
+        (stratProject.deploySource.type === 'github' || stratProject.deploySource.type === 'gitscm')
+      ) {
+        const gitscm = stratProject.deploySource.scm || stratProject.deploySource.type;
+        const scm = scmService.getSCM(gitscm as GitSCMType, stratProject.deploySource.endpointGuid);
+        const iconInfo = scm.getIcon();
+        // Add tab or update existing tab
+        const tab = this.tabLinks().find(t => t.link === 'gitscm');
+        if (!tab) {
+          this.tabLinks.update(tabs => [...tabs, { link: 'gitscm', label: scm.getLabel(), iconFont: iconInfo.fontName, icon: iconInfo.iconName }]);
+        } else {
+          tab.label = scm.getLabel();
+          tab.iconFont = iconInfo.fontName;
+          tab.icon = iconInfo.iconName;
         }
-      });
+        this.tabLinks.update(tabs => [...tabs]);
+      }
+    });
   }
-
-  public breadcrumbs$: Observable<IHeaderBreadcrumb[]>;
-  isFetching$!: Observable<boolean>;
-  applicationActions$!: Observable<string[]>;
-  summaryDataChanging$!: Observable<boolean>;
-  stratosProjectSub!: Subscription;
 
   // Signal: written after the first render; an OnPush view under zoneless CD only repaints for signal writes.
   readonly tabLinks = signal<IPageSideNavTab[]>([]);
@@ -309,41 +288,6 @@ export class ApplicationTabsBaseComponent implements OnInit, OnDestroy {
         }
       });
     });
-
-    // The full-page "Retrieving application" overlay is for the INITIAL load
-    // only. Lifecycle actions (restage/start/stop/restart) refresh the app
-    // entity on success, which flips isFetchingApp$ true again — but the app
-    // is already on screen and the Status card (stage-row progress) + the
-    // snackbar convey the action's progress/result in place. Gating on "app
-    // not yet present" stops those refreshes from blanking the whole page with
-    // the spinner (the restage repaint regression).
-    this.isFetching$ = observableCombineLatest([
-      this.applicationService.isFetchingApp$,
-      toObservable(this.detail.app, { injector: this.injector }),
-    ]).pipe(
-      map(([isFetchingApp, app]) => isFetchingApp && !app),
-    );
-
-    this.isBusyUpdating$ = toObservable(this.detail.updating, { injector: this.injector }).pipe(
-      map(updating => ({ updating })),
-      startWith({ updating: true }),
-    );
-
-    const initialFetch$ = observableCombineLatest([
-      this.applicationService.isFetchingApp$,
-      this.applicationService.isFetchingEnvVars$,
-      this.applicationService.isFetchingStats$
-    ]).pipe(
-      map(([isFetchingApp, isFetchingEnvVars, isFetchingStats]) => {
-        return isFetchingApp || isFetchingEnvVars || isFetchingStats;
-      }));
-
-    this.summaryDataChanging$ = observableCombineLatest([
-      initialFetch$,
-      this.applicationService.isUpdatingApp$,
-    ]).pipe(map(([isFetchingApp, isUpdating]) => {
-      return !!(isFetchingApp || isUpdating);
-    }));
   }
 
   // Loading-overlay text reflects the active tab — e.g. "Retrieving Events" on
@@ -358,6 +302,5 @@ export class ApplicationTabsBaseComponent implements OnInit, OnDestroy {
   ngOnDestroy() {
     this.lifecycleProgress.destroy();
     this.errorRedirectEffect?.destroy();
-    safeUnsubscribe(this.stratosProjectSub);
   }
 }

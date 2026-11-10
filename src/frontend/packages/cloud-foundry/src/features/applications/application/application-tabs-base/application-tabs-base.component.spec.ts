@@ -5,7 +5,7 @@ import { provideRouter } from '@angular/router';
 import { describe, it, expect, beforeEach, vi } from 'vitest';
 import { BehaviorSubject } from 'rxjs';
 
-import { ApplicationServiceMock, generateCfStoreModules, ApplicationStateService, ApplicationEnvVarsHelper, populateStoreWithTestEndpoint } from '@test-framework/cf';
+import { ApplicationServiceMock, makeAppDetailDataServiceStub, generateCfStoreModules, ApplicationStateService, ApplicationEnvVarsHelper, populateStoreWithTestEndpoint } from '@test-framework/cf';
 import {ApplicationService} from '@stratosui/cloud-foundry';
 import { EndpointModel, EndpointsDataService, UserFavoriteManager } from '@stratosui/store';
 import {
@@ -23,8 +23,15 @@ describe('ApplicationTabsBaseComponent', () => {
   let component: ApplicationTabsBaseComponent;
   let fixture: ComponentFixture<ApplicationTabsBaseComponent>;
   let applicationServiceMock: ApplicationServiceMock;
+  // The detail signals the component derives from; each test writes them.
+  const app = signal<any>(undefined);
+  const org = signal<any>(undefined);
+  const space = signal<any>(undefined);
+  const loading = signal<any>({ app: false, envVars: false, stats: false });
 
   beforeEach(async () => {
+    app.set(undefined); org.set(undefined); space.set(undefined);
+    loading.set({ app: false, envVars: false, stats: false });
     // Create mock - we'll override specific observables to prevent immediate completion
     applicationServiceMock = new ApplicationServiceMock();
 
@@ -124,7 +131,10 @@ describe('ApplicationTabsBaseComponent', () => {
         // AppApplicationActionsService injects AppDetailDataService for
         // the post-op refresh fan-out. Provide a no-op stub so the test
         // doesn't need to thread the full HTTP-backed service.
-        { provide: AppDetailDataService, useValue: { refresh: () => Promise.resolve(), app: signal(undefined), updating: signal(false) } },
+        { provide: AppDetailDataService, useValue: {
+          ...makeAppDetailDataServiceStub(), refresh: () => Promise.resolve(), updating: signal(false),
+          app, org, space, loading,
+        } },
         provideRouter([]),
         provideZonelessChangeDetection(),
       ]
@@ -140,6 +150,25 @@ describe('ApplicationTabsBaseComponent', () => {
 
   it('should be created', () => {
     expect(component).toBeTruthy();
+  });
+
+  it('shows the loading overlay only until the app arrives', () => {
+    loading.set({ app: true, envVars: false, stats: false });
+    expect(component.isFetching()).toBe(true);
+    app.set({ entity: { cfGuid: 'mockCfGuid', name: 'my-app' } });
+    expect(component.isFetching()).toBe(false);
+  });
+
+  it('builds the breadcrumbs once the app, endpoint, org and space are known', () => {
+    expect(component.breadcrumbs()).toBeNull();
+    app.set({ entity: { cfGuid: 'mockCfGuid', name: 'my-app' } });
+    org.set({ guid: 'org-1', name: 'my-org' });
+    expect(component.breadcrumbs()).toBeNull();
+    space.set({ guid: 'space-1', name: 'my-space' });
+    const crumbs = component.breadcrumbs()!;
+    const spaceCrumbs = crumbs.find(c => c.key === 'space')!.breadcrumbs;
+    expect(spaceCrumbs.map(c => c.value)).toEqual(['Mock CF', 'my-org', 'my-space']);
+    expect(spaceCrumbs[2].routerLink).toBe('/cloud-foundry/mockCfGuid/organizations/org-1/spaces/space-1/apps');
   });
 
   // GUARD: an app-detail error bounce must stay CF-scoped when the app was
