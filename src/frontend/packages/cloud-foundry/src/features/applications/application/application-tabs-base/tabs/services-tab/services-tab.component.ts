@@ -8,9 +8,9 @@ import {
   inject,
   signal,
 } from '@angular/core';
-import { toSignal } from '@angular/core/rxjs-interop';
+import { toObservable, toSignal } from '@angular/core/rxjs-interop';
 import { Router } from '@angular/router';
-import { switchMap } from 'rxjs/operators';
+import { filter, switchMap } from 'rxjs/operators';
 
 import {
   ConfirmationDialogConfig,
@@ -97,11 +97,14 @@ export class ServicesTabComponent implements OnInit {
    *  same predicate the legacy ngrx list-config exposed before it was
    *  retired in Stage 9d. */
   private readonly canBindSignal: Signal<boolean> = toSignal(
-    this.appService.waitForAppEntity$.pipe(
+    // can() is a stream (permissions are a later step), so the app is
+    // bridged for it; the Bind action waits for the app's space.
+    toObservable(this.dataService.app).pipe(
+      filter(app => !!app?.entity?.space_guid),
       switchMap(app => this.permissions.can(
         CfCurrentUserPermissions.SERVICE_INSTANCE_CREATE,
         this.appService.cfGuid,
-        app.entity.entity.space_guid,
+        app!.entity.space_guid,
       )),
     ),
     { initialValue: false },
