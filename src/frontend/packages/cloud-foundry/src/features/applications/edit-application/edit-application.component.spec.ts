@@ -1,7 +1,7 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { provideZonelessChangeDetection, signal } from '@angular/core';
 import { describe, it, expect, beforeEach, vi } from 'vitest';
-import { of, firstValueFrom } from 'rxjs';
+import { firstValueFrom } from 'rxjs';
 import { provideRouter } from '@angular/router';
 
 import { TabNavService } from '@stratosui/core';
@@ -59,12 +59,12 @@ describe('EditApplicationComponent labels', () => {
         ApplicationEnvVarsHelper,
         TabNavService,
         provideRouter([]),
-        { provide: ApplicationService, useValue: { cfGuid: cfId, appGuid: appId, application$: of({ app: { entity: {
-          name: 'my-app', instances: 1, memory: 256, disk_quota: 1024, enable_ssh: true, space_guid: 'sp-1',
-        } } }) } },
+        { provide: ApplicationService, useValue: { cfGuid: cfId, appGuid: appId } },
         { provide: AppDetailDataService, useValue: {
           appDetail: signal({ app: { labels: { team: 'old', keep: 'yes' } } }), update,
-          app: signal({ entity: { name: 'my-app' } }),
+          app: signal({ entity: {
+            name: 'my-app', instances: 1, memory: 256, disk_quota: 1024, enable_ssh: true, space_guid: 'sp-1',
+          } }),
         } },
         provideZonelessChangeDetection(),
       ],

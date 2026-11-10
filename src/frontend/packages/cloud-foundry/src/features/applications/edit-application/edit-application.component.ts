@@ -1,13 +1,13 @@
 import { CommonModule } from '@angular/common';
 import { HttpClient } from '@angular/common/http';
-import { Component, OnDestroy, OnInit, ChangeDetectionStrategy, inject, computed } from '@angular/core';
+import { Component, Injector, OnInit, ChangeDetectionStrategy, computed, effect, inject } from '@angular/core';
 import { toSignal } from '@angular/core/rxjs-interop';
 import { ReactiveFormsModule, Validators, FormBuilder, FormControl, FormGroup } from '@angular/forms';
 import { AppErrorComponent, AppInputDirective, CustomFormFieldComponent } from '@stratosui/core';
 import { Router, RouterModule } from '@angular/router';
 import { ErrorStateMatcher, ShowOnDirtyErrorStateMatcher } from '@stratosui/core';
-import { defer, firstValueFrom, from, Observable, of as observableOf, Subscription } from 'rxjs';
-import { filter, map, startWith, switchMap, take, tap } from 'rxjs/operators';
+import { defer, firstValueFrom, from, Observable, of as observableOf } from 'rxjs';
+import { map, startWith, switchMap, take, tap } from 'rxjs/operators';
 import { CustomSlideToggleComponent } from '../../../../../core/src/shared/components/custom-slide-toggle/custom-slide-toggle.component';
 
 import { CfAppsSignalConfigService } from '../../../shared/signal-list-configs/app/cf-apps-signal-config.service';
@@ -60,13 +60,14 @@ interface EditApplicationForm {
     FocusDirective,
   ]
 })
-export class EditApplicationComponent implements OnInit, OnDestroy {
+export class EditApplicationComponent implements OnInit {
   applicationService = inject(ApplicationService);
   private createAppState = inject(CreateAppStateService);
   private fb = inject(FormBuilder);
   private http = inject(HttpClient);
   private apps = inject(CfAppsSignalConfigService);
   private router = inject(Router);
+  private injector = inject(Injector);
   readonly detail = inject(AppDetailDataService);
 
 
@@ -154,7 +155,6 @@ export class EditApplicationComponent implements OnInit, OnDestroy {
     entity: {}
   };
 
-  private sub?: Subscription;
 
   private error = false;
   private originalLabels: Record<string, string> = {};
@@ -196,11 +196,14 @@ export class EditApplicationComponent implements OnInit, OnDestroy {
   }
 
   ngOnInit() {
-    this.sub = this.applicationService.application$.pipe(
-      filter(app => !!app.app.entity),
-      take(1),
-      map(app => app.app.entity)
-    ).subscribe(app => {
+    // Fill the form once, when the app entity is known; the values must not
+    // change while the user is editing, so the effect ends itself.
+    const fill = effect(() => {
+      const app = this.detail.app()?.entity;
+      if (!app) {
+        return;
+      }
+      fill.destroy();
       this.app = app;
       this.createAppState.setCFDetails({
         cloudFoundry: this.applicationService.cfGuid,
@@ -219,9 +222,7 @@ export class EditApplicationComponent implements OnInit, OnDestroy {
         labels: { ...this.originalLabels },
         labelInput: '',
       });
-      // Don't want the values to change while the user is editing
-      this.clearSub();
-    });
+    }, { injector: this.injector });
   }
 
   updateApp: StepOnNextFunction = () => {
@@ -305,14 +306,4 @@ export class EditApplicationComponent implements OnInit, OnDestroy {
     );
   }
 
-  clearSub() {
-    if (this.sub) {
-      this.sub.unsubscribe();
-      this.sub = undefined;
-    }
-  }
-
-  ngOnDestroy() {
-    this.clearSub();
-  }
 }
