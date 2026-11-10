@@ -9,7 +9,6 @@ export * from './cf-api-svc.types';
 
 // Services
 export { ApplicationService } from './features/applications/application.service';
-export { ApplicationMonitorService } from './features/applications/application-monitor.service';
 export { ApplicationStateService, ApplicationStateData } from './shared/services/application-state.service';
 export { ApplicationEnvVarsHelper } from './features/applications/application/application-tabs-base/tabs/build-tab/application-env-vars.service';
 export { CfOrgSpaceDataService, CfOrgSpaceItem } from './shared/data-services/cf-org-space-service.service';

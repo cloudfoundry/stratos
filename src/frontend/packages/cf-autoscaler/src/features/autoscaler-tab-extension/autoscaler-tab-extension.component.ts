@@ -37,7 +37,6 @@ import {
   ScrollFadeComponent,
 } from '@stratosui/core';
 import {
-  ApplicationMonitorService,
   ApplicationService,
   getGuids,
   CfCurrentUserPermissions,
@@ -121,9 +120,6 @@ interface AutoscalerTabPaginationParams {
 @Component({
   selector: 'app-autoscaler-tab-extension',
   templateUrl: './autoscaler-tab-extension.component.html',
-  providers: [
-    ApplicationMonitorService
-  ],
   standalone: true,
   imports: [
     CommonModule,
