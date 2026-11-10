@@ -44,6 +44,7 @@ describe('ServicesTabComponent', () => {
     refreshScope = vi.fn(async () => undefined);
     removeServiceBinding = vi.fn();
     return {
+      app: signal<any>({ entity: { space_guid: 'space-1' } }).asReadonly(),
       serviceBindings: signal<any[] | null>(null).asReadonly(),
       serviceBindingsCount: signal(0).asReadonly(),
       loading: signal({ serviceBindings: false } as any).asReadonly(),
