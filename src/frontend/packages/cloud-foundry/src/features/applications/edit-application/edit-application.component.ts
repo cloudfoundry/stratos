@@ -67,7 +67,7 @@ export class EditApplicationComponent implements OnInit, OnDestroy {
   private http = inject(HttpClient);
   private apps = inject(CfAppsSignalConfigService);
   private router = inject(Router);
-  private detail = inject(AppDetailDataService);
+  readonly detail = inject(AppDetailDataService);
 
 
   editAppForm: FormGroup<EditApplicationForm>;

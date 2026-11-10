@@ -64,6 +64,7 @@ describe('EditApplicationComponent labels', () => {
         } } }) } },
         { provide: AppDetailDataService, useValue: {
           appDetail: signal({ app: { labels: { team: 'old', keep: 'yes' } } }), update,
+          app: signal({ entity: { name: 'my-app' } }),
         } },
         provideZonelessChangeDetection(),
       ],
