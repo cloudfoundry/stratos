@@ -3,7 +3,7 @@ import { Validators, FormControl, FormGroup, FormsModule, ReactiveFormsModule } 
 import { Router } from '@angular/router';
 import { toSignal } from '@angular/core/rxjs-interop';
 import { Subscription } from 'rxjs';
-import { filter, startWith } from 'rxjs/operators';
+import { startWith } from 'rxjs/operators';
 
 import {
   AppErrorComponent,
