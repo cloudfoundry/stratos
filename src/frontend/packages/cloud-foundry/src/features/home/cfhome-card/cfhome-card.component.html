@@ -20,7 +20,7 @@
       @if (cardLoaded() && recentAppsRows() > 0) {
         <app-card-cf-recent-apps [hideWhenEmpty]="true"
           dateMode="subtle" [showDate]="true" [maxRows]="recentAppsRows()" mode="plain"
-          [endpoint]="guid()" [allApps$]="allApps$">
+          [endpoint]="guid()" [allApps$]="allApps()">
         </app-card-cf-recent-apps>
       }
       @if (!cardLoaded() && recentAppsRows() > 0) {
