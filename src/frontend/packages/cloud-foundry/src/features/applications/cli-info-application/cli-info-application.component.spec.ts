@@ -1,15 +1,15 @@
 import { TemplatePortal } from '@angular/cdk/portal';
 import { ComponentFixture, TestBed } from '@angular/core/testing';
-import { provideZonelessChangeDetection } from '@angular/core';
+import { provideZonelessChangeDetection, signal } from '@angular/core';
 import { describe, it, expect, beforeEach, vi } from 'vitest';
 import { provideRouter, Router, UrlTree } from '@angular/router';
 import { provideHttpClient } from '@angular/common/http';
 import { provideHttpClientTesting } from '@angular/common/http/testing';
-import { of } from 'rxjs';
 
 import { TabNavService } from '@stratosui/core';
 import { EndpointModel, EndpointsDataService } from '@stratosui/store';
 import { STORE_TEST_PROVIDERS } from '@stratosui/store/testing';
+import { AppDetailDataService } from '../app-detail-data.service';
 import { ApplicationService } from '../application.service';
 import { CliInfoApplicationComponent } from './cli-info-application.component';
 
@@ -47,9 +47,14 @@ describe('CliInfoApplicationComponent', () => {
           useValue: {
             cfGuid: 'cf-guid',
             appGuid: 'app-guid',
-            application$: of({ app: { entity: { name: 'my app' } } }),
-            appSpace$: of({ name: 'my space' }),
-            appOrg$: of({ name: 'my org' }),
+          }
+        },
+        {
+          provide: AppDetailDataService,
+          useValue: {
+            app: signal({ entity: { name: 'my app' } }),
+            space: signal({ name: 'my space' }),
+            org: signal({ name: 'my org' }),
           }
         },
         TabNavService,
@@ -60,8 +65,11 @@ describe('CliInfoApplicationComponent', () => {
       ]
     }).compileComponents();
 
-    // The real service stays, since the page header reads its endpoint list.
-    vi.spyOn(TestBed.inject(EndpointsDataService), 'waitFor').mockResolvedValue(endpoint as EndpointModel);
+    // The real service stays, since the page header reads its endpoint list;
+    // the page reads the endpoint from its signal.
+    Object.defineProperty(TestBed.inject(EndpointsDataService), 'endpoints', {
+      value: signal(new Map([['cf-guid', endpoint as EndpointModel]])),
+    });
 
     fixture = TestBed.createComponent(CliInfoApplicationComponent);
     component = fixture.componentInstance;

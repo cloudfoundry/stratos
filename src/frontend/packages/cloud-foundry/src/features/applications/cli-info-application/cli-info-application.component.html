@@ -1,4 +1,4 @@
-<app-page-header [breadcrumbs]="breadcrumbs$ | async">
+<app-page-header [breadcrumbs]="breadcrumbs()">
   <h1>CF CLI All</h1>
   <div class="page-header-right">
     <span>
@@ -9,6 +9,6 @@
   </div>
 </app-page-header>
 
-@if (context$ | async; as context) {
+@if (context(); as context) {
   <app-cli-info [context]="context" [sections]="sections"></app-cli-info>
 }
