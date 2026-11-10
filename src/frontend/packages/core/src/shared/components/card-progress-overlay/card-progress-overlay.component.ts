@@ -1,6 +1,6 @@
 import { CommonModule } from '@angular/common';
-import { ChangeDetectionStrategy, Component, input } from '@angular/core';
-import { Observable } from 'rxjs';
+import { ChangeDetectionStrategy, Component, computed, input } from '@angular/core';
+import { isObservable, Observable, of } from 'rxjs';
 import { AppBusyComponent } from '../busy-indicator/busy-indicator.component';
 
 @Component({
@@ -17,6 +17,13 @@ export class CardProgressOverlayComponent {
 
   readonly label = input<string>();
 
-  readonly busy = input<Observable<boolean>>();
+  // Callers with a signal pass its value; the Observable form stays for the
+  // callers still on rxjs pipelines.
+  readonly busy = input<boolean | Observable<boolean>>();
+
+  protected readonly busy$ = computed(() => {
+    const value = this.busy();
+    return isObservable(value) ? value : of(!!value);
+  });
 
 }
