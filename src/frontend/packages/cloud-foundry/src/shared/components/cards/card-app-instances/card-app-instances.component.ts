@@ -8,11 +8,11 @@ import {
   input,
   viewChild
 } from '@angular/core';
-import { toObservable, toSignal } from '@angular/core/rxjs-interop';
+import { toSignal } from '@angular/core/rxjs-interop';
 import { FormsModule } from '@angular/forms';
 import { RouterLink } from '@angular/router';
 import { combineLatest } from 'rxjs';
-import { map, switchMap } from 'rxjs/operators';
+import { switchMap } from 'rxjs/operators';
 
 import {
   AppInputDirective,
@@ -96,8 +96,8 @@ export class CardAppInstancesComponent implements OnDestroy {
   /** Desired instance count off the app entity. */
   readonly desiredCount = computed(() => this.dataService.app()?.entity?.instances ?? 0);
 
-  /** Card status indicator — feeds the colored bar via Observable bridge. */
-  readonly status$ = toObservable(this.dataService.state).pipe(map(s => s?.indicator));
+  /** Card status indicator: feeds the colored bar. */
+  readonly status = computed(() => this.dataService.state()?.indicator);
 
   /** Disable scale buttons while an app-level update is in flight. */
   readonly isUpdating = computed(() => this.dataService.loading().app);

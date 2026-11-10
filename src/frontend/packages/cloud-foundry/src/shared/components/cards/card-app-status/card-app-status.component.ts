@@ -1,6 +1,4 @@
 import { ChangeDetectionStrategy, Component, computed, inject } from '@angular/core';
-import { toObservable } from '@angular/core/rxjs-interop';
-import { map } from 'rxjs/operators';
 
 import { RouterLink } from '@angular/router';
 import { CardStatusComponent, MbToHumanSizePipe } from '@stratosui/core';
@@ -24,8 +22,8 @@ export class CardAppStatusComponent {
   readonly data = inject(AppDetailDataService);
   readonly actions = inject(AppApplicationActionsService);
 
-  /** Feed the colored-bar component — derives from data.state().indicator. */
-  readonly status$ = toObservable(this.data.state).pipe(map(s => s?.indicator));
+  /** Feeds the colored-bar component from data.state().indicator. */
+  readonly status = computed(() => this.data.state()?.indicator);
 
   readonly stateLabel = computed(() => {
     if (this.actions.inFlight() && this.actions.verb()) {

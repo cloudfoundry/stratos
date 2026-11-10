@@ -85,11 +85,6 @@ export class SelectPlanStepComponent implements OnDestroy {
   selectedPlan$!: Observable<StServicePlan | undefined>;
   private selectedPlanAccessibilitySignal = signal<StratosStatus | null>(null);
   selectedPlanAccessibility = this.selectedPlanAccessibilitySignal.asReadonly();
-  // Observable bridge for <app-card-status [status$]> — skips the initial
-  // null so the status strip only paints once accessibility is resolved.
-  selectedPlanAccessibility$ = toObservable(this.selectedPlanAccessibility).pipe(
-    filter((status): status is StratosStatus => status !== null),
-  );
   cSIHelperService!: CreateServiceInstanceHelper;
   readonly noPlansDiv = viewChild.required('noplans', { read: ViewContainerRef });
 
