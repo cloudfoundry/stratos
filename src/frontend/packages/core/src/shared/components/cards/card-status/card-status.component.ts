@@ -1,6 +1,6 @@
 import { CommonModule } from '@angular/common';
-import { ChangeDetectionStrategy, Component, input } from '@angular/core';
-import { Observable } from 'rxjs';
+import { ChangeDetectionStrategy, Component, computed, input } from '@angular/core';
+import { isObservable, Observable, of } from 'rxjs';
 
 import { StratosStatus } from '@stratosui/store';
 
@@ -33,9 +33,14 @@ export function determineCardStatus(value: number, limit: number): StratosStatus
   ]
 })
 export class CardStatusComponent {
-  readonly status$ = input<Observable<StratosStatus>>();
+  // Callers with a signal pass its value; the Observable form stays for the
+  // callers still on rxjs pipelines.
+  readonly status$ = input<StratosStatus | null | Observable<StratosStatus>>();
+
+  protected readonly statusStream = computed(() => {
+    const value = this.status$();
+    return isObservable(value) ? value : of(value);
+  });
 
   protected cardStatus = StratosStatus;
-
-  constructor() { }
 }
