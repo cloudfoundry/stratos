@@ -12,7 +12,7 @@ import {
   signal,
   untracked,
 } from '@angular/core';
-import { takeUntilDestroyed, toObservable } from '@angular/core/rxjs-interop';
+import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { Router } from '@angular/router';
 import { TailwindSnackBarService, TailwindSnackBarRef } from '@stratosui/core';
 import {
@@ -107,7 +107,7 @@ export class GitSCMTabComponent implements OnInit, OnDestroy {
     const repo = this.repo();
     return repo?.value() ? true : repo?.error() ? false : undefined;
   });
-  public readonly isLoading$ = toObservable(computed(() => this.hasRepo() === undefined));
+  public readonly isLoading = computed(() => this.hasRepo() === undefined);
 
   public readonly gitSCMRepo = computed(() => this.repo()?.value() ?? null);
   // A failed commit or branch lookup leaves these null: the template leaves

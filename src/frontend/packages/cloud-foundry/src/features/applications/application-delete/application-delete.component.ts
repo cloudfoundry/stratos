@@ -1,7 +1,5 @@
-import { ChangeDetectionStrategy, Component, EffectRef, Injector, OnDestroy, computed, effect, inject, runInInjectionContext, signal } from '@angular/core';
-import { toObservable } from '@angular/core/rxjs-interop';
+import { ChangeDetectionStrategy, Component, EffectRef, Injector, OnDestroy, Signal, computed, effect, inject, runInInjectionContext, signal } from '@angular/core';
 import { Router } from '@angular/router';
-import { Observable } from 'rxjs';
 
 import {
   LoadingPageComponent,
@@ -82,10 +80,10 @@ export class ApplicationDeleteComponent implements OnDestroy {
 
   public selectedRoutes: StRoute[] = [];
   public selectedServiceBindings: StServiceCredentialBinding[] = [];
-  // fetchingApplicationData$ drives the top-level loading spinner. Resolves
+  // fetchingApplicationData drives the top-level loading spinner. Resolves
   // once the app's own fetch and the routes + bindings fetches, which run in
   // parallel, have all completed.
-  public fetchingApplicationData$!: Observable<boolean>;
+  public fetchingApplicationData!: Signal<boolean>;
 
   public cancelUrl: string;
 
@@ -130,10 +128,7 @@ export class ApplicationDeleteComponent implements OnDestroy {
 
     // Top-level spinner gates on the parent data service's app load and on
     // the routes/bindings fetches below.
-    this.fetchingApplicationData$ = toObservable(
-      computed(() => this.dataService.loading().app || !this.relatedLoaded()),
-      { injector: this.injector },
-    );
+    this.fetchingApplicationData = computed(() => this.dataService.loading().app || !this.relatedLoaded());
 
     // Redirect to the app wall if the app fetch errors out — covers
     // direct-URL navigation to a deleted/non-existent app.

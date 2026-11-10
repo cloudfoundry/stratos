@@ -1,5 +1,4 @@
 import { Component, ChangeDetectionStrategy, computed, inject, OnInit, Signal } from '@angular/core';
-import { toObservable } from '@angular/core/rxjs-interop';
 import { RouterModule } from '@angular/router';
 import { CommonModule } from '@angular/common';
 import { Observable } from 'rxjs';
@@ -70,7 +69,7 @@ export class CloudFoundryOrganizationBaseComponent implements OnInit {
   // replacing the old ngrx EntityMonitor (entityId/entitySchema) path. It
   // waits for the org only, and is up from the first render (no flash of
   // empty tiles before load() starts); the spaces list fills in behind it.
-  isLoading$ = toObservable(computed(() => !this.orgDataService.orgSettled()));
+  isLoading = computed(() => !this.orgDataService.orgSettled());
 
 
   tabLinks: IPageSideNavTab[] = [

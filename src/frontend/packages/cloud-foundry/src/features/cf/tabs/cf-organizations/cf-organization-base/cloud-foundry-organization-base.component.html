@@ -6,7 +6,7 @@
 <app-page-sub-nav>
   <app-cf-cli-menu></app-cf-cli-menu>
 </app-page-sub-nav>
-<app-loading-page [isLoading]="isLoading$"
+<app-loading-page [isLoading]="isLoading()"
   [text]="'Retrieving organization'">
   <router-outlet></router-outlet>
 </app-loading-page>

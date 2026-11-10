@@ -1,4 +1,4 @@
-<app-loading-page [isLoading]="isLoading$" text="Retrieving Git Details">
+<app-loading-page [isLoading]="isLoading()" text="Retrieving Git Details">
   <div>
     @if (hasRepo()) {
       <app-tile-grid>
