@@ -46,6 +46,8 @@ const makeDataStub = () => {
   return {
     addRoute,
     routes: signal<any[] | null>([]).asReadonly(),
+    domains: signal<any[]>([]).asReadonly(),
+    app: signal<any>(undefined).asReadonly(),
     appDetail: signal<any>(undefined).asReadonly(),
     cnsiGuid: 'mockCfGuid',
     appGuid: 'mockAppGuid',
