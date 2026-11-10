@@ -10,6 +10,7 @@ import { CommonModule } from '@angular/common';
 
 import { RecentlyVisitedDataService } from '@stratosui/store';
 import { CoreTestingModule } from '@test-framework';
+import { DashboardDataService } from '../../../core/dashboard-data.service';
 import { EndpointsService } from '../../../core/endpoints.service';
 import { CurrentUserPermissionsService } from '../../../core/permissions/current-user-permissions.service';
 import { TabNavService } from '../../../tab-nav.service';
@@ -58,6 +59,21 @@ describe('PageHeaderComponent', () => {
 
   it('should be created', () => {
     expect(component).toBeTruthy();
+  });
+
+  it('shows the menu toggle only on a mobile viewport', async () => {
+    // The header renders through a portal; instantiate its template directly.
+    const view = component.pageHeaderTmpl().createEmbeddedView({});
+    const host = document.createElement('div');
+    view.detectChanges();
+    view.rootNodes.forEach((node: Node) => host.appendChild(node));
+    expect(host.querySelector('.page-header-nav-toggle-wrapper')).toBeNull();
+
+    TestBed.inject(DashboardDataService).enableMobileNav();
+    await fixture.whenStable();
+    view.detectChanges();
+    expect(host.querySelector('.page-header-nav-toggle-wrapper')).not.toBeNull();
+    view.destroy();
   });
 
   it('has no breadcrumbs element while none are bound', () => {
