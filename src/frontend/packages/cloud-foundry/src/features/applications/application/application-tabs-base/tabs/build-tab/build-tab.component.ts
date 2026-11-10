@@ -1,5 +1,5 @@
 import { CommonModule } from '@angular/common';
-import { Component, OnInit, ChangeDetectionStrategy, inject } from '@angular/core';
+import { Component, OnInit, ChangeDetectionStrategy, computed, inject } from '@angular/core';
 import { RouterModule } from '@angular/router';
 import { GitCommit, GitDataService, GitResourceState, GitRepo, GitSCMService, GitSCMType, SCMIcon } from '@stratosui/git';
 import { combineLatest as observableCombineLatest, EMPTY, Observable, of } from 'rxjs';
@@ -19,6 +19,7 @@ import { CfCurrentUserPermissions } from '../../../../../../user-permissions/cf-
 import { ApplicationMonitorService } from '../../../../application-monitor.service';
 import { ApplicationData, ApplicationService } from '../../../../application.service';
 import { AppDetailDataService } from '../../../../app-detail-data.service';
+import { CfEndpointsDataService } from '../../../../../../services/domain-data/cf-endpoints-data.service';
 import { AppApplicationActionsService } from '../../../../../../shared/services/application-actions.service';
 import { DEPLOY_TYPES_IDS } from '../../../../deploy-application/deploy-application-steps.types';
 import { CardAppStatusComponent } from '../../../../../../shared/components/cards/card-app-status/card-app-status.component';
@@ -89,6 +90,9 @@ interface DeploySourceView {
 export class BuildTabComponent implements OnInit {
   applicationService = inject(ApplicationService);
   data = inject(AppDetailDataService);
+  private cfEndpoints = inject(CfEndpointsDataService);
+  // The endpoint's name once the endpoints are known, else its id.
+  readonly endpointName = computed(() => this.cfEndpoints.all()?.[this.applicationService.cfGuid]?.name || this.applicationService.cfGuid);
   // Read inFlight signal from the action service so the status card pulses
   // while a lifecycle action is in progress — visual feedback right where
   // the operator is looking, in addition to the bottom-of-page snackbar.
