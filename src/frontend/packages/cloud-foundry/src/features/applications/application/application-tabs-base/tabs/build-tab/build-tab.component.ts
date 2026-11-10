@@ -1,9 +1,10 @@
 import { CommonModule } from '@angular/common';
-import { Component, OnInit, ChangeDetectionStrategy, computed, inject } from '@angular/core';
+import { Component, Injector, OnInit, ChangeDetectionStrategy, computed, inject } from '@angular/core';
 import { RouterModule } from '@angular/router';
 import { GitCommit, GitDataService, GitResourceState, GitRepo, GitSCMService, GitSCMType, SCMIcon } from '@stratosui/git';
+import { toObservable } from '@angular/core/rxjs-interop';
 import { combineLatest as observableCombineLatest, EMPTY, Observable, of } from 'rxjs';
-import { catchError, combineLatestWith, distinct, distinctUntilChanged, map, startWith, switchMap } from 'rxjs/operators';
+import { catchError, distinctUntilChanged, filter, map, startWith, switchMap } from 'rxjs/operators';
 
 import {
   CurrentUserPermissionsService,
@@ -13,11 +14,9 @@ import {
   TileGroupComponent,
   MbToHumanSizePipe,
   UptimePipe } from '@stratosui/core';
-import { getFullEndpointApiUrl, EntityInfo } from '@stratosui/store';
-import { IAppSummary } from '../../../../../../cf-api.types';
+import { getFullEndpointApiUrl } from '@stratosui/store';
 import { CfCurrentUserPermissions } from '../../../../../../user-permissions/cf-user-permissions-checkers';
-import { ApplicationMonitorService } from '../../../../application-monitor.service';
-import { ApplicationData, ApplicationService } from '../../../../application.service';
+import { ApplicationService } from '../../../../application.service';
 import { AppDetailDataService } from '../../../../app-detail-data.service';
 import { CfEndpointsDataService } from '../../../../../../services/domain-data/cf-endpoints-data.service';
 import { AppApplicationActionsService } from '../../../../../../shared/services/application-actions.service';
@@ -27,7 +26,7 @@ import { CardAppInstancesComponent } from '../../../../../../shared/components/c
 import { CardAppUptimeComponent } from '../../../../../../shared/components/cards/card-app-uptime/card-app-uptime.component';
 import { ViewBuildpackComponent } from './view-buildpack/view-buildpack.component';
 import { InstancesAccordionComponent } from './instances-accordion/instances-accordion.component';
-import { EnvVarStratosProjectSource } from './application-env-vars.service';
+import { EnvVarStratosProject, EnvVarStratosProjectSource } from './application-env-vars.service';
 
 const isDockerHubRegEx = /^([a-zA-Z0-9_-]+)\/([a-zA-Z0-9_-]+):([a-zA-Z0-9_.-]+)/g;
 
@@ -83,14 +82,12 @@ interface DeploySourceView {
     MbToHumanSizePipe,
     UptimePipe,
   ],
-  providers: [
-    ApplicationMonitorService,
-  ]
 })
 export class BuildTabComponent implements OnInit {
   applicationService = inject(ApplicationService);
   data = inject(AppDetailDataService);
   private cfEndpoints = inject(CfEndpointsDataService);
+  private injector = inject(Injector);
   // The endpoint's name once the endpoints are known, else its id.
   readonly endpointName = computed(() => this.cfEndpoints.all()?.[this.applicationService.cfGuid]?.name || this.applicationService.cfGuid);
   // Read inFlight signal from the action service so the status card pulses
@@ -101,13 +98,27 @@ export class BuildTabComponent implements OnInit {
   private gitData = inject(GitDataService);
   private cups = inject(CurrentUserPermissionsService);
 
-  cardTwoFetching$!: Observable<boolean>;
-
-  public async: any;
-
   getFullApiUrl = getFullEndpointApiUrl;
 
-  sshStatus$!: Observable<string>;
+  readonly sshStatus = computed(() => {
+    const app = this.data.app();
+    if (!app) {
+      return '';
+    }
+    if (!this.data.space()?.allowSsh) {
+      return 'Disabled by the space';
+    }
+    return app.entity.enable_ssh ? 'Yes' : 'No';
+  });
+
+  // The git lookups and the permission check are streams, so the app and
+  // the project are bridged for them. The project is null until env vars
+  // load and STRATOS_PROJECT is parsed, and never emits as null, so the
+  // deploy source stays 'loading' until then.
+  private readonly app$ = toObservable(this.data.app).pipe(filter(app => !!app));
+  private readonly stratosProject$ = toObservable(this.data.stratosProject).pipe(
+    filter((project): project is EnvVarStratosProject => project != null),
+  );
 
   deploySource$!: Observable<DeploySourceView | null>;
 
@@ -121,34 +132,16 @@ export class BuildTabComponent implements OnInit {
     // the load.
     void this.data.refresh('serviceBindings');
 
-    this.cardTwoFetching$ = this.applicationService.application$.pipe(
-      combineLatestWith(
-        this.applicationService.appSummary$
-      ),
-      map(([app, appSummary]: [ApplicationData, EntityInfo<IAppSummary>]) => {
-        return app.fetching || appSummary.entityRequestInfo.fetching;
-      }), distinct());
-
-    this.sshStatus$ = this.applicationService.application$.pipe(
-      combineLatestWith(this.applicationService.appSpace$),
-      map(([app, space]) => {
-        if (!space?.allowSsh) {
-          return 'Disabled by the space';
-        } else {
-          return app.app.entity.enable_ssh ? 'Yes' : 'No';
-        }
-      })
-    );
-
-    const canSeeEnvVars$ = this.applicationService.appSpace$.pipe(
+    const canSeeEnvVars$ = toObservable(this.data.space, { injector: this.injector }).pipe(
+      filter(space => !!space),
       switchMap(space => this.cups.can(
         CfCurrentUserPermissions.APPLICATION_VIEW_ENV_VARS,
         this.applicationService.cfGuid,
-        space?.guid)
+        space!.guid)
       )
     );
 
-    this.gitRepo$ = this.applicationService.applicationStratProject$.pipe(
+    this.gitRepo$ = this.stratosProject$.pipe(
       distinctUntilChanged((a, b) => gitSourceKey(a.deploySource) === gitSourceKey(b.deploySource)),
       map(project => {
         const scmType = project.deploySource.scm || project.deploySource.type;
@@ -164,8 +157,8 @@ export class BuildTabComponent implements OnInit {
     );
 
     const deploySource$ = observableCombineLatest([
-      this.applicationService.applicationStratProject$,
-      this.applicationService.application$
+      this.stratosProject$,
+      this.app$,
     ]).pipe(
       map(([project, app]): DeploySourceView | null => {
         if (project) {
@@ -180,17 +173,17 @@ export class BuildTabComponent implements OnInit {
           if (deploySource.type === DEPLOY_TYPES_IDS.DOCKER_IMG) {
             return {
               type: 'docker',
-              dockerImage: app.app.entity.docker_image,
-              dockerUrl: this.createDockerImageUrl(deploySource.dockerImage || app.app.entity.docker_image)
+              dockerImage: app!.entity.docker_image,
+              dockerUrl: this.createDockerImageUrl(deploySource.dockerImage || app!.entity.docker_image)
             };
           }
 
           return deploySource;
-        } else if (app.app.entity.docker_image) {
+        } else if (app!.entity.docker_image) {
           return {
             type: 'docker',
-            dockerImage: app.app.entity.docker_image,
-            dockerUrl: this.createDockerImageUrl(app.app.entity.docker_image)
+            dockerImage: app!.entity.docker_image,
+            dockerUrl: this.createDockerImageUrl(app!.entity.docker_image)
           };
         } else {
           return null;
