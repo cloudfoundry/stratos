@@ -1,12 +1,13 @@
 import { CommonModule } from '@angular/common';
-import { Component, OnInit, ChangeDetectionStrategy, inject, signal, viewChild } from '@angular/core';
+import { Component, OnInit, ChangeDetectionStrategy, computed, inject, signal, viewChild } from '@angular/core';
 import { ActivatedRoute, RouterModule } from '@angular/router';
 import { NEVER, Observable, Subject } from 'rxjs';
 import websocketConnect, { normalClosureMessage } from 'rxjs-websockets';
-import { take, catchError, map, switchMap, tap } from 'rxjs/operators';
+import { catchError, switchMap, tap } from 'rxjs/operators';
 import { CustomTooltipDirective, PageHeaderComponent, IHeaderBreadcrumb } from '@stratosui/core';
 import { SshViewerComponent } from '../../../../../core/src/shared/components/ssh-viewer/ssh-viewer.component';
 import { IApp } from '../../../cf-api.types';
+import { AppDetailDataService } from '../app-detail-data.service';
 import { ApplicationService } from '../application.service';
 
 
@@ -26,6 +27,7 @@ import { ApplicationService } from '../application.service';
 export class SshApplicationComponent implements OnInit {
   private activatedRoute = inject(ActivatedRoute);
   private applicationService = inject(ApplicationService);
+  private detail = inject(AppDetailDataService);
 
 
   public messages!: Observable<string>;
@@ -45,7 +47,11 @@ export class SshApplicationComponent implements OnInit {
 
   public instanceId!: string;
 
-  public breadcrumbs$!: Observable<IHeaderBreadcrumb[]>;
+  // Null until the app entity is known.
+  readonly breadcrumbs = computed((): IHeaderBreadcrumb[] | null => {
+    const app = this.detail.app()?.entity;
+    return app ? this.getBreadcrumbs(app, this.applicationService.cfGuid, this.applicationService.appGuid) : null;
+  });
 
   // strict: populated by Angular's @ViewChild query (static query resolves
   // before ngOnInit).
@@ -102,11 +108,6 @@ export class SshApplicationComponent implements OnInit {
           }
           return [];
         }));
-
-      this.breadcrumbs$ = this.applicationService.waitForAppEntity$.pipe(
-        map(app => this.getBreadcrumbs(app.entity.entity, cfGuid, appGuid)),
-        take(1)
-      );
     }
   }
 }

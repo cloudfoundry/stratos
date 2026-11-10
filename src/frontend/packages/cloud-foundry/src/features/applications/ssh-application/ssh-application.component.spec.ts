@@ -1,11 +1,12 @@
 import { TemplatePortal } from '@angular/cdk/portal';
 import { ComponentFixture, TestBed } from '@angular/core/testing';
-import { provideZonelessChangeDetection } from '@angular/core';
+import { provideZonelessChangeDetection, signal } from '@angular/core';
 import { ActivatedRoute, provideRouter } from '@angular/router';
 import { describe, it, expect, beforeEach, afterEach, vi } from 'vitest';
 import { Observable, of, Subject } from 'rxjs';
 import { TabNavService } from '@stratosui/core';
 import { STORE_TEST_PROVIDERS } from '@stratosui/store/testing';
+import { AppDetailDataService } from '../app-detail-data.service';
 import { ApplicationService } from '../application.service';
 import { SshApplicationComponent } from "./ssh-application.component";
 
@@ -72,9 +73,9 @@ describe('SshApplicationComponent', () => {
           useValue: {
             cfGuid: 'cf-guid',
             appGuid: 'app-guid',
-            waitForAppEntity$: of({ entity: { entity: { name: 'test-app' } } }),
           }
         },
+        { provide: AppDetailDataService, useValue: { app: signal({ entity: { name: 'test-app' } }) } },
         TabNavService,
         provideRouter([]),
         { provide: ActivatedRoute, useValue: { snapshot: { params: { index: '0' } } } },
