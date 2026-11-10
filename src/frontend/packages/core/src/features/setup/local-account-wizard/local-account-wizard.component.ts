@@ -1,6 +1,6 @@
 import { CommonModule } from '@angular/common';
 import { Component, OnInit, signal, inject, Injector, runInInjectionContext, ChangeDetectionStrategy } from '@angular/core';
-import { toObservable, toSignal } from '@angular/core/rxjs-interop';
+import { toSignal } from '@angular/core/rxjs-interop';
 import { AbstractControl, ReactiveFormsModule, ValidatorFn, Validators, FormControl, FormGroup } from '@angular/forms';
 import { AuthDataService } from '@stratosui/store';
 import { Observable } from 'rxjs';
@@ -51,8 +51,6 @@ export class LocalAccountWizardComponent implements OnInit {
   passwordForm!: FormGroup;
   validateLocalAuthForm!: Observable<boolean>;
   applyingSetup = signal<boolean>(false);
-  // app-loading-page takes an Observable<boolean> — bridge the signal.
-  applyingSetup$ = toObservable(this.applyingSetup);
   signalHandle!: SignalStepHandle;
 
   showPassword: boolean[] = [];
