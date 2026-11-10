@@ -7,7 +7,8 @@ import { NoopAnimationsModule } from '@angular/platform-browser/animations';
 import { RouterTestingModule } from '@angular/router/testing';
 import { createEmptyStoreModule } from "@stratosui/store/testing";
 import { ApplicationService } from '@stratosui/cloud-foundry';
-import { ApplicationServiceMock } from '@test-framework/cf';
+import { ApplicationServiceMock, makeAppDetailDataServiceStub } from '@test-framework/cf';
+import { AppDetailDataService } from '../../../../cloud-foundry/src/features/applications/app-detail-data.service';
 import { TabNavService, CurrentUserPermissionsService } from '@stratosui/core';
 import { CfAutoscalerTestingModule } from '../../cf-autoscaler-testing.module';
 import { EditAutoscalerPolicyService } from './edit-autoscaler-policy-service';
@@ -30,6 +31,7 @@ describe('EditAutoscalerPolicyComponent', () => {
         provideZonelessChangeDetection(),
         DatePipe,
         { provide: ApplicationService, useClass: ApplicationServiceMock },
+        { provide: AppDetailDataService, useValue: makeAppDetailDataServiceStub() },
         TabNavService,
         EditAutoscalerPolicyService,
         CurrentUserPermissionsService,
