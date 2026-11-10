@@ -1,7 +1,7 @@
 <app-intro-screen id="app-login-page">
   <app-card class="p-0 w-[300px]">
     <app-stratos-title></app-stratos-title>
-    @if (error$ | async) {
+    @if (error()) {
       <div class="p-6 text-center">
         <div class="text-lg pb-5">An error occurred logging out</div>
         <button (click)="reload()" class="btn btn-primary" type="button">Reload</button>
