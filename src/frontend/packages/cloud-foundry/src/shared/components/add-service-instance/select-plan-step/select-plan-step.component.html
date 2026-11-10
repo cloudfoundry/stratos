@@ -12,7 +12,7 @@
   @if (selectedPlan$ | async; as selPlan) {
     <app-card class="max-w-[450px]">
       @if (selectedPlanAccessibility()) {
-        <app-card-status [status$]="selectedPlanAccessibility$"></app-card-status>
+        <app-card-status [status$]="selectedPlanAccessibility()"></app-card-status>
       }
       <app-metadata-item label="Name"> {{ getDisplayName(selPlan) }} </app-metadata-item>
       <app-metadata-item label="Description"> {{ selPlan.description }} </app-metadata-item>
