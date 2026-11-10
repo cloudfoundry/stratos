@@ -1,5 +1,5 @@
 <ng-content></ng-content>
-@if (isLoading() | async) {
+@if (loading$() | async) {
   <div
     [@leaveLoaderAnimation]
     class="loading-page loading-page__overlay">
