@@ -2,7 +2,7 @@ import { DatePipe } from '@angular/common';
 import { provideHttpClient } from '@angular/common/http';
 import { HttpTestingController, provideHttpClientTesting } from '@angular/common/http/testing';
 import { ComponentFixture, TestBed } from '@angular/core/testing';
-import { provideZonelessChangeDetection, NO_ERRORS_SCHEMA, signal } from '@angular/core';
+import { provideZonelessChangeDetection, NO_ERRORS_SCHEMA, signal, WritableSignal } from '@angular/core';
 import { provideRouter } from '@angular/router';
 import { provideNoopAnimations } from '@angular/platform-browser/animations';
 import { describe, it, expect, beforeEach, afterEach, vi } from 'vitest';
@@ -10,7 +10,7 @@ import { describe, it, expect, beforeEach, afterEach, vi } from 'vitest';
 import { CommonModule } from '@angular/common';
 import { getGitHubAPIURL, GITHUB_API_URL, GitDataService, GitResource, GitSCMService } from '@stratosui/git';
 import { TailwindSnackBarService } from '@stratosui/core';
-import { defer, EMPTY, Observable, of, Subject } from 'rxjs';
+import { defer, Observable } from 'rxjs';
 import { finalize } from 'rxjs/operators';
 
 import { TruncatePipe } from '../../../../../../../../core/src/core/truncate.pipe';
@@ -20,7 +20,6 @@ import {
 } from '../../../../../../../../core/src/shared/components/no-content-message/no-content-message.component';
 import { AppDetailDataService } from '../../../../../../features/applications/app-detail-data.service';
 import { CfDeployAppDataService } from '../../../../../../services/domain-data/cf-deploy-app-data.service';
-import { ApplicationService } from '../../../../application.service';
 import { GitSCMTabComponent } from './gitscm-tab.component';
 
 const project = {
@@ -36,24 +35,17 @@ const project = {
 };
 
 /**
- * Minimal AppDetailDataService stub. Used only for `data.stratosProject()`
- * reads from the template; ngOnInit branches on ApplicationService instead.
+ * Minimal AppDetailDataService stub: the project the tab reads, writable so
+ * a test can deliver it after the first render. No app or space, so the
+ * Deploy action's guids are never captured.
  */
-const makeDataStub = (stratosProject: unknown) => ({
-  stratosProject: signal<any>(stratosProject).asReadonly(),
+const makeDataStub = (stratosProject: WritableSignal<unknown>) => ({
+  stratosProject: stratosProject.asReadonly(),
+  app: signal(undefined).asReadonly(),
+  space: signal(undefined).asReadonly(),
 });
 
-/**
- * Minimal ApplicationService stub. EMPTY suppresses the inner subscribe
- * body so ngOnInit doesn't reach into the git data service.
- */
-const makeAppServiceStub = (applicationStratProject$: Observable<unknown>) => ({
-  applicationStratProject$,
-  waitForAppEntity$: EMPTY,
-  appSpace$: EMPTY,
-});
-
-function configure(applicationStratProject$: Observable<unknown>, stratosProject: unknown) {
+function configure(stratosProject: WritableSignal<unknown>) {
   return TestBed.configureTestingModule({
     imports: [
       GitSCMTabComponent,
@@ -69,7 +61,6 @@ function configure(applicationStratProject$: Observable<unknown>, stratosProject
       DatePipe,
       GitSCMService,
       { provide: AppDetailDataService, useFactory: () => makeDataStub(stratosProject) },
-      { provide: ApplicationService, useFactory: () => makeAppServiceStub(applicationStratProject$) },
       { provide: CfDeployAppDataService, useValue: {} },
     ],
     schemas: [NO_ERRORS_SCHEMA]
@@ -89,7 +80,7 @@ describe('GitSCMTabComponent', () => {
 
   describe('without a deployed project', () => {
     beforeEach(async () => {
-      await configure(EMPTY, null);
+      await configure(signal(null));
       fixture = TestBed.createComponent(GitSCMTabComponent);
       component = fixture.componentInstance;
       await fixture.whenStable();
@@ -124,7 +115,7 @@ describe('GitSCMTabComponent', () => {
     });
 
     beforeEach(async () => {
-      await configure(of(project), project);
+      await configure(signal(project));
       open = { repo: 0, commit: 0, branch: 0 };
       const gitData = TestBed.inject(GitDataService);
       const getRepository = gitData.getRepository.bind(gitData);
@@ -220,16 +211,16 @@ describe('GitSCMTabComponent', () => {
   // after the tab has first rendered.
   describe('when the project arrives after the first render', () => {
     const repoUrl = 'https://api.github.com/repos/org/repo';
-    let project$: Subject<unknown>;
+    let project$: WritableSignal<unknown>;
     let httpMock: HttpTestingController;
 
     beforeEach(async () => {
-      project$ = new Subject();
-      await configure(project$, project);
+      project$ = signal(null);
+      await configure(project$);
       httpMock = TestBed.inject(HttpTestingController);
       fixture = TestBed.createComponent(GitSCMTabComponent);
       await fixture.whenStable();
-      project$.next(project);
+      project$.set(project);
       await fixture.whenStable();
     });
 
