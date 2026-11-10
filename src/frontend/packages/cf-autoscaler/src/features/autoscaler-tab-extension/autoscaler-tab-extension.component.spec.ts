@@ -9,7 +9,8 @@ import { provideRouter } from '@angular/router';
 import { describe, it, expect, beforeEach, afterAll, afterEach } from 'vitest';
 
 import { ApplicationService } from '@stratosui/cloud-foundry';
-import { ApplicationServiceMock } from '@test-framework/cf';
+import { ApplicationServiceMock, makeAppDetailDataServiceStub } from '@test-framework/cf';
+import { AppDetailDataService } from '../../../../cloud-foundry/src/features/applications/app-detail-data.service';
 import { CoreModule, TabNavService } from '@stratosui/core';
 import { EndpointsDataService } from '@stratosui/store';
 import { generateBaseTestStoreModules } from '@test-framework/core-test.helper';
@@ -42,6 +43,7 @@ describe('AutoscalerTabExtensionComponent', () => {
         provideRouter([]),
         DatePipe,
         { provide: ApplicationService, useClass: ApplicationServiceMock },
+        { provide: AppDetailDataService, useValue: makeAppDetailDataServiceStub() },
         TabNavService,
         provideZonelessChangeDetection(),
         provideHttpClient(),
