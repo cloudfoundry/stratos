@@ -1,7 +1,6 @@
 import { HttpClient } from '@angular/common/http';
 import { Component, OnDestroy, signal, computed, inject, ChangeDetectionStrategy } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { toObservable } from '@angular/core/rxjs-interop';
 import { ActivatedRoute, RouterModule } from '@angular/router';
 import { Observable } from 'rxjs';
 import { map } from 'rxjs/operators';
@@ -120,12 +119,9 @@ export class KubedashConfigurationComponent implements OnDestroy {
 
   // Signals for busy state tracking
   public serviceAccountBusy = signal<boolean>(false);
-  // Observable view — app-card-progress-overlay's `busy` input is an Observable<boolean>
-  public serviceAccountBusy$ = toObservable(this.serviceAccountBusy);
   public serviceAccountMsg = '';
 
   public dashboardUIBusy = signal<boolean>(false);
-  public dashboardUIBusy$ = toObservable(this.dashboardUIBusy);
   public dashboardUIMsg = '';
 
   // Are we busy with an operation - disable buttons if we are

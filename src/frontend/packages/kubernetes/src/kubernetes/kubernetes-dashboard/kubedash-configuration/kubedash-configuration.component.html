@@ -35,7 +35,7 @@
           </div>
         }
         <app-card class="mb-5">
-          <app-card-progress-overlay [busy]="dashboardUIBusy$" [label]="dashboardUIMsg"></app-card-progress-overlay>
+          <app-card-progress-overlay [busy]="dashboardUIBusy()" [label]="dashboardUIMsg"></app-card-progress-overlay>
           <div class="card-header">
             <div class="card-title">Kubernetes Dashboard Installation</div>
             <div class="absolute right-5 top-5">
@@ -86,7 +86,7 @@
           }
         </app-card>
         <app-card class="mb-5">
-          <app-card-progress-overlay [busy]="serviceAccountBusy$" [label]="serviceAccountMsg"></app-card-progress-overlay>
+          <app-card-progress-overlay [busy]="serviceAccountBusy()" [label]="serviceAccountMsg"></app-card-progress-overlay>
           <div class="card-header">
             <div class="card-title">Service Account</div>
             <div class="absolute right-5 top-5">

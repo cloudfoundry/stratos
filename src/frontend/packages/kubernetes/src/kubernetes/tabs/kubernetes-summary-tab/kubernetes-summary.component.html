@@ -14,7 +14,7 @@
     }
   </app-page-sub-nav>
 
-  <app-loading-page [isLoading]="isLoading$" [text]="'Retrieving Kubernetes details'">
+  <app-loading-page [isLoading]="isLoading()" [text]="'Retrieving Kubernetes details'">
     @if (endpointDetails$ | async; as details) {
       <app-entity-summary-title [imagePath]="details.imagePath ?? null"
         [title]="details.name" [subTitle]="details.label">

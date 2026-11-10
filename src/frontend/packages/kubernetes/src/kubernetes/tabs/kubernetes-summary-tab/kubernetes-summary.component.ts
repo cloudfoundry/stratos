@@ -1,5 +1,5 @@
 import { HttpClient } from '@angular/common/http';
-import {Component, OnDestroy, OnInit, computed, inject, ChangeDetectionStrategy, Injector, runInInjectionContext } from '@angular/core';
+import { Component, OnDestroy, OnInit, computed, inject, ChangeDetectionStrategy, Injector, runInInjectionContext, Signal } from '@angular/core';
 import { toSignal, toObservable } from '@angular/core/rxjs-interop';
 import { CommonModule } from '@angular/common';
 import { SafeResourceUrl } from '@angular/platform-browser';
@@ -147,7 +147,7 @@ export class KubernetesSummaryTabComponent implements OnInit, OnDestroy {
   private polls: Subscription[] = [];
 
   // strict: assigned in ngOnInit before the template subscribes
-  public isLoading$!: Observable<boolean>;
+  public isLoading!: Signal<boolean>;
 
   // Why a cluster list failed to load (shown above the charts), and
   // whether the node list did (its charts are then hidden: they would
@@ -240,7 +240,7 @@ export class KubernetesSummaryTabComponent implements OnInit, OnDestroy {
 
       // Compute loading state - false when all are loaded. A count whose
       // load failed stays null but is done: the page shows the failure.
-      const isLoadingComputed = computed(() => {
+      this.isLoading = computed(() => {
         // Check if all required data is loaded
         return !(
           endpointDetailsSignal() !== null &&
@@ -254,8 +254,6 @@ export class KubernetesSummaryTabComponent implements OnInit, OnDestroy {
           networkUnavailableSignal() !== null
         );
       });
-
-      this.isLoading$ = toObservable(isLoadingComputed);
     });
   }
 
