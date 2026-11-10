@@ -1,7 +1,7 @@
 import { Component, OnInit, ChangeDetectionStrategy, computed, input } from '@angular/core';
-import { outputFromObservable, toObservable } from '@angular/core/rxjs-interop';
+import { outputFromObservable } from '@angular/core/rxjs-interop';
 import { AsyncPipe, CommonModule } from '@angular/common';
-import { combineLatest, Observable, of, Subject } from 'rxjs';
+import { isObservable, Observable, of, Subject } from 'rxjs';
 import { filter, map, startWith } from 'rxjs/operators';
 
 import { APIResource } from '@stratosui/store';
@@ -38,12 +38,10 @@ const RECENT_ITEMS_COUNT = 10;
 })
 export class CardCfRecentAppsComponent implements OnInit {
 
-  // strict: assigned in ngOnInit for the live path; in placeholderMode the
-  // hasEntities$=of(false) gate makes the template render placeholders and
-  // never read recentApps$, so the field is never observed unassigned.
-  public recentApps$!: Observable<APIResource<IApp>[]>;
-  readonly allApps$ = input<Observable<APIResource<IApp>[]>>();
-  readonly loading$ = input<Observable<boolean>>();
+  // Callers with a signal pass its value (home card); the Observable form
+  // stays for the service pipelines (CF, org and space summaries).
+  readonly allApps$ = input<APIResource<IApp>[] | Observable<APIResource<IApp>[]>>();
+  readonly loading$ = input<boolean | Observable<boolean>>();
   // Backed by a Subject so ngOnInit can tell whether a parent listens:
   // the subject is observed only while a (refresh) binding exists.
   protected readonly refresh$ = new Subject<void>();
@@ -63,41 +61,36 @@ export class CardCfRecentAppsComponent implements OnInit {
   // Only the count matters: each placeholder row renders with a null app.
   readonly placeholders = computed(() => Array.from({ length: this.maxRows() }, (_, i) => i));
 
-  hasEntities$!: Observable<boolean>;
-  show$!: Observable<boolean>;
-  // The loading$ input; not loading when none is given.
-  appsLoading$!: Observable<boolean>;
-
-  private readonly maxRows$ = toObservable(this.maxRows);
-
-  ngOnInit() {
-    if (this.placeholderMode()) {
-      this.canRefresh = false;
-      this.hasEntities$ = of(false);
-      return;
-    }
-    this.canRefresh = this.refresh$.observed;
-    // Every live caller passes allApps$ (home, CF, org and space summaries)
-    const allApps$ = this.allApps$() ?? of([]);
-    this.appsLoading$ = this.loading$() ?? of(false);
-    this.hasEntities$ = of(true);
-
-    // Stats are loaded by each row (CompactAppCardComponent), once per
-    // started app; the registry shares the request between rows.
-    this.recentApps$ = combineLatest([
-      allApps$,
-      this.maxRows$,
-    ]).pipe(
-      filter(([apps]) => !!apps),
-      map(([apps, maxRows]) => this.restrictApps(apps, maxRows)),
+  // Each is a stream the template reads with `async`; a new input value
+  // yields a new stream, which the pipe re-subscribes to.
+  private readonly apps$ = computed(() => {
+    const value = this.allApps$();
+    return isObservable(value) ? value : of(value ?? []);
+  });
+  // Not loading when none is given.
+  protected readonly appsLoading$ = computed(() => {
+    const value = this.loading$();
+    return isObservable(value) ? value : of(!!value);
+  });
+  // Stats are loaded by each row (CompactAppCardComponent), once per
+  // started app; the registry shares the request between rows.
+  protected readonly recentApps$ = computed(() => {
+    const maxRows = this.maxRows();
+    return this.apps$().pipe(
+      filter(apps => !!apps),
+      map(apps => this.restrictApps(apps, maxRows)),
     );
-
-    this.show$ = allApps$.pipe(
-      map(apps => {
-        return !this.hideWhenEmpty() || this.hideWhenEmpty() && apps.length > 0;
-      }),
+  });
+  protected readonly show$ = computed(() => {
+    const hideWhenEmpty = this.hideWhenEmpty();
+    return this.apps$().pipe(
+      map(apps => !hideWhenEmpty || apps.length > 0),
       startWith(true),
     );
+  });
+
+  ngOnInit() {
+    this.canRefresh = !this.placeholderMode() && this.refresh$.observed;
   }
 
   private restrictApps(apps: APIResource<IApp>[], maxRows = RECENT_ITEMS_COUNT): APIResource<IApp>[] {
