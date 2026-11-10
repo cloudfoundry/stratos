@@ -1,4 +1,4 @@
-@if ((isBusy$ | async) === false || false) {
+@if (!isBusy()) {
   <app-page-sub-nav>
     <button class="btn btn-danger" name="delete" (click)="deleteRelease()" title="Delete">
       <span aria-hidden="true" class="material-icons">delete</span>
@@ -21,7 +21,7 @@
   </app-page-sub-nav>
 }
 
-<app-loading-page [isLoading]="isBusy$" [text]="loadingMessage">
+<app-loading-page [isLoading]="isBusy()" [text]="loadingMessage">
   @if (helmReleaseHelper.release$ | async; as release) {
     <div>
       @if (hasUpgrade$ | async; as upgrade) {

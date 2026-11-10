@@ -1,5 +1,4 @@
-import { Component, ElementRef, OnInit, Renderer2, effect, signal, inject, ChangeDetectionStrategy, Injector, untracked, viewChild } from '@angular/core';
-import { toObservable } from '@angular/core/rxjs-interop';
+import { Component, ElementRef, OnInit, Renderer2, effect, signal, inject, ChangeDetectionStrategy, untracked, viewChild } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { DomSanitizer, SafeResourceUrl } from '@angular/platform-browser';
 import { ActivatedRoute, RouterModule } from '@angular/router';
@@ -63,10 +62,8 @@ export class KubernetesDashboardTabComponent implements OnInit {
 
   source!: SafeResourceUrl; // strict: assigned in ngOnInit
   href = '';
-  private isLoadingSignal = signal<boolean>(true);
-  private hasErrorSignal = signal<boolean>(false);
-  isLoading$: Observable<boolean>;
-  hasError$: Observable<boolean>;
+  isLoading = signal<boolean>(true);
+  hasError = signal<boolean>(false);
   expanded = true;
 
   private loadCheckTries = 0;
@@ -79,14 +76,6 @@ export class KubernetesDashboardTabComponent implements OnInit {
   public kubeEndpointService = inject(KubernetesEndpointService);
   private sanitizer = inject(DomSanitizer);
   public renderer = inject(Renderer2);
-  private injector = inject(Injector);
-
-  constructor() {
-    this.hasErrorSignal.set(false);
-    // Convert signals to observables for compatibility with LoadingPageComponent
-    this.isLoading$ = toObservable(this.isLoadingSignal, { injector: this.injector });
-    this.hasError$ = toObservable(this.hasErrorSignal, { injector: this.injector });
-  }
 
   ngOnInit() {
     const guid = this.kubeEndpointService.baseKube.guid;
@@ -129,7 +118,7 @@ export class KubernetesDashboardTabComponent implements OnInit {
         firstLine: errMsg,
         secondLine: { text: '' }
       });
-      this.hasErrorSignal.set(true);
+      this.hasError.set(true);
     }
 
     const kdToolbar = this.getKubeDashToolbar();
@@ -150,7 +139,7 @@ export class KubernetesDashboardTabComponent implements OnInit {
     }
 
     if (hasLoaded) {
-      this.isLoadingSignal.set(false);
+      this.isLoading.set(false);
       this.toggle(true);
     }
 

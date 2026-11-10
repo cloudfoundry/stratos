@@ -1,5 +1,5 @@
 import { CommonModule } from '@angular/common';
-import {Component, OnDestroy, signal, computed, inject, ChangeDetectionStrategy, Injector, runInInjectionContext } from '@angular/core';
+import { Component, OnDestroy, signal, computed, inject, ChangeDetectionStrategy, Injector, runInInjectionContext, Signal } from '@angular/core';
 import { Router, RouterModule } from '@angular/router';
 import { toObservable, toSignal } from '@angular/core/rxjs-interop';
 import { ConfirmationDialogConfig, ConfirmationDialogService, EndpointsSignalService, SidePanelService, naturalCompare } from '@stratosui/core';
@@ -63,7 +63,7 @@ export class HelmReleaseSummaryTabComponent implements OnDestroy {
   private busyDeleting = signal<boolean>(false);
   // strict: the following observables are assigned in the constructor inside
   // runInInjectionContext, which TS can't see through the closure.
-  public isBusy$!: Observable<boolean>;
+  public isBusy!: Signal<boolean>;
   public hasResources$!: Observable<boolean>;
   public hasAllResources$!: Observable<boolean>;
   private readonly DEFAULT_LOADING_MESSAGE = 'Retrieving Release Details';
@@ -143,13 +143,9 @@ export class HelmReleaseSummaryTabComponent implements OnDestroy {
         { initialValue: true }
       );
 
-      // Use computed for isBusy
-      const isBusyComputed = computed(() =>
+      this.isBusy = computed(() =>
         isFetchingSignal() || this.busyDeleting()
       );
-
-      // Provide as Observable for backward compatibility with template
-      this.isBusy$ = toObservable(isBusyComputed);
 
       this.path = `${this.helmReleaseHelper.namespace}/${this.helmReleaseHelper.releaseTitle}`;
 
