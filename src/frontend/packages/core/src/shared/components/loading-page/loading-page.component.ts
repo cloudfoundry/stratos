@@ -1,7 +1,7 @@
 import { animate, style, transition, trigger } from '@angular/animations';
 import { CommonModule } from '@angular/common';
 import { Component, ChangeDetectionStrategy, computed, inject, input } from '@angular/core';
-import { Observable } from 'rxjs';
+import { isObservable, Observable, of } from 'rxjs';
 
 import { StratosBrandingService } from '../../../../../theme/stratos-branding.service';
 
@@ -35,9 +35,14 @@ export class LoadingPageComponent {
   // path (entityId/entitySchema → isFetching/isDeleting) was removed: the
   // detail pages that used it now pass their signal-native isLoading, and the
   // delete flow navigates away rather than painting a "deleting" overlay here.
-  // Left unbound, nothing is loading: the template's async pipe reads
-  // undefined as "no value".
-  readonly isLoading = input<Observable<boolean>>();
+  // Left unbound, nothing is loading. Callers with a signal pass its value;
+  // the Observable form stays for the callers still on rxjs pipelines.
+  readonly isLoading = input<boolean | Observable<boolean>>();
+
+  protected readonly loading$ = computed(() => {
+    const value = this.isLoading();
+    return isObservable(value) ? value : of(!!value);
+  });
 
   readonly text = input('Retrieving your data');
 

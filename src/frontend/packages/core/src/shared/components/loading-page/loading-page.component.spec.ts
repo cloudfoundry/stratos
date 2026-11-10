@@ -59,6 +59,18 @@ describe('LoadingPageComponent', () => {
     });
   });
 
+  it('shows and hides the indicator from a plain boolean', async () => {
+    fixture = TestBed.createComponent(LoadingPageComponent);
+    element = fixture.nativeElement;
+    fixture.componentRef.setInput('isLoading', true);
+    await fixture.whenStable();
+    expect(element.querySelector('[data-test="loading-page-indicator"]')).toBeTruthy();
+
+    fixture.componentRef.setInput('isLoading', false);
+    await fixture.whenStable();
+    expect(element.querySelector('[data-test="loading-page-indicator"]')).toBeFalsy();
+  });
+
   it('should be created', () => {
     fixture = TestBed.createComponent(LoadingPageComponent);
     component = fixture.componentInstance;
