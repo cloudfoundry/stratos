@@ -1,8 +1,7 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
-import { AsyncPipe } from '@angular/common';
 import { Component, Input, provideZonelessChangeDetection, CUSTOM_ELEMENTS_SCHEMA, ChangeDetectorRef, signal } from '@angular/core';
 import { describe, it, expect, beforeEach, vi } from 'vitest';
-import { Observable, of, Subject } from 'rxjs';
+import { of, Subject } from 'rxjs';
 
 import { ApplicationDeploySourceTypes } from '../../applications/deploy-application/deploy-application-steps.types';
 import { EndpointDataRegistry } from '../../../services/endpoint-data/endpoint-data.registry';
@@ -82,11 +81,10 @@ describe('CFHomeCardComponent', () => {
 @Component({
   selector: 'app-card-cf-recent-apps',
   standalone: true,
-  imports: [AsyncPipe],
-  template: `@for (app of (allApps$ | async) ?? []; track app.metadata.guid) {<span class="stub-app">{{ app.entity.name }}:{{ app.entity.state }}</span>}`,
+  template: `@for (app of allApps$ ?? []; track app.metadata.guid) {<span class="stub-app">{{ app.entity.name }}:{{ app.entity.state }}</span>}`,
 })
 class StubRecentAppsComponent {
-  @Input() allApps$!: Observable<any[]>;
+  @Input() allApps$!: any[];
   @Input() hideWhenEmpty = false;
   @Input() dateMode!: string;
   @Input() showDate = true;

@@ -1,6 +1,5 @@
 import { AsyncPipe, CommonModule } from '@angular/common';
 import { Component, ChangeDetectionStrategy, computed, inject, input, OnDestroy, signal } from '@angular/core';
-import { toObservable } from '@angular/core/rxjs-interop';
 import { Router } from '@angular/router';
 import { Observable, of } from 'rxjs';
 import { map, take } from 'rxjs/operators';
@@ -83,9 +82,8 @@ export class CFHomeCardComponent implements HomePageEndpointCard, OnDestroy {
 
   // Follows the service's recent-apps signal, so the list picks up the app
   // mutators (start/stop, create, delete) without another load().
-  private readonly allApps = computed<APIResource<IApp>[]>(() =>
+  readonly allApps = computed<APIResource<IApp>[]>(() =>
     this.endpointDataService()?.recentApps().map(app => stAppToAPIResource(app)) ?? []);
-  readonly allApps$ = toObservable(this.allApps);
   // Only once a load has succeeded: before then appCount is just the default 0.
   readonly hasNoApps = computed(() => {
     const eds = this.endpointDataService();
