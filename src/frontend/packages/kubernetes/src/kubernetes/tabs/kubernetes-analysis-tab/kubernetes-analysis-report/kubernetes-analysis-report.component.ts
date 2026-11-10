@@ -1,6 +1,5 @@
 import { CommonModule } from '@angular/common';
 import { ChangeDetectionStrategy, Component, OnInit, inject, signal } from '@angular/core';
-import { toObservable } from '@angular/core/rxjs-interop';
 import { ActivatedRoute } from '@angular/router';
 import { Observable, Subject, of } from 'rxjs';
 import { catchError, map, startWith, take } from 'rxjs/operators';
@@ -59,11 +58,10 @@ export class KubernetesAnalysisReportComponent implements OnInit {
   endpointID?: string;
   id: string;
 
-  private breadcrumbsSignal = signal<IHeaderBreadcrumbLink[]>([
+  readonly breadcrumbs = signal<IHeaderBreadcrumbLink[]>([
     { value: 'Analysis', routerLink: '' },
     { value: 'Report' },
   ]);
-  public breadcrumbs$ = toObservable(this.breadcrumbsSignal);
 
   private analysisData = inject(KubeAnalysisDataService);
   private route = inject(ActivatedRoute);
@@ -71,7 +69,7 @@ export class KubernetesAnalysisReportComponent implements OnInit {
 
   constructor() {
     this.id = this.route.snapshot.params.id;
-    this.breadcrumbsSignal.set([
+    this.breadcrumbs.set([
       { value: 'Analysis', routerLink: getParentURL(this.route, 2) },
       { value: 'Report' },
     ]);
@@ -108,7 +106,7 @@ export class KubernetesAnalysisReportComponent implements OnInit {
     // shows the report name rather than the static "Report" label.
     this.report$.pipe(take(1)).subscribe((report) => {
       if (report && typeof report !== 'boolean') {
-        this.breadcrumbsSignal.set([
+        this.breadcrumbs.set([
           { value: 'Analysis', routerLink: getParentURL(this.route, 2) },
           { value: report.name },
         ]);
