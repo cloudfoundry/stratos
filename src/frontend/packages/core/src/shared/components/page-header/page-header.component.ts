@@ -120,7 +120,7 @@ export class PageHeaderComponent implements OnDestroy, AfterViewInit {
   private breadcrumbKey = signal<string | null>(null);
   public eventSeverity = InternalEventSeverity;
 
-  public isMobile$: Observable<boolean> = toObservable(this.dashboardSignals.isMobile);
+  readonly isMobile = this.dashboardSignals.isMobile;
 
   public environment = environment;
 
