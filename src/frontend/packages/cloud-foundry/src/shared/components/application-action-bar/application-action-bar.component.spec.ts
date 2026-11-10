@@ -1,5 +1,5 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
-import { Component, inject, provideZonelessChangeDetection, signal } from '@angular/core';
+import { Component, computed, inject, provideZonelessChangeDetection, signal } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { provideHttpClient } from '@angular/common/http';
 import { provideHttpClientTesting } from '@angular/common/http/testing';
@@ -10,11 +10,13 @@ import { BehaviorSubject } from 'rxjs';
 
 import {
   ApplicationServiceMock,
+  makeAppDetailDataServiceStub,
   generateCfStoreModules,
   ApplicationStateService,
   ApplicationEnvVarsHelper,
 } from '@test-framework/cf';
 import { ApplicationService } from '@stratosui/cloud-foundry';
+import { AppDetailDataService } from '../../../features/applications/app-detail-data.service';
 import { CurrentUserPermissionsService, TabNavService } from '@stratosui/core';
 
 import { AppApplicationActionsService } from '../../services/application-actions.service';
@@ -53,14 +55,15 @@ describe('AppApplicationActionBarComponent', () => {
   let applicationServiceMock: ApplicationServiceMock;
 
   /**
-   * Build the test bed with optional overrides applied to the
-   * ApplicationServiceMock so each test can shape applicationState$ and
-   * isBusyUpdating$ semantics independently.
+   * Build the test bed with optional overrides applied to the detail
+   * service stub so each test can shape the app state, URL and running
+   * flag independently.
    */
   async function setUp(
     overrides: {
-      applicationState$?: any;
-      updatingSection$?: any;
+      state?: any;
+      url?: string | null;
+      running?: boolean;
       inFlight?: boolean;
     } = {}
   ) {
@@ -70,13 +73,14 @@ describe('AppApplicationActionBarComponent', () => {
     // we don't need to seed CF role state into the test store.
     (applicationServiceMock as any).cfGuid = '';
 
-    if (overrides.applicationState$) {
-      applicationServiceMock.applicationState$ = overrides.applicationState$;
-    }
-    if (overrides.updatingSection$) {
-      // entityService.updatingSection$ feeds the component's isBusyUpdating$
-      (applicationServiceMock.entityService as any).updatingSection$ = overrides.updatingSection$;
-    }
+    const detailStub = {
+      ...makeAppDetailDataServiceStub(),
+      // The permission-gated block needs the space.
+      space: signal({ guid: 'mockSpaceGuid', name: 'mockSpace' } as any).asReadonly(),
+      state: computed(() => overrides.state ?? { label: '', indicator: null, actions: null }),
+      url: computed(() => overrides.url ?? null),
+      running: computed(() => overrides.running ?? false),
+    };
 
     // Mock action methods so click handlers don't trigger real navigation/dispatch.
     // The component reads `actions.inFlight` as a readonly Signal and pipes it
@@ -109,6 +113,7 @@ describe('AppApplicationActionBarComponent', () => {
         provideHttpClient(),
         provideHttpClientTesting(),
         { provide: ApplicationService, useValue: applicationServiceMock },
+        { provide: AppDetailDataService, useValue: detailStub },
         { provide: AppApplicationActionsService, useValue: actionsMock },
         { provide: AppLifecycleProgressService, useValue: { setAnchor: vi.fn() } },
         { provide: CurrentUserPermissionsService, useValue: permissionsMock },
@@ -126,9 +131,9 @@ describe('AppApplicationActionBarComponent', () => {
   // #6126: every application tab offers the CF CLI menu beside the actions.
   it('offers the CF CLI menu, with CF CLI All leading to the application\'s CLI page', async () => {
     await setUp({
-      applicationState$: new BehaviorSubject({
+      state: {
         label: 'Running', indicator: null, actions: { restart: true, stop: true, start: false, restage: true },
-      }).asObservable(),
+      },
     });
 
     const root: HTMLElement = fixture.nativeElement;
@@ -144,12 +149,11 @@ describe('AppApplicationActionBarComponent', () => {
 
   it('renders restart/stop/restage buttons when app is started', async () => {
     await setUp({
-      applicationState$: new BehaviorSubject({
+      state: {
         label: 'Running',
         indicator: null,
         actions: { restart: true, stop: true, start: false, restage: true },
-      }).asObservable(),
-      updatingSection$: new BehaviorSubject({}).asObservable(),
+      },
     });
 
     const root: HTMLElement = fixture.nativeElement;
@@ -167,12 +171,11 @@ describe('AppApplicationActionBarComponent', () => {
 
   it('renders start button when app is stopped', async () => {
     await setUp({
-      applicationState$: new BehaviorSubject({
+      state: {
         label: 'Stopped',
         indicator: null,
         actions: { restart: false, stop: false, start: true, restage: false },
-      }).asObservable(),
-      updatingSection$: new BehaviorSubject({}).asObservable(),
+      },
     });
 
     const root: HTMLElement = fixture.nativeElement;
@@ -189,12 +192,11 @@ describe('AppApplicationActionBarComponent', () => {
     // can never strand the buttons. The test drives the new signal
     // directly.
     await setUp({
-      applicationState$: new BehaviorSubject({
+      state: {
         label: 'Running',
         indicator: null,
         actions: { restart: true, stop: true, start: false, restage: true },
-      }).asObservable(),
-      updatingSection$: new BehaviorSubject({}).asObservable(),
+      },
       inFlight: true,
     });
 
@@ -206,5 +208,18 @@ describe('AppApplicationActionBarComponent', () => {
     expect(restartBtn?.disabled).toBe(true);
     expect(stopBtn?.disabled).toBe(true);
     expect(restageBtn?.disabled).toBe(true);
+  });
+
+  it('enables Visit only for a started app with a route', async () => {
+    await setUp({ url: 'https://app.example.test', running: true });
+    const visit = fixture.nativeElement.querySelector('a[aria-label="Visit"]') as HTMLAnchorElement;
+    expect(visit.getAttribute('href')).toBe('https://app.example.test');
+    expect(visit.classList.contains('pointer-events-none')).toBe(false);
+  });
+
+  it('disables Visit while the app is stopped', async () => {
+    await setUp({ url: 'https://app.example.test', running: false });
+    const visit = fixture.nativeElement.querySelector('a[aria-label="Visit"]') as HTMLAnchorElement;
+    expect(visit.classList.contains('pointer-events-none')).toBe(true);
   });
 });

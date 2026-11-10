@@ -136,7 +136,7 @@ export class ApplicationServiceMock {
  * ApplicationService now requires AppDetailDataService via inject(), so
  * the stub must be provided whenever the real ApplicationService is used.
  */
-function makeAppDetailDataServiceStub() {
+export function makeAppDetailDataServiceStub() {
   const _loading = signal<Record<string, boolean>>({
     app: false, summary: false, stats: false, envVars: false,
     space: false, org: false, domains: false,
