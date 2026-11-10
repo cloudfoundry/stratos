@@ -4,7 +4,7 @@
   </div>
   <div class="card-content p-4 space-y-4">
     <app-metadata-item label="Current">
-      <app-running-instances [instances]="applicationInstances$ | async" [cfGuid]="appService.cfGuid"
+      <app-running-instances [instances]="applicationInstances()" [cfGuid]="appService.cfGuid"
         [appGuid]="this.appService.appGuid">
       </app-running-instances>
     </app-metadata-item>
