@@ -3,6 +3,7 @@ import {
   ChangeDetectionStrategy,
   Component,
   DestroyRef,
+  Injector,
   OnDestroy,
   OnInit,
   WritableSignal,
@@ -12,7 +13,6 @@ import {
   signal,
   untracked,
 } from '@angular/core';
-import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { Router } from '@angular/router';
 import { TailwindSnackBarService, TailwindSnackBarRef } from '@stratosui/core';
 import {
@@ -30,10 +30,7 @@ import {
   GithubCommitAuthorComponent,
 } from '@stratosui/git';
 import { getUnixTime } from 'date-fns';
-import { combineLatest } from 'rxjs';
-import { take } from 'rxjs/operators';
 
-import { ApplicationService } from '../../../../application.service';
 
 import {
   SignalListColumn,
@@ -82,7 +79,7 @@ import { TruncatePipe } from '../../../../../../../../core/src/core/truncate.pip
 })
 export class GitSCMTabComponent implements OnInit, OnDestroy {
   data = inject(AppDetailDataService);
-  private appService = inject(ApplicationService);
+  private injector = inject(Injector);
   private snackBar = inject(TailwindSnackBarService);
   private scmService = inject(GitSCMService);
   private datePipe = inject(DatePipe);
@@ -192,29 +189,30 @@ export class GitSCMTabComponent implements OnInit, OnDestroy {
 
   ngOnInit() {
     // Resolve the CF org/space/app guids the Deploy action needs to seed the
-    // redeploy wizard.
-    combineLatest([this.appService.waitForAppEntity$, this.appService.appSpace$]).pipe(
-      take(1),
-      takeUntilDestroyed(this.destroyRef),
-    ).subscribe(([app, space]) => {
+    // redeploy wizard, once the app and its space are known.
+    const guids = effect(() => {
+      const app = this.data.app();
+      const space = this.data.space();
+      if (!app || !space) {
+        return;
+      }
+      guids.destroy();
       // strict: cfGuid is stamped on every loaded app entity (optional on IApp
       // only because the raw CF payload omits it before Stratos decorates it).
-      this.cfGuid = app.entity.entity.cfGuid!;
-      this.spaceGuid = app.entity.entity.space_guid;
-      // strict: appSpace$ has resolved by the time waitForAppEntity$ emits an
-      // app on a detail page; the legacy code read space.orgGuid unguarded.
-      this.orgGuid = space!.orgGuid;
-      this.appGuid = app.entity.metadata.guid;
-    });
+      this.cfGuid = app.entity.cfGuid!;
+      this.spaceGuid = app.entity.space_guid;
+      this.orgGuid = space.orgGuid;
+      this.appGuid = app.metadata.guid;
+    }, { injector: this.injector });
 
-    // applicationStratProject$ is filtered to non-null by the facade
-    // (application.service.ts:197-199), so it suspends until env vars
-    // load and STRATOS_PROJECT is parsed; on a direct load that is after
-    // the first render.
-    this.appService.applicationStratProject$.pipe(
-      take(1),
-      takeUntilDestroyed(this.destroyRef),
-    ).subscribe(stProject => {
+    // The project is null until env vars load and STRATOS_PROJECT is parsed;
+    // on a direct load that is after the first render. Read once and held.
+    const project = effect(() => {
+      const stProject = this.data.stratosProject();
+      if (!stProject) {
+        return;
+      }
+      project.destroy();
       const { projectName, scm } = this.createBaseGitMeta(stProject);
       this.scm = scm;
       this.projectName = projectName;
@@ -226,7 +224,7 @@ export class GitSCMTabComponent implements OnInit, OnDestroy {
       // Read once and held: a failed lookup leaves the cache, so a second
       // read would start a new request instead of seeing this one.
       this.repo.set(this.gitData.getRepository(scm, projectName));
-    });
+    }, { injector: this.injector });
   }
 
   private loadRepoDetails(): void {
