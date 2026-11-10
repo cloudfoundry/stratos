@@ -1,6 +1,8 @@
 import { provideZonelessChangeDetection } from '@angular/core';
 import { ComponentFixture, TestBed } from '@angular/core/testing';
-import { provideRouter } from '@angular/router';
+import { By } from '@angular/platform-browser';
+import { ActivatedRoute, provideRouter } from '@angular/router';
+import { PageSubNavComponent } from '@stratosui/core';
 import { of } from 'rxjs';
 import { describe, it, expect, beforeEach, vi } from 'vitest';
 
@@ -31,6 +33,7 @@ describe('KubernetesAnalysisReportComponent', () => {
       ],
       providers: [
         provideRouter([]),
+        { provide: ActivatedRoute, useValue: { snapshot: { params: { id: 'test-id' }, pathFromRoot: [] } } },
         KubeBaseGuidMock,
         { provide: KubeAnalysisDataService, useValue: mockAnalysisData },
         provideZonelessChangeDetection(),
@@ -46,5 +49,11 @@ describe('KubernetesAnalysisReportComponent', () => {
 
   it('should create', () => {
     expect(component).toBeTruthy();
+  });
+
+  it('names the loaded report in the breadcrumbs it hands the sub-nav', async () => {
+    await fixture.whenStable();
+    const subNav = fixture.debugElement.query(By.directive(PageSubNavComponent)).componentInstance as PageSubNavComponent;
+    expect(subNav.breadcrumbs()?.map(b => b.value)).toEqual(['Analysis', 'Test Analysis Report']);
   });
 });

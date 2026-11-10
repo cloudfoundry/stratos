@@ -1,4 +1,4 @@
-<app-page-sub-nav [breadcrumbs]="(breadcrumbs$ | async) ?? []"></app-page-sub-nav>
+<app-page-sub-nav [breadcrumbs]="breadcrumbs()"></app-page-sub-nav>
 
 <app-loading-page [isLoading]="isLoading$" text="Loading Analysis Report">
   @if (errorMsg$ | async; as message) {
