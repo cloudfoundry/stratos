@@ -72,7 +72,7 @@ export class CloudFoundrySpaceBaseComponent implements OnInit {
 
   // Drives the loading-page overlay from the signal-native data service,
   // replacing the old ngrx EntityMonitor (entityId/entitySchema) path.
-  isLoading$ = toObservable(this.spaceDataService.isLoading);
+  isLoading = this.spaceDataService.isLoading;
 
 
   // Signal: written after the first render; an OnPush view under zoneless CD only repaints for signal writes.

@@ -1,8 +1,7 @@
 import { CommonModule } from '@angular/common';
 import { Component, ChangeDetectionStrategy, Signal, computed, inject } from '@angular/core';
-import { toObservable, toSignal } from '@angular/core/rxjs-interop';
+import { toSignal } from '@angular/core/rxjs-interop';
 import { ActivatedRoute, RouterModule } from '@angular/router';
-import { Observable } from 'rxjs';
 
 import {
   BooleanIndicatorComponent,
@@ -58,8 +57,6 @@ export const QUOTA_ORG_GUID = 'org';
 export class QuotaDefinitionComponent extends QuotaDefinitionBaseComponent {
   readonly quotaDefinition: Signal<StOrgQuota | null>;
   readonly detailsLoading: Signal<boolean>;
-  // Observable bridge for <app-loading-page> until it migrates to Signal inputs.
-  readonly detailsLoading$: Observable<boolean>;
   readonly editLink: Signal<string[]>;
   readonly canEditQuota: Signal<boolean>;
 
@@ -99,7 +96,6 @@ export class QuotaDefinitionComponent extends QuotaDefinitionBaseComponent {
     });
     this.quotaDefinition = computed(() => sourceSignal()?.value() ?? null);
     this.detailsLoading = computed(() => sourceSignal()?.isLoading() ?? false);
-    this.detailsLoading$ = toObservable(this.detailsLoading);
 
     this.editLink = computed(() => {
       const guid = resolvedQuotaGuid();

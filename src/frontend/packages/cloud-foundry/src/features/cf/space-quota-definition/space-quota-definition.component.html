@@ -31,7 +31,7 @@
 
 @if (spaceQuotaDefinition(); as quotaDefinition) {
   <div class="space-quota-definition-page">
-    <app-loading-page [isLoading]="detailsLoading$" text="Retrieving details">
+    <app-loading-page [isLoading]="detailsLoading()" text="Retrieving details">
       <div class="text-sm text-content-muted">Name</div>
       <h2 class="m-0">{{ quotaDefinition.name }}</h2>
       <div class="flex my-2">

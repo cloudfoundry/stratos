@@ -134,13 +134,12 @@ describe('CloudFoundryOrganizationBaseComponent', () => {
   // The overlay covers the tabs until the org itself is in; the spaces list
   // (enriched with per-space counts, slow on a large org) fills in behind it.
   it('shows the loading overlay until the org settles', async () => {
-    const seen: boolean[] = [];
-    component.isLoading$.subscribe(v => seen.push(v));
+    const element: HTMLElement = fixture.nativeElement;
     await fixture.whenStable();
-    expect(seen.at(-1)).toBe(true);
+    expect(element.querySelector('[data-test="loading-page-indicator"]')).toBeTruthy();
     mockOrgDataService.orgSettled.set(true);
     await fixture.whenStable();
-    expect(seen.at(-1)).toBe(false);
+    expect(element.querySelector('[data-test="loading-page-indicator"]')).toBeFalsy();
     mockOrgDataService.orgSettled.set(false);
   });
 });
