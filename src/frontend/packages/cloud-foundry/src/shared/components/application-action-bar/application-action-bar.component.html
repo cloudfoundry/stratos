@@ -1,22 +1,20 @@
 <app-page-sub-nav>
   <div class="flex w-full">
-    @if (applicationService.appSpace$ | async; as space) {
+    @if (detail.space(); as space) {
       <div class="flex">
         <ng-container
           *appCfUserPermission="manageAppPermission;spaceGuid:space.guid;endpointGuid:applicationService.cfGuid">
           <app-page-sub-nav-section>
-            @if (applicationService.applicationState$ | async) {
-              <button aria-label="Edit" class="btn btn-secondary btn-icon" name="edit"
-                routerLink="/applications/{{applicationService.cfGuid}}/{{applicationService.appGuid}}/edit"
-                title="Edit">
-                <span aria-hidden="true" class="material-icons">edit</span>
-              </button>
-            }
+            <button aria-label="Edit" class="btn btn-secondary btn-icon" name="edit"
+              routerLink="/applications/{{applicationService.cfGuid}}/{{applicationService.appGuid}}/edit"
+              title="Edit">
+              <span aria-hidden="true" class="material-icons">edit</span>
+            </button>
             <button aria-label="Delete" class="btn btn-danger btn-icon" name="delete" (click)="actions.redirectToDelete()" title="Delete">
               <span aria-hidden="true" class="material-icons">delete</span>
             </button>
           </app-page-sub-nav-section>
-          @if (applicationService.applicationState$ | async; as appState) {
+          @if (detail.state(); as appState) {
             <!--
               appState.actions is null during the initial load window —
               ApplicationStateService.get() returns the Unknown fallback
@@ -56,9 +54,8 @@
     }
     <app-cli-menu [commands]="cliCommands()" [context]="cliNames()" [allLink]="cliAllLink"></app-cli-menu>
     <a aria-label="Visit" class="flex justify-center btn btn-info btn-icon"
-      [class.pointer-events-none]="(applicationService.applicationUrl$ | async) === null || (applicationService.application$ | async)?.app?.entity?.state !== 'STARTED'"
-      [class.opacity-50]="(applicationService.applicationUrl$ | async) === null || (applicationService.application$ | async)?.app?.entity?.state !== 'STARTED'"
-      href="{{applicationService.applicationUrl$ | async}}" target="_blank" title="Visit">
+      [class.pointer-events-none]="cannotVisit()" [class.opacity-50]="cannotVisit()"
+      href="{{detail.url()}}" target="_blank" title="Visit">
       <span aria-hidden="true" class="material-icons">launch</span>
     </a>
   </div>

@@ -1,15 +1,12 @@
-import { CommonModule } from '@angular/common';
 import { ChangeDetectionStrategy, Component, ElementRef, OnDestroy, OnInit, computed, inject } from '@angular/core';
-import { toSignal } from '@angular/core/rxjs-interop';
 import { RouterModule } from '@angular/router';
-import { combineLatest } from 'rxjs';
-import { map } from 'rxjs/operators';
 
 import {
   PageSubNavComponent,
   PageSubNavSectionComponent,
 } from '@stratosui/core';
 
+import { AppDetailDataService } from '../../../features/applications/app-detail-data.service';
 import { ApplicationService } from '../../../features/applications/application.service';
 import { activeTabKey } from '../../active-tab-key';
 import { CfCurrentUserPermissions } from '../../../user-permissions/cf-user-permissions-checkers';
@@ -39,7 +36,6 @@ import { CliMenuComponent } from '../cli-menu/cli-menu.component';
   standalone: true,
   changeDetection: ChangeDetectionStrategy.OnPush,
   imports: [
-    CommonModule,
     RouterModule,
     PageSubNavComponent,
     PageSubNavSectionComponent,
@@ -53,6 +49,7 @@ import { CliMenuComponent } from '../cli-menu/cli-menu.component';
 })
 export class AppApplicationActionBarComponent implements OnInit, OnDestroy {
   applicationService = inject(ApplicationService);
+  detail = inject(AppDetailDataService);
   actions = inject(AppApplicationActionsService);
   private host = inject(ElementRef);
   private progressSvc = inject(AppLifecycleProgressService);
@@ -69,15 +66,13 @@ export class AppApplicationActionBarComponent implements OnInit, OnDestroy {
   // The CF CLI menu: the commands of the open tab, with the names filled in.
   private activeTab = activeTabKey();
   readonly cliCommands = computed(() => commandsForTab(APPLICATION_CLI_COMMANDS, this.activeTab()));
-  readonly cliNames = toSignal(combineLatest([
-    this.applicationService.application$,
-    this.applicationService.appOrg$,
-    this.applicationService.appSpace$,
-  ]).pipe(map(([app, org, space]): CliCommandNames => ({
-    appName: app?.app?.entity?.name,
-    orgName: org?.name ?? '',
-    spaceName: space?.name ?? '',
-  }))), { initialValue: { orgName: '', spaceName: '' } as CliCommandNames });
+  readonly cliNames = computed((): CliCommandNames => ({
+    appName: this.detail.app()?.entity?.name,
+    orgName: this.detail.org()?.name ?? '',
+    spaceName: this.detail.space()?.name ?? '',
+  }));
+  // The Visit link is live only for a started app with a route.
+  readonly cannotVisit = computed(() => this.detail.url() === null || !this.detail.running());
   readonly cliAllLink = ['/applications', this.applicationService.cfGuid, this.applicationService.appGuid, 'cli'];
 
   ngOnInit(): void {
