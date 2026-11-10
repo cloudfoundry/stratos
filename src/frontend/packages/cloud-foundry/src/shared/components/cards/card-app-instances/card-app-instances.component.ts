@@ -8,11 +8,10 @@ import {
   input,
   viewChild
 } from '@angular/core';
-import { toSignal } from '@angular/core/rxjs-interop';
+import { toObservable, toSignal } from '@angular/core/rxjs-interop';
 import { FormsModule } from '@angular/forms';
 import { RouterLink } from '@angular/router';
-import { combineLatest } from 'rxjs';
-import { switchMap } from 'rxjs/operators';
+import { filter, switchMap } from 'rxjs/operators';
 
 import {
   AppInputDirective,
@@ -108,8 +107,11 @@ export class CardAppInstancesComponent implements OnDestroy {
    * check is pending and resolves to a boolean after it lands.
    */
   readonly canEdit = toSignal(
-    combineLatest([this.appService.appOrg$, this.appService.appSpace$]).pipe(
-      switchMap(([org, space]) =>
+    // can() is a stream (permissions are a later step), so the org and
+    // space are bridged for it once both are known.
+    toObservable(computed(() => ({ org: this.dataService.org(), space: this.dataService.space() }))).pipe(
+      filter(({ org, space }) => !!org && !!space),
+      switchMap(({ org, space }) =>
         this.cups.can(
           CfCurrentUserPermissions.APPLICATION_EDIT,
           this.appService.cfGuid,
