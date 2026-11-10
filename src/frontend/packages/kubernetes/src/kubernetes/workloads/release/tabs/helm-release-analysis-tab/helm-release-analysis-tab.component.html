@@ -7,7 +7,7 @@
   </app-analysis-report-selector>
 </app-page-sub-nav>
 
-<app-analysis-report-viewer [report]="report$ | async"></app-analysis-report-viewer>
+<app-analysis-report-viewer [report]="report()"></app-analysis-report-viewer>
 @if (noReportsAvailable) {
   <app-no-content-message icon="assignment" [hidden]="false" firstLine="No reports available">
   </app-no-content-message>
