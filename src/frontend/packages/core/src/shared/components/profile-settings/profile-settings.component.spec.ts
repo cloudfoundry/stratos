@@ -4,6 +4,7 @@ import { describe, it, expect, beforeEach, vi } from 'vitest';
 import { of } from 'rxjs';
 
 import { BaseTestModules, STORE_TEST_PROVIDERS } from '@test-framework/core-test.helper';
+import { DashboardDataService } from '../../../core/dashboard-data.service';
 import { UserProfileService } from '../../../core/user-profile.service';
 import { ProfileSettingsComponent } from './profile-settings.component';
 
@@ -55,5 +56,13 @@ describe('ProfileSettingsComponent', () => {
     for (const subtext of subtexts) {
       expect(subtext.classList).toContain('text-content-muted');
     }
+  });
+
+  it('flags the session-timeout option as a warning once the timeout is disabled', async () => {
+    await fixture.whenStable();
+    expect(fixture.nativeElement.querySelector('.user-profile__option-warning')).toBeNull();
+    TestBed.inject(DashboardDataService).setSessionTimeout(false);
+    await fixture.whenStable();
+    expect(fixture.nativeElement.querySelector('.user-profile__option-warning')).not.toBeNull();
   });
 });
