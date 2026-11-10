@@ -86,6 +86,14 @@ describe('CardCfRecentAppsComponent stats requests', () => {
     expect(statsRequests()).toEqual(['/pp/v1/cf/app-stats/ep-1/a-started']);
   });
 
+  it('takes the app list as a plain value', async () => {
+    fixture.componentRef.setInput('endpoint', 'ep-1');
+    fixture.componentRef.setInput('allApps$', [app('a-started', 'STARTED'), app('b-stopped', 'STOPPED')]);
+    await fixture.whenStable();
+    expect(statsRequests()).toEqual(['/pp/v1/cf/app-stats/ep-1/a-started']);
+    expect(fixture.nativeElement.querySelectorAll('.compact-app-card').length).toBe(2);
+  });
+
   it('renders placeholder rows, with no stats requests, in placeholderMode', async () => {
     fixture.componentRef.setInput('placeholderMode', true);
     fixture.componentRef.setInput('maxRows', 3);
