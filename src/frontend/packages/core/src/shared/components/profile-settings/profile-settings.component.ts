@@ -1,5 +1,5 @@
 import { CommonModule } from '@angular/common';
-import { ChangeDetectionStrategy, Component, inject, input } from '@angular/core';
+import { ChangeDetectionStrategy, Component, computed, inject, input } from '@angular/core';
 import { toObservable } from '@angular/core/rxjs-interop';
 import { CustomSlideToggleComponent } from '../custom-slide-toggle/custom-slide-toggle.component';
 import { CustomTooltipDirective } from '../custom-tooltip/custom-tooltip.directive';
@@ -78,19 +78,11 @@ export class ProfileSettingsComponent {
 
   public types = ProfileSettingsTypes;
 
-  public timeoutSession$ = toObservable(this.dashboardSignals.timeoutSession).pipe(
-    map(v => v ? 'true' : 'false')
-  );
+  readonly timeoutSession = computed(() => this.dashboardSignals.timeoutSession() ? 'true' : 'false');
 
-  public pollingEnabled$ = toObservable(this.dashboardSignals.pollingEnabled).pipe(
-    map(v => v ? 'true' : 'false')
-  );
+  readonly pollingEnabled = computed(() => this.dashboardSignals.pollingEnabled() ? 'true' : 'false');
 
-  public gravatarEnabled$ = toObservable(this.dashboardSignals.gravatarEnabled).pipe(
-    map(v => v ? 'true' : 'false')
-  );
-
-  public allowGravatar$ = toObservable(this.dashboardSignals.gravatarEnabled);
+  readonly gravatarEnabled = computed(() => this.dashboardSignals.gravatarEnabled() ? 'true' : 'false');
 
   public localStorageSize$ = this.sessionData$.pipe(
     // -1 means the size could not be determined (no user session or storage unavailable)
