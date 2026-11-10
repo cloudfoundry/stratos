@@ -1,5 +1,4 @@
 import { ChangeDetectionStrategy, Component, OnDestroy, OnInit, computed, inject, signal } from '@angular/core';
-import { toObservable } from '@angular/core/rxjs-interop';
 import { CommonModule } from '@angular/common';
 import { ReactiveFormsModule, FormsModule, FormControl, FormGroup, Validators } from '@angular/forms';
 import { AuthDataService } from '@stratosui/store';
@@ -66,8 +65,6 @@ export class ConsoleUaaWizardComponent implements OnInit, OnDestroy {
   uaaScopes = signal<string[]>([]);
   selectedScope = signal('');
   applyingSetup = signal<boolean>(false);
-  // app-loading-page takes an Observable<boolean> — bridge the signal.
-  applyingSetup$ = toObservable(this.applyingSetup);
 
   // Tracks UAA form validity for the first step's signal handle. Updated
   // from the form's valueChanges subscription in ngOnInit so the step's

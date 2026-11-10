@@ -1,8 +1,6 @@
 import { CommonModule } from '@angular/common';
 import { Component, OnChanges, OnInit, computed, signal, inject, ChangeDetectionStrategy, input, output } from '@angular/core';
-import { toObservable } from '@angular/core/rxjs-interop';
 import { Router } from '@angular/router';
-import { Observable } from 'rxjs';
 
 import { StratosStatus } from '@stratosui/store';
 import { isUnlimited } from '../../../../core/cf-quota.types';
@@ -68,7 +66,6 @@ export class CardNumberMetricComponent implements OnInit, OnChanges {
 
   private _status = signal<StratosStatus>(StratosStatus.NONE);
   public status = this._status.asReadonly();
-  public status$: Observable<StratosStatus> = toObservable(this._status);
   isUnlimited!: boolean;
 
   ngOnInit() {
