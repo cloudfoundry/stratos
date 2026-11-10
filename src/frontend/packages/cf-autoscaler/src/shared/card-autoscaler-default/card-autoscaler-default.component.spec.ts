@@ -5,7 +5,8 @@ import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { NoopAnimationsModule } from '@angular/platform-browser/animations';
 import { afterEach, beforeEach, describe, expect, it } from 'vitest';
 
-import { ApplicationServiceMock, ApplicationStateService } from "@test-framework/cf";
+import { ApplicationServiceMock, ApplicationStateService, makeAppDetailDataServiceStub } from "@test-framework/cf";
+import { AppDetailDataService } from '../../../../cloud-foundry/src/features/applications/app-detail-data.service';
 import { ApplicationService } from '@stratosui/cloud-foundry';
 import { CoreModule } from '@stratosui/core';
 import { generateBaseTestStoreModules } from '@test-framework/core-test.helper';
@@ -37,6 +38,7 @@ describe('CardAutoscalerDefaultComponent', () => {
           NoopAnimationsModule
         ),
         { provide: ApplicationService, useClass: ApplicationServiceMock },
+        { provide: AppDetailDataService, useValue: makeAppDetailDataServiceStub() },
         ApplicationStateService,
         provideZonelessChangeDetection(),
         provideHttpClient(),

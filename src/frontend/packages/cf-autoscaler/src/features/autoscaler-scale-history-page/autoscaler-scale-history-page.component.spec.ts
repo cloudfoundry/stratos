@@ -9,7 +9,8 @@ import { provideRouter } from '@angular/router';
 import { afterAll, afterEach, beforeAll, beforeEach, describe, expect, it, vi } from 'vitest';
 
 import { ApplicationService } from '@stratosui/cloud-foundry';
-import { ApplicationServiceMock } from '@test-framework/cf';
+import { ApplicationServiceMock, makeAppDetailDataServiceStub } from '@test-framework/cf';
+import { AppDetailDataService } from '../../../../cloud-foundry/src/features/applications/app-detail-data.service';
 import { CoreModule, CurrentUserPermissionsService, TabNavService } from '@stratosui/core';
 import { generateBaseTestStoreModules } from '@test-framework/core-test.helper';
 import { CfAutoscalerTestingModule } from '../../cf-autoscaler-testing.module';
@@ -35,6 +36,7 @@ describe('AutoscalerScaleHistoryPageComponent', () => {
         provideRouter([]),
         DatePipe,
         { provide: ApplicationService, useClass: ApplicationServiceMock },
+        { provide: AppDetailDataService, useValue: makeAppDetailDataServiceStub() },
         TabNavService,
         CurrentUserPermissionsService,
         provideZonelessChangeDetection(),

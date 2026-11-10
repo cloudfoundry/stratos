@@ -2,9 +2,10 @@ import { CommonModule } from '@angular/common';
 import { ChangeDetectionStrategy, ChangeDetectorRef, Component, Injector, OnInit, computed, inject, input } from '@angular/core';
 import { toObservable } from '@angular/core/rxjs-interop';
 import { Observable } from 'rxjs';
-import { map, shareReplay } from 'rxjs/operators';
+import { shareReplay } from 'rxjs/operators';
 
 import { ApplicationService, RunningInstancesComponent } from '@stratosui/cloud-foundry';
+import { AppDetailDataService } from '../../../../cloud-foundry/src/features/applications/app-detail-data.service';
 import { MetadataItemComponent } from '@stratosui/core';
 
 import { AutoscalerPolicyDataService } from '../../services/domain-data/autoscaler-policy-data.service';
@@ -32,19 +33,19 @@ import { AppAutoscalerPolicyLocal } from '../../store/app-autoscaler.types';
 })
 export class CardAutoscalerDefaultComponent implements OnInit {
   appService = inject(ApplicationService);
-  private applicationService = inject(ApplicationService);
+  private detail = inject(AppDetailDataService);
   private policyData = inject(AutoscalerPolicyDataService);
   private injector = inject(Injector);
   private cdr = inject(ChangeDetectorRef);
 
   appAutoscalerPolicy$!: Observable<AppAutoscalerPolicyLocal | false | null>;
-  applicationInstances$!: Observable<number | null | undefined>;
+  readonly applicationInstances = computed(() => this.detail.app()?.entity?.instances ?? null);
 
   readonly onUpdate = input<() => void>(() => { });
 
   ngOnInit() {
-    const cfGuid = this.applicationService.cfGuid;
-    const appGuid = this.applicationService.appGuid;
+    const cfGuid = this.appService.cfGuid;
+    const appGuid = this.appService.appGuid;
 
     void this.policyData.load(cfGuid, appGuid);
 
@@ -65,10 +66,6 @@ export class CardAutoscalerDefaultComponent implements OnInit {
       shareReplay({ bufferSize: 1, refCount: true }),
     );
 
-    this.applicationInstances$ = this.applicationService.app$.pipe(
-      map(({ entity }) => entity ? entity.entity.instances : null),
-      shareReplay({ bufferSize: 1, refCount: true })
-    );
     this.cdr.markForCheck();
   }
 
