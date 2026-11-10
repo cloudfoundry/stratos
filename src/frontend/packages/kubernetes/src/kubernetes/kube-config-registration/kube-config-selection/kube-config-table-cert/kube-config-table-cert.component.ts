@@ -1,7 +1,5 @@
 import { HttpClient, HttpErrorResponse } from '@angular/common/http';
 import {Component, effect, signal, inject, untracked, ChangeDetectionStrategy } from '@angular/core';
-import { CommonModule } from '@angular/common';
-import { toObservable } from '@angular/core/rxjs-interop';
 import { CustomCheckboxComponent } from '../../../../../../core/src/shared/components/custom-checkbox/custom-checkbox.component';
 import { AppBusyComponent } from '../../../../../../core/src/shared/components/busy-indicator/busy-indicator.component';
 import { timeout } from 'rxjs/operators';
@@ -24,17 +22,15 @@ selector: 'app-kube-config-table-cert',
   changeDetection: ChangeDetectionStrategy.OnPush,
   standalone: true,
   imports: [
-    CommonModule,
     CustomCheckboxComponent,
     AppBusyComponent
   ]
 })
 export class KubeConfigTableCertComponent extends TableCellCustom<KubeConfigFileCluster> {
 
-  private _initialValue = signal<{
+  readonly initialValue = signal<{
     checked: boolean;
   } | null>(null);
-  initialValue$ = toObservable(this._initialValue);
   initialized = false;
 
   private helper = inject(KubeConfigHelper);
@@ -57,7 +53,7 @@ export class KubeConfigTableCertComponent extends TableCellCustom<KubeConfigFile
     this.initialized = true;
     if (row.cluster['insecure-skip-tls-verify']) {
       // User has manually specified default skip option
-      this._initialValue.set({
+      this.initialValue.set({
         checked: true
       });
     } else {
@@ -74,7 +70,7 @@ export class KubeConfigTableCertComponent extends TableCellCustom<KubeConfigFile
   }
 
   private update(checked: boolean) {
-    this._initialValue.set({ checked });
+    this.initialValue.set({ checked });
     this.valueChanged(checked);
   }
 
