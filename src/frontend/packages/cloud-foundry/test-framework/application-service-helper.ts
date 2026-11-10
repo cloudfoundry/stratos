@@ -1,140 +1,20 @@
-import { Observable, of as observableOf, of, BehaviorSubject } from 'rxjs';
-import { map } from 'rxjs/operators';
 import { signal, computed } from '@angular/core';
 
 import { APP_GUID, CF_GUID } from '@stratosui/core';
-import { RequestInfoState, APIResource, EntityInfo, StratosStatus } from '@stratosui/store';
 import { ApplicationService } from '@stratosui/cloud-foundry';
-import { IApp, IAppSummary } from '../src/cf-api.types';
-import { StDomain, StOrg, StSpace } from '../src/services/endpoint-data/stratos-types';
-import { ApplicationData } from '../src/features/applications/application.service';
-import { EnvVarStratosProject } from '../src/features/applications/application/application-tabs-base/tabs/build-tab/application-env-vars.service';
-import { ApplicationStateData } from '../src/shared/services/application-state.service';
-import { AppStat } from '../src/store/types/app-metadata.types';
 import { AppDetailDataService } from '../src/features/applications/app-detail-data.service';
-
-function createEntity<T>(entity: T): APIResource<T> {
-  return {
-    metadata: {
-      created_at: '',
-      guid: 'mockEntityGuid',
-      updated_at: '',
-      url: ''
-    },
-    entity
-  };
-}
 
 export class ApplicationServiceMock {
   static cfGuid = 'mockCfGuid';
   static appGuid = 'mockAppGuid';
   cfGuid = ApplicationServiceMock.cfGuid;
   appGuid = ApplicationServiceMock.appGuid;
-
-  private entityObsSubject = new BehaviorSubject({} as any);
-
-  // Use BehaviorSubjects instead of observableOf() to prevent immediate completion
-  // This fixes issues with withLatestFrom() and take(1) operators in components
-  private appSubject = new BehaviorSubject<ApplicationData>({
-    cf: {
-      guid: this.cfGuid
-    },
-    app: {
-      metadata: {
-        guid: this.appGuid
-      },
-      entity: {
-        space_guid: 'mockSpaceGuid',
-        cfGuid: this.cfGuid
-      } as IApp,
-    } as APIResource<IApp>,
-    stack: {
-      entity: {
-      },
-    },
-    fetching: false
-  } as ApplicationData);
-
-  private appOrgSubject = new BehaviorSubject<StOrg | undefined>({
-    guid: 'mockOrgGuid',
-    name: 'mockOrg',
-    status: 'active',
-    quotaGuid: '',
-    labels: {},
-    annotations: {},
-    createdAt: '',
-    updatedAt: '',
-    cnsiGuid: this.cfGuid,
-  });
-
-  private appSpaceSubject = new BehaviorSubject<StSpace | undefined>({
-    guid: 'mockSpaceGuid',
-    name: 'mockSpace',
-    orgGuid: 'mockOrgGuid',
-    createdAt: '',
-    updatedAt: '',
-    cnsiGuid: this.cfGuid,
-    appCount: 0,
-    routeCount: 0,
-    allowSsh: false,
-  });
-
-  application$: Observable<ApplicationData> = this.appSubject.asObservable();
-  app$: Observable<EntityInfo<APIResource<IApp>>> = this.application$.pipe(
-    map(appData => {
-      return {
-        entity: appData.app,
-        entityRequestInfo: {
-
-        } as RequestInfoState
-      }
-    })
-  );
-  appSummary$: Observable<EntityInfo<APIResource<IAppSummary>>> = observableOf({
-    entityRequestInfo: { fetching: false }
-  } as EntityInfo<APIResource<IAppSummary>>);
-  appStats$: Observable<AppStat[]> = observableOf(new Array<AppStat>());
-  applicationStratProject$: Observable<EnvVarStratosProject> =
-    observableOf({
-      deploySource: { type: 'github', timestamp: 0, commit: '', endpointGuid: '' },
-      // "Nothing overridden" — every OverrideAppDetails field at its documented
-      // empty/null default (the deploy form leaves them null when untouched).
-      deployOverrides: {
-        name: null, buildpack: null, instances: null, diskQuota: null, memQuota: null,
-        doNotStart: false, noRoute: false, randomRoute: false, host: null, domain: null,
-        path: null, startCmd: null, healthCheckType: null, stack: null, time: null,
-        dockerImage: null, dockerUsername: null,
-      },
-    });
-  isFetchingApp$: Observable<boolean> = observableOf(false);
-  isFetchingEnvVars$: Observable<boolean> = observableOf(false);
-  isUpdatingEnvVars$: Observable<boolean> = observableOf(false);
-  waitForAppEntity$: Observable<EntityInfo<APIResource<IApp>>> = this.app$;
-  appEnvVars = {
-    entities$: observableOf(new Array<APIResource<any>>())
-  };
-  applicationState$: Observable<ApplicationStateData> = observableOf({
-    label: '',
-    indicator: StratosStatus.NONE,
-    actions: {}
-  });
-  appOrg$: Observable<StOrg | undefined> = this.appOrgSubject.asObservable();
-  appSpace$: Observable<StSpace | undefined> = this.appSpaceSubject.asObservable();
-  applicationRunning$: Observable<boolean> = observableOf(false);
-  orgDomains$: Observable<StDomain[]> = observableOf([]);
-  entityService: any = {
-    waitForEntity$: of({}),
-    updatingSection$: of({}),
-    entityObs$: this.entityObsSubject.asObservable(),
-    poll: () => of({})
-  }
 }
 
 /**
- * Minimal AppDetailDataService stub for use in tests that instantiate the
- * real ApplicationService (via generateTestApplicationServiceProvider).
- * ApplicationService now requires AppDetailDataService via inject(), so
- * the stub must be provided whenever the real ApplicationService is used.
+ * Minimal AppDetailDataService stub for the pages and cards that read the
+ * detail signals; generateTestApplicationServiceProvider provides it beside
+ * the real ApplicationService.
  */
 export function makeAppDetailDataServiceStub() {
   const _loading = signal<Record<string, boolean>>({
@@ -157,8 +37,7 @@ export function makeAppDetailDataServiceStub() {
     errors: _errors.asReadonly(),
     running: computed(() => false),
     url: computed(() => null as string | null),
-    // null means env vars not loaded — ApplicationService.applicationStratProject$
-    // filters null values out, so components that do take(1) won't receive null.
+    // null means env vars not loaded.
     stratosProject: computed(() => null),
     state: computed(() => ({ label: '', indicator: null, actions: {} })),
     fetching: computed(() => false),
