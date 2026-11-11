@@ -31,12 +31,16 @@
     font-size: 14px;
     letter-spacing: 0.01em;
     line-height: 18px;
-    // Keyboard focus shows the global :focus-visible outline.
     padding: 10px;
     padding-left: $item-header-padding;
     text-decoration: none;
     &:hover {
       background-color: var(--table-row-hover);
+    }
+    // The global :focus-visible outline, drawn inside the item: the item
+    // spans its scrolling list, which cuts off an outline drawn outside.
+    &:focus-visible {
+      outline-offset: -2px;
     }
     &--active {
       // 6 %: the primary text stays above 4.5:1 on the tint in both modes

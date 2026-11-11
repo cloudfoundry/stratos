@@ -57,7 +57,7 @@
         <li class="nav-item-container">
           @if (revealHiddenItems || !tab.hidden || (tab.hidden && (tab.hidden | async) === false)) {
             <a
-              class="nav-item nav-item-link flex items-center pl-0 pr-3 py-3 text-nav-text-muted hover:text-nav-text hover:bg-nav-hover transition-all duration-200 relative group"
+              class="nav-item nav-item-link flex items-center pl-0 pr-3 py-3 focus-visible:-outline-offset-2 text-nav-text-muted hover:text-nav-text hover:bg-nav-hover transition-all duration-200 relative group"
               [class.nav-item--active]="isActiveRoute(tab.link)"
               [class.bg-nav-active]="isActiveRoute(tab.link)"
               [class.text-nav-text]="isActiveRoute(tab.link)"
