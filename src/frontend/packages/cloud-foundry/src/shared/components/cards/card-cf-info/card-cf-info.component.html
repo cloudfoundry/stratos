@@ -10,7 +10,7 @@
             </div>
           </app-metadata-item>
           <app-metadata-item icon="info_outline" label="CF API Version">
-          {{ info()?.entity?.entity?.api_version }}</app-metadata-item>
+          {{ info()?.api_version }}</app-metadata-item>
           @if (autoscalerVersionLabel(); as v) {
             <app-metadata-item icon="meter"
               iconFont="stratos-icons" label="Autoscaler Version">

@@ -69,7 +69,7 @@ export class CardCfInfoComponent implements OnInit {
 
   /** Endpoint description, falling back to '-' when absent. */
   readonly description = computed((): string => {
-    const metadata = this.info()?.entity?.entity;
+    const metadata = this.info();
     if (!metadata) return '-';
     if (!metadata.description) return '-';
     return metadata.description + (metadata.build ? ` (${metadata.build})` : '');
