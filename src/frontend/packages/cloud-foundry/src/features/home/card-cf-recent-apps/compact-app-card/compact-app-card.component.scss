@@ -41,8 +41,14 @@
     text-overflow: ellipsis;
     white-space: nowrap;
   }
+  // The link carries the ellipsis, so its box is as wide as the name that
+  // shows and its focus outline stays inside the name box.
   &__name a {
     color: rgb(37 99 235); // blue-600
+    display: block;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
 
     :host-context(.dark) & {
       color: rgb(96 165 250); // blue-400
