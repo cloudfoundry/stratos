@@ -50,6 +50,17 @@ export class CloudFoundryEndpointService {
   private injector = inject(Injector);
 
 
+  // Signal members for template reads; the `*$` members beside them are
+  // toObservable bridges over the same signals and go once no reader is left.
+  apps!: Signal<APIResource<IApp>[]>;
+  appsLoading!: Signal<boolean>;
+  hasApps!: Signal<boolean>;
+  appCount!: Signal<number>;
+  totalMem!: Signal<number>;
+  usersCount!: Signal<number | null>;
+  info!: Signal<ICfV2Info | null>;
+  hasSSHAccess!: Signal<boolean>;
+
   hasSSHAccess$!: Observable<boolean>;
   totalMem$!: Observable<number>;
   paginationSubscription!: Subscription;
@@ -135,6 +146,14 @@ export class CloudFoundryEndpointService {
     // that happen to read them do not throw.
     if (!this.cfGuid) {
       this.cfInfoData = { info: signal(null) } as unknown as CfInfoDataService;
+      this.apps = signal([]);
+      this.appsLoading = signal(false);
+      this.hasApps = signal(false);
+      this.appCount = signal(0);
+      this.totalMem = signal(0);
+      this.usersCount = signal(null);
+      this.info = signal(null);
+      this.hasSSHAccess = signal(false);
       this.endpoint$ = EMPTY;
       this.endpoint = signal(undefined);
       this.info$ = EMPTY;
@@ -152,6 +171,7 @@ export class CloudFoundryEndpointService {
         apps: signal([]),
         orgs: signal([]),
         appCount: signal(0),
+        orgCount: signal(0),
         isLoadingDetails: signal(false),
       } as unknown as EndpointDataService;
       return;
@@ -184,16 +204,21 @@ export class CloudFoundryEndpointService {
     // during constructor execution.
     this.endpoint = toSignal(this.endpoint$, { initialValue: undefined, injector: this.injector });
 
-    this.info$ = toObservable(this.cfInfoData.info, { injector: this.injector }).pipe(
+    this.info = this.cfInfoData.info;
+    this.hasSSHAccess = computed(() => {
+      const info = this.info();
+      return !!(info?.app_ssh_endpoint && info.app_ssh_host_key_fingerprint && info.app_ssh_oauth_client);
+    });
+    this.info$ = toObservable(this.info, { injector: this.injector }).pipe(
       filter((info): info is ICfV2Info => !!info),
     );
 
     // V3-native: lazy read of the /pp/v1/cf/users/:cnsi cache. Counts every user
     // visible to the connected principal — admin sees the whole CNSI; non-
     // admin sees the role-restricted subset that getNativeUsers returns.
-    this.usersCount$ = toObservable(this.cnsiUsers.users(this.cfGuid), { injector: this.injector }).pipe(
-      map(users => users === null ? null : users.length),
-    );
+    const users = this.cnsiUsers.users(this.cfGuid);
+    this.usersCount = computed(() => users()?.length ?? null);
+    this.usersCount$ = toObservable(this.usersCount, { injector: this.injector });
 
     this.constructAppObs();
   }
@@ -206,14 +231,15 @@ export class CloudFoundryEndpointService {
     // every CF page-tree consumer now reads through these observables
     // bridged off the EndpointDataService signals.
     this.endpointData = this.endpointDataRegistry.acquire(this.cfGuid);
-    const appsResources = computed(() => this.endpointData.apps().map(stAppToAPIResource));
-    this.apps$ = toObservable(appsResources, { injector: this.injector });
-    this.appsLoading$ = toObservable(this.endpointData.isLoadingDetails, { injector: this.injector });
-    this.hasApps$ = toObservable(
-      computed(() => this.endpointData.apps().length > 0),
-      { injector: this.injector },
-    );
-    this.appCount$ = toObservable(this.endpointData.appCount, { injector: this.injector });
+    this.apps = computed(() => this.endpointData.apps().map(stAppToAPIResource));
+    this.appsLoading = this.endpointData.isLoadingDetails;
+    this.hasApps = computed(() => this.endpointData.apps().length > 0);
+    this.appCount = this.endpointData.appCount;
+    this.totalMem = computed(() => this.getMetricFromApps(this.apps(), 'memory'));
+    this.apps$ = toObservable(this.apps, { injector: this.injector });
+    this.appsLoading$ = toObservable(this.appsLoading, { injector: this.injector });
+    this.hasApps$ = toObservable(this.hasApps, { injector: this.injector });
+    this.appCount$ = toObservable(this.appCount, { injector: this.injector });
 
     // V3-native orgs pipeline — replaces the legacy
     // cfEntityCatalog.org.actions.getMultiple(... includeRelations: [...])
@@ -228,12 +254,8 @@ export class CloudFoundryEndpointService {
   }
 
   private constructSecondaryObservable() {
-    this.hasSSHAccess$ = this.info$.pipe(
-      map(info => !!(info.app_ssh_endpoint
-        && info.app_ssh_host_key_fingerprint
-        && info.app_ssh_oauth_client))
-    );
-    this.totalMem$ = this.apps$.pipe(map(apps => this.getMetricFromApps(apps, 'memory')));
+    this.hasSSHAccess$ = toObservable(this.hasSSHAccess, { injector: this.injector });
+    this.totalMem$ = toObservable(this.totalMem, { injector: this.injector });
 
     this.connected$ = this.endpoint$.pipe(
       map(p => p.entity.connectionStatus === 'connected')
