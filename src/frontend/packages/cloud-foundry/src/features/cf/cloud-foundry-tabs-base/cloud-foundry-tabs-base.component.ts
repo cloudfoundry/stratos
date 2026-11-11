@@ -1,4 +1,5 @@
-import { Component, OnInit, ChangeDetectionStrategy, inject } from '@angular/core';
+import { Component, OnInit, ChangeDetectionStrategy, computed, inject } from '@angular/core';
+import { toObservable } from '@angular/core/rxjs-interop';
 import { CommonModule } from '@angular/common';
 import { RouterModule } from '@angular/router';
 import { Observable, of as observableOf } from 'rxjs';
@@ -77,8 +78,8 @@ export class CloudFoundryTabsBaseComponent implements OnInit {
       .can(CfCurrentUserPermissions.FIREHOSE_VIEW, this.cfEndpointService.cfGuid)
       .pipe(map(visible => !visible));
 
-    const usersHidden$ = cfEndpointService.usersCount$.pipe(
-      map(count => !count),
+    // The side-nav tab type still takes an Observable for `hidden$`.
+    const usersHidden$ = toObservable(computed(() => !cfEndpointService.usersCount())).pipe(
       startWith(true),
     );
 
