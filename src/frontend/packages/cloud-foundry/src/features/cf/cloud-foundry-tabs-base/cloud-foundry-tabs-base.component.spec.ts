@@ -1,6 +1,6 @@
 import { TemplatePortal } from '@angular/cdk/portal';
 import { ComponentFixture, TestBed } from '@angular/core/testing';
-import { importProvidersFrom, provideZonelessChangeDetection } from '@angular/core';
+import { importProvidersFrom, provideZonelessChangeDetection, signal } from '@angular/core';
 import { provideHttpClient } from '@angular/common/http';
 import { provideHttpClientTesting } from '@angular/common/http/testing';
 import { provideRouter } from '@angular/router';
@@ -14,11 +14,14 @@ import { TEST_CATALOGUE_ENTITIES, generateStratosEntities, EntityCatalogTestModu
 import { STORE_TEST_PROVIDERS, testSCFEndpointGuid, populateStoreWithTestEndpoint } from '@stratosui/store/testing';
 import { generateCFEntities, generateTestCfEndpointServiceProvider } from '@test-framework/cf';
 import { ActiveRouteCfOrgSpace } from '../cf-page.types';
+import { CfUsersPagedDataService } from '../../../shared/data-services/cf-users-paged-data.service';
 import { CloudFoundryTabsBaseComponent } from "./cloud-foundry-tabs-base.component";
 describe('CloudFoundryTabsBaseComponent', () => {
   let component: CloudFoundryTabsBaseComponent;
   let fixture: ComponentFixture<CloudFoundryTabsBaseComponent>;
+  const users = signal<unknown[] | null>(null);
   beforeEach(async () => {
+      users.set(null);
       await TestBed.configureTestingModule({
         imports: [CloudFoundryTabsBaseComponent],
         providers: [
@@ -41,6 +44,7 @@ describe('CloudFoundryTabsBaseComponent', () => {
           ...cfCurrentUserPermissionsService,
           ...generateTestCfEndpointServiceProvider(),
           { provide: ActiveRouteCfOrgSpace, useValue: { cfGuid: testSCFEndpointGuid } },
+          { provide: CfUsersPagedDataService, useValue: { users: () => users } },
           TabNavService,
         ]
       }).compileComponents();
@@ -52,10 +56,10 @@ describe('CloudFoundryTabsBaseComponent', () => {
       populateStoreWithTestEndpoint();
     });
 
-  beforeEach(() => {
+  beforeEach(async () => {
     fixture = TestBed.createComponent(CloudFoundryTabsBaseComponent);
     component = fixture.componentInstance;
-    fixture.detectChanges();
+    await fixture.whenStable();
   });
 
   it('should create', () => {
@@ -71,6 +75,23 @@ describe('CloudFoundryTabsBaseComponent', () => {
     view.detectChanges();
     const row = view.rootNodes.find((n: Node) => n instanceof HTMLElement) as HTMLElement;
     expect(row.querySelector('button[aria-label="CF CLI"]')).toBeTruthy();
+  });
+
+  it('hides the Users tab until the endpoint has users', async () => {
+    const usersTab = component.tabLinks.find(t => t.link === CloudFoundryTabsBaseComponent.users);
+    const seen: boolean[] = [];
+    const sub = usersTab!.hidden$!.subscribe(hidden => seen.push(hidden));
+    await fixture.whenStable();
+    expect(seen.at(-1)).toBe(true);
+
+    users.set([]);
+    await fixture.whenStable();
+    expect(seen.at(-1)).toBe(true);
+
+    users.set([{}, {}]);
+    await fixture.whenStable();
+    expect(seen.at(-1)).toBe(false);
+    sub.unsubscribe();
   });
 
   afterAll(() => { });
