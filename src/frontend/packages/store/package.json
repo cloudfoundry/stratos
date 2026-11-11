@@ -16,13 +16,13 @@
     }
   },
   "peerDependencies": {
-    "@angular/common": "22.2.4",
-    "@angular/core": "22.2.4"
+    "@angular/common": "22.2.5",
+    "@angular/core": "22.2.5"
   },
   "description": "Stratos Store",
   "license": "Apache-2.0",
   "devDependencies": {
-    "@analogjs/vite-plugin-angular": "^2.9.6",
-    "@analogjs/vitest-angular": "^2.9.6"
+    "@analogjs/vite-plugin-angular": "^2.9.7",
+    "@analogjs/vitest-angular": "^2.9.7"
   }
 }
