@@ -1,7 +1,16 @@
 .number-metric-card {
   height: 100%;
+  // A block, so the global :focus-visible outline has a box to go round
+  // (an inline anchor round the card's blocks drew no visible outline);
+  // drawn inside, so a card container that clips cannot cut it off.
   &__anchor {
+    border-radius: 0.5rem;
     cursor: pointer;
+    display: block;
+    height: 100%;
+    &:focus-visible {
+      outline-offset: -2px;
+    }
   }
   &__container {
     align-items: center;

@@ -32,6 +32,11 @@
     flex: 1;
     min-width: 0;
     padding-left: 12px;
+    // Room for the focus outline (2 px, 2 px out) inside the box that
+    // clips for the ellipsis; the margin keeps the row height.
+    padding-block: 4px;
+    padding-right: 4px;
+    margin-block: -4px;
     overflow: hidden;
     text-overflow: ellipsis;
     white-space: nowrap;
