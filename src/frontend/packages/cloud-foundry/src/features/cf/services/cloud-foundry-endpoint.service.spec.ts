@@ -1,7 +1,7 @@
 import { TestBed } from '@angular/core/testing';
 import { provideHttpClient } from '@angular/common/http';
 import { HttpTestingController, provideHttpClientTesting } from '@angular/common/http/testing';
-import { provideZonelessChangeDetection } from '@angular/core';
+import { provideZonelessChangeDetection, signal } from '@angular/core';
 import { describe, it, expect, beforeEach, afterEach, vi } from 'vitest';
 
 import { CloudFoundryEndpointService } from './cloud-foundry-endpoint.service';
@@ -10,6 +10,8 @@ import { CfUsersPagedDataService } from '../../../shared/data-services/cf-users-
 import { EndpointDataRegistry } from '../../../services/endpoint-data/endpoint-data.registry';
 import { ActiveRouteCfOrgSpace } from '../cf-page.types';
 import { EndpointsDataService } from '@stratosui/store';
+import { ICfV2Info } from '../../../cf-api.types';
+import { StApp } from '../../../services/endpoint-data/stratos-types';
 
 // A.#1: pins the URL shape of the instance fetchAppCount / fetchRouteCount
 // helpers that replaced the V2 ngrx-pagination statics. The native handlers'
@@ -161,9 +163,94 @@ describe('CloudFoundryEndpointService — no-op when cfGuid is falsy', () => {
     expect(emitted).toBe(false);
   });
 
+  it('signal members hold empty values when cfGuid is undefined', () => {
+    const { svc } = buildWithGuid(undefined);
+    expect(svc.apps()).toEqual([]);
+    expect(svc.appsLoading()).toBe(false);
+    expect(svc.hasApps()).toBe(false);
+    expect(svc.appCount()).toBe(0);
+    expect(svc.totalMem()).toBe(0);
+    expect(svc.usersCount()).toBeNull();
+    expect(svc.info()).toBeNull();
+    expect(svc.hasSSHAccess()).toBe(false);
+  });
+
   it('still calls acquire/load when cfGuid IS present (regression guard)', () => {
     const { acquireFn, cfInfoAcquireFn } = buildWithGuid('cnsi-1');
     expect(acquireFn).toHaveBeenCalledWith('cnsi-1');
     expect(cfInfoAcquireFn).toHaveBeenCalledWith('cnsi-1');
+  });
+});
+
+describe('CloudFoundryEndpointService — signal members', () => {
+  const apps = signal<Partial<StApp>[]>([]);
+  const users = signal<unknown[] | null>(null);
+  const info = signal<Partial<ICfV2Info> | null>(null);
+  const loadingDetails = signal(true);
+  let svc: CloudFoundryEndpointService;
+
+  beforeEach(() => {
+    apps.set([]);
+    users.set(null);
+    info.set(null);
+    loadingDetails.set(true);
+    TestBed.configureTestingModule({
+      providers: [
+        provideZonelessChangeDetection(),
+        provideHttpClient(),
+        provideHttpClientTesting(),
+        { provide: ActiveRouteCfOrgSpace, useValue: { cfGuid: 'cnsi-1' } },
+        { provide: CfUsersPagedDataService, useValue: { users: () => users } },
+        {
+          provide: EndpointDataRegistry,
+          useValue: {
+            acquire: () => ({
+              apps, orgs: () => [], appCount: () => 0, isLoadingDetails: loadingDetails,
+            }),
+            release: vi.fn(),
+          },
+        },
+        { provide: CfInfoDataRegistry, useValue: { acquire: () => ({ info, load: () => ({ subscribe: vi.fn() }) }) } },
+        { provide: EndpointsDataService, useValue: { waitFor: () => new Promise(() => { /* never resolves */ }) } },
+        CloudFoundryEndpointService,
+      ],
+    });
+    svc = TestBed.inject(CloudFoundryEndpointService);
+  });
+
+  afterEach(() => {
+    TestBed.resetTestingModule();
+  });
+
+  it('usersCount is null until the users load, then their number', () => {
+    expect(svc.usersCount()).toBeNull();
+    users.set([{}, {}, {}]);
+    expect(svc.usersCount()).toBe(3);
+    users.set([]);
+    expect(svc.usersCount()).toBe(0);
+  });
+
+  it('totalMem sums memory x instances of the apps that are not stopped', () => {
+    apps.set([
+      { guid: 'a', state: 'STARTED', memory: 256, instances: 2 },
+      { guid: 'b', state: 'STOPPED', memory: 1024, instances: 1 },
+      { guid: 'c', state: 'STARTED', memory: 128, instances: 1 },
+    ]);
+    expect(svc.hasApps()).toBe(true);
+    expect(svc.totalMem()).toBe(640);
+  });
+
+  it('hasSSHAccess needs the endpoint, host key fingerprint and OAuth client', () => {
+    expect(svc.hasSSHAccess()).toBe(false);
+    info.set({ app_ssh_endpoint: 'ssh.example.com:2222', app_ssh_host_key_fingerprint: 'aa:bb' });
+    expect(svc.hasSSHAccess()).toBe(false);
+    info.set({ app_ssh_endpoint: 'ssh.example.com:2222', app_ssh_host_key_fingerprint: 'aa:bb', app_ssh_oauth_client: 'ssh-proxy' });
+    expect(svc.hasSSHAccess()).toBe(true);
+  });
+
+  it('appsLoading follows the endpoint data loading flag', () => {
+    expect(svc.appsLoading()).toBe(true);
+    loadingDetails.set(false);
+    expect(svc.appsLoading()).toBe(false);
   });
 });
