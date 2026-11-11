@@ -181,7 +181,7 @@
     "@playwright/test": "^1.64.1",
     "@schematics/angular": "22.2.6",
     "@tailwindcss/forms": "^0.5.11",
-    "@tailwindcss/postcss": "^4.3.3",
+    "@tailwindcss/postcss": "^4.3.5",
     "@tailwindcss/typography": "^0.5.20",
     "@types/d3-dispatch": "^3.0.7",
     "@types/d3-drag": "^3.0.7",
@@ -212,7 +212,7 @@
     "pngjs": "^7.0.0",
     "sass": "^1.107.1",
     "sass-loader": "^17.0.1",
-    "tailwindcss": "^4.3.3",
+    "tailwindcss": "^4.3.5",
     "typescript": "^6.0.3",
     "typescript-eslint": "^8.72.1",
     "vitest": "^5.1.0"
