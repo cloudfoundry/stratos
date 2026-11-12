@@ -137,14 +137,8 @@ export class HelmReleaseSummaryTabComponent implements OnDestroy {
   constructor() {
     // Convert signals within injection context
     runInInjectionContext(this.injector, () => {
-      // Convert isFetching$ to signal for computed
-      const isFetchingSignal = toSignal(
-        this.helmReleaseHelper.isFetching$,
-        { initialValue: true }
-      );
-
       this.isBusy = computed(() =>
-        isFetchingSignal() || this.busyDeleting()
+        this.helmReleaseHelper.isFetching() || this.busyDeleting()
       );
 
       this.path = `${this.helmReleaseHelper.namespace}/${this.helmReleaseHelper.releaseTitle}`;
