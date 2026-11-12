@@ -1,6 +1,5 @@
 import { CommonModule } from '@angular/common';
 import { DestroyRef, ChangeDetectionStrategy, Component, Signal, WritableSignal, computed, inject, signal } from '@angular/core';
-import { toSignal } from '@angular/core/rxjs-interop';
 import { Router, RouterModule } from '@angular/router';
 
 import {
@@ -71,15 +70,11 @@ export class CloudFoundrySpaceUserServiceInstancesSignalComponent {
   public readonly countPending: Signal<boolean> = computed(() => !this.instancesConfig.hasLoadedOnce());
 
   /** Gate the Add button on space-scoped SERVICE_INSTANCE_CREATE
-   *  (SPACE_DEVELOPER). Built here in the injection context so toSignal()
-   *  resolves. */
-  public readonly canCreateServiceInstance: Signal<boolean> = toSignal(
-    this.permissionsService.can$(
-      CfCurrentUserPermissions.SERVICE_INSTANCE_CREATE,
-      this.cfEndpointService.cfGuid,
-      this.cfSpaceService.spaceGuid,
-    ),
-    { initialValue: false },
+   *  (SPACE_DEVELOPER). */
+  public readonly canCreateServiceInstance: Signal<boolean> = this.permissionsService.can(
+    CfCurrentUserPermissions.SERVICE_INSTANCE_CREATE,
+    this.cfEndpointService.cfGuid,
+    this.cfSpaceService.spaceGuid,
   );
 
   /** L5 primary action — opens the add-service-instance wizard straight to
