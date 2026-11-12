@@ -1,6 +1,5 @@
 import { CommonModule } from '@angular/common';
 import { Component, ChangeDetectionStrategy, Signal, WritableSignal, inject, signal } from '@angular/core';
-import { toSignal } from '@angular/core/rxjs-interop';
 import { Router, RouterModule } from '@angular/router';
 
 import {
@@ -77,30 +76,9 @@ export class CloudFoundryOrganizationSpaceQuotasComponent {
     const router = inject(Router);
 
     const { cfGuid, orgGuid } = this.activeRouteCfOrgSpace;
-    this.canAddSpaceQuota = toSignal(
-      currentUserPermissionsService.can$(
-        CfCurrentUserPermissions.SPACE_QUOTA_CREATE,
-        cfGuid,
-        orgGuid,
-      ),
-      { initialValue: false },
-    );
-    this.canEditSpaceQuota = toSignal(
-      currentUserPermissionsService.can$(
-        CfCurrentUserPermissions.SPACE_QUOTA_EDIT,
-        cfGuid,
-        orgGuid,
-      ),
-      { initialValue: false },
-    );
-    this.canDeleteSpaceQuota = toSignal(
-      currentUserPermissionsService.can$(
-        CfCurrentUserPermissions.SPACE_QUOTA_DELETE,
-        cfGuid,
-        orgGuid,
-      ),
-      { initialValue: false },
-    );
+    this.canAddSpaceQuota = currentUserPermissionsService.can(CfCurrentUserPermissions.SPACE_QUOTA_CREATE, cfGuid, orgGuid);
+    this.canEditSpaceQuota = currentUserPermissionsService.can(CfCurrentUserPermissions.SPACE_QUOTA_EDIT, cfGuid, orgGuid);
+    this.canDeleteSpaceQuota = currentUserPermissionsService.can(CfCurrentUserPermissions.SPACE_QUOTA_DELETE, cfGuid, orgGuid);
 
     // Set basePredicate before initialize so the auto-filter effect picks
     // it up on first run.
