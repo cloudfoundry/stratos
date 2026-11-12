@@ -1,6 +1,4 @@
 import { Injectable, Signal, WritableSignal, computed, signal } from '@angular/core';
-import { toObservable } from '@angular/core/rxjs-interop';
-import { Observable, defer, distinctUntilChanged, map, startWith } from 'rxjs';
 
 import { SessionUser } from '../types/auth.types';
 import {
@@ -32,12 +30,11 @@ const getDefaultState = (): ICurrentUserRolesState => ({
  * methods that every roles writer calls directly:
  *   - stratos: {@link applySessionScopes} + request-state transitions
  *   - per-endpoint: {@link updateEndpointRoles} — a CF-agnostic write seam the
- *     cloud-foundry package's role facade uses to commit its own transforms
+ *     cloud-foundry package's roles data service uses to commit its own transforms
  *     (the store package must not depend on CF role types). This replaces the
  *     entity-catalog `getAllCurrentUserReducers` composition.
  *
- * Read surface (signals + `*$` observable getters) is unchanged from the
- * former bridge facade, so the cf-side read facades keep compiling untouched.
+ * Reads are signals; the permission checkers build their computeds on them.
  */
 @Injectable({ providedIn: 'root' })
 export class CurrentUserRolesDataService {
@@ -49,19 +46,6 @@ export class CurrentUserRolesDataService {
   readonly stratos: Signal<IStratosRolesState | undefined> = computed(
     () => this._state().internal,
   );
-
-  private readonly _state$ = toObservable(this._state);
-
-  /**
-   * Long-lived source observable; data services in dependent packages reuse it.
-   * Emits the current value synchronously on subscribe (BehaviorSubject-like,
-   * matching the legacy `store.select`) — `toObservable` alone replays via an
-   * effect that flushes on a later tick, so we `startWith` the live signal value
-   * at subscribe time and `distinctUntilChanged` dedups the duplicate.
-   */
-  readonly state$: Observable<ICurrentUserRolesState | undefined> = defer(() =>
-    this._state$.pipe(startWith(this._state())),
-  ).pipe(distinctUntilChanged());
 
   // ---- writes -------------------------------------------------------------
 
@@ -101,9 +85,9 @@ export class CurrentUserRolesDataService {
   }
 
   /**
-   * CF-agnostic per-endpoint-type write seam. The cloud-foundry role facade
-   * supplies an `updater` that maps the previous role subtree to the next one;
-   * the store package never needs to know the subtree's shape. Replaces the
+   * CF-agnostic per-endpoint-type write seam. The cloud-foundry roles data
+   * service supplies an `updater` that maps the previous role subtree to the next
+   * one; the store package never needs to know the subtree's shape. Replaces the
    * entity-catalog `getAllCurrentUserReducers` per-endpoint composition.
    */
   updateEndpointRoles<T = any>(endpointType: string, updater: (prev: T | undefined) => T): void {
@@ -143,24 +127,5 @@ export class CurrentUserRolesDataService {
       const scopes = this._state().internal?.scopes;
       return !!scopes?.includes(scope as UserScopeStrings);
     });
-  }
-
-  /** Observable boolean — keeps legacy `combineLatest`/`switchMap` pipelines simple. */
-  stratosRole$(role: PermissionValues): Observable<boolean> {
-    return this.state$.pipe(
-      map(state => {
-        const internal = state?.internal as Record<string, any> | undefined;
-        return internal ? !!internal[role] : false;
-      }),
-      distinctUntilChanged(),
-    );
-  }
-
-  /** Observable boolean — keeps legacy `combineLatest`/`switchMap` pipelines simple. */
-  stratosHasScope$(scope: UserScopeStrings | string): Observable<boolean> {
-    return this.state$.pipe(
-      map(state => !!state?.internal?.scopes?.includes(scope as UserScopeStrings)),
-      distinctUntilChanged(),
-    );
   }
 }
