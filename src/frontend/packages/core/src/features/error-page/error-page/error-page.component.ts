@@ -1,4 +1,4 @@
-import { ChangeDetectionStrategy, Component, Injector, OnInit, computed, inject } from '@angular/core';
+import { ChangeDetectionStrategy, Component, Injector, OnInit, computed, inject, untracked } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { toObservable } from '@angular/core/rxjs-interop';
 import { DomSanitizer, SafeUrl } from '@angular/platform-browser';
@@ -13,7 +13,7 @@ import {
   InternalEventState,
 } from '@stratosui/store';
 import { Observable, combineLatest } from 'rxjs';
-import { take, map } from 'rxjs/operators';
+import { map } from 'rxjs/operators';
 
 import { eventReturnUrlParam } from '../../event-page/events-page/events-page.component';
 import { PageHeaderComponent } from '../../../shared/components/page-header/page-header.component';
@@ -43,8 +43,21 @@ export class ErrorPageComponent implements OnInit {
   private endpointsData = inject(EndpointsDataService);
   private injector = inject(Injector);
 
-  public back$: Observable<string>;
-  public backParams$: Observable<object>;
+  // The page before this one, read once at the first render (by then the
+  // navigation here is recorded). Untracked, so later navigations from this
+  // page do not move the Close link.
+  private readonly previousState = computed(() => untracked(this.routingHistory.previousState));
+
+  public readonly back = computed(() => {
+    const previousState = this.previousState();
+    return previousState && previousState.url !== '/login' ? previousState.url.split('?')[0] : '/home';
+  });
+
+  // If we've come from the events page ensure we pass it back its param
+  public readonly backParams = computed(() => {
+    const overrideReturnUrl = this.activatedRoute.snapshot.queryParams[eventReturnUrlParam];
+    return this.back().startsWith('/events') ? { [eventReturnUrlParam]: overrideReturnUrl || null } : {};
+  });
   // strict: only assigned in ngOnInit when an endpointId route param is present; left
   // undefined otherwise. The template guards via `@if (errorDetails$ | async; as ...)`
   // and the async pipe tolerates an undefined source.
@@ -90,22 +103,5 @@ export class ErrorPageComponent implements OnInit {
         })
       );
     }
-  }
-
-  constructor() {
-    this.back$ = this.routingHistory.previousState$.pipe(take(1)).pipe(
-      map((previousState: any) => previousState && previousState.url !== '/login' ? previousState.url.split('?')[0] : '/home')
-    );
-
-    this.backParams$ = this.back$.pipe(
-      map((urlBack: string) => {
-        // If we've come from the events page ensure we pass it back it's param
-        const overrideReturnUrl = this.activatedRoute.snapshot.queryParams[eventReturnUrlParam];
-        return urlBack && urlBack.startsWith('/events') ? {
-          [eventReturnUrlParam]: overrideReturnUrl || null
-        } : {};
-      }),
-      take(1)
-    );
   }
 }
