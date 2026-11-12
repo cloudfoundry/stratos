@@ -11,8 +11,8 @@
   </button>
   <app-cf-cli-menu tab="summary"></app-cf-cli-menu>
   <app-polling-indicator class="ml-auto"
-    [manualPoll]="(cfOrgService.loadingApps$ | async) === false"
-    [isPolling]="(cfOrgService.loadingApps$ | async) ?? false"
+    [manualPoll]="cfOrgService.loadingApps() === false"
+    [isPolling]="cfOrgService.loadingApps()"
     (poll)="cfOrgService.fetchApps()">
   </app-polling-indicator>
 </app-page-sub-nav>
@@ -24,65 +24,65 @@
         </app-card-cf-org-user-details>
       </app-tile>
     </app-tile-group>
-    <app-loading-page [isLoading]="detailsLoading$" text="Retrieving details">
+    <app-loading-page [isLoading]="detailsLoading()" text="Retrieving details">
       <app-tile-group class="tile-group-4-cols">
         <app-tile>
           <app-card-number-metric
             link="/cloud-foundry/{{cfOrgService.cfGuid}}/organizations/{{cfOrgService.orgGuid}}/spaces" iconFont="stratos-icons" icon="virtual_space"
-            label="Spaces" labelSingular="Space" value="{{ (cfOrgService.spaces$ | async)?.length }}">
+            label="Spaces" labelSingular="Space" value="{{ cfOrgService.spaces()?.length }}">
           </app-card-number-metric>
         </app-tile>
         <app-tile>
           <app-card-number-metric [link]="appLink" icon="apps" label="Applications" labelSingular="Application"
-          value="{{ cfOrgService.appCount$ | async }}"></app-card-number-metric>
+          value="{{ appCount() }}"></app-card-number-metric>
         </app-tile>
-        @if (cfEndpointService.hasApps$ | async) {
+        @if (cfEndpointService.hasApps()) {
           <app-tile>
             <app-card-number-metric icon="application_instance" iconFont="stratos-icons" label="App Instances"
-              value="{{ (cfOrgService.appInstances$ | async) }}"
-            limit="{{ (cfOrgService.quotaDefinition$ | async)?.totalInstances}}"></app-card-number-metric>
+              value="{{ cfOrgService.appInstances() }}"
+            limit="{{ quota()?.totalInstances }}"></app-card-number-metric>
           </app-tile>
         }
         <app-tile>
           <app-card-number-metric iconFont="stratos-icons" icon="route" label="Routes"
-            value="{{ (cfOrgService.routesCount$ | async) }}"
-          limit="{{ (cfOrgService.quotaDefinition$ | async)?.totalRoutes}}"></app-card-number-metric>
+            value="{{ routesCount() }}"
+          limit="{{ quota()?.totalRoutes }}"></app-card-number-metric>
         </app-tile>
         <app-tile>
           <app-card-number-metric
             link="/cloud-foundry/{{cfOrgService.cfGuid}}/organizations/{{cfOrgService.orgGuid}}/users" icon="person"
-          label="Users" labelSingular="User" value="{{(cfOrgService.usersCount$ | async)}}"></app-card-number-metric>
+          label="Users" labelSingular="User" value="{{ cfOrgService.usersCount() }}"></app-card-number-metric>
         </app-tile>
         <app-tile>
           <app-card-number-metric icon="domain" label="Private Domains"
-            value="{{ (cfOrgService.privateDomains$ | async)?.length }}"
-          limit="{{ (cfOrgService.quotaDefinition$ | async)?.totalDomains}}"></app-card-number-metric>
+            value="{{ privateDomainCount() }}"
+          limit="{{ quota()?.totalDomains }}"></app-card-number-metric>
         </app-tile>
         <app-tile>
           <app-card-number-metric iconFont="stratos-icons" icon="service_instance" label="Service Instances"
             value="{{ cfOrgService.serviceInstancesCount() }}"
-          limit="{{ (cfOrgService.quotaDefinition$ | async)?.totalServiceInstances }}"></app-card-number-metric>
+          limit="{{ quota()?.totalServiceInstances }}"></app-card-number-metric>
         </app-tile>
-        @if (((cfOrgService.userProvidedServiceInstancesCount$ | async) ?? 0) > 0) {
+        @if ((userProvidedServiceInstancesCount() ?? 0) > 0) {
           <app-tile>
             <app-card-number-metric iconFont="stratos-icons" icon="service_instance" label="User Service Instances"
-            value="{{ (cfOrgService.userProvidedServiceInstancesCount$ | async) }}"></app-card-number-metric>
+            value="{{ userProvidedServiceInstancesCount() }}"></app-card-number-metric>
           </app-tile>
         }
-        @if (cfEndpointService.hasApps$ | async) {
+        @if (cfEndpointService.hasApps()) {
           <app-tile>
             <app-card-number-metric icon="memory" label="Memory Usage" units="mb"
-              value="{{ (cfOrgService.totalMem$ | async) }}"
-            limit="{{ (cfOrgService.quotaDefinition$ | async)?.totalMemoryInMB }}"></app-card-number-metric>
+              value="{{ cfOrgService.totalMem() }}"
+            limit="{{ quota()?.totalMemoryInMB }}"></app-card-number-metric>
           </app-tile>
         }
       </app-tile-group>
       <app-tile-group class="tile-group-1-cols">
         <app-tile>
-          @if ((detailsLoading$ | async) === false) {
-            <app-card-cf-recent-apps [allApps$]="cfOrgService.apps$"
+          @if (!detailsLoading() && cfOrgService.apps(); as apps) {
+            <app-card-cf-recent-apps [allApps$]="apps"
               [endpoint]="cfEndpointService.cfGuid"
-            [loading$]="cfOrgService.loadingApps$" (refresh)="cfOrgService.fetchApps()"></app-card-cf-recent-apps>
+            [loading$]="cfOrgService.loadingApps()" (refresh)="cfOrgService.fetchApps()"></app-card-cf-recent-apps>
           }
         </app-tile>
       </app-tile-group>
