@@ -1,5 +1,4 @@
-import { combineLatest, Observable, of } from 'rxjs';
-import { distinctUntilChanged, map } from 'rxjs/operators';
+import { computed, Signal, signal } from '@angular/core';
 
 import { PermissionConfig, PermissionConfigType, PermissionTypes } from './current-user-permissions.config';
 
@@ -12,7 +11,7 @@ export type IConfigGroup = PermissionConfig[];
 export type IPermissionCheckCombineTypes = '||' | '&&';
 
 export interface IPermissionCheckCombiner {
-  checks: Observable<boolean>[];
+  checks: Signal<boolean>[];
   combineType?: IPermissionCheckCombineTypes;
 }
 export interface ICurrentUserPermissionsChecker {
@@ -30,7 +29,7 @@ export interface ICurrentUserPermissionsChecker {
     permissionConfig: PermissionConfig,
     endpointGuid?: string,
     ...args: any[]
-  ) => Observable<boolean> | undefined;
+  ) => Signal<boolean> | undefined;
   /**
    * Used when the permission config contains multiple things to check.
    * Returns null if this checker cannot handle all of the given configs.
@@ -46,19 +45,20 @@ export interface ICurrentUserPermissionsChecker {
   getFallbackCheck: (
     endpointGuid: string,
     endpointType: string
-  ) => Observable<boolean> | null;
+  ) => Signal<boolean> | null;
 }
 
+/** A check that never passes: unknown permission, no checker, no guid. */
+export const PERMISSION_DENIED: Signal<boolean> = signal(false).asReadonly();
+
 export abstract class BaseCurrentUserPermissionsChecker {
-  public static reduceChecks(checks: Observable<boolean>[], type: IPermissionCheckCombineTypes = '||') {
-    const func = type === '||' ? 'some' : 'every';
+  public static reduceChecks(checks: Signal<boolean>[], type: IPermissionCheckCombineTypes = '||'): Signal<boolean> {
     if (!checks || !checks.length) {
       // Identity of the combinator, as some([]) / every([]) give.
-      return of(type === '&&');
+      return signal(type === '&&').asReadonly();
     }
-    return combineLatest(checks).pipe(
-      map(flags => flags[func](flag => flag)),
-      distinctUntilChanged()
-    );
+    return type === '||' ?
+      computed(() => checks.some(check => check())) :
+      computed(() => checks.every(check => check()));
   }
 }

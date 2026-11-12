@@ -1,7 +1,5 @@
 import { HttpClient } from '@angular/common/http';
-import { Injectable, Injector, inject } from '@angular/core';
-import { combineLatest, Observable, of } from 'rxjs';
-import { distinctUntilChanged, filter, map, switchMap } from 'rxjs/operators';
+import { computed, Injectable, inject, Signal, signal, untracked } from '@angular/core';
 import {
   BaseCurrentUserPermissionsChecker,
   CUSTOM_USER_PERMISSION_CHECKERS,
@@ -11,17 +9,18 @@ import {
   ICurrentUserPermissionsChecker,
   IPermissionCheckCombiner,
   IPermissionConfigs,
+  PERMISSION_DENIED,
   PermissionConfig,
   PermissionConfigLink,
   PermissionTypes,
 } from '@stratosui/core';
-import { combineLatestOrEmpty, observeSignal, PermissionValues } from '@stratosui/store';
+import { EndpointsDataService, PermissionValues } from '@stratosui/store';
 import { CFFeatureFlagTypes } from '../cf-api.types';
 import { CF_ENDPOINT_TYPE } from '../cf-types';
+import { CfCurrentUserRolesDataService } from '../services/cf-current-user-roles-data.service';
 import { StFeatureFlag } from '../services/endpoint-data/stratos-types';
-import { featureFlagsAfterLoad$, getFeatureFlagsSource } from './feature-flags-cache';
-import { IOrgRoleState, ISpaceRoleState, ISpacesRoleState } from '../store/types/cf-current-user-roles.types';
-import { CfCurrentUserRolesSignalService } from './cf-current-user-roles-signal.service';
+import { getFeatureFlagsSource } from './feature-flags-cache';
+import { ICfRolesState, IOrgRoleState, ISpaceRoleState, ISpacesRoleState } from '../store/types/cf-current-user-roles.types';
 import {
   CfCurrentUserPermissions,
   CfPermissionStrings,
@@ -112,50 +111,55 @@ export const cfPermissionConfigs: IPermissionConfigs = {
 
 @Injectable()
 export class CfUserPermissionsChecker extends BaseCurrentUserPermissionsChecker implements ICurrentUserPermissionsChecker {
-  private roles = inject(CfCurrentUserRolesSignalService);
+  private roles = inject(CfCurrentUserRolesDataService);
+  private endpointsService = inject(EndpointsDataService);
   private http = inject(HttpClient);
-  private injector = inject(Injector);
 
   static readonly ALL_SPACES = 'PERMISSIONS__ALL_SPACES_PLEASE';
+
+  /** GUIDs of every connected CF endpoint. */
+  private readonly connectedCfGuids: Signal<string[]> = computed(() =>
+    Array.from(this.endpointsService.endpoints().values())
+      .filter((e): e is typeof e & { guid: string } =>
+        e.cnsi_type === CF_ENDPOINT_TYPE && e.connectionStatus === 'connected' && !!e.guid)
+      .map(endpoint => endpoint.guid)
+  );
 
   getPermissionConfig(action: string) {
     return cfPermissionConfigs[action];
   }
 
-  private check(
+  /** Role state of one endpoint; `null` until the roles request lands. Reads a signal. */
+  private stateOf(endpointGuid: string): ICfRolesState | null {
+    return this.roles.cfRolesState()?.[endpointGuid] ?? null;
+  }
+
+  /** Reads the role state; call inside a computed. */
+  private checkNow(
     type: PermissionTypes,
     permission: PermissionValues,
     endpointGuid?: string,
     orgOrSpaceGuid?: string,
     allSpacesWithinOrg = false
-  ): Observable<boolean> {
-    // In some situations the observable returned here is not subscribed to (for example due to applyAdminCheck).
-    // This is bad (we should skip this function entirely) and should be fixed. This would require a thorough appraisal and overhaul.
-    if (type === CfPermissionTypes.ENDPOINT_SCOPE) {
-      if (!endpointGuid) {
-        return of(false);
-      }
-      return this.roles.cfEndpointHasScope$(endpointGuid, permission as CfScopeStrings);
-    }
-
+  ): boolean {
     if (!endpointGuid) {
-      return of(false);
+      return false;
+    }
+    const state = this.stateOf(endpointGuid);
+    if (!state) {
+      return false;
+    }
+    if (type === CfPermissionTypes.ENDPOINT_SCOPE) {
+      return !!state.global?.scopes?.includes(permission as string);
     }
     if (type === CfPermissionTypes.ENDPOINT) {
-      return this.roles.cfGlobalState$(endpointGuid, permission);
+      return !!(state.global as Record<string, any> | undefined)?.[permission];
     }
-    return this.getCfEndpointState(endpointGuid).pipe(
-      filter(state => !!state),
-      map(state => {
-        const permissionString = permission as CfPermissionStrings;
-        if (allSpacesWithinOrg) {
-          const spaceState = (state as any)[CfPermissionTypes.SPACE];
-          return this.checkAllSpacesInOrg((state as any)[CfPermissionTypes.ORGANIZATION][orgOrSpaceGuid as string], spaceState, permissionString);
-        }
-        return this.selectPermission((state as any)[type][orgOrSpaceGuid as string], permissionString);
-      }),
-      distinctUntilChanged(),
-    );
+    const permissionString = permission as CfPermissionStrings;
+    if (allSpacesWithinOrg) {
+      return this.checkAllSpacesInOrg(state.organizations?.[orgOrSpaceGuid as string], state.spaces, permissionString);
+    }
+    return this.selectPermission((state as any)[type]?.[orgOrSpaceGuid as string], permissionString);
   }
 
   /**
@@ -166,15 +170,15 @@ export class CfUserPermissionsChecker extends BaseCurrentUserPermissionsChecker 
     endpointGuid?: string,
     orgOrSpaceGuid?: string,
     spaceGuid?: string
-  ): Observable<boolean> | undefined {
-    const check$ = this.getBaseSimpleCheck(permissionConfig, endpointGuid, orgOrSpaceGuid, spaceGuid);
-    if (!check$) {
+  ): Signal<boolean> | undefined {
+    const check = this.getBaseSimpleCheck(permissionConfig, endpointGuid, orgOrSpaceGuid, spaceGuid);
+    if (!check) {
       return undefined;
     }
     if (permissionConfig.type === CfPermissionTypes.ORGANIZATION || permissionConfig.type === CfPermissionTypes.SPACE) {
-      return this.applyAdminCheck(check$, endpointGuid);
+      return this.applyAdminCheck(check, endpointGuid);
     }
-    return check$;
+    return check;
   }
 
   private getBaseSimpleCheck(
@@ -182,7 +186,7 @@ export class CfUserPermissionsChecker extends BaseCurrentUserPermissionsChecker 
     endpointGuid?: string,
     orgOrSpaceGuid?: string,
     spaceGuid?: string
-  ): Observable<boolean> | undefined {
+  ): Signal<boolean> | undefined {
     switch (permissionConfig.type) {
       case (CfPermissionTypes.FEATURE_FLAG):
         return this.getFeatureFlagCheck(permissionConfig, endpointGuid);
@@ -195,95 +199,58 @@ export class CfUserPermissionsChecker extends BaseCurrentUserPermissionsChecker 
       default:
         // Not a CF permission type: returning undefined tells
         // CurrentUserPermissionsService this checker does not own the config.
-        // Returning a denial stream here instead makes findChecker() count two
+        // Returning a denial here instead makes findChecker() count two
         // claimants for every stratos-level check and deny it app-wide (#5570,
         // #5571).
         return undefined;
     }
   }
 
-  private getEndpointScopesCheck(permission: CfScopeStrings, endpointGuid?: string): Observable<boolean> {
-    const endpointGuids$ = this.getEndpointGuidObservable(endpointGuid);
-    return endpointGuids$.pipe(
-      switchMap(guids => combineLatestOrEmpty(guids.map(guid => this.check(CfPermissionTypes.ENDPOINT_SCOPE, permission, guid)))),
-      map(checks => checks.some(check => check)),
-      distinctUntilChanged()
-    );
+  private getEndpointScopesCheck(permission: CfScopeStrings, endpointGuid?: string): Signal<boolean> {
+    const guids = this.getEndpointGuids(endpointGuid);
+    return computed(() => guids().some(guid => this.checkNow(CfPermissionTypes.ENDPOINT_SCOPE, permission, guid)));
   }
 
-  private getEndpointScopesChecks(
-    configs: PermissionConfig[],
-    endpoint?: string
-  ): Observable<boolean>[] {
-    return configs.map(config => {
-      const { permission } = config;
-      return this.getEndpointScopesCheck(permission as CfScopeStrings, endpoint);
-    });
-  }
-
-  private getCfChecks(
-    configs: PermissionConfig[],
-    endpointGuid?: string,
-    orgOrSpaceGuid?: string,
-    spaceGuid?: string
-  ): Observable<boolean>[] {
-    return configs.map(config => this.getCfCheck(config, endpointGuid, orgOrSpaceGuid, spaceGuid));
-  }
-
-  private getCfCheck(config: PermissionConfig, endpointGuid?: string, orgOrSpaceGuid?: string, spaceGuid?: string): Observable<boolean> {
+  private getCfCheck(config: PermissionConfig, endpointGuid?: string, orgOrSpaceGuid?: string, spaceGuid?: string): Signal<boolean> {
     const { type, permission } = config;
     const checkAllSpaces = spaceGuid === CfUserPermissionsChecker.ALL_SPACES;
     const actualGuid = type === CfPermissionTypes.SPACE && spaceGuid && !checkAllSpaces ? spaceGuid : orgOrSpaceGuid;
     const cfPermissions = permission as CfPermissionStrings;
     if (type === CfPermissionTypes.ENDPOINT || (endpointGuid && actualGuid)) {
-      return this.check(type, cfPermissions, endpointGuid, actualGuid, checkAllSpaces);
+      return computed(() => this.checkNow(type, cfPermissions, endpointGuid, actualGuid, checkAllSpaces));
     } else if (!actualGuid) {
-      const endpointGuids$ = this.getEndpointGuidObservable(endpointGuid);
-      return endpointGuids$.pipe(
-        switchMap(guids => combineLatestOrEmpty(guids.map(guid => this.checkAllOfType(guid, type as CfPermissionTypes, cfPermissions)))),
-        map(checks => checks.some(check => check)),
-        distinctUntilChanged()
-      );
+      const guids = this.getEndpointGuids(endpointGuid);
+      return computed(() => guids().some(guid => this.checkAllOfType(guid, type as CfPermissionTypes, cfPermissions)));
     }
-    return of(false);
+    return PERMISSION_DENIED;
   }
 
-  private getFeatureFlagChecks(configs: PermissionConfig[], endpointGuid?: string): Observable<boolean>[] {
-    return configs.map(config => {
-      return this.getFeatureFlagCheck(config, endpointGuid);
-    });
-  }
-
-  private getFeatureFlagCheck(config: PermissionConfig, endpointGuid?: string): Observable<boolean> {
+  private getFeatureFlagCheck(config: PermissionConfig, endpointGuid?: string): Signal<boolean> {
     const permission = config.permission as CFFeatureFlagTypes;
-    const endpointGuids$ = this.getEndpointGuidObservable(endpointGuid);
-    return endpointGuids$.pipe(
-      switchMap(guids => {
-        const createFFObs = (guid: string): Observable<StFeatureFlag[]> => {
-          // For admins the role-fetch barrier does not prime feature flags
-          // for us, so trigger an idempotent load() here. The shared cache
-          // (feature-flags-cache.ts) collapses concurrent + repeat loads
-          // for the same cnsi, so this is safe to call on every check.
-          //
-          // Gate on load() completion: the items signal starts empty, so a
-          // take(1) consumer would otherwise capture the pre-load empty list
-          // and resolve to a false negative (set/unset-roles-by-username
-          // wrongly appearing disabled despite the flag being enabled).
-          //
-          // observeSignal, not toObservable: this checker lives on the root
-          // injector, so a toObservable effect would outlive every
-          // subscription and run for the rest of the session.
-          const src = getFeatureFlagsSource(guid, this.http);
-          return featureFlagsAfterLoad$(
-            () => src.load(),
-            () => observeSignal(src.items, this.injector),
-          );
-        };
-        return combineLatestOrEmpty(guids.map(createFFObs));
-      }),
-      map(endpointFeatureFlags => endpointFeatureFlags.some(featureFlags => this.checkFeatureFlag(featureFlags, permission))),
-      distinctUntilChanged(),
-    );
+    const guids = this.getEndpointGuids(endpointGuid);
+    this.loadFeatureFlags(endpointGuid);
+    // The items signal starts empty and fills when load() lands, so the check
+    // reads false until the flags are known.
+    return computed(() => guids().some(guid =>
+      this.checkFeatureFlag(getFeatureFlagsSource(guid, this.http).items(), permission)
+    ));
+  }
+
+  /**
+   * Starts the (idempotent, shared) feature flag load for the endpoints a
+   * check reads. For admins the role-fetch barrier does not prime feature
+   * flags, so the check has to.
+   *
+   * NOTE: runs once, when the check is built, outside any reactive context
+   * (a load writes signals). With no endpoint guid it loads the endpoints
+   * connected at that moment; an endpoint connected later is loaded by the
+   * next check built, or by the roles fetch for non-admins.
+   */
+  private loadFeatureFlags(endpointGuid?: string) {
+    const guids = endpointGuid ?
+      Promise.resolve([endpointGuid]) :
+      this.endpointsService.whenReady().then(() => untracked(this.connectedCfGuids));
+    void guids.then(list => list.forEach(guid => void getFeatureFlagsSource(guid, this.http).load()));
   }
 
   private checkFeatureFlag(featureFlags: StFeatureFlag[], permission: CFFeatureFlagTypes) {
@@ -294,107 +261,71 @@ export class CfUserPermissionsChecker extends BaseCurrentUserPermissionsChecker 
     return flag.enabled;
   }
 
-  private getAdminChecks(endpointGuid?: string): Observable<boolean> {
-    const endpointGuids$ = this.getEndpointGuidObservable(endpointGuid);
-    return endpointGuids$.pipe(
-      map(guids => guids.map(guid => this.getCfAdminCheck(guid))),
-      switchMap(checks => BaseCurrentUserPermissionsChecker.reduceChecks(checks)),
-    );
-  }
-
   /**
    * Includes read only admins, global auditors and users that don't have the cloud_controller.write scope
    */
-  private getReadOnlyCheck(endpointGuid: string): Observable<boolean> {
-    return this.getCfEndpointState(endpointGuid).pipe(
-      map(
-        cfPermissions => (
-          cfPermissions && (
-            cfPermissions.global.isGlobalAuditor ||
-            cfPermissions.global.isReadOnlyAdmin ||
-            !cfPermissions.global.canWrite
-          )
-        )
-      ),
-      distinctUntilChanged()
-    );
+  private isReadOnly(endpointGuid: string): boolean {
+    const global = this.stateOf(endpointGuid)?.global;
+    return !!global && (global.isGlobalAuditor || global.isReadOnlyAdmin || !global.canWrite);
   }
 
-  private applyAdminCheck(check$: Observable<boolean>, endpointGuid?: string): Observable<boolean> {
-    const adminCheck$ = this.getAdminChecks(endpointGuid);
-    const readOnlyCheck$ = this.getReadOnlyChecks(endpointGuid);
-    return combineLatest([
-      adminCheck$,
-      readOnlyCheck$
-    ]).pipe(
-      distinctUntilChanged(),
-      switchMap(([isAdmin, isReadOnly]) => {
-        if (isAdmin) {
-          return of(true);
-        }
-        if (isReadOnly) {
-          // This is bad, we should not assume that the check type wants a negative result if the user only has 'read only' rights.
-          return of(false);
-        }
-        return check$;
-      })
-    );
+  private isAdmin(endpointGuid: string): boolean {
+    return !!this.stateOf(endpointGuid)?.global?.isAdmin;
   }
 
   /**
-   * If no endpoint is passed, check them all
+   * Admin on any of the endpoints → allowed. Read only on all of them
+   * (true for none) → denied. Otherwise the check decides.
    */
-  private getReadOnlyChecks(endpointGuid?: string): Observable<boolean> {
-    const endpointGuids$ = this.getEndpointGuidObservable(endpointGuid);
-    return endpointGuids$.pipe(
-      map(guids => guids.map(guid => this.getReadOnlyCheck(guid))),
-      switchMap(checks => BaseCurrentUserPermissionsChecker.reduceChecks(checks, '&&'))
-    );
+  private applyAdminCheck(check: Signal<boolean>, endpointGuid?: string): Signal<boolean> {
+    const guids = this.getEndpointGuids(endpointGuid);
+    return computed(() => {
+      const list = guids();
+      if (list.some(guid => this.isAdmin(guid))) {
+        return true;
+      }
+      if (list.every(guid => this.isReadOnly(guid))) {
+        // This is bad, we should not assume that the check type wants a negative result if the user only has 'read only' rights.
+        return false;
+      }
+      return check();
+    });
   }
 
-  private getCfAdminCheck(endpointGuid: string): Observable<boolean> {
-    return this.getCfEndpointState(endpointGuid).pipe(
-      filter(cfPermissions => !!cfPermissions),
-      map(cfPermissions => cfPermissions.global.isAdmin)
-    );
+  private checkAllOfType(endpointGuid: string, type: CfPermissionTypes, permission: CfPermissionStrings): boolean {
+    const state = this.stateOf(endpointGuid);
+    const ofType = state ? (state as any)[type] : null;
+    if (!ofType) {
+      return false;
+    }
+    return Object.keys(ofType).some((guid: string) => this.selectPermission(ofType[guid], permission));
   }
 
-  private checkAllOfType(endpointGuid: string, type: CfPermissionTypes, permission: CfPermissionStrings, _orgGuid?: string): Observable<boolean> {
-    return this.getCfEndpointState(endpointGuid).pipe(
-      map(state => {
-        if (!state || !(state as any)[type]) {
-          return false;
-        }
-        return Object.keys((state as any)[type]).some((guid: string) => {
-          return this.selectPermission((state as any)[type][guid], permission);
-        });
-      })
-    );
-  }
-
-  private getAllEndpointGuids(): Observable<string[]> {
-    return this.roles.connectedCfEndpointGuids$();
-  }
-
-  private getEndpointGuidObservable(endpointGuid: string | undefined): Observable<string[]> {
-    return !endpointGuid ? this.getAllEndpointGuids() : of([endpointGuid]);
+  /** The endpoint asked for, or (none given) every connected CF endpoint. */
+  private getEndpointGuids(endpointGuid: string | undefined): Signal<string[]> {
+    if (endpointGuid) {
+      return signal([endpointGuid]).asReadonly();
+    }
+    // First read before the endpoint list loads: start loading it.
+    untracked(() => {
+      if (!this.endpointsService.hydrated()) {
+        void this.endpointsService.whenReady();
+      }
+    });
+    return this.connectedCfGuids;
   }
 
   private selectPermission(state: IOrgRoleState | ISpaceRoleState, permission: CfPermissionStrings): boolean {
     return state ? (state as any)[permission] || false : false;
   }
 
-  private checkAllSpacesInOrg(orgState: IOrgRoleState, endpointSpaces: ISpacesRoleState, permission: CfPermissionStrings): boolean {
+  private checkAllSpacesInOrg(orgState: IOrgRoleState | undefined, endpointSpaces: ISpacesRoleState, permission: CfPermissionStrings): boolean {
     const spaceGuids = !!orgState && orgState.spaceGuids ? orgState.spaceGuids : [];
     return spaceGuids.map(spaceGuid => {
-      const space = endpointSpaces[spaceGuid];
+      const space = endpointSpaces?.[spaceGuid];
       return space ? (space as any)[permission] || false : false;
     }).some(check => check);
 
-  }
-
-  private getCfEndpointState(endpointGuid: string): Observable<any> {
-    return this.roles.cfEndpointRolesState$(endpointGuid);
   }
 
   public getComplexCheck(
@@ -409,7 +340,7 @@ export class CfUserPermissionsChecker extends BaseCurrentUserPermissionsChecker 
         const configGroup = groupedChecks[permission];
         const checkCombiner = this.getBaseCheckFromConfig(configGroup, permission, endpointGuid, orgOrSpaceGuid, spaceGuid);
         if (checkCombiner) {
-          checkCombiner.checks = checkCombiner.checks.map(check$ => this.applyAdminCheck(check$, endpointGuid));
+          checkCombiner.checks = checkCombiner.checks.map(check => this.applyAdminCheck(check, endpointGuid));
         }
         return checkCombiner;
       })
@@ -452,22 +383,22 @@ export class CfUserPermissionsChecker extends BaseCurrentUserPermissionsChecker 
     switch (permission) {
       case CfPermissionTypes.ENDPOINT_SCOPE:
         return {
-          checks: this.getEndpointScopesChecks(configGroup, endpointGuid),
+          checks: configGroup.map(config => this.getEndpointScopesCheck(config.permission as CfScopeStrings, endpointGuid)),
         };
       case CfPermissionTypes.FEATURE_FLAG:
         return {
-          checks: this.getFeatureFlagChecks(configGroup, endpointGuid),
+          checks: configGroup.map(config => this.getFeatureFlagCheck(config, endpointGuid)),
           combineType: '&&'
         };
       case CHECKER_GROUPS.CF_GROUP:
         return {
-          checks: this.getCfChecks(configGroup, endpointGuid, orgOrSpaceGuid, spaceGuid)
+          checks: configGroup.map(config => this.getCfCheck(config, endpointGuid, orgOrSpaceGuid, spaceGuid))
         };
     }
   }
 
-  public getFallbackCheck(endpointGuid: string, endpointType: string): Observable<boolean> | null {
-    return endpointType === CF_ENDPOINT_TYPE ? this.getCfAdminCheck(endpointGuid) : null;
+  public getFallbackCheck(endpointGuid: string, endpointType: string): Signal<boolean> | null {
+    return endpointType === CF_ENDPOINT_TYPE ? computed(() => this.isAdmin(endpointGuid)) : null;
   }
 
 }

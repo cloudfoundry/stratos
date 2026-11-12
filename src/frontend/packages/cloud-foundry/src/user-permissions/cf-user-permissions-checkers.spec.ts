@@ -1,22 +1,21 @@
 import { HttpClient } from '@angular/common/http';
-import { computed, provideZonelessChangeDetection, Signal, signal } from '@angular/core';
+import { provideZonelessChangeDetection, Signal, signal } from '@angular/core';
 import { TestBed } from '@angular/core/testing';
 import {
   CUSTOM_USER_PERMISSION_CHECKERS,
   CurrentUserPermissionsService,
-  CurrentUserRolesSignalService,
   PermissionConfig,
   PermissionTypes,
   StratosCurrentUserPermissions,
 } from '@stratosui/core';
-import { EndpointsDataService, SessionData } from '@stratosui/store';
-import { firstValueFrom, Observable, of, timeout } from 'rxjs';
+import { AuthDataService, CurrentUserRolesDataService, EndpointModel, EndpointsDataService, SessionData } from '@stratosui/store';
 import { describe, expect, it, beforeEach, vi } from 'vitest';
 
 import { CFFeatureFlagTypes } from '../cf-api.types';
+import { CfCurrentUserRolesDataService } from '../services/cf-current-user-roles-data.service';
 import { StFeatureFlag } from '../services/endpoint-data/stratos-types';
+import { IAllCfRolesState, ICfRolesState, IGlobalRolesState } from '../store/types/cf-current-user-roles.types';
 
-import { CfCurrentUserRolesSignalService } from './cf-current-user-roles-signal.service';
 import { CfUserPermissionsChecker } from './cf-user-permissions-checkers';
 import { CfPermissionStrings, CfPermissionTypes, CfScopeStrings } from './cf-user-permissions.types';
 import { getFeatureFlagsSource } from './feature-flags-cache';
@@ -24,10 +23,10 @@ import { getFeatureFlagsSource } from './feature-flags-cache';
 /**
  * Checker contract (#5570 / #5571): a checker signals "this config is not
  * mine" by returning undefined (simple) / null (complex / fallback). Returning
- * a denial observable instead makes CurrentUserPermissionsService.findChecker
- * see two claimants for every Stratos-level check ("Found too many ...
- * Permission Denied"), which denied every internal / internal-scope / api-key
- * permission app-wide (Register Endpoint button, /api-keys route guard, ...).
+ * a denial instead makes CurrentUserPermissionsService.findChecker see two
+ * claimants for every Stratos-level check ("Found too many ... Permission
+ * Denied"), which denied every internal / internal-scope / api-key permission
+ * app-wide (Register Endpoint button, /api-keys route guard, ...).
  *
  * Stratos permission types are spelled as literals here because the enum is
  * core-internal; the values are pinned by stratosPermissionConfigs.
@@ -36,19 +35,51 @@ const STRATOS_INTERNAL = 'internal' as PermissionTypes;
 const STRATOS_INTERNAL_SCOPE = 'internal-scope' as PermissionTypes;
 const STRATOS_API_KEY = 'api-key' as PermissionTypes;
 
+/** Roles of one CF endpoint: a writer with no roles unless given. */
+function cfState(global: Partial<IGlobalRolesState> = {}, orgs: ICfRolesState['organizations'] = {}): ICfRolesState {
+  return {
+    global: {
+      isAdmin: false, isReadOnlyAdmin: false, isGlobalAuditor: false, canRead: true, canWrite: true, scopes: [],
+      ...global,
+    },
+    organizations: orgs,
+    spaces: {},
+    state: { initialised: true, fetching: false, error: false },
+  };
+}
+
+function connected(...guids: string[]): Map<string, EndpointModel> {
+  return new Map(guids.map(guid => [guid, { guid, cnsi_type: 'cf', connectionStatus: 'connected' } as EndpointModel]));
+}
+
+const managerOf = (orgGuid: string): ICfRolesState['organizations'] => ({
+  [orgGuid]: { isManager: true, isAuditor: false, isBillingManager: false, isUser: true, spaceGuids: [] },
+});
+
+/** The checker over writable role state and endpoint list. */
+function setupChecker(rolesState: Signal<IAllCfRolesState | undefined>, endpoints = signal(new Map<string, EndpointModel>())) {
+  TestBed.configureTestingModule({
+    providers: [
+      provideZonelessChangeDetection(),
+      { provide: CfCurrentUserRolesDataService, useValue: { cfRolesState: rolesState } },
+      {
+        provide: EndpointsDataService,
+        useValue: { endpoints, hydrated: signal(true), whenReady: () => Promise.resolve() },
+      },
+      { provide: HttpClient, useValue: {} },
+      CfUserPermissionsChecker,
+    ],
+  });
+  return TestBed.inject(CfUserPermissionsChecker);
+}
+
+const orgManager = new PermissionConfig(CfPermissionTypes.ORGANIZATION, CfPermissionStrings.ORG_MANAGER);
+
 describe('CfUserPermissionsChecker contract', () => {
   let checker: CfUserPermissionsChecker;
 
   beforeEach(() => {
-    TestBed.configureTestingModule({
-      providers: [
-        provideZonelessChangeDetection(),
-        { provide: CfCurrentUserRolesSignalService, useValue: {} },
-        { provide: HttpClient, useValue: {} },
-        CfUserPermissionsChecker,
-      ],
-    });
-    checker = TestBed.inject(CfUserPermissionsChecker);
+    checker = setupChecker(signal(undefined));
   });
 
   it('returns undefined from getSimpleCheck for non-CF permission types', () => {
@@ -75,17 +106,17 @@ describe('CurrentUserPermissionsService with both checkers registered', () => {
     TestBed.configureTestingModule({
       providers: [
         provideZonelessChangeDetection(),
-        { provide: CfCurrentUserRolesSignalService, useValue: {} },
+        { provide: CfCurrentUserRolesDataService, useValue: { cfRolesState: signal(undefined) } },
         { provide: HttpClient, useValue: {} },
         { provide: EndpointsDataService, useValue: {} },
         {
-          provide: CurrentUserRolesSignalService,
+          provide: CurrentUserRolesDataService,
           useValue: {
-            stratosRole$: (role: string) => of(role === 'isAdmin' && isAdmin),
-            stratosHasScope$: () => of(false),
-            sessionData$: () => of(sessionData as SessionData),
+            stratosRole: (role: string) => signal(role === 'isAdmin' && isAdmin),
+            stratosHasScope: () => signal(false),
           },
         },
+        { provide: AuthDataService, useValue: { sessionData: signal(sessionData as SessionData) } },
         CfUserPermissionsChecker,
         {
           provide: CUSTOM_USER_PERMISSION_CHECKERS,
@@ -98,137 +129,132 @@ describe('CurrentUserPermissionsService with both checkers registered', () => {
     return TestBed.inject(CurrentUserPermissionsService);
   }
 
-  it('resolves stratos-admin permission for an admin (#5570 Register Endpoint)', async () => {
+  it('resolves stratos-admin permission for an admin (#5570 Register Endpoint)', () => {
     const service = setup(null, true);
-    await expect(
-      firstValueFrom(service.can(StratosCurrentUserPermissions.EDIT_ADMIN_ENDPOINT)),
-    ).resolves.toBe(true);
+    expect(service.can(StratosCurrentUserPermissions.EDIT_ADMIN_ENDPOINT)()).toBe(true);
   });
 
-  it('resolves api-keys permission for an admin when APIKeysEnabled=admin_only (#5571 route guard)', async () => {
+  it('resolves api-keys permission for an admin when APIKeysEnabled=admin_only (#5571 route guard)', () => {
     const service = setup({ config: { APIKeysEnabled: 'admin_only' } } as Partial<SessionData>, true);
-    await expect(
-      firstValueFrom(service.can(StratosCurrentUserPermissions.API_KEYS)),
-    ).resolves.toBe(true);
+    expect(service.can(StratosCurrentUserPermissions.API_KEYS)()).toBe(true);
   });
 
-  it('still denies stratos-admin permission for a non-admin', async () => {
+  it('denies api-keys permission before the session arrives', () => {
+    const service = setup(null, true);
+    expect(service.can(StratosCurrentUserPermissions.API_KEYS)()).toBe(false);
+  });
+
+  it('still denies stratos-admin permission for a non-admin', () => {
     const service = setup(null, false);
-    await expect(
-      firstValueFrom(service.can(StratosCurrentUserPermissions.EDIT_ADMIN_ENDPOINT)),
-    ).resolves.toBe(false);
+    expect(service.can(StratosCurrentUserPermissions.EDIT_ADMIN_ENDPOINT)()).toBe(false);
   });
 });
 
 describe('CfUserPermissionsChecker feature flag check', () => {
-  // The checker is a root service, so whatever watches the flags signal must
-  // end with the subscription, not with the (permanent) root injector.
-  it('stops reading the feature flags after unsubscribe', async () => {
-    TestBed.configureTestingModule({
-      providers: [
-        provideZonelessChangeDetection(),
-        { provide: CfCurrentUserRolesSignalService, useValue: {} },
-        { provide: HttpClient, useValue: {} },
-        CfUserPermissionsChecker,
-      ],
-    });
-    const checker = TestBed.inject(CfUserPermissionsChecker);
+  it('reads false until the flags load, then the flag', async () => {
+    const checker = setupChecker(signal(undefined));
 
-    // Pre-seed the shared cache entry so load() resolves without a request,
-    // and read the flags through a computed that counts its evaluations.
-    const guid = 'ff-unsubscribe-cf';
+    // The shared cache entry for this guid: load() resolves without a
+    // request, and its items are a signal the test fills.
+    const guid = 'ff-load-cf';
     const src = getFeatureFlagsSource(guid, TestBed.inject(HttpClient));
-    vi.spyOn(src, 'load').mockResolvedValue();
-    const flags = signal<StFeatureFlag[]>([{ name: CFFeatureFlagTypes.set_roles_by_username, enabled: true } as StFeatureFlag]);
-    let reads = 0;
-    (src as { items: Signal<StFeatureFlag[]> }).items = computed(() => {
-      reads++;
-      return flags();
-    });
+    const load = vi.spyOn(src, 'load').mockResolvedValue();
+    const flags = signal<StFeatureFlag[]>([]);
+    (src as { items: Signal<StFeatureFlag[]> }).items = flags;
 
-    const values: boolean[] = [];
-    const check$ = checker.getSimpleCheck(
+    const check = checker.getSimpleCheck(
       new PermissionConfig(CfPermissionTypes.FEATURE_FLAG, CFFeatureFlagTypes.set_roles_by_username),
       guid,
-    );
-    const sub = check$!.subscribe(v => values.push(v));
-    await src.load();
+    )!;
     await Promise.resolve();
-    TestBed.tick();
-    expect(values).toEqual([true]);
-    const readsWhileSubscribed = reads;
+    expect(load).toHaveBeenCalled();
+    expect(check()).toBe(false);
 
-    sub.unsubscribe();
-    flags.set([{ name: CFFeatureFlagTypes.set_roles_by_username, enabled: false } as StFeatureFlag]);
-    TestBed.tick();
+    flags.set([{ name: CFFeatureFlagTypes.set_roles_by_username, enabled: true } as StFeatureFlag]);
+    expect(check()).toBe(true);
+  });
+});
 
-    expect(reads).toBe(readsWhileSubscribed);
-    expect(values).toEqual([true]);
+describe('CfUserPermissionsChecker admin and read-only gates', () => {
+  const rolesFor = (state: ICfRolesState) => signal<IAllCfRolesState | undefined>({ 'cf-1': state });
+
+  it('allows a CF admin with no role in the org', () => {
+    const checker = setupChecker(rolesFor(cfState({ isAdmin: true })));
+    expect(checker.getSimpleCheck(orgManager, 'cf-1', 'org-1')!()).toBe(true);
+  });
+
+  it('denies a read-only user even with the org role', () => {
+    const checker = setupChecker(rolesFor(cfState({ isReadOnlyAdmin: true }, managerOf('org-1'))));
+    expect(checker.getSimpleCheck(orgManager, 'cf-1', 'org-1')!()).toBe(false);
+  });
+
+  it('reads false until the roles land, then follows them', () => {
+    const roles = signal<IAllCfRolesState | undefined>(undefined);
+    const checker = setupChecker(roles);
+    const check = checker.getSimpleCheck(orgManager, 'cf-1', 'org-1')!;
+    expect(check()).toBe(false);
+
+    roles.set({ 'cf-1': cfState({}, managerOf('org-1')) });
+    expect(check()).toBe(true);
   });
 });
 
 describe('CfUserPermissionsChecker across all connected CF endpoints', () => {
   function setup(connectedGuids: string[], hasScope: (guid: string) => boolean = () => false) {
-    TestBed.configureTestingModule({
-      providers: [
-        provideZonelessChangeDetection(),
-        {
-          provide: CfCurrentUserRolesSignalService,
-          useValue: {
-            connectedCfEndpointGuids$: () => of(connectedGuids),
-            cfEndpointHasScope$: (guid: string) => of(hasScope(guid)),
-          },
-        },
-        { provide: HttpClient, useValue: {} },
-        CfUserPermissionsChecker,
-      ],
-    });
-    return TestBed.inject(CfUserPermissionsChecker);
+    const roles: IAllCfRolesState = {};
+    for (const guid of connectedGuids) {
+      roles[guid] = cfState({ scopes: hasScope(guid) ? [CfScopeStrings.CF_ADMIN_GROUP] : [] });
+    }
+    return setupChecker(signal(roles), signal(connected(...connectedGuids)));
   }
 
-  // combineLatest([]) completes without a value, so a check over zero
-  // endpoints must still answer.
-  const answer = (check$: Observable<boolean>) => firstValueFrom(check$.pipe(timeout(1000)));
-
-  it('denies an endpoint scope when no CF endpoint is connected', async () => {
+  it('denies an endpoint scope when no CF endpoint is connected', () => {
     const checker = setup([]);
-    const check$ = checker.getSimpleCheck(
+    const check = checker.getSimpleCheck(
       new PermissionConfig(CfPermissionTypes.ENDPOINT_SCOPE, CfScopeStrings.CF_ADMIN_GROUP),
     );
-    await expect(answer(check$!)).resolves.toBe(false);
+    expect(check!()).toBe(false);
   });
 
-  it('denies a feature flag when no CF endpoint is connected', async () => {
+  it('denies a feature flag when no CF endpoint is connected', () => {
     const checker = setup([]);
-    const check$ = checker.getSimpleCheck(
+    const check = checker.getSimpleCheck(
       new PermissionConfig(CfPermissionTypes.FEATURE_FLAG, CFFeatureFlagTypes.route_creation),
     );
-    await expect(answer(check$!)).resolves.toBe(false);
+    expect(check!()).toBe(false);
   });
 
-  it('denies an org role with no org guid when no CF endpoint is connected', async () => {
+  it('denies an org role with no org guid when no CF endpoint is connected', () => {
     const checker = setup([]);
-    const check$ = checker.getSimpleCheck(
-      new PermissionConfig(CfPermissionTypes.ORGANIZATION, CfPermissionStrings.ORG_MANAGER),
-    );
-    await expect(answer(check$!)).resolves.toBe(false);
+    expect(checker.getSimpleCheck(orgManager)!()).toBe(false);
   });
 
-  it('answers the org role check itself when no CF endpoint is connected', async () => {
+  it('answers the org role check itself when no CF endpoint is connected', () => {
     const checker = setup([]);
     // With zero endpoints the read-only check (every([]) is true) denies
     // before getSimpleCheck reads the role check, so read it directly.
-    const check$ = checker['getCfCheck'](
-      new PermissionConfig(CfPermissionTypes.ORGANIZATION, CfPermissionStrings.ORG_MANAGER),
-    );
-    await expect(answer(check$)).resolves.toBe(false);
+    const check: Signal<boolean> = checker['getCfCheck'](orgManager);
+    expect(check()).toBe(false);
   });
 
-  it('checks an endpoint scope on each connected endpoint', async () => {
+  it('checks an endpoint scope on each connected endpoint', () => {
     const checker = setup(['cf-1', 'cf-2'], guid => guid === 'cf-2');
-    const check$ = checker.getSimpleCheck(
+    const check = checker.getSimpleCheck(
       new PermissionConfig(CfPermissionTypes.ENDPOINT_SCOPE, CfScopeStrings.CF_ADMIN_GROUP),
     );
-    await expect(answer(check$!)).resolves.toBe(true);
+    expect(check!()).toBe(true);
+  });
+
+  it('follows endpoints connecting after the check was built', () => {
+    const roles = signal<IAllCfRolesState | undefined>({ 'cf-2': cfState({ scopes: [CfScopeStrings.CF_ADMIN_GROUP] }) });
+    const endpoints = signal(connected('cf-1'));
+    const checker = setupChecker(roles, endpoints);
+    const check = checker.getSimpleCheck(
+      new PermissionConfig(CfPermissionTypes.ENDPOINT_SCOPE, CfScopeStrings.CF_ADMIN_GROUP),
+    )!;
+    expect(check()).toBe(false);
+
+    endpoints.set(connected('cf-1', 'cf-2'));
+    expect(check()).toBe(true);
   });
 });

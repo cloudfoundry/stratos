@@ -1,26 +1,21 @@
 import { TestBed } from '@angular/core/testing';
-import { ApplicationRef, provideZonelessChangeDetection } from '@angular/core';
-import { BehaviorSubject } from 'rxjs';
+import { provideZonelessChangeDetection, signal } from '@angular/core';
 import { describe, it, expect, beforeEach } from 'vitest';
 
 import { CurrentUserPermissionsService } from '../permissions/current-user-permissions.service';
 import { PermissionsSignalService } from './permissions-signal.service';
 
-function flushEffects() {
-  TestBed.inject(ApplicationRef).tick();
-}
-
 describe('PermissionsSignalService', () => {
-  let result$: BehaviorSubject<boolean>;
+  const result = signal(false);
   let lastArgs: { action: any; endpointGuid?: string; rest: any[] } | null;
 
   beforeEach(() => {
-    result$ = new BehaviorSubject<boolean>(false);
+    result.set(false);
     lastArgs = null;
     const stubPermissions = {
       can: (action: any, endpointGuid?: string, ...rest: any[]) => {
         lastArgs = { action, endpointGuid, rest };
-        return result$.asObservable();
+        return result.asReadonly();
       },
     } as unknown as CurrentUserPermissionsService;
 
@@ -33,24 +28,16 @@ describe('PermissionsSignalService', () => {
     });
   });
 
-  it('returns a signal seeded with false', () => {
+  it('returns the permission service signal', () => {
     const service = TestBed.inject(PermissionsSignalService);
     const sig = service.can('any.action');
     expect(sig()).toBe(false);
-  });
 
-  it('reflects underlying permission emissions', () => {
-    const service = TestBed.inject(PermissionsSignalService);
-    const sig = service.can('any.action');
-    flushEffects();
-    expect(sig()).toBe(false);
-
-    result$.next(true);
-    flushEffects();
+    result.set(true);
     expect(sig()).toBe(true);
   });
 
-  it('forwards action, endpointGuid and extra args to the legacy service', () => {
+  it('forwards action, endpointGuid and extra args to the permission service', () => {
     const service = TestBed.inject(PermissionsSignalService);
     service.can('do.thing', 'endpoint-guid', 'org-guid', 'space-guid');
     expect(lastArgs).toEqual({
@@ -58,21 +45,5 @@ describe('PermissionsSignalService', () => {
       endpointGuid: 'endpoint-guid',
       rest: ['org-guid', 'space-guid'],
     });
-  });
-
-  it('deduplicates identical consecutive emissions via distinctUntilChanged', () => {
-    const service = TestBed.inject(PermissionsSignalService);
-    const sig = service.can('any.action');
-    flushEffects();
-    expect(sig()).toBe(false);
-
-    // Pump the same value through; signal should stay at false.
-    result$.next(false);
-    flushEffects();
-    expect(sig()).toBe(false);
-
-    result$.next(true);
-    flushEffects();
-    expect(sig()).toBe(true);
   });
 });

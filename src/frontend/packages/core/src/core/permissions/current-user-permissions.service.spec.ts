@@ -1,7 +1,6 @@
 import { TestBed } from '@angular/core/testing';
 import { computed, provideZonelessChangeDetection, signal } from '@angular/core';
 import { describe, it, expect, beforeEach, afterEach, beforeAll, afterAll, vi } from 'vitest';
-import { firstValueFrom, timeout } from 'rxjs';
 import { AppState, BaseEntityValues, CurrentUserRolesDataService, EndpointsDataService, EntityCatalogEntityConfig, EntityCatalogTestModule, EndpointModel, PaginationEntityState, TEST_CATALOGUE_ENTITIES, endpointEntityType, generateStratosEntities, stratosEntityFactory } from '@stratosui/store';
 import {
   createBasicStoreModule,
@@ -10,7 +9,6 @@ import {
   STORE_TEST_PROVIDERS,
 } from '@stratosui/store/testing';
 import { AppTestModule } from '@test-framework';
-import { CurrentUserRolesSignalService } from '../signals/current-user-roles-signal.service';
 import { PermissionConfig, PermissionConfigLink } from './current-user-permissions.config';
 import { CurrentUserPermissionsService } from './current-user-permissions.service';
 import { BaseCurrentUserPermissionsChecker } from './current-user-permissions.types';
@@ -547,24 +545,28 @@ describe('CurrentUserPermissionsService', () => {
   });
 
 
-  it('should allow if stratos admin', async () => {
-    const can = await firstValueFrom(
-      service.can(new PermissionConfig(StratosPermissionTypes.STRATOS, StratosPermissionStrings.STRATOS_ADMIN))
-    );
+  it('should allow if stratos admin', () => {
+    const can = service.can(new PermissionConfig(StratosPermissionTypes.STRATOS, StratosPermissionStrings.STRATOS_ADMIN))();
     expect(can).toBe(false);
   });
 
-  it('should allow if has stratos change password scope', async () => {
-    const can = await firstValueFrom(
-      service.can(new PermissionConfig(StratosPermissionTypes.STRATOS_SCOPE, StratosScopeStrings.STRATOS_CHANGE_PASSWORD))
-    );
+  it('should allow if has stratos change password scope', () => {
+    const can = service.can(new PermissionConfig(StratosPermissionTypes.STRATOS_SCOPE, StratosScopeStrings.STRATOS_CHANGE_PASSWORD))();
     expect(can).toBe(true);
   });
 
-  it('should allow if has stratos change password scope (array config)', async () => {
-    const can = await firstValueFrom(
-      service.can([new PermissionConfig(StratosPermissionTypes.STRATOS_SCOPE, StratosScopeStrings.STRATOS_CHANGE_PASSWORD)])
-    );
+  it('a scope check reads false until the session scopes land, then follows them', () => {
+    const rolesData = TestBed.inject(CurrentUserRolesDataService);
+    rolesData.applySessionScopes({ admin: false, scopes: [] } as any);
+    const check = service.can(new PermissionConfig(StratosPermissionTypes.STRATOS_SCOPE, StratosScopeStrings.SCIM_READ));
+    expect(check()).toBe(false);
+
+    rolesData.applySessionScopes({ admin: false, scopes: [StratosScopeStrings.SCIM_READ] } as any);
+    expect(check()).toBe(true);
+  });
+
+  it('should allow if has stratos change password scope (array config)', () => {
+    const can = service.can([new PermissionConfig(StratosPermissionTypes.STRATOS_SCOPE, StratosScopeStrings.STRATOS_CHANGE_PASSWORD)])();
     expect(can).toBe(true);
   });
 
@@ -572,16 +574,17 @@ describe('CurrentUserPermissionsService', () => {
 });
 
 describe('CurrentUserPermissionsService fallback permission', () => {
-  // The service is a root singleton, so the endpoint watch behind a fallback
-  // check must end with the subscription, not with the root injector.
-  it('stops reading the endpoint after unsubscribe', () => {
-    const version = signal(0);
-    let reads = 0;
+  let version: ReturnType<typeof signal<number>>;
+  let reads: number;
+  let service: CurrentUserPermissionsService;
+
+  beforeEach(() => {
+    version = signal(0);
+    reads = 0;
     TestBed.configureTestingModule({
       providers: [
         provideZonelessChangeDetection(),
         CurrentUserPermissionsService,
-        { provide: CurrentUserRolesSignalService, useValue: {} },
         {
           provide: EndpointsDataService,
           // Unknown endpoint: the fallback branch answers false without
@@ -596,11 +599,26 @@ describe('CurrentUserPermissionsService fallback permission', () => {
         },
       ],
     });
-    const service = TestBed.inject(CurrentUserPermissionsService);
+    service = TestBed.inject(CurrentUserPermissionsService);
+  });
 
+  // The service is a root singleton, so the check must not keep watching
+  // the endpoint once nothing reads it: a signal check holds no effect.
+  it('holds no watch once read', () => {
     // A link to no known config leaves only the fallback branch.
+    const check = service.can(new PermissionConfigLink('no-such-permission'), 'ep-1');
+    expect(check()).toBe(false);
+    const readsAfterRead = reads;
+
+    version.set(1);
+    TestBed.tick();
+
+    expect(reads).toBe(readsAfterRead);
+  });
+
+  it('can$ stops reading the endpoint after unsubscribe', () => {
     const values: boolean[] = [];
-    const sub = service.can(new PermissionConfigLink('no-such-permission'), 'ep-1')
+    const sub = service.can$(new PermissionConfigLink('no-such-permission'), 'ep-1')
       .subscribe(v => values.push(v));
     TestBed.tick();
     expect(values).toEqual([false]);
@@ -617,29 +635,41 @@ describe('CurrentUserPermissionsService fallback permission', () => {
 describe('CurrentUserPermissionsService empty complex config', () => {
   // An empty config array leaves no check groups. combineLatest([]) completes
   // without a value, so the service must still answer.
-  it('denies an empty permission config', async () => {
+  it('denies an empty permission config', () => {
     TestBed.configureTestingModule({
       providers: [
         provideZonelessChangeDetection(),
         CurrentUserPermissionsService,
-        { provide: CurrentUserRolesSignalService, useValue: {} },
         { provide: EndpointsDataService, useValue: {} },
       ],
     });
     const service = TestBed.inject(CurrentUserPermissionsService);
 
-    await expect(firstValueFrom(service.can([]).pipe(timeout(1000)))).resolves.toBe(false);
+    expect(service.can([])()).toBe(false);
   });
 });
 
 describe('BaseCurrentUserPermissionsChecker.reduceChecks', () => {
   // An empty list answers with the identity of its combinator, as
   // some([]) / every([]) do.
-  it('answers false for an empty list combined with ||', async () => {
-    await expect(firstValueFrom(BaseCurrentUserPermissionsChecker.reduceChecks([], '||'))).resolves.toBe(false);
+  it('answers false for an empty list combined with ||', () => {
+    expect(BaseCurrentUserPermissionsChecker.reduceChecks([], '||')()).toBe(false);
   });
 
-  it('answers true for an empty list combined with &&', async () => {
-    await expect(firstValueFrom(BaseCurrentUserPermissionsChecker.reduceChecks([], '&&'))).resolves.toBe(true);
+  it('answers true for an empty list combined with &&', () => {
+    expect(BaseCurrentUserPermissionsChecker.reduceChecks([], '&&')()).toBe(true);
+  });
+
+  it('follows its checks as they change', () => {
+    const a = signal(false);
+    const b = signal(true);
+    const any = BaseCurrentUserPermissionsChecker.reduceChecks([a, b], '||');
+    const all = BaseCurrentUserPermissionsChecker.reduceChecks([a, b], '&&');
+    expect([any(), all()]).toEqual([true, false]);
+    a.set(true);
+    expect([any(), all()]).toEqual([true, true]);
+    b.set(false);
+    a.set(false);
+    expect([any(), all()]).toEqual([false, false]);
   });
 });
