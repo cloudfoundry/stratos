@@ -13,7 +13,7 @@
     <app-analysis-report-runner [kubeId]="helmReleaseHelper.endpointGuid" [namespace]="helmReleaseHelper.namespace"
       [app]="helmReleaseHelper.releaseTitle">
     </app-analysis-report-runner>
-    @if (analyzerService.enabled$ | async) {
+    @if (analyzerService.enabled()) {
       <app-analysis-report-selector (selected)="analysisChanged($event)"
       [endpoint]="helmReleaseHelper.endpointGuid" [path]="path"></app-analysis-report-selector>
     }
