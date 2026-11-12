@@ -60,6 +60,15 @@ describe('LogViewerComponent', () => {
     expect(component).toBeTruthy();
   });
 
+  // WCAG 2.1.1: a keyboard user can scroll the log, so the scroll box
+  // takes focus (it holds no control of its own) and has a name.
+  it('lets the keyboard reach the scroll box', () => {
+    const scroller = fixture.nativeElement.querySelector('.log-scroller') as HTMLElement;
+    expect(scroller.getAttribute('tabindex')).toBe('0');
+    expect(scroller.getAttribute('role')).toBe('region');
+    expect(scroller.getAttribute('aria-label')).toBe('Log');
+  });
+
   it('should add logline from observable', async () => {
     const logText = 'Log';
     expect(contentEl.children.length).toEqual(0);

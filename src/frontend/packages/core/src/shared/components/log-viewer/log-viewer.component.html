@@ -1,5 +1,7 @@
 <div class="log-viewer">
-  <div class="log-scroller" #container>
+  <!-- Focusable so the keyboard can scroll it (it holds no control).
+       Not role="log": that is a live region and would read each line. -->
+  <div class="log-scroller" #container tabindex="0" role="region" aria-label="Log">
     <div class="log-scroller__content" #content></div>
   </div>
 

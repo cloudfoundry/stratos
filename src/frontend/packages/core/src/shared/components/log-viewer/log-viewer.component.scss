@@ -66,4 +66,9 @@
     top: 0;
     word-break: break-word;
   }
+
+  // The viewer clips its overflow; draw the focus outline inside.
+  &:focus-visible {
+    outline-offset: -2px;
+  }
 }
