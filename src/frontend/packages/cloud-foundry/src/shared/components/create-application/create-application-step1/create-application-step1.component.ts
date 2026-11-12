@@ -1,11 +1,12 @@
 import { CommonModule } from '@angular/common';
-import { AfterContentInit, Component, OnInit, Signal, ChangeDetectionStrategy, computed, inject, input, viewChild } from '@angular/core';
+import { AfterContentInit, Component, Injector, OnInit, Signal, ChangeDetectionStrategy, computed, inject, input, viewChild } from '@angular/core';
 import { toObservable } from '@angular/core/rxjs-interop';
 import { FormsModule, NgForm } from '@angular/forms';
 import { ActivatedRoute } from '@angular/router';
 import { asapScheduler, Observable, of } from 'rxjs';
 import { map, observeOn, startWith, switchMap, withLatestFrom } from 'rxjs/operators';
 
+import { observeSignal } from '@stratosui/store';
 import { AppErrorComponent, CustomFormFieldComponent, CustomSelectComponent, CustomOptionComponent, FocusDirective, StepOnNextFunction } from '@stratosui/core';
 import { ISpace } from '../../../../cf-api.types';
 import { CfCurrentUserRolesDataService } from '../../../../services/cf-current-user-roles-data.service';
@@ -31,6 +32,7 @@ import { CreateAppStateService } from '../../../data-services/create-app-state.s
 })
 export class CreateApplicationStep1Component implements OnInit, AfterContentInit {
   private cfCurrentUserRoles = inject(CfCurrentUserRolesDataService);
+  private injector = inject(Injector);
   private createAppState = inject(CreateAppStateService);
   cfOrgSpaceService = inject(CfOrgSpaceDataService);
   route = inject(ActivatedRoute);
@@ -175,7 +177,10 @@ export class CreateApplicationStep1Component implements OnInit, AfterContentInit
     return this.orgSelect$.pipe(
       withLatestFrom(this.cfSelect$),
       switchMap(([orgGuid, endpointGuid]) => {
-        return this.cfCurrentUserRoles.spacesWithRoleInOrg$(endpointGuid!, orgGuid!, CfPermissionStrings.SPACE_DEVELOPER);
+        return observeSignal(
+          this.cfCurrentUserRoles.spacesWithRoleInOrg(endpointGuid!, orgGuid!, CfPermissionStrings.SPACE_DEVELOPER),
+          this.injector,
+        );
       }),
       switchMap((spacesOrAll => {
         if (spacesOrAll === 'all') {
