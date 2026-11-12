@@ -7,6 +7,9 @@
   dashboard status) stay streams that each page subscribes to.
 
 [BugFixes: Cloud Foundry]
+- The recently updated applications card on the Cloud Foundry summary
+  shows the newest apps as soon as the summary loads, instead of
+  "There are no applications" until the full app list arrives.
 - "View organization's quota" on the space summary card navigates once
   per click; it used to navigate again whenever the quota reloaded.
 - The space page and CLI Info breadcrumbs follow an organization or
