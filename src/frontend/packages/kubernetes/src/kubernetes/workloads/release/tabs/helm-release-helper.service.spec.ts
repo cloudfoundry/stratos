@@ -48,6 +48,14 @@ describe('HelmReleaseHelperService', () => {
       expect(rel.chart.metadata.icon).toBe('/kubernetes/assets/custom/app_placeholder.svg');
     });
 
+    it('release holds the loaded detail with a default icon, undefined before', async () => {
+      const helper = TestBed.inject(HelmReleaseHelperService);
+      expect(helper.release()).toBeUndefined();
+      httpMock.expectOne(DETAIL_URL).flush({ name: 'rel-x', namespace: 'ns-a', chart: { metadata: { name: 'nginx' } } });
+      await vi.waitFor(() => expect(helper.release()?.name).toBe('rel-x'));
+      expect(helper.release()?.chart.metadata.icon).toBe('/kubernetes/assets/custom/app_placeholder.svg');
+    });
+
     it('fetchReleaseHistory loads and emits the revisions array', async () => {
       const helper = TestBed.inject(HelmReleaseHelperService);
       httpMock.expectOne(DETAIL_URL).flush({ name: 'rel-x', namespace: 'ns-a', chart: { metadata: {} } });
