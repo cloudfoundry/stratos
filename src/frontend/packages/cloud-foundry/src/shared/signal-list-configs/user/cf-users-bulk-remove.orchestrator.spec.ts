@@ -26,7 +26,7 @@ function makeDeps(over: any = {}) {
       applyStatus: () => ({}),
       ...over.rolesData,
     },
-    userPerms: { can: vi.fn().mockReturnValue(of(true)), ...over.userPerms },
+    userPerms: { can$: vi.fn().mockReturnValue(of(true)), ...over.userPerms },
     confirmDialog: { open: vi.fn((_cfg: any, doFn: () => void) => doFn()), ...over.confirmDialog },
     snackBar: { error: vi.fn(), open: vi.fn(), ...over.snackBar },
     cfGuid: 'cnsi',
@@ -53,7 +53,7 @@ describe('bulkRemoveUsers', () => {
   });
 
   it('skips confirm and reports when permission filtering removes everything', async () => {
-    const deps = makeDeps({ userPerms: { can: vi.fn().mockReturnValue(of(false)) } });
+    const deps = makeDeps({ userPerms: { can$: vi.fn().mockReturnValue(of(false)) } });
     await bulkRemoveUsers(deps, { users: [u], opts: { scope: 'orgAndSpaces' }, title: 'T', message: 'M' });
     expect(deps.confirmDialog.open).not.toHaveBeenCalled();
     expect(deps.rolesData.executeChanges).not.toHaveBeenCalled();
@@ -73,7 +73,7 @@ describe('bulkRemoveUsers', () => {
     const canFn = vi.fn().mockImplementation((_perm: any, _cf: any, _org: any, spaceGuid?: string) =>
       of(spaceGuid === undefined), // org-level: true; space-level: false
     );
-    const deps = makeDeps({ userPerms: { can: canFn } });
+    const deps = makeDeps({ userPerms: { can$: canFn } });
     await bulkRemoveUsers(deps, { users: [uWithSpace], opts: { scope: 'orgAndSpaces' }, title: 'T', message: 'M' });
     await Promise.resolve(); await Promise.resolve();
     expect(deps.snackBar.open).toHaveBeenCalledWith(expect.stringContaining('skipped'));

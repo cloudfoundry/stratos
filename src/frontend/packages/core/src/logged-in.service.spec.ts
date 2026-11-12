@@ -49,7 +49,7 @@ describe('LoggedInService activity tracking', () => {
         provideZonelessChangeDetection(),
         { provide: AuthSignalService, useValue: { auth } },
         { provide: DashboardSignalService, useValue: { dashboard: signal({}) } },
-        { provide: CurrentUserPermissionsService, useValue: { can: () => of(false) } },
+        { provide: CurrentUserPermissionsService, useValue: { can$: () => of(false) } },
       ],
     });
     service = TestBed.inject(LoggedInService);

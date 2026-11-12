@@ -66,7 +66,7 @@ function buildTestBed(activeRoute: Partial<ActiveRouteCfOrgSpace>) {
   };
 
   const mockUserPerms = {
-    can: vi.fn().mockReturnValue(of(true)),
+    can$: vi.fn().mockReturnValue(of(true)),
   };
 
   TestBed.configureTestingModule({

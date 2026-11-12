@@ -84,12 +84,12 @@ export class ManageUsersSetUsernamesComponent implements OnInit {
     const ffSetPermConfig = new PermissionConfig(CfPermissionTypes.FEATURE_FLAG, CFFeatureFlagTypes.set_roles_by_username);
     const ffRemovePermConfig = new PermissionConfig(CfPermissionTypes.FEATURE_FLAG, CFFeatureFlagTypes.unset_roles_by_username);
     this.canAdd$ = waitForCFPermissions(cfRoles, activeRouteCfOrgSpace.cfGuid).pipe(
-      switchMap(() => userPerms.can(ffSetPermConfig, activeRouteCfOrgSpace.cfGuid)),
+      switchMap(() => userPerms.can$(ffSetPermConfig, activeRouteCfOrgSpace.cfGuid)),
       take(1),
       shareReplay({ bufferSize: 1, refCount: true })
     );
     this.canRemove$ = waitForCFPermissions(cfRoles, activeRouteCfOrgSpace.cfGuid).pipe(
-      switchMap(() => userPerms.can(ffRemovePermConfig, activeRouteCfOrgSpace.cfGuid)),
+      switchMap(() => userPerms.can$(ffRemovePermConfig, activeRouteCfOrgSpace.cfGuid)),
       take(1),
       shareReplay({ bufferSize: 1, refCount: true })
     );

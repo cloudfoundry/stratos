@@ -19,7 +19,7 @@ const stubCfEndpoint = { endpoint: signal(undefined) };
 const stubActiveRoute = { cfGuid: '' };
 const stubCfRoles = { cfEndpointRolesState$: () => NEVER };
 const stubAuthData = { sessionData: signal(null) };
-const stubPermissions = { can: () => NEVER };
+const stubPermissions = { can$: () => NEVER };
 
 describe('UserInviteService.invite', () => {
   let svc: UserInviteService;
@@ -122,7 +122,7 @@ describe('UserInviteService.canShowInviteUser', () => {
           cfEndpointRolesState$: () => of({ state: { initialised: true } }),
         } },
         { provide: AuthDataService, useValue: stubAuthData },
-        { provide: CurrentUserPermissionsService, useValue: { can: () => of(true) } },
+        { provide: CurrentUserPermissionsService, useValue: { can$: () => of(true) } },
         UserInviteService,
       ],
     });

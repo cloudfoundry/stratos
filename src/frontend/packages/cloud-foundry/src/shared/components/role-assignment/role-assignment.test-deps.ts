@@ -39,7 +39,7 @@ export interface RoleAssignmentTestCfg {
   spacesByOrg: Record<string, { guid: string; name: string }[]>;
   /**
    * Optional permission predicate.  Receives the same args as
-   * CurrentUserPermissionsService.can().  Defaults to `() => true`.
+   * CurrentUserPermissionsService.can$().  Defaults to `() => true`.
    */
   permissions?: (perm: unknown, cf: string, org?: string, space?: string) => boolean;
 }
@@ -64,7 +64,7 @@ export function provideRoleAssignmentTestDeps(cfg: RoleAssignmentTestCfg): Provi
     {
       provide: CurrentUserPermissionsService,
       useValue: {
-        can: (perm: unknown, cf: string, org?: string, space?: string) =>
+        can$: (perm: unknown, cf: string, org?: string, space?: string) =>
           of(cfg.permissions ? cfg.permissions(perm, cf, org, space) : true),
       },
     },

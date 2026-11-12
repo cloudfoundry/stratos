@@ -73,7 +73,7 @@ describe('CloudFoundryServicesSignalComponent', () => {
         importProvidersFrom(generateCfBaseTestModulesNoShared()),
         TabNavService,
         { provide: CfServiceInstancesSignalConfigService, useValue: stubSignalConfig },
-        { provide: CurrentUserPermissionsService, useValue: { can: () => of(true) } },
+        { provide: CurrentUserPermissionsService, useValue: { can$: () => of(true) } },
         { provide: CloudFoundryEndpointService, useValue: { cfGuid: 'cnsi-1' } },
       ],
     }).compileComponents();

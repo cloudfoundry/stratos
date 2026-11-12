@@ -112,7 +112,7 @@ export class CardAppInstancesComponent implements OnDestroy {
     toObservable(computed(() => ({ org: this.dataService.org(), space: this.dataService.space() }))).pipe(
       filter(({ org, space }) => !!org && !!space),
       switchMap(({ org, space }) =>
-        this.cups.can(
+        this.cups.can$(
           CfCurrentUserPermissions.APPLICATION_EDIT,
           this.appService.cfGuid,
           org!.guid,

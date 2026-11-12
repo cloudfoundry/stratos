@@ -283,8 +283,8 @@ export function canUpdateOrgSpaceRoles(
   orgGuid?: string,
   spaceGuid?: string): Observable<boolean> {
   return combineLatest([
-    perms.can(CfCurrentUserPermissions.ORGANIZATION_CHANGE_ROLES, cfGuid, orgGuid),
-    perms.can(CfCurrentUserPermissions.SPACE_CHANGE_ROLES, cfGuid, orgGuid, spaceGuid)
+    perms.can$(CfCurrentUserPermissions.ORGANIZATION_CHANGE_ROLES, cfGuid, orgGuid),
+    perms.can$(CfCurrentUserPermissions.SPACE_CHANGE_ROLES, cfGuid, orgGuid, spaceGuid)
   ]).pipe(
     map((checks: boolean[]) => checks.some(check => check))
   );
@@ -294,7 +294,7 @@ export function canUpdateOrgRoles(
   perms: CurrentUserPermissionsService,
   cfGuid: string,
   orgGuid?: string): Observable<boolean> {
-  return perms.can(CfCurrentUserPermissions.ORGANIZATION_CHANGE_ROLES, cfGuid, orgGuid);
+  return perms.can$(CfCurrentUserPermissions.ORGANIZATION_CHANGE_ROLES, cfGuid, orgGuid);
 }
 
 export function waitForCFPermissions(
@@ -381,7 +381,7 @@ export function someFeatureFlags(
   return waitForCFPermissions(cfRoles, cfGuid).pipe(
     switchMap(() => combineLatest(ff.map(flag => {
       const permConfig = new PermissionConfig(CfPermissionTypes.FEATURE_FLAG, flag);
-      return userPerms.can(permConfig, cfGuid);
+      return userPerms.can$(permConfig, cfGuid);
     }))),
     map(results => results.some(result => !!result))
   );

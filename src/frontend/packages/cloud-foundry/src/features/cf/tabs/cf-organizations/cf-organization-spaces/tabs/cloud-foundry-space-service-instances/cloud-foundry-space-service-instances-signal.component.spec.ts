@@ -80,7 +80,7 @@ describe('CloudFoundrySpaceServiceInstancesSignalComponent', () => {
         importProvidersFrom(generateCfBaseTestModulesNoShared()),
         TabNavService,
         { provide: CfServiceInstancesSignalConfigService, useValue: stubSignalConfig },
-        { provide: CurrentUserPermissionsService, useValue: { can: () => of(true) } },
+        { provide: CurrentUserPermissionsService, useValue: { can$: () => of(true) } },
         { provide: CloudFoundryEndpointService, useValue: { cfGuid: 'cnsi-1' } },
         { provide: CloudFoundryOrganizationService, useValue: { orgGuid: 'org-1', cfGuid: 'cnsi-1' } },
         { provide: CloudFoundrySpaceService, useValue: { spaceGuid: 'space-1', orgGuid: 'org-1', cfGuid: 'cnsi-1' } },

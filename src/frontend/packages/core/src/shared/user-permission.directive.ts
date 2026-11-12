@@ -47,7 +47,7 @@ export class UserPermissionDirective implements OnChanges, OnDestroy {
 
     const checks: Observable<boolean>[] = appUserPermission.map(
       (permission: PermissionTypes) =>
-        this.currentUserPermissionsService.can(permission, this.appUserPermissionEndpointGuid())
+        this.currentUserPermissionsService.can$(permission, this.appUserPermissionEndpointGuid())
     );
 
     this.canSub = combineLatest(checks).pipe(

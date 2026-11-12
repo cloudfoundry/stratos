@@ -79,7 +79,7 @@ export class CloudFoundrySpaceAppsSignalComponent implements OnInit {
    *  to this space (APPLICATION_CREATE checks SPACE_DEVELOPER role). Built
    *  in the constructor (injection context) so toSignal() resolves. */
   public readonly canCreateApplication: Signal<boolean> = toSignal(
-    this.permissionsService.can(
+    this.permissionsService.can$(
       CfCurrentUserPermissions.APPLICATION_CREATE,
       this.cfEndpointService.cfGuid,
       this.cfSpaceService.spaceGuid,

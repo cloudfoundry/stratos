@@ -110,8 +110,8 @@ export async function bulkRemoveUsers(deps: BulkRemoveDeps, req: BulkRemoveReque
   // Permission-filter per change.
   const checks = candidates.map(c => {
     const can$ = c.spaceGuid
-      ? deps.userPerms.can(CfCurrentUserPermissions.SPACE_CHANGE_ROLES, deps.cfGuid, c.orgGuid, c.spaceGuid)
-      : deps.userPerms.can(CfCurrentUserPermissions.ORGANIZATION_CHANGE_ROLES, deps.cfGuid, c.orgGuid);
+      ? deps.userPerms.can$(CfCurrentUserPermissions.SPACE_CHANGE_ROLES, deps.cfGuid, c.orgGuid, c.spaceGuid)
+      : deps.userPerms.can$(CfCurrentUserPermissions.ORGANIZATION_CHANGE_ROLES, deps.cfGuid, c.orgGuid);
     return can$.pipe(map(can => ({ can, change: c })));
   });
   const verdicts = await firstValueFrom(checks.length ? combineLatest(checks) : of([]));

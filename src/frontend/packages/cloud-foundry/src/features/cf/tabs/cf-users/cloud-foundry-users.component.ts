@@ -162,8 +162,8 @@ export class CloudFoundryUsersComponent {
    *  needs only perms + the endpoint guid, no usersConfig.initialize(). */
   private readonly canManageRoles: Signal<boolean> = toSignal(
     combineLatest([
-      this.perms.can(CfCurrentUserPermissions.ORGANIZATION_CHANGE_ROLES, this.cfEndpointService.cfGuid),
-      this.perms.can(CfCurrentUserPermissions.SPACE_CHANGE_ROLES, this.cfEndpointService.cfGuid),
+      this.perms.can$(CfCurrentUserPermissions.ORGANIZATION_CHANGE_ROLES, this.cfEndpointService.cfGuid),
+      this.perms.can$(CfCurrentUserPermissions.SPACE_CHANGE_ROLES, this.cfEndpointService.cfGuid),
     ]).pipe(map(([org, space]) => org || space)),
     { initialValue: false },
   );

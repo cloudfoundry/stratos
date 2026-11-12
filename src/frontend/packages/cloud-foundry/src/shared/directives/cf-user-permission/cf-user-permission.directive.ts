@@ -28,7 +28,7 @@ export class CfUserPermissionDirective implements OnDestroy, OnInit {
 
   public ngOnInit() {
     this.canSub = this.waitForEndpointPermissions(this.appCfUserPermissionEndpointGuid()).pipe(
-      switchMap(() => this.currentUserPermissionsService.can(
+      switchMap(() => this.currentUserPermissionsService.can$(
         this.appCfUserPermission(),
         this.appCfUserPermissionEndpointGuid(),
         this.getOrgOrSpaceGuid(),

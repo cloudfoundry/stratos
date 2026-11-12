@@ -134,7 +134,7 @@ export class BuildTabComponent implements OnInit {
 
     const canSeeEnvVars$ = toObservable(this.data.space, { injector: this.injector }).pipe(
       filter(space => !!space),
-      switchMap(space => this.cups.can(
+      switchMap(space => this.cups.can$(
         CfCurrentUserPermissions.APPLICATION_VIEW_ENV_VARS,
         this.applicationService.cfGuid,
         space!.guid)

@@ -203,7 +203,7 @@ export class ApplicationWallComponent implements OnInit {
     // directive call (no endpoint/org/space scope — true if any connected
     // CF allows it). Push the result into a signal the L5 button reads.
     // The check stays live, so end it with the wall.
-    currentUserPermissionsService.can(CfCurrentUserPermissions.APPLICATION_CREATE).pipe(
+    currentUserPermissionsService.can$(CfCurrentUserPermissions.APPLICATION_CREATE).pipe(
       takeUntilDestroyed(this.destroyRef),
     ).subscribe({
       next: can => this.canCreateApplication.set(can),

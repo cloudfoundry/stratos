@@ -97,7 +97,7 @@ interface AutoscalerTabPaginationParams {
         if (!orgGuid || !spaceGuid) {
           return of(false);
         }
-        return cups.can(
+        return cups.can$(
           CfCurrentUserPermissions.APPLICATION_EDIT,
           endpointGuid,
           orgGuid,

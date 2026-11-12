@@ -76,7 +76,7 @@ export class CloudFoundrySpaceServiceInstancesSignalComponent {
    *  (SPACE_DEVELOPER). Built here in the injection context so toSignal()
    *  resolves. */
   public readonly canCreateServiceInstance: Signal<boolean> = toSignal(
-    this.permissionsService.can(
+    this.permissionsService.can$(
       CfCurrentUserPermissions.SERVICE_INSTANCE_CREATE,
       this.cfEndpointService.cfGuid,
       this.cfSpaceService.spaceGuid,

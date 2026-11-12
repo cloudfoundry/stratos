@@ -133,11 +133,11 @@ describe('ApplicationWallComponent', () => {
 
     canCreate$ = new Subject<boolean>();
     const perms = TestBed.inject(CurrentUserPermissionsService);
-    const realCan = perms.can.bind(perms);
-    vi.spyOn(perms, 'can').mockImplementation(((action: unknown, ...rest: unknown[]) =>
+    const realCan = perms.can$.bind(perms);
+    vi.spyOn(perms, 'can$').mockImplementation(((action: unknown, ...rest: unknown[]) =>
       action === CfCurrentUserPermissions.APPLICATION_CREATE
         ? canCreate$
-        : (realCan as (...a: unknown[]) => Observable<boolean>)(action, ...rest)) as typeof perms.can);
+        : (realCan as (...a: unknown[]) => Observable<boolean>)(action, ...rest)) as typeof perms.can$);
 
     fixture = TestBed.createComponent(ApplicationWallComponent);
     component = fixture.componentInstance;

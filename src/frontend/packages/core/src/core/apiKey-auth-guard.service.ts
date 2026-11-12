@@ -10,7 +10,7 @@ export const apiKeyAuthGuard: CanActivateFn = (): Observable<boolean> => {
   const router = inject(Router);
   const cups = inject(CurrentUserPermissionsService);
 
-  return cups.can(StratosCurrentUserPermissions.API_KEYS).pipe(
+  return cups.can$(StratosCurrentUserPermissions.API_KEYS).pipe(
     map(can => {
       if (!can) {
         router.navigate(['/']);

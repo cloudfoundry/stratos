@@ -101,7 +101,7 @@ export class ServicesTabComponent implements OnInit {
     // bridged for it; the Bind action waits for the app's space.
     toObservable(this.dataService.app).pipe(
       filter(app => !!app?.entity?.space_guid),
-      switchMap(app => this.permissions.can(
+      switchMap(app => this.permissions.can$(
         CfCurrentUserPermissions.SERVICE_INSTANCE_CREATE,
         this.appService.cfGuid,
         app!.entity.space_guid,

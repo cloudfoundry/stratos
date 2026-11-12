@@ -72,7 +72,7 @@ export class CloudFoundryApplicationsSignalComponent implements OnInit {
   /** Reactive permission flag for the Create Application button. Built
    *  in the constructor (injection context) so toSignal() resolves. */
   public readonly canCreateApplication: Signal<boolean> = toSignal(
-    this.permissionsService.can(CfCurrentUserPermissions.APPLICATION_CREATE, this.cfEndpointService.cfGuid),
+    this.permissionsService.can$(CfCurrentUserPermissions.APPLICATION_CREATE, this.cfEndpointService.cfGuid),
     { initialValue: false },
   );
   /** L5 primary action — navigates to the deploy stepper with this CNSI
