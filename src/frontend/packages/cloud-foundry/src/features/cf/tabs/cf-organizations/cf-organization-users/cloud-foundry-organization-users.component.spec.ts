@@ -80,7 +80,7 @@ describe('CloudFoundryOrganizationUsersComponent', () => {
           provide: CloudFoundryOrganizationService,
           useValue: { orgGuid: 'org-1', cfGuid: 'cnsi-1', orgDataService: { org: signal(null) } },
         },
-        { provide: UserInviteService, useValue: { configured$: of(false) } },
+        { provide: UserInviteService, useValue: { configured: signal(false) } },
       ],
     }).compileComponents();
 
@@ -175,7 +175,7 @@ async function makeSubNavFixture(canReturn: boolean, filteredItems?: StUser[]): 
         useValue: { orgGuid: 'org-1', cfGuid: 'cnsi-1', orgDataService: { org: signal(null) } },
       },
       { provide: CurrentUserPermissionsService, useValue: { can: () => of(canReturn) } },
-      { provide: UserInviteService, useValue: { configured$: of(false) } },
+      { provide: UserInviteService, useValue: { configured: signal(false) } },
     ],
   }).compileComponents();
   const fixture = TestBed.createComponent(CloudFoundryOrganizationUsersComponent);
