@@ -57,7 +57,7 @@ export class KubernetesAnalysisService {
   public hideAnalysis$: Observable<boolean>;
 
   // Signal members, read off the session's plugin flags and config.
-  readonly enabled = computed(() => !!this.session.sessionData()?.plugins?.analysis);
+  readonly enabled = computed(() => KubernetesAnalysisService.analysisEnabled(this.session));
   readonly hideAnalysis = computed(() => !this.enabled());
   readonly analyzers = computed(() => {
     const enginesCsv = this.session.sessionData()?.['plugin-config']?.analysisEngines;
@@ -77,6 +77,10 @@ export class KubernetesAnalysisService {
 
   // Reads the `plugins.analysis` flag from session data via the
   // signal-native SessionService — no ngrx Store / `store.select('auth')`.
+  public static analysisEnabled(session: SessionService): boolean {
+    return !!session?.sessionData()?.plugins?.analysis;
+  }
+
   public static isAnalysisEnabled(session: SessionService): Observable<boolean> {
     return of(!!session?.sessionData()?.plugins?.analysis).pipe(startWith(false));
   }
