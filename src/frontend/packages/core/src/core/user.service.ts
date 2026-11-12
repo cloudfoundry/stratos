@@ -17,12 +17,16 @@ import { UserSignalService } from './signals/user-signal.service';
   providedIn: 'root'
 })
 export class UserService {
+  private userSignals = inject(UserSignalService);
+
+  readonly isAdmin = this.userSignals.isAdmin;
+  readonly isEndpointAdmin = this.userSignals.isEndpointAdmin;
 
   isAdmin$: Observable<boolean>;
   isEndpointAdmin$: Observable<boolean>;
 
   constructor() {
-    const userSignals = inject(UserSignalService);
+    const userSignals = this.userSignals;
 
     this.isAdmin$ = toObservable(userSignals.isAdmin);
     this.isEndpointAdmin$ = toObservable(userSignals.isEndpointAdmin);
