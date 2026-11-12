@@ -1,4 +1,5 @@
-import { Component, OnDestroy, OnInit, inject, ChangeDetectionStrategy } from '@angular/core';
+import { Component, OnDestroy, OnInit, inject, ChangeDetectionStrategy, computed } from '@angular/core';
+import { toObservable } from '@angular/core/rxjs-interop';
 import { CommonModule } from '@angular/common';
 import { HttpClient } from '@angular/common/http';
 import { AbstractControl, ReactiveFormsModule, FormControl, FormGroup, Validators } from '@angular/forms';
@@ -40,6 +41,12 @@ interface DomainHostForm {
 })
 export class CreateApplicationStep3Component implements OnInit, OnDestroy {
   private createAppState = inject(CreateAppStateService);
+  // The wizard's selection and app name as one value; the domains
+  // pipeline below composes it with an HTTP request.
+  private readonly appState$ = toObservable(computed(() => ({
+    cloudFoundryDetails: this.createAppState.cloudFoundryDetails(),
+    name: this.createAppState.name(),
+  })));
   private router = inject(Router);
   private route = inject(ActivatedRoute);
   private http = inject(HttpClient);
@@ -163,7 +170,7 @@ export class CreateApplicationStep3Component implements OnInit, OnDestroy {
   }
 
   ngOnInit() {
-    this.domains$ = this.createAppState.state$.pipe(
+    this.domains$ = this.appState$.pipe(
       filter(state => !!state.cloudFoundryDetails?.cloudFoundry && !!state.cloudFoundryDetails?.org),
       mergeMap(state => {
         this.hostControl().setValue(state.name.split(' ').join('-').toLowerCase());
