@@ -1,7 +1,6 @@
 import { Signal, computed, provideZonelessChangeDetection, signal } from '@angular/core';
 import { TestBed } from '@angular/core/testing';
 import { ActivatedRoute } from '@angular/router';
-import { firstValueFrom } from 'rxjs';
 import { describe, it, expect, beforeEach, vi } from 'vitest';
 
 import { MetricsDataService } from '../../../../store/src/services/metrics-data.service';
@@ -52,11 +51,6 @@ describe('KubernetesNodeService', () => {
 
   it('refreshes the cluster node cache for its endpoint', () => {
     expect(refresh).toHaveBeenCalledWith('k1');
-  });
-
-  it('projects the node by name onto nodeEntity$', async () => {
-    const node = await firstValueFrom(svc.nodeEntity$);
-    expect(node.metadata.name).toBe('node-a');
   });
 
   it('follows the node by name in the node signal', () => {

@@ -1,14 +1,12 @@
 import { Injectable, Injector, Signal, computed, inject, signal } from '@angular/core';
-import { toObservable } from '@angular/core/rxjs-interop';
 import { ActivatedRoute } from '@angular/router';
-import { Observable, Subscription } from 'rxjs';
-import { filter, map, shareReplay, take } from 'rxjs/operators';
+import { Subscription } from 'rxjs';
+import { filter, map } from 'rxjs/operators';
 
 import { getIdFromRoute } from '../../../../core/src/core/utils.service';
 import { MetricQueryConfig } from '../../../../store/src/actions/metrics.actions';
 import { observeSignal } from '../../../../store/src/helpers/signal-interop';
 import { MetricsDataService, MetricsRequest } from '../../../../store/src/services/metrics-data.service';
-import { EntityInfo } from '../../../../store/src/types/api.types';
 import { MetricQueryType } from '../../../../store/src/types/metric.types';
 import { KubeNodeDataService } from '../../services/domain-data/kube-node-data.service';
 import { KubernetesNode, MetricStatistic } from '../store/kube.types';
@@ -33,8 +31,6 @@ export class KubernetesNodeService {
 
   public nodeName: string;
   public kubeGuid: string;
-  public node$: Observable<EntityInfo<KubernetesNode>>;
-  nodeEntity$: Observable<KubernetesNode>;
   // The route's node, undefined until the cluster cache holds it.
   readonly node: Signal<KubernetesNode | undefined>;
 
@@ -51,17 +47,6 @@ export class KubernetesNodeService {
     void this.nodeData.refresh(this.kubeGuid);
     const node = this.nodeData.nodeByName(this.kubeGuid, this.nodeName);
     this.node = computed(() => node() as unknown as KubernetesNode | undefined);
-
-    this.nodeEntity$ = toObservable(node, { injector: this.injector }).pipe(
-      filter((n): n is NonNullable<typeof n> => !!n),
-      take(1),
-      map(n => n as unknown as KubernetesNode),
-      shareReplay({ bufferSize: 1, refCount: true })
-    );
-
-    this.node$ = this.nodeEntity$.pipe(
-      map(entity => ({ entity } as unknown as EntityInfo<KubernetesNode>))
-    );
   }
 
 
