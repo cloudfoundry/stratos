@@ -3,7 +3,9 @@ import { Router } from '@angular/router';
 import { describe, expect, it, vi } from 'vitest';
 
 import { CfAppsSignalConfigService } from '../../shared/signal-list-configs/app/cf-apps-signal-config.service';
-import { goToAppWall, goToCfApplications } from './cf.helpers';
+import { CurrentUserPermissionsService } from '@stratosui/core';
+import { CfCurrentUserPermissions } from '../../user-permissions/cf-user-permissions.types';
+import { canUpdateOrgSpaceRoles, goToAppWall, goToCfApplications } from './cf.helpers';
 
 // goToAppWall scopes the signal-native application wall by writing the
 // CfAppsSignalConfigService toolbar selections (cnsi/org/space) — the root
@@ -67,5 +69,24 @@ describe('goToCfApplications', () => {
     // Stays in the CF scope — never the global /applications wall.
     expect(router.navigate).toHaveBeenCalledWith(['/cloud-foundry', 'cf-1', 'applications']);
     expect(router.navigate).not.toHaveBeenCalledWith(['applications']);
+  });
+});
+
+describe('canUpdateOrgSpaceRoles', () => {
+  it('follows either the org or the space role-change check', () => {
+    const org = signal(false);
+    const space = signal(false);
+    const can = vi.fn((action: string) =>
+      action === CfCurrentUserPermissions.ORGANIZATION_CHANGE_ROLES ? org : space);
+    const perms = { can } as unknown as CurrentUserPermissionsService;
+
+    const canUpdate = canUpdateOrgSpaceRoles(perms, 'cf-1', 'org-1', 'space-1');
+    expect(canUpdate()).toBe(false);
+    expect(can).toHaveBeenCalledWith(CfCurrentUserPermissions.SPACE_CHANGE_ROLES, 'cf-1', 'org-1', 'space-1');
+    space.set(true);
+    expect(canUpdate()).toBe(true);
+    space.set(false);
+    org.set(true);
+    expect(canUpdate()).toBe(true);
   });
 });
