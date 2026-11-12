@@ -3,8 +3,6 @@ import { Router } from '@angular/router';
 
 import { CustomTooltipDirective } from '@stratosui/core';
 import { RoutingHistoryService } from '@stratosui/store';
-import { Observable } from 'rxjs';
-import { take, map } from 'rxjs/operators';
 
 import { PageHeaderComponent } from '../../../../../core/src/shared/components/page-header/page-header.component';
 import { IHeaderBreadcrumb } from '../../../../../core/src/shared/components/page-header/page-header.types';
@@ -64,7 +62,6 @@ export class CliInfoCloudFoundryComponent implements OnInit {
     [key: string]: string;
   };
 
-  public route$!: Observable<{ url: string, queryParams: any }>;
 
   // The endpoint with the route's organization and space, once each one the
   // route names has loaded: otherwise a page opened by its address would show
@@ -120,12 +117,10 @@ export class CliInfoCloudFoundryComponent implements OnInit {
   });
 
   ngOnInit() {
-    this.setupRouteObservable(this.getDefaultBackLink());
-    // Will auto unsubscribe as we are using 'first'
-    this.route$.pipe(take(1)).subscribe(route => {
-      this.previousUrl = route.url;
-      this.previousQueryParams = route.queryParams;
-    });
+    // The page before this one; by ngOnInit the navigation here is recorded.
+    const route = this.routingHistory.previousState();
+    this.previousUrl = route && route.state ? route.state.url : this.getDefaultBackLink();
+    this.previousQueryParams = route && route.state && route.state.queryParams ? route.state.queryParams : {};
 
   }
 
@@ -141,16 +136,6 @@ export class CliInfoCloudFoundryComponent implements OnInit {
     return backLink;
   }
 
-  private setupRouteObservable(defaultBackLink: string) {
-    this.route$ = this.routingHistory.previousState$.pipe(
-      map(route => {
-        return {
-          url: route && route.state ? route.state.url : defaultBackLink,
-          queryParams: route && route.state && route.state.queryParams ? route.state.queryParams : {}
-        };
-      })
-    );
-  }
 
   back() {
     // Direct Angular Router navigation, replacing the ngrx RouterNav dispatch
