@@ -143,7 +143,7 @@ describe('VariablesTabComponent', () => {
         provideZonelessChangeDetection(),
         provideRouter([]),
         { provide: ApplicationService, useClass: ApplicationServiceMock },
-        { provide: CloudFoundryService, useValue: { cFEndpoints$: of([]) } },
+        { provide: CloudFoundryService, useValue: { cfEndpoints: signal([]) } },
         { provide: AppDetailDataService, useFactory: makeDataStub },
         { provide: ConfirmationDialogService, useFactory: makeConfirmStub },
         { provide: TailwindDialogService, useFactory: makeDialogStub },

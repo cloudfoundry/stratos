@@ -1,9 +1,6 @@
 import { Injectable, Signal, computed, inject } from '@angular/core';
-import { toObservable } from '@angular/core/rxjs-interop';
-import { Observable } from 'rxjs';
 
 import { EndpointsDataService } from '../../../../store/src/services/endpoints-data.service';
-import { APIResource, EntityInfo } from '../../../../store/src/types/api.types';
 import { EndpointModel, withConnectingOverlay } from '../../../../store/src/types/endpoint.types';
 
 @Injectable({
@@ -52,13 +49,5 @@ export class CloudFoundryService {
 
   readonly hasRegisteredCFEndpoints: Signal<boolean> = computed(() => this.cfEndpoints().length > 0);
   readonly hasConnectedCFEndpoints: Signal<boolean> = computed(() => this.connectedCFEndpoints().length > 0);
-
-  // Feeds the page header's Observable endpointIds$ input.
-  cFEndpoints$: Observable<EndpointModel[]>;
-  waitForAppEntity$!: Observable<EntityInfo<APIResource>>;
-
-  constructor() {
-    this.cFEndpoints$ = toObservable(this.cfEndpoints);
-  }
 }
 
