@@ -104,7 +104,8 @@ export class CloudFoundryQuotasComponent {
       columns: [
         {
           header: 'Name', key: 'name', sortField: 'name',
-          kind: 'text',
+          kind: 'link',
+          link: (q: StOrgQuota) => ['/cloud-foundry', cfGuid, 'quota-definitions', q.guid],
           render: (q: StOrgQuota) => q.name,
           widthHint: '14rem',
         },
