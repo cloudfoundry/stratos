@@ -1,6 +1,6 @@
 import { CommonModule } from '@angular/common';
 import { HttpClient } from '@angular/common/http';
-import { ChangeDetectionStrategy, Component, ElementRef, Injector, Signal, computed, inject, input, linkedSignal, signal, untracked, viewChild } from '@angular/core';
+import { ChangeDetectionStrategy, Component, ElementRef, Injector, Signal, computed, inject, input, linkedSignal, runInInjectionContext, signal, untracked, viewChild } from '@angular/core';
 import { toObservable, toSignal } from '@angular/core/rxjs-interop';
 import { ActivatedRoute, RouterModule } from '@angular/router';
 import { Observable } from 'rxjs';
@@ -62,11 +62,15 @@ export class PageSideNavComponent {
       }
       // A tab's hidden() is extension code returning a stream; run it outside
       // the reactive context so it can neither add dependencies nor fail on a
-      // signal write, and read it as a signal.
+      // signal write, and read it as a signal. It runs in this view's
+      // injection context, so it may inject() (for example to watch a
+      // permission signal).
       return untracked(() => tabs.map(tab => ({
         ...tab,
         isHidden: tab.isHidden ?? (tab.hidden
-          ? toSignal(tab.hidden(this.activatedRoute, this.cups, this.http), { initialValue: null, injector: this.injector })
+          ? toSignal(
+            runInInjectionContext(this.injector, () => tab.hidden!(this.activatedRoute, this.cups, this.http)),
+            { initialValue: null, injector: this.injector })
           : SHOWN),
       })));
     },
