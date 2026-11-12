@@ -45,7 +45,9 @@ describe('ApplicationTabsBaseComponent', () => {
 
     // Mock other required services
     const mockCurrentUserPermissionsService = {
-      can$: vi.fn().mockReturnValue(new BehaviorSubject<boolean>(true).asObservable())
+      can$: vi.fn().mockReturnValue(new BehaviorSubject<boolean>(true).asObservable()),
+      // The page header reads its permissions as signals.
+      can: vi.fn().mockReturnValue(signal(true)),
     };
 
     const mockGitSCMService = {
