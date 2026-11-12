@@ -7,9 +7,10 @@ import { provideRouter } from '@angular/router';
 import { provideNoopAnimations } from '@angular/platform-browser/animations';
 import { describe, it, expect, beforeEach, afterEach, beforeAll, afterAll, vi } from 'vitest';
 import {
+  CurrentUserPermissionsService,
   TabNavService
 } from '@stratosui/core';
-import { cfCurrentUserPermissionsService } from '@stratosui/cloud-foundry';
+import { CfCurrentUserPermissions, cfCurrentUserPermissionsService } from '@stratosui/cloud-foundry';
 import { TEST_CATALOGUE_ENTITIES, generateStratosEntities, EntityCatalogTestModule, EntityCatalogHelper, EntityCatalogHelpers } from '@stratosui/store';
 import { STORE_TEST_PROVIDERS, testSCFEndpointGuid, populateStoreWithTestEndpoint } from '@stratosui/store/testing';
 import { generateCFEntities, generateTestCfEndpointServiceProvider } from '@test-framework/cf';
@@ -20,8 +21,10 @@ describe('CloudFoundryTabsBaseComponent', () => {
   let component: CloudFoundryTabsBaseComponent;
   let fixture: ComponentFixture<CloudFoundryTabsBaseComponent>;
   const users = signal<unknown[] | null>(null);
+  const canViewFirehose = signal(false);
   beforeEach(async () => {
       users.set(null);
+      canViewFirehose.set(false);
       await TestBed.configureTestingModule({
         imports: [CloudFoundryTabsBaseComponent],
         providers: [
@@ -57,6 +60,10 @@ describe('CloudFoundryTabsBaseComponent', () => {
     });
 
   beforeEach(async () => {
+    const perms = TestBed.inject(CurrentUserPermissionsService);
+    const realCan = perms.can.bind(perms);
+    vi.spyOn(perms, 'can').mockImplementation((perm, ...args) =>
+      perm === CfCurrentUserPermissions.FIREHOSE_VIEW ? canViewFirehose : realCan(perm, ...args));
     fixture = TestBed.createComponent(CloudFoundryTabsBaseComponent);
     component = fixture.componentInstance;
     await fixture.whenStable();
@@ -86,6 +93,15 @@ describe('CloudFoundryTabsBaseComponent', () => {
     expect(hidden()).toBe(true);
 
     users.set([{}, {}]);
+    expect(hidden()).toBe(false);
+  });
+
+  it('hides the Firehose tab until the user may view the firehose', () => {
+    const firehoseTab = component.tabLinks.find(t => t.link === CloudFoundryTabsBaseComponent.firehose);
+    const hidden = firehoseTab!.isHidden!;
+    expect(hidden()).toBe(true);
+
+    canViewFirehose.set(true);
     expect(hidden()).toBe(false);
   });
 
