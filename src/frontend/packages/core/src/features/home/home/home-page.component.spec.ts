@@ -7,7 +7,6 @@ import { Router } from '@angular/router';
 import { describe, it, expect, vi } from 'vitest';
 import { NoopAnimationsModule } from '@angular/platform-browser/animations';
 import { RouterTestingModule } from '@angular/router/testing';
-import { of } from 'rxjs';
 import { createBasicStoreModule, STORE_TEST_PROVIDERS } from '@test-framework';
 import {
   EndpointModel,
@@ -63,7 +62,7 @@ describe('HomePageComponent', () => {
         provideHttpClient(),
         provideHttpClientTesting(),
         { provide: EndpointsService, useValue: endpointsServiceStub },
-        ...(favGroups ? [{ provide: UserFavoriteManager, useValue: { getAllFavorites: () => of([favGroups, []]) } }] : []),
+        ...(favGroups ? [{ provide: UserFavoriteManager, useValue: { allFavorites: signal([favGroups, {}]) } }] : []),
       ]
     }).compileComponents();
 

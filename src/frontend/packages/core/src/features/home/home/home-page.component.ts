@@ -1,6 +1,6 @@
 import { CommonModule } from '@angular/common';
 import { ChangeDetectionStrategy, Component, computed, HostListener, Injector, OnInit, Signal, effect, signal, inject } from '@angular/core';
-import { toObservable, toSignal } from '@angular/core/rxjs-interop';
+import { toObservable } from '@angular/core/rxjs-interop';
 import { Router } from '@angular/router';
 import {
   IUserFavoritesGroups,
@@ -66,7 +66,7 @@ export class HomePageComponent implements OnInit {
   public haveRegistered: Signal<boolean> = this.endpointsService.haveRegistered;
 
   private connectedEndpointsRaw: Signal<EndpointModel[]> = this.endpointsService.connectedEndpoints;
-  private allFavorites = toSignal(this.userFavoriteManager.getAllFavorites());
+  private allFavorites = this.userFavoriteManager.allFavorites;
 
   private connectedEndpoints: Signal<EndpointModel[]> = computed(() =>
     this.haveRegistered() ? this.connectedEndpointsRaw() : []
