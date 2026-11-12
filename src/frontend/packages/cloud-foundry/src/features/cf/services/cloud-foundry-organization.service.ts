@@ -1,7 +1,6 @@
 import { HttpClient } from '@angular/common/http';
 import { DestroyRef, Injectable, Injector, Signal, computed, inject } from '@angular/core';
 import { takeUntilDestroyed, toObservable } from '@angular/core/rxjs-interop';
-import { Route } from '@angular/router';
 import { observeSignal } from '@stratosui/store';
 import { EMPTY, Observable } from 'rxjs';
 import { catchError, distinctUntilChanged, filter, map, shareReplay, switchMap } from 'rxjs/operators';
@@ -86,8 +85,6 @@ export class CloudFoundryOrganizationService {
   orgGuid: string;
   cfGuid: string;
 
-  // Signal members for template reads; the `*$` members beside them are
-  // toObservable bridges over the same signals and go once no reader is left.
   // The HTTP-backed members (quota, route, private domain and user-provided
   // service counts) stay Observables: this service lives on every org and
   // space page, so a reader turns them into signals where it needs them and
@@ -101,29 +98,18 @@ export class CloudFoundryOrganizationService {
   userOrgRole!: Signal<string | null>;
   quotaLink!: Signal<string[] | undefined>;
 
-  quotaLink$!: Observable<string[] | undefined>;
-  userOrgRole$!: Observable<string | null>;
   // V3-shape — quotaDefinition$ now emits StOrgQuota directly. Consumers
   // that previously read V2 fields (memory_limit, etc.) must read the V3
   // camelCase equivalents (totalMemoryInMB, etc.). Backwards-compat shim
   // lives in space-detail template which still mixes IOrgQuotaDefinition
   // for the union with space-quota fallback.
   quotaDefinition$!: Observable<StOrgQuota>;
-  totalMem$!: Observable<number>;
   // V3-native: signal of StPrivateDomain[] surfaced as Observable for
   // template binding compatibility. Downstream only reads .length.
   privateDomains$!: Observable<StPrivateDomain[]>;
-  routes$!: Observable<APIResource<Route>[]>;
   serviceInstancesCount!: Signal<number>;
   userProvidedServiceInstancesCount$!: Observable<number>;
   routesCount$!: Observable<number>;
-  // V3-shape — spaces$ now emits StSpace[] direct from OrgDataService.
-  spaces$!: Observable<StSpace[]>;
-  appInstances$!: Observable<number>;
-  apps$!: Observable<APIResource<IApp>[]>;
-  appCount$!: Observable<number>;
-  loadingApps$!: Observable<boolean>;
-  usersCount$!: Observable<number | null>;
 
   constructor() {
     const activeRouteCfOrgSpace = this.activeRouteCfOrgSpace;
@@ -139,7 +125,6 @@ export class CloudFoundryOrganizationService {
   private initialiseObservables() {
     this.initialiseOrgObservables();
     this.initialiseAppObservables();
-    this.initialiseSpaceObservables();
 
     const users = this.cnsiUsers.users(this.cfGuid);
     this.userOrgRole = computed(() => {
@@ -156,7 +141,6 @@ export class CloudFoundryOrganizationService {
         roles.includes('user'),
       ));
     });
-    this.userOrgRole$ = toObservable(this.userOrgRole, { injector: this.injector });
     // Same membership predicate as the per-org Users tab
     // (CfUsersSignalConfigService org lock): an org role OR a space role
     // under one of the org's spaces. Counting orgRoles alone undercounts
@@ -169,7 +153,6 @@ export class CloudFoundryOrganizationService {
         u.spaceRoles.some(r => r.orgGuid === this.orgGuid),
       ).length;
     });
-    this.usersCount$ = toObservable(this.usersCount, { injector: this.injector });
 
     // Quota tile: managed only — user-provided instances don't count
     // against the service-instance quota (#5769); they get their own tile.
@@ -182,14 +165,6 @@ export class CloudFoundryOrganizationService {
     );
   }
 
-  private initialiseSpaceObservables() {
-    // V3-shape StSpace doesn't carry routes inline. The template binding
-    // for `routes$` is unused after the V3 migration — leave a stub that
-    // emits [] so legacy template branches continue to render "0 routes"
-    // without dispatching anything.
-    this.routes$ = this.spaces$.pipe(map((): APIResource<Route>[] => []));
-  }
-
   private initialiseAppObservables() {
     // The foundation-wide apps filtered to this org's spaces; null until the
     // spaces have arrived, so the tiles show placeholders rather than 0.
@@ -199,40 +174,15 @@ export class CloudFoundryOrganizationService {
       const spaceGuids = new Set(spaces.map(s => s.guid));
       return this.cfEndpointService.apps().filter(a => spaceGuids.has(a.entity.space_guid));
     });
-    this.apps$ = toObservable(this.apps, { injector: this.injector }).pipe(
-      filter((apps): apps is APIResource<IApp>[] => !!apps),
-    );
     this.appInstances = computed(() => {
       const apps = this.apps();
       return apps ? getStartedAppInstanceCount(apps) : null;
     });
-    this.appInstances$ = toObservable(this.appInstances, { injector: this.injector }).pipe(
-      filter((count): count is number => count !== null),
-    );
     this.totalMem = computed(() => {
       const apps = this.apps();
       return apps ? this.cfEndpointService.getMetricFromApps(apps, 'memory') : null;
     });
-    this.totalMem$ = toObservable(this.totalMem, { injector: this.injector }).pipe(
-      filter((mem): mem is number => mem !== null),
-    );
-
-    this.appCount$ = this.cfEndpointService.hasApps$.pipe(
-      switchMap(hasAllApps => hasAllApps ? this.countExistingApps() : this.fetchAppCount()),
-    );
-
     this.loadingApps = this.cfEndpointService.appsLoading;
-    this.loadingApps$ = this.cfEndpointService.appsLoading$;
-  }
-
-  private countExistingApps(): Observable<number> {
-    return this.apps$.pipe(
-      map(apps => apps.length)
-    );
-  }
-
-  private fetchAppCount(): Observable<number> {
-    return this.cfEndpointService.fetchAppCount(this.activeRouteCfOrgSpace.orgGuid);
   }
 
   private initialiseOrgObservables() {
@@ -241,9 +191,6 @@ export class CloudFoundryOrganizationService {
     // Held back until the spaces have arrived: the Spaces tile shows its
     // placeholder, not "0", and the org's apps (filtered by space) wait too.
     this.spaces = computed(() => (this.orgDataService.spacesSettled() ? this.orgDataService.spaces() : null));
-    this.spaces$ = toObservable(this.spaces, { injector: this.injector }).pipe(
-      filter((spaces): spaces is StSpace[] => !!spaces),
-    );
 
     // V3-native private domains: hit /pp/v1/cf/org/:cnsi/:orgGuid/private_domains
     // directly. Backend filters /v3/domains?organization_guids= to the
@@ -290,6 +237,5 @@ export class CloudFoundryOrganizationService {
       this.orgGuid,
       'quota'
     ] : undefined);
-    this.quotaLink$ = toObservable(this.quotaLink, { injector: this.injector });
   }
 }

@@ -70,10 +70,6 @@ describe('CloudFoundryOrganizationService', () => {
             endpoint: signal({ entity: { user: { guid: 'me' } } }),
             apps: endpointApps,
             appsLoading: signal(false),
-            apps$: of([]),
-            hasApps$: of(false),
-            appsLoading$: of(false),
-            fetchAppCount: () => of(0),
             fetchRouteCount: () => of(0),
             getMetricFromApps: (apps: APIResource<IApp>[]) =>
               apps.reduce((total, a) => total + (a.entity.memory ?? 0) * (a.entity.instances ?? 0), 0),
@@ -146,47 +142,30 @@ describe('CloudFoundryOrganizationService', () => {
   // only for a user with no role here (it used to show 'None' for both).
   it('gives no role string while the users are loading', () => {
     const svc = TestBed.inject(CloudFoundryOrganizationService);
-    const seen: (string | null)[] = [];
-    const sub = svc.userOrgRole$.subscribe(r => seen.push(r));
-    TestBed.tick();
-    expect(seen.at(-1)).toBeNull();
-    sub.unsubscribe();
+    expect(svc.userOrgRole()).toBeNull();
   });
 
   it('says None once loaded when the user has no role here', () => {
     const svc = TestBed.inject(CloudFoundryOrganizationService);
-    const seen: (string | null)[] = [];
-    const sub = svc.userOrgRole$.subscribe(r => seen.push(r));
     users.set([{ guid: 'me', username: 'me', cnsiGuid: 'cf-1', orgRoles: [], spaceRoles: [] }]);
-    TestBed.tick();
-    expect(seen.at(-1)).toBe('None');
-    sub.unsubscribe();
+    expect(svc.userOrgRole()).toBe('None');
   });
 
   it('names the user\'s role once loaded', () => {
     const svc = TestBed.inject(CloudFoundryOrganizationService);
-    const seen: (string | null)[] = [];
-    const sub = svc.userOrgRole$.subscribe(r => seen.push(r));
     users.set([{ guid: 'me', username: 'me', cnsiGuid: 'cf-1', spaceRoles: [],
       orgRoles: [{ orgGuid: 'org-1', roles: ['auditor'] }] } as unknown as StUser]);
-    TestBed.tick();
-    expect(seen.at(-1)).toBe('Auditor');
-    sub.unsubscribe();
+    expect(svc.userOrgRole()).toBe('Auditor');
   });
 
-  // The Spaces tile and the org's apps (filtered by space) read spaces$; an
+  // The Spaces tile and the org's apps (filtered by space) read spaces; an
   // empty list before the spaces arrive read as "0 Spaces".
-  it('emits the spaces only once they have arrived', () => {
+  it('gives the spaces only once they have arrived', () => {
     const svc = TestBed.inject(CloudFoundryOrganizationService);
-    const seen: StSpace[][] = [];
-    const sub = svc.spaces$.subscribe(s => seen.push(s));
-    TestBed.tick();
-    expect(seen).toEqual([]);
+    expect(svc.spaces()).toBeNull();
     spaces.set([{ guid: 'sp-1', name: 'sp-1' } as StSpace]);
     spacesSettled.set(true);
-    TestBed.tick();
-    expect(seen.at(-1)?.map(s => s.guid)).toEqual(['sp-1']);
-    sub.unsubscribe();
+    expect(svc.spaces()?.map(s => s.guid)).toEqual(['sp-1']);
   });
 
   const app = (guid: string, spaceGuid: string, state: string, memory: number, instances: number) =>

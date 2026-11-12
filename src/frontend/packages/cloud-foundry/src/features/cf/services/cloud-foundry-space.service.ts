@@ -1,7 +1,7 @@
 import { DestroyRef, Injectable, Injector, Signal, computed, inject } from '@angular/core';
 import { takeUntilDestroyed, toObservable } from '@angular/core/rxjs-interop';
 import { observeSignal } from '@stratosui/store';
-import { combineLatest, Observable, of } from 'rxjs';
+import { Observable, of } from 'rxjs';
 import { distinctUntilChanged, filter, map, shareReplay, switchMap } from 'rxjs/operators';
 
 import { CfUsersPagedDataService } from '../../../shared/data-services/cf-users-paged-data.service';
@@ -48,8 +48,7 @@ export class CloudFoundrySpaceService {
   orgGuid: string;
   spaceGuid: string;
 
-  // Signal members for template reads; the `*$` members beside them go once
-  // no reader is left. The HTTP-backed members (quota, app count fallback and
+  // The HTTP-backed members (quota, app count fallback and
   // user-provided service count) stay Observables: this service lives on
   // every space page, so a reader turns them into signals where it needs them
   // and the requests go out only from the pages that show them.
@@ -61,7 +60,6 @@ export class CloudFoundrySpaceService {
   userRole!: Signal<string | null>;
   routesCount!: Signal<number | null>;
 
-  userRole$!: Observable<string | null>;
   /**
    * Sensible quota to use for space. If there's no specific space quota set this will be the org quota. If there's no org quota
    * a mock quota with everything allowed will be used
@@ -74,21 +72,8 @@ export class CloudFoundrySpaceService {
   quotaDefinition$!: Observable<StSpaceQuota | StOrgQuota | null>;
   /** Actual Space Quota (null when the space inherits the org quota). */
   spaceQuotaDefinition$!: Observable<StSpaceQuota | null>;
-  allowSsh$!: Observable<string>;
-  totalMem$!: Observable<number>;
-  // Route count derived from the V3-native StSpace.routeCount aggregate
-  // (server-side fill). The full route list is loaded by the routes-tab
-  // data source separately — this stream exists for the summary tile's
-  // "Routes" card only.
-  routesCount$!: Observable<number>;
   serviceInstancesCount!: Signal<number>;
   userProvidedServiceInstancesCount$!: Observable<number>;
-  appInstances$!: Observable<number>;
-  apps$!: Observable<APIResource<IApp>[]>;
-  appCount$!: Observable<number>;
-  loadingApps$!: Observable<boolean>;
-  usersCount$!: Observable<number | null>;
-  quotaLink$!: Observable<string[]>;
 
   constructor() {
     const activeRouteCfOrgSpace = this.activeRouteCfOrgSpace;
@@ -138,28 +123,6 @@ export class CloudFoundrySpaceService {
       if (!all) return null;
       return all.filter(u => u.spaceRoles.some(r => r.spaceGuid === this.spaceGuid)).length;
     });
-
-    const users$ = toObservable(users, { injector: this.injector });
-    this.userRole$ = combineLatest([this.cfEndpointService.currentUser$, users$]).pipe(
-      map(([currentUser, users]) => {
-        // Still loading: the tile shows its placeholder, not 'None'.
-        if (!users) return null;
-        const me = users.find(u => u.guid === currentUser.guid);
-        const roles = me?.spaceRoles.find(r => r.spaceGuid === this.spaceGuid)?.roles ?? [];
-        return getSpaceRolesString(createUserRoleInSpace(
-          roles.includes('manager'),
-          roles.includes('auditor'),
-          roles.includes('developer'),
-        ));
-      }),
-    );
-
-    this.usersCount$ = users$.pipe(
-      map(users => {
-        if (!users) return null;
-        return users.filter(u => u.spaceRoles.some(r => r.spaceGuid === this.spaceGuid)).length;
-      }),
-    );
   }
 
   private initialiseSpaceObservables() {
@@ -172,12 +135,12 @@ export class CloudFoundrySpaceService {
     this.serviceInstancesCount = this.serviceCatalog.serviceInstanceCount(this.cfGuid, this.orgGuid, this.spaceGuid, 'managed').value;
     this.userProvidedServiceInstancesCount$ =
       this.cfUserProvidedServicesService.fetchUserProvidedServiceInstancesCount(this.cfGuid, this.orgGuid, this.spaceGuid);
+    // Route count from the V3-native StSpace.routeCount aggregate
+    // (server-side fill); null until the space has arrived.
     this.routesCount = computed(() => {
       const space = this.spaceDataService.space();
       return space ? space.routeCount ?? 0 : null;
     });
-    this.routesCount$ = space$.pipe(map(s => s.routeCount ?? 0));
-    this.allowSsh$ = space$.pipe(map(s => s.allowSsh ? 'true' : 'false'));
     // V3-native space-quota lookup. quotaGuid mapped from V3
     // relationships.quota.data.guid by getNativeSpaceDetail. The
     // QuotaDataService returns a SignalSource; we bridge to Observable
@@ -206,77 +169,13 @@ export class CloudFoundrySpaceService {
     this.quotaDefinition$ = this.spaceQuotaDefinition$.pipe(
       switchMap(def => def ? of(def) : this.cfOrgService.quotaDefinition$.pipe(map(q => q ?? null))),
     );
-    this.quotaLink$ = combineLatest([this.quotaDefinition$, this.spaceQuotaDefinition$]).pipe(
-      map(([_quota, spaceQuota]) => {
-        if (!spaceQuota) {
-          return [
-            '/cloud-foundry',
-            this.cfGuid,
-            'organizations',
-            this.orgGuid,
-            'quota',
-          ];
-        }
-
-        // quotaDefinition$ resolves to the space-specific quota whenever
-        // spaceQuota is present (see quotaDefinition$ above), so reaching
-        // here always means a space quota exists — link to it directly.
-        // strict: the prior `quota && [...]` guard's null branch was
-        // unreachable; dropping it keeps the emitted shape as string[].
-        return [
-          '/cloud-foundry',
-          this.cfGuid,
-          'organizations',
-          this.orgGuid,
-          'spaces',
-          this.spaceGuid,
-          'space-quota'
-        ];
-      }
-      )
-    );
   }
 
   private initialiseAppObservables() {
-    // V3-native: derive apps for this space from the foundation-wide apps
-    // stream filtered by space_guid (mirrors the cf-org-service pattern).
-    // Old getAppsInSpaceViaAllApps required an APIResource<ISpace> envelope
-    // which we no longer carry.
+    // The foundation-wide apps filtered to this space.
     this.apps = computed(() => this.cfEndpointService.apps().filter(a => a.entity.space_guid === this.spaceGuid));
     this.appInstances = computed(() => getStartedAppInstanceCount(this.apps()));
     this.totalMem = computed(() => this.cfEndpointService.getMetricFromApps(this.apps(), 'memory'));
     this.loadingApps = this.cfEndpointService.appsLoading;
-
-    this.apps$ = this.cfEndpointService.apps$.pipe(
-      filter(apps => !!apps),
-      map(allApps => allApps.filter(a => a.entity.space_guid === this.spaceGuid)),
-    );
-
-    this.appInstances$ = this.apps$.pipe(
-      map(getStartedAppInstanceCount)
-    );
-
-    this.totalMem$ = this.apps$.pipe(
-      map(a => this.cfEndpointService.getMetricFromApps(a, 'memory'))
-    );
-
-    this.appCount$ = this.cfEndpointService.hasApps$.pipe(
-      switchMap(hasAllApps => hasAllApps ? this.countExistingApps() : this.fetchAppCount()),
-    );
-
-    this.loadingApps$ = this.cfEndpointService.appsLoading$;
-  }
-
-  private countExistingApps(): Observable<number> {
-    return this.apps$.pipe(
-      map(apps => apps.length)
-    );
-  }
-
-  private fetchAppCount(): Observable<number> {
-    return this.cfEndpointService.fetchAppCount(
-      this.activeRouteCfOrgSpace.orgGuid,
-      this.activeRouteCfOrgSpace.spaceGuid
-    );
   }
 }

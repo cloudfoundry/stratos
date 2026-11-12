@@ -59,7 +59,6 @@ export class CliInfoCloudFoundryComponent implements OnInit {
     : this.activeRouteCfOrgSpace.orgGuid ? ORGANIZATION_CLI_COMMANDS
     : CLOUD_FOUNDRY_CLI_COMMANDS;
 
-  cfEndpointEntityService: any;
   public previousUrl!: string;
   public previousQueryParams!: {
     [key: string]: string;

@@ -62,16 +62,11 @@ describe('CloudFoundrySpaceService', () => {
         {
           provide: CloudFoundryEndpointService,
           useValue: {
-            currentUser$: of({ guid: 'me' }),
             endpoint: signal({ entity: { user: { guid: 'me' } } }),
             apps: endpointApps,
             appsLoading: signal(false),
             getMetricFromApps: (apps: APIResource<IApp>[]) =>
               apps.reduce((total, a) => total + (a.entity.memory ?? 0) * (a.entity.instances ?? 0), 0),
-            apps$: of([]),
-            hasApps$: of(false),
-            appsLoading$: of(false),
-            fetchAppCount: () => of(0),
           },
         },
         CloudFoundrySpaceService,
