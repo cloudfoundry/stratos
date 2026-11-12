@@ -1,4 +1,4 @@
-import { ChangeDetectionStrategy, Component, OnInit, computed, effect, inject, input, linkedSignal, output } from '@angular/core';
+import { ChangeDetectionStrategy, Component, OnInit, Signal, computed, effect, inject, input, linkedSignal, output } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { Router, RouterModule } from '@angular/router';
 import { Observable, map } from 'rxjs';
@@ -22,7 +22,7 @@ export interface SideNavItem extends TabNavItem {
   matIconFont?: string;
   link: string;
   position?: number;
-  hidden?: Observable<boolean>;
+  hidden?: Signal<boolean>;
   requiresEndpointType?: string;
   requiresPersistence?: boolean;
 }

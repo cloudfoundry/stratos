@@ -3,7 +3,7 @@ import { ApplicationRef, provideZonelessChangeDetection, signal } from '@angular
 import { ActivatedRouteSnapshot, Router, RouterStateSnapshot } from '@angular/router';
 import { describe, it, expect, beforeEach, vi } from 'vitest';
 import { firstValueFrom, Observable, of } from 'rxjs';
-import { AuthDataService, AuthState, EndpointModel, EndpointsDataService } from '@stratosui/store';
+import { AuthDataService, AuthState, EndpointModel, EndpointsDataService, entityCatalog } from '@stratosui/store';
 import { createBasicStoreModule, STORE_TEST_PROVIDERS } from '@stratosui/store/testing';
 import { CoreTestingModule } from '@test-framework/core-test.modules';
 import { SessionService } from '../shared/services/session.service';
@@ -66,6 +66,22 @@ describe('EndpointsService', () => {
     await TestBed.inject(ApplicationRef).whenStable();
 
     expect(checked).toEqual(['ep:disconnected']);
+  });
+
+  // Gates the main navigation's items for an endpoint type.
+  it('reports no connected endpoint of a type until one connects', async () => {
+    const data = TestBed.inject(EndpointsDataService);
+    const list = signal(new Map([
+      ['cf-1', { guid: 'cf-1', cnsi_type: 'cf', connectionStatus: 'disconnected' } as EndpointModel],
+      ['k8s-1', { guid: 'k8s-1', cnsi_type: 'k8s', connectionStatus: 'connected' } as EndpointModel],
+    ]));
+    vi.spyOn(data, 'endpoints').mockImplementation(() => list());
+    vi.spyOn(entityCatalog, 'getEndpoint').mockReturnValue({ definition: { unConnectable: false } } as never);
+    const none = TestBed.inject(EndpointsService).noConnectedEndpointOfType('cf');
+
+    expect(none()).toBe(true);
+    list.set(new Map([['cf-1', { guid: 'cf-1', cnsi_type: 'cf', connectionStatus: 'connected' } as EndpointModel]]));
+    expect(none()).toBe(false);
   });
 });
 

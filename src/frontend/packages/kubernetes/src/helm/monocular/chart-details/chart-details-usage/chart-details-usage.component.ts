@@ -1,4 +1,3 @@
-import { AsyncPipe } from '@angular/common';
 import { Component, ViewEncapsulation, inject, ChangeDetectionStrategy, input } from '@angular/core';
 import { CustomTooltipDirective } from '@stratosui/core';
 import { ActivatedRoute, RouterLink } from '@angular/router';
@@ -13,14 +12,15 @@ import { getMonocularEndpoint } from '../../stratos-monocular.helper';
   encapsulation: ViewEncapsulation.None,
   changeDetection: ChangeDetectionStrategy.OnPush,
   standalone: true,
-  imports: [AsyncPipe, CustomTooltipDirective, RouterLink]
+  imports: [CustomTooltipDirective, RouterLink]
 })
 export class ChartDetailsUsageComponent {
   // Its one host (chart-details-info) binds both, inside @if (currentVersion).
   readonly chart = input.required<Chart>();
   readonly currentVersion = input.required<string>();
   installing!: boolean;
-  public endpointsService = inject(EndpointsService);
+  // Install needs a connected Kubernetes endpoint.
+  protected readonly noKubeEndpoint = inject(EndpointsService).noConnectedEndpointOfType('k8s');
   private route = inject(ActivatedRoute);
 
   get installUrl(): string {

@@ -254,9 +254,9 @@ export class DashboardBaseComponent implements OnInit, OnDestroy, AfterViewInit 
           const alwaysShowNavFor = this.cs.get().alwaysShowNavForEndpointTypes;
           const alwaysShow = alwaysShowNavFor ?
             alwaysShowNavFor(item.requiresEndpointType) : (item.requiresEndpointType === 'cf');
-          item.hidden = alwaysShow ? of(false) : this.endpointsService.doesNotHaveConnectedEndpointType(item.requiresEndpointType);
+          item.hidden = alwaysShow ? signal(false) : this.endpointsService.noConnectedEndpointOfType(item.requiresEndpointType);
         } else if (item.requiresPersistence) {
-          item.hidden = this.endpointsService.disablePersistenceFeatures$.pipe(startWith(true));
+          item.hidden = this.endpointsService.disablePersistenceFeatures;
         }
         // Backwards compatibility (text became label)
         if (!item.label && !!item.text) {

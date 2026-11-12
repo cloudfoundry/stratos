@@ -1,4 +1,4 @@
-import { ApplicationRef, inject, Injectable } from '@angular/core';
+import { ApplicationRef, computed, inject, Injectable, Signal } from '@angular/core';
 import { toObservable } from '@angular/core/rxjs-interop';
 import { ActivatedRouteSnapshot, CanActivateFn, Router, RouterStateSnapshot } from '@angular/router';
 import {
@@ -40,11 +40,8 @@ export class EndpointsService {
   readonly connectedEndpoints = this.endpointsSignals.connectedEndpoints;
   readonly disablePersistenceFeatures = this.endpointsSignals.disablePersistenceFeatures;
 
-  // Observable bridges kept for Observable APIs: endpoints$ feeds
-  // connectedEndpointsOfTypes(); disablePersistenceFeatures$ feeds the
-  // side-nav's Observable `hidden`.
+  // Observable bridge kept for the Observable connectedEndpointsOfTypes().
   endpoints$: Observable<IRequestEntityTypeState<EndpointModel>>;
-  disablePersistenceFeatures$: Observable<boolean>;
 
   static getLinkForEndpoint(endpoint: EndpointModel): string {
     if (!endpoint || !endpoint.cnsi_type || !endpoint.guid) {
@@ -113,12 +110,6 @@ export class EndpointsService {
         return of({} as IRequestEntityTypeState<EndpointModel>);
       })
     );
-    this.disablePersistenceFeatures$ = toObservable(this.endpointsSignals.disablePersistenceFeatures).pipe(
-      catchError((error): Observable<boolean> => {
-        console.error('Error checking persistence features:', error);
-        return of(false);
-      })
-    );
   }
 
   /**
@@ -168,71 +159,60 @@ export class EndpointsService {
     return endpointHasMetrics(endpointId, this.endpointsService);
   }
 
-  doesNotHaveConnectedEndpointType(type: string): Observable<boolean> {
-    return this.connectedEndpointsOfTypes(type).pipe(
-      map(eps => eps.length === 0),
-      catchError((error): Observable<boolean> => {
-        console.error(`Error checking for endpoints of type ${type}:`, error);
-        return of(true);
-      })
-    );
-  }
-
-  hasConnectedEndpointType(type: string): Observable<boolean> {
-    return this.connectedEndpointsOfTypes(type).pipe(
-      map(eps => eps.length > 0),
-      catchError((error): Observable<boolean> => {
-        console.error(`Error checking for endpoints of type ${type}:`, error);
-        return of(false);
-      })
-    );
+  // True while no endpoint of the type is connected (or unconnectable).
+  noConnectedEndpointOfType(type: string): Signal<boolean> {
+    return computed(() => connectedOfType(this.endpointsSignals.endpoints(), type).length === 0);
   }
 
   connectedEndpointsOfTypes(type: string): Observable<EndpointModel[]> {
     return this.endpoints$.pipe(
-      map(ep => {
-        return Object.values(ep)
-          .filter(endpoint => {
-            if (endpoint.cnsi_type !== type) {
-              return false;
-            }
-            try {
-              // Defensive: Entity catalog lookup may return null if endpoint type not registered yet
-              const epType = entityCatalog.getEndpoint(endpoint.cnsi_type, endpoint.sub_type);
-              if (!epType) {
-                console.warn(
-                  `Endpoint catalog entity not found for type: ${endpoint.cnsi_type}${endpoint.sub_type ? ', subtype: ' + endpoint.sub_type : ''}. ` +
-                  `Excluding from results until type is registered.`
-                );
-                return false;
-              }
-
-              // Defensive: Verify definition exists before accessing properties
-              if (!epType.definition) {
-                console.warn(
-                  `Endpoint definition missing for type: ${endpoint.cnsi_type}. ` +
-                  `This may indicate an incomplete entity registration.`
-                );
-                return false;
-              }
-
-              return epType.definition.unConnectable || endpoint.connectionStatus === 'connected';
-            } catch (error) {
-              const message = error instanceof Error ? error.message : String(error);
-              console.warn(
-                `Error checking endpoint type ${endpoint.cnsi_type}: ${message}. ` +
-                `Excluding from results.`
-              );
-              return false;
-            }
-          });
-      }),
+      map(ep => connectedOfType(ep, type)),
       catchError((error): Observable<EndpointModel[]> => {
         console.error(`Error getting connected endpoints of type ${type}:`, error);
         return of([]);
       })
     );
   }
+}
+
+// The endpoints of a type that are connected, or that never need connecting.
+// Types missing from the entity catalog are left out.
+function connectedOfType(endpoints: IRequestEntityTypeState<EndpointModel>, type: string): EndpointModel[] {
+  return Object.values(endpoints)
+    .filter(endpoint => {
+      if (endpoint.cnsi_type !== type) {
+        return false;
+      }
+      try {
+        // Defensive: Entity catalog lookup may return null if endpoint type not registered yet
+        const epType = entityCatalog.getEndpoint(endpoint.cnsi_type, endpoint.sub_type);
+        if (!epType) {
+          console.warn(
+            `Endpoint catalog entity not found for type: ${endpoint.cnsi_type}${endpoint.sub_type ? ', subtype: ' + endpoint.sub_type : ''}. ` +
+            `Excluding from results until type is registered.`
+          );
+          return false;
+        }
+
+        // Defensive: Verify definition exists before accessing properties
+        if (!epType.definition) {
+          console.warn(
+            `Endpoint definition missing for type: ${endpoint.cnsi_type}. ` +
+            `This may indicate an incomplete entity registration.`
+          );
+          return false;
+        }
+
+        return epType.definition.unConnectable || endpoint.connectionStatus === 'connected';
+      } catch (error) {
+        const message = error instanceof Error ? error.message : String(error);
+        console.warn(
+          `Error checking endpoint type ${endpoint.cnsi_type}: ${message}. ` +
+          `Excluding from results.`
+        );
+        return false;
+      }
+    });
 }
 
 // Functional guard for endpoints check

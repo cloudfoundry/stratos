@@ -123,6 +123,21 @@ describe('SideNavComponent', () => {
     });
   });
 
+  it('shows a nav item only while its gate reads false', async () => {
+    const hidden = signal(true);
+    fixture.componentRef.setInput('tabs', [
+      { label: 'Gated', link: '/gated', hidden },
+      { label: 'Open', link: '/open' },
+    ]);
+    await fixture.whenStable();
+    const links = () => Array.from((fixture.nativeElement as HTMLElement).querySelectorAll('a.nav-item-link'))
+      .map(a => a.getAttribute('href'));
+    expect(links()).toEqual(['/open']);
+    hidden.set(false);
+    await fixture.whenStable();
+    expect(links()).toEqual(['/gated', '/open']);
+  });
+
   it('hides the "Show all menu items" debug checkbox by default', () => {
     const el = fixture.nativeElement as HTMLElement;
     expect(el.querySelector('#nav-show-all')).toBeNull();
