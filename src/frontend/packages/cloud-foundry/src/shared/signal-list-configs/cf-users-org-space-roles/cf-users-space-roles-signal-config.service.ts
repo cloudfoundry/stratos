@@ -1,5 +1,4 @@
 import {
-  DestroyRef,
   Injectable,
   Injector,
   Signal,
@@ -10,8 +9,7 @@ import {
   runInInjectionContext,
   signal,
 } from '@angular/core';
-import { Subscription, firstValueFrom } from 'rxjs';
-import { take } from 'rxjs/operators';
+import { firstValueFrom } from 'rxjs';
 
 import { ListStateStore, SignalListConfig, SignalListColumn } from '@stratosui/core';
 
@@ -48,7 +46,6 @@ export class CfUsersSpaceRolesSignalConfigService {
   private readonly activeRoute = inject(ActiveRouteCfOrgSpace);
   private readonly userPerms = inject(CurrentUserPermissionsService);
   private readonly injector = inject(Injector);
-  private readonly destroyRef = inject(DestroyRef);
 
   private readonly state = inject(ListStateStore).bind('cf-users-space-roles', {
     viewMode: 'table',
@@ -72,10 +69,9 @@ export class CfUsersSpaceRolesSignalConfigService {
   // field would not trigger the effect.
   private readonly _orgDataService: WritableSignal<OrgDataService | null> = signal(null);
   private get orgDataService(): OrgDataService | null { return this._orgDataService(); }
-  // Map of space.guid -> canEdit. Resolved per space the first time it
-  // appears via canUpdateOrgSpaceRoles; cached so the editable filter
-  // doesn't re-subscribe on every spaces() tick.
-  private readonly _canEditByGuid: WritableSignal<ReadonlyMap<string, boolean>> = signal(new Map());
+  // Edit check per space guid, built the first time the space appears
+  // and reused on every spaces() tick.
+  private readonly editChecks = new Map<string, Signal<boolean>>();
 
   // Org GUID the wizard is rolled into — populated once newRoles fires.
   // Held in a signal so the spaces source can rewire when the user picks
@@ -88,9 +84,8 @@ export class CfUsersSpaceRolesSignalConfigService {
 
   readonly spaces: Signal<StSpace[]> = computed(() => {
     const all = this._rawSpaces();
-    const canEdit = this._canEditByGuid();
     const spaceLock = this.activeRoute.spaceGuid;
-    return all.filter(s => canEdit.get(s.guid) === true && (!spaceLock || s.guid === spaceLock));
+    return all.filter(s => this.editCheck(s)() && (!spaceLock || s.guid === spaceLock));
   });
 
   readonly hasLoadedOnce: Signal<boolean>;
@@ -103,8 +98,6 @@ export class CfUsersSpaceRolesSignalConfigService {
   // dynamic insertion until this flips true, matching the original
   // BehaviorSubject<boolean> contract that gated <app-list> rendering.
   readonly initialised: Signal<boolean>;
-
-  private permCheckSub?: Subscription;
 
   constructor() {
     this.hasLoadedOnce = this._hasLoadedOnce.asReadonly();
@@ -141,30 +134,6 @@ export class CfUsersSpaceRolesSignalConfigService {
         if (svc) this._hasLoadedOnce.set(true);
       });
 
-      // Resolve canEdit for each new space lazily — every time _rawSpaces
-      // changes, look up canUpdateOrgSpaceRoles for spaces we haven't
-      // checked yet.
-      effect(() => {
-        const all = this._rawSpaces();
-        const known = this._canEditByGuid();
-        const pending = all.filter(s => !known.has(s.guid));
-        if (pending.length === 0) return;
-        for (const s of pending) {
-          this.permCheckSub = canUpdateOrgSpaceRoles(
-            this.userPerms,
-            s.cnsiGuid,
-            s.orgGuid,
-            s.guid,
-          ).pipe(take(1)).subscribe(canEdit => {
-            this._canEditByGuid.update(curr => {
-              const next = new Map(curr);
-              next.set(s.guid, canEdit);
-              return next;
-            });
-          });
-        }
-      });
-
       // Filter effect — name filter just substring-matches space name.
       effect(() => {
         const q = this.nameFilter().trim().toLowerCase();
@@ -172,9 +141,15 @@ export class CfUsersSpaceRolesSignalConfigService {
       });
     });
 
-    this.destroyRef.onDestroy(() => {
-      this.permCheckSub?.unsubscribe();
-    });
+  }
+
+  private editCheck(space: StSpace): Signal<boolean> {
+    let check = this.editChecks.get(space.guid);
+    if (!check) {
+      check = canUpdateOrgSpaceRoles(this.userPerms, space.cnsiGuid, space.orgGuid, space.guid);
+      this.editChecks.set(space.guid, check);
+    }
+    return check;
   }
 
   private bindOrg(orgGuid: string): void {

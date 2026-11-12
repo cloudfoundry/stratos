@@ -108,10 +108,8 @@ export class CfRolesService {
     cfGuid: string,
     orgGuid: string,
     spaceGuid: string): Observable<{ guid: string, canEdit: boolean, }> {
-    return canUpdateOrgSpaceRoles(userPerms, cfGuid, orgGuid, spaceGuid).pipe(
-      take(1),
-      map(canEdit => ({ guid, canEdit }))
-    );
+    // Read once, as the list is filtered when it arrives.
+    return observableOf({ guid, canEdit: canUpdateOrgSpaceRoles(userPerms, cfGuid, orgGuid, spaceGuid)() });
   }
 
   constructor() {
