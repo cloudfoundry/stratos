@@ -1,4 +1,4 @@
-import { inject, Injectable } from '@angular/core';
+import { computed, inject, Injectable, Signal } from '@angular/core';
 import { combineLatest, Observable, of } from 'rxjs';
 import { filter, map, switchMap, tap } from 'rxjs/operators';
 
@@ -32,6 +32,75 @@ interface IGroupedFavorites {
 export class UserFavoriteManager {
   private endpointsService = inject(EndpointsDataService);
   private userFavorites = inject(UserFavoritesDataService);
+
+  // The flat favorites map as a `{ [guid]: UserFavorite }` record.
+  private readonly favoriteEntities = computed(
+    () => Object.fromEntries(this.userFavorites.favorites()) as IRequestEntityTypeState<UserFavorite<IFavoriteMetadata>>
+  );
+
+  /**
+   * The favorite groups and the flat favorites record. Undefined while the
+   * favorites load, and after a failed load.
+   */
+  readonly allFavorites: Signal<[IUserFavoritesGroups, IRequestEntityTypeState<UserFavorite<IFavoriteMetadata>>] | undefined> =
+    computed(() => {
+      if (this.userFavorites.fetching() || this.userFavorites.error()) {
+        return undefined;
+      }
+      return [this.userFavorites.groups(), this.favoriteEntities()];
+    });
+
+  /**
+   * Row keys (`endpointId:entityId`) of the starred entities of the given
+   * types on the given endpoint type. Empty until the favorites have loaded.
+   * Reads signals, so it updates when called inside a reactive context.
+   */
+  public entityFavoriteKeys(endpointType: string, entityTypes: string[]): Set<string> {
+    const out = new Set<string>();
+    const all = this.allFavorites();
+    if (!all) {
+      return out;
+    }
+    const [groups, entities] = all;
+    for (const endpointFavGuid in groups) {
+      for (const favId of groups[endpointFavGuid]?.entitiesIds ?? []) {
+        const fav = entities[favId];
+        if (fav && fav.endpointType === endpointType && entityTypes.includes(fav.entityType)) {
+          out.add(`${fav.endpointId}:${fav.entityId}`);
+        }
+      }
+    }
+    return out;
+  }
+
+  /** Whether the favorite is starred. Reads a signal, so it is reactive. */
+  public isFavorite(favorite: UserFavorite<IFavoriteMetadata>): boolean {
+    return !!favorite && this.userFavorites.favorites().has(favorite.guid);
+  }
+
+  /**
+   * The starred entities of one endpoint. Undefined until the favorites have
+   * loaded.
+   */
+  public favoritesForEndpoint(endpointID: string): Signal<UserFavorite<IFavoriteMetadata>[] | undefined> {
+    return computed(() => {
+      const all = this.allFavorites();
+      if (!all) {
+        return undefined;
+      }
+      const result: UserFavorite<IFavoriteMetadata>[] = [];
+      Object.values(all[1]).forEach(f => {
+        if (f.endpointId === endpointID && f.entityId) {
+          // Ensure we actually have a UserFavorite object and not a struct
+          const userFavorite = this.getUserFavoriteFromObject(f);
+          if (userFavorite) {
+            result.push(userFavorite);
+          }
+        }
+      });
+      return result;
+    });
+  }
 
   // The flat favorites map (legacy `favoriteEntitiesSelector`), projected from
   // the signal source of truth as the `{ [guid]: UserFavorite }` shape callers
