@@ -9,7 +9,7 @@ import {
   UserProfileInfo,
   UserProfileInfoEmail,
   UserProfileInfoUpdates } from '@stratosui/store';
-import { combineLatest, defer, Observable, of as observableOf } from 'rxjs';
+import { combineLatest, Observable, of as observableOf } from 'rxjs';
 import { take, filter, map } from 'rxjs/operators';
 
 import { AuthSignalService } from './signals/auth-signal.service';
@@ -22,12 +22,6 @@ export class UserProfileService {
   private authSignals = inject(AuthSignalService);
   private userProfileData = inject(UserProfileDataService);
 
-
-  isError$: Observable<boolean>;
-
-  isFetching$: Observable<boolean>;
-
-  userProfile$: Observable<UserProfileInfo>;
 
   private userGuid$: Observable<string>;
 
@@ -60,32 +54,6 @@ export class UserProfileService {
       filter((sessionData): sessionData is SessionData & { user: SessionUser } => !!sessionData?.user),
       take(1),
       map(data => data.user.guid)
-    );
-
-    // Read the profile off the signal-native UserProfileDataService (replaces
-    // the ngrx `userProfile` EntityService). Same emission shape as before:
-    // only emit a populated profile. The legacy EntityService's
-    // `waitForEntity$` auto-fetched on first subscribe; the signal store is
-    // passive, so re-establish that here — without it, consumers that never
-    // call fetchUserProfile() (profile page, page header) wait forever.
-    this.userProfile$ = defer(() => {
-      if (!this.fetchStarted) {
-        this.fetchUserProfile();
-      }
-      return this.userProfileData.profile$;
-    }).pipe(
-      filter((data): data is UserProfileInfo => !!data && !!data.id)
-    );
-    this.isFetching$ = this.userProfileData.fetching$;
-
-    // Mirror the legacy behaviour: only report the error once the fetch has
-    // settled (not while still fetching).
-    this.isError$ = combineLatest([
-      this.userProfileData.fetching$,
-      this.userProfileData.error$
-    ]).pipe(
-      filter(([fetching]) => !fetching),
-      map(([, error]) => error)
     );
   }
 

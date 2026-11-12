@@ -3,8 +3,6 @@ import { ApplicationRef, provideZonelessChangeDetection, signal, WritableSignal 
 import { describe, it, expect, beforeEach, vi } from 'vitest';
 import type { SessionData, UserProfileInfo } from '@stratosui/store';
 import { UserProfileDataService } from '@stratosui/store';
-import { BehaviorSubject } from 'rxjs';
-import { first } from 'rxjs/operators';
 
 import { AuthSignalService } from './signals/auth-signal.service';
 import { UserProfileService } from './user-profile.service';
@@ -20,28 +18,20 @@ const SESSION: SessionData = {
 const PROFILE = { id: 'user-1', userName: 'admin', emails: [] } as unknown as UserProfileInfo;
 
 describe('UserProfileService', () => {
-  let profile$: BehaviorSubject<UserProfileInfo | null>;
   let dataStub: {
     profile: WritableSignal<UserProfileInfo | null>;
     fetching: WritableSignal<boolean>;
     error: WritableSignal<boolean>;
-    profile$: BehaviorSubject<UserProfileInfo | null>;
-    fetching$: BehaviorSubject<boolean>;
-    error$: BehaviorSubject<boolean>;
     fetch: ReturnType<typeof vi.fn>;
   };
 
   beforeEach(() => {
-    profile$ = new BehaviorSubject<UserProfileInfo | null>(null);
     const profile = signal<UserProfileInfo | null>(null);
     dataStub = {
       profile,
       fetching: signal(false),
       error: signal(false),
-      profile$,
-      fetching$: new BehaviorSubject<boolean>(false),
-      error$: new BehaviorSubject<boolean>(false),
-      fetch: vi.fn().mockImplementation(() => { profile.set(PROFILE); profile$.next(PROFILE); }),
+      fetch: vi.fn().mockImplementation(() => profile.set(PROFILE)),
     };
     TestBed.configureTestingModule({
       providers: [
@@ -53,26 +43,12 @@ describe('UserProfileService', () => {
     });
   });
 
-  it('fetches the profile on first subscription to userProfile$', async () => {
+  it('fetchUserProfile forces a fetch (explicit refresh)', async () => {
     const service = TestBed.inject(UserProfileService);
-    const profile = await new Promise<UserProfileInfo>(resolve =>
-      service.userProfile$.pipe(first()).subscribe(resolve)
-    );
-    expect(dataStub.fetch).toHaveBeenCalledWith('user-1');
-    expect(profile.id).toBe('user-1');
-  });
-
-  it('does not re-fetch on subsequent subscriptions', async () => {
-    const service = TestBed.inject(UserProfileService);
-    await new Promise(resolve => service.userProfile$.pipe(first()).subscribe(resolve));
-    await new Promise(resolve => service.userProfile$.pipe(first()).subscribe(resolve));
-    expect(dataStub.fetch).toHaveBeenCalledTimes(1);
-  });
-
-  it('fetchUserProfile still forces a fetch (explicit refresh)', async () => {
-    const service = TestBed.inject(UserProfileService);
-    await new Promise(resolve => service.userProfile$.pipe(first()).subscribe(resolve));
+    service.loadUserProfile();
+    await TestBed.inject(ApplicationRef).whenStable();
     service.fetchUserProfile();
+    await TestBed.inject(ApplicationRef).whenStable();
     expect(dataStub.fetch).toHaveBeenCalledTimes(2);
   });
 
