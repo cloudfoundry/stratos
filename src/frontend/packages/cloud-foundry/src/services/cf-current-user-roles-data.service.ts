@@ -42,12 +42,8 @@ interface CfRolesEndpoint {
  * (in the store package) and projects the cf-specific subtree —
  * `state.currentUserRoles.endpoints['cf']` — into per-endpoint signals.
  *
- * Mirrors the pattern from the W36-C Wave 1 `AuthDataService`:
- *   - signal-out for new consumers
- *   - parametric `*$` observable getters preserved so the legacy
- *     rxjs-shaped pipelines in {@link CfUserPermissionsChecker} keep
- *     compiling unchanged through the facade in
- *     {@link CfCurrentUserRolesSignalService}
+ * {@link CfUserPermissionsChecker} builds its checks as computeds over
+ * these per-endpoint signals.
  *
  * Per-endpoint reads choose a `Signal<...>` factory (returned per-guid)
  * rather than a `Signal<Map<guid, ...>>` aggregate because the consumer

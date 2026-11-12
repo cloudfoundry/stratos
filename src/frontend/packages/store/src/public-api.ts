@@ -226,12 +226,8 @@ export { AuthDataService } from './services/auth-data.service';
 // NavigationEnd events.
 export { RoutingHistoryService } from './services/routing-history.service';
 
-// W36-C Wave 2 — signal-native current-user-roles data service. Single
-// bridge over the legacy `currentUserRoles` ngrx slice. Replaces direct
-// `store.select(getCurrentUserStratosRole(...))` /
-// `store.select(getCurrentUserStratosHasScope(...))` reads in
-// `CurrentUserRolesSignalService` and underpins the cf-side
-// `CfCurrentUserRolesDataService` in the cloud-foundry package.
+// Current-user roles as signals: the Stratos permission checker reads it,
+// and the cf-side `CfCurrentUserRolesDataService` builds on it.
 export { CurrentUserRolesDataService } from './services/current-user-roles-data.service';
 // Shared favorites/recents cleanup for entity deletes — invoked by signal-native
 // delete paths (CF delete controller hook, kube resource delete) so they stay
