@@ -4,7 +4,6 @@ import { NavigationEnd, Router } from '@angular/router';
 import { Subject } from 'rxjs';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 
-import { RoutingEvent } from '../types/routing.type';
 import { RoutingHistoryService } from './routing-history.service';
 
 describe('RoutingHistoryService', () => {
