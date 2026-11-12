@@ -8,6 +8,9 @@
     <ng-template #cardTemplate let-row>
       <app-endpoint-card [row]="$any(row)" [actionMenu]="cardMenuFor($any(row))"></app-endpoint-card>
     </ng-template>
+    <ng-template appSignalListCell="name" let-row>
+      <app-table-cell-endpoint-name [row]="row"></app-table-cell-endpoint-name>
+    </ng-template>
     <ng-template appSignalListCell="address" let-row>
       <app-table-cell-endpoint-address [row]="row"></app-table-cell-endpoint-address>
     </ng-template>

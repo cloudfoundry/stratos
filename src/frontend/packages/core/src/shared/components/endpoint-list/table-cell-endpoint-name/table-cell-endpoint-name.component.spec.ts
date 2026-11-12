@@ -19,6 +19,9 @@ import { TableCellEndpointNameComponent } from './table-cell-endpoint-name.compo
 
 const endpointOne = { guid: 'ep-1', name: 'Endpoint One', connectionStatus: 'connected' } as EndpointModel;
 const endpointTwo = { guid: 'ep-2', name: 'Endpoint Two', connectionStatus: 'disconnected' } as EndpointModel;
+const endpointShared = {
+  guid: 'ep-3', name: 'Endpoint Shared', connectionStatus: 'connected', system_shared_token: true,
+} as unknown as EndpointModel;
 
 // Live consumers of the endpoints map signal: each is something that re-runs
 // when the map changes. Read from the signal node because nothing public
@@ -65,7 +68,7 @@ describe('TableCellEndpointNameComponent', () => {
     const helper = TestBed.inject(EntityCatalogHelper);
     EntityCatalogHelpers.SetEntityCatalogHelper(helper);
 
-    seedEndpointsDataService([endpointOne, endpointTwo]);
+    seedEndpointsDataService([endpointOne, endpointTwo, endpointShared]);
   });
 
   beforeEach(() => {
@@ -85,6 +88,16 @@ describe('TableCellEndpointNameComponent', () => {
 
     const link = fixture.nativeElement.querySelector('a');
     expect(link?.textContent?.trim()).toBe('Endpoint One');
+  });
+
+  it('marks a connection the administrator shares', async () => {
+    fixture.componentRef.setInput('row', endpointShared);
+    await fixture.whenStable();
+    expect(fixture.nativeElement.querySelector('[aria-label="Shared by the administrator"]')).not.toBeNull();
+
+    fixture.componentRef.setInput('row', endpointOne);
+    await fixture.whenStable();
+    expect(fixture.nativeElement.querySelector('[aria-label="Shared by the administrator"]')).toBeNull();
   });
 
   it('follows a new row and watches only the current one', async () => {
