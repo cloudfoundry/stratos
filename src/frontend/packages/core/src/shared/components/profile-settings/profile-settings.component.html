@@ -1,5 +1,5 @@
 <div class="user-profile__options">
-  @if (canEdit$ | async) {
+  @if (canEdit()) {
     <div class="user-profile__option">
       @if (show()[types.GRAVATAR] && gravatarEnabled(); as enableGravatar) {
         <div class="user-profile__option-inner">

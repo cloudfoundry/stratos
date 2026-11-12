@@ -1,5 +1,5 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
-import { provideZonelessChangeDetection } from '@angular/core';
+import { provideZonelessChangeDetection, signal } from '@angular/core';
 import { describe, it, expect, beforeEach, vi } from 'vitest';
 import { of } from 'rxjs';
 
@@ -14,9 +14,7 @@ describe('ProfileSettingsComponent', () => {
 
   // Mock UserProfileService to avoid entity catalog issues
   const mockUserProfileService = {
-    userProfile$: of(null),
-    isFetching$: of(false),
-    isError$: of(false),
+    isError: signal(false),
     fetchUserProfile: vi.fn(),
     getPrimaryEmailAddress: vi.fn().mockReturnValue('test@test.com'),
     setPrimaryEmailAddress: vi.fn(),
