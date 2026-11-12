@@ -1,7 +1,7 @@
 import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
 import { HttpClient, HttpResponse } from '@angular/common/http';
 import { of, Subject, throwError } from 'rxjs';
-import { DestroyRef, EnvironmentInjector, createEnvironmentInjector } from '@angular/core';
+import { signal, DestroyRef, EnvironmentInjector, createEnvironmentInjector } from '@angular/core';
 import { TestBed } from '@angular/core/testing';
 import { appLabelsFilterText } from './app-labels';
 import { CfAppsSignalConfigService } from './cf-apps-signal-config.service';
@@ -23,7 +23,7 @@ function makeHttp(): HttpClient {
 // constructor touches `stratosEntityCatalog.endpoint.store` which isn't
 // available in this lightweight test setup.
 function makeStubCfService(endpoints: Array<{ guid: string; name: string }> = []): CloudFoundryService {
-  return { connectedCFEndpoints$: of(endpoints) } as unknown as CloudFoundryService;
+  return { connectedCFEndpoints: signal(endpoints) } as unknown as CloudFoundryService;
 }
 
 // Instantiate the service via TestBed so inject() inside its constructor

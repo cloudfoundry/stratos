@@ -1,7 +1,7 @@
 import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
 import { HttpClient } from '@angular/common/http';
 import { of, throwError } from 'rxjs';
-import { DestroyRef } from '@angular/core';
+import { signal, DestroyRef } from '@angular/core';
 import { TestBed } from '@angular/core/testing';
 import { CfServiceInstancesSignalConfigService } from './cf-service-instances-signal-config.service';
 import { CloudFoundryService } from '../../data-services/cloud-foundry.service';
@@ -40,7 +40,7 @@ function makeHttp(instances: StServiceInstance[] = []): HttpClient {
 }
 
 function makeStubCfService(): CloudFoundryService {
-  return { connectedCFEndpoints$: of([]) } as unknown as CloudFoundryService;
+  return { connectedCFEndpoints: signal([]) } as unknown as CloudFoundryService;
 }
 
 type FakeDs = {

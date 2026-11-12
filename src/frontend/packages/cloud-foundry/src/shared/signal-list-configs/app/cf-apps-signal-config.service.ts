@@ -1,5 +1,4 @@
 import { DestroyRef, EffectRef, Injectable, Injector, Signal, WritableSignal, computed, effect, inject, runInInjectionContext, signal } from '@angular/core';
-import { toSignal } from '@angular/core/rxjs-interop';
 import { HttpClient, HttpParams } from '@angular/common/http';
 import { firstValueFrom } from 'rxjs';
 import type { EndpointModel } from '@stratosui/store';
@@ -273,7 +272,7 @@ export class CfAppsSignalConfigService {
 
     const cfService = inject(CloudFoundryService, { optional: true });
     this.connectedEndpoints = cfService
-      ? toSignal(cfService.connectedCFEndpoints$, { initialValue: [] as EndpointModel[] })
+      ? cfService.connectedCFEndpoints
       : signal<EndpointModel[]>([]).asReadonly();
 
     // CF options come from the connected endpoints list directly.
