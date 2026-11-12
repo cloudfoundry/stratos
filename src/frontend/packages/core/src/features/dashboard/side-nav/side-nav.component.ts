@@ -1,7 +1,6 @@
 import { ChangeDetectionStrategy, Component, OnInit, Signal, computed, effect, inject, input, linkedSignal, output } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { Router, RouterModule } from '@angular/router';
-import { Observable, map } from 'rxjs';
 
 import { StratosBrandingService } from '../../../../../theme/stratos-branding.service';
 import { AuthSignalService } from '../../../core/signals/auth-signal.service';
@@ -48,9 +47,8 @@ export class SideNavComponent implements OnInit {
 
   // Same guard the page header uses: the 'stratos.noauth' scope means there
   // is no session to end, so offering Sign Out is meaningless.
-  public canLogout$: Observable<boolean> = this.permissionsService
-    .can$(StratosCurrentUserPermissions.CAN_NOT_LOGOUT)
-    .pipe(map(noLogout => !noLogout));
+  private readonly noLogout = this.permissionsService.can(StratosCurrentUserPermissions.CAN_NOT_LOGOUT);
+  public readonly canLogout = computed(() => !this.noLogout());
 
   // HIDE_NAV_LOGOUT removes this button only. The header user menu keeps its
   // own Sign Out, so hiding it here is presentation, not a capability change.
