@@ -2,7 +2,6 @@ import { CommonModule, DatePipe } from '@angular/common';
 import {
   Component, OnInit, ChangeDetectionStrategy, DestroyRef, Signal, computed, inject, signal, WritableSignal, Injector, effect,
 } from '@angular/core';
-import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { ActivatedRoute, Router, RouterModule } from '@angular/router';
 
 import {
@@ -158,8 +157,10 @@ export class ApplicationWallComponent implements OnInit {
    * Mirrors the previous *appCfUserPermission directive check, but
    * exposed as a signal so the L5 sub-nav can hide/show the button via
    * its `visible` input without depending on directive timing.
+   * No endpoint/org/space scope: true if any connected CF allows it.
    */
-  public canCreateApplication = signal<boolean>(false);
+  public readonly canCreateApplication: Signal<boolean> =
+    inject(CurrentUserPermissionsService).can(CfCurrentUserPermissions.APPLICATION_CREATE);
 
   /**
    * Total app count for the L5 sub-nav. Assigned in ngOnInit once
@@ -188,7 +189,6 @@ export class ApplicationWallComponent implements OnInit {
   constructor() {
     const activatedRoute = inject(ActivatedRoute);
     const router = inject(Router);
-    const currentUserPermissionsService = inject(CurrentUserPermissionsService);
 
     // If we have an endpoint ID, select it and redirect
     const { endpointId } = activatedRoute.snapshot.params;
@@ -199,16 +199,6 @@ export class ApplicationWallComponent implements OnInit {
     }
 
 
-    // Resolve APPLICATION_CREATE for the current user; mirror the previous
-    // directive call (no endpoint/org/space scope — true if any connected
-    // CF allows it). Push the result into a signal the L5 button reads.
-    // The check stays live, so end it with the wall.
-    currentUserPermissionsService.can$(CfCurrentUserPermissions.APPLICATION_CREATE).pipe(
-      takeUntilDestroyed(this.destroyRef),
-    ).subscribe({
-      next: can => this.canCreateApplication.set(can),
-      error: err => console.error('Error resolving create-application permission:', err),
-    });
     this.createApplicationAction = {
       label: 'Create Application',
       icon: 'add',
