@@ -125,7 +125,7 @@ export class EditProfileInfoComponent implements OnInit, OnDestroy {
   private emailAddress!: string;
 
   // Only allow password change if user has the 'password.write' group
-  public canChangePassword = this.currentUserPermissionsService.can$(StratosCurrentUserPermissions.PASSWORD_CHANGE);
+  public readonly canChangePassword = this.currentUserPermissionsService.can(StratosCurrentUserPermissions.PASSWORD_CHANGE);
 
   readonly passwordRequired = signal(false);
 
