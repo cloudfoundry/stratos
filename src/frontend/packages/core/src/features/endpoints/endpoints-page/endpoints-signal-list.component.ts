@@ -36,6 +36,7 @@ import {
   endpointSyncStatusLabel,
 } from '../../../shared/components/endpoint-list/endpoint-sync-status';
 import { TableCellEndpointAddressComponent } from '../../../shared/components/endpoint-list/table-cell-endpoint-address/table-cell-endpoint-address.component';
+import { TableCellEndpointNameComponent } from '../../../shared/components/endpoint-list/table-cell-endpoint-name/table-cell-endpoint-name.component';
 import { EndpointAuthStateService } from '../../../shared/services/endpoint-auth-state.service';
 import { EndpointRowActionsService, isEndpointExpired } from '../endpoint-row-actions.service';
 import { EndpointsSignalConfigService } from './endpoints-signal-config.service';
@@ -61,6 +62,7 @@ import { EndpointsSignalConfigService } from './endpoints-signal-config.service'
     DuplicateUrlBannerComponent,
     EndpointCardComponent,
     TableCellEndpointAddressComponent,
+    TableCellEndpointNameComponent,
   ],
 })
 export class EndpointsSignalListComponent {
@@ -225,7 +227,11 @@ export class EndpointsSignalListComponent {
         },
         {
           header: 'Name', key: 'name', sortField: 'name',
-          kind: 'text',
+          // Cell projected via <ng-template appSignalListCell="name">: the
+          // name links to the endpoint like the card title does, and the
+          // shared-connection icon marks an administrator-shared token.
+          kind: 'template',
+          templateName: 'name',
           render: (ep: EndpointModel) => ep.name ?? '',
           widthHint: '16rem',
         },

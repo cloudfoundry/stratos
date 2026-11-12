@@ -1,7 +1,7 @@
 @if (endpoint(); as endpoint) {
   <div class="flex items-center">
     @if (endpoint.canShowLink) {
-      <a routerLink="{{ endpoint.link }}">{{ endpoint.name }}</a>
+      <a [routerLink]="endpoint.link" class="text-accent hover:underline">{{ endpoint.name }}</a>
     }
     @if (!endpoint.canShowLink) {
       <span>{{ endpoint.name }}</span>

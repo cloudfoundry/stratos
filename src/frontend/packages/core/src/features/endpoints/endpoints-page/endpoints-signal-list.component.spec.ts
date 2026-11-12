@@ -82,6 +82,14 @@ describe('EndpointsSignalListComponent - expired status + reconnect action', () 
     return col;
   }
 
+  // The table's Name cell links to the endpoint like the card title does,
+  // and marks an administrator-shared connection.
+  it('renders the name through the endpoint name cell', () => {
+    const name = component.listConfig()!.columns.find(c => c.key === 'name');
+    expect(name?.kind).toBe('template');
+    expect(name?.templateName).toBe('name');
+  });
+
   it('renders an expired endpoint as "Expired" with the warning pill color, and offers Reconnect + Disconnect', () => {
     const endpoint = ep('expired');
     const status = statusColumn();
