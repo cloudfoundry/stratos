@@ -43,7 +43,7 @@
                 } @else {
                   <app-metadata-item icon="email" label="Email">No Email Address</app-metadata-item>
                 }
-                @if ((userService.isAdmin$ | async)) {
+                @if (userService.isAdmin()) {
                   <app-metadata-item icon="security" label="User Type">
                   Administrator</app-metadata-item>
                 }
