@@ -1,7 +1,7 @@
-import { provideHttpClient } from '@angular/common/http';
+import { HttpClient, provideHttpClient } from '@angular/common/http';
 import { provideHttpClientTesting } from '@angular/common/http/testing';
 import { ComponentFixture, TestBed } from '@angular/core/testing';
-import { provideZonelessChangeDetection } from '@angular/core';
+import { provideZonelessChangeDetection, signal } from '@angular/core';
 import { provideRouter } from '@angular/router';
 import { describe, it, expect, beforeEach, vi } from 'vitest';
 import { of } from 'rxjs';
@@ -9,6 +9,8 @@ import { of } from 'rxjs';
 import { CurrentUserPermissionsService } from '@stratosui/core';
 import { STORE_TEST_PROVIDERS } from '@stratosui/store/testing';
 
+import { CfCurrentUserRolesSignalService } from '../../../../../user-permissions/cf-current-user-roles-signal.service';
+import { getFeatureFlagsSource } from '../../../../../user-permissions/feature-flags-cache';
 import { ActiveRouteCfOrgSpace } from '../../../cf-page.types';
 import { ManageUsersSetUsernamesComponent } from './manage-users-set-usernames.component';
 
@@ -21,7 +23,7 @@ describe('ManageUsersSetUsernamesComponent', () => {
     // Mock CurrentUserPermissionsService to return observables that emit immediately
     // This avoids having to wait for actual permission checks
     const mockPermissionsService = {
-      can$: vi.fn().mockReturnValue(of(true))
+      can: vi.fn().mockReturnValue(signal(true))
     };
 
     await TestBed.configureTestingModule({
@@ -45,6 +47,11 @@ describe('ManageUsersSetUsernamesComponent', () => {
         {
           provide: CurrentUserPermissionsService,
           useValue: mockPermissionsService
+        },
+        // The endpoint's roles have loaded.
+        {
+          provide: CfCurrentUserRolesSignalService,
+          useValue: { cfEndpointRolesState$: () => of({ state: { initialised: true } }) }
         }
       ],
     }).compileComponents();
@@ -58,5 +65,22 @@ describe('ManageUsersSetUsernamesComponent', () => {
 
   it('should create', () => {
     expect(component).toBeTruthy();
+  });
+
+  it('answers add and remove only once the feature flags have loaded', async () => {
+    const src = getFeatureFlagsSource(cfGuid, TestBed.inject(HttpClient));
+    let finishLoad!: () => void;
+    vi.spyOn(src, 'load').mockReturnValue(new Promise<void>(resolve => finishLoad = resolve));
+    const wizardStep = TestBed.createComponent(ManageUsersSetUsernamesComponent);
+
+    const seen: boolean[] = [];
+    const sub = wizardStep.componentInstance.canAdd$.subscribe(v => seen.push(v));
+    await Promise.resolve();
+    expect(seen).toEqual([]);
+
+    finishLoad();
+    await wizardStep.whenStable();
+    expect(seen).toEqual([true]);
+    sub.unsubscribe();
   });
 });
