@@ -2,7 +2,7 @@ import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { provideZonelessChangeDetection, signal } from '@angular/core';
 import { describe, it, expect, beforeEach } from 'vitest';
 import { Router } from '@angular/router';
-import { Subject, of } from 'rxjs';
+import { Subject } from 'rxjs';
 import { STORE_TEST_PROVIDERS, BASE_TEST_PROVIDERS } from "@test-framework/core-test.helper";
 
 import { BaseTestModulesNoShared } from "@test-framework/core-test.helper";
@@ -41,11 +41,13 @@ describe('PageSideNavComponent', () => {
     expect(component).toBeTruthy();
   });
 
-  it('renders a gated tab only once hidden$ has answered false', async () => {
+  // An extension tab's hidden() returns a stream; the side-nav reads it as a
+  // signal that is null until the stream answers.
+  it('renders an extension tab only once its hidden() has answered false', async () => {
     const hidden$ = new Subject<boolean>();
     fixture.componentRef.setInput('tabs', [
       { link: 'summary', label: 'Summary' },
-      { link: 'variables', label: 'Variables', hidden$ },
+      { link: 'variables', label: 'Variables', hidden: () => hidden$ },
     ]);
     await fixture.whenStable();
     const gated = () => fixture.nativeElement.querySelector('[data-test="page-tab-Variables"]');
@@ -96,7 +98,7 @@ describe('PageSideNavComponent', () => {
   it('draws no list item for a hidden tab', async () => {
     fixture.componentRef.setInput('tabs', [
       { link: 'summary', label: 'Summary' },
-      { link: 'variables', label: 'Variables', hidden$: of(true) },
+      { link: 'variables', label: 'Variables', isHidden: signal(true) },
     ]);
     await fixture.whenStable();
 

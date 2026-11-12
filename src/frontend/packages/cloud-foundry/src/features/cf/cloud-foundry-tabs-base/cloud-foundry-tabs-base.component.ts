@@ -1,4 +1,5 @@
 import { Component, OnInit, ChangeDetectionStrategy, computed, inject, Signal } from '@angular/core';
+import { toSignal } from '@angular/core/rxjs-interop';
 import { CommonModule } from '@angular/common';
 import { RouterModule } from '@angular/router';
 import { Observable, of as observableOf } from 'rxjs';
@@ -70,15 +71,16 @@ export class CloudFoundryTabsBaseComponent implements OnInit {
       userFavoriteManager.getFavoriteEndpointFromEntity(endpointsService.endpoints()[this.cfEndpointService.cfGuid])
     );
 
-    const firehoseHidden$ = this.currentUserPermissionsService
+    // can() and hasMetrics() are streams; null until they answer.
+    const firehoseHidden = toSignal(this.currentUserPermissionsService
       .can(CfCurrentUserPermissions.FIREHOSE_VIEW, this.cfEndpointService.cfGuid)
-      .pipe(map(visible => !visible));
+      .pipe(map(visible => !visible)), { initialValue: null });
 
     const usersHidden = computed(() => !cfEndpointService.usersCount());
 
-    const cellsHidden$ = endpointsService.hasMetrics(cfEndpointService.cfGuid).pipe(
+    const cellsHidden = toSignal(endpointsService.hasMetrics(cfEndpointService.cfGuid).pipe(
       map(hasMetrics => !hasMetrics)
-    );
+    ), { initialValue: null });
 
     // Default tabs + add any tabs from extensions
     this.tabLinks = [
@@ -91,7 +93,7 @@ export class CloudFoundryTabsBaseComponent implements OnInit {
         link: CloudFoundryTabsBaseComponent.cells,
         label: 'Cells',
         icon: 'select_all',
-        hidden$: cellsHidden$
+        isHidden: cellsHidden
       },
       { link: 'routes', label: 'Routes', icon: 'route', iconFont: 'stratos-icons', },
       {
@@ -103,7 +105,7 @@ export class CloudFoundryTabsBaseComponent implements OnInit {
       {
         link: CloudFoundryTabsBaseComponent.firehose,
         label: 'Firehose',
-        hidden$: firehoseHidden$,
+        isHidden: firehoseHidden,
         icon: 'featured_play_list'
       },
       { link: 'feature-flags', label: 'Feature Flags', icon: 'flag' },

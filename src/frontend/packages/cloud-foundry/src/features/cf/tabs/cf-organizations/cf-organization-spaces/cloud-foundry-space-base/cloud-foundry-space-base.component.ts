@@ -1,7 +1,6 @@
 import { Component, ChangeDetectionStrategy, computed, Injector, OnInit, Signal, inject, signal } from '@angular/core';
 import { toObservable } from '@angular/core/rxjs-interop';
 import { RouterModule } from '@angular/router';
-import { of } from 'rxjs';
 import { filter, take } from 'rxjs/operators';
 
 import {
@@ -186,7 +185,7 @@ export class CloudFoundrySpaceBaseComponent implements OnInit {
           link: 'space-quota',
           label: 'Quota',
           icon: 'data_usage',
-          hidden$: of(!space!.quotaGuid),
+          isHidden: signal(!space!.quotaGuid),
         },
         ...getTabsFromExtensions(StratosTabType.CloudFoundrySpace),
       ]);

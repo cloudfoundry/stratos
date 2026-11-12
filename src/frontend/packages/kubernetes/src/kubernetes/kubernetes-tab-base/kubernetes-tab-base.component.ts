@@ -1,6 +1,5 @@
-import { Component, computed, inject, ChangeDetectionStrategy } from '@angular/core';
+import { Component, Signal, computed, inject, ChangeDetectionStrategy } from '@angular/core';
 import { ActivatedRoute, RouterOutlet } from '@angular/router';
-import { Observable } from 'rxjs';
 
 import { PageHeaderComponent } from '@stratosui/core';
 import { LoadingPageComponent } from '@stratosui/core';
@@ -45,7 +44,7 @@ import { kubeEntityCatalog } from './../kubernetes-entity-generator';
 })
 export class KubernetesTabBaseComponent {
 
-  tabLinks: Array<{ link: string; label: string; icon?: string; iconFont?: string; hidden$?: Observable<boolean> }> = [];
+  tabLinks: Array<{ link: string; label: string; icon?: string; iconFont?: string; isHidden?: Signal<boolean> }> = [];
 
   public kubeEndpointService = inject(KubernetesEndpointService);
   public userFavoriteManager = inject(UserFavoriteManager);
@@ -66,7 +65,7 @@ export class KubernetesTabBaseComponent {
 
     this.tabLinks = [
       { link: 'summary', label: 'Summary', icon: 'kubernetes', iconFont: 'stratos-icons' },
-      { link: 'analysis', label: 'Analysis', icon: 'assignment', hidden$: this.analysisService.hideAnalysis$ },
+      { link: 'analysis', label: 'Analysis', icon: 'assignment', isHidden: this.analysisService.hideAnalysis },
       { link: '-', label: 'Cluster' },
       { link: 'nodes', label: 'Nodes', icon: 'node', iconFont: 'stratos-icons' },
       ...this.getTabsFromEntityConfig(false),

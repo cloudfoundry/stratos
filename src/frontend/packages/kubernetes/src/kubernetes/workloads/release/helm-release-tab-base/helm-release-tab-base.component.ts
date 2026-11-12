@@ -1,14 +1,13 @@
-import {Component, OnDestroy, inject, ChangeDetectionStrategy } from '@angular/core';
+import {Component, OnDestroy, computed, inject, ChangeDetectionStrategy } from '@angular/core';
 import { ActivatedRoute, RouterModule } from '@angular/router';
 import { Observable } from 'rxjs';
-import { map } from 'rxjs/operators';
 
 import { naturalCompare } from '@stratosui/core';
 
 import { PageHeaderComponent } from '../../../../../../core/src/shared/components/page-header/page-header.component';
 
 import { IPageSideNavTab } from '../../../../../../core/src/features/dashboard/page-side-nav/page-side-nav.component';
-import { SessionService } from '../../../../../../core/src/shared/services/session.service';
+import { SessionSignalService } from '../../../../../../core/src/core/signals/session-signal.service';
 import { kubeEntityCatalog } from '../../../kubernetes-entity-generator';
 import { KubernetesAnalysisService } from '../../../services/kubernetes.analysis.service';
 import { KubeResourceEntityDefinition } from '../../../store/kube.types';
@@ -57,7 +56,7 @@ export class HelmReleaseTabBaseComponent implements OnDestroy {
   tabLinks: IPageSideNavTab[];
   public helmReleaseHelper = inject(HelmReleaseHelperService);
   private analysisService = inject(KubernetesAnalysisService);
-  private sessionService = inject(SessionService);
+  private sessionSignals = inject(SessionSignalService);
   private socketService = inject(HelmReleaseSocketService);
 
 
@@ -72,9 +71,9 @@ export class HelmReleaseTabBaseComponent implements OnDestroy {
       { link: 'notes', label: 'Notes', icon: 'subject' },
       { link: 'values', label: 'Values', icon: 'list' },
       { link: 'history', label: 'History', icon: 'schedule' },
-      { link: 'analysis', label: 'Analysis', icon: 'assignment', hidden$: this.analysisService.hideAnalysis$ },
+      { link: 'analysis', label: 'Analysis', icon: 'assignment', isHidden: this.analysisService.hideAnalysis },
       { link: '-', label: 'Resources' },
-      { link: 'graph', label: 'Overview', icon: 'share', hidden$: this.sessionService.isTechPreview().pipe(map((tp: boolean) => !tp)) },
+      { link: 'graph', label: 'Overview', icon: 'share', isHidden: computed(() => !this.sessionSignals.isTechPreview()) },
       ...this.getTabsFromEntityConfig()
     ];
 

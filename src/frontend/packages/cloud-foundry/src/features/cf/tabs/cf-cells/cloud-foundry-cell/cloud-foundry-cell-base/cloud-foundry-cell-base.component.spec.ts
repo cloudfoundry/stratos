@@ -124,20 +124,17 @@ describe('CloudFoundryCellBaseComponent', () => {
     TestBed.overrideProvider(CloudFoundryEndpointService, { useValue: { endpoint } });
     await create();
     const appsTab = component.tabLinks.find(t => t.link === CloudFoundryCellBaseComponent.AppsLinks)!;
-    const hidden: boolean[] = [];
-    const sub = appsTab.hidden$!.subscribe(h => hidden.push(h));
     await fixture.whenStable();
     expect(component.breadcrumbs()).toBeNull();
-    expect(hidden.at(-1)).toBe(true);
+    expect(appsTab.isHidden!()).toBe(true);
 
     endpoint.set({ entity: { guid: 'cf-1', name: 'cf one', user: { admin: true } } });
     await fixture.whenStable();
     expect(component.breadcrumbs()).toEqual([{ breadcrumbs: [{ value: 'cf one', routerLink: '/cloud-foundry/cf-1/cells' }] }]);
-    expect(hidden.at(-1)).toBe(false);
+    expect(appsTab.isHidden!()).toBe(false);
 
     endpoint.set({ entity: { guid: 'cf-1', name: 'cf one', user: { admin: false } } });
     await fixture.whenStable();
-    expect(hidden.at(-1)).toBe(true);
-    sub.unsubscribe();
+    expect(appsTab.isHidden!()).toBe(true);
   });
 });

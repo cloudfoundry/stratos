@@ -1,6 +1,5 @@
 import { CommonModule } from '@angular/common';
 import { Component, ChangeDetectionStrategy, computed, inject } from '@angular/core';
-import { toObservable } from '@angular/core/rxjs-interop';
 import { RouterModule } from '@angular/router';
 import { Observable } from 'rxjs';
 import { map, startWith } from 'rxjs/operators';
@@ -84,7 +83,7 @@ export class CloudFoundryCellBaseComponent {
 
     // Admins only; hidden until the endpoint's user is known.
     // strict: AppsLinks tab is statically present in the tabLinks array literal above
-    this.tabLinks.find(link => link.link === CloudFoundryCellBaseComponent.AppsLinks)!.hidden$ =
-      toObservable(computed(() => !this.cfEndpointService.endpoint()?.entity.user?.admin));
+    this.tabLinks.find(link => link.link === CloudFoundryCellBaseComponent.AppsLinks)!.isHidden =
+      computed(() => !this.cfEndpointService.endpoint()?.entity.user?.admin);
   }
 }
