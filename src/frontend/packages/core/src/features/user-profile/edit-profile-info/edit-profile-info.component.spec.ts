@@ -92,4 +92,18 @@ describe('EditProfileInfoComponent', () => {
     expect(component.editProfileForm.value.givenName).toBe('Test');
     expect(component.editProfileForm.value.emailAddress).toBe('test@test.com');
   });
+
+  // The Change Password fields show only to a user with 'password.write'.
+  it('offers Change Password only with the password permission', async () => {
+    const canChange = signal(false);
+    vi.spyOn(TestBed.inject(CurrentUserPermissionsService), 'can').mockReturnValue(canChange);
+    const page = TestBed.createComponent(EditProfileInfoComponent);
+    await page.whenStable();
+    const text = () => (page.nativeElement as HTMLElement).textContent ?? '';
+    expect(text()).not.toContain('Change Password');
+
+    canChange.set(true);
+    await page.whenStable();
+    expect(text()).toContain('Change Password');
+  });
 });
