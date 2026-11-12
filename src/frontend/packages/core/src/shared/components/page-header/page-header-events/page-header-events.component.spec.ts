@@ -1,5 +1,5 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
-import { provideZonelessChangeDetection } from '@angular/core';
+import { provideZonelessChangeDetection, signal } from '@angular/core';
 import { NoopAnimationsModule } from '@angular/platform-browser/animations';
 import { ActivatedRoute, provideRouter } from '@angular/router';
 import { of } from 'rxjs';
@@ -55,7 +55,7 @@ describe('PageHeaderEventsComponent dismiss', () => {
         provideZonelessChangeDetection(),
         provideRouter([]),
         { provide: ActivatedRoute, useValue: { snapshot: { params: {} } } },
-        { provide: GlobalEventService, useValue: { events$: of([event]), updateEventReadState } },
+        { provide: GlobalEventService, useValue: { events: signal([event]), updateEventReadState } },
       ],
     });
     const fixture = TestBed.createComponent(PageHeaderEventsComponent);
@@ -79,7 +79,7 @@ describe('PageHeaderEventsComponent dismiss', () => {
         provideRouter([]),
         { provide: ActivatedRoute, useValue: { snapshot: { params: {} } } },
         { provide: GlobalEventService, useValue: {
-          events$: of([{ key: `${endpointEventKey}-ep-1`, endpointId: 'ep-1', endpointName: 'one', detail: 'HTTP 502', message: 'down', read: false }]),
+          events: signal([{ key: `${endpointEventKey}-ep-1`, endpointId: 'ep-1', endpointName: 'one', detail: 'HTTP 502', message: 'down', read: false }]),
           updateEventReadState: vi.fn(),
         } },
       ],
