@@ -1,6 +1,6 @@
 import { CommonModule } from '@angular/common';
 import { HttpClient } from '@angular/common/http';
-import { ChangeDetectionStrategy, Component, ElementRef, computed, inject, input, linkedSignal, signal, untracked, viewChild } from '@angular/core';
+import { ChangeDetectionStrategy, Component, ElementRef, Signal, computed, inject, input, linkedSignal, signal, untracked, viewChild } from '@angular/core';
 import { toObservable } from '@angular/core/rxjs-interop';
 import { ActivatedRoute, RouterModule } from '@angular/router';
 import { Observable, of } from 'rxjs';
@@ -15,6 +15,8 @@ import { CustomIconComponent } from '../../../shared/components/custom-material/
 
 export interface IPageSideNavTab extends StratosTabMetadata {
   hidden$?: Observable<boolean>;
+  // A gate held as a signal; when present, hidden$ and hidden() are not used.
+  isHidden?: Signal<boolean>;
 }
 
 @Component({
@@ -59,7 +61,8 @@ export class PageSideNavComponent {
       // context so it can neither add dependencies nor fail on a signal write.
       return untracked(() => tabs.map(tab => ({
         ...tab,
-        hidden$: tab.hidden$ || (tab.hidden ? tab.hidden(this.activatedRoute, this.cups, this.http) : of(false))
+        hidden$: tab.isHidden ? undefined :
+          tab.hidden$ || (tab.hidden ? tab.hidden(this.activatedRoute, this.cups, this.http) : of(false))
       })));
     },
   });

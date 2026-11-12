@@ -18,7 +18,7 @@
         </li>
       }
       <!-- null = the gate has not answered yet; keep the tab out until it does. -->
-      @if (tab && tab.link && (tab.hidden$ | async) === false) {
+      @if (tab && tab.link && (tab.isHidden ? tab.isHidden() : (tab.hidden$ | async)) === false) {
         <li>
           <a class="page-side-nav__item"
             [attr.data-test]="'page-tab-' + tab.label"

@@ -1,5 +1,5 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
-import { provideZonelessChangeDetection } from '@angular/core';
+import { provideZonelessChangeDetection, signal } from '@angular/core';
 import { describe, it, expect, beforeEach } from 'vitest';
 import { Router } from '@angular/router';
 import { Subject, of } from 'rxjs';
@@ -61,6 +61,21 @@ describe('PageSideNavComponent', () => {
     hidden$.next(true);
     await fixture.whenStable();
     expect(gated()).toBeNull();
+  });
+
+  it('follows a gate held as a signal', async () => {
+    const isHidden = signal(true);
+    fixture.componentRef.setInput('tabs', [
+      { link: 'summary', label: 'Summary' },
+      { link: 'users', label: 'Users', isHidden },
+    ]);
+    await fixture.whenStable();
+    const gated = () => fixture.nativeElement.querySelector('[data-test="page-tab-Users"]');
+    expect(gated()).toBeNull();
+
+    isHidden.set(false);
+    await fixture.whenStable();
+    expect(gated()).not.toBeNull();
   });
 
   it('leaves the tabs in the page Tab order, one stop per tab', async () => {
