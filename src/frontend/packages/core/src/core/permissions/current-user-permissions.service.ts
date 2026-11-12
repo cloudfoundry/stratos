@@ -1,6 +1,5 @@
 import { computed, EnvironmentInjector, Injectable, inject, runInInjectionContext, Signal, untracked } from '@angular/core';
-import { EndpointsDataService, observeSignal } from '@stratosui/store';
-import { Observable } from 'rxjs';
+import { EndpointsDataService } from '@stratosui/store';
 
 import {
   CurrentUserPermissions,
@@ -80,19 +79,6 @@ export class CurrentUserPermissionsService {
       }
       return this.getCanSignal(actionConfig, endpointGuid, ...args) ?? PERMISSION_DENIED;
     });
-  }
-
-  /**
-   * NOTE: temporary Observable form of {@link can} for callers not yet
-   * reading the signal. Emits on subscribe (after the next effect flush)
-   * and on every change.
-   */
-  public can$(
-    action: CurrentUserPermissions | PermissionConfigType,
-    endpointGuid?: string,
-    ...args: any[]
-  ): Observable<boolean> {
-    return observeSignal(this.can(action, endpointGuid, ...args), this.injector);
   }
 
   private getCanSignal(

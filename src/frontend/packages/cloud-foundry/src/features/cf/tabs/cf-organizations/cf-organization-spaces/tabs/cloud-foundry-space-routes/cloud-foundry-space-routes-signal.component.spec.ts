@@ -3,7 +3,6 @@ import { importProvidersFrom, provideZonelessChangeDetection, signal } from '@an
 import { provideHttpClient } from '@angular/common/http';
 import { provideHttpClientTesting } from '@angular/common/http/testing';
 import { provideRouter } from '@angular/router';
-import { of } from 'rxjs';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 
 import { ConfirmationDialogService, CurrentUserPermissionsService, TabNavService, TailwindSnackBarService } from '@stratosui/core';
@@ -102,7 +101,7 @@ describe('CloudFoundrySpaceRoutesSignalComponent', () => {
         { provide: CloudFoundryEndpointService, useValue: stubEndpointService },
         { provide: CloudFoundryOrganizationService, useValue: stubOrgService },
         { provide: CloudFoundrySpaceService, useValue: stubSpaceService },
-        { provide: CurrentUserPermissionsService, useValue: { can$: () => of(true) } },
+        { provide: CurrentUserPermissionsService, useValue: { can: () => signal(true) } },
         { provide: TailwindSnackBarService, useValue: snackBar },
         // The confirm dialog normally opens a modal and waits for the user;
         // the harness fires the confirm callback immediately so the bulk
