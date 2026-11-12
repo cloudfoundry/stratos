@@ -1,4 +1,4 @@
-@if (noContent$ | async; as message) {
+@if (noContent(); as message) {
   <app-no-content-message [icon]="'settings_ethernet'" [hidden]="!message" [firstLine]="message.firstLine" [secondLine]="message.secondLine">
   </app-no-content-message>
 }

@@ -44,6 +44,9 @@ describe('EndpointsPageComponent', () => {
     disablePersistenceFeatures$: new Subject<boolean>(),
     haveRegistered$: of(false),
     haveConnected$: of(false),
+    haveRegistered: signal(false),
+    haveConnected: signal(false),
+    disablePersistenceFeatures: signal(false),
     checkAllEndpoints: vi.fn()
   };
 

@@ -1,8 +1,7 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
-import { provideZonelessChangeDetection } from '@angular/core';
+import { provideZonelessChangeDetection, signal } from '@angular/core';
 import { describe, it, expect, beforeEach, vi } from 'vitest';
 import { RouterTestingModule } from '@angular/router/testing';
-import { of } from 'rxjs';
 import { createBasicStoreModule } from "@test-framework/core-test.helper";
 
 import { CoreTestingModule } from "@test-framework/core-test.modules";
@@ -15,13 +14,15 @@ describe('EndpointsMissingComponent', () => {
   let component: EndpointsMissingComponent;
   let fixture: ComponentFixture<EndpointsMissingComponent>;
 
+  const disablePersistenceFeatures = signal(false);
   const mockEndpointsService = {
-    haveRegistered$: of(false),
-    haveConnected$: of(false),
-    disablePersistenceFeatures$: of(false),
+    haveRegistered: signal(false),
+    haveConnected: signal(false),
+    disablePersistenceFeatures,
   };
 
   beforeEach(() => {
+    disablePersistenceFeatures.set(false);
     TestBed.configureTestingModule({
       providers: [
         provideZonelessChangeDetection(),
@@ -52,6 +53,13 @@ describe('EndpointsMissingComponent', () => {
   it('shows the no-endpoints message when none are registered', async () => {
     await vi.waitFor(() => {
       expect(fixture.nativeElement.textContent).toContain('There are no registered endpoints');
+    });
+  });
+
+  it('sends users to the administrator when persistence is off', async () => {
+    disablePersistenceFeatures.set(true);
+    await vi.waitFor(() => {
+      expect(fixture.nativeElement.textContent).toContain('Please contact your console administrator');
     });
   });
 });

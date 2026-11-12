@@ -1,5 +1,5 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
-import { ApplicationRef, EmbeddedViewRef, ViewContainerRef, provideZonelessChangeDetection } from '@angular/core';
+import { ApplicationRef, EmbeddedViewRef, ViewContainerRef, provideZonelessChangeDetection, signal } from '@angular/core';
 import { By } from '@angular/platform-browser';
 import { provideHttpClient } from '@angular/common/http';
 import { provideHttpClientTesting } from '@angular/common/http/testing';
@@ -32,6 +32,9 @@ function makeStubEndpointsService(disablePersistenceFeatures: boolean, endpoints
     haveConnected$: of(Object.values(endpoints).some(ep => ep.connectionStatus === 'connected')),
     connectedEndpoints$: of(Object.values(endpoints).filter(ep => ep.connectionStatus === 'connected')),
     endpoints$: of(endpoints),
+    disablePersistenceFeatures: signal(disablePersistenceFeatures),
+    haveRegistered: signal(Object.keys(endpoints).length > 0),
+    haveConnected: signal(Object.values(endpoints).some(ep => ep.connectionStatus === 'connected')),
   } as Partial<EndpointsService>;
 }
 

@@ -1,5 +1,4 @@
 import { Component, ChangeDetectionStrategy, inject, input } from '@angular/core';
-import { AsyncPipe } from '@angular/common';
 
 import {
   EndpointMissingMessageParts,
@@ -14,7 +13,7 @@ selector: 'app-cf-endpoints-missing',
   styleUrls: ['./cf-endpoints-missing.component.scss'],
   standalone: true,
   changeDetection: ChangeDetectionStrategy.OnPush,
-  imports: [AsyncPipe, NoContentMessageComponent]
+  imports: [NoContentMessageComponent]
 })
 export class CfEndpointsMissingComponent extends EndpointsMissingComponent {
 
@@ -40,8 +39,8 @@ export class CfEndpointsMissingComponent extends EndpointsMissingComponent {
     const cloudFoundryService = inject(CloudFoundryService);
 
     super();
-    this.haveConnected$ = cloudFoundryService.hasConnectedCFEndpoints$;
-    this.haveRegistered$ = cloudFoundryService.hasRegisteredCFEndpoints$;
+    this.haveConnected = cloudFoundryService.hasConnectedCFEndpoints;
+    this.haveRegistered = cloudFoundryService.hasRegisteredCFEndpoints;
   }
 
 }

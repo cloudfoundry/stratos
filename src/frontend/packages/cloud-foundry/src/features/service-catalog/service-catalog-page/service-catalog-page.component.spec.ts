@@ -74,6 +74,8 @@ describe('ServiceCatalogPageComponent', () => {
       connectedCFEndpoints: signal(endpoints),
       hasConnectedCFEndpoints$: of(true),
       hasRegisteredCFEndpoints$: of(true),
+      hasConnectedCFEndpoints: signal(true),
+      hasRegisteredCFEndpoints: signal(true),
     };
     await TestBed.configureTestingModule({
       imports: [
