@@ -3,7 +3,6 @@ import { HttpClient } from '@angular/common/http';
 import {
   Component, ChangeDetectionStrategy, DestroyRef, OnInit, Signal, WritableSignal, computed, inject, signal, Injector, effect,
 } from '@angular/core';
-import { toSignal } from '@angular/core/rxjs-interop';
 import { Router, RouterModule } from '@angular/router';
 
 import {
@@ -69,11 +68,10 @@ export class CloudFoundryApplicationsSignalComponent implements OnInit {
 
   /** Total app count for the L5 sub-nav. */
   public totalApplications!: Signal<number>;
-  /** Reactive permission flag for the Create Application button. Built
-   *  in the constructor (injection context) so toSignal() resolves. */
-  public readonly canCreateApplication: Signal<boolean> = toSignal(
-    this.permissionsService.can$(CfCurrentUserPermissions.APPLICATION_CREATE, this.cfEndpointService.cfGuid),
-    { initialValue: false },
+  /** Reactive permission flag for the Create Application button. */
+  public readonly canCreateApplication: Signal<boolean> = this.permissionsService.can(
+    CfCurrentUserPermissions.APPLICATION_CREATE,
+    this.cfEndpointService.cfGuid,
   );
   /** L5 primary action — navigates to the deploy stepper with this CNSI
    *  pre-selected via the `:endpointId` route param (the new-application
