@@ -1,8 +1,6 @@
 import { CommonModule } from '@angular/common';
 import { Component, ChangeDetectionStrategy, Signal, WritableSignal, computed, inject, signal } from '@angular/core';
-import { toSignal } from '@angular/core/rxjs-interop';
 import { Router, RouterModule } from '@angular/router';
-import { combineLatest, map } from 'rxjs';
 
 import {
   ConfirmationDialogService,
@@ -155,18 +153,12 @@ export class CloudFoundryUsersComponent {
 
   /** True when the current user holds org or space role-change rights on
    *  this endpoint. Admin satisfies both checks; non-admin must have the
-   *  specific permission in at least one org or space. Bridges the
-   *  Observable from CurrentUserPermissionsService into a signal via
-   *  toSignal; initialValue: false keeps the action safely disabled until
-   *  the first emission resolves. Field initializer (injection context) —
-   *  needs only perms + the endpoint guid, no usersConfig.initialize(). */
-  private readonly canManageRoles: Signal<boolean> = toSignal(
-    combineLatest([
-      this.perms.can$(CfCurrentUserPermissions.ORGANIZATION_CHANGE_ROLES, this.cfEndpointService.cfGuid),
-      this.perms.can$(CfCurrentUserPermissions.SPACE_CHANGE_ROLES, this.cfEndpointService.cfGuid),
-    ]).pipe(map(([org, space]) => org || space)),
-    { initialValue: false },
-  );
+   *  specific permission in at least one org or space. False until the
+   *  roles load, which keeps the action disabled until then. Needs only
+   *  perms + the endpoint guid, no usersConfig.initialize(). */
+  private readonly canChangeOrgRoles = this.perms.can(CfCurrentUserPermissions.ORGANIZATION_CHANGE_ROLES, this.cfEndpointService.cfGuid);
+  private readonly canChangeSpaceRoles = this.perms.can(CfCurrentUserPermissions.SPACE_CHANGE_ROLES, this.cfEndpointService.cfGuid);
+  private readonly canManageRoles: Signal<boolean> = computed(() => this.canChangeOrgRoles() || this.canChangeSpaceRoles());
 
   /** True when the CF endpoint has the UAA invite feature configured;
    *  false until the endpoint has loaded, so the invite tab stays absent
