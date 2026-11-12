@@ -17,6 +17,7 @@ import { STORE_TEST_PROVIDERS, testSCFEndpointGuid, populateStoreWithTestEndpoin
 import { generateCFEntities, generateTestCfEndpointServiceProvider } from '@test-framework/cf';
 import { ActiveRouteCfOrgSpace } from '../../cf-page.types';
 import { CloudFoundryQuotasComponent } from './cloud-foundry-quotas.component';
+import type { StOrgQuota } from '../../../../services/endpoint-data/stratos-types';
 
 describe('CloudFoundryQuotasComponent', () => {
   let component: CloudFoundryQuotasComponent;
@@ -70,5 +71,12 @@ describe('CloudFoundryQuotasComponent', () => {
 
   it('should create', () => {
     expect(component).toBeTruthy();
+  });
+
+  it('links each quota name to its page', () => {
+    const name = component.listConfig()!.columns[0];
+    expect(name.kind).toBe('link');
+    expect(name.link!({ guid: 'q1' } as StOrgQuota))
+      .toEqual(['/cloud-foundry', testSCFEndpointGuid, 'quota-definitions', 'q1']);
   });
 });

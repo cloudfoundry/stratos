@@ -129,7 +129,10 @@ export class CloudFoundryOrganizationSpaceQuotasComponent {
       columns: [
         {
           header: 'Name', key: 'name', sortField: 'name',
-          kind: 'text',
+          kind: 'link',
+          link: (q: StSpaceQuota) => [
+            '/cloud-foundry', cfGuid, 'organizations', orgGuid, 'space-quota-definitions', q.guid,
+          ],
           render: (q: StSpaceQuota) => q.name,
           widthHint: '14rem',
         },

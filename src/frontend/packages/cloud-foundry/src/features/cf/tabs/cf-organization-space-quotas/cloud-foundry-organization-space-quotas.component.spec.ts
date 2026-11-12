@@ -17,6 +17,7 @@ import { STORE_TEST_PROVIDERS, testSCFEndpointGuid, populateStoreWithTestEndpoin
 import { generateCFEntities, generateTestCfEndpointServiceProvider } from '@test-framework/cf';
 import { ActiveRouteCfOrgSpace } from '../../cf-page.types';
 import { CloudFoundryOrganizationSpaceQuotasComponent } from './cloud-foundry-organization-space-quotas.component';
+import type { StSpaceQuota } from '../../../../services/endpoint-data/stratos-types';
 
 describe('CloudFoundryOrganizationSpaceQuotasComponent', () => {
   let component: CloudFoundryOrganizationSpaceQuotasComponent;
@@ -70,5 +71,13 @@ describe('CloudFoundryOrganizationSpaceQuotasComponent', () => {
 
   it('should create', () => {
     expect(component).toBeTruthy();
+  });
+
+  it('links each space quota name to its page', () => {
+    const name = component.listConfig()!.columns[0];
+    expect(name.kind).toBe('link');
+    expect(name.link!({ guid: 'q1' } as StSpaceQuota)).toEqual([
+      '/cloud-foundry', testSCFEndpointGuid, 'organizations', testSCFEndpointGuid, 'space-quota-definitions', 'q1',
+    ]);
   });
 });
