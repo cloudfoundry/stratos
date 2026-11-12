@@ -1,4 +1,4 @@
-@if (canShow$ | async) {
+@if (canShow()) {
   @if (analyzers$ | async; as analyzers) {
     <div class="relative">
       @if (isMenuOpen) {

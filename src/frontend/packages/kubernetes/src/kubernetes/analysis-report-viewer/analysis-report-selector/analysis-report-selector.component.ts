@@ -1,5 +1,5 @@
 import { AsyncPipe } from '@angular/common';
-import {Component, OnDestroy, OnInit, inject, ChangeDetectionStrategy, input, output} from '@angular/core';
+import { Component, OnDestroy, OnInit, computed, inject, ChangeDetectionStrategy, input, output } from '@angular/core';
 import { formatDistance } from 'date-fns';
 import { Observable, Subscription } from 'rxjs';
 import { map, tap } from 'rxjs/operators';
@@ -21,7 +21,6 @@ export class AnalysisReportSelectorComponent implements OnInit, OnDestroy {
 
   public selection = { title: 'None' };
 
-  public canShow$: Observable<boolean>;
   // strict: assigned in ngOnInit before the template's async pipe reads it
   public analyzers$!: Observable<AnalysisReport[]>;
 
@@ -41,15 +40,7 @@ export class AnalysisReportSelectorComponent implements OnInit, OnDestroy {
   subs: Subscription[] = [];
   public analysisService = inject(KubernetesAnalysisService);
 
-
-
-  constructor() {
-
-
-    this.canShow$ = this.analysisService.hideAnalysis$.pipe(map(h => !h));
-
-
-  }
+  readonly canShow = computed(() => !this.analysisService.hideAnalysis());
 
   ngOnInit() {
     this.analyzers$ = this.analysisService.getByPath(this.endpoint(), this.path(), true).pipe(
