@@ -33,19 +33,18 @@ export class EndpointsService {
   private sessionService = inject(SessionService);
   private appRef = inject(ApplicationRef);
 
-  // Signal reads of the endpoint projections. The Observable members below
-  // are bridges over the same signals for the readers not yet moved.
+  // Signal reads of the endpoint projections.
   readonly endpoints = this.endpointsSignals.endpoints;
   readonly haveRegistered = this.endpointsSignals.haveRegistered;
   readonly haveConnected = this.endpointsSignals.haveConnected;
   readonly connectedEndpoints = this.endpointsSignals.connectedEndpoints;
   readonly disablePersistenceFeatures = this.endpointsSignals.disablePersistenceFeatures;
 
+  // Observable bridges kept for Observable APIs: endpoints$ feeds
+  // connectedEndpointsOfTypes(); disablePersistenceFeatures$ feeds the
+  // side-nav's Observable `hidden`.
   endpoints$: Observable<IRequestEntityTypeState<EndpointModel>>;
-  haveRegistered$: Observable<boolean>;
-  haveConnected$: Observable<boolean>;
   disablePersistenceFeatures$: Observable<boolean>;
-  connectedEndpoints$: Observable<EndpointModel[]>;
 
   static getLinkForEndpoint(endpoint: EndpointModel): string {
     if (!endpoint || !endpoint.cnsi_type || !endpoint.guid) {
@@ -112,24 +111,6 @@ export class EndpointsService {
       catchError((error): Observable<IRequestEntityTypeState<EndpointModel>> => {
         console.error('Error reading endpoints:', error);
         return of({} as IRequestEntityTypeState<EndpointModel>);
-      })
-    );
-    this.haveRegistered$ = toObservable(this.endpointsSignals.haveRegistered).pipe(
-      catchError((error): Observable<boolean> => {
-        console.error('Error checking registered endpoints:', error);
-        return of(false);
-      })
-    );
-    this.connectedEndpoints$ = toObservable(this.endpointsSignals.connectedEndpoints).pipe(
-      catchError((error): Observable<EndpointModel[]> => {
-        console.error('Error getting connected endpoints:', error);
-        return of([]);
-      })
-    );
-    this.haveConnected$ = toObservable(this.endpointsSignals.haveConnected).pipe(
-      catchError((error): Observable<boolean> => {
-        console.error('Error checking connected endpoints:', error);
-        return of(false);
       })
     );
     this.disablePersistenceFeatures$ = toObservable(this.endpointsSignals.disablePersistenceFeatures).pipe(

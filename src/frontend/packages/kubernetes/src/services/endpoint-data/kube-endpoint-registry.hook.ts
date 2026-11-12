@@ -12,10 +12,9 @@ import { KubeEndpointEviction } from './kube-endpoint-eviction';
 // listened for `CONNECT_ENDPOINTS_SUCCESS` / `DISCONNECT_ENDPOINTS_SUCCESS`
 // ngrx Actions.
 //
-// Source of truth: `EndpointsService.endpoints$` — the same selector
-// the rest of the app reads. Whatever flips an endpoint's
-// `connectionStatus` (action, effect, or future signal-native writer)
-// shows up here on the next emission.
+// Source of truth: the `EndpointsService.endpoints` signal — the same
+// projection the rest of the app reads. Whatever flips an endpoint's
+// `connectionStatus` shows up here on the next effect run.
 //
 // Per emission we diff against the previously-seen set of *connected
 // kubernetes endpoint GUIDs* and:
