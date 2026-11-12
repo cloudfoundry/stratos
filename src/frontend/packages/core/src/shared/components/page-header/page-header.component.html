@@ -156,8 +156,8 @@
             }
 
             <!-- Notifications button -->
-            @if (((events$ | async) || []).length > 0) {
-              @let unread = (unreadEventCount$ | async) ?? 0;
+            @if (events().length > 0) {
+              @let unread = unreadEventCount();
               <!-- A link, since it goes to a route; its name carries the badge's count. -->
               <a
                 routerLink="/events"

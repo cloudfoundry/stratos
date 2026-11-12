@@ -9,7 +9,6 @@ import {
   IFavoriteMetadata,
   UserFavorite,
   RecentlyVisitedDataService,
-  StratosStatus,
   UserProfileInfo,
   AuthTokenEnvelope,
 } from '@stratosui/store';
@@ -27,7 +26,7 @@ import { StratosCurrentUserPermissions } from '../../../core/permissions/stratos
 import { UserProfileService } from '../../../core/user-profile.service';
 import { IPageSideNavTab } from '../../../features/dashboard/page-side-nav/page-side-nav.component';
 import { TabNavService } from '../../../tab-nav.service';
-import { GlobalEventService, IGlobalEvent } from '../../global-events.service';
+import { GlobalEventService } from '../../global-events.service';
 import { EndpointsService } from './../../../core/endpoints.service';
 import { environment } from './../../../environments/environment';
 import { BREADCRUMB_URL_PARAM, IHeaderBreadcrumb, IHeaderBreadcrumbLink } from './page-header.types';
@@ -160,9 +159,9 @@ export class PageHeaderComponent implements OnDestroy, AfterViewInit {
   // The logout-only menu never offers the history.
   readonly historyVisible = computed(() => !this.logoutOnly() && this.showHistory());
 
-  public events$: Observable<IGlobalEvent[]>;
-  public unreadEventCount$: Observable<number>;
-  public eventPriorityStatus$: Observable<StratosStatus | undefined>;
+  private readonly eventService = inject(GlobalEventService);
+  public readonly events = this.eventService.events;
+  public readonly unreadEventCount = computed(() => this.events().filter(event => !event.read).length);
 
   readonly favorite = input<UserFavorite<IFavoriteMetadata> | null>();
   // The favorite the star is shown for: the last one bound that can be
@@ -229,17 +228,6 @@ export class PageHeaderComponent implements OnDestroy, AfterViewInit {
 
   constructor() {
     const route = this.route;
-    const eventService = inject(GlobalEventService);
-
-    this.events$ = eventService.events$.pipe(
-      startWith([])
-    );
-    this.unreadEventCount$ = eventService.events$.pipe(
-      map(events => events.filter(event => !event.read)),
-      map(events => events.length)
-    );
-    this.eventPriorityStatus$ = eventService.priorityStratosStatus$;
-
     this.actionsKey = this.route.snapshot.data ? this.route.snapshot.data.extensionsActionsKey : null;
     // Reactive breadcrumb key — re-resolves whenever the URL's
     // ?breadcrumbs= query param changes. Snapshot-only reads broke on

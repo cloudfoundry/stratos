@@ -3,7 +3,6 @@ import { EmbeddedViewRef, provideZonelessChangeDetection } from '@angular/core';
 import { provideHttpClient } from '@angular/common/http';
 import { provideHttpClientTesting, HttpTestingController } from '@angular/common/http/testing';
 import { describe, it, expect, beforeEach, afterEach, vi } from 'vitest';
-import { of } from 'rxjs';
 import { ActivatedRoute } from '@angular/router';
 import { RouterTestingModule } from '@angular/router/testing';
 import { CommonModule } from '@angular/common';
@@ -14,6 +13,7 @@ import { DashboardDataService } from '../../../core/dashboard-data.service';
 import { EndpointsService } from '../../../core/endpoints.service';
 import { CurrentUserPermissionsService } from '../../../core/permissions/current-user-permissions.service';
 import { TabNavService } from '../../../tab-nav.service';
+import { GlobalEventService } from '../../global-events.service';
 import { TailwindSnackBarService } from '../../services/tailwind-snackbar.service';
 import { environment } from '../../../environments/environment';
 import { PageHeaderComponent } from './page-header.component';
@@ -432,8 +432,9 @@ describe('PageHeaderComponent', () => {
     let view: EmbeddedViewRef<unknown>;
 
     beforeEach(() => {
-      component.events$ = of([{ read: false }, { read: true }, { read: false }] as any);
-      component.unreadEventCount$ = of(2);
+      const events = TestBed.inject(GlobalEventService);
+      ['a', 'b', 'c'].forEach(key => events.setStaticEvent(key, { key, message: key, link: '' }));
+      events.updateEventReadState(events.events()[1], true);
       view = component.pageHeaderTmpl().createEmbeddedView({});
       view.detectChanges();
       host = document.createElement('div');
