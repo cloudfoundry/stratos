@@ -111,14 +111,22 @@ export class BuildTabComponent implements OnInit {
     return app.entity.enable_ssh ? 'Yes' : 'No';
   });
 
-  // The git lookups and the permission check are streams, so the app and
-  // the project are bridged for them. The project is null until env vars
+  // The git lookups are streams, so the app and the project are bridged
+  // for them. The project is null until env vars
   // load and STRATOS_PROJECT is parsed, and never emits as null, so the
   // deploy source stays 'loading' until then.
   private readonly app$ = toObservable(this.data.app).pipe(filter(app => !!app));
   private readonly stratosProject$ = toObservable(this.data.stratosProject).pipe(
     filter((project): project is EnvVarStratosProject => project != null),
   );
+
+  // Built once per space; null until the space is known.
+  private readonly envVarsCheck = computed(() => {
+    const spaceGuid = this.data.space()?.guid;
+    return spaceGuid ? this.cups.can(CfCurrentUserPermissions.APPLICATION_VIEW_ENV_VARS,
+      this.applicationService.cfGuid, spaceGuid) : null;
+  });
+  private readonly canSeeEnvVars = computed(() => this.envVarsCheck()?.() ?? null);
 
   deploySource$!: Observable<DeploySourceView | null>;
 
@@ -132,13 +140,10 @@ export class BuildTabComponent implements OnInit {
     // the load.
     void this.data.refresh('serviceBindings');
 
-    const canSeeEnvVars$ = toObservable(this.data.space, { injector: this.injector }).pipe(
-      filter(space => !!space),
-      switchMap(space => this.cups.can$(
-        CfCurrentUserPermissions.APPLICATION_VIEW_ENV_VARS,
-        this.applicationService.cfGuid,
-        space!.guid)
-      )
+    // The git lookups below are requests, so the permission is bridged.
+    const canSeeEnvVars$ = toObservable(this.canSeeEnvVars, { injector: this.injector }).pipe(
+      filter((can): can is boolean => can !== null),
+      distinctUntilChanged(),
     );
 
     this.gitRepo$ = this.stratosProject$.pipe(
