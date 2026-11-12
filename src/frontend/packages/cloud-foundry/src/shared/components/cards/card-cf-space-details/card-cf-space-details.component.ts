@@ -1,10 +1,9 @@
-import { CommonModule } from '@angular/common';
-import { Component, OnDestroy, inject, ChangeDetectionStrategy } from '@angular/core';
+import { DatePipe } from '@angular/common';
+import { Component, inject, ChangeDetectionStrategy, computed } from '@angular/core';
+import { toSignal } from '@angular/core/rxjs-interop';
 import { Router, RouterModule } from '@angular/router';
-import { Observable, Subscription } from 'rxjs';
-import { map } from 'rxjs/operators';
 
-import { safeUnsubscribe, MetadataItemComponent, BooleanIndicatorComponent, TailwindSnackBarService } from '@stratosui/core';
+import { MetadataItemComponent, BooleanIndicatorComponent, TailwindSnackBarService } from '@stratosui/core';
 import { CloudFoundrySpaceService } from '../../../../features/cf/services/cloud-foundry-space.service';
 
 @Component({
@@ -13,34 +12,33 @@ import { CloudFoundrySpaceService } from '../../../../features/cf/services/cloud
   changeDetection: ChangeDetectionStrategy.OnPush,
   standalone: true,
   imports: [
-    CommonModule,
+    DatePipe,
     RouterModule,
     MetadataItemComponent,
     BooleanIndicatorComponent
   ]
 })
-export class CardCfSpaceDetailsComponent implements OnDestroy {
+export class CardCfSpaceDetailsComponent {
   public cfSpaceService = inject(CloudFoundrySpaceService);
   private router = inject(Router);
   private snackBarService = inject(TailwindSnackBarService);
 
-  allowSshStatus$: Observable<string>;
-  quotaLinkSub!: Subscription;
-
-  constructor() {
-    this.allowSshStatus$ = this.cfSpaceService.allowSsh$.pipe(
-      map(status => status === 'false' ? 'Disabled' : 'Enabled')
-    );
-  }
+  // The space's own quota, and the quota in effect (the org's when the space
+  // has none).
+  readonly spaceQuota = toSignal(this.cfSpaceService.spaceQuotaDefinition$, { initialValue: null });
+  readonly quota = toSignal(this.cfSpaceService.quotaDefinition$, { initialValue: null });
+  readonly spaceQuotaLink = [
+    '/cloud-foundry', this.cfSpaceService.cfGuid,
+    'organizations', this.cfSpaceService.orgGuid,
+    'spaces', this.cfSpaceService.spaceGuid, 'space-quota',
+  ];
+  readonly allowSshStatus = computed(() => {
+    const space = this.cfSpaceService.spaceDataService.space();
+    return space ? (space.allowSsh ? 'Enabled' : 'Disabled') : null;
+  });
 
   goToOrgQuota() {
-    this.quotaLinkSub = this.cfSpaceService.quotaLink$.subscribe(quotaLink => {
-      this.router.navigate(quotaLink);
-      this.snackBarService.showWithLink('You were switched to an organization', this.router.url, 'Return to space');
-    });
-  }
-
-  ngOnDestroy() {
-    safeUnsubscribe(this.quotaLinkSub);
+    this.router.navigate(['/cloud-foundry', this.cfSpaceService.cfGuid, 'organizations', this.cfSpaceService.orgGuid, 'quota']);
+    this.snackBarService.showWithLink('You were switched to an organization', this.router.url, 'Return to space');
   }
 }
