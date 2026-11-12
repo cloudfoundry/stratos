@@ -52,7 +52,7 @@ describe('CloudFoundryOrganizationBaseComponent', () => {
 
   const mockEndpointService = {
     cfGuid: 'cf-guid',
-    endpoint$: of({
+    endpoint: signal({
       entity: {
         guid: 'cf-guid',
         name: 'Test CF',
@@ -141,5 +141,11 @@ describe('CloudFoundryOrganizationBaseComponent', () => {
     await fixture.whenStable();
     expect(element.querySelector('[data-test="loading-page-indicator"]')).toBeFalsy();
     mockOrgDataService.orgSettled.set(false);
+  });
+
+  it('links back to the endpoint\'s organizations', () => {
+    expect(component.breadcrumbs()).toEqual([{
+      breadcrumbs: [{ value: 'Test CF', routerLink: '/cloud-foundry/cf-guid/organizations' }]
+    }]);
   });
 });
