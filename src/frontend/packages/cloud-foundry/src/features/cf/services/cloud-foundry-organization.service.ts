@@ -3,7 +3,7 @@ import { DestroyRef, Injectable, Injector, Signal, computed, inject } from '@ang
 import { takeUntilDestroyed, toObservable } from '@angular/core/rxjs-interop';
 import { Route } from '@angular/router';
 import { observeSignal } from '@stratosui/store';
-import { combineLatest, EMPTY, Observable } from 'rxjs';
+import { EMPTY, Observable } from 'rxjs';
 import { catchError, distinctUntilChanged, filter, map, shareReplay, switchMap } from 'rxjs/operators';
 
 import { CfUsersPagedDataService } from '../../../shared/data-services/cf-users-paged-data.service';
@@ -85,6 +85,22 @@ export class CloudFoundryOrganizationService {
 
   orgGuid: string;
   cfGuid: string;
+
+  // Signal members for template reads; the `*$` members beside them are
+  // toObservable bridges over the same signals and go once no reader is left.
+  // The HTTP-backed members (quota, route, private domain and user-provided
+  // service counts) stay Observables: this service lives on every org and
+  // space page, so a reader turns them into signals where it needs them and
+  // the requests go out only from the pages that show them.
+  spaces!: Signal<StSpace[] | null>;
+  apps!: Signal<APIResource<IApp>[] | null>;
+  appInstances!: Signal<number | null>;
+  totalMem!: Signal<number | null>;
+  loadingApps!: Signal<boolean>;
+  usersCount!: Signal<number | null>;
+  userOrgRole!: Signal<string | null>;
+  quotaLink!: Signal<string[] | undefined>;
+
   quotaLink$!: Observable<string[] | undefined>;
   userOrgRole$!: Observable<string | null>;
   // V3-shape — quotaDefinition$ now emits StOrgQuota directly. Consumers
@@ -125,34 +141,35 @@ export class CloudFoundryOrganizationService {
     this.initialiseAppObservables();
     this.initialiseSpaceObservables();
 
-    const users$ = toObservable(this.cnsiUsers.users(this.cfGuid), { injector: this.injector });
-    this.userOrgRole$ = combineLatest([this.cfEndpointService.currentUser$, users$]).pipe(
-      map(([currentUser, users]) => {
-        // Still loading: the tile shows its placeholder, not 'None'.
-        if (!users) return null;
-        const me = users.find(u => u.guid === currentUser.guid);
-        const roles = me?.orgRoles.find(r => r.orgGuid === this.orgGuid)?.roles ?? [];
-        return getOrgRolesString(createUserRoleInOrg(
-          roles.includes('manager'),
-          roles.includes('billing_manager'),
-          roles.includes('auditor'),
-          roles.includes('user'),
-        ));
-      }),
-    );
+    const users = this.cnsiUsers.users(this.cfGuid);
+    this.userOrgRole = computed(() => {
+      const all = users();
+      const currentUser = this.cfEndpointService.endpoint()?.entity.user;
+      // Still loading: the tile shows its placeholder, not 'None'.
+      if (!all || !currentUser) return null;
+      const me = all.find(u => u.guid === currentUser.guid);
+      const roles = me?.orgRoles.find(r => r.orgGuid === this.orgGuid)?.roles ?? [];
+      return getOrgRolesString(createUserRoleInOrg(
+        roles.includes('manager'),
+        roles.includes('billing_manager'),
+        roles.includes('auditor'),
+        roles.includes('user'),
+      ));
+    });
+    this.userOrgRole$ = toObservable(this.userOrgRole, { injector: this.injector });
     // Same membership predicate as the per-org Users tab
     // (CfUsersSignalConfigService org lock): an org role OR a space role
     // under one of the org's spaces. Counting orgRoles alone undercounts
     // whenever a user's only grant is space-scoped (#5805).
-    this.usersCount$ = users$.pipe(
-      map(users => {
-        if (!users) return null;
-        return users.filter(u =>
-          u.orgRoles.some(r => r.orgGuid === this.orgGuid) ||
-          u.spaceRoles.some(r => r.orgGuid === this.orgGuid),
-        ).length;
-      }),
-    );
+    this.usersCount = computed(() => {
+      const all = users();
+      if (!all) return null;
+      return all.filter(u =>
+        u.orgRoles.some(r => r.orgGuid === this.orgGuid) ||
+        u.spaceRoles.some(r => r.orgGuid === this.orgGuid),
+      ).length;
+    });
+    this.usersCount$ = toObservable(this.usersCount, { injector: this.injector });
 
     // Quota tile: managed only — user-provided instances don't count
     // against the service-instance quota (#5769); they get their own tile.
@@ -174,26 +191,37 @@ export class CloudFoundryOrganizationService {
   }
 
   private initialiseAppObservables() {
-    // V3-native: filter foundation-wide apps stream by this org's space
-    // guids. spaces$ is V3-shaped (StSpace, .guid not .metadata.guid).
-    this.apps$ = combineLatest([this.cfEndpointService.apps$, this.spaces$]).pipe(
-      filter(([apps, spaces]) => !!apps && !!spaces),
-      map(([allApps, spaces]) => {
-        const spaceGuids = new Set(spaces.map(s => s.guid));
-        return allApps.filter(a => spaceGuids.has(a.entity.space_guid));
-      }),
+    // The foundation-wide apps filtered to this org's spaces; null until the
+    // spaces have arrived, so the tiles show placeholders rather than 0.
+    this.apps = computed(() => {
+      const spaces = this.spaces();
+      if (!spaces) return null;
+      const spaceGuids = new Set(spaces.map(s => s.guid));
+      return this.cfEndpointService.apps().filter(a => spaceGuids.has(a.entity.space_guid));
+    });
+    this.apps$ = toObservable(this.apps, { injector: this.injector }).pipe(
+      filter((apps): apps is APIResource<IApp>[] => !!apps),
     );
-    this.appInstances$ = this.apps$.pipe(
-      filter($apps => !!$apps),
-      map(getStartedAppInstanceCount)
+    this.appInstances = computed(() => {
+      const apps = this.apps();
+      return apps ? getStartedAppInstanceCount(apps) : null;
+    });
+    this.appInstances$ = toObservable(this.appInstances, { injector: this.injector }).pipe(
+      filter((count): count is number => count !== null),
     );
-
-    this.totalMem$ = this.apps$.pipe(map(a => this.cfEndpointService.getMetricFromApps(a, 'memory')));
+    this.totalMem = computed(() => {
+      const apps = this.apps();
+      return apps ? this.cfEndpointService.getMetricFromApps(apps, 'memory') : null;
+    });
+    this.totalMem$ = toObservable(this.totalMem, { injector: this.injector }).pipe(
+      filter((mem): mem is number => mem !== null),
+    );
 
     this.appCount$ = this.cfEndpointService.hasApps$.pipe(
       switchMap(hasAllApps => hasAllApps ? this.countExistingApps() : this.fetchAppCount()),
     );
 
+    this.loadingApps = this.cfEndpointService.appsLoading;
     this.loadingApps$ = this.cfEndpointService.appsLoading$;
   }
 
@@ -212,10 +240,8 @@ export class CloudFoundryOrganizationService {
     this.orgDataService.load().subscribe({ error: () => {} });
     // Held back until the spaces have arrived: the Spaces tile shows its
     // placeholder, not "0", and the org's apps (filtered by space) wait too.
-    this.spaces$ = toObservable(
-      computed(() => (this.orgDataService.spacesSettled() ? this.orgDataService.spaces() : null)),
-      { injector: this.injector },
-    ).pipe(
+    this.spaces = computed(() => (this.orgDataService.spacesSettled() ? this.orgDataService.spaces() : null));
+    this.spaces$ = toObservable(this.spaces, { injector: this.injector }).pipe(
       filter((spaces): spaces is StSpace[] => !!spaces),
     );
 
@@ -257,15 +283,13 @@ export class CloudFoundryOrganizationService {
       shareReplay({ bufferSize: 1, refCount: false }),
     );
 
-    this.quotaLink$ = orgSnapshot$.pipe(map(o => {
-      const quotaDefinitionGuid = o.quotaGuid;
-      return quotaDefinitionGuid ? [
-        '/cloud-foundry',
-        this.cfGuid,
-        'organizations',
-        this.orgGuid,
-        'quota'
-      ] : undefined;
-    }));
+    this.quotaLink = computed(() => this.orgDataService.org()?.quotaGuid ? [
+      '/cloud-foundry',
+      this.cfGuid,
+      'organizations',
+      this.orgGuid,
+      'quota'
+    ] : undefined);
+    this.quotaLink$ = toObservable(this.quotaLink, { injector: this.injector });
   }
 }

@@ -5,6 +5,9 @@ import { TestBed } from '@angular/core/testing';
 import { of } from 'rxjs';
 import { afterEach, beforeEach, describe, expect, it } from 'vitest';
 
+import { APIResource } from '@stratosui/store';
+
+import { IApp } from '../../../cf-api.types';
 import { CfUsersPagedDataService } from '../../../shared/data-services/cf-users-paged-data.service';
 import { OrgDataRegistry } from '../../../services/endpoint-data/org-data.registry';
 import { QuotaDataService } from '../../../services/endpoint-data/quota-data.service';
@@ -17,7 +20,7 @@ import { ActiveRouteCfOrgSpace } from '../cf-page.types';
 import { CloudFoundryEndpointService } from './cloud-foundry-endpoint.service';
 import { CloudFoundryOrganizationService } from './cloud-foundry-organization.service';
 
-describe('CloudFoundryOrganizationService — quotaDefinition$', () => {
+describe('CloudFoundryOrganizationService', () => {
   let org: ReturnType<typeof signal<StOrgDetail | null>>;
   let quota: ReturnType<typeof signal<StOrgQuota | null>>;
   // Each live signal-to-observable bridge reads the quota value once per
@@ -29,8 +32,10 @@ describe('CloudFoundryOrganizationService — quotaDefinition$', () => {
   let users: WritableSignal<StUser[] | null>;
   let spaces: WritableSignal<StSpace[]>;
   let spacesSettled: WritableSignal<boolean>;
+  let endpointApps: WritableSignal<APIResource<IApp>[]>;
 
   beforeEach(() => {
+    endpointApps = signal<APIResource<IApp>[]>([]);
     users = signal<StUser[] | null>(null);
     spaces = signal<StSpace[]>([]);
     spacesSettled = signal(false);
@@ -62,12 +67,16 @@ describe('CloudFoundryOrganizationService — quotaDefinition$', () => {
         {
           provide: CloudFoundryEndpointService,
           useValue: {
-            currentUser$: of({ guid: 'me' }),
+            endpoint: signal({ entity: { user: { guid: 'me' } } }),
+            apps: endpointApps,
+            appsLoading: signal(false),
             apps$: of([]),
             hasApps$: of(false),
             appsLoading$: of(false),
             fetchAppCount: () => of(0),
             fetchRouteCount: () => of(0),
+            getMetricFromApps: (apps: APIResource<IApp>[]) =>
+              apps.reduce((total, a) => total + (a.entity.memory ?? 0) * (a.entity.instances ?? 0), 0),
           },
         },
         CloudFoundryOrganizationService,
@@ -178,5 +187,56 @@ describe('CloudFoundryOrganizationService — quotaDefinition$', () => {
     TestBed.tick();
     expect(seen.at(-1)?.map(s => s.guid)).toEqual(['sp-1']);
     sub.unsubscribe();
+  });
+
+  const app = (guid: string, spaceGuid: string, state: string, memory: number, instances: number) =>
+    ({ metadata: { guid }, entity: { space_guid: spaceGuid, state, memory, instances } }) as unknown as APIResource<IApp>;
+
+  // The org's apps are the foundation's apps in its spaces; until the spaces
+  // arrive there is no list, so the tiles show placeholders rather than 0.
+  it('lists the apps in the org\'s spaces once the spaces have arrived', () => {
+    const svc = TestBed.inject(CloudFoundryOrganizationService);
+    endpointApps.set([
+      app('a-1', 'sp-1', 'STARTED', 64, 2),
+      app('a-2', 'sp-other', 'STARTED', 64, 1),
+      app('a-3', 'sp-1', 'STOPPED', 128, 1),
+    ]);
+    expect(svc.apps()).toBeNull();
+    expect(svc.appInstances()).toBeNull();
+    expect(svc.totalMem()).toBeNull();
+
+    spaces.set([{ guid: 'sp-1', name: 'sp-1' } as StSpace]);
+    spacesSettled.set(true);
+
+    expect(svc.apps()?.map(a => a.metadata.guid)).toEqual(['a-1', 'a-3']);
+    expect(svc.appInstances()).toBe(2);
+  });
+
+  it('totals the memory of the org\'s apps', () => {
+    const svc = TestBed.inject(CloudFoundryOrganizationService);
+    endpointApps.set([app('a-1', 'sp-1', 'STARTED', 64, 2), app('a-2', 'sp-other', 'STARTED', 512, 1)]);
+    spaces.set([{ guid: 'sp-1', name: 'sp-1' } as StSpace]);
+    spacesSettled.set(true);
+    expect(svc.totalMem()).toBe(128);
+  });
+
+  // Same predicate as the org's Users tab: an org role or a space role here.
+  it('counts users with an org role or a space role in this org', () => {
+    const svc = TestBed.inject(CloudFoundryOrganizationService);
+    expect(svc.usersCount()).toBeNull();
+    users.set([
+      { guid: 'u-1', orgRoles: [{ orgGuid: 'org-1', roles: ['user'] }], spaceRoles: [] },
+      { guid: 'u-2', orgRoles: [], spaceRoles: [{ orgGuid: 'org-1', spaceGuid: 'sp-1', roles: ['developer'] }] },
+      { guid: 'u-3', orgRoles: [{ orgGuid: 'org-2', roles: ['user'] }], spaceRoles: [] },
+    ] as unknown as StUser[]);
+    expect(svc.usersCount()).toBe(2);
+  });
+
+  it('links to the quota page only when the org has a quota', () => {
+    const svc = TestBed.inject(CloudFoundryOrganizationService);
+    org.set({ guid: 'org-1', name: 'a', quotaGuid: '' } as StOrgDetail);
+    expect(svc.quotaLink()).toBeUndefined();
+    org.set({ guid: 'org-1', name: 'a', quotaGuid: 'quota-1' } as StOrgDetail);
+    expect(svc.quotaLink()).toEqual(['/cloud-foundry', 'cf-1', 'organizations', 'org-1', 'quota']);
   });
 });
