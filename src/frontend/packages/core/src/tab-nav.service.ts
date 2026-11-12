@@ -1,5 +1,5 @@
 import { Portal } from '@angular/cdk/portal';
-import { Injectable, signal, Signal, inject } from '@angular/core';
+import { Injectable, computed, signal, Signal, inject } from '@angular/core';
 import { toObservable } from '@angular/core/rxjs-interop';
 import { NavigationEnd, Router } from '@angular/router';
 import { combineLatest, Observable } from 'rxjs';
@@ -36,6 +36,15 @@ export class TabNavService {
   private _pageHeader = signal<Portal<any> | undefined>(undefined);
   public readonly pageHeader: Signal<Portal<any> | undefined> = this._pageHeader.asReadonly();
   public readonly pageHeader$: Observable<Portal<any> | undefined> = toObservable(this._pageHeader);
+
+  /**
+   * The tab whose link the router has active, or null. Reading the router's
+   * current navigation makes it recompute when a navigation starts and ends.
+   */
+  public readonly currentTabHeader: Signal<(IPageSideNavTab & { link: string; }) | null> = computed(() => {
+    this.router.currentNavigation();
+    return this.getCurrentTabHeader(this.tabNavs());
+  });
 
   public setTabs(tabs: IPageSideNavTab[]) {
     this._tabNavs.set(tabs);
