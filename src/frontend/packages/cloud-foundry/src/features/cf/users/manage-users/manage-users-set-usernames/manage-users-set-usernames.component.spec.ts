@@ -4,12 +4,11 @@ import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { provideZonelessChangeDetection, signal } from '@angular/core';
 import { provideRouter } from '@angular/router';
 import { describe, it, expect, beforeEach, vi } from 'vitest';
-import { of } from 'rxjs';
 
 import { CurrentUserPermissionsService } from '@stratosui/core';
 import { STORE_TEST_PROVIDERS } from '@stratosui/store/testing';
 
-import { CfCurrentUserRolesSignalService } from '../../../../../user-permissions/cf-current-user-roles-signal.service';
+import { CfCurrentUserRolesDataService } from '../../../../../services/cf-current-user-roles-data.service';
 import { getFeatureFlagsSource } from '../../../../../user-permissions/feature-flags-cache';
 import { ActiveRouteCfOrgSpace } from '../../../cf-page.types';
 import { ManageUsersSetUsernamesComponent } from './manage-users-set-usernames.component';
@@ -50,8 +49,8 @@ describe('ManageUsersSetUsernamesComponent', () => {
         },
         // The endpoint's roles have loaded.
         {
-          provide: CfCurrentUserRolesSignalService,
-          useValue: { cfEndpointRolesState$: () => of({ state: { initialised: true } }) }
+          provide: CfCurrentUserRolesDataService,
+          useValue: { cfEndpointRolesState: () => signal({ state: { initialised: true } }) }
         }
       ],
     }).compileComponents();

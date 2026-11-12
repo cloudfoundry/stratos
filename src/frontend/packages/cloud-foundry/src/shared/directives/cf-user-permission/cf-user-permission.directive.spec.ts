@@ -5,20 +5,21 @@ import { provideRouter } from '@angular/router';
 import { describe, it, expect, beforeEach } from 'vitest';
 
 import { CurrentUserPermissionsService } from '@stratosui/core';
-import { cfCurrentUserPermissionsService } from '@stratosui/cloud-foundry';
+import { CfCurrentUserRolesDataService, cfCurrentUserPermissionsService } from '@stratosui/cloud-foundry';
 
 import { CfUserPermissionDirective } from './cf-user-permission.directive';
 
 @Component({
   imports: [CfUserPermissionDirective],
   template: `
-    <div *appCfUserPermission="permission">
+    <div *appCfUserPermission="permission; endpointGuid: endpointGuid">
       Test Content
     </div>
   `
 })
 class TestUserPermissionComponent {
   permission: any;
+  endpointGuid = '';
 }
 
 describe('CfUserPermissionDirective', () => {
@@ -62,5 +63,20 @@ describe('CfUserPermissionDirective', () => {
     allowed.set(false);
     await fixture.whenStable();
     expect(text()).toBe('');
+  });
+
+  it('waits for the endpoint roles to load before showing content', async () => {
+    const text = () => (fixture.nativeElement as HTMLElement).textContent?.trim();
+    const roles = TestBed.inject(CfCurrentUserRolesDataService);
+    roles.registerEndpoint('cf-1');
+    component.endpointGuid = 'cf-1';
+    allowed.set(true);
+    fixture.changeDetectorRef.markForCheck();
+    await fixture.whenStable();
+    expect(text()).toBe('');
+
+    roles.setFetched('cf-1');
+    await fixture.whenStable();
+    expect(text()).toBe('Test Content');
   });
 });

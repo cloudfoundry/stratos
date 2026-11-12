@@ -1,5 +1,5 @@
 import { HttpClient } from '@angular/common/http';
-import { Injectable, Signal, computed, inject } from '@angular/core';
+import { Injectable, Injector, Signal, computed, inject } from '@angular/core';
 import { toObservable } from '@angular/core/rxjs-interop';
 import { TailwindSnackBarService } from '@stratosui/core';
 import { AuthDataService } from '@stratosui/store';
@@ -10,8 +10,8 @@ import { CurrentUserPermissionsService } from '../../../../../core/src/core/perm
 import { environment } from '../../../../../core/src/environments/environment.prod';
 import { ConfirmationDialogConfig } from '../../../../../core/src/shared/components/confirmation-dialog.config';
 import { ConfirmationDialogService } from '../../../../../core/src/shared/components/confirmation-dialog.service';
-import { CfCurrentUserRolesSignalService } from '../../../user-permissions/cf-current-user-roles-signal.service';
 import { CfCurrentUserPermissions } from '../../../user-permissions/cf-user-permissions-checkers';
+import { CfCurrentUserRolesDataService } from '../../../services/cf-current-user-roles-data.service';
 import { ActiveRouteCfOrgSpace } from '../cf-page.types';
 import { waitForCFPermissions } from '../cf.helpers';
 import { CloudFoundryEndpointService } from '../services/cloud-foundry-endpoint.service';
@@ -126,7 +126,8 @@ export class UserInviteConfigureService {
 })
 export class UserInviteService {
   private authData = inject(AuthDataService);
-  private cfRoles = inject(CfCurrentUserRolesSignalService);
+  private rolesData = inject(CfCurrentUserRolesDataService);
+  private injector = inject(Injector);
   private http = inject(HttpClient);
   private currentUserPermissionsService = inject(CurrentUserPermissionsService);
   private activeRouteCfOrgSpace = inject(ActiveRouteCfOrgSpace);
@@ -157,7 +158,7 @@ export class UserInviteService {
     );
 
     this.canConfigure$ = combineLatest([
-      waitForCFPermissions(this.cfRoles, this.activeRouteCfOrgSpace.cfGuid),
+      waitForCFPermissions(this.rolesData, this.activeRouteCfOrgSpace.cfGuid, this.injector),
       toObservable(this.authData.sessionData)
     ]).pipe(
       map(([cf, sessionData]) =>
@@ -181,7 +182,7 @@ export class UserInviteService {
     );
     // The roles have loaded once waitForCFPermissions emits, so the check
     // is read as each configured value arrives.
-    return waitForCFPermissions(this.cfRoles, cfGuid).pipe(
+    return waitForCFPermissions(this.rolesData, cfGuid, this.injector).pipe(
       switchMap(() => this.configuredChanges),
       map(configured => !!configured && canChangeRoles())
     );
