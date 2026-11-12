@@ -1,13 +1,13 @@
 import { CommonModule } from '@angular/common';
 import { ComponentFixture, TestBed } from '@angular/core/testing';
-import { Component, provideZonelessChangeDetection, signal } from '@angular/core';
+import { Component, provideZonelessChangeDetection, signal, WritableSignal } from '@angular/core';
 import { describe, it, expect, beforeEach, vi } from 'vitest';
 import { By } from '@angular/platform-browser';
 import { NoopAnimationsModule } from '@angular/platform-browser/animations';
 import { Router } from '@angular/router';
 import { RouterTestingModule } from '@angular/router/testing';
-import { of, Subject } from 'rxjs';
-import { EndpointsDataService, EntityCatalogHelper, EntityCatalogHelpers } from '@stratosui/store';
+import { of } from 'rxjs';
+import { AuthDataService, EndpointsDataService, EntityCatalogHelper, EntityCatalogHelpers } from '@stratosui/store';
 import { createBasicStoreModule, STORE_TEST_PROVIDERS } from '@stratosui/store/testing';
 import { CoreTestingModule } from "@test-framework/core-test.modules";
 import { CoreModule } from '../../../core/core.module';
@@ -30,7 +30,7 @@ class TestWelcomeComponent {}
 describe('EndpointsPageComponent', () => {
   let component: EndpointsPageComponent;
   let fixture: ComponentFixture<EndpointsPageComponent>;
-  let perm$: Subject<boolean>;
+  let perm: WritableSignal<boolean>;
   let customizations: CustomizationsMetadata;
 
   // Mock services
@@ -57,7 +57,7 @@ describe('EndpointsPageComponent', () => {
   };
 
   const mockPermissionsService = {
-    can$: () => of(true)
+    can: () => signal(true)
   };
 
   const mockEndpointStatusSignals = {
@@ -105,13 +105,13 @@ describe('EndpointsPageComponent', () => {
   });
 
   beforeEach(async () => {
-    perm$ = new Subject<boolean>();
+    perm = signal(false);
     mockEndpointsService.haveRegistered.set(false);
     mockEndpointsService.haveConnected.set(false);
     mockEndpointsService.disablePersistenceFeatures.set(false);
     mockSnackBarService.show.mockClear();
     customizations = { noEndpointsComponent: null };
-    vi.spyOn(TestBed.inject(CurrentUserPermissionsService), 'can$').mockReturnValue(perm$);
+    vi.spyOn(TestBed.inject(CurrentUserPermissionsService), 'can').mockReturnValue(perm);
     fixture = TestBed.createComponent(EndpointsPageComponent);
     component = fixture.componentInstance;
     await fixture.whenStable();
@@ -122,7 +122,7 @@ describe('EndpointsPageComponent', () => {
   });
 
   it('offers Register Endpoint when no endpoints are registered', async () => {
-    perm$.next(true);
+    perm.set(true);
     await vi.waitFor(() => {
       const add = fixture.nativeElement.querySelector('[data-test="list-sub-nav-add"]');
       expect(add?.textContent).toContain('Register Endpoint');
@@ -131,17 +131,20 @@ describe('EndpointsPageComponent', () => {
 
   it('shows Register when a permission check passes', async () => {
     expect(component.canRegisterEndpoint()).toBe(false);
-    perm$.next(true);
+    perm.set(true);
     await fixture.whenStable();
     expect(component.canRegisterEndpoint()).toBe(true);
   });
 
-  // The permission streams are long-lived: a subscription that outlives
-  // the page holds the destroyed component.
-  it('stops watching permissions when destroyed', () => {
-    expect(perm$.observed).toBe(true);
-    fixture.destroy();
-    expect(perm$.observed).toBe(false);
+  // Backup and restore need the backend plugin and the admin permission;
+  // the session may arrive after the page.
+  it('offers backup and restore once the session has the plugin', () => {
+    perm.set(true);
+    expect(component.canBackupRestore()).toBe(false);
+    (TestBed.inject(AuthDataService) as any)._auth.update((s: object) => ({ ...s, sessionData: { plugins: { backup: true } } }));
+    expect(component.canBackupRestore()).toBe(true);
+    perm.set(false);
+    expect(component.canBackupRestore()).toBe(false);
   });
 
   it('tells the user when endpoints are registered but none are connected', async () => {

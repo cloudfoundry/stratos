@@ -1,13 +1,13 @@
 import { CommonModule } from '@angular/common';
-import { ChangeDetectionStrategy, Component, OnDestroy, OnInit, effect, inject, signal, untracked } from '@angular/core';
+import { ChangeDetectionStrategy, Component, OnDestroy, OnInit, computed, effect, inject, signal, untracked } from '@angular/core';
 import { toObservable, toSignal } from '@angular/core/rxjs-interop';
 import { CustomTooltipDirective } from '../../../shared/components/custom-tooltip/custom-tooltip.directive';
 import { Router, RouterModule } from '@angular/router';
 import {
   EndpointsDataService,
 } from '@stratosui/store';
-import { combineLatest, Observable, of, Subscription } from 'rxjs';
-import { catchError, take, delay, filter, map, switchMap } from 'rxjs/operators';
+import { Observable, of, Subscription } from 'rxjs';
+import { catchError, take, delay, filter } from 'rxjs/operators';
 
 import { CustomizationService, CustomizationsMetadata } from '../../../core/customizations.types';
 import { EndpointsService } from '../../../core/endpoints.service';
@@ -70,25 +70,24 @@ export class EndpointsPageComponent implements OnDestroy, OnInit {
   // regardless of surrounding component state churn.
   //
   // Allowed when ANY of the permissions that allow endpoint registration
-  // passes — matching the previous directive-based behavior. toSignal
-  // ends the long-lived permission streams with the page.
-  public canRegisterEndpoint = toSignal(
+  // passes — matching the previous directive-based behavior.
+  private readonly canEditAdminEndpoint = this.currentUserPermissionsService.can(StratosCurrentUserPermissions.EDIT_ADMIN_ENDPOINT);
+  private readonly canEditEndpoint = this.currentUserPermissionsService.can(StratosCurrentUserPermissions.EDIT_ENDPOINT);
+  private readonly userEndpointsEnabled = toSignal(
     this.sessionService.userEndpointsEnabled().pipe(
-      filter(enabled => enabled !== undefined && enabled !== null),
-      switchMap(enabled => {
-        const perms = enabled
-          ? [StratosCurrentUserPermissions.EDIT_ADMIN_ENDPOINT, StratosCurrentUserPermissions.EDIT_ENDPOINT]
-          : [StratosCurrentUserPermissions.EDIT_ADMIN_ENDPOINT];
-        return combineLatest(perms.map(p => this.currentUserPermissionsService.can$(p)));
-      }),
-      map(results => results.some(Boolean)),
       catchError(err => {
         console.error('Error resolving register-endpoint permission:', err);
-        return of(false);
+        return of(null);
       })
     ),
-    { initialValue: false }
   );
+  public readonly canRegisterEndpoint = computed(() => {
+    const enabled = this.userEndpointsEnabled();
+    if (enabled === undefined || enabled === null) {
+      return false;
+    }
+    return this.canEditAdminEndpoint() || (enabled && this.canEditEndpoint());
+  });
   private healthCheckTimeout!: number;
 
   /**
@@ -109,7 +108,10 @@ export class EndpointsPageComponent implements OnDestroy, OnInit {
   /** Count for the sub-nav shown when no endpoints are registered. */
   public readonly noEndpoints = signal(0);
 
-  public canBackupRestore$: Observable<boolean>;
+  // Is the backup/restore plugin available on the backend, and may the user
+  // use it?
+  public readonly canBackupRestore = computed(() =>
+    !!this.authSignal.sessionData()?.plugins?.backup && this.canEditAdminEndpoint());
   public readonly showRegisterModal = signal(false);
   public isInitialised$: Observable<boolean>;
 
@@ -146,15 +148,6 @@ export class EndpointsPageComponent implements OnDestroy, OnInit {
       const show = endpointsService.haveRegistered() && !endpointsService.haveConnected();
       untracked(() => this.showSnackBar(show));
     });
-
-    // Is the backup/restore plugin available on the backend?
-    // Defensive: Add catchError to handle session data access issues
-    this.canBackupRestore$ = toObservable(this.authSignal.sessionData).pipe(
-      filter(sessionData => !!sessionData),
-      take(1),
-      map(sessionData => sessionData?.plugins?.backup || false),
-      switchMap(enabled => enabled ? this.currentUserPermissionsService.can$(StratosCurrentUserPermissions.EDIT_ADMIN_ENDPOINT) : of(false))
-    );
 
     // Create an observable to track when endpoints are loaded and ready
     // Defensive: Add null checks and error handling
