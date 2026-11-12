@@ -1,6 +1,6 @@
 import { CommonModule } from '@angular/common';
 import { ChangeDetectionStrategy, Component, computed, inject, input } from '@angular/core';
-import { toObservable, toSignal } from '@angular/core/rxjs-interop';
+import { toObservable } from '@angular/core/rxjs-interop';
 import { CustomSlideToggleComponent } from '../custom-slide-toggle/custom-slide-toggle.component';
 import { CustomTooltipDirective } from '../custom-tooltip/custom-tooltip.directive';
 import { take, filter, map } from 'rxjs/operators';
@@ -74,9 +74,7 @@ export class ProfileSettingsComponent {
   );
 
   private readonly userProfileService = inject(UserProfileService);
-  private readonly hasEditPermission = toSignal(
-    this.currentUserPermissionsService.can$(StratosCurrentUserPermissions.EDIT_PROFILE), { initialValue: false }
-  );
+  private readonly hasEditPermission = this.currentUserPermissionsService.can(StratosCurrentUserPermissions.EDIT_PROFILE);
   public readonly canEdit = computed(() => !this.userProfileService.isError() && this.hasEditPermission());
 
   public types = ProfileSettingsTypes;

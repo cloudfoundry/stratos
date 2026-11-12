@@ -5,6 +5,7 @@ import { of } from 'rxjs';
 
 import { BaseTestModules, STORE_TEST_PROVIDERS } from '@test-framework/core-test.helper';
 import { DashboardDataService } from '../../../core/dashboard-data.service';
+import { CurrentUserPermissionsService } from '../../../core/permissions/current-user-permissions.service';
 import { UserProfileService } from '../../../core/user-profile.service';
 import { ProfileSettingsComponent } from './profile-settings.component';
 
@@ -44,6 +45,16 @@ describe('ProfileSettingsComponent', () => {
 
   it('should create', () => {
     expect(component).toBeTruthy();
+  });
+
+  // The settings are editable by a user with 'scim.write'.
+  it('allows editing only with the profile permission', () => {
+    const canEdit = signal(false);
+    vi.spyOn(TestBed.inject(CurrentUserPermissionsService), 'can').mockReturnValue(canEdit);
+    const settings = TestBed.createComponent(ProfileSettingsComponent).componentInstance;
+    expect(settings.canEdit()).toBe(false);
+    canEdit.set(true);
+    expect(settings.canEdit()).toBe(true);
   });
 
   // #4166: the option subtexts were body text at opacity 0.6 (4.04:1 in light mode).
