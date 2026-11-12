@@ -1,9 +1,8 @@
 import { Component, OnInit, ChangeDetectionStrategy, computed, inject, Signal } from '@angular/core';
-import { toObservable } from '@angular/core/rxjs-interop';
 import { CommonModule } from '@angular/common';
 import { RouterModule } from '@angular/router';
 import { Observable, of as observableOf } from 'rxjs';
-import { map, startWith } from 'rxjs/operators';
+import { map } from 'rxjs/operators';
 
 import {
   EndpointsService,
@@ -75,10 +74,7 @@ export class CloudFoundryTabsBaseComponent implements OnInit {
       .can(CfCurrentUserPermissions.FIREHOSE_VIEW, this.cfEndpointService.cfGuid)
       .pipe(map(visible => !visible));
 
-    // The side-nav tab type still takes an Observable for `hidden$`.
-    const usersHidden$ = toObservable(computed(() => !cfEndpointService.usersCount())).pipe(
-      startWith(true),
-    );
+    const usersHidden = computed(() => !cfEndpointService.usersCount());
 
     const cellsHidden$ = endpointsService.hasMetrics(cfEndpointService.cfGuid).pipe(
       map(hasMetrics => !hasMetrics)
@@ -101,7 +97,7 @@ export class CloudFoundryTabsBaseComponent implements OnInit {
       {
         link: CloudFoundryTabsBaseComponent.users,
         label: 'Users',
-        hidden$: usersHidden$,
+        isHidden: usersHidden,
         icon: 'people'
       },
       {

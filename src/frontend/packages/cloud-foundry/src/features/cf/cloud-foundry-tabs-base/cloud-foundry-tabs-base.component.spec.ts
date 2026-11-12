@@ -79,19 +79,14 @@ describe('CloudFoundryTabsBaseComponent', () => {
 
   it('hides the Users tab until the endpoint has users', async () => {
     const usersTab = component.tabLinks.find(t => t.link === CloudFoundryTabsBaseComponent.users);
-    const seen: boolean[] = [];
-    const sub = usersTab!.hidden$!.subscribe(hidden => seen.push(hidden));
-    await fixture.whenStable();
-    expect(seen.at(-1)).toBe(true);
+    const hidden = usersTab!.isHidden!;
+    expect(hidden()).toBe(true);
 
     users.set([]);
-    await fixture.whenStable();
-    expect(seen.at(-1)).toBe(true);
+    expect(hidden()).toBe(true);
 
     users.set([{}, {}]);
-    await fixture.whenStable();
-    expect(seen.at(-1)).toBe(false);
-    sub.unsubscribe();
+    expect(hidden()).toBe(false);
   });
 
   afterAll(() => { });
