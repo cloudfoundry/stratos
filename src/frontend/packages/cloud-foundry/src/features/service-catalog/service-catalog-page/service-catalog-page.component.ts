@@ -2,8 +2,8 @@ import { CommonModule, DatePipe } from '@angular/common';
 import { Component, OnInit, ChangeDetectionStrategy, Signal, inject, signal, WritableSignal } from '@angular/core';
 import { toSignal } from '@angular/core/rxjs-interop';
 import { Router, RouterModule } from '@angular/router';
-import { Observable, firstValueFrom } from 'rxjs';
-import { filter, map, take } from 'rxjs/operators';
+import { Observable } from 'rxjs';
+import { map } from 'rxjs/operators';
 
 import {
   DuplicateUrlBannerComponent,
@@ -56,7 +56,6 @@ export class ServiceCatalogPageComponent implements OnInit {
   private router = inject(Router);
 
   public cfIds$: Observable<string[]>;
-  public haveConnectedCf$: Observable<boolean>;
 
   // Row keys ({cnsiGuid}:{offeringGuid}) for service offerings the user has
   // favorited. Mirrors the app-wall pattern exactly — derived from
@@ -114,18 +113,10 @@ export class ServiceCatalogPageComponent implements OnInit {
         .filter((guid): guid is string => !!guid),
       ),
     );
-    this.haveConnectedCf$ = this.cloudFoundryService.connectedCFEndpoints$.pipe(
-      map(endpoints => !!endpoints && endpoints.length > 0),
-    );
   }
 
-  async ngOnInit(): Promise<void> {
-    const connected = await firstValueFrom(
-      this.cloudFoundryService.connectedCFEndpoints$.pipe(
-        filter(endpoints => !!endpoints),
-        take(1),
-      ),
-    );
+  ngOnInit(): void {
+    const connected = this.cloudFoundryService.connectedCFEndpoints();
     const cnsiGuids = (connected ?? []).map(ep => ep.guid).filter((guid): guid is string => !!guid);
     this.offeringsConfig.initialize(cnsiGuids);
     // Bind the L5 sub-nav count — view exists only after initialize().
