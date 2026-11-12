@@ -1,5 +1,4 @@
 import { Injectable, Signal, computed, inject } from '@angular/core';
-import { toObservable } from '@angular/core/rxjs-interop';
 import { Observable } from 'rxjs';
 
 import { EndpointModel, EndpointsDataService } from '../../../../store/src/public-api';
@@ -18,13 +17,8 @@ export class KubernetesService {
     this.endpointsData.endpointsList().filter(e => e.cnsi_type === KUBERNETES_ENDPOINT_TYPE)
   );
 
-  kubeEndpoints$: Observable<EndpointModel[]>;
   // strict: structural-shape field mirroring the sibling endpoint services
   // (metrics-service / cloud-foundry.service); populated by consumers, never
   // initialized here. Matches the existing definite-assignment convention.
   waitForAppEntity$!: Observable<EntityInfo<APIResource>>;
-
-  constructor() {
-    this.kubeEndpoints$ = toObservable(this.kubeEndpoints);
-  }
 }
