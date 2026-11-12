@@ -3,8 +3,8 @@ import {
   StratosStatus, GeneralEntityAppState,
   EndpointsDataService, EndpointErrorEventsService,
 } from '@stratosui/store';
-import { toObservable, toSignal } from '@angular/core/rxjs-interop';
-import { Observable, ReplaySubject } from 'rxjs';
+import { toSignal } from '@angular/core/rxjs-interop';
+import { ReplaySubject } from 'rxjs';
 import { debounceTime, map, startWith } from 'rxjs/operators';
 
 export type GlobalEventTypes = 'warning' | 'error' | 'process' | 'complete';
@@ -69,10 +69,6 @@ export class GlobalEventService {
   private eventConfigs: IGlobalEventConfig<any>[] = [];
   private eventConfigsSubject = new ReplaySubject<IGlobalEventConfig<any>[]>();
 
-  private readonly eventTypePriority: GlobalEventTypes[] = [
-    'process', 'error', 'warning', 'complete'
-  ];
-
   private dataCache = new Map<any, Map<any, IGlobalEvent[]>>();
 
   private _readEvents = signal<Map<string, IGlobalEvent>>(new Map<string, IGlobalEvent>());
@@ -112,7 +108,7 @@ export class GlobalEventService {
   // Per-key static events published from signal-driven sources (e.g.
   // app.module's timeout-session / polling-disabled banners that used to
   // observe `state.dashboard.*` via ngrx). Each entry is keyed; setting
-  // `null` removes that key. Merged into `events$` alongside the ngrx-
+  // `null` removes that key. Merged into `events` alongside the ngrx-
   // driven and endpoint-error channels.
   private _staticEvents = signal<ReadonlyMap<string, IGlobalEvent>>(new Map());
 
@@ -151,12 +147,6 @@ export class GlobalEventService {
       }
       return newEvents;
     });
-  }
-
-  public filterEvents(eventType: GlobalEventTypes) {
-    return this.events$.pipe(
-      map(events => events.filter(event => event.type === eventType))
-    );
   }
 
   // The 'complete' event type (and the no-priority null case) has no
@@ -226,28 +216,6 @@ export class GlobalEventService {
     }
   }
 
-  // Will get the highest priority event type as dictated by eventTypePriority (0 index is highest priority)
-  // Returns null when none of the supplied events carry a recognised type
-  // (the accumulator starts empty and may never be assigned).
-  private getHighestPriorityEventType(eventTypes: IGlobalEventType[]): GlobalEventTypes | null {
-    return eventTypes.reduce((currentPriority, nextType) => {
-      if (
-        currentPriority.priority !== 0 &&
-        nextType.type &&
-        nextType.type !== currentPriority.eventType
-      ) {
-        const priority = this.eventTypePriority.findIndex(priorities => nextType.type === priorities);
-        if (currentPriority.priority === null || priority < currentPriority.priority) {
-          return {
-            eventType: nextType.type,
-            priority
-          };
-        }
-      }
-      return currentPriority;
-    }, { eventType: null, priority: null } as { eventType: GlobalEventTypes | null, priority: number | null }).eventType;
-  }
-
   // We cache the event results by keying them by the selectedState object.
   private getNewTriggeredEventsOrCached(config: IGlobalEventConfig<any>, appState: GeneralEntityAppState): IGlobalEvent[] {
     const selectedState = config.selector ? config.selector(appState) : appState;
@@ -285,7 +253,7 @@ export class GlobalEventService {
     }
   }
 
-  private getEventsAndPriorityType() {
+  private getConfigEvents() {
     // The legacy ngrx event-config channel: configs evaluated a `selector`
     // against the root store state. The store is gone (#5413) and there are
     // no live `addEventConfig` callers, so `appState` is null — configs (if
@@ -296,18 +264,7 @@ export class GlobalEventService {
       debounceTime(100),
       map((configs) => {
         const appState = null as unknown as GeneralEntityAppState;
-        return configs.reduce((eventsAndPriority, config) => {
-          const newEvents = this.getNewTriggeredEventsOrCached(config, appState);
-          if (newEvents && newEvents.length) {
-            const newHighestPriority = this.getHighestPriorityEventType([
-              { type: eventsAndPriority[1] ?? undefined },
-              ...newEvents,
-            ]);
-            eventsAndPriority[0] = [...eventsAndPriority[0], ...newEvents];
-            eventsAndPriority[1] = newHighestPriority;
-          }
-          return eventsAndPriority;
-        }, [[], null] as [IGlobalEvent[], GlobalEventTypes | null]);
+        return configs.flatMap(config => this.getNewTriggeredEventsOrCached(config, appState));
       }),
     );
   }
@@ -315,14 +272,12 @@ export class GlobalEventService {
   private endpointErrorEvents = inject(EndpointErrorEventsService);
   private endpointsData = inject(EndpointsDataService);
 
-  // The config channel's events and their highest priority type. A root
-  // service, so this one subscription lasts as long as the app.
-  private readonly configEventsAndPriority = toSignal(this.getEventsAndPriorityType(), {
-    initialValue: [[], null] as [IGlobalEvent[], GlobalEventTypes | null],
-  });
+  // The config channel's events. A root service, so this one subscription
+  // lasts as long as the app.
+  private readonly configEvents = toSignal(this.getConfigEvents(), { initialValue: [] as IGlobalEvent[] });
 
   private readonly allEvents = computed(() => [
-    ...this.configEventsAndPriority()[0],
+    ...this.configEvents(),
     ...this._endpointErrorEvents(),
     ...this._staticEvents().values(),
   ]);
@@ -333,13 +288,6 @@ export class GlobalEventService {
     return this.allEvents().map(event => ({ ...event, read: !!readEvents.get(event.key) }));
   });
 
-  /** The status of the highest priority config-channel event, if any. */
-  public readonly priorityStratosStatus: Signal<StratosStatus | undefined> = computed(() =>
-    this.eventTypeToStratosStatus(this.configEventsAndPriority()[1])
-  );
-
-  public readonly events$: Observable<IGlobalEvent[]> = toObservable(this.events);
-  public readonly priorityStratosStatus$: Observable<StratosStatus | undefined> = toObservable(this.priorityStratosStatus);
 
   constructor() {
     // Drop the read marker of an event that has gone, so it shows unread if
