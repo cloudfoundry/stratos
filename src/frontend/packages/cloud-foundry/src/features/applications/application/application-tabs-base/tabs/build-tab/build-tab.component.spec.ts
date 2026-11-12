@@ -6,7 +6,6 @@ import { By } from '@angular/platform-browser';
 import { ActivatedRoute } from '@angular/router';
 import { CurrentUserPermissionsService } from '@stratosui/core';
 import { getGitHubAPIURL, GITHUB_API_URL } from '@stratosui/git';
-import { of } from 'rxjs';
 import { describe, it, expect, beforeEach, afterEach, beforeAll, afterAll, vi } from 'vitest';
 
 import { generateTestApplicationServiceProvider, generateCfStoreModules, ApplicationStateService, ApplicationEnvVarsHelper } from '@test-framework/cf';
@@ -189,6 +188,34 @@ describe('BuildTabComponent', () => {
   // App and env var refreshes hand the tab an equal deploy source again. The
   // git lookups depend only on that source, so a failed lookup is not
   // retried on every refresh.
+  describe('when the space does not allow env var reads', () => {
+    let canSee: WritableSignal<boolean>;
+
+    beforeEach(async () => {
+      canSee = signal(false);
+      await configure({
+        stratosProject: signal({ deploySource: { type: 'docker', dockerImage: 'img' } }),
+        app: signal({ entity: { instances: 1, docker_image: 'img' } }),
+        space: signal({ guid: 'space-1' }),
+      });
+      vi.spyOn(TestBed.inject(CurrentUserPermissionsService), 'can').mockReturnValue(canSee);
+      fixture = TestBed.createComponent(BuildTabComponent);
+      component = fixture.componentInstance;
+      await fixture.whenStable();
+    });
+
+    it('shows the deploy source as not available until the permission holds', async () => {
+      const seen: ({ type?: string } | null)[] = [];
+      const sub = component.deploySource$.subscribe(v => seen.push(v));
+      await fixture.whenStable();
+      expect(seen.at(-1)?.type).toBe('not-available');
+      canSee.set(true);
+      await fixture.whenStable();
+      expect(seen.at(-1)?.type).toBe('docker');
+      sub.unsubscribe();
+    });
+  });
+
   describe('when the app refreshes after a failed git lookup', () => {
     const source = { type: 'gitscm', scm: 'github', project: 'org/missing', branch: 'main', commit: 'abc', endpointGuid: '' };
     const repoUrl = 'https://api.github.com/repos/org/missing';
@@ -204,7 +231,7 @@ describe('BuildTabComponent', () => {
       app = signal({ entity: { instances: 1 } });
       // The deploy source shows once the space allows env var reads.
       await configure({ stratosProject, app, space: signal({ guid: 'space-1' }) });
-      vi.spyOn(TestBed.inject(CurrentUserPermissionsService), 'can$').mockReturnValue(of(true));
+      vi.spyOn(TestBed.inject(CurrentUserPermissionsService), 'can').mockReturnValue(signal(true));
       fixture = TestBed.createComponent(BuildTabComponent);
       component = fixture.componentInstance;
       await fixture.whenStable();
