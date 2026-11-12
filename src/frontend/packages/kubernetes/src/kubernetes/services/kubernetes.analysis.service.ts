@@ -1,9 +1,9 @@
 import { HttpClient } from '@angular/common/http';
-import { Injectable, computed, Injector, inject, runInInjectionContext } from '@angular/core';
-import { toSignal, toObservable } from '@angular/core/rxjs-interop';
+import { Injectable, computed, inject } from '@angular/core';
+import { toObservable } from '@angular/core/rxjs-interop';
 import { ActivatedRoute } from '@angular/router';
 import { Observable, of, BehaviorSubject } from 'rxjs';
-import { catchError, filter, map, startWith, switchMap, tap } from 'rxjs/operators';
+import { catchError, filter, map, switchMap, tap } from 'rxjs/operators';
 
 import { SessionService } from '../../../../core/src/core/session.service';
 import { TailwindSnackBarService } from '../../../../core/src/shared/services/tailwind-snackbar.service';
@@ -48,17 +48,11 @@ export class KubernetesAnalysisService {
 
   kubeGuid: string;
 
-  public analyzers$: Observable<KubernetesAnalysisType[]>;
-  // strict: assigned inside the constructor's runInInjectionContext callback;
-  // emits null when analysis is disabled (template guards with @if/async).
-  public namespaceAnalyzers$!: Observable<KubernetesAnalysisType[] | null>;
-
-  public enabled$: Observable<boolean>;
-  public hideAnalysis$: Observable<boolean>;
-
   // Signal members, read off the session's plugin flags and config.
   readonly enabled = computed(() => KubernetesAnalysisService.analysisEnabled(this.session));
   readonly hideAnalysis = computed(() => !this.enabled());
+  // The side-nav tab type takes an Observable for a hidden tab.
+  readonly hideAnalysis$ = toObservable(this.hideAnalysis);
   readonly analyzers = computed(() => {
     const enginesCsv = this.session.sessionData()?.['plugin-config']?.analysisEngines;
     return enginesCsv
@@ -81,48 +75,11 @@ export class KubernetesAnalysisService {
     return !!session?.sessionData()?.plugins?.analysis;
   }
 
-  public static isAnalysisEnabled(session: SessionService): Observable<boolean> {
-    return of(!!session?.sessionData()?.plugins?.analysis).pipe(startWith(false));
-  }
-
-  private injector = inject(Injector);
-
   constructor() {
     const kubeEndpointService = this.kubeEndpointService;
     const activatedRoute = this.activatedRoute;
 
     this.kubeGuid = kubeEndpointService.kubeGuid || getHelmReleaseDetailsFromGuid(activatedRoute.snapshot.params.guid).endpointId;
-
-    // Is the backend plugin available?
-    this.enabled$ = KubernetesAnalysisService.isAnalysisEnabled(this.session);
-    this.hideAnalysis$ = this.enabled$.pipe(map(enabled => !enabled));
-
-    this.analyzers$ = of(this.analyzers());
-
-    // Convert to signals for computed within injection context
-    runInInjectionContext(this.injector, () => {
-      const analyzersSignal = toSignal(
-        this.analyzers$,
-        { initialValue: [] as KubernetesAnalysisType[] }
-      );
-
-      const enabledSignal = toSignal(
-        this.enabled$,
-        { initialValue: false }
-      );
-
-      // Compute namespace analyzers
-      const namespaceAnalyzersComputed = computed(() => {
-        const analyzers = analyzersSignal();
-        const enabled = enabledSignal();
-        if (!enabled) {
-          return null;
-        }
-        return analyzers.filter(v => v.namespaceAware);
-      });
-
-      this.namespaceAnalyzers$ = toObservable(namespaceAnalyzersComputed);
-    });
   }
 
   public delete(endpointID: string, item: { id: string }): Observable<any> {
