@@ -1,8 +1,8 @@
 import { DOCUMENT } from '@angular/common';
-import { Injectable, inject } from '@angular/core';
+import { Injectable, Injector, inject } from '@angular/core';
 import { toObservable } from '@angular/core/rxjs-interop';
 import { TailwindDialogService } from './shared/services/tailwind-dialog.service';
-import { AuthState } from '@stratosui/store';
+import { AuthState, observeSignal } from '@stratosui/store';
 
 import { DashboardState } from './core/dashboard-data.service';
 import { combineLatest, fromEvent, interval, merge, Subscription } from 'rxjs';
@@ -24,6 +24,7 @@ export class LoggedInService {
   private currentUserPermissionsService = inject(CurrentUserPermissionsService);
   private authSignals = inject(AuthSignalService);
   private dashboardSignals = inject(DashboardSignalService);
+  private injector = inject(Injector);
 
   // Bridge signals → observables once at construction time so the
   // injection context is available for toObservable().
@@ -65,7 +66,10 @@ export class LoggedInService {
       return fromEvent(this.document, eventName);
     });
 
-    const canNotLogout$ = this.currentUserPermissionsService.can$(StratosCurrentUserPermissions.CAN_NOT_LOGOUT);
+    const canNotLogout$ = observeSignal(
+      this.currentUserPermissionsService.can(StratosCurrentUserPermissions.CAN_NOT_LOGOUT),
+      this.injector,
+    );
     this.sub = combineLatest([this.auth$, canNotLogout$]).subscribe(([auth, canNotLogout]) => {
       if (!auth) {
         return;
