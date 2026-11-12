@@ -1,4 +1,4 @@
-@if ((endpointsService.disablePersistenceFeatures$ | async) === false) {
+@if (endpointsService.disablePersistenceFeatures() === false) {
   <div class="flex items-center cursor-pointer" role="button" tabindex="0"
     [attr.aria-label]="(isFavorite$() | async) ? 'Remove from favorites' : 'Add to favorites'"
     (click)="toggleFavorite($event)"

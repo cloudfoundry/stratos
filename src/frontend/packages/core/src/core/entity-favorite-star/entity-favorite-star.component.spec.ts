@@ -1,5 +1,5 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
-import { provideZonelessChangeDetection } from '@angular/core';
+import { provideZonelessChangeDetection, signal } from '@angular/core';
 import { describe, it, expect, beforeEach, vi } from 'vitest';
 import { BehaviorSubject, of } from 'rxjs';
 import { STORE_TEST_PROVIDERS, BaseTestModulesNoShared } from '@test-framework/core-test.helper';
@@ -7,6 +7,7 @@ import { IFavoriteMetadata, UserFavorite, UserFavoriteManager } from '@stratosui
 import { ConfirmationDialogService } from '../../shared/components/confirmation-dialog.service';
 import { DialogConfirmComponent } from '../../shared/components/dialog-confirm/dialog-confirm.component';
 import { SessionService } from '../../shared/services/session.service';
+import { EndpointsService } from '../endpoints.service';
 import { EntityFavoriteStarComponent } from './entity-favorite-star.component';
 
 describe('EntityFavoriteStarComponent', () => {
@@ -15,9 +16,12 @@ describe('EntityFavoriteStarComponent', () => {
   let element: HTMLElement;
   let userFavoriteManager: UserFavoriteManager;
   let favorite: UserFavorite;
+  const disablePersistenceFeatures = signal(false);
   beforeEach(() => {
+    disablePersistenceFeatures.set(false);
     TestBed.configureTestingModule({
       providers: [
+        { provide: EndpointsService, useValue: { disablePersistenceFeatures } },
         ...(STORE_TEST_PROVIDERS || []),
         ConfirmationDialogService,
         SessionService,
@@ -38,8 +42,6 @@ describe('EntityFavoriteStarComponent', () => {
     component = fixture.componentInstance;
     element = fixture.nativeElement;
     favorite = new UserFavorite<IFavoriteMetadata>('endpoint', 'endpointType', 'entityType');
-    // Initialize disablePersistenceFeatures$ to false so the component renders
-    component.endpointsService.disablePersistenceFeatures$ = of(false);
     // Not a favorite unless a test says otherwise. Nothing renders here, so
     // each test can still replace the lookup before the first render.
     vi.spyOn(userFavoriteManager, 'getIsFavoriteObservable').mockReturnValue(of(false));
@@ -208,7 +210,7 @@ describe('EntityFavoriteStarComponent', () => {
   });
 
   it('should hide if persistence not available', async () => {
-    component.endpointsService.disablePersistenceFeatures$ = of(true);
+    disablePersistenceFeatures.set(true);
     await fixture.whenStable();
 
     expect(element.textContent).toBe('');
