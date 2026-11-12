@@ -14,7 +14,6 @@ import {
   MultilineTitleComponent
 } from '@stratosui/core';
 
-import { CfCurrentUserRolesSignalService } from '../../../../user-permissions/cf-current-user-roles-signal.service';
 import { StServiceOffering } from '../../../../services/endpoint-data/stratos-types';
 import { CfOrgSpaceLabelService } from '../../../services/cf-org-space-label.service';
 import { ServiceIconComponent } from '../../service-icon/service-icon.component';
@@ -55,7 +54,6 @@ import { TableCellServiceTagsComponent } from './table-cell-service-tags/table-c
 export class CfServiceCardComponent extends CardCell<StServiceOffering> {
   private endpoints = inject(EndpointsSignalService);
   private router = inject(Router);
-  private cfRoles = inject(CfCurrentUserRolesSignalService);
 
   // The row under the name the template and the methods below use. It can be
   // absent: select-service binds its selection before one is made.
@@ -67,7 +65,7 @@ export class CfServiceCardComponent extends CardCell<StServiceOffering> {
   private readonly cnsiGuid = computed(() => this.row()?.cnsiGuid);
   readonly cfOrgSpace = computed(() => {
     const cnsiGuid = this.cnsiGuid();
-    return untracked(() => new CfOrgSpaceLabelService(this.endpoints, this.cfRoles, cnsiGuid));
+    return untracked(() => new CfOrgSpaceLabelService(this.endpoints, cnsiGuid));
   });
   // Lookup of providerDisplayName from brokerCatalogMetadata. The
   // legacy code JSON-parsed entity.extra; the backend now decodes it.
