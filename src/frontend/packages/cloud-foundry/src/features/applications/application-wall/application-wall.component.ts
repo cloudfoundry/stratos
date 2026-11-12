@@ -4,7 +4,6 @@ import {
 } from '@angular/core';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { ActivatedRoute, Router, RouterModule } from '@angular/router';
-import { map } from 'rxjs/operators';
 
 import {
   ConfirmationDialogConfig,

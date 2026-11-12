@@ -1,7 +1,6 @@
 import { CommonModule, DatePipe } from '@angular/common';
 import { Component, OnInit, ChangeDetectionStrategy, Signal, computed, inject, signal, WritableSignal } from '@angular/core';
 import { Router, RouterModule } from '@angular/router';
-import { map } from 'rxjs/operators';
 
 import {
   DuplicateUrlBannerComponent,
