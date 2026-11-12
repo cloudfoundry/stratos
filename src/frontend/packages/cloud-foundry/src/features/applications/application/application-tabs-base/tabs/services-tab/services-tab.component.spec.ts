@@ -16,6 +16,7 @@ import { ApplicationServiceMock } from '@test-framework/cf';
 import {
   ConfirmationDialogConfig,
   ConfirmationDialogService,
+  CurrentUserPermissionsService,
   TailwindSnackBarService,
 } from '@stratosui/core';
 
@@ -167,6 +168,15 @@ describe('ServicesTabComponent', () => {
 
   it('renders without throwing', async () => {
     await expect(fixture.whenStable()).resolves.toBeDefined();
+  });
+
+  it('shows Bind Service while the user can create instances in the app\'s space', () => {
+    const canBind = signal(false);
+    const can = vi.spyOn(TestBed.inject(CurrentUserPermissionsService), 'can').mockReturnValue(canBind);
+    expect(component.bindServiceAction.visible!()).toBe(false);
+    expect(can).toHaveBeenCalledWith('create.service-instance', expect.any(String), 'space-1');
+    canBind.set(true);
+    expect(component.bindServiceAction.visible!()).toBe(true);
   });
 
   it('triggers an initial serviceBindings fetch on init', async () => {
