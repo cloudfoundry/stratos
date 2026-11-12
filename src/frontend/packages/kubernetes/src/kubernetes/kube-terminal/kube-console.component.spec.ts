@@ -1,11 +1,11 @@
 import { TemplatePortal } from '@angular/cdk/portal';
 import { ComponentFixture, TestBed } from '@angular/core/testing';
-import { provideZonelessChangeDetection } from '@angular/core';
+import { provideZonelessChangeDetection, signal } from '@angular/core';
 import { provideRouter } from '@angular/router';
 import { provideHttpClient } from '@angular/common/http';
 import { provideHttpClientTesting } from '@angular/common/http/testing';
 import { describe, it, expect, beforeEach, afterEach, vi } from 'vitest';
-import { Observable, of, Subject } from 'rxjs';
+import { Observable, Subject } from 'rxjs';
 
 import { EndpointModel } from '@stratosui/store';
 import { createBasicStoreModule, STORE_TEST_PROVIDERS } from '@stratosui/store/testing';
@@ -78,10 +78,7 @@ describe('KubeConsoleComponent', () => {
 
     const mockKubernetesEndpointService = {
       baseKube: { guid: 'test-endpoint-guid' },
-      endpoint$: of({
-        entity: mockEndpoint,
-        metadata: {}
-      })
+      endpoint: signal(mockEndpoint)
     };
 
     await TestBed.configureTestingModule({

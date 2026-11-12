@@ -1,10 +1,9 @@
-import { AsyncPipe } from '@angular/common';
-import {Component, OnInit, inject, signal, ChangeDetectionStrategy, viewChild} from '@angular/core';
+import { Component, OnInit, Signal, computed, inject, signal, ChangeDetectionStrategy, viewChild } from '@angular/core';
 import { ActivatedRoute, RouterLink } from '@angular/router';
 import { CustomTooltipDirective } from '@stratosui/core';
 import { EMPTY, NEVER, Observable, Subject } from 'rxjs';
 import websocketConnect, { normalClosureMessage } from 'rxjs-websockets';
-import { catchError, map, switchMap, tap } from 'rxjs/operators';
+import { catchError, switchMap, tap } from 'rxjs/operators';
 
 import { PageHeaderComponent } from '../../../../core/src/shared/components/page-header/page-header.component';
 import { IHeaderBreadcrumb } from '../../../../core/src/shared/components/page-header/page-header.types';
@@ -21,7 +20,6 @@ import { KubernetesService } from '../services/kubernetes.service';
   changeDetection: ChangeDetectionStrategy.OnPush,
   standalone: true,
   imports: [
-    AsyncPipe,
     CustomTooltipDirective,
     PageHeaderComponent,
     RouterLink,
@@ -60,7 +58,7 @@ export class KubeConsoleComponent implements OnInit {
 
   public kubeSummaryLink!: string; // strict: always assigned in ngOnInit
 
-  public breadcrumbs$!: Observable<IHeaderBreadcrumb[]>; // strict: assigned in ngOnInit when an endpoint guid is available
+  public breadcrumbs: Signal<IHeaderBreadcrumb[]> = signal([]);
 
   readonly sshViewer = viewChild.required<SshViewerComponent>('sshViewer'); // strict: @ViewChild populated after view init
   public kubeEndpointService = inject(KubernetesEndpointService);
@@ -96,14 +94,17 @@ export class KubeConsoleComponent implements OnInit {
         }));
 
       // Breadcrumbs
-      this.breadcrumbs$ = this.kubeEndpointService.endpoint$.pipe(
-        map((endpoint: any) => ([{
+      this.breadcrumbs = computed((): IHeaderBreadcrumb[] => {
+        const endpoint = this.kubeEndpointService.endpoint();
+        if (!endpoint) {
+          return [];
+        }
+        return [{
           breadcrumbs: [
-            { value: endpoint.entity.name, routerLink: `/kubernetes/${endpoint.entity.guid}` },
+            { value: endpoint.name, routerLink: `/kubernetes/${endpoint.guid}` },
           ]
-        }])
-        )
-      );
+        }];
+      });
     }
   }
 }
