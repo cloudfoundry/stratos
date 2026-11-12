@@ -1,6 +1,5 @@
 import { CommonModule } from '@angular/common';
 import { Component, ChangeDetectionStrategy, Signal, WritableSignal, computed, inject, signal } from '@angular/core';
-import { toSignal } from '@angular/core/rxjs-interop';
 import { Router, RouterModule } from '@angular/router';
 
 import {
@@ -79,10 +78,7 @@ export class CloudFoundryOrganizationSpacesSignalComponent {
       this.spacesConfig.view.totalItems;
     // Creating a space is the org manager's; every other role sees the list
     // without the action, as the sibling create actions already do.
-    const canCreateSpace = toSignal(
-      inject(CurrentUserPermissionsService).can$(CfCurrentUserPermissions.SPACE_CREATE, cfGuid, orgGuid),
-      { initialValue: false },
-    );
+    const canCreateSpace = inject(CurrentUserPermissionsService).can(CfCurrentUserPermissions.SPACE_CREATE, cfGuid, orgGuid);
     this.createSpaceAction = {
       label: 'Create Space',
       icon: 'add',
