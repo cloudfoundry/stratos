@@ -61,7 +61,7 @@ describe('UnlimitedInputComponent', () => {
   });
 
   it('should show checkbox', () => {
-    expect(element.querySelector('input[type=checkbox]')).toBeTruthy();
+    expect(element.querySelector('[role=checkbox]')).toBeTruthy();
   });
 
   it('should not display suffix', () => {
@@ -74,7 +74,7 @@ describe('UnlimitedInputComponent', () => {
 
   it('should disable input if checkbox checked', async () => {
     const input = element.querySelector<HTMLInputElement>('input[type=number]');
-    const _checkbox = element.querySelector<HTMLInputElement>('input[type=checkbox]');
+    const _checkbox = element.querySelector<HTMLElement>('[role=checkbox]');
     expect(input).toBeTruthy();
     expect(_checkbox).toBeTruthy();
 
@@ -89,7 +89,7 @@ describe('UnlimitedInputComponent', () => {
 
   it('should clear input when checkbox is checked', async () => {
     const input = element.querySelector<HTMLInputElement>('input[type=number]');
-    const _checkbox = element.querySelector<HTMLInputElement>('input[type=checkbox]');
+    const _checkbox = element.querySelector<HTMLElement>('[role=checkbox]');
     expect(input).toBeTruthy();
     expect(_checkbox).toBeTruthy();
     component.formControl.setValue(2);
@@ -106,7 +106,7 @@ describe('UnlimitedInputComponent', () => {
 
   it('should preserve the previous value when checking and unchecking', async () => {
     const input = element.querySelector<HTMLInputElement>('input[type=number]');
-    const _checkbox = element.querySelector<HTMLInputElement>('input[type=checkbox]');
+    const _checkbox = element.querySelector<HTMLElement>('[role=checkbox]');
     expect(input).toBeTruthy();
     expect(_checkbox).toBeTruthy();
     component.formControl.setValue(2);
