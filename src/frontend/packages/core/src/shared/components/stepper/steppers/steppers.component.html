@@ -134,7 +134,7 @@
                 [disabled]="steps[currentIndex()].busy || steps[currentIndex()].effectiveBlocked || !canGoNext(currentIndex())">
                 <!-- Loading spinner -->
                 @if (showNextButtonProgress) {
-                  <app-busy class="text-white" size="1.25rem" context="stepper-next"></app-busy>
+                  <app-busy size="1.25rem" context="stepper-next"></app-busy>
                 } @else {
                   <span>{{ this.getNextButtonText(currentIndex()) }}</span>
                 }
