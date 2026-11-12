@@ -126,7 +126,8 @@
                 [attr.aria-describedby]="stepError() ? 'stepper_error' : null"
                   [ngClass]="{
                     'btn-danger': steps[currentIndex()].effectiveDestructiveStep,
-                    'btn-primary': !steps[currentIndex()].effectiveDestructiveStep
+                    'btn-warning': !steps[currentIndex()].effectiveDestructiveStep && steps[currentIndex()].effectiveWarningStep,
+                    'btn-primary': !steps[currentIndex()].effectiveDestructiveStep && !steps[currentIndex()].effectiveWarningStep
                   }"
                 type="submit"
                 (click)="goNext()"

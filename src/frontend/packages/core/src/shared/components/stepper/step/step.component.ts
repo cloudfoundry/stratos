@@ -69,6 +69,8 @@ export interface SignalStepHandle {
   readonly onLeave?: (isNext?: boolean) => void | Promise<void>;
   /** UI: marks the step as destructive (red Apply button etc.). */
   readonly destructiveStep?: Signal<boolean>;
+  /** UI: marks a step that changes things but deletes nothing (yellow button). */
+  readonly warningStep?: Signal<boolean>;
   /** UI: enables the Close button (e.g. after applyStarted flips). */
   readonly canClose?: Signal<boolean>;
   /** UI: disables the Previous button. */
@@ -185,6 +187,11 @@ export class StepComponent {
     return this.signalHandle()?.destructiveStep?.() ?? this.destructiveStep();
   }
 
+  readonly warningStep = input(false);
+  get effectiveWarningStep(): boolean {
+    return this.signalHandle()?.warningStep?.() ?? this.warningStep();
+  }
+
   readonly content = viewChild.required(TemplateRef);
 
   // When `signalHandle.skipIf` is set, prefer the signal read so admin-only
@@ -272,7 +279,7 @@ export class StepComponent {
       const handleEnter = this.signalHandle()?.onEnter;
       const enter = handleEnter ?? this.onEnter();
       if (enter) {
-        if (this.effectiveDestructiveStep) {
+        if (this.effectiveDestructiveStep || this.effectiveWarningStep) {
           this.busy = true;
           setTimeout(() => {
             this.busy = false;
