@@ -88,10 +88,8 @@ describe('ApplicationWallComponent', () => {
 
   beforeEach(async () => {
     stubSignalConfig = makeStubSignalConfigService();
-    // Stub CloudFoundryService so its observables emit and complete
-    // synchronously. The real service pulls from a PaginationMonitor that
-    // never emits in isolation, which makes ngOnInit's
-    // firstValueFrom(connectedCFEndpoints$) hang / throw EmptyError.
+    // Stub CloudFoundryService with fixed endpoint signals; the real one
+    // reads EndpointsDataService, which holds no endpoints in isolation.
     const endpoints: any[] = [
       {
         guid: 'cnsi-1',
@@ -103,10 +101,7 @@ describe('ApplicationWallComponent', () => {
     ];
     const stubCloudFoundryService = {
       cFEndpoints$: of(endpoints),
-      connectedCFEndpoints$: of(endpoints),
       connectedCFEndpoints: signal(endpoints),
-      hasConnectedCFEndpoints$: of(true),
-      hasRegisteredCFEndpoints$: of(true),
       hasConnectedCFEndpoints: signal(true),
       hasRegisteredCFEndpoints: signal(true),
     };

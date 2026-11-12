@@ -4,8 +4,8 @@ import {
 } from '@angular/core';
 import { takeUntilDestroyed, toSignal } from '@angular/core/rxjs-interop';
 import { ActivatedRoute, Router, RouterModule } from '@angular/router';
-import { Observable, firstValueFrom } from 'rxjs';
-import { filter, map, take } from 'rxjs/operators';
+import { Observable } from 'rxjs';
+import { map } from 'rxjs/operators';
 
 import {
   ConfirmationDialogConfig,
@@ -192,7 +192,6 @@ export class ApplicationWallComponent implements OnInit {
    */
   public createApplicationAction!: ListSubNavAddAction;
 
-  public haveConnectedCf$!: Observable<boolean>;
 
   // Config for <app-signal-list>. Populated in ngOnInit after the signal
   // config service is initialized with the connected CF GUIDs. Using a
@@ -238,22 +237,14 @@ export class ApplicationWallComponent implements OnInit {
       invoke: () => router.navigate(['/applications/new/']),
     };
 
-    this.haveConnectedCf$ = cloudFoundryService.connectedCFEndpoints$.pipe(
-      map(endpoints => !!endpoints && endpoints.length > 0)
-    );
   }
 
-  async ngOnInit(): Promise<void> {
+  ngOnInit(): void {
     if (this.redirected) {
       return;
     }
     // Resolve connected CF guids once, then initialize the signal config.
-    const connected = await firstValueFrom(
-      this.cloudFoundryService.connectedCFEndpoints$.pipe(
-        filter(endpoints => !!endpoints),
-        take(1),
-      ),
-    );
+    const connected = this.cloudFoundryService.connectedCFEndpoints();
     const cnsiGuids = (connected ?? [])
       .map(ep => ep.guid)
       .filter((guid): guid is string => guid !== undefined);
