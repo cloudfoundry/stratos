@@ -154,11 +154,9 @@ describe('CloudFoundryEndpointService — no-op when cfGuid is falsy', () => {
     expect(acquireFn).not.toHaveBeenCalled();
   });
 
-  it('endpoint$ is an inert EMPTY stream when cfGuid is undefined', () => {
+  it('endpoint stays undefined when cfGuid is undefined', () => {
     const { svc } = buildWithGuid(undefined);
-    let emitted = false;
-    svc.endpoint$.subscribe(() => { emitted = true; });
-    expect(emitted).toBe(false);
+    expect(svc.endpoint()).toBeUndefined();
   });
 
   it('signal members hold empty values when cfGuid is undefined', () => {

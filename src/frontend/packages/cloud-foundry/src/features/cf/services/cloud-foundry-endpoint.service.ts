@@ -1,7 +1,7 @@
 import { HttpClient } from '@angular/common/http';
 import { Injectable, Injector, Signal, computed, inject, signal } from '@angular/core';
 import { toSignal } from '@angular/core/rxjs-interop';
-import { EMPTY, Observable, from, of } from 'rxjs';
+import { Observable, from, of } from 'rxjs';
 import { catchError, map } from 'rxjs/operators';
 
 import { CfInfoDataRegistry } from '../../../services/endpoint-data/cf-info-data.registry';
@@ -63,9 +63,7 @@ export class CloudFoundryEndpointService {
   // envelope). Field names still match the legacy /v2/info wire shape so
   // consumers reading p.api_version / p.app_ssh_endpoint etc. keep working.
   cfInfoData!: CfInfoDataService;
-  // One-shot: emits the endpoint once the endpoints list has it.
-  endpoint$!: Observable<EntityInfo<EndpointModel>>;
-  /** Signal mirror of `endpoint$`: undefined until the endpoint is known. */
+  /** The endpoint, undefined until the endpoints list has it. */
   endpoint!: Signal<EntityInfo<EndpointModel> | undefined>;
   cfGuid: string;
 
@@ -119,7 +117,6 @@ export class CloudFoundryEndpointService {
       this.usersCount = signal(null);
       this.info = signal(null);
       this.hasSSHAccess = signal(false);
-      this.endpoint$ = EMPTY;
       this.endpoint = signal(undefined);
       this.endpointData = {
         apps: signal([]),
@@ -141,21 +138,16 @@ export class CloudFoundryEndpointService {
   }
 
   private constructCoreObservables() {
-    // W36-B Wave 3: replace cfEndpointEntityService.waitForEntity$ with
-    // the signal-native EndpointsDataService.waitFor() promise lifted
-    // to an Observable. Wrap in EntityInfo envelope so existing
-    // downstream consumers (`endpoint$.entity.foo`) keep working —
-    // those consumers are out of Wave 3 scope.
-    this.endpoint$ = from(this.endpointsData.waitFor(this.cfGuid)).pipe(
+    // EndpointsDataService.waitFor() resolves once the endpoints list has
+    // the endpoint; wrapped in the EntityInfo envelope readers expect.
+    const endpoint$ = from(this.endpointsData.waitFor(this.cfGuid)).pipe(
       map((endpoint: EndpointModel) => ({
         entity: endpoint,
         entityRequestInfo: getDefaultRequestState(),
       } as EntityInfo<EndpointModel>)),
     );
-    // Sync mirror — backs the new `endpoint` signal. toSignal needs an
-    // injection context; we have one because constructCoreObservables runs
-    // during constructor execution.
-    this.endpoint = toSignal(this.endpoint$, { initialValue: undefined, injector: this.injector });
+    // toSignal needs an injection context: this runs in the constructor.
+    this.endpoint = toSignal(endpoint$, { initialValue: undefined, injector: this.injector });
 
     this.info = this.cfInfoData.info;
     this.hasSSHAccess = computed(() => {

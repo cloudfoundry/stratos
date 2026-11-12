@@ -57,13 +57,6 @@ describe('CloudFoundryOrganizationSummaryComponent', () => {
 
   const mockEndpointService = {
     cfGuid: 'cf-guid',
-    endpoint$: of({
-      entity: {
-        guid: 'cf-guid',
-        name: 'Test CF',
-        api_endpoint: { Host: 'api.example.com' }
-      }
-    }),
     hasApps: signal(false),
     fetchAppCount: () => of(7),
     deleteOrg: () => {}
