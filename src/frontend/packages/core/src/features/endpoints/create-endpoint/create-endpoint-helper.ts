@@ -1,9 +1,9 @@
 import { Observable, combineLatest } from 'rxjs';
-import { map } from 'rxjs/operators';
+import { filter, map } from 'rxjs/operators';
 import { toObservable } from '@angular/core/rxjs-interop';
 import { Injector } from '@angular/core';
 
-import { EndpointsDataService, endpointUrlKey, getFullEndpointApiUrl } from '@stratosui/store';
+import { EndpointsDataService, endpointUrlKey, getFullEndpointApiUrl, UserProfileInfo } from '@stratosui/store';
 import { CurrentUserPermissionsService } from '../../../core/permissions/current-user-permissions.service';
 import { StratosCurrentUserPermissions } from '../../../core/permissions/stratos-user-permissions.checker';
 import { UserProfileService } from '../../../core/user-profile.service';
@@ -46,9 +46,15 @@ export class CreateEndpointHelperComponent {
         urls: endpoints.filter(ep => ep.creator.system).map(ep => endpointUrlKey(getFullEndpointApiUrl(ep))),
       }))
     );
+    // The personal endpoints are matched on the user's name, so they wait for
+    // the profile.
+    this.userProfileService.loadUserProfile();
+    const userProfile$ = toObservable(this.userProfileService.userProfile, { injector }).pipe(
+      filter((profile): profile is UserProfileInfo => !!profile)
+    );
     this.existingPersonalEndpoints = combineLatest([
       currentPage$,
-      this.userProfileService.userProfile$
+      userProfile$
     ]).pipe(
       map(([endpoints, profile]) => ({
         names: endpoints.filter(ep => !ep.creator.system && ep.creator.name === profile.userName).map(ep => ep.name),
