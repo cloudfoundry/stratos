@@ -82,9 +82,9 @@ export const KubeBaseGuidMock = { provide: BaseKubeGuid, useValue: { guid: 'anyt
 
 /**
  * The endpoint behind KubeBaseGuidMock's guid. Specs whose component reads
- * `KubernetesEndpointService.endpoint$` must seed it, or `waitFor('anything')`
- * rejects and the template's async pipe rethrows it as an unhandled error:
- * `seedEndpointsDataService([kubeTestEndpoint])` before `createComponent`.
+ * `KubernetesEndpointService.endpoint()` seed it, or the signal stays
+ * undefined: `seedEndpointsDataService([kubeTestEndpoint])` before
+ * `createComponent`.
  */
 export const kubeTestEndpoint: EndpointModel = {
   ...testSCFEndpoint,

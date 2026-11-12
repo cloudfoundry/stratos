@@ -1,14 +1,11 @@
 import { HttpClient } from '@angular/common/http';
-import { Injectable, Signal, computed, Injector, inject, runInInjectionContext, signal } from '@angular/core';
-import { toSignal, toObservable } from '@angular/core/rxjs-interop';
-import { Observable, defer, from, of } from 'rxjs';
-import { catchError, map, shareReplay, startWith } from 'rxjs/operators';
+import { Injectable, Signal, computed, inject, signal } from '@angular/core';
+import { Observable, of } from 'rxjs';
+import { catchError, shareReplay } from 'rxjs/operators';
 
 import {
   EndpointsDataService,
   EndpointModel,
-  EntityInfo,
-  EndpointUser,
 } from '@stratosui/store';
 import { SessionService } from '../../../../core/src/core/session.service';
 import { BaseKubeGuid } from '../kubernetes-page.types';
@@ -97,21 +94,11 @@ export class KubernetesEndpointService {
   private http = inject(HttpClient);
   private endpointsService = inject(EndpointsDataService);
 
-  // Currently never populated within this package (no assigner, no reader); kept
-  // as optional rather than asserted so the type reflects reality.
-  info$?: Observable<EntityInfo<any>>;
-  kubeDashboardVersion$?: Observable<string>;
-  // strict: assigned by initialize()/constructCoreObservables() during the
-  // endpoint lifecycle (constructor calls initialize when a kubeGuid exists).
-  endpoint$!: Observable<EntityInfo<EndpointModel>>;
-  connected$!: Observable<boolean>;
-  currentUser$!: Observable<EndpointUser | undefined>;
+  // strict: assigned by initialize() when a kubeGuid exists (the
+  // constructor calls it).
   kubeGuid!: string;
-  kubeDashboardEnabled$!: Observable<boolean>;
+  // An HTTP read: stays a stream; the summary page subscribes to it.
   kubeDashboardStatus$!: Observable<KubeDashboardStatus | null>;
-  kubeDashboardLabel$!: Observable<string>;
-  kubeDashboardConfigured$!: Observable<boolean>;
-  kubeTerminalEnabled$!: Observable<boolean>;
 
   // Signal members. The endpoint is read from the endpoints map, so it
   // follows later updates; it stays undefined without a kubeGuid.
@@ -119,18 +106,6 @@ export class KubernetesEndpointService {
   private readonly pluginConfig = computed(() => this.session.sessionData()?.['plugin-config']);
   readonly kubeDashboardEnabled = computed(() => this.pluginConfig()?.kubeDashboardEnabled === 'true');
   readonly kubeTerminalEnabled = computed(() => this.pluginConfig()?.kubeTerminalEnabled === 'true');
-
-  private injector = inject(Injector);
-
-  // Static helpers retained as a public surface for callers outside the
-  // service instance lifecycle (e.g. KubernetesHomeCardComponent's
-  // imperative load() method). Wave-3.5 dropped the ngrx Store
-  // dependency; the helpers now require SessionService + HttpClient
-  // injected by the caller (mirrors the wave-3 cf-autoscaler pattern).
-  public static hasKubeTerminalEnabled(session: SessionService): Observable<boolean> {
-    const pluginConfig = session.sessionData()?.['plugin-config'];
-    return of(pluginConfig?.kubeTerminalEnabled === 'true');
-  }
 
   public static getKubeDashboardStatus(http: HttpClient, session: SessionService, kubeGuid: string): Observable<KubeDashboardStatus | null> {
     const pluginConfig = session.sessionData()?.['plugin-config'];
@@ -140,12 +115,6 @@ export class KubernetesEndpointService {
     }
     return http.get<KubeDashboardStatus>(`/pp/v1/kubedash/${kubeGuid}/status`).pipe(
       catchError(() => of(null)),
-    );
-  }
-
-  public static kubeDashboardConfigured(http: HttpClient, session: SessionService, kubeGuid: string): Observable<boolean> {
-    return KubernetesEndpointService.getKubeDashboardStatus(http, session, kubeGuid).pipe(
-      map(status => !!(status && status.installed && !!status.serviceAccount && !!status.service)),
     );
   }
 
@@ -282,64 +251,7 @@ export class KubernetesEndpointService {
     }
     this.endpoint = computed(() => this.endpointsService.endpoints().get(kubeGuid));
 
-    // Wave 5 (W36-B): replaces the legacy `entityServiceFactory.create(guid,
-    // new GetAllEndpoints()).waitForEntity$` chain. Resolves the endpoint
-    // model directly off EndpointsDataService.waitFor (Promise) and wraps
-    // it in an EntityInfo-shaped observable for downstream template
-    // consumers.
-    this.endpoint$ = defer(() => from(this.endpointsService.waitFor(this.kubeGuid))).pipe(
-      map(endpoint => ({
-        entityRequestInfo: undefined,
-        entity: endpoint,
-      } as unknown as EntityInfo<EndpointModel>)),
-      shareReplay(1),
-    );
-
-    this.connected$ = this.endpoint$.pipe(
-      map(p => p.entity.connectionStatus === 'connected')
-    );
-
-    this.currentUser$ = this.endpoint$.pipe(map(e => e.entity.user), shareReplay(1));
-
-    // Plugin-config-derived flags — read off the SessionService signal,
-    // mirrored back into Observables for template consumers.
-    const pluginConfig = () => this.session.sessionData()?.['plugin-config'];
-
-    this.kubeDashboardEnabled$ = of(pluginConfig()?.kubeDashboardEnabled === 'true');
-    this.kubeTerminalEnabled$ = of(pluginConfig()?.kubeTerminalEnabled === 'true');
-
-    // Wave-3.5: dashboard status now fetched directly from the kubedash
-    // status endpoint. The legacy ngrx-backed entity-catalog dashboard
-    // slice is being deleted — this read replaces both the entity
-    // service.waitForEntity$ chain and the dispatch that used to seed
-    // it. Cached via shareReplay so the multiple template bindings
-    // (status, label, configured) share one wire request.
-    this.kubeDashboardStatus$ = KubernetesEndpointService
-      .getKubeDashboardStatus(this.http, this.session, this.kubeGuid)
-      .pipe(shareReplay({ bufferSize: 1, refCount: false }));
-    this.kubeDashboardConfigured$ = this.kubeDashboardStatus$.pipe(
-      map(status => !!(status && status.installed && !!status.serviceAccount && !!status.service)),
-    );
-
-    this.kubeDashboardLabel$ = this.kubeDashboardStatus$.pipe(
-      map(status => {
-        if (!status) {
-          return '';
-        }
-        if (!status.installed) {
-          return 'Not installed';
-        } else if (!status.serviceAccount) {
-          return 'Not configured';
-        } else {
-          return status.version;
-        }
-      })
-    );
-  }
-
-  public refreshKubernetesDashboardStatus() {
-    // Re-fetch the status directly. Replaces the legacy
-    // `kubeEntityCatalog.dashboard.api.get(guid)` ngrx dispatch.
+    // Cached via shareReplay so the page's bindings share one request.
     this.kubeDashboardStatus$ = KubernetesEndpointService
       .getKubeDashboardStatus(this.http, this.session, this.kubeGuid)
       .pipe(shareReplay({ bufferSize: 1, refCount: false }));

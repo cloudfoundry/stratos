@@ -1,7 +1,7 @@
 import { HttpClient } from '@angular/common/http';
 import { provideZonelessChangeDetection, signal } from '@angular/core';
 import { TestBed } from '@angular/core/testing';
-import { firstValueFrom, of } from 'rxjs';
+import { of } from 'rxjs';
 import { describe, it, expect, vi } from 'vitest';
 
 import { SessionService } from '../../../../core/src/core/session.service';
@@ -33,22 +33,18 @@ describe('KubernetesEndpointService', () => {
     return TestBed.inject(KubernetesEndpointService);
   };
 
-  it('kubeDashboardEnabled follows the dashboard flag, not the terminal flag', async () => {
+  it('kubeDashboardEnabled follows the dashboard flag, not the terminal flag', () => {
     const service = create({ kubeDashboardEnabled: 'true', kubeTerminalEnabled: 'false' });
 
     expect(service.kubeDashboardEnabled()).toBe(true);
     expect(service.kubeTerminalEnabled()).toBe(false);
-    expect(await firstValueFrom(service.kubeDashboardEnabled$)).toBe(true);
-    expect(await firstValueFrom(service.kubeTerminalEnabled$)).toBe(false);
   });
 
-  it('kubeDashboardEnabled is off when only the terminal is enabled', async () => {
+  it('kubeDashboardEnabled is off when only the terminal is enabled', () => {
     const service = create({ kubeDashboardEnabled: 'false', kubeTerminalEnabled: 'true' });
 
     expect(service.kubeDashboardEnabled()).toBe(false);
     expect(service.kubeTerminalEnabled()).toBe(true);
-    expect(await firstValueFrom(service.kubeDashboardEnabled$)).toBe(false);
-    expect(await firstValueFrom(service.kubeTerminalEnabled$)).toBe(true);
   });
 
   it('reads the endpoint from the endpoints map, loading the map when it lacks it', () => {
