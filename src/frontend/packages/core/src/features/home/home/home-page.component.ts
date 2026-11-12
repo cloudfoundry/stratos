@@ -1,14 +1,11 @@
 import { CommonModule } from '@angular/common';
 import { ChangeDetectionStrategy, Component, computed, HostListener, Injector, OnInit, Signal, effect, signal, inject } from '@angular/core';
-import { toObservable } from '@angular/core/rxjs-interop';
 import { Router } from '@angular/router';
 import {
   IUserFavoritesGroups,
   EndpointModel,
   entityCatalog,
   UserFavoriteManager } from '@stratosui/store';
-import { Observable } from 'rxjs';
-import { filter } from 'rxjs/operators';
 
 import { EndpointsService } from '../../../core/endpoints.service';
 import { HomeShowMode, HomeSortDirection } from '../../../core/dashboard-preferences.service';
@@ -139,13 +136,12 @@ export class HomePageComponent implements OnInit {
   private redirectChecked = false;
   private layoutInitialized = false;
 
-  // Connected endpoint ids once any endpoint is registered. Stays an
-  // Observable while PageHeaderComponent takes endpointIds$ as one.
-  public allEndpointIds$: Observable<string[]> = toObservable(computed(() =>
+  // Connected endpoint ids once any endpoint is registered.
+  public readonly allEndpointIds = computed<string[] | undefined>(() =>
     this.haveRegistered()
       ? this.connectedEndpointsRaw().map(endpoint => endpoint.guid).filter((guid): guid is string => !!guid)
-      : null
-  )).pipe(filter((ids): ids is string[] => ids !== null));
+      : undefined
+  );
 
   constructor() {
     // Redirect to /applications when persistence features are disabled

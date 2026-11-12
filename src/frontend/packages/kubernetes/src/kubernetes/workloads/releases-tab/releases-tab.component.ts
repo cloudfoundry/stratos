@@ -1,7 +1,5 @@
 import { CommonModule, DatePipe } from '@angular/common';
 import { ChangeDetectionStrategy, Component, Injector, WritableSignal, computed, effect, inject, signal } from '@angular/core';
-import { toObservable } from '@angular/core/rxjs-interop';
-import { Observable } from 'rxjs';
 
 import { EndpointsSignalService } from '../../../../../core/src/core/signals/endpoints-signal.service';
 import { DuplicateUrlBannerComponent } from '../../../../../core/src/shared/components/duplicate-url-banner/duplicate-url-banner.component';
@@ -32,7 +30,6 @@ import { reportKubeListErrors } from '../../list-types/kube-list-errors';
   providers: [DatePipe],
 })
 export class HelmReleasesTabComponent {
-  public helmIds$: Observable<string[]>;
   private endpointsSignals = inject(EndpointsSignalService);
   private datePipe = inject(DatePipe);
   readonly signalConfig = inject(HelmReleasesSignalConfigService);
@@ -40,7 +37,7 @@ export class HelmReleasesTabComponent {
 
   // Helm endpoint guids for the page header chips. Replaces the legacy
   // `store.select(endpointOfTypeSelector(HELM_ENDPOINT_TYPE))` read.
-  private readonly helmEndpointIds = computed(() =>
+  public readonly helmEndpointIds = computed(() =>
     Object.values(this.endpointsSignals.endpoints())
       .filter(ep => ep?.cnsi_type === HELM_ENDPOINT_TYPE)
       .map(ep => ep.guid)
@@ -79,10 +76,6 @@ export class HelmReleasesTabComponent {
   });
 
   constructor() {
-    // Endpoint-id stream for the page header. Bridges the helmEndpointIds
-    // computed signal to an Observable for PageHeaderComponent's input.
-    this.helmIds$ = toObservable(this.helmEndpointIds);
-
     this.signalConfig.initialize();
     void this.signalConfig.loadAll();
 

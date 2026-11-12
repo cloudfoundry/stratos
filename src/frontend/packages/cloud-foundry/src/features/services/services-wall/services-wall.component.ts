@@ -1,7 +1,6 @@
 import { CommonModule, DatePipe } from '@angular/common';
-import { DestroyRef, Component, OnInit, ChangeDetectionStrategy, Signal, inject, signal, WritableSignal, computed } from '@angular/core';
+import { DestroyRef, Component, OnInit, ChangeDetectionStrategy, Signal, computed, inject, signal, WritableSignal } from '@angular/core';
 import { Router, RouterModule } from '@angular/router';
-import { Observable } from 'rxjs';
 import { map } from 'rxjs/operators';
 
 import {
@@ -73,7 +72,11 @@ export class ServicesWallComponent implements OnInit {
   private snackBar = inject(TailwindSnackBarService);
   private router = inject(Router);
 
-  public cfIds$: Observable<string[]>;
+  // Connected CF endpoint ids, for the page header's endpoint errors.
+  public readonly cfIds = computed(() => this.cloudFoundryService.cfEndpoints()
+    .filter(endpoint => endpoint.connectionStatus === 'connected')
+    .map(endpoint => endpoint.guid)
+    .filter((guid): guid is string => !!guid));
 
   // Row keys ({cnsiGuid}:{siGuid}) for service instances the user has
   // favorited. Either entity type qualifies — the legacy 481 UI used
@@ -107,13 +110,6 @@ export class ServicesWallComponent implements OnInit {
   };
 
   constructor() {
-    this.cfIds$ = this.cloudFoundryService.cFEndpoints$.pipe(
-      map(endpoints => endpoints
-        .filter(endpoint => endpoint.connectionStatus === 'connected')
-        .map(endpoint => endpoint.guid)
-        .filter((guid): guid is string => !!guid),
-      ),
-    );
   }
 
   ngOnInit(): void {

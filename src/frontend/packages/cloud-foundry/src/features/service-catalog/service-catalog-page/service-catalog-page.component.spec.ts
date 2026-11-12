@@ -3,7 +3,6 @@ import { importProvidersFrom, provideZonelessChangeDetection, signal } from '@an
 import { provideHttpClient } from '@angular/common/http';
 import { provideHttpClientTesting } from '@angular/common/http/testing';
 import { provideRouter } from '@angular/router';
-import { of } from 'rxjs';
 import { describe, it, expect, beforeEach, vi } from 'vitest';
 
 import { TabNavService } from '@stratosui/core';
@@ -70,7 +69,7 @@ describe('ServiceCatalogPageComponent', () => {
       },
     ];
     const stubCloudFoundryService = {
-      cFEndpoints$: of(endpoints),
+      cfEndpoints: signal(endpoints),
       connectedCFEndpoints: signal(endpoints),
       hasConnectedCFEndpoints: signal(true),
       hasRegisteredCFEndpoints: signal(true),

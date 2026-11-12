@@ -1,6 +1,6 @@
 import { Component, computed, inject, ChangeDetectionStrategy } from '@angular/core';
 import { ActivatedRoute, RouterOutlet } from '@angular/router';
-import { Observable, of } from 'rxjs';
+import { Observable } from 'rxjs';
 
 import { PageHeaderComponent } from '@stratosui/core';
 import { LoadingPageComponent } from '@stratosui/core';
@@ -56,8 +56,8 @@ export class KubernetesTabBaseComponent {
     const endpoint = this.kubeEndpointService.endpoint();
     return endpoint ? this.userFavoriteManager.getFavoriteEndpointFromEntity(endpoint) : null;
   });
-  // The page header takes the ids as a stream; the guid is the route's.
-  readonly endpointIds$: Observable<string[]> = of([this.kubeEndpointService.baseKube.guid]);
+  // The route's endpoint, for the page header's endpoint errors.
+  readonly endpointIds: string[] = [this.kubeEndpointService.baseKube.guid];
 
 
 

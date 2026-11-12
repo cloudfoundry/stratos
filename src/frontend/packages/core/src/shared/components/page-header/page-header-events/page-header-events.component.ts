@@ -1,8 +1,6 @@
 import { CommonModule } from '@angular/common';
-import { ChangeDetectionStrategy, Component, Injector, OnInit, Signal, computed, inject, input, signal } from '@angular/core';
-import { toSignal } from '@angular/core/rxjs-interop';
+import { ChangeDetectionStrategy, Component, OnInit, computed, inject, input, signal } from '@angular/core';
 import { ActivatedRoute, RouterModule } from '@angular/router';
-import { Observable, of as observableOf } from 'rxjs';
 
 import { endpointEventKey, GlobalEventService, IGlobalEvent } from '../../../global-events.service';
 import { CustomIconComponent } from '../../../../shared/components/custom-material/custom-material.component';
@@ -21,18 +19,22 @@ import { CustomIconComponent } from '../../../../shared/components/custom-materi
 export class PageHeaderEventsComponent implements OnInit {
   private activatedRoute = inject(ActivatedRoute);
   private eventService = inject(GlobalEventService);
-  private injector = inject(Injector);
 
-  public readonly endpointIds$ = input<Observable<string[]>>();
+  public readonly endpointIds = input<string[]>();
   public readonly simpleErrorMessage = input(false);
 
   endpointId: any;
-  // Set in ngOnInit from the bound ids, or the route's endpoint.
-  private endpointIds: Signal<string[] | undefined> = signal(undefined);
+  // The route's endpoint, set in ngOnInit.
+  private readonly routeEndpointId = signal<string | null>(null);
+  // The bound ids; without them an endpoint page watches its own endpoint.
+  private readonly watchedIds = computed<string[] | undefined>(() => {
+    const routeEndpointId = this.routeEndpointId();
+    return this.endpointIds() ?? (routeEndpointId ? [routeEndpointId] : undefined);
+  });
 
   // The unread endpoint errors of the endpoints watched.
   private readonly events = computed(() => {
-    const endpointIds = this.endpointIds();
+    const endpointIds = this.watchedIds();
     if (!endpointIds) {
       return [];
     }
@@ -77,11 +79,7 @@ export class PageHeaderEventsComponent implements OnInit {
   ngOnInit() {
     this.endpointId = this.activatedRoute.snapshot.params && this.activatedRoute.snapshot.params.endpointId ?
       this.activatedRoute.snapshot.params.endpointId : null;
-    // Without bound ids, an endpoint page watches its own endpoint.
-    const endpointIds$ = this.endpointIds$() ?? (this.endpointId ? observableOf([this.endpointId as string]) : undefined);
-    if (endpointIds$) {
-      this.endpointIds = toSignal(endpointIds$, { injector: this.injector });
-    }
+    this.routeEndpointId.set(this.endpointId);
   }
 
   private getEndpointId(event: IGlobalEvent): string {

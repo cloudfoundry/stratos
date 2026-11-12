@@ -4,7 +4,7 @@ import { provideHttpClient } from '@angular/common/http';
 import { provideHttpClientTesting } from '@angular/common/http/testing';
 import { ActivatedRoute } from '@angular/router';
 import { provideRouter } from '@angular/router';
-import { Observable, Subject, of } from 'rxjs';
+import { Observable, Subject } from 'rxjs';
 import { describe, it, expect, beforeEach, vi } from 'vitest';
 import { appLabelsFilterText } from '../../../shared/signal-list-configs/app/app-labels';
 
@@ -100,7 +100,7 @@ describe('ApplicationWallComponent', () => {
       },
     ];
     const stubCloudFoundryService = {
-      cFEndpoints$: of(endpoints),
+      cfEndpoints: signal(endpoints),
       connectedCFEndpoints: signal(endpoints),
       hasConnectedCFEndpoints: signal(true),
       hasRegisteredCFEndpoints: signal(true),

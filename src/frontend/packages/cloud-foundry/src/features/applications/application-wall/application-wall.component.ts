@@ -4,7 +4,6 @@ import {
 } from '@angular/core';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { ActivatedRoute, Router, RouterModule } from '@angular/router';
-import { Observable } from 'rxjs';
 import { map } from 'rxjs/operators';
 
 import {
@@ -149,7 +148,11 @@ export class ApplicationWallComponent implements OnInit {
     return actions;
   };
 
-  public cfIds$!: Observable<string[]>;
+  // CF endpoint ids, for the page header's endpoint errors; none bound while
+  // redirecting to an endpoint's wall.
+  public readonly cfIds = computed(() => this.redirected ? undefined : this.cloudFoundryService.cfEndpoints()
+    .map(endpoint => endpoint.guid)
+    .filter((guid): guid is string => guid !== undefined));
 
   /**
    * Reactive permission flag for the L5 "+ Create Application" button.
@@ -184,7 +187,6 @@ export class ApplicationWallComponent implements OnInit {
   private redirected = false;
 
   constructor() {
-    const cloudFoundryService = this.cloudFoundryService;
     const activatedRoute = inject(ActivatedRoute);
     const router = inject(Router);
     const currentUserPermissionsService = inject(CurrentUserPermissionsService);
@@ -197,11 +199,6 @@ export class ApplicationWallComponent implements OnInit {
       return;
     }
 
-    this.cfIds$ = cloudFoundryService.cFEndpoints$.pipe(
-      map(endpoints => endpoints
-        .map(endpoint => endpoint.guid)
-        .filter((guid): guid is string => guid !== undefined)),
-    );
 
     // Resolve APPLICATION_CREATE for the current user; mirror the previous
     // directive call (no endpoint/org/space scope — true if any connected

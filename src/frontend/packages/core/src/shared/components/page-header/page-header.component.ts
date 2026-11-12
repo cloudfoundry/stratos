@@ -16,7 +16,7 @@ import { DashboardSignalService } from '../../../core/signals/dashboard-signal.s
 import { DashboardDataService } from '../../../core/dashboard-data.service';
 import { getTime } from 'date-fns';
 import { firstValueFrom, Observable, shareReplay } from 'rxjs';
-import { map, startWith } from 'rxjs/operators';
+import { map } from 'rxjs/operators';
 import { TailwindSnackBarService } from '../../services/tailwind-snackbar.service';
 
 import { StratosActionType } from '../../../core/extension/extension-service';
@@ -145,7 +145,7 @@ export class PageHeaderComponent implements OnDestroy, AfterViewInit {
 
   readonly hideMenu = input(false);
 
-  readonly endpointIds$ = input<Observable<string[]>>();
+  readonly endpointIds = input<string[]>();
 
   // Published to the side navigation by the effects in the constructor.
   readonly tabs = input<IPageSideNavTab[]>();
