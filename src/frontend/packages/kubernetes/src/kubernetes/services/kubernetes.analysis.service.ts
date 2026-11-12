@@ -21,6 +21,21 @@ export interface KubernetesAnalysisType {
   descriptionUrl?: string;
 }
 
+const ALL_ENGINES: Record<string, KubernetesAnalysisType> = {
+  popeye: {
+    name: 'PopEye',
+    id: 'popeye',
+    namespaceAware: true,
+    descriptionUrl: '/kubernetes/assets/custom/analysis/popeye.md'
+  },
+  'kube-score': {
+    name: 'Kube Score',
+    id: 'kube-score',
+    namespaceAware: true,
+    descriptionUrl: '/kubernetes/assets/custom/analysis/kubescore.md'
+  }
+};
+
 @Injectable({
   providedIn: 'root'
 })
@@ -40,6 +55,19 @@ export class KubernetesAnalysisService {
 
   public enabled$: Observable<boolean>;
   public hideAnalysis$: Observable<boolean>;
+
+  // Signal members, read off the session's plugin flags and config.
+  readonly enabled = computed(() => !!this.session.sessionData()?.plugins?.analysis);
+  readonly hideAnalysis = computed(() => !this.enabled());
+  readonly analyzers = computed(() => {
+    const enginesCsv = this.session.sessionData()?.['plugin-config']?.analysisEngines;
+    return enginesCsv
+      ? enginesCsv.split(',').map(e => ALL_ENGINES[e.trim()]).filter(e => !!e)
+      : [];
+  });
+  // null while analysis is off.
+  readonly namespaceAnalyzers = computed(() =>
+    this.enabled() ? this.analyzers().filter(v => v.namespaceAware) : null);
 
   // Wave-3.5: refresh trigger replaces the legacy
   // `ResetPaginationOfType(action)` ngrx dispatch. Consumers that
@@ -65,31 +93,7 @@ export class KubernetesAnalysisService {
     this.enabled$ = KubernetesAnalysisService.isAnalysisEnabled(this.session);
     this.hideAnalysis$ = this.enabled$.pipe(map(enabled => !enabled));
 
-    const allEngines: Record<string, { name: string; id: string; namespaceAware: boolean; descriptionUrl: string }> = {
-      popeye:
-      {
-        name: 'PopEye',
-        id: 'popeye',
-        namespaceAware: true,
-        descriptionUrl: '/kubernetes/assets/custom/analysis/popeye.md'
-      },
-      'kube-score':
-      {
-        name: 'Kube Score',
-        id: 'kube-score',
-        namespaceAware: true,
-        descriptionUrl: '/kubernetes/assets/custom/analysis/kubescore.md'
-      }
-    };
-
-    // Determine which analyzers are enabled — read off plugin-config via
-    // the SessionService signal-native shim instead of store.select('auth').
-    const pluginCfg = this.session.sessionData()?.['plugin-config'];
-    const enginesCsv = pluginCfg?.analysisEngines;
-    const enabledAnalyzers: KubernetesAnalysisType[] = enginesCsv
-      ? enginesCsv.split(',').map(e => allEngines[e.trim()]).filter(e => !!e)
-      : [];
-    this.analyzers$ = of(enabledAnalyzers);
+    this.analyzers$ = of(this.analyzers());
 
     // Convert to signals for computed within injection context
     runInInjectionContext(this.injector, () => {
