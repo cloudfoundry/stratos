@@ -1,20 +1,27 @@
 import { DatePipe } from '@angular/common';
-import { provideHttpClient } from '@angular/common/http';
+import { HttpClient, provideHttpClient } from '@angular/common/http';
 import { HttpTestingController, provideHttpClientTesting } from '@angular/common/http/testing';
-import { CUSTOM_ELEMENTS_SCHEMA, importProvidersFrom } from '@angular/core';
+import { CUSTOM_ELEMENTS_SCHEMA, importProvidersFrom, Injector, signal } from '@angular/core';
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { provideZonelessChangeDetection } from '@angular/core';
 import { NoopAnimationsModule } from '@angular/platform-browser/animations';
-import { provideRouter } from '@angular/router';
+import { ActivatedRoute, provideRouter } from '@angular/router';
 import { describe, it, expect, beforeEach, afterAll, afterEach } from 'vitest';
 
 import { ApplicationService } from '@stratosui/cloud-foundry';
 import { ApplicationServiceMock, makeAppDetailDataServiceStub } from '@test-framework/cf';
 import { AppDetailDataService } from '../../../../cloud-foundry/src/features/applications/app-detail-data.service';
-import { CoreModule, TabNavService } from '@stratosui/core';
+import {
+  CoreModule,
+  CurrentUserPermissionsService,
+  getTabsFromExtensions,
+  StratosTabType,
+  TabNavService,
+} from '@stratosui/core';
 import { EndpointsDataService } from '@stratosui/store';
 import { generateBaseTestStoreModules } from '@test-framework/core-test.helper';
 import { CfAutoscalerTestingModule } from '../../cf-autoscaler-testing.module';
+import { setAutoscalerHelperInjector } from '../../core/autoscaler-helpers/autoscaler-available';
 import { AutoscalerTabExtensionComponent } from './autoscaler-tab-extension.component';
 
 // FWT-959 wave-3 (A-effects-cleanup): the component used to chain
@@ -87,6 +94,30 @@ describe('AutoscalerTabExtensionComponent', () => {
 
   it('should be created', () => {
     expect(component).toBeTruthy();
+  });
+
+  // The tab shows only to a user who can edit the app, and follows that
+  // permission after the app's org and space are known.
+  it('gates the tab on the app edit permission', async () => {
+    const tab = getTabsFromExtensions(StratosTabType.Application).find(t => t.link === 'autoscale')!;
+    const canEdit = signal(false);
+    const cups = { can: () => canEdit } as unknown as CurrentUserPermissionsService;
+    const route = { snapshot: { params: { endpointId: 'cf1', id: 'app1' } } } as unknown as ActivatedRoute;
+    setAutoscalerHelperInjector(TestBed.inject(Injector));
+    const values: boolean[] = [];
+    const sub = TestBed.runInInjectionContext(() => tab.hidden!(route, cups, TestBed.inject(HttpClient)))
+      .subscribe(v => values.push(v));
+    const httpMock = TestBed.inject(HttpTestingController);
+    httpMock.expectOne('/pp/v1/cf/apps/cf1/app1').flush({ orgGuid: 'o1', spaceGuid: 's1' });
+    httpMock.match(r => r.url.endsWith('/info'))
+      .forEach(req => req.flush({ name: 'as', build: '3.0.0', support: '', description: '' }));
+    await settle();
+    expect(values.at(-1)).toBe(true);
+
+    canEdit.set(true);
+    await settle();
+    expect(values.at(-1)).toBe(false);
+    sub.unsubscribe();
   });
 
   // The tab says which autoscaler it talks to, and when the choice is not
