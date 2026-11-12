@@ -86,4 +86,17 @@ describe('CloudFoundryService endpoint sets', () => {
     expect(service.availableCFEndpoints().map(e => e.guid)).toEqual(['a', 'b']);
     expect(service.connectedCFEndpoints().map(e => e.guid)).toEqual(['a', 'b']);
   });
+
+  it('flags a registered CF apart from a connected one', () => {
+    list.set([ep('k', 'connected', 'metrics')]);
+    expect(service.hasRegisteredCFEndpoints()).toBe(false);
+    expect(service.hasConnectedCFEndpoints()).toBe(false);
+
+    list.set([ep('b', 'expired'), ep('k', 'connected', 'metrics')]);
+    expect(service.hasRegisteredCFEndpoints()).toBe(true);
+    expect(service.hasConnectedCFEndpoints()).toBe(false);
+
+    list.set([ep('a', 'connected')]);
+    expect(service.hasConnectedCFEndpoints()).toBe(true);
+  });
 });
