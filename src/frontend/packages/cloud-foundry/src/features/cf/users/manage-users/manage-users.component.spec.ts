@@ -88,6 +88,15 @@ describe('UsersRolesComponent', () => {
     expect(component).toBeTruthy();
   });
 
+  it('marks the confirm step as a warning, not a delete, until Apply starts', async () => {
+    await setup();
+    const confirm = component.confirmStepHandle;
+    expect(confirm.destructiveStep).toBeUndefined();
+    expect(confirm.warningStep!()).toBe(true);
+    component.applyStarted = true;
+    expect(confirm.warningStep!()).toBe(false);
+  });
+
   it('F: breadcrumbs emit a single Users breadcrumb pointing at defaultCancelUrl', async () => {
     await setup();
     const breadcrumbs = component.breadcrumbs();

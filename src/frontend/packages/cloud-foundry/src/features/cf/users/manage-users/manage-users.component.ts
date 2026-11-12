@@ -86,7 +86,7 @@ export class UsersRolesComponent implements AfterViewInit, OnDestroy {
   });
   defaultCancelUrl!: string;
   // FWT-959 Part 2: applyStarted promoted to a signal so the confirm step's
-  // canClose / disablePrevious / destructiveStep / finishButtonText handle
+  // canClose / disablePrevious / warningStep / finishButtonText handle
   // fields can be `computed()` over it. The legacy boolean read/write API
   // is kept via a getter/setter pair so the existing imperative call-sites
   // don't need to learn signal syntax.
@@ -153,7 +153,7 @@ export class UsersRolesComponent implements AfterViewInit, OnDestroy {
     valid: signal(true).asReadonly(),
     canClose: computed(() => !this.applyStartedSignal()),
     disablePrevious: computed(() => this.applyStartedSignal()),
-    destructiveStep: computed(() => !this.applyStartedSignal()),
+    warningStep: computed(() => !this.applyStartedSignal()),
     finishButtonText: computed(() => this.applyStartedSignal() ? 'Close' : 'Apply'),
     onEnter: () => this.confirm()?.onEnter(),
     submit: async () => {
