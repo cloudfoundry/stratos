@@ -2,7 +2,7 @@ import { CommonModule } from '@angular/common';
 import { ChangeDetectionStrategy, Component, ComponentRef, OnDestroy, OnInit, ViewContainerRef, ChangeDetectorRef, computed, effect, inject, input, untracked, viewChild } from '@angular/core';
 import { CustomTooltipDirective } from '../../custom-tooltip/custom-tooltip.directive';
 import { RouterModule } from '@angular/router';
-import { toObservable } from '@angular/core/rxjs-interop';
+import { toObservable, toSignal } from '@angular/core/rxjs-interop';
 import {
   EndpointModel,
   entityCatalog,
@@ -15,7 +15,7 @@ import {
 } from '@stratosui/store';
 
 import { EndpointsSignalService } from '../../../../core/signals/endpoints-signal.service';
-import { combineLatest, Observable, Subscription } from 'rxjs';
+import { Observable, Subscription } from 'rxjs';
 import { map } from 'rxjs/operators';
 
 import { EndpointsService } from '../../../../core/endpoints.service';
@@ -110,7 +110,15 @@ export class EndpointCardComponent extends CardCell<EndpointModel> implements On
   // an async pipe and tolerates an absent stream.
   public cardStatus$?: Observable<StratosStatus>;
   private subs: Subscription[] = [];
-  public viewCreator$!: Observable<boolean>;
+  // The creator shows to admins, and to endpoint admins while user
+  // endpoints are enabled.
+  private readonly userEndpointsEnabled = toSignal(this.sessionService.userEndpointsEnabled());
+  private readonly userEndpointsNotDisabled = toSignal(this.sessionService.userEndpointsNotDisabled());
+  private readonly isAdmin = this.currentUserPermissionsService.can(StratosCurrentUserPermissions.EDIT_ADMIN_ENDPOINT);
+  private readonly isEndpointAdmin = this.currentUserPermissionsService.can(StratosCurrentUserPermissions.EDIT_ENDPOINT);
+  public readonly viewCreator = computed(() =>
+    (!!this.userEndpointsEnabled() && (this.isAdmin() || this.isEndpointAdmin())) ||
+    (!!this.userEndpointsNotDisabled() && this.isAdmin()));
 
   private componentRef!: ComponentRef<EndpointListDetailsComponent>;
 
@@ -150,16 +158,6 @@ export class EndpointCardComponent extends CardCell<EndpointModel> implements On
     this.favorite = this.userFavoriteManager.getFavoriteEndpointFromEntity(this.row());
     const e = this.endpointCatalogEntity()?.definition;
     this.hasDetails = !!e && !!e.listDetailsComponent;
-    this.viewCreator$ = combineLatest([
-      this.sessionService.userEndpointsEnabled(),
-      this.sessionService.userEndpointsNotDisabled(),
-      this.currentUserPermissionsService.can$(StratosCurrentUserPermissions.EDIT_ADMIN_ENDPOINT),
-      this.currentUserPermissionsService.can$(StratosCurrentUserPermissions.EDIT_ENDPOINT)
-    ]).pipe(
-      map(([userEndpointsEnabled, userEndpointsNotDisabled, isAdmin, isEndpointAdmin]) => {
-        return (userEndpointsEnabled && (isAdmin || isEndpointAdmin)) || (userEndpointsNotDisabled && isAdmin);
-      })
-    );
   }
 
   ngOnDestroy(): void {
