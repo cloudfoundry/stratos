@@ -1,8 +1,8 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
-import { provideZonelessChangeDetection, signal } from '@angular/core';
+import { inject, provideZonelessChangeDetection, signal } from '@angular/core';
 import { describe, it, expect, beforeEach } from 'vitest';
 import { Router } from '@angular/router';
-import { Subject } from 'rxjs';
+import { of, Subject } from 'rxjs';
 import { STORE_TEST_PROVIDERS, BASE_TEST_PROVIDERS } from "@test-framework/core-test.helper";
 
 import { BaseTestModulesNoShared } from "@test-framework/core-test.helper";
@@ -63,6 +63,14 @@ describe('PageSideNavComponent', () => {
     hidden$.next(true);
     await fixture.whenStable();
     expect(gated()).toBeNull();
+  });
+
+  it('runs an extension tab\'s hidden() where it may inject()', async () => {
+    fixture.componentRef.setInput('tabs', [
+      { link: 'variables', label: 'Variables', hidden: () => of(!inject(TabNavService)) },
+    ]);
+    await fixture.whenStable();
+    expect(fixture.nativeElement.querySelector('[data-test="page-tab-Variables"]')).not.toBeNull();
   });
 
   it('follows a gate held as a signal', async () => {
