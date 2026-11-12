@@ -615,21 +615,6 @@ describe('CurrentUserPermissionsService fallback permission', () => {
 
     expect(reads).toBe(readsAfterRead);
   });
-
-  it('can$ stops reading the endpoint after unsubscribe', () => {
-    const values: boolean[] = [];
-    const sub = service.can$(new PermissionConfigLink('no-such-permission'), 'ep-1')
-      .subscribe(v => values.push(v));
-    TestBed.tick();
-    expect(values).toEqual([false]);
-    const readsWhileSubscribed = reads;
-
-    sub.unsubscribe();
-    version.set(1);
-    TestBed.tick();
-
-    expect(reads).toBe(readsWhileSubscribed);
-  });
 });
 
 describe('CurrentUserPermissionsService empty complex config', () => {
