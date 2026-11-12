@@ -292,11 +292,11 @@ export class GitRegistrationComponent extends CreateEndpointHelperComponent impl
     // `endpoints$` unscoped, which contradicted the URL input's scoped
     // `appUnique` validator and the backend's per-scope uniqueness.
     combineLatest([
-      this.endpointsService.endpoints$,
       this.existingSystemEndpoints,
       this.existingPersonalEndpoints,
       this.userEndpointsAndIsAdmin,
-    ]).pipe(take(1)).subscribe(([eps, systemEps, personalEps, isAdminWithUserEndpoints]) => {
+    ]).pipe(take(1)).subscribe(([systemEps, personalEps, isAdminWithUserEndpoints]) => {
+      const eps = this.endpointsService.endpoints();
       Object.values(this.gitTypes[this.epSubType].types).forEach(type => {
         if (!type.url) {
           type.exists = false;
