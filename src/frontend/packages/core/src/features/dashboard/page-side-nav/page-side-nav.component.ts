@@ -1,10 +1,9 @@
 import { CommonModule } from '@angular/common';
 import { HttpClient } from '@angular/common/http';
-import { ChangeDetectionStrategy, Component, ElementRef, OnInit, inject, input, linkedSignal, signal, untracked, viewChild } from '@angular/core';
+import { ChangeDetectionStrategy, Component, ElementRef, computed, inject, input, linkedSignal, signal, untracked, viewChild } from '@angular/core';
 import { toObservable } from '@angular/core/rxjs-interop';
 import { ActivatedRoute, RouterModule } from '@angular/router';
 import { Observable, of } from 'rxjs';
-import { map } from 'rxjs/operators';
 import { StratosTabMetadata } from '../../../core/extension/extension-service';
 import { CurrentUserPermissionsService } from '../../../core/permissions/current-user-permissions.service';
 import { DashboardSignalService } from '../../../core/signals/dashboard-signal.service';
@@ -34,7 +33,7 @@ export interface IPageSideNavTab extends StratosTabMetadata {
     '(focusout)': 'onFocusOut($event)',
   },
 })
-export class PageSideNavComponent implements OnInit {
+export class PageSideNavComponent {
   tabNavService = inject(TabNavService);
   private activatedRoute = inject(ActivatedRoute);
   private cups = inject(CurrentUserPermissionsService);
@@ -68,7 +67,7 @@ export class PageSideNavComponent implements OnInit {
   // Bound from async-piped streams that may emit null/undefined before the
   // header resolves; interpolation renders those as an empty string.
   public readonly header = input<string | null>();
-  public activeTab$!: Observable<string>;
+  public readonly activeTab = computed(() => this.tabNavService.currentTabHeader()?.label ?? null);
   public breadcrumbs$!: Observable<IBreadcrumb[]>;
   public isMobile$: Observable<boolean>;
   // The compact dropdown, opened by its button as well as by hover.
@@ -92,10 +91,6 @@ export class PageSideNavComponent implements OnInit {
 
   constructor() {
     this.isMobile$ = toObservable(this.dashboardSignals.isMobile);
-  }
-
-  ngOnInit() {
-    this.activeTab$ = this.tabNavService.getCurrentTabHeaderObservable().pipe(map((item: any) => item ? item.label : null));
   }
 
 }
