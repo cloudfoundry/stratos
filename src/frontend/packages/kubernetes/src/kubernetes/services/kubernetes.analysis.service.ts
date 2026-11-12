@@ -1,6 +1,5 @@
 import { HttpClient } from '@angular/common/http';
 import { Injectable, computed, inject } from '@angular/core';
-import { toObservable } from '@angular/core/rxjs-interop';
 import { ActivatedRoute } from '@angular/router';
 import { Observable, of, BehaviorSubject } from 'rxjs';
 import { catchError, filter, map, switchMap, tap } from 'rxjs/operators';
@@ -51,8 +50,6 @@ export class KubernetesAnalysisService {
   // Signal members, read off the session's plugin flags and config.
   readonly enabled = computed(() => KubernetesAnalysisService.analysisEnabled(this.session));
   readonly hideAnalysis = computed(() => !this.enabled());
-  // The side-nav tab type takes an Observable for a hidden tab.
-  readonly hideAnalysis$ = toObservable(this.hideAnalysis);
   readonly analyzers = computed(() => {
     const enginesCsv = this.session.sessionData()?.['plugin-config']?.analysisEngines;
     return enginesCsv
