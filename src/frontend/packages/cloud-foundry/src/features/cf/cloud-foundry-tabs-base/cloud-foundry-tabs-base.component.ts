@@ -1,9 +1,9 @@
-import { Component, OnInit, ChangeDetectionStrategy, computed, inject } from '@angular/core';
+import { Component, OnInit, ChangeDetectionStrategy, computed, inject, Signal } from '@angular/core';
 import { toObservable } from '@angular/core/rxjs-interop';
 import { CommonModule } from '@angular/common';
 import { RouterModule } from '@angular/router';
 import { Observable, of as observableOf } from 'rxjs';
-import { take, map, startWith } from 'rxjs/operators';
+import { map, startWith } from 'rxjs/operators';
 
 import {
   EndpointsService,
@@ -59,19 +59,16 @@ export class CloudFoundryTabsBaseComponent implements OnInit {
   public tabsHeader = 'Cloud Foundry';
   public extensionActions: StratosActionMetadata[] = getActionsFromExtensions(StratosActionType.CloudFoundry);
 
-  // null when the endpoint has no cnsi_type/guid (getFavoriteEndpointFromEntity);
-  // the template binds via `| async`, which already yields null.
-  public favorite$: Observable<UserFavoriteEndpoint | null>;
+  // null when the endpoint has no cnsi_type/guid (getFavoriteEndpointFromEntity).
+  public favorite: Signal<UserFavoriteEndpoint | null>;
 
   constructor() {
     const cfEndpointService = this.cfEndpointService;
     const endpointsService = inject(EndpointsService);
     const userFavoriteManager = inject(UserFavoriteManager);
 
-    this.favorite$ = endpointsService.endpoints$.pipe(
-      take(1),
-      map(endpoints => endpoints[this.cfEndpointService.cfGuid]),
-      map(endpoint => userFavoriteManager.getFavoriteEndpointFromEntity(endpoint))
+    this.favorite = computed(() =>
+      userFavoriteManager.getFavoriteEndpointFromEntity(endpointsService.endpoints()[this.cfEndpointService.cfGuid])
     );
 
     const firehoseHidden$ = this.currentUserPermissionsService
