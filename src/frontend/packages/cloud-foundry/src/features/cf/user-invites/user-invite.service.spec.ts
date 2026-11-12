@@ -68,3 +68,39 @@ describe('UserInviteService.invite', () => {
     httpMock.verify();
   });
 });
+
+describe('UserInviteService.configured', () => {
+  const endpoint = signal<unknown>(undefined);
+
+  beforeEach(() => {
+    endpoint.set(undefined);
+    TestBed.resetTestingModule();
+    TestBed.configureTestingModule({
+      providers: [
+        provideZonelessChangeDetection(),
+        provideHttpClient(),
+        provideHttpClientTesting(),
+        { provide: CloudFoundryEndpointService, useValue: { endpoint$: NEVER, endpoint } },
+        { provide: ActiveRouteCfOrgSpace, useValue: stubActiveRoute },
+        { provide: CfCurrentUserRolesSignalService, useValue: stubCfRoles },
+        { provide: AuthDataService, useValue: stubAuthData },
+        { provide: CurrentUserPermissionsService, useValue: stubPermissions },
+        UserInviteService,
+      ],
+    });
+  });
+
+  it('is false until the endpoint has loaded', () => {
+    expect(TestBed.inject(UserInviteService).configured()).toBe(false);
+  });
+
+  it('is true only when the endpoint allows invitations', () => {
+    const svc = TestBed.inject(UserInviteService);
+    endpoint.set({ entity: { metadata: { userInviteAllowed: 'false' } } });
+    expect(svc.configured()).toBe(false);
+    endpoint.set({ entity: {} });
+    expect(svc.configured()).toBe(false);
+    endpoint.set({ entity: { metadata: { userInviteAllowed: 'true' } } });
+    expect(svc.configured()).toBe(true);
+  });
+});

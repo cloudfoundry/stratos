@@ -1,5 +1,5 @@
 import { HttpClient } from '@angular/common/http';
-import { Injectable, inject } from '@angular/core';
+import { Injectable, Signal, computed, inject } from '@angular/core';
 import { toObservable } from '@angular/core/rxjs-interop';
 import { TailwindSnackBarService } from '@stratosui/core';
 import { AuthDataService } from '@stratosui/store';
@@ -132,12 +132,22 @@ export class UserInviteService {
   private activeRouteCfOrgSpace = inject(ActiveRouteCfOrgSpace);
 
 
+  /** Whether the CF endpoint allows user invitations; false until the
+   *  endpoint record has loaded. */
+  readonly configured: Signal<boolean>;
   configured$!: Observable<boolean>;
   enabled$!: Observable<boolean>;
   canConfigure$!: Observable<boolean>;
 
   constructor() {
     const cfEndpointService = inject(CloudFoundryEndpointService);
+
+    this.configured = computed(() => {
+      // metadata is missing when no SMTP server or other invite
+      // settings are configured
+      const metadata = cfEndpointService.endpoint()?.entity?.metadata;
+      return !!metadata && metadata.userInviteAllowed === 'true';
+    });
 
     this.configured$ = cfEndpointService.endpoint$.pipe(
       filter(v => !!v && !!v.entity),
