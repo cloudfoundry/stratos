@@ -1,8 +1,6 @@
 import { Component, EffectRef, Injector, OnDestroy, OnInit, ChangeDetectionStrategy, computed, effect, inject, runInInjectionContext, signal } from '@angular/core';
-import { toObservable, toSignal } from '@angular/core/rxjs-interop';
 import { Router, RouterModule } from '@angular/router';
 import { GitSCMService, GitSCMType } from '@stratosui/git';
-import { filter, map, switchMap } from 'rxjs/operators';
 
 import {
   EndpointsService,
@@ -103,15 +101,16 @@ export class ApplicationTabsBaseComponent implements OnInit, OnDestroy {
     const applicationService = this.applicationService;
     const scmService = inject(GitSCMService);
 
-    // can() is a stream (permissions are a later step), so the space is
-    // bridged for it; null until it answers.
-    const appDoesNotHaveEnvVars = toSignal(toObservable(this.detail.space).pipe(
-      filter((space): space is StSpace => !!space),
-      switchMap(space => this.currentUserPermissionsService.can$(CfCurrentUserPermissions.APPLICATION_VIEW_ENV_VARS,
-        this.applicationService.cfGuid, space.guid)
-      ),
-      map(can => !can),
-    ), { initialValue: null });
+    // Built once per space; null until the space is known.
+    const envVarsCheck = computed(() => {
+      const spaceGuid = this.detail.space()?.guid;
+      return spaceGuid ? this.currentUserPermissionsService.can(CfCurrentUserPermissions.APPLICATION_VIEW_ENV_VARS,
+        this.applicationService.cfGuid, spaceGuid) : null;
+    });
+    const appDoesNotHaveEnvVars = computed(() => {
+      const check = envVarsCheck();
+      return check ? !check() : null;
+    });
 
     this.tabLinks.set([
       { link: 'summary', label: 'Summary', iconFont: 'stratos-icons', icon: 'application' },

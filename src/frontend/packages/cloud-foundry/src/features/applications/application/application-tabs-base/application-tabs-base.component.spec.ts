@@ -28,9 +28,11 @@ describe('ApplicationTabsBaseComponent', () => {
   const org = signal<any>(undefined);
   const space = signal<any>(undefined);
   const loading = signal<any>({ app: false, envVars: false, stats: false });
+  const canViewEnvVars = signal(true);
 
   beforeEach(async () => {
     app.set(undefined); org.set(undefined); space.set(undefined);
+    canViewEnvVars.set(true);
     loading.set({ app: false, envVars: false, stats: false });
     // Create mock - we'll override specific observables to prevent immediate completion
     applicationServiceMock = new ApplicationServiceMock();
@@ -45,9 +47,7 @@ describe('ApplicationTabsBaseComponent', () => {
 
     // Mock other required services
     const mockCurrentUserPermissionsService = {
-      can$: vi.fn().mockReturnValue(new BehaviorSubject<boolean>(true).asObservable()),
-      // The page header reads its permissions as signals.
-      can: vi.fn().mockReturnValue(signal(true)),
+      can: vi.fn().mockReturnValue(canViewEnvVars),
     };
 
     const mockGitSCMService = {
@@ -158,6 +158,15 @@ describe('ApplicationTabsBaseComponent', () => {
     expect(component.isFetching()).toBe(true);
     app.set({ entity: { cfGuid: 'mockCfGuid', name: 'my-app' } });
     expect(component.isFetching()).toBe(false);
+  });
+
+  it('hides Variables once the space is known and env vars are not allowed', () => {
+    const variables = () => component.tabLinks().find(t => t.link === 'variables')!.isHidden!();
+    expect(variables()).toBeNull();
+    space.set({ guid: 'space-1', name: 'my-space' });
+    expect(variables()).toBe(false);
+    canViewEnvVars.set(false);
+    expect(variables()).toBe(true);
   });
 
   it('builds the breadcrumbs once the app, endpoint, org and space are known', () => {
