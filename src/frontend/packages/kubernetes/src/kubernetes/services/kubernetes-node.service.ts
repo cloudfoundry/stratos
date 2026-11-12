@@ -1,4 +1,4 @@
-import { Injectable, Injector, inject, signal } from '@angular/core';
+import { Injectable, Injector, Signal, computed, inject, signal } from '@angular/core';
 import { toObservable } from '@angular/core/rxjs-interop';
 import { ActivatedRoute } from '@angular/router';
 import { Observable, Subscription } from 'rxjs';
@@ -35,6 +35,8 @@ export class KubernetesNodeService {
   public kubeGuid: string;
   public node$: Observable<EntityInfo<KubernetesNode>>;
   nodeEntity$: Observable<KubernetesNode>;
+  // The route's node, undefined until the cluster cache holds it.
+  readonly node: Signal<KubernetesNode | undefined>;
 
   constructor() {
     const kubeEndpointService = this.kubeEndpointService;
@@ -48,6 +50,7 @@ export class KubernetesNodeService {
     // structurally-identical k8s JSON via the legacy KubernetesNode type.
     void this.nodeData.refresh(this.kubeGuid);
     const node = this.nodeData.nodeByName(this.kubeGuid, this.nodeName);
+    this.node = computed(() => node() as unknown as KubernetesNode | undefined);
 
     this.nodeEntity$ = toObservable(node, { injector: this.injector }).pipe(
       filter((n): n is NonNullable<typeof n> => !!n),

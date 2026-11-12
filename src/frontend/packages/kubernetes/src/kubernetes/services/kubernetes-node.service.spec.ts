@@ -59,6 +59,12 @@ describe('KubernetesNodeService', () => {
     expect(node.metadata.name).toBe('node-a');
   });
 
+  it('follows the node by name in the node signal', () => {
+    expect(svc.node()?.metadata.name).toBe('node-a');
+    nodeSig.set(undefined);
+    expect(svc.node()).toBeUndefined();
+  });
+
   it('ends the metric observation and its watch when the caller lets go', () => {
     const { entity$, pollerSub } = svc.setupMetricObservable(KubeNodeMetric.CPU, MetricStatistic.MAXIMUM);
     const values: number[] = [];
