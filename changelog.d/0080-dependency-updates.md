@@ -3,7 +3,7 @@
 
 | Package                                        | From         | To           |
 |------------------------------------------------|--------------|--------------|
-| Angular                                        | 22.2.4       | 22.2.5       |
+| Angular                                        | 22.2.4       | 22.2.6       |
 | Angular CLI and build                          | 22.2.5       | 22.2.6       |
 | @angular/cdk                                   | 22.2.5       | 22.2.7       |
 | @analogjs/vite-plugin-angular, vitest-angular  | 2.9.6        | 2.9.7        |
