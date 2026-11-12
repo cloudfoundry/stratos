@@ -9,7 +9,6 @@ import {
   IFavoriteMetadata,
   UserFavorite,
   RecentlyVisitedDataService,
-  UserProfileInfo,
   AuthTokenEnvelope,
 } from '@stratosui/store';
 import { StratosBrandingService } from '../../../../../theme/stratos-branding.service';
@@ -180,8 +179,19 @@ export class PageHeaderComponent implements OnDestroy, AfterViewInit {
     },
   });
 
-  public username$: Observable<string>;
-  public user$: Observable<UserProfileInfo>;
+  public readonly user = this.userProfileService.userProfile;
+  public readonly username = computed(() => {
+    const profile = this.user();
+    if (!profile) {
+      return null;
+    }
+    let name = profile.userName;
+    if (profile.name) {
+      name = profile.name.givenName + ' ' + profile.name.familyName;
+      name = name.trim();
+    }
+    return name ? name : profile.userName;
+  });
   public allowGravatar$: Observable<boolean>;
   public canLogout$: Observable<boolean>;
   public authToken$!: Observable<string>;
@@ -285,18 +295,12 @@ export class PageHeaderComponent implements OnDestroy, AfterViewInit {
       }
     });
 
-    this.user$ = this.userProfileService.userProfile$;
-
-    this.username$ = this.user$.pipe(
-      map(profile => {
-        let name = profile.userName;
-        if (profile.name) {
-          name = profile.name.givenName + ' ' + profile.name.familyName;
-          name = name.trim();
-        }
-        return name ? name : profile.userName;
-      })
-    );
+    // The user menu shows the profile: fetch it once the menu is shown.
+    effect(() => {
+      if (!this.hideMenu() && !environment.hideUserMenu) {
+        untracked(() => this.userProfileService.loadUserProfile());
+      }
+    });
 
     this.allowGravatar$ = toObservable(this.dashboardSignals.gravatarEnabled);
 

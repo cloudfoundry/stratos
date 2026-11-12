@@ -13,6 +13,7 @@ import { DashboardDataService } from '../../../core/dashboard-data.service';
 import { EndpointsService } from '../../../core/endpoints.service';
 import { CurrentUserPermissionsService } from '../../../core/permissions/current-user-permissions.service';
 import { TabNavService } from '../../../tab-nav.service';
+import { UserProfileService } from '../../../core/user-profile.service';
 import { GlobalEventService } from '../../global-events.service';
 import { TailwindSnackBarService } from '../../services/tailwind-snackbar.service';
 import { environment } from '../../../environments/environment';
@@ -59,6 +60,19 @@ describe('PageHeaderComponent', () => {
 
   it('should be created', () => {
     expect(component).toBeTruthy();
+  });
+
+  // The user menu shows the profile; a header without the menu fetches none.
+  it('loads the user profile only while the user menu shows', async () => {
+    const load = vi.spyOn(TestBed.inject(UserProfileService), 'loadUserProfile');
+    const hidden = TestBed.createComponent(PageHeaderComponent);
+    hidden.componentRef.setInput('hideMenu', true);
+    await hidden.whenStable();
+    expect(load).not.toHaveBeenCalled();
+
+    hidden.componentRef.setInput('hideMenu', false);
+    await hidden.whenStable();
+    expect(load).toHaveBeenCalled();
   });
 
   it('shows the menu toggle only on a mobile viewport', async () => {
