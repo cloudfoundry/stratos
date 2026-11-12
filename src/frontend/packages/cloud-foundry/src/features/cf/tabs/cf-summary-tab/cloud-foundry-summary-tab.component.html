@@ -41,7 +41,7 @@
           @if (!detailsLoading()) {
             <app-card-cf-recent-apps
               [endpoint]="cfEndpointService.cfGuid"
-              [allApps]="cfEndpointService.apps()"
+              [allApps]="cfEndpointService.recentApps()"
               [loading]="cfEndpointService.appsLoading()" (refresh)="cfEndpointService.fetchApps()">
             </app-card-cf-recent-apps>
           }

@@ -49,6 +49,12 @@ export class CloudFoundryEndpointService {
 
   apps!: Signal<APIResource<IApp>[]>;
   appsLoading!: Signal<boolean>;
+  /**
+   * Apps for the recently-updated card: the full list once it has been
+   * fetched, before that the newest apps from the counts call, so the
+   * card does not say "no applications" while the full list loads.
+   */
+  recentApps!: Signal<APIResource<IApp>[]>;
   hasApps!: Signal<boolean>;
   appCount!: Signal<number>;
   totalMem!: Signal<number>;
@@ -110,6 +116,7 @@ export class CloudFoundryEndpointService {
     if (!this.cfGuid) {
       this.cfInfoData = { info: signal(null) } as unknown as CfInfoDataService;
       this.apps = signal([]);
+      this.recentApps = signal([]);
       this.appsLoading = signal(false);
       this.hasApps = signal(false);
       this.appCount = signal(0);
@@ -171,6 +178,9 @@ export class CloudFoundryEndpointService {
     this.endpointData = this.endpointDataRegistry.acquire(this.cfGuid);
     this.apps = computed(() => this.endpointData.apps().map(stAppToAPIResource));
     this.appsLoading = this.endpointData.isLoadingDetails;
+    this.recentApps = computed(() => this.endpointData.appsLastFetched()
+      ? this.apps()
+      : this.endpointData.recentApps().map(stAppToAPIResource));
     this.hasApps = computed(() => this.endpointData.apps().length > 0);
     this.appCount = this.endpointData.appCount;
     this.totalMem = computed(() => this.getMetricFromApps(this.apps(), 'memory'));

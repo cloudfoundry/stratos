@@ -183,6 +183,8 @@ describe('CloudFoundryEndpointService — signal members', () => {
   const users = signal<unknown[] | null>(null);
   const info = signal<Partial<ICfV2Info> | null>(null);
   const loadingDetails = signal(true);
+  const recent = signal<Partial<StApp>[]>([]);
+  const appsFetched = signal<Date | null>(null);
   let svc: CloudFoundryEndpointService;
 
   beforeEach(() => {
@@ -190,6 +192,8 @@ describe('CloudFoundryEndpointService — signal members', () => {
     users.set(null);
     info.set(null);
     loadingDetails.set(true);
+    recent.set([]);
+    appsFetched.set(null);
     TestBed.configureTestingModule({
       providers: [
         provideZonelessChangeDetection(),
@@ -202,6 +206,7 @@ describe('CloudFoundryEndpointService — signal members', () => {
           useValue: {
             acquire: () => ({
               apps, orgs: () => [], appCount: () => 0, isLoadingDetails: loadingDetails,
+              recentApps: recent, appsLastFetched: appsFetched,
             }),
             release: vi.fn(),
           },
@@ -242,6 +247,14 @@ describe('CloudFoundryEndpointService — signal members', () => {
     expect(svc.hasSSHAccess()).toBe(false);
     info.set({ app_ssh_endpoint: 'ssh.example.com:2222', app_ssh_host_key_fingerprint: 'aa:bb', app_ssh_oauth_client: 'ssh-proxy' });
     expect(svc.hasSSHAccess()).toBe(true);
+  });
+
+  it('recentApps uses the newest apps until the full list is fetched', () => {
+    recent.set([{ guid: 'r1', name: 'newest' }]);
+    expect(svc.recentApps().map(a => a.metadata.guid)).toEqual(['r1']);
+    apps.set([{ guid: 'a1' }, { guid: 'a2' }]);
+    appsFetched.set(new Date());
+    expect(svc.recentApps().map(a => a.metadata.guid)).toEqual(['a1', 'a2']);
   });
 
   it('appsLoading follows the endpoint data loading flag', () => {
