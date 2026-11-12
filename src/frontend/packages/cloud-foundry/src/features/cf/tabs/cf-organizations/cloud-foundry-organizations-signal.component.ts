@@ -1,6 +1,5 @@
 import { CommonModule } from '@angular/common';
 import { Component, ChangeDetectionStrategy, Signal, WritableSignal, computed, inject, signal } from '@angular/core';
-import { toSignal } from '@angular/core/rxjs-interop';
 import { Router, RouterModule } from '@angular/router';
 
 import {
@@ -82,10 +81,7 @@ export class CloudFoundryOrganizationsSignalComponent {
     this.orgsConfig.initialize(cfGuid);
     (this as { totalOrganizations: Signal<number> }).totalOrganizations =
       this.orgsConfig.view.totalItems;
-    this.canCreateOrganization = toSignal(
-      currentUserPermissionsService.can$(CfCurrentUserPermissions.ORGANIZATION_CREATE, cfGuid),
-      { initialValue: false },
-    );
+    this.canCreateOrganization = currentUserPermissionsService.can(CfCurrentUserPermissions.ORGANIZATION_CREATE, cfGuid);
     this.createOrgAction = {
       label: 'Create Organization',
       icon: 'add',
