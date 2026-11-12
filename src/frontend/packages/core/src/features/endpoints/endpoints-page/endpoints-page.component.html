@@ -24,7 +24,7 @@
 <!-- Show content once loaded -->
 <div class="endpoints-content flex flex-col flex-1 min-h-0">
   @if (isInitialised$ | async) {
-    @if ((endpointsService.haveRegistered$ | async)) {
+    @if (endpointsService.haveRegistered()) {
       <app-endpoints-signal-list [addAction]="registerEndpointAction" class="flex-1"></app-endpoints-signal-list>
     } @else {
       <!-- The list (and its sub-nav) renders only with endpoints, so the
