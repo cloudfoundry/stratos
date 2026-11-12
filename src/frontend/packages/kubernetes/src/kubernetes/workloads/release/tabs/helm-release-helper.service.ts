@@ -99,8 +99,6 @@ type InternalHelmUpgrade = {
 })
 export class HelmReleaseHelperService {
 
-  public isFetching$: Observable<boolean>;
-
   public release$: Observable<HelmRelease>;
 
   // Signal members. The release is undefined until its detail loads; one
@@ -149,8 +147,6 @@ export class HelmReleaseHelperService {
     this.release$ = toObservable(this.release, { injector: this.injector }).pipe(
       filter((item): item is HelmRelease => !!item),
     );
-
-    this.isFetching$ = toObservable(this.releaseData.isFetchingDetail(this.guid), { injector: this.injector });
   }
 
   public guidAsUrlFragment(): string {
