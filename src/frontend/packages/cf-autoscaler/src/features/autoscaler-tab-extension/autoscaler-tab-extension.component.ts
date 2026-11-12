@@ -43,7 +43,7 @@ import {
   CardAppUsageComponent,
   StApp,
 } from '@stratosui/cloud-foundry';
-import { EndpointsDataService, getFullEndpointApiUrl } from '@stratosui/store';
+import { EndpointsDataService, getFullEndpointApiUrl, observeSignal } from '@stratosui/store';
 import { isAutoscalerEnabled } from '../../core/autoscaler-helpers/autoscaler-available';
 import { buildMetricData } from '../../core/autoscaler-helpers/autoscaler-transform-metric';
 import { AutoscalerConstants } from '../../core/autoscaler-helpers/autoscaler-util';
@@ -85,6 +85,9 @@ interface AutoscalerTabPaginationParams {
   ) => {
     const endpointGuid = getGuids('cf')(activatedRoute) || window.location.pathname.split('/')[2];
     const appGuid = getGuids()(activatedRoute) || window.location.pathname.split('/')[3];
+    // The side-nav calls this in its injection context; the permission
+    // signal is watched for as long as the tab gate is.
+    const injector = inject(Injector);
 
     // Native app detail returns StApp with spaceGuid + orgGuid stitched
     // server-side (composeStAppWithSpaceOrg). Replaces the legacy
@@ -97,12 +100,12 @@ interface AutoscalerTabPaginationParams {
         if (!orgGuid || !spaceGuid) {
           return of(false);
         }
-        return cups.can$(
+        return observeSignal(cups.can(
           CfCurrentUserPermissions.APPLICATION_EDIT,
           endpointGuid,
           orgGuid,
           spaceGuid
-        );
+        ), injector);
       }),
       catchError(() => of(false)),
     );
