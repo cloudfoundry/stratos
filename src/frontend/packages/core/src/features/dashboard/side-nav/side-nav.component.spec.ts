@@ -9,6 +9,7 @@ import { CustomizationService, MDAppModule } from '@stratosui/core';
 import { StratosBrandingService } from '../../../../../theme/stratos-branding.service';
 import { SideNavComponent } from './side-nav.component';
 import { AuthSignalService } from '../../../core/signals/auth-signal.service';
+import { CurrentUserPermissionsService } from '../../../core/permissions/current-user-permissions.service';
 
 
 describe('SideNavComponent', () => {
@@ -121,6 +122,25 @@ describe('SideNavComponent', () => {
     it('is true when HIDE_NAV_LOGOUT is on', async () => {
       expect((await build({ hideNavLogout: true })).hideNavLogout()).toBe(true);
     });
+  });
+
+  // The 'stratos.noauth' scope means there is no session to end.
+  it('offers Sign Out only while the user may log out', async () => {
+    const noLogout = signal(true);
+    TestBed.resetTestingModule();
+    TestBed.configureTestingModule({
+      imports: [RouterTestingModule, MDAppModule, CoreTestingModule, createBasicStoreModule(), SideNavComponent],
+      providers: [
+        CustomizationService,
+        provideZonelessChangeDetection(),
+        { provide: CurrentUserPermissionsService, useValue: { can: () => noLogout } },
+      ]
+    });
+    const f = TestBed.createComponent(SideNavComponent);
+    await f.whenStable();
+    expect(f.componentInstance.canLogout()).toBe(false);
+    noLogout.set(false);
+    expect(f.componentInstance.canLogout()).toBe(true);
   });
 
   it('shows a nav item only while its gate reads false', async () => {
