@@ -116,4 +116,28 @@ describe('CloudFoundryCellBaseComponent', () => {
     // check the name it binds.
     expect(await firstValueFrom(component.name$)).toBe('cellId');
   });
+
+  // Breadcrumb back to the endpoint's cells; the App Instances tab is for
+  // admins only and stays hidden until the endpoint's user is known.
+  it('links back to the endpoint\'s cells and shows App Instances to an admin only', async () => {
+    const endpoint = signal<unknown>(undefined);
+    TestBed.overrideProvider(CloudFoundryEndpointService, { useValue: { endpoint } });
+    await create();
+    const appsTab = component.tabLinks.find(t => t.link === CloudFoundryCellBaseComponent.AppsLinks)!;
+    const hidden: boolean[] = [];
+    const sub = appsTab.hidden$!.subscribe(h => hidden.push(h));
+    await fixture.whenStable();
+    expect(component.breadcrumbs()).toBeNull();
+    expect(hidden.at(-1)).toBe(true);
+
+    endpoint.set({ entity: { guid: 'cf-1', name: 'cf one', user: { admin: true } } });
+    await fixture.whenStable();
+    expect(component.breadcrumbs()).toEqual([{ breadcrumbs: [{ value: 'cf one', routerLink: '/cloud-foundry/cf-1/cells' }] }]);
+    expect(hidden.at(-1)).toBe(false);
+
+    endpoint.set({ entity: { guid: 'cf-1', name: 'cf one', user: { admin: false } } });
+    await fixture.whenStable();
+    expect(hidden.at(-1)).toBe(true);
+    sub.unsubscribe();
+  });
 });
