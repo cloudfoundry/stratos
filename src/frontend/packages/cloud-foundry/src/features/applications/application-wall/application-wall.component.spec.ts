@@ -1,10 +1,9 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
-import { importProvidersFrom, provideZonelessChangeDetection, signal } from '@angular/core';
+import { importProvidersFrom, provideZonelessChangeDetection, Signal, signal, WritableSignal } from '@angular/core';
 import { provideHttpClient } from '@angular/common/http';
 import { provideHttpClientTesting } from '@angular/common/http/testing';
 import { ActivatedRoute } from '@angular/router';
 import { provideRouter } from '@angular/router';
-import { Observable, Subject } from 'rxjs';
 import { describe, it, expect, beforeEach, vi } from 'vitest';
 import { appLabelsFilterText } from '../../../shared/signal-list-configs/app/app-labels';
 
@@ -84,7 +83,7 @@ describe('ApplicationWallComponent', () => {
   let stubSignalConfig: ReturnType<typeof makeStubSignalConfigService>;
   // Source for the wall's own create-application permission check, so a
   // spec can emit on it after the wall is gone.
-  let canCreate$: Subject<boolean>;
+  let canCreate: WritableSignal<boolean>;
 
   beforeEach(async () => {
     stubSignalConfig = makeStubSignalConfigService();
@@ -131,13 +130,13 @@ describe('ApplicationWallComponent', () => {
       ]
     }).compileComponents();
 
-    canCreate$ = new Subject<boolean>();
+    canCreate = signal(false);
     const perms = TestBed.inject(CurrentUserPermissionsService);
-    const realCan = perms.can$.bind(perms);
-    vi.spyOn(perms, 'can$').mockImplementation(((action: unknown, ...rest: unknown[]) =>
+    const realCan = perms.can.bind(perms);
+    vi.spyOn(perms, 'can').mockImplementation(((action: unknown, ...rest: unknown[]) =>
       action === CfCurrentUserPermissions.APPLICATION_CREATE
-        ? canCreate$
-        : (realCan as (...a: unknown[]) => Observable<boolean>)(action, ...rest)) as typeof perms.can$);
+        ? canCreate
+        : (realCan as (...a: unknown[]) => Signal<boolean>)(action, ...rest)) as typeof perms.can);
 
     fixture = TestBed.createComponent(ApplicationWallComponent);
     component = fixture.componentInstance;
@@ -228,14 +227,12 @@ describe('ApplicationWallComponent', () => {
     expect(column.render({} as any)).toBe('—');
   });
 
-  it('stops listening for the create permission once destroyed', () => {
-    canCreate$.next(true);
-    expect(component.canCreateApplication()).toBe(true);
-
-    fixture.destroy();
-    expect(canCreate$.observed).toBe(false);
-    canCreate$.next(false);
-    expect(component.canCreateApplication()).toBe(true);
+  it('shows Create Application while the create permission holds', () => {
+    expect(component.createApplicationAction.visible!()).toBe(false);
+    canCreate.set(true);
+    expect(component.createApplicationAction.visible!()).toBe(true);
+    canCreate.set(false);
+    expect(component.createApplicationAction.visible!()).toBe(false);
   });
 
   it('says why a row action failed in Cloud Foundry\'s words', async () => {
