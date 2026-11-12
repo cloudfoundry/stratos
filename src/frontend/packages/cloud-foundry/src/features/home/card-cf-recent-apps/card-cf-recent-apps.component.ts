@@ -34,8 +34,8 @@ const RECENT_ITEMS_COUNT = 10;
 })
 export class CardCfRecentAppsComponent implements OnInit {
 
-  readonly allApps$ = input<APIResource<IApp>[]>();
-  readonly loading$ = input<boolean>();
+  readonly allApps = input<APIResource<IApp>[]>();
+  readonly loading = input<boolean>();
   // Backed by a Subject so ngOnInit can tell whether a parent listens:
   // the subject is observed only while a (refresh) binding exists.
   protected readonly refresh$ = new Subject<void>();
@@ -56,11 +56,11 @@ export class CardCfRecentAppsComponent implements OnInit {
   readonly placeholders = computed(() => Array.from({ length: this.maxRows() }, (_, i) => i));
 
   // Not loading when none is given.
-  protected readonly appsLoading = computed(() => !!this.loading$());
+  protected readonly appsLoading = computed(() => !!this.loading());
   // Stats are loaded by each row (CompactAppCardComponent), once per
   // started app; the registry shares the request between rows.
-  protected readonly recentApps = computed(() => this.restrictApps(this.allApps$() ?? [], this.maxRows()));
-  protected readonly show = computed(() => !this.hideWhenEmpty() || (this.allApps$() ?? []).length > 0);
+  protected readonly recentApps = computed(() => this.restrictApps(this.allApps() ?? [], this.maxRows()));
+  protected readonly show = computed(() => !this.hideWhenEmpty() || (this.allApps() ?? []).length > 0);
 
   ngOnInit() {
     this.canRefresh = !this.placeholderMode() && this.refresh$.observed;

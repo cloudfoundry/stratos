@@ -81,9 +81,9 @@
       <app-tile-group class="tile-group-1-cols">
         <app-tile>
           @if (!detailsLoading()) {
-            <app-card-cf-recent-apps [allApps$]="cfSpaceService.apps()"
+            <app-card-cf-recent-apps [allApps]="cfSpaceService.apps()"
               [endpoint]="cfEndpointService.cfGuid"
-            [loading$]="cfSpaceService.loadingApps()" (refresh)="cfSpaceService.fetchApps()"></app-card-cf-recent-apps>
+            [loading]="cfSpaceService.loadingApps()" (refresh)="cfSpaceService.fetchApps()"></app-card-cf-recent-apps>
           }
         </app-tile>
       </app-tile-group>

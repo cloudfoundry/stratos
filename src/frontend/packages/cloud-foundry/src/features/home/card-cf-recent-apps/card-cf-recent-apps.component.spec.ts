@@ -37,8 +37,8 @@ describe('CardCfRecentAppsComponent', () => {
   beforeEach(() => {
     fixture = TestBed.createComponent(CardCfRecentAppsComponent);
     component = fixture.componentInstance;
-    fixture.componentRef.setInput('allApps$', []);
-    fixture.componentRef.setInput('loading$', false);
+    fixture.componentRef.setInput('allApps', []);
+    fixture.componentRef.setInput('loading', false);
     fixture.componentRef.setInput('placeholderMode', true);
 
     // Don't call detectChanges() to avoid rendering child components
@@ -80,7 +80,7 @@ describe('CardCfRecentAppsComponent stats requests', () => {
 
   it('loads stats once per started app', async () => {
     fixture.componentRef.setInput('endpoint', 'ep-1');
-    fixture.componentRef.setInput('allApps$', [app('a-started', 'STARTED'), app('b-stopped', 'STOPPED')]);
+    fixture.componentRef.setInput('allApps', [app('a-started', 'STARTED'), app('b-stopped', 'STOPPED')]);
     await fixture.whenStable();
     expect(statsRequests()).toEqual(['/pp/v1/cf/app-stats/ep-1/a-started']);
     expect(fixture.nativeElement.querySelectorAll('.compact-app-card').length).toBe(2);
