@@ -55,7 +55,6 @@ export class CloudFoundryTabsBaseComponent implements OnInit {
 
   isFetching$!: Observable<boolean>;
 
-  public canAddOrg$!: Observable<boolean>;
   public tabsHeader = 'Cloud Foundry';
   public extensionActions: StratosActionMetadata[] = getActionsFromExtensions(StratosActionType.CloudFoundry);
 
@@ -71,13 +70,14 @@ export class CloudFoundryTabsBaseComponent implements OnInit {
       userFavoriteManager.getFavoriteEndpointFromEntity(endpointsService.endpoints()[this.cfEndpointService.cfGuid])
     );
 
-    // can() and hasMetrics() are streams; null until they answer.
-    const firehoseHidden = toSignal(this.currentUserPermissionsService
-      .can$(CfCurrentUserPermissions.FIREHOSE_VIEW, this.cfEndpointService.cfGuid)
-      .pipe(map(visible => !visible)), { initialValue: null });
+    // Hidden until the roles load (the check reads false until then).
+    const canViewFirehose = this.currentUserPermissionsService
+      .can(CfCurrentUserPermissions.FIREHOSE_VIEW, this.cfEndpointService.cfGuid);
+    const firehoseHidden = computed(() => !canViewFirehose());
 
     const usersHidden = computed(() => !cfEndpointService.usersCount());
 
+    // hasMetrics() is a stream; null until it answers.
     const cellsHidden = toSignal(endpointsService.hasMetrics(cfEndpointService.cfGuid).pipe(
       map(hasMetrics => !hasMetrics)
     ), { initialValue: null });
@@ -120,7 +120,6 @@ export class CloudFoundryTabsBaseComponent implements OnInit {
 
   ngOnInit() {
     this.isFetching$ = observableOf(false);
-    this.canAddOrg$ = this.currentUserPermissionsService.can$(CfCurrentUserPermissions.ORGANIZATION_CREATE, this.cfEndpointService.cfGuid);
   }
 
 }
