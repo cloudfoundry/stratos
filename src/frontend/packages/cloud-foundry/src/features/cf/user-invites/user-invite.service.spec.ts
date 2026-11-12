@@ -3,7 +3,7 @@ import { TestBed } from '@angular/core/testing';
 import { provideHttpClient } from '@angular/common/http';
 import { HttpTestingController, provideHttpClientTesting } from '@angular/common/http/testing';
 import { describe, expect, it, beforeEach } from 'vitest';
-import { NEVER } from 'rxjs';
+import { NEVER, of } from 'rxjs';
 import { firstValueFrom } from 'rxjs';
 
 import { UserInviteService, UserInviteSendSpaceRoles } from './user-invite.service';
@@ -15,7 +15,7 @@ import { CurrentUserPermissionsService } from '../../../../../core/src/core/perm
 
 // ─── Minimal stubs ────────────────────────────────────────────────────────────
 
-const stubCfEndpoint = { endpoint$: NEVER };
+const stubCfEndpoint = { endpoint: signal(undefined) };
 const stubActiveRoute = { cfGuid: '' };
 const stubCfRoles = { cfEndpointRolesState$: () => NEVER };
 const stubAuthData = { sessionData: signal(null) };
@@ -66,5 +66,77 @@ describe('UserInviteService.invite', () => {
     expect(req.request.body.spaceRoles).toEqual({});
     req.flush({ new_invites: [], failed_invites: [] });
     httpMock.verify();
+  });
+});
+
+describe('UserInviteService.configured', () => {
+  const endpoint = signal<unknown>(undefined);
+
+  beforeEach(() => {
+    endpoint.set(undefined);
+    TestBed.resetTestingModule();
+    TestBed.configureTestingModule({
+      providers: [
+        provideZonelessChangeDetection(),
+        provideHttpClient(),
+        provideHttpClientTesting(),
+        { provide: CloudFoundryEndpointService, useValue: { endpoint } },
+        { provide: ActiveRouteCfOrgSpace, useValue: stubActiveRoute },
+        { provide: CfCurrentUserRolesSignalService, useValue: stubCfRoles },
+        { provide: AuthDataService, useValue: stubAuthData },
+        { provide: CurrentUserPermissionsService, useValue: stubPermissions },
+        UserInviteService,
+      ],
+    });
+  });
+
+  it('is false until the endpoint has loaded', () => {
+    expect(TestBed.inject(UserInviteService).configured()).toBe(false);
+  });
+
+  it('is true only when the endpoint allows invitations', () => {
+    const svc = TestBed.inject(UserInviteService);
+    endpoint.set({ entity: { metadata: { userInviteAllowed: 'false' } } });
+    expect(svc.configured()).toBe(false);
+    endpoint.set({ entity: {} });
+    expect(svc.configured()).toBe(false);
+    endpoint.set({ entity: { metadata: { userInviteAllowed: 'true' } } });
+    expect(svc.configured()).toBe(true);
+  });
+});
+
+describe('UserInviteService.canShowInviteUser', () => {
+  const endpoint = signal<unknown>(undefined);
+
+  beforeEach(() => {
+    endpoint.set(undefined);
+    TestBed.resetTestingModule();
+    TestBed.configureTestingModule({
+      providers: [
+        provideZonelessChangeDetection(),
+        provideHttpClient(),
+        provideHttpClientTesting(),
+        { provide: CloudFoundryEndpointService, useValue: { endpoint } },
+        { provide: ActiveRouteCfOrgSpace, useValue: stubActiveRoute },
+        { provide: CfCurrentUserRolesSignalService, useValue: {
+          cfEndpointRolesState$: () => of({ state: { initialised: true } }),
+        } },
+        { provide: AuthDataService, useValue: stubAuthData },
+        { provide: CurrentUserPermissionsService, useValue: { can: () => of(true) } },
+        UserInviteService,
+      ],
+    });
+  });
+
+  it('waits for the endpoint before answering', () => {
+    const svc = TestBed.inject(UserInviteService);
+    const seen: boolean[] = [];
+    svc.canShowInviteUser('cf1', 'org1', '').subscribe(v => seen.push(v));
+    TestBed.tick();
+    expect(seen).toEqual([]);
+
+    endpoint.set({ entity: { metadata: { userInviteAllowed: 'true' } } });
+    TestBed.tick();
+    expect(seen).toEqual([true]);
   });
 });

@@ -3,7 +3,6 @@ import { importProvidersFrom, provideZonelessChangeDetection, signal } from '@an
 import { provideHttpClient } from '@angular/common/http';
 import { provideHttpClientTesting } from '@angular/common/http/testing';
 import { provideRouter, Router } from '@angular/router';
-import { of } from 'rxjs';
 import { describe, it, expect, beforeEach, vi } from 'vitest';
 
 import { TabNavService } from '@stratosui/core';
@@ -23,6 +22,7 @@ function makeStubSignalConfigService() {
   const sortSig = signal({ field: 'name' as const, direction: 'asc' as const });
   const view = {
     pagedItems: signal([]).asReadonly(),
+    totalItems: signal(0).asReadonly(),
     totalFilteredResults: signal(0).asReadonly(),
     totalPages: signal(1).asReadonly(),
   };
@@ -78,10 +78,10 @@ describe('ServicesWallComponent', () => {
       },
     ];
     const stubCloudFoundryService = {
-      cFEndpoints$: of(endpoints),
-      connectedCFEndpoints$: of(endpoints),
-      hasConnectedCFEndpoints$: of(true),
-      hasRegisteredCFEndpoints$: of(true),
+      cfEndpoints: signal(endpoints),
+      connectedCFEndpoints: signal(endpoints),
+      hasConnectedCFEndpoints: signal(true),
+      hasRegisteredCFEndpoints: signal(true),
     };
     await TestBed.configureTestingModule({
       imports: [

@@ -2,7 +2,6 @@ import { CommonModule } from '@angular/common';
 import { Component, ChangeDetectionStrategy, Signal, WritableSignal, computed, inject, signal } from '@angular/core';
 import { toSignal } from '@angular/core/rxjs-interop';
 import { Router, RouterModule } from '@angular/router';
-import { map } from 'rxjs/operators';
 
 import {
   ConfirmationDialogConfig,
@@ -57,25 +56,8 @@ export class CloudFoundryOrganizationSpacesSignalComponent {
   // Favorite keys in rowKey format (${cnsi}:${spaceGuid}). Reads spaces
   // + orgs favorites from the manager and projects to the row-key set
   // the SignalListColumn.favorite binding expects.
-  private readonly favoriteSpaceRowKeys: Signal<ReadonlySet<string>> = toSignal(
-    this.userFavoriteManager.getAllFavorites().pipe(
-      map(([groups, entities]) => {
-        const out = new Set<string>();
-        if (!groups || !entities) return out;
-        for (const epFavGuid in groups) {
-          const g = groups[epFavGuid];
-          if (!g?.entitiesIds) continue;
-          for (const favId of g.entitiesIds) {
-            const fav = entities[favId];
-            if (fav && fav.entityType === 'space' && fav.endpointType === 'cf') {
-              out.add(`${fav.endpointId}:${fav.entityId}`);
-            }
-          }
-        }
-        return out;
-      }),
-    ),
-    { initialValue: new Set<string>() },
+  private readonly favoriteSpaceRowKeys: Signal<ReadonlySet<string>> = computed(() =>
+    this.userFavoriteManager.entityFavoriteKeys('cf', ['space']),
   );
 
   public listConfig: WritableSignal<SignalListConfig<StSpace> | undefined> = signal(undefined);

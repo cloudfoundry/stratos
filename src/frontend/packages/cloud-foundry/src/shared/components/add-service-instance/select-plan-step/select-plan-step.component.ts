@@ -143,7 +143,9 @@ export class SelectPlanStepComponent implements OnDestroy {
         // helper had to drive the load itself or the plan dropdown
         // would stay empty with "no visible plans".
         void this.cSIHelperService.load();
-        return this.cSIHelperService.servicePlans$;
+        // Bridged here, in the step's injector, so the bridge ends with
+        // the step; one per service picked while the step is open.
+        return toObservable(this.cSIHelperService.servicePlans, { injector: this.injector });
       }),
       tap(o => {
         if (o.length === 0) {

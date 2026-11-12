@@ -10,7 +10,6 @@ import {
 } from '@angular/core';
 import { By } from '@angular/platform-browser';
 import { Router, provideRouter } from '@angular/router';
-import { of } from 'rxjs';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 
 import { EndpointsDataService } from '@stratosui/store';
@@ -139,7 +138,7 @@ describe('InstancesAccordionComponent', () => {
         provideZonelessChangeDetection(),
         provideRouter([]),
         { provide: ApplicationService, useClass: ApplicationServiceMock },
-        { provide: CloudFoundryService, useValue: { cFEndpoints$: of([]), connectedCFEndpoints$: of([]) } },
+        { provide: CloudFoundryService, useValue: { cfEndpoints: signal([]) } },
         { provide: AppDetailDataService, useFactory: makeDataStub },
         { provide: AppApplicationActionsService, useFactory: makeActionsStub },
         { provide: ConfirmationDialogService, useFactory: makeConfirmStub },
@@ -241,7 +240,7 @@ describe('InstancesAccordionComponent', () => {
           provideZonelessChangeDetection(),
           provideRouter([]),
           { provide: ApplicationService, useClass: ApplicationServiceMock },
-          { provide: CloudFoundryService, useValue: { cFEndpoints$: of([]), connectedCFEndpoints$: of([]) } },
+          { provide: CloudFoundryService, useValue: { cfEndpoints: signal([]) } },
           { provide: AppDetailDataService, useFactory: makeDataStub },
           { provide: AppApplicationActionsService, useFactory: makeActionsStub },
           { provide: ConfirmationDialogService, useFactory: makeConfirmStub },
@@ -301,7 +300,7 @@ describe('InstancesAccordionComponent', () => {
           provideZonelessChangeDetection(),
           provideRouter([]),
           { provide: ApplicationService, useClass: ApplicationServiceMock },
-          { provide: CloudFoundryService, useValue: { cFEndpoints$: of([]), connectedCFEndpoints$: of([]) } },
+          { provide: CloudFoundryService, useValue: { cfEndpoints: signal([]) } },
           { provide: AppDetailDataService, useFactory: makeDataStub },
           { provide: AppApplicationActionsService, useFactory: makeActionsStub },
           { provide: ConfirmationDialogService, useFactory: makeConfirmStub },

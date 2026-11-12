@@ -1,9 +1,6 @@
 import { CommonModule, DatePipe } from '@angular/common';
-import { Component, OnInit, ChangeDetectionStrategy, Signal, inject, signal, WritableSignal } from '@angular/core';
-import { toSignal } from '@angular/core/rxjs-interop';
+import { Component, OnInit, ChangeDetectionStrategy, Signal, computed, inject, signal, WritableSignal } from '@angular/core';
 import { Router, RouterModule } from '@angular/router';
-import { Observable, firstValueFrom } from 'rxjs';
-import { filter, map, take } from 'rxjs/operators';
 
 import {
   DuplicateUrlBannerComponent,
@@ -55,8 +52,11 @@ export class ServiceCatalogPageComponent implements OnInit {
   private userFavoriteManager = inject(UserFavoriteManager);
   private router = inject(Router);
 
-  public cfIds$: Observable<string[]>;
-  public haveConnectedCf$: Observable<boolean>;
+  // Connected CF endpoint ids, for the page header's endpoint errors.
+  public readonly cfIds = computed(() => this.cloudFoundryService.cfEndpoints()
+    .filter(endpoint => endpoint.connectionStatus === 'connected')
+    .map(endpoint => endpoint.guid)
+    .filter((guid): guid is string => !!guid));
 
   // Row keys ({cnsiGuid}:{offeringGuid}) for service offerings the user has
   // favorited. Mirrors the app-wall pattern exactly — derived from
@@ -64,25 +64,8 @@ export class ServiceCatalogPageComponent implements OnInit {
   // as a Signal so SignalListColumn.favorite can subscribe directly. The
   // legacy 481 catalog page used the same `serviceEntityType = 'service'`
   // key, so existing favorites carry over.
-  private readonly favoriteOfferingRowKeys: Signal<ReadonlySet<string>> = toSignal(
-    this.userFavoriteManager.getAllFavorites().pipe(
-      map(([groups, entities]) => {
-        const out = new Set<string>();
-        if (!groups || !entities) return out;
-        for (const epFavGuid in groups) {
-          const g = groups[epFavGuid];
-          if (!g?.entitiesIds) continue;
-          for (const favId of g.entitiesIds) {
-            const fav = entities[favId];
-            if (fav && fav.entityType === serviceEntityType && fav.endpointType === 'cf') {
-              out.add(`${fav.endpointId}:${fav.entityId}`);
-            }
-          }
-        }
-        return out;
-      }),
-    ),
-    { initialValue: new Set<string>() },
+  private readonly favoriteOfferingRowKeys: Signal<ReadonlySet<string>> = computed(() =>
+    this.userFavoriteManager.entityFavoriteKeys('cf', [serviceEntityType]),
   );
 
   private toggleOfferingFavorite(o: StServiceOffering): void {
@@ -107,25 +90,10 @@ export class ServiceCatalogPageComponent implements OnInit {
   };
 
   constructor() {
-    this.cfIds$ = this.cloudFoundryService.cFEndpoints$.pipe(
-      map(endpoints => endpoints
-        .filter(endpoint => endpoint.connectionStatus === 'connected')
-        .map(endpoint => endpoint.guid)
-        .filter((guid): guid is string => !!guid),
-      ),
-    );
-    this.haveConnectedCf$ = this.cloudFoundryService.connectedCFEndpoints$.pipe(
-      map(endpoints => !!endpoints && endpoints.length > 0),
-    );
   }
 
-  async ngOnInit(): Promise<void> {
-    const connected = await firstValueFrom(
-      this.cloudFoundryService.connectedCFEndpoints$.pipe(
-        filter(endpoints => !!endpoints),
-        take(1),
-      ),
-    );
+  ngOnInit(): void {
+    const connected = this.cloudFoundryService.connectedCFEndpoints();
     const cnsiGuids = (connected ?? []).map(ep => ep.guid).filter((guid): guid is string => !!guid);
     this.offeringsConfig.initialize(cnsiGuids);
     // Bind the L5 sub-nav count — view exists only after initialize().

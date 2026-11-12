@@ -1,4 +1,4 @@
-@if (showAnalysis$ | async) {
+@if (showAnalysis()) {
   <div class="flex items-center my-2.5">
     <span aria-hidden="true" class="material-icons text-lg size-[18px] leading-[18px] mr-1 opacity-70">assignment</span>
     <a [routerLink]="link">Namespace Analysis</a>

@@ -1,6 +1,6 @@
 import { BreakpointObserver, Breakpoints } from '@angular/cdk/layout';
 import { Portal, PortalModule } from '@angular/cdk/portal';
-import { ChangeDetectionStrategy, AfterViewInit, ChangeDetectorRef, Component, ElementRef, OnDestroy, OnInit, signal, ViewContainerRef, inject, viewChild } from '@angular/core';
+import { ChangeDetectionStrategy, AfterViewInit, ChangeDetectorRef, Component, ElementRef, OnDestroy, OnInit, computed, signal, ViewContainerRef, inject, viewChild } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { ActivatedRoute, ActivatedRouteSnapshot, NavigationEnd, Route, Router, RouterModule } from '@angular/router';
 import { toObservable } from '@angular/core/rxjs-interop';
@@ -10,7 +10,7 @@ import {
 } from '@stratosui/store';
 import { DashboardSignalService } from '../../../core/signals/dashboard-signal.service';
 import { DashboardDataService, DashboardState } from '../../../core/dashboard-data.service';
-import { combineLatest, Observable, of, Subscription } from 'rxjs';
+import { Observable, of, Subscription } from 'rxjs';
 import { distinctUntilChanged, filter, map, startWith } from 'rxjs/operators';
 
 import { CustomizationService } from '../../../core/customizations.types';
@@ -65,7 +65,10 @@ export class DashboardBaseComponent implements OnInit, OnDestroy, AfterViewInit 
   private endpointReauthReport = inject(EndpointReauthReportService);
 
   public activeTabLabel$!: Observable<string>;
-  public subNavData$!: Observable<[string, Portal<any>, IPageSideNavTab, IHeaderBreadcrumbLink[]]>;
+  public readonly subNavData = computed<[string | null, Portal<any> | undefined, IPageSideNavTab | null, IHeaderBreadcrumbLink[] | undefined]>(() => {
+    const tabNav = this.tabNavService.currentTabHeader();
+    return [tabNav ? tabNav.label : null, this.tabNavService.tabSubNav(), tabNav, this.tabNavService.tabSubNavBreadcrumbs()];
+  });
   public isMobile$: Observable<boolean> = of(false);
   public sideNavMode$!: Observable<string>;
   public sideNavMode!: string;
@@ -150,14 +153,6 @@ export class DashboardBaseComponent implements OnInit, OnDestroy, AfterViewInit 
   }
 
   ngOnInit() {
-    this.subNavData$ = combineLatest([
-      this.tabNavService.getCurrentTabHeaderObservable().pipe(
-        startWith(null)
-      ),
-      this.tabNavService.tabSubNav$,
-      this.tabNavService.tabSubNavBreadcrumbs$
-    ]).pipe(map(([tabNav, tabSubNav, tabSubNavBreadcrumb]: [any, any, any]) => [tabNav ? tabNav.label : null, tabSubNav, tabNav, tabSubNavBreadcrumb]));
-
     // Register all health checks for endpoint types that support this
     entityCatalog.getAllEndpointTypes().forEach(epType => {
       if (epType && epType.definition && epType.definition.healthCheck) {
@@ -259,9 +254,9 @@ export class DashboardBaseComponent implements OnInit, OnDestroy, AfterViewInit 
           const alwaysShowNavFor = this.cs.get().alwaysShowNavForEndpointTypes;
           const alwaysShow = alwaysShowNavFor ?
             alwaysShowNavFor(item.requiresEndpointType) : (item.requiresEndpointType === 'cf');
-          item.hidden = alwaysShow ? of(false) : this.endpointsService.doesNotHaveConnectedEndpointType(item.requiresEndpointType);
+          item.hidden = alwaysShow ? signal(false) : this.endpointsService.noConnectedEndpointOfType(item.requiresEndpointType);
         } else if (item.requiresPersistence) {
-          item.hidden = this.endpointsService.disablePersistenceFeatures$.pipe(startWith(true));
+          item.hidden = this.endpointsService.disablePersistenceFeatures;
         }
         // Backwards compatibility (text became label)
         if (!item.label && !!item.text) {

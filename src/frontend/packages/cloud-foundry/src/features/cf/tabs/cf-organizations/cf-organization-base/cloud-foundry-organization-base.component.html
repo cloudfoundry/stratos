@@ -1,4 +1,4 @@
-<app-page-header [breadcrumbs]="breadcrumbs$ | async" [tabs]="tabLinks" tabsHeader="Organization"
+<app-page-header [breadcrumbs]="breadcrumbs()" [tabs]="tabLinks" tabsHeader="Organization"
   [favorite]="favorite()">
   <h1>{{ orgDataService.org()?.name }}</h1>
 </app-page-header>

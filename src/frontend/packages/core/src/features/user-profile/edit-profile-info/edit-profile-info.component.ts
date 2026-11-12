@@ -1,4 +1,4 @@
-import { ChangeDetectionStrategy, Component, OnDestroy, OnInit, computed, inject, signal } from '@angular/core';
+import { ChangeDetectionStrategy, Component, Injector, OnDestroy, OnInit, computed, effect, inject, signal, untracked } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { AbstractControl, ReactiveFormsModule, FormBuilder, FormGroup, FormControl, ValidationErrors, ValidatorFn, Validators } from '@angular/forms';
 import { AppInputDirective, CustomFormFieldComponent } from '../../../shared/components/custom-form-field/custom-form-field.component';
@@ -7,7 +7,7 @@ import { toSignal } from '@angular/core/rxjs-interop';
 import { ErrorStateMatcher, ShowOnDirtyErrorStateMatcher } from '../../../shared/services/tailwind-error-state-matcher';
 import { UserProfileInfo, UserProfileInfoUpdates } from '@stratosui/store';
 import { Subscription, firstValueFrom } from 'rxjs';
-import { defaultIfEmpty, take } from 'rxjs/operators';
+import { take } from 'rxjs/operators';
 
 import { CurrentUserPermissionsService } from '../../../core/permissions/current-user-permissions.service';
 import { StratosCurrentUserPermissions } from '../../../core/permissions/stratos-user-permissions.checker';
@@ -51,6 +51,7 @@ interface EditProfileForm {
 })
 export class EditProfileInfoComponent implements OnInit, OnDestroy {
   private userProfileService = inject(UserProfileService);
+  private injector = inject(Injector);
   private fb = inject(FormBuilder);
   private currentUserPermissionsService = inject(CurrentUserPermissionsService);
   private router = inject(Router);
@@ -129,21 +130,27 @@ export class EditProfileInfoComponent implements OnInit, OnDestroy {
   readonly passwordRequired = signal(false);
 
   ngOnInit() {
-    this.userProfileService.userProfile$.pipe(take(1), defaultIfEmpty(null)).subscribe(profile => {
+    this.userProfileService.loadUserProfile();
+    // Fill the form once, from the first profile loaded.
+    const fill = effect(() => {
+      const profile = this.userProfileService.userProfile();
       if (!profile) { return; }
-      // UAA needs the user's password for email changes. Local user does not
-      // Both need it for password change
-      this.needsPasswordForEmailChange.set(profile.origin === 'uaa');
-      this.profile = profile;
-      this.emailAddress = this.userProfileService.getPrimaryEmailAddress(profile);
-      this.editProfileForm.patchValue({
-        givenName: profile.name.givenName,
-        familyName: profile.name.familyName,
-        emailAddress: this.userProfileService.getPrimaryEmailAddress(profile),
-        currentPassword: '',
-        newPassword: '',
-        confirmPassword: '' });
-    });
+      fill.destroy();
+      untracked(() => {
+        // UAA needs the user's password for email changes. Local user does not
+        // Both need it for password change
+        this.needsPasswordForEmailChange.set(profile.origin === 'uaa');
+        this.profile = profile;
+        this.emailAddress = this.userProfileService.getPrimaryEmailAddress(profile);
+        this.editProfileForm.patchValue({
+          givenName: profile.name.givenName,
+          familyName: profile.name.familyName,
+          emailAddress: this.userProfileService.getPrimaryEmailAddress(profile),
+          currentPassword: '',
+          newPassword: '',
+          confirmPassword: '' });
+      });
+    }, { injector: this.injector });
     this.onChanges();
   }
 

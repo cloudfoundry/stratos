@@ -1,9 +1,9 @@
-<app-page-header [endpointIds$]="helmIds$">
+<app-page-header [endpointIds]="helmEndpointIds()">
   <h1>Workloads</h1>
 </app-page-header>
 
 <app-duplicate-url-banner
-  [endpoints$]="connectedKubeEndpoints$"
+  [endpoints]="connectedKubeEndpoints()"
   nounPlural="Releases"></app-duplicate-url-banner>
 
 <div class="h-full flex flex-col">

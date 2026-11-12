@@ -6,14 +6,14 @@
     <div class="card-content">
       <div class="kubernetes-node-summary-card__content">
         <app-metadata-item icon="title" label="Name"
-          >{{ (kubeNodeService.nodeEntity$ | async)?.metadata?.name }}
+          >{{ kubeNodeService.node()?.metadata?.name }}
         </app-metadata-item>
         <app-metadata-item icon="today" label="Created">
           {{
-            (kubeNodeService.nodeEntity$ | async)?.metadata?.creationTimestamp | date: "medium"
+            kubeNodeService.node()?.metadata?.creationTimestamp | date: "medium"
           }}</app-metadata-item
         >
-        @if (caaspNode$ | async; as caaspNode) {
+        @if (caaspNode(); as caaspNode) {
           @if (caaspNode.version) {
             <app-metadata-item icon="info_outline" label="CaaSP Version"> {{ caaspNode.version }}</app-metadata-item>
           }
@@ -22,7 +22,7 @@
             [subtle]="false"
             type="no-yes"
             condition="CaaspUpdates"
-            [overrideCondition$]="caaspNodeUpdates$"
+            [overrideCondition]="caaspNode.updates"
             [paddingTop]="'0'"
           >
           </app-kubernetes-node-condition>
@@ -31,7 +31,7 @@
             [subtle]="false"
             type="no-yes"
             condition="CaaspDisruptive"
-            [overrideCondition$]="caaspNodeDisruptive$"
+            [overrideCondition]="caaspNode.disruptiveUpdates"
             [paddingTop]="'12px'"
           >
           </app-kubernetes-node-condition>
@@ -40,7 +40,7 @@
             [subtle]="false"
             type="no-yes"
             condition="CaaspSecurity"
-            [overrideCondition$]="caaspNodeSecurity$"
+            [overrideCondition]="caaspNode.securityUpdates"
             [paddingTop]="'12px'"
           >
           </app-kubernetes-node-condition>

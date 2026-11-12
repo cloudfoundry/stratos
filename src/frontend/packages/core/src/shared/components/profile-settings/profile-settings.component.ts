@@ -1,9 +1,8 @@
 import { CommonModule } from '@angular/common';
 import { ChangeDetectionStrategy, Component, computed, inject, input } from '@angular/core';
-import { toObservable } from '@angular/core/rxjs-interop';
+import { toObservable, toSignal } from '@angular/core/rxjs-interop';
 import { CustomSlideToggleComponent } from '../custom-slide-toggle/custom-slide-toggle.component';
 import { CustomTooltipDirective } from '../custom-tooltip/custom-tooltip.directive';
-import { combineLatest, Observable } from 'rxjs';
 import { take, filter, map } from 'rxjs/operators';
 
 import {
@@ -74,7 +73,11 @@ export class ProfileSettingsComponent {
     filter(sessionData => !!sessionData)
   );
 
-  public canEdit$: Observable<boolean>;
+  private readonly userProfileService = inject(UserProfileService);
+  private readonly hasEditPermission = toSignal(
+    this.currentUserPermissionsService.can(StratosCurrentUserPermissions.EDIT_PROFILE), { initialValue: false }
+  );
+  public readonly canEdit = computed(() => !this.userProfileService.isError() && this.hasEditPermission());
 
   public types = ProfileSettingsTypes;
 
@@ -119,14 +122,6 @@ export class ProfileSettingsComponent {
 
   public setGravatarEnabled(gravatarEnabled: boolean) {
     this.dashboardData.setGravatarEnabled(gravatarEnabled);
-  }
-
-  constructor() {
-    const userProfileService = inject(UserProfileService);
-
-    const canEdit = userProfileService.isError$.pipe(map(e => !e));
-    const hasEditPermissions = this.currentUserPermissionsService.can(StratosCurrentUserPermissions.EDIT_PROFILE);
-    this.canEdit$ = combineLatest([canEdit, hasEditPermissions]).pipe(map(([a, b]) => a && b));
   }
 
   clearLocalStorage() {

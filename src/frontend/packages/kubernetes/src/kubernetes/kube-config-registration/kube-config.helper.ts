@@ -114,12 +114,10 @@ export class KubeConfigHelper {
   // Check the validity of a cluster for import
   public checkValidity(cluster: KubeConfigFileCluster): Observable<any> {
     // Check endpoint name
-    return combineLatest([
-      this.endpointsService.endpoints$,
-      this._clusters.asObservable() // Might be called before we've loaded clusters, so used the non-filtered one
-    ]).pipe(
+    // Might be called before we've loaded clusters, so used the non-filtered one
+    return this._clusters.asObservable().pipe(
       take(1),
-      map(([eps, clusters]) => this.validate(Object.values(eps), cluster, clusters))
+      map(clusters => this.validate(Object.values(this.endpointsService.endpoints()), cluster, clusters))
     );
   }
 

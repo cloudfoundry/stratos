@@ -1,4 +1,4 @@
-<app-page-header tabsHeader="Cell" [breadcrumbs]="breadcrumbs$ | async" [tabs]="tabLinks">
+<app-page-header tabsHeader="Cell" [breadcrumbs]="breadcrumbs()" [tabs]="tabLinks">
   @if (name$ | async; as name) {
     <h1> Cell: {{ name }}</h1>
   }

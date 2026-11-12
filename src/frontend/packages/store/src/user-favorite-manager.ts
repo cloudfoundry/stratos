@@ -1,17 +1,13 @@
-import { inject, Injectable } from '@angular/core';
-import { combineLatest, Observable, of } from 'rxjs';
-import { filter, map, switchMap, tap } from 'rxjs/operators';
+import { computed, inject, Injectable, Signal } from '@angular/core';
 
 import { IRequestEntityTypeState } from './app-state';
 import { StratosBaseCatalogEntity } from './entity-catalog/entity-catalog-entity/entity-catalog-entity';
 import { EntityCatalogHelpers } from './entity-catalog/entity-catalog.helper';
 import { IEntityMetadata, IStratosEntityDefinition } from './entity-catalog/entity-catalog.types';
 import { EndpointModel, entityCatalog } from './public-api';
-import { EndpointsDataService } from './services/endpoints-data.service';
 import { UserFavoritesDataService } from './services/user-favorites-data.service';
 import { IUserFavoritesGroups } from './types/favorite-groups.types';
 import {
-  IEndpointFavMetadata,
   IFavoriteMetadata,
   IFavoriteTypeInfo,
   UserFavorite,
@@ -19,101 +15,78 @@ import {
 } from './types/user-favorites.types';
 
 
-interface IGroupedFavorites {
-  // Both may be null: getUserFavoriteFromObject returns null when a favorite
-  // record is missing required fields or the endpoint cannot be resolved.
-  endpoint: UserFavorite<IEndpointFavMetadata> | null;
-  entities: (UserFavorite<IFavoriteMetadata> | null)[];
-}
-
 @Injectable({
   providedIn: 'root'
 })
 export class UserFavoriteManager {
-  private endpointsService = inject(EndpointsDataService);
   private userFavorites = inject(UserFavoritesDataService);
 
-  // The flat favorites map (legacy `favoriteEntitiesSelector`), projected from
-  // the signal source of truth as the `{ [guid]: UserFavorite }` shape callers
-  // (hydrateGroup, getFavoritesForEndpoint) expect.
-  private getFavoriteEntitiesObservable(): Observable<IRequestEntityTypeState<UserFavorite<IFavoriteMetadata>>> {
-    return this.userFavorites.favorites$.pipe(
-      map(favs => Object.fromEntries(favs) as IRequestEntityTypeState<UserFavorite<IFavoriteMetadata>>)
-    );
-  }
+  // The flat favorites map as a `{ [guid]: UserFavorite }` record.
+  private readonly favoriteEntities = computed(
+    () => Object.fromEntries(this.userFavorites.favorites()) as IRequestEntityTypeState<UserFavorite<IFavoriteMetadata>>
+  );
 
-  public getAllFavorites() {
-    const waitForFavorites$ = this.getWaitForFavoritesObservable();
-    const favoriteGroups$ = this.userFavorites.groups$;
-    const favoriteEntities$ = this.getFavoriteEntitiesObservable();
-    const combined$ = combineLatest([
-      favoriteGroups$,
-      favoriteEntities$
-    ]);
-    return waitForFavorites$
-      .pipe(switchMap(() => combined$));
-  }
+  /**
+   * The favorite groups and the flat favorites record. Undefined while the
+   * favorites load, and after a failed load.
+   */
+  readonly allFavorites: Signal<[IUserFavoritesGroups, IRequestEntityTypeState<UserFavorite<IFavoriteMetadata>>] | undefined> =
+    computed(() => {
+      if (this.userFavorites.fetching() || this.userFavorites.error()) {
+        return undefined;
+      }
+      return [this.userFavorites.groups(), this.favoriteEntities()];
+    });
 
-  private getWaitForFavoritesObservable() {
-    return combineLatest([
-      this.userFavorites.fetching$,
-      this.userFavorites.error$
-    ]).pipe(
-      tap(([fetching, error]) => {
-        // Defensive: Log error details before throwing
-        if (error) {
-          console.error('User favorites: Error fetching favorites from store', { fetching, error });
-          throw new Error('Could not fetch favorites');
+  /**
+   * Row keys (`endpointId:entityId`) of the starred entities of the given
+   * types on the given endpoint type. Empty until the favorites have loaded.
+   * Reads signals, so it updates when called inside a reactive context.
+   */
+  public entityFavoriteKeys(endpointType: string, entityTypes: string[]): Set<string> {
+    const out = new Set<string>();
+    const all = this.allFavorites();
+    if (!all) {
+      return out;
+    }
+    const [groups, entities] = all;
+    for (const endpointFavGuid in groups) {
+      for (const favId of groups[endpointFavGuid]?.entitiesIds ?? []) {
+        const fav = entities[favId];
+        if (fav && fav.endpointType === endpointType && entityTypes.includes(fav.entityType)) {
+          out.add(`${fav.endpointId}:${fav.entityId}`);
         }
-      }),
-      filter(([fetching]) => fetching === false),
-    );
-  }
-
-  public hydrateAllFavorites(): Observable<IGroupedFavorites[]> {
-    return this.getAllFavorites().pipe(
-      filter(([groups, favoriteEntities]) => !!groups && !!favoriteEntities),
-      switchMap(([groups, favoriteEntities]) => this.getHydratedGroups(groups, favoriteEntities))
-    );
-  }
-
-  private getHydratedGroups = (
-    groups: IUserFavoritesGroups,
-    favoriteEntities: IRequestEntityTypeState<UserFavorite<IFavoriteMetadata>>
-  ): Observable<IGroupedFavorites[]> => {
-    const hydrationResults$ = Object.keys(groups).map(
-      endpointGuid => this.hydrateGroup(groups[endpointGuid].entitiesIds, endpointGuid, favoriteEntities)
-    );
-    if (!hydrationResults$ || !hydrationResults$.length) {
-      return of([]);
+      }
     }
-    return combineLatest(
-      hydrationResults$
-    );
+    return out;
   }
 
-  private hydrateGroup(
-    favEntitiesGuid: string[],
-    endpointFavoriteGuid: string,
-    favoriteEntities: IRequestEntityTypeState<UserFavorite<IFavoriteMetadata>>
-  ): Observable<IGroupedFavorites> {
-    const endpointFav = favoriteEntities[endpointFavoriteGuid] as UserFavorite<IEndpointFavMetadata>;
-    const entities = favEntitiesGuid.map(guid => this.getUserFavoriteFromObject(favoriteEntities[guid]));
-    if (!endpointFav) {
-      // Wave 5 (W36-B) decision C: legacy favorites point at endpoints by
-      // guid. Resolve via EndpointsDataService.endpointById signal rather
-      // than the deleted endpointEntitiesSelector.
-      const endpointGuid = UserFavorite.getEntityGuidFromFavoriteGuid(endpointFavoriteGuid);
-      const endpointEntity = endpointGuid ? this.endpointsService.endpointById(endpointGuid)() : null;
-      const endpointFavorite = endpointEntity ? this.getFavoriteEndpointFromEntity(endpointEntity) : null;
-      return of({
-        endpoint: endpointFavorite ? this.getUserFavoriteFromObject<IEndpointFavMetadata>(endpointFavorite) : null,
-        entities
+  /** Whether the favorite is starred. Reads a signal, so it is reactive. */
+  public isFavorite(favorite: UserFavorite<IFavoriteMetadata>): boolean {
+    return !!favorite && this.userFavorites.favorites().has(favorite.guid);
+  }
+
+  /**
+   * The starred entities of one endpoint. Undefined until the favorites have
+   * loaded.
+   */
+  public favoritesForEndpoint(endpointID: string): Signal<UserFavorite<IFavoriteMetadata>[] | undefined> {
+    return computed(() => {
+      const all = this.allFavorites();
+      if (!all) {
+        return undefined;
+      }
+      const result: UserFavorite<IFavoriteMetadata>[] = [];
+      Object.values(all[1]).forEach(f => {
+        if (f.endpointId === endpointID && f.entityId) {
+          // Ensure we actually have a UserFavorite object and not a struct
+          const userFavorite = this.getUserFavoriteFromObject(f);
+          if (userFavorite) {
+            result.push(userFavorite);
+          }
+        }
       });
-    }
-    return of({
-      endpoint: this.getUserFavoriteFromObject<IEndpointFavMetadata>(endpointFav),
-      entities
+      return result;
     });
   }
 
@@ -137,16 +110,6 @@ export class UserFavoriteManager {
     return new UserFavorite<T>(f.endpointId, f.endpointType, f.entityType, f.entityId, f.metadata);
   }
 
-  public getIsFavoriteObservable(favorite: UserFavorite<IFavoriteMetadata>) {
-    // Defensive: Validate favorite before selecting from store
-    if (!favorite) {
-      console.error('User favorites: getIsFavoriteObservable - favorite is null or undefined');
-      return of(false);
-    }
-
-    return this.userFavorites.isFavorite$(favorite);
-  }
-
   public toggleFavorite(favorite: UserFavorite<IFavoriteMetadata>) {
     // Defensive: Validate favorite before toggling
     if (!favorite) {
@@ -155,27 +118,6 @@ export class UserFavoriteManager {
     }
 
     this.userFavorites.toggle(favorite);
-  }
-
-  // Get all favorites for the given endpoint ID
-  public getFavoritesForEndpoint(endpointID: string): Observable<UserFavorite<IFavoriteMetadata>[]> {
-    const waitForFavorites$ = this.getWaitForFavoritesObservable();
-    const favoriteEntities$ = this.getFavoriteEntitiesObservable();
-    return waitForFavorites$.pipe(switchMap(() => favoriteEntities$)).pipe(
-      map(favs => {
-        const result: Array<UserFavorite<IFavoriteMetadata>> = [];
-        Object.values(favs).forEach(f => {
-          if (f.endpointId === endpointID && f.entityId) {
-            // Ensure we actually have a UserFavorite object and not a struct
-            const userFavorite = this.getUserFavoriteFromObject(f);
-            if (userFavorite) {
-              result.push(userFavorite);
-            }
-          }
-        });
-        return result;
-      })
-    );
   }
 
   /**

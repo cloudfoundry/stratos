@@ -156,8 +156,8 @@
             }
 
             <!-- Notifications button -->
-            @if (((events$ | async) || []).length > 0) {
-              @let unread = (unreadEventCount$ | async) ?? 0;
+            @if (events().length > 0) {
+              @let unread = unreadEventCount();
               <!-- A link, since it goes to a route; its name carries the badge's count. -->
               <a
                 routerLink="/events"
@@ -184,7 +184,7 @@
                   aria-controls="userMenuPanel"
                   [attr.aria-expanded]="isUserMenuOpen"
                   (click)="toggleUserMenu()">
-                  <app-user-avatar color="header" [allowGravatar]="allowGravatar$ | async" [user]="user$ | async">
+                  <app-user-avatar color="header" [allowGravatar]="allowGravatar$ | async" [user]="user()">
                   </app-user-avatar>
                 </button>
                 <!-- User dropdown menu -->
@@ -194,9 +194,9 @@
                     <div class="page-header-menu-inner p-4 w-64">
                       <!-- User info -->
                       <div class="page-header-username flex items-center space-x-3 pb-4 border-b border-content-border mb-4">
-                        <app-user-avatar [allowGravatar]="allowGravatar$ | async" [user]="user$ | async"></app-user-avatar>
+                        <app-user-avatar [allowGravatar]="allowGravatar$ | async" [user]="user()"></app-user-avatar>
                         <div class="page-header-username-text">
-                          <div class="font-medium text-content-text">{{ username$ | async }}</div>
+                          <div class="font-medium text-content-text">{{ username() }}</div>
                         </div>
                       </div>
                       <!-- Menu items -->
@@ -212,7 +212,7 @@
                             (click)="closeUserMenu()">
                             <span>Profile</span>
                           </a>
-                          @if (canAPIKeys$ | async) {
+                          @if (canAPIKeys()) {
                             <a class="block px-3 py-2 text-sm text-content-text hover:bg-content-secondary rounded-md transition-colors"
                               routerLink="/api-keys"
                               (click)="closeUserMenu()"
@@ -244,7 +244,7 @@
         @if (!hideEndpointErrors()) {
           <app-page-header-events
             class="header-events z-[1]"
-            [endpointIds$]="endpointIds$()">
+            [endpointIds]="endpointIds()">
           </app-page-header-events>
         }
       </div>

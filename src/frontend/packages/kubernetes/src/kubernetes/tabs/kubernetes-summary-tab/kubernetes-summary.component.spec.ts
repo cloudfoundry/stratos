@@ -24,11 +24,12 @@ describe('KubernetesSummaryTabComponent', () => {
   const nodeRefresh = vi.fn().mockResolvedValue(undefined);
   const namespaceRefresh = vi.fn().mockResolvedValue(undefined);
   const nodeErrors = signal<StratosError[]>([]);
+  const nodes = signal<unknown[]>([]);
   const podStub = {
     podsInCluster: (_g: string) => signal([]) as Signal<unknown[]>, refresh: podRefresh, scopeErrors: () => [],
   };
   const nodeStub = {
-    nodesInCluster: (_g: string) => signal([]) as Signal<unknown[]>, refresh: nodeRefresh,
+    nodesInCluster: (_g: string) => nodes as Signal<unknown[]>, refresh: nodeRefresh,
     errors: () => nodeErrors.asReadonly(),
   };
   const namespaces = signal<unknown[]>([]);
@@ -58,6 +59,7 @@ describe('KubernetesSummaryTabComponent', () => {
 
   beforeEach(async () => {
     nodeErrors.set([]);
+    nodes.set([]);
     namespaces.set([]);
     seedEndpointsDataService([kubeTestEndpoint]);
     fixture = TestBed.createComponent(KubernetesSummaryTabComponent);
@@ -96,6 +98,17 @@ describe('KubernetesSummaryTabComponent', () => {
     const namespacesTile = tiles().find(t => t.label() === 'Namespaces')!;
     expect(namespacesTile.value()).toBe('1');
     expect(namespacesTile.labelSingular()).toBe('Namespace');
+  });
+
+  it('shows the nodes\' kubelet versions, "-" while none reports one', async () => {
+    const nodeVersion = () => (fixture.nativeElement as HTMLElement)
+      .querySelector('app-metadata-item[label="Node version"]')?.textContent?.replace('Node version', '').trim();
+    expect(nodeVersion()).toBe('-');
+
+    const node = (v: string) => ({ metadata: {}, status: { nodeInfo: { kubeletVersion: v }, conditions: [] } });
+    nodes.set([node('v1.30.1'), node('v1.30.1'), node('v1.31.0')]);
+    await fixture.whenStable();
+    expect(nodeVersion()).toBe('v1.30.1,v1.31.0');
   });
 
   it('links each tile to an existing list route', () => {

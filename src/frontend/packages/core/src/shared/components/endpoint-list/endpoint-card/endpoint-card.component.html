@@ -1,4 +1,5 @@
-<app-page-header-events class="endpoint-warning" [endpointIds$]="endpointIds$" [simpleErrorMessage]="true">
+<!-- No ids are bound (none have been since 2019), so the banner stays empty. -->
+<app-page-header-events class="endpoint-warning" [endpointIds]="[]" [simpleErrorMessage]="true">
 </app-page-header-events>
 <!-- 'expired' intentionally skips the endpoint-card--disconnected dimming: the
      signal-list renders it as an amber warning pill (needs attention), and

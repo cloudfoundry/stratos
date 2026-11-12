@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest';
 import { TestBed } from '@angular/core/testing';
-import { of } from 'rxjs';
+import { signal } from '@angular/core';
 
 import { EndpointsService } from '../../../../core/src/core/endpoints.service';
 import { RowState } from '../../../../core/src/shared/components/signal-list/row-state.types';
@@ -55,7 +55,7 @@ describe('KubeConfigHelper', () => {
     TestBed.configureTestingModule({
       providers: [
         KubeConfigHelper,
-        { provide: EndpointsService, useValue: { endpoints$: of(Object.fromEntries(endpoints.map((e, i) => [i, e]))) } },
+        { provide: EndpointsService, useValue: { endpoints: signal(Object.fromEntries(endpoints.map((e, i) => [i, e]))) } },
       ],
     });
     helper = TestBed.inject(KubeConfigHelper);

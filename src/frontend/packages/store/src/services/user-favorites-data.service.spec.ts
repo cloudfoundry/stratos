@@ -2,8 +2,6 @@ import { provideHttpClient } from '@angular/common/http';
 import { HttpTestingController, provideHttpClientTesting } from '@angular/common/http/testing';
 import { provideZonelessChangeDetection } from '@angular/core';
 import { TestBed } from '@angular/core/testing';
-import { firstValueFrom } from 'rxjs';
-import { filter, take } from 'rxjs/operators';
 import { beforeEach, afterEach, describe, expect, it } from 'vitest';
 
 import { proxyAPIVersion } from '../jetstream';
@@ -190,16 +188,6 @@ describe('UserFavoritesDataService', () => {
       expect(groups[groupKey].ethereal).toBe(false);
       expect(groups[groupKey].endpoint.endpointId).toBe('cf-1');
       expect(groups[groupKey].entitiesIds).toEqual([child.guid]);
-    });
-  });
-
-  describe('observable surface', () => {
-    it('favorites$ emits the current map', async () => {
-      const a = entityFav('app-1', 'cf-1');
-      svc.load();
-      httpMock.expectOne(FAV_URL).flush([a]);
-      const map = await firstValueFrom(svc.favorites$.pipe(filter(m => m.size > 0), take(1)));
-      expect(map.get(a.guid)).toEqual(a);
     });
   });
 });

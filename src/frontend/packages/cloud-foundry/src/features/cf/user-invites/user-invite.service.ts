@@ -1,5 +1,5 @@
 import { HttpClient } from '@angular/common/http';
-import { Injectable, inject } from '@angular/core';
+import { Injectable, Signal, computed, inject } from '@angular/core';
 import { toObservable } from '@angular/core/rxjs-interop';
 import { TailwindSnackBarService } from '@stratosui/core';
 import { AuthDataService } from '@stratosui/store';
@@ -132,17 +132,28 @@ export class UserInviteService {
   private activeRouteCfOrgSpace = inject(ActiveRouteCfOrgSpace);
 
 
-  configured$!: Observable<boolean>;
-  enabled$!: Observable<boolean>;
+  /** Whether the CF endpoint allows user invitations; false until the
+   *  endpoint record has loaded. */
+  readonly configured: Signal<boolean>;
   canConfigure$!: Observable<boolean>;
+  // Stream form of configured for canShowInviteUser, which combines it
+  // with the permission checks. It emits only once the endpoint has
+  // loaded: its reader takes the first value.
+  private readonly configuredChanges: Observable<boolean>;
 
   constructor() {
     const cfEndpointService = inject(CloudFoundryEndpointService);
 
-    this.configured$ = cfEndpointService.endpoint$.pipe(
-      filter(v => !!v && !!v.entity),
-      // Note - metadata could be falsy if smtp server not configured/other metadata properties are missing
-      map(v => !!v.entity.metadata && v.entity.metadata.userInviteAllowed === 'true')
+    this.configured = computed(() => {
+      // metadata is missing when no SMTP server or other invite
+      // settings are configured
+      const metadata = cfEndpointService.endpoint()?.entity?.metadata;
+      return !!metadata && metadata.userInviteAllowed === 'true';
+    });
+
+    const loadedConfigured = computed(() => cfEndpointService.endpoint()?.entity ? this.configured() : null);
+    this.configuredChanges = toObservable(loadedConfigured).pipe(
+      filter((configured): configured is boolean => configured !== null),
     );
 
     this.canConfigure$ = combineLatest([
@@ -161,7 +172,7 @@ export class UserInviteService {
     // Can only invite someone to an org or space and user must be admin or org manager
     return !orgGuid ? observableOf(false) : waitForCFPermissions(this.cfRoles, cfGuid).pipe(
       switchMap(() => combineLatest([
-        this.configured$,
+        this.configuredChanges,
         this.currentUserPermissionsService.can(
           CfCurrentUserPermissions.ORGANIZATION_CHANGE_ROLES,
           cfGuid,

@@ -1,13 +1,13 @@
 import { CommonModule } from '@angular/common';
-import { ChangeDetectionStrategy, AfterViewInit, Component, OnDestroy, OnInit, inject, signal } from '@angular/core';
-import { takeUntilDestroyed, toObservable, toSignal } from '@angular/core/rxjs-interop';
+import { ChangeDetectionStrategy, Component, OnDestroy, OnInit, effect, inject, signal, untracked } from '@angular/core';
+import { toObservable, toSignal } from '@angular/core/rxjs-interop';
 import { CustomTooltipDirective } from '../../../shared/components/custom-tooltip/custom-tooltip.directive';
 import { Router, RouterModule } from '@angular/router';
 import {
   EndpointsDataService,
 } from '@stratosui/store';
 import { combineLatest, Observable, of, Subscription } from 'rxjs';
-import { catchError, take, delay, filter, map, switchMap, tap } from 'rxjs/operators';
+import { catchError, take, delay, filter, map, switchMap } from 'rxjs/operators';
 
 import { CustomizationService, CustomizationsMetadata } from '../../../core/customizations.types';
 import { EndpointsService } from '../../../core/endpoints.service';
@@ -49,7 +49,7 @@ import { AppAreaLoaderComponent } from '../../../shared/components/area-loader/a
     ListSubNavComponent
   ]
 })
-export class EndpointsPageComponent implements AfterViewInit, OnDestroy, OnInit {
+export class EndpointsPageComponent implements OnDestroy, OnInit {
   endpointsService = inject(EndpointsService);
   router = inject(Router);
   private endpointsData = inject(EndpointsDataService);
@@ -127,21 +127,24 @@ export class EndpointsPageComponent implements AfterViewInit, OnDestroy, OnInit 
 
     this.customizations = cs.get();
 
-    // Redirect to /applications if not enabled.
-    // Defensive: Use catchError to prevent subscription errors from breaking initialization
-    endpointsService.disablePersistenceFeatures$.pipe(
-      filter(off => off !== undefined && off !== null),
-      map(off => {
-        if (off) {
-          // User should only get here if url is manually entered
-          this.router.navigate(['applications'], { replaceUrl: true });
-        }
-      }),
-      take(1),
-      // The flag may never arrive; do not hold the page after it closes.
-      takeUntilDestroyed()
-    ).subscribe({
-      error: (err) => console.error('Error checking persistence features:', err)
+    // Redirect to /applications if not enabled, checked once on entry.
+    let persistenceChecked = false;
+    effect(() => {
+      const off = endpointsService.disablePersistenceFeatures();
+      if (persistenceChecked) {
+        return;
+      }
+      persistenceChecked = true;
+      if (off) {
+        // User should only get here if url is manually entered
+        untracked(() => this.router.navigate(['applications'], { replaceUrl: true }));
+      }
+    });
+
+    // Tell the user when endpoints are registered but none are connected.
+    effect(() => {
+      const show = endpointsService.haveRegistered() && !endpointsService.haveConnected();
+      untracked(() => this.showSnackBar(show));
     });
 
     // Is the backup/restore plugin available on the backend?
@@ -231,24 +234,6 @@ export class EndpointsPageComponent implements AfterViewInit, OnDestroy, OnInit 
     );
   }
 
-  ngAfterViewInit() {
-    // Subscribe to endpoint registration state to show snackbar when endpoints exist but aren't connected
-    // Defensive: Add error handling and ensure proper cleanup
-    this.subs.push(
-      combineLatest([
-        this.endpointsService.haveRegistered$.pipe(filter(val => val !== undefined && val !== null)),
-        this.endpointsService.haveConnected$.pipe(filter(val => val !== undefined && val !== null))
-      ]).pipe(
-        delay(1),
-        tap(([hasRegistered, hasConnected]) => {
-          // Show snackbar if endpoints are registered but none are connected
-          this.showSnackBar(hasRegistered && !hasConnected);
-        })
-      ).subscribe({
-        error: (err) => console.error('Error subscribing to endpoint state:', err)
-      })
-    );
-  }
 
   ngOnDestroy() {
     // Defensive: Ensure all cleanup operations complete even if one fails

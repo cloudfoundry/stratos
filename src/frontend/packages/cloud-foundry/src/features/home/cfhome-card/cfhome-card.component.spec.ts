@@ -81,10 +81,10 @@ describe('CFHomeCardComponent', () => {
 @Component({
   selector: 'app-card-cf-recent-apps',
   standalone: true,
-  template: `@for (app of allApps$ ?? []; track app.metadata.guid) {<span class="stub-app">{{ app.entity.name }}:{{ app.entity.state }}</span>}`,
+  template: `@for (app of allApps ?? []; track app.metadata.guid) {<span class="stub-app">{{ app.entity.name }}:{{ app.entity.state }}</span>}`,
 })
 class StubRecentAppsComponent {
-  @Input() allApps$!: any[];
+  @Input() allApps!: any[];
   @Input() hideWhenEmpty = false;
   @Input() dateMode!: string;
   @Input() showDate = true;

@@ -1,7 +1,7 @@
 <app-page-header>
   <h1>User Profile</h1>
   <div class="page-header-right">
-    @if (canEdit$ | async) {
+    @if (canEdit()) {
       <button aria-label="Edit" class="btn-icon" name="edit" routerLink="/user-profile/edit" title="Edit">
         <span aria-hidden="true" class="material-icons">edit</span>
       </button>
@@ -9,18 +9,18 @@
   </div>
 </app-page-header>
 <div class="p-6">
-  @if (isError$ | async) {
+  @if (isError()) {
     <app-no-content-message icon="error"
     firstLine="An error occurred retrieving the User Profile" [secondLine]="{
     text: ''
   }"></app-no-content-message>
   }
-  @if (userProfile$ | async; as profile) {
+  @if (userProfile(); as profile) {
     <app-user-profile-banner [user]="profile"
       [allowGravatar]="(allowGravatar$ | async) ?? false">
     </app-user-profile-banner>
   }
-  @if (userProfile$ | async; as profile) {
+  @if (userProfile(); as profile) {
     <div class="mt-6">
       <div class="space-y-6">
         <div class="card">
@@ -37,13 +37,13 @@
                 } @else {
                   <app-metadata-item icon="title" label="Name">No Name</app-metadata-item>
                 }
-                @if (primaryEmailAddress$ | async) {
+                @if (primaryEmailAddress()) {
                   <app-metadata-item icon="email" label="Email">
-                  {{ primaryEmailAddress$ | async }}</app-metadata-item>
+                  {{ primaryEmailAddress() }}</app-metadata-item>
                 } @else {
                   <app-metadata-item icon="email" label="Email">No Email Address</app-metadata-item>
                 }
-                @if ((userService.isAdmin$ | async)) {
+                @if (userService.isAdmin()) {
                   <app-metadata-item icon="security" label="User Type">
                   Administrator</app-metadata-item>
                 }

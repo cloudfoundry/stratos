@@ -1,6 +1,5 @@
 import { provideZonelessChangeDetection } from '@angular/core';
 import { TestBed } from '@angular/core/testing';
-import { BehaviorSubject } from 'rxjs';
 import { describe, it, expect, beforeEach } from 'vitest';
 import type { EndpointModel } from '@stratosui/store';
 
@@ -11,10 +10,10 @@ function ep(host: string): EndpointModel {
 }
 
 describe('DuplicateUrlBannerComponent', () => {
-  let connected$: BehaviorSubject<EndpointModel[]>;
+  let connected: EndpointModel[];
 
   beforeEach(() => {
-    connected$ = new BehaviorSubject<EndpointModel[]>([]);
+    connected = [];
     TestBed.configureTestingModule({
       providers: [provideZonelessChangeDetection()],
     });
@@ -22,15 +21,15 @@ describe('DuplicateUrlBannerComponent', () => {
 
   it('hides the banner when no endpoints share a URL', () => {
     const fixture = TestBed.createComponent(DuplicateUrlBannerComponent);
-    fixture.componentRef.setInput('endpoints$', connected$.asObservable());
+    fixture.componentRef.setInput('endpoints', connected);
     fixture.detectChanges();
     expect(fixture.nativeElement.textContent.trim()).toBe('');
   });
 
   it('shows the count and the default noun sentence', () => {
-    connected$.next([ep('shared'), ep('shared')]);
+    connected = [ep('shared'), ep('shared')];
     const fixture = TestBed.createComponent(DuplicateUrlBannerComponent);
-    fixture.componentRef.setInput('endpoints$', connected$.asObservable());
+    fixture.componentRef.setInput('endpoints', connected);
     fixture.detectChanges();
     const text = fixture.nativeElement.textContent;
     // Endpoint-type label resolves via the entity catalog (empty in this
@@ -41,9 +40,9 @@ describe('DuplicateUrlBannerComponent', () => {
   });
 
   it('names the group sizes when endpoints share more than one URL', () => {
-    connected$.next([ep('shared-a'), ep('shared-a'), ep('shared-b'), ep('shared-b')]);
+    connected = [ep('shared-a'), ep('shared-a'), ep('shared-b'), ep('shared-b')];
     const fixture = TestBed.createComponent(DuplicateUrlBannerComponent);
-    fixture.componentRef.setInput('endpoints$', connected$.asObservable());
+    fixture.componentRef.setInput('endpoints', connected);
     fixture.detectChanges();
     // 2 disjoint pairs (shared-a, shared-b), not one group of 4 - "4 X
     // endpoints" alone would misleadingly imply they all relate to each
@@ -52,9 +51,9 @@ describe('DuplicateUrlBannerComponent', () => {
   });
 
   it('replaces the trailing sentence when a custom message is set', () => {
-    connected$.next([ep('shared'), ep('shared')]);
+    connected = [ep('shared'), ep('shared')];
     const fixture = TestBed.createComponent(DuplicateUrlBannerComponent);
-    fixture.componentRef.setInput('endpoints$', connected$.asObservable());
+    fixture.componentRef.setInput('endpoints', connected);
     fixture.componentRef.setInput('message', 'Several of the endpoints below are views of the same foundation.');
     fixture.detectChanges();
     const text = fixture.nativeElement.textContent;

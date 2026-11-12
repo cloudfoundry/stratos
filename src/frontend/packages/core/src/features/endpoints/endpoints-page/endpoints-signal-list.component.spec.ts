@@ -1,7 +1,6 @@
 import { TestBed } from '@angular/core/testing';
 import { provideZonelessChangeDetection, signal } from '@angular/core';
 import { Router } from '@angular/router';
-import { of } from 'rxjs';
 import { describe, it, expect, beforeEach } from 'vitest';
 import { vi } from 'vitest';
 import type { EndpointModel } from '@stratosui/store';
@@ -54,7 +53,7 @@ describe('EndpointsSignalListComponent - expired status + reconnect action', () 
       providers: [
         provideZonelessChangeDetection(),
         { provide: EndpointsSignalConfigService, useValue: makeEndpointsConfigStub() },
-        { provide: UserFavoriteManager, useValue: { getAllFavorites: () => of([{}, {}]) } as unknown as UserFavoriteManager },
+        { provide: UserFavoriteManager, useValue: { allFavorites: signal([{}, {}]) } as unknown as UserFavoriteManager },
         { provide: Router, useValue: { navigate: vi.fn() } },
         { provide: ConfirmationDialogService, useValue: { open: vi.fn() } },
         { provide: TailwindDialogService, useValue: { open: vi.fn() } },

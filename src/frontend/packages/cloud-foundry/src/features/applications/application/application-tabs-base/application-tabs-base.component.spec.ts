@@ -38,10 +38,9 @@ describe('ApplicationTabsBaseComponent', () => {
     // Create mock for EndpointsService.hasMetrics() that returns a BehaviorSubject
     // to prevent immediate completion which causes EmptyErrors
     const hasMetricsSubject = new BehaviorSubject<boolean>(false);
-    const disablePersistenceFeaturesSubject = new BehaviorSubject<boolean>(false);
     const mockEndpointsService = {
       hasMetrics: vi.fn().mockReturnValue(hasMetricsSubject.asObservable()),
-      disablePersistenceFeatures$: disablePersistenceFeaturesSubject.asObservable()
+      disablePersistenceFeatures: signal(false),
     };
 
     // Mock other required services

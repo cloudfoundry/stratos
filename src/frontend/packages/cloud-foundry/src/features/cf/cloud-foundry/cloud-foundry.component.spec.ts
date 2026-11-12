@@ -2,7 +2,6 @@ import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { Signal, WritableSignal, computed, importProvidersFrom, provideZonelessChangeDetection, signal } from '@angular/core';
 import { Router, provideRouter } from '@angular/router';
 import { NoopAnimationsModule } from '@angular/platform-browser/animations';
-import { of } from 'rxjs';
 import { describe, it, expect, beforeEach, vi, type Mock } from 'vitest';
 
 import { EndpointRowActionsService, TabNavService } from '@stratosui/core';
@@ -151,7 +150,7 @@ describe('CloudFoundryComponent single-CF shortcut', () => {
       // The duplicate-URL banner in the template resolves CloudFoundryService
       // through this same component-level provider. It plays no part in the
       // shortcut, so an empty list keeps it inert.
-      connectedCFEndpoints$: of([] as EndpointModel[]),
+      connectedCFEndpoints: signal([] as EndpointModel[]),
     };
 
     await TestBed.configureTestingModule({

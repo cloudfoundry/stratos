@@ -168,13 +168,10 @@ export class CloudFoundryUsersComponent {
     { initialValue: false },
   );
 
-  /** True when the CF endpoint has the UAA invite feature configured.
-   *  Bridges UserInviteService.configured$ into a signal; false until the
-   *  first emission so the invite tab stays absent until resolved. */
-  private readonly userInviteAllowed: Signal<boolean> = toSignal(
-    this.userInviteService.configured$,
-    { initialValue: false },
-  );
+  /** True when the CF endpoint has the UAA invite feature configured;
+   *  false until the endpoint has loaded, so the invite tab stays absent
+   *  until resolved. */
+  private readonly userInviteAllowed: Signal<boolean> = this.userInviteService.configured;
 
   /** Resolves the selected row keys against the full filtered list to yield
    *  the concrete StUser objects. Used by the bulk Remove actions to pass

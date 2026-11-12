@@ -1,7 +1,5 @@
-import { AsyncPipe, DatePipe } from "@angular/common";
-import { Component, inject, ChangeDetectionStrategy } from "@angular/core";
-import { Observable } from "rxjs";
-import { map } from "rxjs/operators";
+import { DatePipe } from "@angular/common";
+import { Component, computed, inject, ChangeDetectionStrategy } from "@angular/core";
 
 import { MetadataItemComponent } from "@stratosui/core";
 import {
@@ -16,36 +14,18 @@ import {
 @Component({
   selector: "app-kubernetes-node-summary-card",
   templateUrl: "./kubernetes-node-summary-card.component.html",
-  imports: [AsyncPipe, DatePipe, MetadataItemComponent, KubernetesNodeConditionComponent],
+  imports: [DatePipe, MetadataItemComponent, KubernetesNodeConditionComponent],
   changeDetection: ChangeDetectionStrategy.OnPush,
   standalone: true,
 })
 export class KubernetesNodeSummaryCardComponent {
-  public caaspNode$: Observable<CaaspNodeData | null>;
-  public caaspNodeUpdates$: Observable<boolean>;
-  public caaspNodeDisruptive$: Observable<boolean>;
-  public caaspNodeSecurity$: Observable<boolean>;
   public kubeEndpointService = inject(KubernetesEndpointService);
   public kubeNodeService = inject(KubernetesNodeService);
 
-  constructor() {
-    this.caaspNode$ = this.kubeNodeService.nodeEntity$.pipe(
-      map((node) => {
-        const nodeData = this.kubeEndpointService.getCaaspNodeData(node);
-        return nodeData?.version ? nodeData : null;
-      }),
-    );
-
-    this.caaspNodeUpdates$ = this.caaspNode$.pipe(
-      map((node) => node?.updates ?? false),
-    );
-
-    this.caaspNodeDisruptive$ = this.caaspNode$.pipe(
-      map((node) => node?.disruptiveUpdates ?? false),
-    );
-
-    this.caaspNodeSecurity$ = this.caaspNode$.pipe(
-      map((node) => node?.securityUpdates ?? false),
-    );
-  }
+  // The node's CaaSP data, null for a node that is not a CaaSP node.
+  readonly caaspNode = computed((): CaaspNodeData | null => {
+    const node = this.kubeNodeService.node();
+    const nodeData = node ? this.kubeEndpointService.getCaaspNodeData(node) : undefined;
+    return nodeData?.version ? nodeData : null;
+  });
 }

@@ -1,11 +1,10 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
-import { Component, NO_ERRORS_SCHEMA, input, provideZonelessChangeDetection } from '@angular/core';
+import { Component, NO_ERRORS_SCHEMA, input, provideZonelessChangeDetection, signal } from '@angular/core';
 import { NoopAnimationsModule } from '@angular/platform-browser/animations';
 import { RouterTestingModule } from '@angular/router/testing';
 import { provideHttpClient } from '@angular/common/http';
 import { provideHttpClientTesting } from '@angular/common/http/testing';
 import { describe, it, expect, beforeEach, afterEach, vi } from 'vitest';
-import { of } from 'rxjs';
 import { EndpointModel, UserFavoriteManager, UserFavorite, IEndpointFavMetadata, entityCatalog } from '@stratosui/store';
 import { createBasicStoreModule, STORE_TEST_PROVIDERS } from '@stratosui/store/testing';
 import { SidePanelService } from '@stratosui/core';
@@ -84,7 +83,7 @@ describe('HomePageEndpointCardComponent', () => {
 
     // Mock UserFavoriteManager methods used in ngOnInit
     vi.spyOn(userFavoriteManager, 'endpointHasEntitiesThatCanFavorite').mockReturnValue(false);
-    vi.spyOn(userFavoriteManager, 'getFavoritesForEndpoint').mockReturnValue(of([]));
+    vi.spyOn(userFavoriteManager, 'favoritesForEndpoint').mockReturnValue(signal([]));
     vi.spyOn(userFavoriteManager, 'getFavoriteEndpointFromEntity').mockReturnValue(mockFavorite as any);
 
     // Set required input

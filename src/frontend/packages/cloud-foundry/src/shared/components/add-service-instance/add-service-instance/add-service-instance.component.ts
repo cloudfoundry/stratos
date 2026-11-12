@@ -791,8 +791,8 @@ export class AddServiceInstanceComponent implements OnInit, OnDestroy {
 
   // Marketplace mode setup. Resolves the route params, primes csi state,
   // awaits the connected CF endpoint list signal, and selects the
-  // requested endpoint. The serviceName$ subscription stays — it just
-  // imperatively updates the title as the helper resolves.
+  // requested endpoint. An effect on the helper's serviceName signal
+  // updates the title as the helper resolves.
   private async initialiseForMarketplaceMode(): Promise<boolean> {
     const { endpointId, serviceId } = this.activatedRoute.snapshot.params;
 
@@ -835,26 +835,18 @@ export class AddServiceInstanceComponent implements OnInit, OnDestroy {
       );
     }
 
-    // Title is set imperatively as the helper resolves the service name.
+    // Title follows the helper's service name as it resolves.
     // setTimeout pushes each update past the current change-detection
     // cycle to avoid ExpressionChangedAfterItHasBeenChecked.
-    this.cSIHelperService.serviceName$.pipe(
-      catchError(error => {
-        console.error('initialiseForMarketplaceMode: Failed to fetch service name', {
-          serviceId,
-          endpointId,
-          error
-        });
-        return observableOf('');
-      }),
-      takeUntil(this.destroyed$)
-    ).subscribe(label => {
+    const helper = this.cSIHelperService;
+    effect(() => {
+      const label = helper.serviceName();
       const title = `Create Instance: ${label || 'Service'}`;
       setTimeout(() => {
         this.title.set(title);
         this._serviceName.set(label || '');
       }, 0);
-    });
+    }, { injector: this.injector });
     this.marketPlaceMode = true;
 
     let endpoints: ReadonlyArray<unknown>;

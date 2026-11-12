@@ -15,7 +15,7 @@ import {
 } from '@stratosui/store';
 
 import { EndpointsSignalService } from '../../../../core/signals/endpoints-signal.service';
-import { combineLatest, Observable, ReplaySubject, Subscription } from 'rxjs';
+import { combineLatest, Observable, Subscription } from 'rxjs';
 import { map } from 'rxjs/operators';
 
 import { EndpointsService } from '../../../../core/endpoints.service';
@@ -106,8 +106,6 @@ export class EndpointCardComponent extends CardCell<EndpointModel> implements On
 
   public hasDetails = true;
   public endpointParentType!: string;
-  private endpointIds = new ReplaySubject<string[]>();
-  public endpointIds$: Observable<string[]>;
   // strict: never assigned in this component; the meta-card consumes it via
   // an async pipe and tolerates an absent stream.
   public cardStatus$?: Observable<StratosStatus>;
@@ -138,7 +136,6 @@ export class EndpointCardComponent extends CardCell<EndpointModel> implements On
 
   constructor() {
     super();
-    this.endpointIds$ = this.endpointIds.asObservable();
     // Create the details component once the row's type is known, and hand it
     // each new row. Untracked: only the row and its type should re-run this,
     // not whatever the details component reads while it is created.

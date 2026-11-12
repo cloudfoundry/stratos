@@ -38,7 +38,6 @@ function makeAppServiceStub(cfGuid = 'cf-1', appGuid = 'app-1') {
 
 function makeEndpointStub(cfName = 'test-cf') {
   return {
-    endpoint$: new BehaviorSubject({ entity: { name: cfName } }),
     // Sync signal mirror — slice 1 added a sync read path on this service.
     endpoint: signal({ entity: { name: cfName } }),
   };

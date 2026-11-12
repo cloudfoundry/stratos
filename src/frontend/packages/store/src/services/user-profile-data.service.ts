@@ -1,6 +1,5 @@
 import { HttpClient } from '@angular/common/http';
 import { Injectable, Signal, inject, signal } from '@angular/core';
-import { toObservable } from '@angular/core/rxjs-interop';
 import { Observable, catchError, map, of } from 'rxjs';
 
 import { proxyAPIVersion } from '../jetstream';
@@ -34,10 +33,6 @@ export class UserProfileDataService {
   readonly profile: Signal<UserProfileInfo | null> = this._profile.asReadonly();
   readonly fetching: Signal<boolean> = this._fetching.asReadonly();
   readonly error: Signal<boolean> = this._error.asReadonly();
-
-  readonly profile$: Observable<UserProfileInfo | null> = toObservable(this._profile);
-  readonly fetching$: Observable<boolean> = toObservable(this._fetching);
-  readonly error$: Observable<boolean> = toObservable(this._error);
 
   /** Fetch the user's profile (legacy `FetchUserProfileAction`). Fire-and-forget. */
   fetch(userGuid: string): void {

@@ -8,7 +8,7 @@
     [attr.aria-expanded]="open()" aria-controls="page-side-nav-items" (click)="open.set(!open())">
     <app-custom-icon class="page-side-nav__items-compact-dropdown" aria-hidden="true">arrow_drop_down</app-custom-icon>
     <small> {{ header() }}</small>
-    <span class="page-side-nav__items-compact-tab-label"> {{ activeTab$ | async }}</span>
+    <span class="page-side-nav__items-compact-tab-label"> {{ activeTab() }}</span>
   </button>
   <ul id="page-side-nav-items" class="page-side-nav__items" [class.page-side-nav__items--open]="open()">
     @for (tab of shownTabs(); track tab.link || tab.label) {
@@ -18,7 +18,7 @@
         </li>
       }
       <!-- null = the gate has not answered yet; keep the tab out until it does. -->
-      @if (tab && tab.link && (tab.hidden$ | async) === false) {
+      @if (tab && tab.link && tab.isHidden?.() === false) {
         <li>
           <a class="page-side-nav__item"
             [attr.data-test]="'page-tab-' + tab.label"

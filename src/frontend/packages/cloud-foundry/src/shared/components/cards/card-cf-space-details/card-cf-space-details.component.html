@@ -7,23 +7,23 @@
       <div class="flex flex-row">
         <div class="flex-1">
           <app-metadata-item class="mt-0" label="User Space Role/s">
-            {{ (cfSpaceService.userRole$ | async) ?? '–' }}
+            {{ cfSpaceService.userRole() ?? '–' }}
           </app-metadata-item>
           <app-metadata-item label="Quota Definition">
-            @if (cfSpaceService.spaceQuotaDefinition$ | async; as spaceQuotaDefinition) {
-              <a [routerLink]="cfSpaceService.quotaLink$ | async">
+            @if (spaceQuota(); as spaceQuotaDefinition) {
+              <a [routerLink]="spaceQuotaLink">
                 {{ spaceQuotaDefinition.name }}
               </a>
             } @else {
               None assigned
-              @if (cfSpaceService.quotaDefinition$ | async; as quotaDefinition) {
+              @if (quota()) {
                 <span> - <a [routerLink]="[]" (click)="goToOrgQuota()">view organization's quota</a> </span>
               }
             }
           </app-metadata-item>
           <app-metadata-item label="Provision Paid Services">
             <app-boolean-indicator
-              [isTrue]="$safeNavigationMigration((cfSpaceService.quotaDefinition$ | async)?.paidServicesAllowed)"
+              [isTrue]="$safeNavigationMigration(quota()?.paidServicesAllowed)"
               type="yes-no"
             >
             </app-boolean-indicator>
@@ -31,7 +31,7 @@
         </div>
         <div class="flex-1">
           <app-metadata-item class="mt-0" label="SSH Access">
-            {{ allowSshStatus$ | async }}
+            {{ allowSshStatus() }}
           </app-metadata-item>
           <app-metadata-item label="Created At">
             {{ $safeNavigationMigration(cfSpaceService.spaceDataService.space()?.createdAt) | date: "medium" }}

@@ -36,7 +36,7 @@ export class CardCfInfoComponent implements OnInit {
   readonly info = this.cfEndpointService.info;
   readonly hasSSHAccess = this.cfEndpointService.hasSSHAccess;
   readonly canConfigureInvites = toSignal(this.userInviteService.canConfigure$, { initialValue: false });
-  readonly invitesConfigured = toSignal(this.userInviteService.configured$, { initialValue: false });
+  readonly invitesConfigured = this.userInviteService.configured;
 
   // Autoscaler version comes from the cf-autoscaler signal-native data
   // service. Wave-3 (A-effects-cleanup) replaced the legacy

@@ -40,14 +40,14 @@ import { AppApplicationActionBarComponent } from './application-action-bar.compo
   template: `
     <app-application-action-bar></app-application-action-bar>
     <div data-test-id="portal-outlet">
-      @if (portal$ | async; as portal) {
+      @if (portal(); as portal) {
         <ng-container [cdkPortalOutlet]="portal"></ng-container>
       }
     </div>
   `,
 })
 class ActionBarTestHostComponent {
-  portal$ = inject(TabNavService).tabSubNav$;
+  portal = inject(TabNavService).tabSubNav;
 }
 
 describe('AppApplicationActionBarComponent', () => {

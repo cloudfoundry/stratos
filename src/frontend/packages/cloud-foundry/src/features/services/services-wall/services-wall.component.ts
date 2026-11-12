@@ -1,9 +1,6 @@
 import { CommonModule, DatePipe } from '@angular/common';
-import { DestroyRef, Component, OnInit, ChangeDetectionStrategy, Signal, inject, signal, WritableSignal } from '@angular/core';
-import { toSignal } from '@angular/core/rxjs-interop';
+import { DestroyRef, Component, OnInit, ChangeDetectionStrategy, Signal, computed, inject, signal, WritableSignal } from '@angular/core';
 import { Router, RouterModule } from '@angular/router';
-import { Observable, firstValueFrom } from 'rxjs';
-import { filter, map, take } from 'rxjs/operators';
 
 import {
   ConfirmationDialogService,
@@ -74,35 +71,19 @@ export class ServicesWallComponent implements OnInit {
   private snackBar = inject(TailwindSnackBarService);
   private router = inject(Router);
 
-  public cfIds$: Observable<string[]>;
-  public haveConnectedCf$: Observable<boolean>;
+  // Connected CF endpoint ids, for the page header's endpoint errors.
+  public readonly cfIds = computed(() => this.cloudFoundryService.cfEndpoints()
+    .filter(endpoint => endpoint.connectionStatus === 'connected')
+    .map(endpoint => endpoint.guid)
+    .filter((guid): guid is string => !!guid));
 
   // Row keys ({cnsiGuid}:{siGuid}) for service instances the user has
   // favorited. Either entity type qualifies — the legacy 481 UI used
   // separate favorite entityTypes for managed (`serviceInstance`) and
   // user-provided (`userProvidedServiceInstance`); we OR them so existing
   // favorites of either kind light up here.
-  private readonly favoriteInstanceRowKeys: Signal<ReadonlySet<string>> = toSignal(
-    this.userFavoriteManager.getAllFavorites().pipe(
-      map(([groups, entities]) => {
-        const out = new Set<string>();
-        if (!groups || !entities) return out;
-        for (const epFavGuid in groups) {
-          const g = groups[epFavGuid];
-          if (!g?.entitiesIds) continue;
-          for (const favId of g.entitiesIds) {
-            const fav = entities[favId];
-            if (!fav || fav.endpointType !== 'cf') continue;
-            if (fav.entityType === serviceInstancesEntityType
-              || fav.entityType === userProvidedServiceInstanceEntityType) {
-              out.add(`${fav.endpointId}:${fav.entityId}`);
-            }
-          }
-        }
-        return out;
-      }),
-    ),
-    { initialValue: new Set<string>() },
+  private readonly favoriteInstanceRowKeys: Signal<ReadonlySet<string>> = computed(() =>
+    this.userFavoriteManager.entityFavoriteKeys('cf', [serviceInstancesEntityType, userProvidedServiceInstanceEntityType]),
   );
 
   private toggleInstanceFavorite(si: StServiceInstance): void {
@@ -128,25 +109,10 @@ export class ServicesWallComponent implements OnInit {
   };
 
   constructor() {
-    this.cfIds$ = this.cloudFoundryService.cFEndpoints$.pipe(
-      map(endpoints => endpoints
-        .filter(endpoint => endpoint.connectionStatus === 'connected')
-        .map(endpoint => endpoint.guid)
-        .filter((guid): guid is string => !!guid),
-      ),
-    );
-    this.haveConnectedCf$ = this.cloudFoundryService.connectedCFEndpoints$.pipe(
-      map(endpoints => !!endpoints && endpoints.length > 0),
-    );
   }
 
-  async ngOnInit(): Promise<void> {
-    const connected = await firstValueFrom(
-      this.cloudFoundryService.connectedCFEndpoints$.pipe(
-        filter(endpoints => !!endpoints),
-        take(1),
-      ),
-    );
+  ngOnInit(): void {
+    const connected = this.cloudFoundryService.connectedCFEndpoints();
     const cnsiGuids = (connected ?? []).map(ep => ep.guid).filter((guid): guid is string => !!guid);
     this.instancesConfig.initialize(cnsiGuids);
     // Bind the L5 sub-nav count — view exists only after initialize().

@@ -1,10 +1,6 @@
-import { Injectable, inject } from '@angular/core';
-import { toObservable } from '@angular/core/rxjs-interop';
-import { Observable } from 'rxjs';
-import { map, shareReplay } from 'rxjs/operators';
+import { Injectable, Signal, computed, inject } from '@angular/core';
 
 import { EndpointModel, EndpointsDataService } from '../../../../store/src/public-api';
-import { APIResource, EntityInfo } from '../../../../store/src/types/api.types';
 import { KUBERNETES_ENDPOINT_TYPE } from '../kubernetes-entity-factory';
 
 @Injectable({
@@ -15,16 +11,11 @@ export class KubernetesService {
   // of the legacy ngrx PaginationMonitor.
   private endpointsData = inject(EndpointsDataService);
 
-  kubeEndpoints$: Observable<EndpointModel[]>;
+  readonly kubeEndpoints: Signal<EndpointModel[]> = computed(() =>
+    this.endpointsData.endpointsList().filter(e => e.cnsi_type === KUBERNETES_ENDPOINT_TYPE)
+  );
+
   // strict: structural-shape field mirroring the sibling endpoint services
   // (metrics-service / cloud-foundry.service); populated by consumers, never
   // initialized here. Matches the existing definite-assignment convention.
-  waitForAppEntity$!: Observable<EntityInfo<APIResource>>;
-
-  constructor() {
-    this.kubeEndpoints$ = toObservable(this.endpointsData.endpointsList).pipe(
-      map(endpoints => endpoints.filter(e => e.cnsi_type === KUBERNETES_ENDPOINT_TYPE)),
-      shareReplay(1)
-    );
-  }
 }

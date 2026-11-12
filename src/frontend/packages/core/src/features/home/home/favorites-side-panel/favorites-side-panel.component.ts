@@ -1,6 +1,6 @@
 import { CommonModule } from '@angular/common';
-import { ChangeDetectionStrategy, Component  } from '@angular/core';
-import { Observable } from 'rxjs';
+import { ChangeDetectionStrategy, Component, Signal, signal } from '@angular/core';
+import { IFavoriteMetadata, UserFavorite } from '@stratosui/store';
 
 import { PreviewableComponent } from '../../../../shared/previewable-component';
 import { SidepanelPreviewComponent } from '../../../../shared/components/sidepanel-preview/sidepanel-preview.component';
@@ -19,12 +19,13 @@ import { FavoritesMetaCardComponent } from '../favorites-meta-card/favorites-met
 })
 export class FavoritesSidePanelComponent implements PreviewableComponent {
 
-  // strict: assigned in setProps (PreviewableComponent contract) before use
-  favorites$!: Observable<any>;
+  // Replaced in setProps (PreviewableComponent contract); empty until then.
+  favorites: Signal<UserFavorite<IFavoriteMetadata>[] | undefined> = signal(undefined);
+  // strict: assigned in setProps before use
   name!: string;
 
   setProps(props: { [key: string]: any; }): void {
-    this.favorites$ = props.favorites$;
+    this.favorites = props.favorites;
     this.name = props.endpoint.name;
   }
 

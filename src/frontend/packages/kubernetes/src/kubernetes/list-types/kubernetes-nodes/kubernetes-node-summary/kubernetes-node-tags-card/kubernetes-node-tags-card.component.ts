@@ -1,8 +1,5 @@
-import { AsyncPipe } from '@angular/common';
-import {Component, OnInit, inject, ChangeDetectionStrategy, input} from '@angular/core';
+import { Component, computed, inject, ChangeDetectionStrategy, input } from '@angular/core';
 import { CardWrapperComponent, CardHeaderComponent, CardTitleComponent, CardContentComponent } from '@stratosui/core';
-import { Observable } from 'rxjs';
-import { map } from 'rxjs/operators';
 
 import { AppChip, AppChipsComponent } from '../../../../../../../core/src/shared/components/chips/chips.component';
 import { KubernetesNodeService } from '../../../../services/kubernetes-node.service';
@@ -14,7 +11,6 @@ import { KubernetesNodeService } from '../../../../services/kubernetes-node.serv
   changeDetection: ChangeDetectionStrategy.OnPush,
   standalone: true,
   imports: [
-    AsyncPipe,
     CardWrapperComponent,
     CardHeaderComponent,
     CardTitleComponent,
@@ -22,7 +18,7 @@ import { KubernetesNodeService } from '../../../../services/kubernetes-node.serv
     AppChipsComponent
   ]
 })
-export class KubernetesNodeTagsCardComponent implements OnInit {
+export class KubernetesNodeTagsCardComponent {
 
 
   // Both hosts bind mode (the metadata key to list) and title.
@@ -30,14 +26,12 @@ export class KubernetesNodeTagsCardComponent implements OnInit {
 
   readonly title = input.required<string>();
 
-  chipTags$!: Observable<AppChip[]>;  public kubeNodeService = inject(KubernetesNodeService); // strict: assigned in ngOnInit before the template reads it
+  public kubeNodeService = inject(KubernetesNodeService);
 
-  ngOnInit(): void {
-    this.chipTags$ = this.kubeNodeService.nodeEntity$.pipe(
-      map(node => this.getTags((node.metadata as any)[this.mode()])),
-    );
-  }
-
+  readonly chipTags = computed((): AppChip[] => {
+    const node = this.kubeNodeService.node();
+    return node ? this.getTags((node.metadata as any)[this.mode()] ?? {}) : [];
+  });
 
   private getTags(tags: Record<string, any>): AppChip[] {
     const labelEntries = Object.entries(tags);

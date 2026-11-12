@@ -1,8 +1,6 @@
 import { Component, OnInit, ChangeDetectionStrategy, computed, input } from '@angular/core';
 import { outputFromObservable } from '@angular/core/rxjs-interop';
-import { AsyncPipe, CommonModule } from '@angular/common';
-import { isObservable, Observable, of, Subject } from 'rxjs';
-import { filter, map, startWith } from 'rxjs/operators';
+import { Subject } from 'rxjs';
 
 import { APIResource } from '@stratosui/store';
 import { IApp } from '../../../cf-api.types';
@@ -26,8 +24,6 @@ const RECENT_ITEMS_COUNT = 10;
   standalone: true,
   changeDetection: ChangeDetectionStrategy.OnPush,
   imports: [
-    CommonModule,
-    AsyncPipe,
     PollingIndicatorComponent,
     CompactAppCardComponent,
     CardWrapperComponent,
@@ -38,10 +34,8 @@ const RECENT_ITEMS_COUNT = 10;
 })
 export class CardCfRecentAppsComponent implements OnInit {
 
-  // Callers with a signal pass its value (home card); the Observable form
-  // stays for the service pipelines (CF, org and space summaries).
-  readonly allApps$ = input<APIResource<IApp>[] | Observable<APIResource<IApp>[]>>();
-  readonly loading$ = input<boolean | Observable<boolean>>();
+  readonly allApps = input<APIResource<IApp>[]>();
+  readonly loading = input<boolean>();
   // Backed by a Subject so ngOnInit can tell whether a parent listens:
   // the subject is observed only while a (refresh) binding exists.
   protected readonly refresh$ = new Subject<void>();
@@ -61,33 +55,12 @@ export class CardCfRecentAppsComponent implements OnInit {
   // Only the count matters: each placeholder row renders with a null app.
   readonly placeholders = computed(() => Array.from({ length: this.maxRows() }, (_, i) => i));
 
-  // Each is a stream the template reads with `async`; a new input value
-  // yields a new stream, which the pipe re-subscribes to.
-  private readonly apps$ = computed(() => {
-    const value = this.allApps$();
-    return isObservable(value) ? value : of(value ?? []);
-  });
   // Not loading when none is given.
-  protected readonly appsLoading$ = computed(() => {
-    const value = this.loading$();
-    return isObservable(value) ? value : of(!!value);
-  });
+  protected readonly appsLoading = computed(() => !!this.loading());
   // Stats are loaded by each row (CompactAppCardComponent), once per
   // started app; the registry shares the request between rows.
-  protected readonly recentApps$ = computed(() => {
-    const maxRows = this.maxRows();
-    return this.apps$().pipe(
-      filter(apps => !!apps),
-      map(apps => this.restrictApps(apps, maxRows)),
-    );
-  });
-  protected readonly show$ = computed(() => {
-    const hideWhenEmpty = this.hideWhenEmpty();
-    return this.apps$().pipe(
-      map(apps => !hideWhenEmpty || apps.length > 0),
-      startWith(true),
-    );
-  });
+  protected readonly recentApps = computed(() => this.restrictApps(this.allApps() ?? [], this.maxRows()));
+  protected readonly show = computed(() => !this.hideWhenEmpty() || (this.allApps() ?? []).length > 0);
 
   ngOnInit() {
     this.canRefresh = !this.placeholderMode() && this.refresh$.observed;

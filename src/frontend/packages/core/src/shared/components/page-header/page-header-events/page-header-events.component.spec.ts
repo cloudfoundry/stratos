@@ -1,8 +1,7 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
-import { provideZonelessChangeDetection } from '@angular/core';
+import { provideZonelessChangeDetection, signal } from '@angular/core';
 import { NoopAnimationsModule } from '@angular/platform-browser/animations';
 import { ActivatedRoute, provideRouter } from '@angular/router';
-import { of } from 'rxjs';
 import { describe, it, expect, beforeEach, vi } from 'vitest';
 
 import { endpointEventKey, GlobalEventService } from '../../../global-events.service';
@@ -55,11 +54,11 @@ describe('PageHeaderEventsComponent dismiss', () => {
         provideZonelessChangeDetection(),
         provideRouter([]),
         { provide: ActivatedRoute, useValue: { snapshot: { params: {} } } },
-        { provide: GlobalEventService, useValue: { events$: of([event]), updateEventReadState } },
+        { provide: GlobalEventService, useValue: { events: signal([event]), updateEventReadState } },
       ],
     });
     const fixture = TestBed.createComponent(PageHeaderEventsComponent);
-    fixture.componentRef.setInput('endpointIds$', of(['ep-1']));
+    fixture.componentRef.setInput('endpointIds', ['ep-1']);
     await fixture.whenStable();
 
     const button = (fixture.nativeElement as HTMLElement).querySelector<HTMLButtonElement>('button[aria-label="Dismiss"]');
@@ -79,18 +78,50 @@ describe('PageHeaderEventsComponent dismiss', () => {
         provideRouter([]),
         { provide: ActivatedRoute, useValue: { snapshot: { params: {} } } },
         { provide: GlobalEventService, useValue: {
-          events$: of([{ key: `${endpointEventKey}-ep-1`, endpointId: 'ep-1', endpointName: 'one', detail: 'HTTP 502', message: 'down', read: false }]),
+          events: signal([{ key: `${endpointEventKey}-ep-1`, endpointId: 'ep-1', endpointName: 'one', detail: 'HTTP 502', message: 'down', read: false }]),
           updateEventReadState: vi.fn(),
         } },
       ],
     });
     const fixture = TestBed.createComponent(PageHeaderEventsComponent);
-    fixture.componentRef.setInput('endpointIds$', of(['ep-1']));
+    fixture.componentRef.setInput('endpointIds', ['ep-1']);
     await fixture.whenStable();
     const el: HTMLElement = fixture.nativeElement;
     const banner = el.querySelector('h3')!.closest('.rounded-md')!;
     expect(banner.className).toContain('bg-[var(--danger-bg)]');
     expect(banner.className).toContain('text-[var(--danger-text)]');
     expect(el.innerHTML).not.toMatch(/text-danger-shade-|text-primary/);
+  });
+});
+
+describe('PageHeaderEventsComponent watched endpoints', () => {
+  const events = [
+    { key: `${endpointEventKey}-ep-1`, endpointId: 'ep-1', message: 'One down', read: false },
+    { key: `${endpointEventKey}-ep-2`, endpointId: 'ep-2', message: 'Two down', read: false },
+  ];
+  function create(params: Record<string, string>) {
+    TestBed.configureTestingModule({
+      imports: [PageHeaderEventsComponent],
+      providers: [
+        provideZonelessChangeDetection(),
+        provideRouter([]),
+        { provide: ActivatedRoute, useValue: { snapshot: { params } } },
+        { provide: GlobalEventService, useValue: { events: signal(events), updateEventReadState: vi.fn() } },
+      ],
+    });
+    return TestBed.createComponent(PageHeaderEventsComponent);
+  }
+
+  it('watches the route endpoint when no ids are bound', async () => {
+    const fixture = create({ endpointId: 'ep-2' });
+    await fixture.whenStable();
+    expect(fixture.componentInstance.errorMessage()).toBe('Two down');
+  });
+
+  it('watches the bound ids over the route endpoint', async () => {
+    const fixture = create({ endpointId: 'ep-2' });
+    fixture.componentRef.setInput('endpointIds', ['ep-1']);
+    await fixture.whenStable();
+    expect(fixture.componentInstance.errorMessage()).toBe('One down');
   });
 });

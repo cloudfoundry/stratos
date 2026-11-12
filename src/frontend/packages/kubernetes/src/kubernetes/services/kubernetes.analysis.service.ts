@@ -1,9 +1,8 @@
 import { HttpClient } from '@angular/common/http';
-import { Injectable, computed, Injector, inject, runInInjectionContext } from '@angular/core';
-import { toSignal, toObservable } from '@angular/core/rxjs-interop';
+import { Injectable, computed, inject } from '@angular/core';
 import { ActivatedRoute } from '@angular/router';
 import { Observable, of, BehaviorSubject } from 'rxjs';
-import { catchError, filter, map, startWith, switchMap, tap } from 'rxjs/operators';
+import { catchError, filter, map, switchMap, tap } from 'rxjs/operators';
 
 import { SessionService } from '../../../../core/src/core/session.service';
 import { TailwindSnackBarService } from '../../../../core/src/shared/services/tailwind-snackbar.service';
@@ -21,6 +20,21 @@ export interface KubernetesAnalysisType {
   descriptionUrl?: string;
 }
 
+const ALL_ENGINES: Record<string, KubernetesAnalysisType> = {
+  popeye: {
+    name: 'PopEye',
+    id: 'popeye',
+    namespaceAware: true,
+    descriptionUrl: '/kubernetes/assets/custom/analysis/popeye.md'
+  },
+  'kube-score': {
+    name: 'Kube Score',
+    id: 'kube-score',
+    namespaceAware: true,
+    descriptionUrl: '/kubernetes/assets/custom/analysis/kubescore.md'
+  }
+};
+
 @Injectable({
   providedIn: 'root'
 })
@@ -33,13 +47,18 @@ export class KubernetesAnalysisService {
 
   kubeGuid: string;
 
-  public analyzers$: Observable<KubernetesAnalysisType[]>;
-  // strict: assigned inside the constructor's runInInjectionContext callback;
-  // emits null when analysis is disabled (template guards with @if/async).
-  public namespaceAnalyzers$!: Observable<KubernetesAnalysisType[] | null>;
-
-  public enabled$: Observable<boolean>;
-  public hideAnalysis$: Observable<boolean>;
+  // Signal members, read off the session's plugin flags and config.
+  readonly enabled = computed(() => KubernetesAnalysisService.analysisEnabled(this.session));
+  readonly hideAnalysis = computed(() => !this.enabled());
+  readonly analyzers = computed(() => {
+    const enginesCsv = this.session.sessionData()?.['plugin-config']?.analysisEngines;
+    return enginesCsv
+      ? enginesCsv.split(',').map(e => ALL_ENGINES[e.trim()]).filter(e => !!e)
+      : [];
+  });
+  // null while analysis is off.
+  readonly namespaceAnalyzers = computed(() =>
+    this.enabled() ? this.analyzers().filter(v => v.namespaceAware) : null);
 
   // Wave-3.5: refresh trigger replaces the legacy
   // `ResetPaginationOfType(action)` ngrx dispatch. Consumers that
@@ -49,72 +68,15 @@ export class KubernetesAnalysisService {
 
   // Reads the `plugins.analysis` flag from session data via the
   // signal-native SessionService — no ngrx Store / `store.select('auth')`.
-  public static isAnalysisEnabled(session: SessionService): Observable<boolean> {
-    return of(!!session?.sessionData()?.plugins?.analysis).pipe(startWith(false));
+  public static analysisEnabled(session: SessionService): boolean {
+    return !!session?.sessionData()?.plugins?.analysis;
   }
-
-  private injector = inject(Injector);
 
   constructor() {
     const kubeEndpointService = this.kubeEndpointService;
     const activatedRoute = this.activatedRoute;
 
     this.kubeGuid = kubeEndpointService.kubeGuid || getHelmReleaseDetailsFromGuid(activatedRoute.snapshot.params.guid).endpointId;
-
-    // Is the backend plugin available?
-    this.enabled$ = KubernetesAnalysisService.isAnalysisEnabled(this.session);
-    this.hideAnalysis$ = this.enabled$.pipe(map(enabled => !enabled));
-
-    const allEngines: Record<string, { name: string; id: string; namespaceAware: boolean; descriptionUrl: string }> = {
-      popeye:
-      {
-        name: 'PopEye',
-        id: 'popeye',
-        namespaceAware: true,
-        descriptionUrl: '/kubernetes/assets/custom/analysis/popeye.md'
-      },
-      'kube-score':
-      {
-        name: 'Kube Score',
-        id: 'kube-score',
-        namespaceAware: true,
-        descriptionUrl: '/kubernetes/assets/custom/analysis/kubescore.md'
-      }
-    };
-
-    // Determine which analyzers are enabled — read off plugin-config via
-    // the SessionService signal-native shim instead of store.select('auth').
-    const pluginCfg = this.session.sessionData()?.['plugin-config'];
-    const enginesCsv = pluginCfg?.analysisEngines;
-    const enabledAnalyzers: KubernetesAnalysisType[] = enginesCsv
-      ? enginesCsv.split(',').map(e => allEngines[e.trim()]).filter(e => !!e)
-      : [];
-    this.analyzers$ = of(enabledAnalyzers);
-
-    // Convert to signals for computed within injection context
-    runInInjectionContext(this.injector, () => {
-      const analyzersSignal = toSignal(
-        this.analyzers$,
-        { initialValue: [] as KubernetesAnalysisType[] }
-      );
-
-      const enabledSignal = toSignal(
-        this.enabled$,
-        { initialValue: false }
-      );
-
-      // Compute namespace analyzers
-      const namespaceAnalyzersComputed = computed(() => {
-        const analyzers = analyzersSignal();
-        const enabled = enabledSignal();
-        if (!enabled) {
-          return null;
-        }
-        return analyzers.filter(v => v.namespaceAware);
-      });
-
-      this.namespaceAnalyzers$ = toObservable(namespaceAnalyzersComputed);
-    });
   }
 
   public delete(endpointID: string, item: { id: string }): Observable<any> {

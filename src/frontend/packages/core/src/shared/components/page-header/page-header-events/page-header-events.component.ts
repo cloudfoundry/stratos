@@ -1,8 +1,6 @@
 import { CommonModule } from '@angular/common';
-import { ChangeDetectionStrategy, Component, OnInit, inject, input } from '@angular/core';
+import { ChangeDetectionStrategy, Component, OnInit, computed, inject, input, signal } from '@angular/core';
 import { ActivatedRoute, RouterModule } from '@angular/router';
-import { combineLatest, Observable, of as observableOf } from 'rxjs';
-import { take, map, shareReplay, share } from 'rxjs/operators';
 
 import { endpointEventKey, GlobalEventService, IGlobalEvent } from '../../../global-events.service';
 import { CustomIconComponent } from '../../../../shared/components/custom-material/custom-material.component';
@@ -22,84 +20,66 @@ export class PageHeaderEventsComponent implements OnInit {
   private activatedRoute = inject(ActivatedRoute);
   private eventService = inject(GlobalEventService);
 
-  public readonly endpointIds$ = input<Observable<string[]>>();
+  public readonly endpointIds = input<string[]>();
   public readonly simpleErrorMessage = input(false);
 
-  public errorMessage$!: Observable<string>;
-  // Emits the single underlying event when only one endpoint is in
-  // error AND it carries the structured fields (endpointName /
-  // endpointId / detail). Lets the banner render the endpoint
-  // identifier as a title above the error detail. Null for multi-
-  // endpoint or legacy events where structured fields are absent.
-  public singleErrorEvent$!: Observable<IGlobalEvent | null>;
   endpointId: any;
-  private events$!: Observable<any>;
+  // The route's endpoint, set in ngOnInit.
+  private readonly routeEndpointId = signal<string | null>(null);
+  // The bound ids; without them an endpoint page watches its own endpoint.
+  private readonly watchedIds = computed<string[] | undefined>(() => {
+    const routeEndpointId = this.routeEndpointId();
+    return this.endpointIds() ?? (routeEndpointId ? [routeEndpointId] : undefined);
+  });
+
+  // The unread endpoint errors of the endpoints watched.
+  private readonly events = computed(() => {
+    const endpointIds = this.watchedIds();
+    if (!endpointIds) {
+      return [];
+    }
+    return this.eventService.events().filter(event =>
+      event.key.startsWith(endpointEventKey) &&
+      endpointIds.includes(this.getEndpointId(event)) &&
+      !event.read
+    );
+  });
+
+  public readonly errorMessage = computed(() => {
+    const events = this.events();
+    if (events.length === 0) {
+      return '';
+    }
+    const endpointErrorKeys = new Set(events.map(event => this.getEndpointId(event)));
+    return endpointErrorKeys.size > 1 ? `There are multiple endpoints with errors` : events[0].message;
+  });
+
+  // The single underlying event when only one endpoint is in error AND it
+  // carries the structured fields (endpointName / endpointId / detail), so
+  // the banner can render the endpoint identifier as a title above the
+  // error detail. Null for multi-endpoint or legacy events where the
+  // structured fields are absent.
+  public readonly singleErrorEvent = computed<IGlobalEvent | null>(() => {
+    const events = this.events();
+    if (events.length === 0) {
+      return null;
+    }
+    const endpointErrorKeys = new Set(events.map(event => this.getEndpointId(event)));
+    if (endpointErrorKeys.size !== 1) {
+      return null;
+    }
+    const e = events[0];
+    return e.endpointName && e.detail ? e : null;
+  });
 
   public markEventsAsRead() {
-    this.events$.pipe(
-      take(1),
-    ).subscribe((events: IGlobalEvent[]) => {
-      if (events && !!events.length) {
-        events.forEach(event => this.eventService.updateEventReadState(event, true));
-      }
-    });
+    this.events().forEach(event => this.eventService.updateEventReadState(event, true));
   }
 
   ngOnInit() {
     this.endpointId = this.activatedRoute.snapshot.params && this.activatedRoute.snapshot.params.endpointId ?
       this.activatedRoute.snapshot.params.endpointId : null;
-    // Without bound ids, an endpoint page watches its own endpoint.
-    const endpointIds$ = this.endpointIds$() ?? (this.endpointId ? observableOf([this.endpointId as string]) : undefined);
-    if (endpointIds$) {
-      this.events$ = combineLatest([
-        this.eventService.events$,
-        endpointIds$,
-      ]).pipe(
-        map(([events, endpointIds]) => {
-          const filteredEvents = events.filter(event => {
-            // Is it an error of type endpoint?
-            if (event.key.startsWith(endpointEventKey)) {
-              const endpointId = this.getEndpointId(event);
-              // Is it an endpoint error for an endpoint we're interested in?
-              const relevantEndpoint = endpointIds.find(id => id === endpointId);
-              const unread = !event.read;
-              return relevantEndpoint && unread;
-            }
-          });
-          return filteredEvents;
-        }),
-        shareReplay({ bufferSize: 1, refCount: true })
-      );
-      this.errorMessage$ = this.events$.pipe(
-        // Fixme this emits a lot, we should fix this.
-        map((events: IGlobalEvent[]) => {
-          if (!events || events.length === 0) {
-            return '';
-          }
-          const endpointErrorKeys = events.reduce((endpointIds, event) => {
-            return endpointIds.add(this.getEndpointId(event));
-          }, new Set<string>());
-          return endpointErrorKeys.size > 1 ? `There are multiple endpoints with errors` : events[0].message;
-        }),
-        share()
-      );
-      this.singleErrorEvent$ = this.events$.pipe(
-        map((events: IGlobalEvent[]) => {
-          if (!events || events.length === 0) return null;
-          const endpointErrorKeys = events.reduce(
-            (ids, event) => ids.add(this.getEndpointId(event)),
-            new Set<string>(),
-          );
-          if (endpointErrorKeys.size !== 1) return null;
-          // Only switch to structured rendering when the event carries
-          // the title/body fields; legacy ngrx events fall back to the
-          // flat message string via errorMessage$.
-          const e = events[0];
-          return e.endpointName && e.detail ? e : null;
-        }),
-        share(),
-      );
-    }
+    this.routeEndpointId.set(this.endpointId);
   }
 
   private getEndpointId(event: IGlobalEvent): string {

@@ -1,5 +1,5 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
-import { ApplicationRef, EmbeddedViewRef, ViewContainerRef, provideZonelessChangeDetection } from '@angular/core';
+import { ApplicationRef, EmbeddedViewRef, ViewContainerRef, provideZonelessChangeDetection, signal } from '@angular/core';
 import { By } from '@angular/platform-browser';
 import { provideHttpClient } from '@angular/common/http';
 import { provideHttpClientTesting } from '@angular/common/http/testing';
@@ -7,7 +7,6 @@ import { Router } from '@angular/router';
 import { describe, it, expect, vi } from 'vitest';
 import { NoopAnimationsModule } from '@angular/platform-browser/animations';
 import { RouterTestingModule } from '@angular/router/testing';
-import { of } from 'rxjs';
 import { createBasicStoreModule, STORE_TEST_PROVIDERS } from '@test-framework';
 import {
   EndpointModel,
@@ -27,11 +26,11 @@ import { HomePageComponent } from './home-page.component';
 
 function makeStubEndpointsService(disablePersistenceFeatures: boolean, endpoints: Record<string, EndpointModel> = {}): Partial<EndpointsService> {
   return {
-    disablePersistenceFeatures$: of(disablePersistenceFeatures),
-    haveRegistered$: of(Object.keys(endpoints).length > 0),
-    haveConnected$: of(Object.values(endpoints).some(ep => ep.connectionStatus === 'connected')),
-    connectedEndpoints$: of(Object.values(endpoints).filter(ep => ep.connectionStatus === 'connected')),
-    endpoints$: of(endpoints),
+    connectedEndpoints: signal(Object.values(endpoints).filter(ep => ep.connectionStatus === 'connected')),
+    endpoints: signal(endpoints),
+    disablePersistenceFeatures: signal(disablePersistenceFeatures),
+    haveRegistered: signal(Object.keys(endpoints).length > 0),
+    haveConnected: signal(Object.values(endpoints).some(ep => ep.connectionStatus === 'connected')),
   } as Partial<EndpointsService>;
 }
 
@@ -63,7 +62,7 @@ describe('HomePageComponent', () => {
         provideHttpClient(),
         provideHttpClientTesting(),
         { provide: EndpointsService, useValue: endpointsServiceStub },
-        ...(favGroups ? [{ provide: UserFavoriteManager, useValue: { getAllFavorites: () => of([favGroups, []]) } }] : []),
+        ...(favGroups ? [{ provide: UserFavoriteManager, useValue: { allFavorites: signal([favGroups, {}]) } }] : []),
       ]
     }).compileComponents();
 

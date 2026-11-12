@@ -1,6 +1,6 @@
 import { CommonModule } from '@angular/common';
 import { ComponentFixture, TestBed } from '@angular/core/testing';
-import { provideZonelessChangeDetection } from '@angular/core';
+import { provideZonelessChangeDetection, signal } from '@angular/core';
 import { describe, it, expect, beforeEach, afterEach, beforeAll, afterAll, vi } from 'vitest';
 import { NoopAnimationsModule } from '@angular/platform-browser/animations';
 import { RouterTestingModule } from '@angular/router/testing';
@@ -21,7 +21,7 @@ describe('EditProfileInfoComponent', () => {
 
   // Mock UserProfileService to avoid entity catalog issues
   const mockUserProfileService = {
-    userProfile$: of({
+    userProfile: signal({
       id: 'test-user',
       name: {
         familyName: 'User',
@@ -44,8 +44,8 @@ describe('EditProfileInfoComponent', () => {
       zoneId: '',
       origin: ''
     }),
-    isFetching$: of(false),
-    isError$: of(false),
+    isError: signal(false),
+    loadUserProfile: vi.fn(),
     fetchUserProfile: vi.fn(),
     getPrimaryEmailAddress: vi.fn().mockReturnValue('test@test.com'),
     setPrimaryEmailAddress: vi.fn(),
@@ -84,5 +84,12 @@ describe('EditProfileInfoComponent', () => {
 
   it('should create', () => {
     expect(component).toBeTruthy();
+  });
+
+  it('fills the form from the loaded profile', async () => {
+    await fixture.whenStable();
+    expect(mockUserProfileService.loadUserProfile).toHaveBeenCalled();
+    expect(component.editProfileForm.value.givenName).toBe('Test');
+    expect(component.editProfileForm.value.emailAddress).toBe('test@test.com');
   });
 });

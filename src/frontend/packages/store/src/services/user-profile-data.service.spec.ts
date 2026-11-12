@@ -3,7 +3,6 @@ import { HttpTestingController, provideHttpClientTesting } from '@angular/common
 import { provideZonelessChangeDetection } from '@angular/core';
 import { TestBed } from '@angular/core/testing';
 import { firstValueFrom } from 'rxjs';
-import { filter, take } from 'rxjs/operators';
 import { afterEach, beforeEach, describe, expect, it } from 'vitest';
 
 import { proxyAPIVersion } from '../jetstream';
@@ -73,14 +72,6 @@ describe('UserProfileDataService', () => {
       expect(svc.fetching()).toBe(false);
       expect(svc.error()).toBe(true);
       expect(svc.profile()).toBeNull();
-    });
-
-    it('profile$ emits the fetched profile', async () => {
-      const p = profile();
-      svc.fetch('user-1');
-      httpMock.expectOne(usersUrl('user-1')).flush(p);
-      const emitted = await firstValueFrom(svc.profile$.pipe(filter(Boolean), take(1)));
-      expect(emitted).toEqual(p);
     });
   });
 

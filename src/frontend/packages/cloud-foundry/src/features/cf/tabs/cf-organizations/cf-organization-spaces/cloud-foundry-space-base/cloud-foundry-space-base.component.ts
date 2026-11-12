@@ -1,9 +1,7 @@
 import { Component, ChangeDetectionStrategy, computed, Injector, OnInit, Signal, inject, signal } from '@angular/core';
 import { toObservable } from '@angular/core/rxjs-interop';
-import { CommonModule } from '@angular/common';
 import { RouterModule } from '@angular/router';
-import { combineLatest, Observable, of } from 'rxjs';
-import { filter, take, map } from 'rxjs/operators';
+import { filter, take } from 'rxjs/operators';
 
 import {
   getActionsFromExtensions,
@@ -41,7 +39,6 @@ import { CloudFoundrySpaceService } from '../../../../services/cloud-foundry-spa
   standalone: true,
   changeDetection: ChangeDetectionStrategy.OnPush,
   imports: [
-    CommonModule,
     RouterModule,
     PageHeaderComponent,
     PageSubNavComponent,
@@ -118,7 +115,33 @@ export class CloudFoundrySpaceBaseComponent implements OnInit {
     }
   ]);
 
-  public breadcrumbs$!: Observable<IHeaderBreadcrumb[]>;
+  // Back to the endpoint's organizations and to the org's spaces, once both
+  // the endpoint and the org are in.
+  readonly breadcrumbs = computed<IHeaderBreadcrumb[] | null>(() => {
+    const endpoint = this.cfEndpointService.endpoint();
+    const org = this.cfOrgService.orgDataService.org();
+    if (!endpoint || !org) return null;
+    return [
+      {
+        breadcrumbs: [
+          {
+            value: endpoint.entity.name,
+            routerLink: `/cloud-foundry/${endpoint.entity.guid}/organizations`
+          },
+          {
+            value: org.name,
+            routerLink: `/cloud-foundry/${endpoint.entity.guid}/organizations/${org.guid}/spaces`
+          }
+        ]
+      },
+      {
+        key: 'services-wall',
+        breadcrumbs: [
+          { value: 'Services', routerLink: `/services` }
+        ]
+      }
+    ];
+  });
 
   // Used to hide tab that is not yet implemented when in production
   public isDevEnvironment = !environment.production;
@@ -149,8 +172,6 @@ export class CloudFoundrySpaceBaseComponent implements OnInit {
         spaceEntityType, CF_ENDPOINT_TYPE, route.cfGuid, favEntity);
     });
 
-    this.setUpBreadcrumbs(this.cfEndpointService, this.cfOrgService);
-
     // Add the Quota tab once the space snapshot lands — only show it if a
     // space-specific quota is linked (quotaGuid set). Extension tabs are
     // appended unconditionally to match the legacy ordering.
@@ -164,7 +185,7 @@ export class CloudFoundrySpaceBaseComponent implements OnInit {
           link: 'space-quota',
           label: 'Quota',
           icon: 'data_usage',
-          hidden$: of(!space!.quotaGuid),
+          isHidden: signal(!space!.quotaGuid),
         },
         ...getTabsFromExtensions(StratosTabType.CloudFoundrySpace),
       ]);
@@ -175,43 +196,6 @@ export class CloudFoundrySpaceBaseComponent implements OnInit {
     // Trigger initial load. The registry-acquired instance dedupes concurrent
     // load() calls and short-circuits once warm.
     this.spaceDataService.load().subscribe({ error: () => {} });
-  }
-
-  private setUpBreadcrumbs(
-    cfEndpointService: CloudFoundryEndpointService,
-    cfOrgService: CloudFoundryOrganizationService
-  ) {
-    // Org name comes from the V3-native OrgDataService signal; bridge into the
-    // existing breadcrumb pipeline via toObservable so the rest of the chain
-    // stays the same shape. take(1) preserves the original "freeze first
-    // populated value" behaviour.
-    const orgSignal$ = toObservable(cfOrgService.orgDataService.org, { injector: this.injector });
-    this.breadcrumbs$ = combineLatest([
-      cfEndpointService.endpoint$,
-      orgSignal$.pipe(filter(org => !!org)),
-    ]).pipe(
-      map(([endpoint, org]) => ([
-        {
-          breadcrumbs: [
-            {
-              value: endpoint.entity.name,
-              routerLink: `/cloud-foundry/${endpoint.entity.guid}/organizations`
-            },
-            {
-              value: org.name,
-              routerLink: `/cloud-foundry/${endpoint.entity.guid}/organizations/${org.guid}/spaces`
-            }
-          ]
-        },
-        {
-          key: 'services-wall',
-          breadcrumbs: [
-            { value: 'Services', routerLink: `/services` }
-          ]
-        }
-      ])),
-      take(1)
-    );
   }
 
 }

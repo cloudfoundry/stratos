@@ -1,10 +1,9 @@
 import { CommonModule } from '@angular/common';
 import { HttpClient } from '@angular/common/http';
-import { ChangeDetectionStrategy, Component, ElementRef, OnInit, inject, input, linkedSignal, signal, untracked, viewChild } from '@angular/core';
-import { toObservable } from '@angular/core/rxjs-interop';
+import { ChangeDetectionStrategy, Component, ElementRef, Injector, Signal, computed, inject, input, linkedSignal, signal, untracked, viewChild } from '@angular/core';
+import { toObservable, toSignal } from '@angular/core/rxjs-interop';
 import { ActivatedRoute, RouterModule } from '@angular/router';
-import { Observable, of } from 'rxjs';
-import { map } from 'rxjs/operators';
+import { Observable } from 'rxjs';
 import { StratosTabMetadata } from '../../../core/extension/extension-service';
 import { CurrentUserPermissionsService } from '../../../core/permissions/current-user-permissions.service';
 import { DashboardSignalService } from '../../../core/signals/dashboard-signal.service';
@@ -15,8 +14,12 @@ import { CustomIconComponent } from '../../../shared/components/custom-material/
 
 
 export interface IPageSideNavTab extends StratosTabMetadata {
-  hidden$?: Observable<boolean>;
+  // The tab's gate: shown only while it reads false (null = not known yet).
+  // When present, the extension metadata's hidden() is not used.
+  isHidden?: Signal<boolean | null>;
 }
+
+const SHOWN = signal(false).asReadonly();
 
 @Component({
   selector: 'app-page-side-nav',
@@ -34,17 +37,18 @@ export interface IPageSideNavTab extends StratosTabMetadata {
     '(focusout)': 'onFocusOut($event)',
   },
 })
-export class PageSideNavComponent implements OnInit {
+export class PageSideNavComponent {
   tabNavService = inject(TabNavService);
   private activatedRoute = inject(ActivatedRoute);
   private cups = inject(CurrentUserPermissionsService);
   private http = inject(HttpClient);
   private dashboardSignals = inject(DashboardSignalService);
+  private injector = inject(Injector);
 
 
   readonly tabs = input<IPageSideNavTab[] | null>();
 
-  // The tabs as rendered, each with its hidden$ gate. A new list of the same
+  // The tabs as rendered, each with its gate. A new list of the same
   // length keeps the tabs already shown, so their gates are not asked again.
   readonly shownTabs = linkedSignal<IPageSideNavTab[] | null | undefined, IPageSideNavTab[]>({
     source: this.tabs,
@@ -56,11 +60,14 @@ export class PageSideNavComponent implements OnInit {
       if (tabs.length === shown.length) {
         return shown;
       }
-      // A tab's hidden() is extension code; run it outside the reactive
-      // context so it can neither add dependencies nor fail on a signal write.
+      // A tab's hidden() is extension code returning a stream; run it outside
+      // the reactive context so it can neither add dependencies nor fail on a
+      // signal write, and read it as a signal.
       return untracked(() => tabs.map(tab => ({
         ...tab,
-        hidden$: tab.hidden$ || (tab.hidden ? tab.hidden(this.activatedRoute, this.cups, this.http) : of(false))
+        isHidden: tab.isHidden ?? (tab.hidden
+          ? toSignal(tab.hidden(this.activatedRoute, this.cups, this.http), { initialValue: null, injector: this.injector })
+          : SHOWN),
       })));
     },
   });
@@ -68,7 +75,7 @@ export class PageSideNavComponent implements OnInit {
   // Bound from async-piped streams that may emit null/undefined before the
   // header resolves; interpolation renders those as an empty string.
   public readonly header = input<string | null>();
-  public activeTab$!: Observable<string>;
+  public readonly activeTab = computed(() => this.tabNavService.currentTabHeader()?.label ?? null);
   public breadcrumbs$!: Observable<IBreadcrumb[]>;
   public isMobile$: Observable<boolean>;
   // The compact dropdown, opened by its button as well as by hover.
@@ -92,10 +99,6 @@ export class PageSideNavComponent implements OnInit {
 
   constructor() {
     this.isMobile$ = toObservable(this.dashboardSignals.isMobile);
-  }
-
-  ngOnInit() {
-    this.activeTab$ = this.tabNavService.getCurrentTabHeaderObservable().pipe(map((item: any) => item ? item.label : null));
   }
 
 }

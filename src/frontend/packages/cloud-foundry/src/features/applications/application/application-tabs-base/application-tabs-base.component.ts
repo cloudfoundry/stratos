@@ -1,5 +1,5 @@
 import { Component, EffectRef, Injector, OnDestroy, OnInit, ChangeDetectionStrategy, computed, effect, inject, runInInjectionContext, signal } from '@angular/core';
-import { toObservable } from '@angular/core/rxjs-interop';
+import { toObservable, toSignal } from '@angular/core/rxjs-interop';
 import { Router, RouterModule } from '@angular/router';
 import { GitSCMService, GitSCMType } from '@stratosui/git';
 import { filter, map, switchMap } from 'rxjs/operators';
@@ -104,21 +104,21 @@ export class ApplicationTabsBaseComponent implements OnInit, OnDestroy {
     const scmService = inject(GitSCMService);
 
     // can() is a stream (permissions are a later step), so the space is
-    // bridged for it; the tab contract takes hidden$ as an Observable.
-    const appDoesNotHaveEnvVars$ = toObservable(this.detail.space).pipe(
+    // bridged for it; null until it answers.
+    const appDoesNotHaveEnvVars = toSignal(toObservable(this.detail.space).pipe(
       filter((space): space is StSpace => !!space),
       switchMap(space => this.currentUserPermissionsService.can(CfCurrentUserPermissions.APPLICATION_VIEW_ENV_VARS,
         this.applicationService.cfGuid, space.guid)
       ),
       map(can => !can),
-    );
+    ), { initialValue: null });
 
     this.tabLinks.set([
       { link: 'summary', label: 'Summary', iconFont: 'stratos-icons', icon: 'application' },
       { link: 'log-stream', label: 'Log Stream', icon: 'featured_play_list' },
       { link: 'revisions', label: 'Revisions', icon: 'history' },
       { link: 'routes', label: 'Routes', iconFont: 'stratos-icons', icon: 'route' },
-      { link: 'variables', label: 'Variables', icon: 'list', hidden$: appDoesNotHaveEnvVars$ },
+      { link: 'variables', label: 'Variables', icon: 'list', isHidden: appDoesNotHaveEnvVars },
       { link: 'services', label: 'Services', iconFont: 'stratos-icons', icon: 'service' },
       { link: 'events', label: 'Events', icon: 'watch_later' },
     ]);

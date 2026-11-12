@@ -1,8 +1,5 @@
 import { Component, ChangeDetectionStrategy, computed, inject, OnInit, Signal } from '@angular/core';
 import { RouterModule } from '@angular/router';
-import { CommonModule } from '@angular/common';
-import { Observable } from 'rxjs';
-import { take, map } from 'rxjs/operators';
 import { OrgDataRegistry } from '../../../../../services/endpoint-data/org-data.registry';
 import { OrgDataService } from '../../../../../services/endpoint-data/org-data.service';
 
@@ -52,7 +49,6 @@ import { CloudFoundryOrganizationService } from '../../../services/cloud-foundry
   standalone: true,
   changeDetection: ChangeDetectionStrategy.OnPush,
   imports: [
-    CommonModule,
     RouterModule,
     PageHeaderComponent,
     PageSubNavComponent,
@@ -108,7 +104,15 @@ export class CloudFoundryOrganizationBaseComponent implements OnInit {
       icon: 'watch_later'
     }
   ];
-  public breadcrumbs$: Observable<IHeaderBreadcrumb[]>;
+  readonly breadcrumbs = computed<IHeaderBreadcrumb[] | null>(() => {
+    const endpoint = this.cfEndpointService.endpoint();
+    return endpoint ? [{
+      breadcrumbs: [{
+        value: endpoint.entity.name,
+        routerLink: `/cloud-foundry/${endpoint.entity.guid}/organizations`
+      }]
+    }] : null;
+  });
 
   // Used to hide tab that is not yet implemented when in production
   public isDevEnvironment = !environment.production;
@@ -134,7 +138,6 @@ export class CloudFoundryOrganizationBaseComponent implements OnInit {
       return userFavoriteManager.getFavoriteFromEntity<IFavoriteMetadata>(
         organizationEntityType, CF_ENDPOINT_TYPE, route.cfGuid, favEntity);
     });
-    this.breadcrumbs$ = this.getBreadcrumbs();
 
     // Add any tabs from extensions
     this.tabLinks = this.tabLinks.concat(getTabsFromExtensions(StratosTabType.CloudFoundryOrg));
@@ -145,21 +148,5 @@ export class CloudFoundryOrganizationBaseComponent implements OnInit {
     // load() calls and short-circuits once warm, so re-entry on tab nav is a
     // no-op.
     this.orgDataService.load().subscribe({ error: () => {} });
-  }
-
-  private getBreadcrumbs() {
-    return this.cfEndpointService.endpoint$.pipe(
-      map(endpoint => ([
-        {
-          breadcrumbs: [
-            {
-              value: endpoint.entity.name,
-              routerLink: `/cloud-foundry/${endpoint.entity.guid}/organizations`
-            }
-          ]
-        }
-      ])),
-      take(1)
-    );
   }
 }

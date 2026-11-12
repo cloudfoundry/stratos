@@ -2,14 +2,14 @@
   <h1>Notifications</h1>
   <div class="page-header-right">
     <span>
-      <button aria-label="Close" class="btn btn-icon" type="button" matTooltip="Close" [routerLink]="back$ | async">
+      <button aria-label="Close" class="btn btn-icon" type="button" matTooltip="Close" [routerLink]="back()">
         <app-custom-icon>close</app-custom-icon>
       </button>
     </span>
   </div>
 </app-page-header>
 <div class="event-page">
-  @if (hasReadEvents$ | async) {
+  @if (hasReadEvents()) {
     <div class="event-page__filter inline-flex rounded-lg border border-content-border bg-content-bg p-1 shadow-sm mt-4 mb-2"
       role="group" aria-label="filter">
       <button type="button"
@@ -45,9 +45,9 @@
     </div>
   }
 
-  @if (events$ | async; as events) {
+  @if (events(); as events) {
     <div class="event-page__list space-y-2"
-      [ngClass]="{'event-page__list-has-read': hasReadEvents$ | async}"
+      [ngClass]="{'event-page__list-has-read': hasReadEvents()}"
       role="list">
       @for (event of events; track event.key) {
         <app-card class="event-page__event-row-card">
@@ -72,7 +72,7 @@
             }
             @if (event.link) {
               <button class="event-page__event-row-button btn btn-primary" type="button"
-              [routerLink]="event.link" [queryParams]="createQueryParams(event.link) | async">View</button>
+              [routerLink]="event.link" [queryParams]="createQueryParams(event.link)">View</button>
             }
             @if (event.read) {
               <button class="event-page__event-row-button btn btn-primary" type="button"

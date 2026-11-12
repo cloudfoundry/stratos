@@ -2,8 +2,6 @@ import { CommonModule } from '@angular/common';
 import { Component, computed, inject, ChangeDetectionStrategy, input } from '@angular/core';
 import { CustomTooltipDirective } from '../../shared/components/custom-tooltip/custom-tooltip.directive';
 import { UserFavoriteManager, IFavoriteMetadata, UserFavorite } from '@stratosui/store';
-import { Observable } from 'rxjs';
-import { take, tap } from 'rxjs/operators';
 
 import { ConfirmationDialogConfig } from '../../shared/components/confirmation-dialog.config';
 import { ConfirmationDialogService } from '../../shared/components/confirmation-dialog.service';
@@ -33,9 +31,7 @@ export class EntityFavoriteStarComponent {
 
   readonly small = input(false);
 
-  public readonly isFavorite$ = computed<Observable<boolean>>(
-    () => this.userFavoriteManager.getIsFavoriteObservable(this.favorite())
-  );
+  public readonly isFavorite = computed(() => this.userFavoriteManager.isFavorite(this.favorite()));
 
   private readonly confirmationDialogConfig = computed(() => {
     const name = this.favorite().getPrettyTypeName();
@@ -50,16 +46,11 @@ export class EntityFavoriteStarComponent {
   public toggleFavorite(event: Event) {
     event.stopPropagation();
     if (this.confirmRemoval()) {
-      this.isFavorite$().pipe(
-        take(1),
-        tap(is => {
-          if (is) {
-            this.confirmDialog.open(this.confirmationDialogConfig(), this.pToggleFavorite);
-          } else {
-            this.pToggleFavorite();
-          }
-        })
-      ).subscribe();
+      if (this.isFavorite()) {
+        this.confirmDialog.open(this.confirmationDialogConfig(), this.pToggleFavorite);
+      } else {
+        this.pToggleFavorite();
+      }
     } else {
       this.pToggleFavorite();
     }

@@ -1,5 +1,5 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
-import { provideZonelessChangeDetection } from '@angular/core';
+import { provideZonelessChangeDetection, signal } from '@angular/core';
 import { describe, it, expect, beforeEach, afterEach, beforeAll, afterAll, vi } from 'vitest';
 import { ActivatedRoute } from '@angular/router';
 
@@ -51,5 +51,44 @@ describe('AnalysisReportRunnerComponent', () => {
 
   it('should create', () => {
     expect(component).toBeTruthy();
+  });
+});
+
+describe('AnalysisReportRunnerComponent analyzers', () => {
+  const popeye = { id: 'popeye', name: 'PopEye', namespaceAware: true };
+  const cluster = { id: 'cluster-only', name: 'Cluster', namespaceAware: false };
+
+  const create = async (namespace?: string) => {
+    await TestBed.configureTestingModule({
+      imports: [AnalysisReportRunnerComponent],
+      providers: [
+        provideZonelessChangeDetection(),
+        { provide: SidePanelService, useValue: {} },
+        {
+          provide: KubernetesAnalysisService, useValue: {
+            hideAnalysis: signal(false),
+            analyzers: signal([popeye, cluster]),
+            namespaceAnalyzers: signal([popeye]),
+          }
+        },
+      ],
+    }).compileComponents();
+    const fixture = TestBed.createComponent(AnalysisReportRunnerComponent);
+    fixture.componentRef.setInput('kubeId', 'kube-1');
+    if (namespace) {
+      fixture.componentRef.setInput('namespace', namespace);
+    }
+    return fixture.componentInstance;
+  };
+
+  it('offers every analyzer for the cluster', async () => {
+    const component = await create();
+    expect(component.canShow()).toBe(true);
+    expect(component.analyzers()?.map(a => a.id)).toEqual(['popeye', 'cluster-only']);
+  });
+
+  it('offers only the namespace-aware analyzers for a namespace', async () => {
+    const component = await create('default');
+    expect(component.analyzers()?.map(a => a.id)).toEqual(['popeye']);
   });
 });

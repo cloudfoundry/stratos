@@ -1,9 +1,9 @@
-import { Component, OnInit, ChangeDetectionStrategy, computed, inject } from '@angular/core';
-import { toObservable } from '@angular/core/rxjs-interop';
+import { Component, OnInit, ChangeDetectionStrategy, computed, inject, Signal } from '@angular/core';
+import { toSignal } from '@angular/core/rxjs-interop';
 import { CommonModule } from '@angular/common';
 import { RouterModule } from '@angular/router';
 import { Observable, of as observableOf } from 'rxjs';
-import { take, map, startWith } from 'rxjs/operators';
+import { map } from 'rxjs/operators';
 
 import {
   EndpointsService,
@@ -59,33 +59,28 @@ export class CloudFoundryTabsBaseComponent implements OnInit {
   public tabsHeader = 'Cloud Foundry';
   public extensionActions: StratosActionMetadata[] = getActionsFromExtensions(StratosActionType.CloudFoundry);
 
-  // null when the endpoint has no cnsi_type/guid (getFavoriteEndpointFromEntity);
-  // the template binds via `| async`, which already yields null.
-  public favorite$: Observable<UserFavoriteEndpoint | null>;
+  // null when the endpoint has no cnsi_type/guid (getFavoriteEndpointFromEntity).
+  public favorite: Signal<UserFavoriteEndpoint | null>;
 
   constructor() {
     const cfEndpointService = this.cfEndpointService;
     const endpointsService = inject(EndpointsService);
     const userFavoriteManager = inject(UserFavoriteManager);
 
-    this.favorite$ = endpointsService.endpoints$.pipe(
-      take(1),
-      map(endpoints => endpoints[this.cfEndpointService.cfGuid]),
-      map(endpoint => userFavoriteManager.getFavoriteEndpointFromEntity(endpoint))
+    this.favorite = computed(() =>
+      userFavoriteManager.getFavoriteEndpointFromEntity(endpointsService.endpoints()[this.cfEndpointService.cfGuid])
     );
 
-    const firehoseHidden$ = this.currentUserPermissionsService
+    // can() and hasMetrics() are streams; null until they answer.
+    const firehoseHidden = toSignal(this.currentUserPermissionsService
       .can(CfCurrentUserPermissions.FIREHOSE_VIEW, this.cfEndpointService.cfGuid)
-      .pipe(map(visible => !visible));
+      .pipe(map(visible => !visible)), { initialValue: null });
 
-    // The side-nav tab type still takes an Observable for `hidden$`.
-    const usersHidden$ = toObservable(computed(() => !cfEndpointService.usersCount())).pipe(
-      startWith(true),
-    );
+    const usersHidden = computed(() => !cfEndpointService.usersCount());
 
-    const cellsHidden$ = endpointsService.hasMetrics(cfEndpointService.cfGuid).pipe(
+    const cellsHidden = toSignal(endpointsService.hasMetrics(cfEndpointService.cfGuid).pipe(
       map(hasMetrics => !hasMetrics)
-    );
+    ), { initialValue: null });
 
     // Default tabs + add any tabs from extensions
     this.tabLinks = [
@@ -98,19 +93,19 @@ export class CloudFoundryTabsBaseComponent implements OnInit {
         link: CloudFoundryTabsBaseComponent.cells,
         label: 'Cells',
         icon: 'select_all',
-        hidden$: cellsHidden$
+        isHidden: cellsHidden
       },
       { link: 'routes', label: 'Routes', icon: 'route', iconFont: 'stratos-icons', },
       {
         link: CloudFoundryTabsBaseComponent.users,
         label: 'Users',
-        hidden$: usersHidden$,
+        isHidden: usersHidden,
         icon: 'people'
       },
       {
         link: CloudFoundryTabsBaseComponent.firehose,
         label: 'Firehose',
-        hidden$: firehoseHidden$,
+        isHidden: firehoseHidden,
         icon: 'featured_play_list'
       },
       { link: 'feature-flags', label: 'Feature Flags', icon: 'flag' },

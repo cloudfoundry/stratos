@@ -4,6 +4,7 @@ import { Component, provideZonelessChangeDetection, signal } from '@angular/core
 import { describe, it, expect, beforeEach, vi } from 'vitest';
 import { By } from '@angular/platform-browser';
 import { NoopAnimationsModule } from '@angular/platform-browser/animations';
+import { Router } from '@angular/router';
 import { RouterTestingModule } from '@angular/router/testing';
 import { of, Subject } from 'rxjs';
 import { EndpointsDataService, EntityCatalogHelper, EntityCatalogHelpers } from '@stratosui/store';
@@ -30,7 +31,6 @@ describe('EndpointsPageComponent', () => {
   let component: EndpointsPageComponent;
   let fixture: ComponentFixture<EndpointsPageComponent>;
   let perm$: Subject<boolean>;
-  let persistence$: Subject<boolean>;
   let customizations: CustomizationsMetadata;
 
   // Mock services
@@ -41,9 +41,9 @@ describe('EndpointsPageComponent', () => {
   };
 
   const mockEndpointsService = {
-    disablePersistenceFeatures$: new Subject<boolean>(),
-    haveRegistered$: of(false),
-    haveConnected$: of(false),
+    haveRegistered: signal(false),
+    haveConnected: signal(false),
+    disablePersistenceFeatures: signal(false),
     checkAllEndpoints: vi.fn()
   };
 
@@ -106,8 +106,10 @@ describe('EndpointsPageComponent', () => {
 
   beforeEach(async () => {
     perm$ = new Subject<boolean>();
-    persistence$ = new Subject<boolean>();
-    mockEndpointsService.disablePersistenceFeatures$ = persistence$;
+    mockEndpointsService.haveRegistered.set(false);
+    mockEndpointsService.haveConnected.set(false);
+    mockEndpointsService.disablePersistenceFeatures.set(false);
+    mockSnackBarService.show.mockClear();
     customizations = { noEndpointsComponent: null };
     vi.spyOn(TestBed.inject(CurrentUserPermissionsService), 'can').mockReturnValue(perm$);
     fixture = TestBed.createComponent(EndpointsPageComponent);
@@ -142,10 +144,21 @@ describe('EndpointsPageComponent', () => {
     expect(perm$.observed).toBe(false);
   });
 
-  it('stops waiting for the persistence flag when destroyed', () => {
-    expect(persistence$.observed).toBe(true);
-    fixture.destroy();
-    expect(persistence$.observed).toBe(false);
+  it('tells the user when endpoints are registered but none are connected', async () => {
+    mockEndpointsService.haveRegistered.set(true);
+    mockSnackBarService.show.mockClear();
+    const page = TestBed.createComponent(EndpointsPageComponent);
+    await page.whenStable();
+    expect(mockSnackBarService.show).toHaveBeenCalledWith(
+      expect.stringContaining('There are no connected endpoints'), 'Got it', 20000);
+  });
+
+  it('sends the user to applications when persistence is off', async () => {
+    const navigate = vi.spyOn(TestBed.inject(Router), 'navigate').mockResolvedValue(true);
+    mockEndpointsService.disablePersistenceFeatures.set(true);
+    const page = TestBed.createComponent(EndpointsPageComponent);
+    await page.whenStable();
+    expect(navigate).toHaveBeenCalledWith(['applications'], { replaceUrl: true });
   });
 
   // The content waits for isInitialised$, which is delayed by 500ms.

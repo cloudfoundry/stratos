@@ -1,5 +1,5 @@
 <app-duplicate-url-banner
-  [endpoints$]="registeredEndpoints$"
+  [endpoints]="registeredEndpoints()"
   message="Endpoints that share a URL are listed separately; each has its own connection.">
 </app-duplicate-url-banner>
 <app-list-sub-nav title="Total Endpoints" [count]="totalEndpoints" [addAction]="addAction()"></app-list-sub-nav>

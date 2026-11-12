@@ -27,8 +27,6 @@ describe('CloudFoundryInviteUserLinkComponent', () => {
 
   const mockUserInviteService = {
     canShowInviteUser: vi.fn().mockReturnValue(of(true)),
-    configured$: of(true),
-    enabled$: of(true),
     canConfigure$: of(true)
   };
 

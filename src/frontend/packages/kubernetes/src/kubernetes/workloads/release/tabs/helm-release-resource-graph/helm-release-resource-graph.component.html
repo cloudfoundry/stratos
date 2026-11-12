@@ -4,13 +4,13 @@
     <span>Fit</span>
   </button>
 
-  @if (analyzerService.enabled$ | async) {
+  @if (analyzerService.enabled()) {
     <app-analysis-report-runner [kubeId]="helper.endpointGuid"
       [namespace]="helper.namespace" [app]="helper.releaseTitle">
     </app-analysis-report-runner>
   }
 
-  @if (analyzerService.enabled$ | async) {
+  @if (analyzerService.enabled()) {
     <app-analysis-report-selector (selected)="analysisChanged($event)"
     [endpoint]="helper.endpointGuid" [path]="path"></app-analysis-report-selector>
   }

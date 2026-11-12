@@ -1,4 +1,4 @@
-import { Injectable, Injector, inject } from '@angular/core';
+import { Injectable, Injector, Signal, computed, inject } from '@angular/core';
 import { toObservable } from '@angular/core/rxjs-interop';
 import { observeSignal } from '@stratosui/store';
 import { combineLatest, Observable } from 'rxjs';
@@ -99,9 +99,12 @@ type InternalHelmUpgrade = {
 })
 export class HelmReleaseHelperService {
 
-  public isFetching$: Observable<boolean>;
-
   public release$: Observable<HelmRelease>;
+
+  // Signal members. The release is undefined until its detail loads; one
+  // without an icon gets the placeholder.
+  readonly release: Signal<HelmRelease | undefined>;
+  readonly isFetching: Signal<boolean>;
 
   public guid: string;
   public endpointGuid: string;
@@ -127,19 +130,23 @@ export class HelmReleaseHelperService {
     // HelmReleaseDataService signal.
     void this.releaseData.loadReleaseDetail(this.endpointGuid, this.namespace, this.releaseTitle);
 
-    this.release$ = toObservable(this.releaseData.releaseDetail(this.guid), { injector: this.injector }).pipe(
-      filter((item): item is HelmRelease => !!item),
-      map((item: HelmRelease) => {
-        if (!item.chart.metadata.icon) {
-          const copy = JSON.parse(JSON.stringify(item));
-          copy.chart.metadata.icon = '/kubernetes/assets/custom/app_placeholder.svg';
-          return copy;
-        }
-        return item;
-      })
-    );
+    const detail = this.releaseData.releaseDetail(this.guid);
+    this.release = computed(() => {
+      const item = detail();
+      if (item && !item.chart.metadata.icon) {
+        const copy = JSON.parse(JSON.stringify(item));
+        copy.chart.metadata.icon = '/kubernetes/assets/custom/app_placeholder.svg';
+        return copy;
+      }
+      return item;
+    });
+    this.isFetching = this.releaseData.isFetchingDetail(this.guid);
 
-    this.isFetching$ = toObservable(this.releaseData.isFetchingDetail(this.guid), { injector: this.injector });
+    // Stream form for readers that combine the release with a request
+    // (hasUpgrade, the upgrade wizard).
+    this.release$ = toObservable(this.release, { injector: this.injector }).pipe(
+      filter((item): item is HelmRelease => !!item),
+    );
   }
 
   public guidAsUrlFragment(): string {

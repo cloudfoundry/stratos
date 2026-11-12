@@ -3,6 +3,10 @@ import { TestBed } from '@angular/core/testing';
 import { of } from 'rxjs';
 import { afterEach, beforeEach, describe, expect, it } from 'vitest';
 
+import { APIResource } from '@stratosui/store';
+
+import { IApp } from '../../../cf-api.types';
+
 import { CfUsersPagedDataService } from '../../../shared/data-services/cf-users-paged-data.service';
 import { QuotaDataService } from '../../../services/endpoint-data/quota-data.service';
 import { ServiceCatalogDataService } from '../../../services/endpoint-data/service-catalog-data.service';
@@ -16,7 +20,7 @@ import { CloudFoundryEndpointService } from './cloud-foundry-endpoint.service';
 import { CloudFoundryOrganizationService } from './cloud-foundry-organization.service';
 import { CloudFoundrySpaceService } from './cloud-foundry-space.service';
 
-describe('CloudFoundrySpaceService — spaceQuotaDefinition$', () => {
+describe('CloudFoundrySpaceService', () => {
   let space: ReturnType<typeof signal<StSpace | null>>;
   let quota: ReturnType<typeof signal<StSpaceQuota | null>>;
   // Each live signal-to-observable bridge reads the quota value once per
@@ -26,8 +30,10 @@ describe('CloudFoundrySpaceService — spaceQuotaDefinition$', () => {
   let lookups: number;
 
   let users: WritableSignal<StUser[] | null>;
+  let endpointApps: WritableSignal<APIResource<IApp>[]>;
 
   beforeEach(() => {
+    endpointApps = signal<APIResource<IApp>[]>([]);
     users = signal<StUser[] | null>(null);
     space = signal<StSpace | null>(null);
     quota = signal<StSpaceQuota | null>(null);
@@ -56,11 +62,11 @@ describe('CloudFoundrySpaceService — spaceQuotaDefinition$', () => {
         {
           provide: CloudFoundryEndpointService,
           useValue: {
-            currentUser$: of({ guid: 'me' }),
-            apps$: of([]),
-            hasApps$: of(false),
-            appsLoading$: of(false),
-            fetchAppCount: () => of(0),
+            endpoint: signal({ entity: { user: { guid: 'me' } } }),
+            apps: endpointApps,
+            appsLoading: signal(false),
+            getMetricFromApps: (apps: APIResource<IApp>[]) =>
+              apps.reduce((total, a) => total + (a.entity.memory ?? 0) * (a.entity.instances ?? 0), 0),
           },
         },
         CloudFoundrySpaceService,
@@ -144,31 +150,58 @@ describe('CloudFoundrySpaceService — spaceQuotaDefinition$', () => {
   // only for a user with no role here (it used to show 'None' for both).
   it('gives no role string while the users are loading', () => {
     const svc = TestBed.inject(CloudFoundrySpaceService);
-    const seen: (string | null)[] = [];
-    const sub = svc.userRole$.subscribe(r => seen.push(r));
-    TestBed.tick();
-    expect(seen.at(-1)).toBeNull();
-    sub.unsubscribe();
+    expect(svc.userRole()).toBeNull();
   });
 
   it('says None once loaded when the user has no role here', () => {
     const svc = TestBed.inject(CloudFoundrySpaceService);
-    const seen: (string | null)[] = [];
-    const sub = svc.userRole$.subscribe(r => seen.push(r));
     users.set([{ guid: 'me', username: 'me', cnsiGuid: 'cf-1', orgRoles: [], spaceRoles: [] }]);
-    TestBed.tick();
-    expect(seen.at(-1)).toBe('None');
-    sub.unsubscribe();
+    expect(svc.userRole()).toBe('None');
   });
 
   it('names the user\'s role once loaded', () => {
     const svc = TestBed.inject(CloudFoundrySpaceService);
-    const seen: (string | null)[] = [];
-    const sub = svc.userRole$.subscribe(r => seen.push(r));
     users.set([{ guid: 'me', username: 'me', cnsiGuid: 'cf-1', orgRoles: [],
       spaceRoles: [{ orgGuid: 'org-1', spaceGuid: 'space-1', roles: ['developer'] }] }]);
-    TestBed.tick();
-    expect(seen.at(-1)).toBe('Developer');
-    sub.unsubscribe();
+    expect(svc.userRole()).toBe('Developer');
+  });
+
+  const app = (guid: string, spaceGuid: string, state: string, memory: number, instances: number) =>
+    ({ metadata: { guid }, entity: { space_guid: spaceGuid, state, memory, instances } }) as unknown as APIResource<IApp>;
+
+  it('lists the foundation\'s apps in this space and counts their started instances', () => {
+    const svc = TestBed.inject(CloudFoundrySpaceService);
+    endpointApps.set([
+      app('a-1', 'space-1', 'STARTED', 64, 2),
+      app('a-2', 'space-other', 'STARTED', 64, 1),
+      app('a-3', 'space-1', 'STOPPED', 128, 1),
+    ]);
+    expect(svc.apps().map(a => a.metadata.guid)).toEqual(['a-1', 'a-3']);
+    expect(svc.appInstances()).toBe(2);
+  });
+
+  it('totals the memory of the space\'s apps', () => {
+    const svc = TestBed.inject(CloudFoundrySpaceService);
+    endpointApps.set([app('a-1', 'space-1', 'STARTED', 64, 2), app('a-2', 'space-other', 'STARTED', 512, 1)]);
+    expect(svc.totalMem()).toBe(128);
+  });
+
+  it('counts users with a role in this space', () => {
+    const svc = TestBed.inject(CloudFoundrySpaceService);
+    expect(svc.usersCount()).toBeNull();
+    users.set([
+      { guid: 'u-1', orgRoles: [], spaceRoles: [{ orgGuid: 'org-1', spaceGuid: 'space-1', roles: ['developer'] }] },
+      { guid: 'u-2', orgRoles: [{ orgGuid: 'org-1', roles: ['user'] }], spaceRoles: [] },
+      { guid: 'u-3', orgRoles: [], spaceRoles: [{ orgGuid: 'org-1', spaceGuid: 'space-2', roles: ['manager'] }] },
+    ] as unknown as StUser[]);
+    expect(svc.usersCount()).toBe(1);
+  });
+
+  // No space yet: the Routes tile shows its placeholder, not 0.
+  it('counts the space\'s routes once the space has arrived', () => {
+    const svc = TestBed.inject(CloudFoundrySpaceService);
+    expect(svc.routesCount()).toBeNull();
+    space.set({ guid: 'space-1', name: 'a', routeCount: 3 } as StSpace);
+    expect(svc.routesCount()).toBe(3);
   });
 });

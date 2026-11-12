@@ -1,31 +1,20 @@
 import { Injectable, inject } from '@angular/core';
-import { toObservable } from '@angular/core/rxjs-interop';
-import { Observable } from 'rxjs';
 
 import { UserSignalService } from './signals/user-signal.service';
 
 /**
- * Legacy Observable-shaped user facade. Delegates to {@link UserSignalService}
- * (signal-native) and exposes Observables for consumers that haven't yet
- * migrated to signals.
+ * User facade over {@link UserSignalService} (signal-native).
  *
- * Kept as a thin compatibility shim so the call sites that still pull
- * `UserService` (and the matching tests) continue to work. New code should
- * inject `UserSignalService` directly.
+ * Kept as a thin shim so the call sites that still pull `UserService`
+ * (and the matching tests) continue to work. New code should inject
+ * `UserSignalService` directly.
  */
 @Injectable({
   providedIn: 'root'
 })
 export class UserService {
+  private userSignals = inject(UserSignalService);
 
-  isAdmin$: Observable<boolean>;
-  isEndpointAdmin$: Observable<boolean>;
-
-  constructor() {
-    const userSignals = inject(UserSignalService);
-
-    this.isAdmin$ = toObservable(userSignals.isAdmin);
-    this.isEndpointAdmin$ = toObservable(userSignals.isEndpointAdmin);
-  }
-
+  readonly isAdmin = this.userSignals.isAdmin;
+  readonly isEndpointAdmin = this.userSignals.isEndpointAdmin;
 }

@@ -1,8 +1,6 @@
-import { AsyncPipe } from '@angular/common';
-import {Component, inject, ChangeDetectionStrategy } from '@angular/core';
+import { Component, Signal, computed, inject, signal, ChangeDetectionStrategy } from '@angular/core';
 import { ActivatedRoute, RouterOutlet } from '@angular/router';
-import { Observable } from 'rxjs';
-import { map, take, tap } from 'rxjs/operators';
+import { take, tap } from 'rxjs/operators';
 
 import { EndpointsService } from '../../../../core/src/core/endpoints.service';
 import { PageHeaderComponent } from '../../../../core/src/shared/components/page-header/page-header.component';
@@ -19,7 +17,6 @@ import { KubernetesService } from '../services/kubernetes.service';
   changeDetection: ChangeDetectionStrategy.OnPush,
   standalone: true,
   imports: [
-    AsyncPipe,
     RouterOutlet,
     PageHeaderComponent,
   ],
@@ -48,7 +45,8 @@ export class KubernetesNodeComponent {
     { link: 'pods', label: 'Pods', icon: 'pod', iconFont: 'stratos-icons' },
   ];
 
-  public breadcrumbs$: Observable<IHeaderBreadcrumb[]>;  public kubeEndpointService = inject(KubernetesEndpointService);
+  public breadcrumbs: Signal<IHeaderBreadcrumb[]> = signal([]);
+  public kubeEndpointService = inject(KubernetesEndpointService);
   public kubeNodeService = inject(KubernetesNodeService);
   public endpointsService = inject(EndpointsService);
 
@@ -67,14 +65,17 @@ export class KubernetesNodeComponent {
       })
     ).subscribe();
 
-    this.breadcrumbs$ = this.kubeEndpointService.endpoint$.pipe(
-      map(endpoint => ([{
+    this.breadcrumbs = computed((): IHeaderBreadcrumb[] => {
+      const endpoint = this.kubeEndpointService.endpoint();
+      if (!endpoint) {
+        return [];
+      }
+      return [{
         breadcrumbs: [
-          { value: endpoint.entity.name, routerLink: `/kubernetes/${endpoint.entity.guid}` },
+          { value: endpoint.name, routerLink: `/kubernetes/${endpoint.guid}` },
         ]
-      }])
-      )
-    );
+      }];
+    });
 
 
   }

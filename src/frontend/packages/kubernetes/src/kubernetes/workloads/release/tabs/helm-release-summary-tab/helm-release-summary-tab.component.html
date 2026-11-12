@@ -13,7 +13,7 @@
     <app-analysis-report-runner [kubeId]="helmReleaseHelper.endpointGuid" [namespace]="helmReleaseHelper.namespace"
       [app]="helmReleaseHelper.releaseTitle">
     </app-analysis-report-runner>
-    @if (analyzerService.enabled$ | async) {
+    @if (analyzerService.enabled()) {
       <app-analysis-report-selector (selected)="analysisChanged($event)"
       [endpoint]="helmReleaseHelper.endpointGuid" [path]="path"></app-analysis-report-selector>
     }
@@ -22,7 +22,7 @@
 }
 
 <app-loading-page [isLoading]="isBusy()" [text]="loadingMessage">
-  @if (helmReleaseHelper.release$ | async; as release) {
+  @if (helmReleaseHelper.release(); as release) {
     <div>
       @if (hasUpgrade$ | async; as upgrade) {
         <div class="float-right rounded-lg text-xs mr-2.5 px-2 py-0.5">

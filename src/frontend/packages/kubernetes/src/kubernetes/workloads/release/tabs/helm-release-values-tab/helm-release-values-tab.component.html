@@ -2,15 +2,15 @@
 
   <div class="flex bg-content-secondary rounded-lg p-1 toolbar" role="group" aria-label="View">
     <button class="btn btn-toggle"
-            [class.btn-toggle-active]="(viewType$ | async) === 'user'"
+            [class.btn-toggle-active]="viewType() === 'user'"
             (click)="viewTypeChange('user')"
             name="view-user">User</button>
     <button class="btn btn-toggle"
-            [class.btn-toggle-active]="(viewType$ | async) === 'chart'"
+            [class.btn-toggle-active]="viewType() === 'chart'"
             (click)="viewTypeChange('chart')"
             name="view-chart">Chart</button>
     <button class="btn btn-toggle"
-            [class.btn-toggle-active]="(viewType$ | async) === 'combined'"
+            [class.btn-toggle-active]="viewType() === 'combined'"
             (click)="viewTypeChange('combined')"
             name="view-combined">Combined</button>
   </div>
@@ -25,7 +25,7 @@
   </button>
 </app-page-sub-nav>
 
-<app-json-viewer #viewer [json]="values$ | async"></app-json-viewer>
+<app-json-viewer #viewer [json]="values()"></app-json-viewer>
 <!-- <div *ngIf="values$ | async as values; else noValues">
   <app-json-viewer #viewer [json]="values"></app-json-viewer>
 </div> -->

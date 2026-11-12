@@ -1,9 +1,7 @@
-import { Component, ElementRef, OnInit, Renderer2, effect, signal, inject, ChangeDetectionStrategy, untracked, viewChild } from '@angular/core';
+import { Component, ElementRef, OnInit, Renderer2, Signal, computed, effect, signal, inject, ChangeDetectionStrategy, untracked, viewChild } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { DomSanitizer, SafeResourceUrl } from '@angular/platform-browser';
 import { ActivatedRoute, RouterModule } from '@angular/router';
-import { Observable } from 'rxjs';
-import { map } from 'rxjs/operators';
 
 import {
   EndpointMissingMessageParts,
@@ -69,7 +67,7 @@ export class KubernetesDashboardTabComponent implements OnInit {
   private loadCheckTries = 0;
   private haveSetupEventLister = false;
   private hasIframeLoaded = false;
-  public breadcrumbs$!: Observable<IHeaderBreadcrumb[]>; // strict: assigned in ngOnInit
+  public breadcrumbs: Signal<IHeaderBreadcrumb[]> = signal([]);
 
   public errorMsg = signal<EndpointMissingMessageParts>({} as EndpointMissingMessageParts);
 
@@ -84,14 +82,17 @@ export class KubernetesDashboardTabComponent implements OnInit {
     href = href.substr(index + 9);
     this.href = href;
     this.source = this.sanitizer.bypassSecurityTrustResourceUrl(`/pp/v1/kubedash/${guid}/login`);
-    this.breadcrumbs$ = this.kubeEndpointService.endpoint$.pipe(
-      map(endpoint => ([{
+    this.breadcrumbs = computed((): IHeaderBreadcrumb[] => {
+      const endpoint = this.kubeEndpointService.endpoint();
+      if (!endpoint) {
+        return [];
+      }
+      return [{
         breadcrumbs: [
-          { value: endpoint.entity.name, routerLink: `/kubernetes/${endpoint.entity.guid}` },
+          { value: endpoint.name, routerLink: `/kubernetes/${endpoint.guid}` },
         ]
-      }])
-      )
-    );
+      }];
+    });
   }
 
   public configUrl(): string {

@@ -1,8 +1,7 @@
 import { CommonModule } from '@angular/common';
-import { DestroyRef, Component, ChangeDetectionStrategy, OnInit, Signal, WritableSignal, inject, signal } from '@angular/core';
+import { DestroyRef, Component, ChangeDetectionStrategy, OnInit, Signal, WritableSignal, inject, signal, computed } from '@angular/core';
 import { toSignal } from '@angular/core/rxjs-interop';
 import { Router, RouterModule } from '@angular/router';
-import { map } from 'rxjs/operators';
 
 import {
   ConfirmationDialogService,
@@ -78,27 +77,8 @@ export class CloudFoundryServicesSignalComponent implements OnInit {
       { queryParams: { 'auto-select-endpoint': this.cfEndpointService.cfGuid } }),
   };
 
-  private readonly favoriteInstanceRowKeys: Signal<ReadonlySet<string>> = toSignal(
-    this.userFavoriteManager.getAllFavorites().pipe(
-      map(([groups, entities]) => {
-        const out = new Set<string>();
-        if (!groups || !entities) return out;
-        for (const epFavGuid in groups) {
-          const g = groups[epFavGuid];
-          if (!g?.entitiesIds) continue;
-          for (const favId of g.entitiesIds) {
-            const fav = entities[favId];
-            if (!fav || fav.endpointType !== 'cf') continue;
-            if (fav.entityType === serviceInstancesEntityType
-              || fav.entityType === userProvidedServiceInstanceEntityType) {
-              out.add(`${fav.endpointId}:${fav.entityId}`);
-            }
-          }
-        }
-        return out;
-      }),
-    ),
-    { initialValue: new Set<string>() },
+  private readonly favoriteInstanceRowKeys: Signal<ReadonlySet<string>> = computed(() =>
+    this.userFavoriteManager.entityFavoriteKeys('cf', [serviceInstancesEntityType, userProvidedServiceInstanceEntityType]),
   );
 
   private toggleInstanceFavorite(si: StServiceInstance): void {

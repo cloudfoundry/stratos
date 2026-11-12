@@ -1,11 +1,9 @@
-import { ApplicationRef, provideZonelessChangeDetection } from '@angular/core';
+import { provideZonelessChangeDetection } from '@angular/core';
 import { TestBed } from '@angular/core/testing';
 import { NavigationEnd, Router } from '@angular/router';
 import { Subject } from 'rxjs';
-import { take } from 'rxjs/operators';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 
-import { RoutingEvent } from '../types/routing.type';
 import { RoutingHistoryService } from './routing-history.service';
 
 describe('RoutingHistoryService', () => {
@@ -14,10 +12,6 @@ describe('RoutingHistoryService', () => {
 
   function navigate(url: string, urlAfterRedirects: string = url) {
     events$.next(new NavigationEnd(++navId, url, urlAfterRedirects));
-  }
-
-  function flushEffects() {
-    TestBed.inject(ApplicationRef).tick();
   }
 
   function makeService(): RoutingHistoryService {
@@ -80,29 +74,5 @@ describe('RoutingHistoryService', () => {
     // strict: a navigation was just dispatched, so currentState is non-null here
     expect(svc.currentState()!.url).toBe('/events?endpointGuid=abc&cf=def');
     expect(svc.currentState()!.state.queryParams).toEqual({ endpointGuid: 'abc', cf: 'def' });
-  });
-
-  // The observable bridges preserve store.select(...) replay timing: consumers
-  // build their cancel/back observables in the constructor but the async pipe
-  // subscribes after view-init, by which point the landing navigation has
-  // settled. A late subscriber must therefore see the latest value.
-  it('replays the latest previous state to a late subscriber via previousState$', () => {
-    const svc = makeService();
-    navigate('/home');
-    navigate('/applications/new');
-    let seen: RoutingEvent | null | undefined;
-    svc.previousState$.pipe(take(1)).subscribe(v => (seen = v));
-    flushEffects();
-    expect(seen?.url).toBe('/home');
-  });
-
-  it('replays the latest current state to a late subscriber via currentState$', () => {
-    const svc = makeService();
-    navigate('/home');
-    navigate('/applications/new');
-    let seen: RoutingEvent | null | undefined;
-    svc.currentState$.pipe(take(1)).subscribe(v => (seen = v));
-    flushEffects();
-    expect(seen?.url).toBe('/applications/new');
   });
 });

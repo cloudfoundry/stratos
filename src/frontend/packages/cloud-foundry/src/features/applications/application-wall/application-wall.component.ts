@@ -2,10 +2,8 @@ import { CommonModule, DatePipe } from '@angular/common';
 import {
   Component, OnInit, ChangeDetectionStrategy, DestroyRef, Signal, computed, inject, signal, WritableSignal, Injector, effect,
 } from '@angular/core';
-import { takeUntilDestroyed, toSignal } from '@angular/core/rxjs-interop';
+import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { ActivatedRoute, Router, RouterModule } from '@angular/router';
-import { Observable, firstValueFrom } from 'rxjs';
-import { filter, map, take } from 'rxjs/operators';
 
 import {
   ConfirmationDialogConfig,
@@ -75,25 +73,8 @@ export class ApplicationWallComponent implements OnInit {
   // and exposed as a Signal so SignalListColumn.favorite can subscribe to
   // it directly. Recomputes when a favorite is added/removed anywhere,
   // which re-renders the affected star cells under OnPush.
-  private readonly favoriteAppRowKeys: Signal<ReadonlySet<string>> = toSignal(
-    this.userFavoriteManager.getAllFavorites().pipe(
-      map(([groups, entities]) => {
-        const out = new Set<string>();
-        if (!groups || !entities) return out;
-        for (const epFavGuid in groups) {
-          const g = groups[epFavGuid];
-          if (!g?.entitiesIds) continue;
-          for (const favId of g.entitiesIds) {
-            const fav = entities[favId];
-            if (fav && fav.entityType === applicationEntityType && fav.endpointType === 'cf') {
-              out.add(`${fav.endpointId}:${fav.entityId}`);
-            }
-          }
-        }
-        return out;
-      }),
-    ),
-    { initialValue: new Set<string>() },
+  private readonly favoriteAppRowKeys: Signal<ReadonlySet<string>> = computed(() =>
+    this.userFavoriteManager.entityFavoriteKeys('cf', [applicationEntityType]),
   );
 
   private toggleAppFavorite(app: StApp): void {
@@ -166,7 +147,11 @@ export class ApplicationWallComponent implements OnInit {
     return actions;
   };
 
-  public cfIds$!: Observable<string[]>;
+  // CF endpoint ids, for the page header's endpoint errors; none bound while
+  // redirecting to an endpoint's wall.
+  public readonly cfIds = computed(() => this.redirected ? undefined : this.cloudFoundryService.cfEndpoints()
+    .map(endpoint => endpoint.guid)
+    .filter((guid): guid is string => guid !== undefined));
 
   /**
    * Reactive permission flag for the L5 "+ Create Application" button.
@@ -192,7 +177,6 @@ export class ApplicationWallComponent implements OnInit {
    */
   public createApplicationAction!: ListSubNavAddAction;
 
-  public haveConnectedCf$!: Observable<boolean>;
 
   // Config for <app-signal-list>. Populated in ngOnInit after the signal
   // config service is initialized with the connected CF GUIDs. Using a
@@ -202,7 +186,6 @@ export class ApplicationWallComponent implements OnInit {
   private redirected = false;
 
   constructor() {
-    const cloudFoundryService = this.cloudFoundryService;
     const activatedRoute = inject(ActivatedRoute);
     const router = inject(Router);
     const currentUserPermissionsService = inject(CurrentUserPermissionsService);
@@ -215,11 +198,6 @@ export class ApplicationWallComponent implements OnInit {
       return;
     }
 
-    this.cfIds$ = cloudFoundryService.cFEndpoints$.pipe(
-      map(endpoints => endpoints
-        .map(endpoint => endpoint.guid)
-        .filter((guid): guid is string => guid !== undefined)),
-    );
 
     // Resolve APPLICATION_CREATE for the current user; mirror the previous
     // directive call (no endpoint/org/space scope — true if any connected
@@ -238,22 +216,14 @@ export class ApplicationWallComponent implements OnInit {
       invoke: () => router.navigate(['/applications/new/']),
     };
 
-    this.haveConnectedCf$ = cloudFoundryService.connectedCFEndpoints$.pipe(
-      map(endpoints => !!endpoints && endpoints.length > 0)
-    );
   }
 
-  async ngOnInit(): Promise<void> {
+  ngOnInit(): void {
     if (this.redirected) {
       return;
     }
     // Resolve connected CF guids once, then initialize the signal config.
-    const connected = await firstValueFrom(
-      this.cloudFoundryService.connectedCFEndpoints$.pipe(
-        filter(endpoints => !!endpoints),
-        take(1),
-      ),
-    );
+    const connected = this.cloudFoundryService.connectedCFEndpoints();
     const cnsiGuids = (connected ?? [])
       .map(ep => ep.guid)
       .filter((guid): guid is string => guid !== undefined);

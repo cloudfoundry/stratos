@@ -106,10 +106,7 @@ export class CloudFoundryOrganizationUsersComponent {
   );
 
   /** True when the CF endpoint has the UAA invite feature configured. */
-  private readonly userInviteAllowed: Signal<boolean> = toSignal(
-    this.userInviteService.configured$,
-    { initialValue: false },
-  );
+  private readonly userInviteAllowed: Signal<boolean> = this.userInviteService.configured;
 
   /** The concrete StUser objects for the current selection, resolved from
    *  filteredItems by row key. Used by Remove to pass actual role data to

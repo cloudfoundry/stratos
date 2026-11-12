@@ -1,12 +1,8 @@
-import { ChangeDetectionStrategy, Component, inject } from '@angular/core';
-import { toObservable } from '@angular/core/rxjs-interop';
+import { ChangeDetectionStrategy, Component, computed, inject } from '@angular/core';
+import { toObservable, toSignal } from '@angular/core/rxjs-interop';
 import { CommonModule } from '@angular/common';
 import { RouterModule } from '@angular/router';
-import {
-  UserProfileInfo,
-} from '@stratosui/store';
-import { combineLatest, Observable } from 'rxjs';
-import { map } from 'rxjs/operators';
+import { Observable } from 'rxjs';
 
 import { CurrentUserPermissionsService } from '../../../core/permissions/current-user-permissions.service';
 import { StratosCurrentUserPermissions } from '../../../core/permissions/stratos-user-permissions.checker';
@@ -42,27 +38,22 @@ export class ProfileInfoComponent {
   private dashboardSignals = inject(DashboardSignalService);
 
 
-  isError$: Observable<boolean>;
-  canEdit$: Observable<boolean>;
-  userProfile$: Observable<UserProfileInfo>;
+  private userProfileService = inject(UserProfileService);
+  private readonly hasEditPermission = toSignal(
+    this.currentUserPermissionsService.can(StratosCurrentUserPermissions.EDIT_PROFILE), { initialValue: false }
+  );
+
+  readonly isError = this.userProfileService.isError;
+  readonly userProfile = this.userProfileService.userProfile;
+  readonly canEdit = computed(() => !this.isError() && this.hasEditPermission());
+  readonly primaryEmailAddress = computed(() => {
+    const profile = this.userProfile();
+    return profile ? this.userProfileService.getPrimaryEmailAddress(profile) : null;
+  });
   allowGravatar$: Observable<boolean>;
 
-  primaryEmailAddress$: Observable<string>;
-
   constructor() {
-    const userProfileService = inject(UserProfileService);
-
-    this.isError$ = userProfileService.isError$;
-    this.userProfile$ = userProfileService.userProfile$;
-
-    const canEdit = this.isError$.pipe(map(e => !e));
-    const hasEditPermissions = this.currentUserPermissionsService.can(StratosCurrentUserPermissions.EDIT_PROFILE);
-    this.canEdit$ = combineLatest([canEdit, hasEditPermissions]).pipe(map(([a, b]) => a && b));
-
-    this.primaryEmailAddress$ = this.userProfile$.pipe(
-      map((profile: UserProfileInfo) => userProfileService.getPrimaryEmailAddress(profile))
-    );
-
+    this.userProfileService.loadUserProfile();
     this.allowGravatar$ = toObservable(this.dashboardSignals.gravatarEnabled);
 
   }

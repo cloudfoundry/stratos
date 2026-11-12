@@ -1,24 +1,22 @@
 import { Portal, TemplatePortal } from '@angular/cdk/portal';
 import { CommonModule } from '@angular/common';
 import { HttpClient } from '@angular/common/http';
-import { ChangeDetectionStrategy, AfterViewInit, Component, HostListener, OnDestroy, TemplateRef, ViewContainerRef, computed, effect, inject, input, linkedSignal, signal, untracked, viewChild } from '@angular/core';
+import { ChangeDetectionStrategy, AfterViewInit, Component, HostListener, OnDestroy, TemplateRef, ViewContainerRef, computed, effect, inject, input, linkedSignal, Signal, signal, untracked, viewChild } from '@angular/core';
 import { RouterModule, ActivatedRoute, Router } from '@angular/router';
-import { toObservable, takeUntilDestroyed } from '@angular/core/rxjs-interop';
+import { toObservable, toSignal, takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import {
   InternalEventSeverity,
   IFavoriteMetadata,
   UserFavorite,
   RecentlyVisitedDataService,
-  StratosStatus,
-  UserProfileInfo,
   AuthTokenEnvelope,
 } from '@stratosui/store';
 import { StratosBrandingService } from '../../../../../theme/stratos-branding.service';
 import { DashboardSignalService } from '../../../core/signals/dashboard-signal.service';
 import { DashboardDataService } from '../../../core/dashboard-data.service';
 import { getTime } from 'date-fns';
-import { combineLatest, firstValueFrom, Observable, shareReplay } from 'rxjs';
-import { map, startWith } from 'rxjs/operators';
+import { firstValueFrom, Observable, shareReplay } from 'rxjs';
+import { map } from 'rxjs/operators';
 import { TailwindSnackBarService } from '../../services/tailwind-snackbar.service';
 
 import { StratosActionType } from '../../../core/extension/extension-service';
@@ -27,7 +25,7 @@ import { StratosCurrentUserPermissions } from '../../../core/permissions/stratos
 import { UserProfileService } from '../../../core/user-profile.service';
 import { IPageSideNavTab } from '../../../features/dashboard/page-side-nav/page-side-nav.component';
 import { TabNavService } from '../../../tab-nav.service';
-import { GlobalEventService, IGlobalEvent } from '../../global-events.service';
+import { GlobalEventService } from '../../global-events.service';
 import { EndpointsService } from './../../../core/endpoints.service';
 import { environment } from './../../../environments/environment';
 import { BREADCRUMB_URL_PARAM, IHeaderBreadcrumb, IHeaderBreadcrumbLink } from './page-header.types';
@@ -115,7 +113,7 @@ export class PageHeaderComponent implements OnDestroy, AfterViewInit {
     window.open(url, DOCUMENTATION_WINDOW_NAME, 'width=1024,height=900');
   }
 
-  public canAPIKeys$: Observable<boolean>;
+  public canAPIKeys: Signal<boolean>;
   // Which of the bound breadcrumb sets to show: the URL's ?breadcrumbs= value.
   private breadcrumbKey = signal<string | null>(null);
   public eventSeverity = InternalEventSeverity;
@@ -147,7 +145,7 @@ export class PageHeaderComponent implements OnDestroy, AfterViewInit {
 
   readonly hideMenu = input(false);
 
-  readonly endpointIds$ = input<Observable<string[]>>();
+  readonly endpointIds = input<string[]>();
 
   // Published to the side navigation by the effects in the constructor.
   readonly tabs = input<IPageSideNavTab[]>();
@@ -160,9 +158,9 @@ export class PageHeaderComponent implements OnDestroy, AfterViewInit {
   // The logout-only menu never offers the history.
   readonly historyVisible = computed(() => !this.logoutOnly() && this.showHistory());
 
-  public events$: Observable<IGlobalEvent[]>;
-  public unreadEventCount$: Observable<number>;
-  public eventPriorityStatus$: Observable<StratosStatus | undefined>;
+  private readonly eventService = inject(GlobalEventService);
+  public readonly events = this.eventService.events;
+  public readonly unreadEventCount = computed(() => this.events().filter(event => !event.read).length);
 
   readonly favorite = input<UserFavorite<IFavoriteMetadata> | null>();
   // The favorite the star is shown for: the last one bound that can be
@@ -181,8 +179,19 @@ export class PageHeaderComponent implements OnDestroy, AfterViewInit {
     },
   });
 
-  public username$: Observable<string>;
-  public user$: Observable<UserProfileInfo>;
+  public readonly user = this.userProfileService.userProfile;
+  public readonly username = computed(() => {
+    const profile = this.user();
+    if (!profile) {
+      return null;
+    }
+    let name = profile.userName;
+    if (profile.name) {
+      name = profile.name.givenName + ' ' + profile.name.familyName;
+      name = name.trim();
+    }
+    return name ? name : profile.userName;
+  });
   public allowGravatar$: Observable<boolean>;
   public canLogout$: Observable<boolean>;
   public authToken$!: Observable<string>;
@@ -229,17 +238,6 @@ export class PageHeaderComponent implements OnDestroy, AfterViewInit {
 
   constructor() {
     const route = this.route;
-    const eventService = inject(GlobalEventService);
-
-    this.events$ = eventService.events$.pipe(
-      startWith([])
-    );
-    this.unreadEventCount$ = eventService.events$.pipe(
-      map(events => events.filter(event => !event.read)),
-      map(events => events.length)
-    );
-    this.eventPriorityStatus$ = eventService.priorityStratosStatus$;
-
     this.actionsKey = this.route.snapshot.data ? this.route.snapshot.data.extensionsActionsKey : null;
     // Reactive breadcrumb key — re-resolves whenever the URL's
     // ?breadcrumbs= query param changes. Snapshot-only reads broke on
@@ -297,28 +295,18 @@ export class PageHeaderComponent implements OnDestroy, AfterViewInit {
       }
     });
 
-    this.user$ = this.userProfileService.userProfile$;
-
-    this.username$ = this.user$.pipe(
-      map(profile => {
-        let name = profile.userName;
-        if (profile.name) {
-          name = profile.name.givenName + ' ' + profile.name.familyName;
-          name = name.trim();
-        }
-        return name ? name : profile.userName;
-      })
-    );
+    // The user menu shows the profile: fetch it once the menu is shown.
+    effect(() => {
+      if (!this.hideMenu() && !environment.hideUserMenu) {
+        untracked(() => this.userProfileService.loadUserProfile());
+      }
+    });
 
     this.allowGravatar$ = toObservable(this.dashboardSignals.gravatarEnabled);
 
     // Must be enabled and the user must have permission
-    this.canAPIKeys$ = combineLatest([
-      this.endpointsService.disablePersistenceFeatures$.pipe(startWith(true)),
-      this.cups.can(StratosCurrentUserPermissions.API_KEYS),
-    ]).pipe(
-      map(([disabled, permission]) => !disabled && permission)
-    );
+    const apiKeysPermission = toSignal(this.cups.can(StratosCurrentUserPermissions.API_KEYS), { initialValue: false });
+    this.canAPIKeys = computed(() => !this.endpointsService.disablePersistenceFeatures() && apiKeysPermission());
 
     this.canLogout$ = this.currentUserPermissionsService.can(StratosCurrentUserPermissions.CAN_NOT_LOGOUT).pipe(
       map(noLogout => !noLogout)

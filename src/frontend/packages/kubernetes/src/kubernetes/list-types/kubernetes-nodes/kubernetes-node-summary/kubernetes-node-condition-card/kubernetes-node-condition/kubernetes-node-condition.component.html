@@ -1,4 +1,4 @@
-@if (hasCondition$ | async) {
+@if (hasCondition()) {
   <div class="flex flex-row items-center justify-between mr-5 pt-5" [ngStyle]="{'padding-top': paddingTop()}">
     <div class="flex items-center justify-center">
       <span [class]="icons[condition()][1]">{{ icons[condition()][0] }}</span>
@@ -7,6 +7,6 @@
       </div>
     </div>
     <app-boolean-indicator class="min-w-[50px]" [subtle]="subtle()" [inverse]="inverse()"
-    [isTrue]="condition$ | async" [type]="type()"></app-boolean-indicator>
+    [isTrue]="conditionValue()" [type]="type()"></app-boolean-indicator>
   </div>
 }
