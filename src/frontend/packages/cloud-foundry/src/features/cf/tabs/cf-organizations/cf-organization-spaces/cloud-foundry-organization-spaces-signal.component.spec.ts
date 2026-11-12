@@ -1,7 +1,6 @@
 import { TestBed } from '@angular/core/testing';
 import { provideZonelessChangeDetection, signal } from '@angular/core';
 import { provideRouter } from '@angular/router';
-import { of } from 'rxjs';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 
 import { ConfirmationDialogService, CurrentUserPermissionsService, TailwindSnackBarService } from '@stratosui/core';
@@ -56,7 +55,7 @@ describe('CloudFoundryOrganizationSpacesSignalComponent', () => {
         { provide: CloudFoundryOrganizationService, useValue: { orgGuid: 'org-1' } },
         { provide: CfSpacesSignalConfigService, useValue: spacesConfig },
         { provide: UserFavoriteManager, useValue: { entityFavoriteKeys: () => new Set<string>(), toggleFavorite: vi.fn() } },
-        { provide: CurrentUserPermissionsService, useValue: { can$: () => of(true) } },
+        { provide: CurrentUserPermissionsService, useValue: { can: () => signal(true) } },
         // The confirm dialog waits for the user; here it confirms at once.
         { provide: ConfirmationDialogService, useValue: { open: (_cfg: unknown, doFn: () => void) => doFn() } },
         { provide: TailwindSnackBarService, useValue: { error: snackError } },
