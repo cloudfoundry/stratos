@@ -1,7 +1,5 @@
 import { CommonModule } from '@angular/common';
-import { ChangeDetectionStrategy, Component, Signal, WritableSignal, inject, signal, input } from '@angular/core';
-import { toSignal } from '@angular/core/rxjs-interop';
-import { map } from 'rxjs/operators';
+import { ChangeDetectionStrategy, Component, Signal, WritableSignal, inject, signal, input, computed } from '@angular/core';
 
 import {
   EndpointLastErrorService,
@@ -103,28 +101,24 @@ export class EndpointsSignalListComponent {
   // the endpoint was explicitly starred. We only care about that group-level
   // record here — the entitiesIds list is for child favorites the app wall /
   // orgs / etc. lists already track separately.
-  private readonly favoriteEndpointRowKeys: Signal<ReadonlySet<string>> = toSignal(
-    this.userFavoriteManager.getAllFavorites().pipe(
-      map(([groups]) => {
-        const out = new Set<string>();
-        if (!groups) return out;
-        for (const epFavGuid in groups) {
-          const g = groups[epFavGuid];
-          if (!g || g.ethereal) continue;
-          const ep = g.endpoint;
-          // Endpoint favorites have entityId omitted on the way in (see
-          // `toggleEndpointFavorite`), so we synthesize the row key from
-          // endpointId twice to match the table's getRowKey shape
-          // (`${ep.guid}:${ep.guid}`).
-          if (ep && ep.entityType === 'endpoint' && ep.endpointId) {
-            out.add(`${ep.endpointId}:${ep.endpointId}`);
-          }
-        }
-        return out;
-      }),
-    ),
-    { initialValue: new Set<string>() },
-  );
+  private readonly favoriteEndpointRowKeys: Signal<ReadonlySet<string>> = computed(() => {
+    const out = new Set<string>();
+    const groups = this.userFavoriteManager.allFavorites()?.[0];
+    if (!groups) return out;
+    for (const epFavGuid in groups) {
+      const g = groups[epFavGuid];
+      if (!g || g.ethereal) continue;
+      const ep = g.endpoint;
+      // Endpoint favorites have entityId omitted on the way in (see
+      // `toggleEndpointFavorite`), so we synthesize the row key from
+      // endpointId twice to match the table's getRowKey shape
+      // (`${ep.guid}:${ep.guid}`).
+      if (ep && ep.entityType === 'endpoint' && ep.endpointId) {
+        out.add(`${ep.endpointId}:${ep.endpointId}`);
+      }
+    }
+    return out;
+  });
 
   public listConfig: WritableSignal<SignalListConfig<EndpointModel> | undefined> = signal(undefined);
 
