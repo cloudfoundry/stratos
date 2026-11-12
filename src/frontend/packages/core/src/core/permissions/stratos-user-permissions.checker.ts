@@ -1,9 +1,6 @@
-import { inject } from '@angular/core';
-import { APIKeysEnabled, PermissionValues } from '@stratosui/store';
-import { Observable, of } from 'rxjs';
-import { filter, switchMap } from 'rxjs/operators';
+import { computed, inject, Signal } from '@angular/core';
+import { APIKeysEnabled, AuthDataService, CurrentUserRolesDataService, PermissionValues } from '@stratosui/store';
 
-import { CurrentUserRolesSignalService } from '../signals/current-user-roles-signal.service';
 import { IPermissionConfigs, PermissionConfig, PermissionTypes } from './current-user-permissions.config';
 import {
   BaseCurrentUserPermissionsChecker,
@@ -71,7 +68,8 @@ export const stratosPermissionConfigs: IPermissionConfigs = {
 };
 
 export class StratosUserPermissionsChecker extends BaseCurrentUserPermissionsChecker implements ICurrentUserPermissionsChecker {
-  private roles = inject(CurrentUserRolesSignalService);
+  private roles = inject(CurrentUserRolesDataService);
+  private authData = inject(AuthDataService);
 
   constructor() {
     super();
@@ -81,65 +79,33 @@ export class StratosUserPermissionsChecker extends BaseCurrentUserPermissionsChe
     return stratosPermissionConfigs[action];
   }
 
-  private check(
-    type: PermissionTypes,
-    permission: PermissionValues,
-  ): Observable<boolean> | undefined {
-    if (type === StratosPermissionTypes.STRATOS) {
-      return this.roles.stratosRole$(permission);
-    }
-
-    if (type === StratosPermissionTypes.STRATOS_SCOPE) {
-      return this.roles.stratosHasScope$(permission as StratosScopeStrings);
-    }
-    return undefined;
-  }
   /**
    * @param permissionConfig Single permission to be checked
    */
-  public getSimpleCheck(permissionConfig: PermissionConfig): Observable<boolean> | undefined {
+  public getSimpleCheck(permissionConfig: PermissionConfig): Signal<boolean> | undefined {
     switch (permissionConfig.type) {
       case (StratosPermissionTypes.STRATOS):
-        return this.getInternalCheck(permissionConfig.permission as StratosPermissionStrings);
+        return this.roles.stratosRole(permissionConfig.permission as PermissionValues);
       case (StratosPermissionTypes.STRATOS_SCOPE):
-        return this.getInternalScopesCheck(permissionConfig.permission as StratosScopeStrings);
+        return this.roles.stratosHasScope(permissionConfig.permission as StratosScopeStrings);
       case (StratosPermissionTypes.API_KEY):
         return this.apiKeyCheck();
     }
+    return undefined;
   }
 
-  private getInternalCheck(permission: StratosPermissionStrings) {
-    return this.check(StratosPermissionTypes.STRATOS, permission);
-  }
-
-  private getInternalScopesChecks(
-    configs: PermissionConfig[]
-  ) {
-    return configs.map(config => {
-      const { permission } = config;
-      return this.getInternalScopesCheck(permission as StratosScopeStrings);
+  private apiKeyCheck(): Signal<boolean> {
+    const isAdmin = this.roles.stratosRole(StratosPermissionStrings.STRATOS_ADMIN);
+    return computed(() => {
+      // No session yet: denied until it arrives.
+      switch (this.authData.sessionData()?.config.APIKeysEnabled) {
+        case APIKeysEnabled.ADMIN_ONLY:
+          return isAdmin();
+        case APIKeysEnabled.ALL_USERS:
+          return true;
+      }
+      return false;
     });
-  }
-
-  private getInternalScopesCheck(permission: StratosScopeStrings): Observable<boolean> {
-    // STRATOS_SCOPE always resolves to the scope observable; the dispatch in
-    // `check` cannot return undefined for this branch.
-    return this.roles.stratosHasScope$(permission);
-  }
-
-  private apiKeyCheck(): Observable<boolean> {
-    return this.roles.sessionData$().pipe(
-      filter(sessionData => !!sessionData),
-      switchMap(sessionData => {
-        switch (sessionData.config.APIKeysEnabled) {
-          case APIKeysEnabled.ADMIN_ONLY:
-            return this.roles.stratosRole$(StratosPermissionStrings.STRATOS_ADMIN);
-          case APIKeysEnabled.ALL_USERS:
-            return of(true);
-        }
-        return of(false);
-      })
-    );
   }
 
   public getComplexCheck(
@@ -153,7 +119,7 @@ export class StratosUserPermissionsChecker extends BaseCurrentUserPermissionsChe
       switch (permission) {
         case StratosPermissionTypes.STRATOS_SCOPE:
           res.push({
-            checks: this.getInternalScopesChecks(configGroup),
+            checks: configGroup.map(config => this.roles.stratosHasScope(config.permission as StratosScopeStrings)),
           });
           break;
         default:
@@ -164,7 +130,7 @@ export class StratosUserPermissionsChecker extends BaseCurrentUserPermissionsChe
     }
     return res;
   }
-  public getFallbackCheck(_endpointGuid: string, _endpointType: string): Observable<boolean> | null {
+  public getFallbackCheck(_endpointGuid: string, _endpointType: string): Signal<boolean> | null {
     return null;
   }
 
