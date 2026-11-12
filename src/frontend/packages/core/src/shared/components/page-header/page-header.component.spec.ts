@@ -1,5 +1,5 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
-import { EmbeddedViewRef, provideZonelessChangeDetection } from '@angular/core';
+import { EmbeddedViewRef, provideZonelessChangeDetection, signal } from '@angular/core';
 import { provideHttpClient } from '@angular/common/http';
 import { provideHttpClientTesting, HttpTestingController } from '@angular/common/http/testing';
 import { describe, it, expect, beforeEach, afterEach, vi } from 'vitest';
@@ -12,6 +12,7 @@ import { CoreTestingModule } from '@test-framework';
 import { DashboardDataService } from '../../../core/dashboard-data.service';
 import { EndpointsService } from '../../../core/endpoints.service';
 import { CurrentUserPermissionsService } from '../../../core/permissions/current-user-permissions.service';
+import { StratosCurrentUserPermissions } from '../../../core/permissions/stratos-user-permissions.checker';
 import { TabNavService } from '../../../tab-nav.service';
 import { UserProfileService } from '../../../core/user-profile.service';
 import { GlobalEventService } from '../../global-events.service';
@@ -60,6 +61,23 @@ describe('PageHeaderComponent', () => {
 
   it('should be created', () => {
     expect(component).toBeTruthy();
+  });
+
+  // API Keys and Sign Out in the user menu follow their permissions.
+  it('gates API Keys and Sign Out on their permissions', async () => {
+    const apiKeys = signal(false);
+    const noLogout = signal(true);
+    vi.spyOn(TestBed.inject(CurrentUserPermissionsService), 'can').mockImplementation(
+      (action: unknown) => action === StratosCurrentUserPermissions.API_KEYS ? apiKeys : noLogout);
+    const header = TestBed.createComponent(PageHeaderComponent);
+    await header.whenStable();
+    expect(header.componentInstance.canAPIKeys()).toBe(false);
+    expect(header.componentInstance.canLogout()).toBe(false);
+
+    apiKeys.set(true);
+    noLogout.set(false);
+    expect(header.componentInstance.canAPIKeys()).toBe(true);
+    expect(header.componentInstance.canLogout()).toBe(true);
   });
 
   // The user menu shows the profile; a header without the menu fetches none.

@@ -3,7 +3,7 @@ import { CommonModule } from '@angular/common';
 import { HttpClient } from '@angular/common/http';
 import { ChangeDetectionStrategy, AfterViewInit, Component, HostListener, OnDestroy, TemplateRef, ViewContainerRef, computed, effect, inject, input, linkedSignal, Signal, signal, untracked, viewChild } from '@angular/core';
 import { RouterModule, ActivatedRoute, Router } from '@angular/router';
-import { toObservable, toSignal, takeUntilDestroyed } from '@angular/core/rxjs-interop';
+import { toObservable, takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import {
   InternalEventSeverity,
   IFavoriteMetadata,
@@ -193,7 +193,7 @@ export class PageHeaderComponent implements OnDestroy, AfterViewInit {
     return name ? name : profile.userName;
   });
   public allowGravatar$: Observable<boolean>;
-  public canLogout$: Observable<boolean>;
+  public canLogout: Signal<boolean>;
   public authToken$!: Observable<string>;
   public refreshToken$!: Observable<string>;
   public tokenExpiry$!: Observable<Date | null>;
@@ -305,12 +305,11 @@ export class PageHeaderComponent implements OnDestroy, AfterViewInit {
     this.allowGravatar$ = toObservable(this.dashboardSignals.gravatarEnabled);
 
     // Must be enabled and the user must have permission
-    const apiKeysPermission = toSignal(this.cups.can$(StratosCurrentUserPermissions.API_KEYS), { initialValue: false });
+    const apiKeysPermission = this.cups.can(StratosCurrentUserPermissions.API_KEYS);
     this.canAPIKeys = computed(() => !this.endpointsService.disablePersistenceFeatures() && apiKeysPermission());
 
-    this.canLogout$ = this.currentUserPermissionsService.can$(StratosCurrentUserPermissions.CAN_NOT_LOGOUT).pipe(
-      map(noLogout => !noLogout)
-    );
+    const noLogout = this.currentUserPermissionsService.can(StratosCurrentUserPermissions.CAN_NOT_LOGOUT);
+    this.canLogout = computed(() => !noLogout());
   }
 
   // Fetch fresh token envelope — called every time the token menu opens so

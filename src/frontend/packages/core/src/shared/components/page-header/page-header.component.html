@@ -220,12 +220,12 @@
                               <span>API Keys</span>
                             </a>
                           }
-                          @if (canLogout$ | async) {
+                          @if (canLogout()) {
                             <div class="page-header-menu-separator border-t border-content-border my-2"></div>
                           }
                         </div>
                       }
-                      @if (canLogout$ | async) {
+                      @if (canLogout()) {
                         <button class="w-full text-left px-3 py-2 text-sm text-content-text hover:bg-content-secondary rounded-md transition-colors"
                           (click)="logout(); closeUserMenu()"
                           >
