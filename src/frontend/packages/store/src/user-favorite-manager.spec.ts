@@ -1,11 +1,10 @@
 import { provideHttpClient } from '@angular/common/http';
 import { HttpTestingController, provideHttpClientTesting } from '@angular/common/http/testing';
-import { provideZonelessChangeDetection, signal } from '@angular/core';
+import { provideZonelessChangeDetection } from '@angular/core';
 import { TestBed } from '@angular/core/testing';
 import { afterEach, beforeEach, describe, expect, it } from 'vitest';
 
 import { proxyAPIVersion } from './jetstream';
-import { EndpointsDataService } from './services/endpoints-data.service';
 import { UserFavoritesDataService } from './services/user-favorites-data.service';
 import { IFavoriteMetadata, UserFavorite } from './types/user-favorites.types';
 import { UserFavoriteManager } from './user-favorite-manager';
@@ -30,7 +29,6 @@ describe('UserFavoriteManager', () => {
         provideZonelessChangeDetection(),
         provideHttpClient(),
         provideHttpClientTesting(),
-        { provide: EndpointsDataService, useValue: { endpointById: () => signal(null) } },
       ],
     });
     manager = TestBed.inject(UserFavoriteManager);

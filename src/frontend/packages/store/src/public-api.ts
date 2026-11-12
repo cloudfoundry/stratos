@@ -86,7 +86,6 @@ export {
   StratosCatalogEndpointEntity,
   StratosCatalogEntity,
 } from './entity-catalog/entity-catalog-entity/entity-catalog-entity';
-export { getFavoriteInfoObservable } from './helpers/store-helpers';
 export {
   JetStreamErrorResponse,
   extractHttpErrorMessage,
@@ -101,7 +100,7 @@ export {
 export type { ErrorPiece, ErrorPieceStyle } from './upstream-error-text';
 export { htmlToPieces, piecesToText } from './upstream-error-text';
 export type { RoutingEvent } from './types/routing.type';
-export type { IFavoriteMetadata, IFavoritesInfo, UserFavoriteEndpoint, IEndpointFavMetadata, FavoriteIconData } from './types/user-favorites.types';
+export type { IFavoriteMetadata, UserFavoriteEndpoint, IEndpointFavMetadata, FavoriteIconData } from './types/user-favorites.types';
 export { UserFavorite } from './types/user-favorites.types';
 export { UserFavoriteManager } from './user-favorite-manager';
 export { UserFavoritesDataService } from './services/user-favorites-data.service';
