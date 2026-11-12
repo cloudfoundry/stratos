@@ -200,7 +200,10 @@ export class SpecifyDetailsStepComponent implements AfterContentInit {
       }),
       switchMap(guids => {
         this.cSIHelperService = this.cSIHelperServiceFactory.create(guids.cfGuid, guids.serviceGuid);
-        return this.cSIHelperService.serviceInstances$(guids.servicePlanGuid, guids.spaceGuid);
+        return toObservable(
+          this.cSIHelperService.serviceInstances(guids.servicePlanGuid, guids.spaceGuid),
+          { injector: this.injector },
+        );
       }),
       shareReplay({ bufferSize: 1, refCount: true }),
     );
@@ -289,7 +292,7 @@ export class SpecifyDetailsStepComponent implements AfterContentInit {
     this.formMode.set(CreateServiceFormMode.CreateServiceInstance);
     const helper = this.ensureHelper();
     if (helper) {
-      this.allServiceInstances$ = helper.serviceInstances$();
+      this.allServiceInstances$ = toObservable(helper.serviceInstances(), { injector: this.injector });
       // Re-entering the step replaces the previous subscription.
       this.formValidatorData?.unsubscribe();
       this.formValidatorData = this.setupFormValidatorData();
