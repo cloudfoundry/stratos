@@ -255,6 +255,29 @@ describe('VariableEditDialogComponent', () => {
     expect(close).not.toHaveBeenCalled();
   });
 
+  it('runs the save callback and closes when it succeeds', async () => {
+    const save = vi.fn().mockResolvedValue(undefined);
+    const { cmp, close } = make({ mode: 'add', save });
+    cmp.name.set('NEW');
+    cmp.value.set('v');
+    await cmp.save();
+    expect(save).toHaveBeenCalledWith({ name: 'NEW', value: 'v' });
+    expect(close).toHaveBeenCalledWith({ name: 'NEW', value: 'v' });
+    expect(cmp.saveError()).toBeNull();
+  });
+
+  it('stays open with the typed name and shows the error when the save fails', async () => {
+    const save = vi.fn().mockRejectedValue(new Error('CF said no'));
+    const { cmp, close } = make({ mode: 'add', save });
+    cmp.name.set('NEW');
+    cmp.value.set('v');
+    await cmp.save();
+    expect(close).not.toHaveBeenCalled();
+    expect(cmp.name()).toBe('NEW');
+    expect(cmp.saveError()).toContain('CF said no');
+    expect(cmp.saving()).toBe(false);
+  });
+
   it('cancel() closes with no result', () => {
     const { cmp, close } = make({ mode: 'edit', name: 'FOO', value: 'bar' });
     cmp.cancel();

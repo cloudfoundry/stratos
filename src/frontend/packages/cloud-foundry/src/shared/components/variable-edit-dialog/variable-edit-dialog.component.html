@@ -57,8 +57,15 @@
     }
   </div>
 
+  @if (saveError()) {
+    <div class="flex items-start gap-2 p-3 mt-4 rounded bg-[var(--warning-bg)] text-[var(--warning-text)]" role="alert">
+      <span class="material-icons text-warning-shade-500" aria-hidden="true">error_outline</span>
+      <span class="text-sm">Save failed: {{ saveError() }}</span>
+    </div>
+  }
+
   <div class="flex gap-2 justify-end mt-6">
     <button type="button" class="btn btn-secondary" (click)="cancel()">Cancel</button>
-    <button type="button" class="btn btn-primary" (click)="save()" [disabled]="!canSave()">Save</button>
+    <button type="button" class="btn btn-primary" (click)="save()" [disabled]="!canSave() || saving()">Save</button>
   </div>
 </div>
