@@ -6,7 +6,6 @@ import { provideHttpClient } from '@angular/common/http';
 import { provideHttpClientTesting } from '@angular/common/http/testing';
 import { NoopAnimationsModule } from '@angular/platform-browser/animations';
 import { describe, it, expect, beforeEach, vi } from 'vitest';
-import { of } from 'rxjs';
 
 import { TabNavService, CoreModule } from '@stratosui/core';
 import { EntityCatalogTestModule, TEST_CATALOGUE_ENTITIES, generateStratosEntities } from '@stratosui/store';
@@ -30,7 +29,7 @@ describe('CliInfoCloudFoundryComponent', () => {
   const spaceRoute = { cfGuid: 'test-guid', orgGuid: 'org-guid', spaceGuid: 'space-guid' };
 
   const mockEndpointService = {
-    endpoint$: of({
+    endpoint: signal({
       entity: {
         guid: 'test-guid',
         name: 'Test Endpoint',
@@ -160,6 +159,8 @@ describe('CliInfoCloudFoundryComponent', () => {
     org.set(null);
     space.set(null);
     await create(spaceRoute);
+    // No placeholders for the names while they load
+    expect((fixture.nativeElement as HTMLElement).textContent).not.toContain('[organization name]');
 
     org.set(loadedOrg);
     space.set(loadedSpace);
