@@ -7,7 +7,8 @@ import { HttpErrorResponse, provideHttpClient } from '@angular/common/http';
 import { provideHttpClientTesting } from '@angular/common/http/testing';
 import { describe, it, expect, beforeEach, afterEach, beforeAll, afterAll, vi } from 'vitest';
 import { NEVER, of, Subject } from 'rxjs';
-import { Router } from '@angular/router';
+import { provideRouter, Router } from '@angular/router';
+import { RoutingHistoryService } from '@stratosui/store';
 import { RouterTestingModule } from '@angular/router/testing';
 import { createBasicStoreModule } from "@test-framework/core-test.helper";
 
@@ -817,6 +818,33 @@ describe('SteppersComponent — Cancel', () => {
     expect(host.cancelAction).toHaveBeenCalledTimes(1);
     expect(host.left).toEqual([false]);
     expect(navigate).not.toHaveBeenCalled();
+  });
+});
+
+describe('SteppersComponent — Cancel link', () => {
+  const previousState = signal<any>(null);
+
+  beforeEach(() => {
+    previousState.set({ url: '/applications?x=1', state: { url: '/applications', params: {}, queryParams: { x: '1' } } });
+    TestBed.configureTestingModule({
+      providers: [
+        provideZonelessChangeDetection(),
+        provideRouter([]),
+        provideHttpClient(),
+        provideHttpClientTesting(),
+        { provide: RoutingHistoryService, useValue: { previousState } },
+      ],
+    });
+    TestBed.overrideComponent(SteppersComponent, { set: { imports: [], template: '' } });
+  });
+
+  it('goes back to the page before the wizard, which later navigations do not move', () => {
+    const steppers = TestBed.createComponent(SteppersComponent).componentInstance;
+    expect(steppers.cancelLink()).toBe('/applications');
+    expect(steppers.cancelQueryParams()).toEqual({ x: '1' });
+
+    previousState.set({ url: '/home', state: { url: '/home', params: {}, queryParams: {} } });
+    expect(steppers.cancelLink()).toBe('/applications');
   });
 });
 

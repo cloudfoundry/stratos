@@ -112,8 +112,8 @@
             @if (!steps[currentIndex()].effectiveHideCloseButton && (cancel() || cancelAction())) {
               <button id="stepper_cancel"
                 class="btn btn-secondary"
-                [routerLink]="cancelReload() || cancelAction() ? null : (cancel$ | async)"
-                [queryParams]="cancelReload() || cancelAction() ? null : (cancelQueryParams$ | async)"
+                [routerLink]="cancelReload() || cancelAction() ? null : cancelLink()"
+                [queryParams]="cancelReload() || cancelAction() ? null : cancelQueryParams()"
                 [disabled]="!canCancel(currentIndex())"
                 (click)="onCancel(currentIndex())">
                 {{ this.getCancelButtonText(currentIndex()) }}

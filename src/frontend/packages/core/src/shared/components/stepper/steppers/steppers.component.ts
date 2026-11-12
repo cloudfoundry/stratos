@@ -1,9 +1,9 @@
-import { ChangeDetectionStrategy, ChangeDetectorRef, AfterContentInit, Component, ElementRef, Injector, OnDestroy, OnInit, TemplateRef, ViewEncapsulation, afterNextRender, effect, inject, signal, untracked, input, viewChild, contentChildren } from '@angular/core';
+import { ChangeDetectionStrategy, ChangeDetectorRef, AfterContentInit, Component, ElementRef, Injector, OnDestroy, OnInit, TemplateRef, ViewEncapsulation, afterNextRender, computed, effect, inject, signal, untracked, input, viewChild, contentChildren } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { ActivatedRoute, Router, RouterModule } from '@angular/router';
 import { ErrorPiece, RoutingHistoryService } from '@stratosui/store';
-import { combineLatest, Observable, of as observableOf, Subscription, Unsubscribable } from 'rxjs';
-import { take, catchError, defaultIfEmpty, finalize, map, switchMap } from 'rxjs/operators';
+import { defer, Observable, of as observableOf, Subscription, Unsubscribable } from 'rxjs';
+import { take, catchError, defaultIfEmpty, finalize, switchMap } from 'rxjs/operators';
 
 import { BASE_REDIRECT_QUERY, StepperRedirectPayload } from '../stepper.types';
 import { SteppersService } from '../steppers.service';
@@ -43,7 +43,6 @@ export class SteppersComponent implements OnInit, AfterContentInit, OnDestroy {
 
 
   private nextSub!: Subscription;
-  cancel$: Observable<string>;
 
   readonly stepComponents = contentChildren(StepComponent);
 
@@ -149,26 +148,23 @@ export class SteppersComponent implements OnInit, AfterContentInit, OnDestroy {
   // zoneless CD, and a direct template read establishes the dependency
   // (a getter-wrapped read does not track for signal-driven CD).
   readonly currentIndex = signal(0);
-  cancelQueryParams$: Observable<{
-    [key: string]: string;
-  }>;
-  constructor() {
-    const previousRoute$ = this.routingHistory.previousState$.pipe(take(1));
-    this.cancel$ = previousRoute$.pipe(
-      map(previousState => {
-        // If we have a previous state, and that previous state was not login (i.e. we've come from afresh), go to whatever the default
-        // cancel state is
-        const cancel = this.cancel();
-        if (cancel) {
-          return cancel;
-        }
-        return previousState && previousState.url !== '/login' ? previousState.url.split('?')[0] : '/home';
-      })
-    );
-    this.cancelQueryParams$ = previousRoute$.pipe(
-      map(previousState => previousState && previousState.url !== '/login' ? previousState.state.queryParams : {})
-    );
-  }
+
+  // The page before the wizard, read once: at the first render of the Cancel
+  // link (by then the navigation here is recorded), or at a redirect.
+  // Untracked, so later navigations do not move it.
+  private readonly previousRoute = computed(() => untracked(this.routingHistory.previousState));
+
+  // Cancel goes to the cancel input, else back to the page before the wizard
+  // (unless that was login, i.e. we've come afresh), else home.
+  readonly cancelLink = computed(() => {
+    const previousState = this.previousRoute();
+    return this.cancel() || (previousState && previousState.url !== '/login' ? previousState.url.split('?')[0] : '/home');
+  });
+
+  readonly cancelQueryParams = computed(() => {
+    const previousState = this.previousRoute();
+    return previousState && previousState.url !== '/login' ? previousState.state.queryParams : {};
+  });
 
   ngOnInit() { }
 
@@ -342,14 +338,7 @@ export class SteppersComponent implements OnInit, AfterContentInit, OnDestroy {
     if (redirectPayload) {
       return observableOf(this.navigate(redirectPayload));
     }
-    return combineLatest([
-      this.cancel$,
-      this.cancelQueryParams$
-    ]).pipe(
-      map(([path, params]) => {
-        this.navigate({ path, query: params });
-      })
-    );
+    return defer(() => observableOf(this.navigate({ path: this.cancelLink(), query: this.cancelQueryParams() })));
   }
 
   // Direct Angular Router navigation, replacing the ngrx RouterNav dispatch +
