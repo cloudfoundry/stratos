@@ -1,7 +1,5 @@
 import { Injectable, Signal, inject, signal } from '@angular/core';
-import { toObservable } from '@angular/core/rxjs-interop';
 import { NavigationEnd, Router } from '@angular/router';
-import { Observable } from 'rxjs';
 import { filter } from 'rxjs/operators';
 
 import { RoutingEvent } from '../types/routing.type';
@@ -32,14 +30,6 @@ export class RoutingHistoryService {
 
   public readonly currentState: Signal<RoutingEvent | null> = this._currentState.asReadonly();
   public readonly previousState: Signal<RoutingEvent | null> = this._previousState.asReadonly();
-
-  // Observable bridges for consumers that build their back/cancel links as
-  // observables in the constructor and let the async pipe subscribe after
-  // view-init (when the landing navigation has settled). toObservable replays
-  // the latest signal value to those late subscribers, matching the old
-  // store.select(getPreviousRoutingState) replay timing.
-  public readonly currentState$: Observable<RoutingEvent | null> = toObservable(this._currentState);
-  public readonly previousState$: Observable<RoutingEvent | null> = toObservable(this._previousState);
 
   constructor() {
     this.router.events.pipe(
