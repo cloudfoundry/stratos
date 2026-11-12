@@ -1,6 +1,5 @@
 import { CommonModule } from '@angular/common';
 import { DestroyRef, Component, ChangeDetectionStrategy, OnInit, Signal, WritableSignal, inject, signal, computed } from '@angular/core';
-import { toSignal } from '@angular/core/rxjs-interop';
 import { Router, RouterModule } from '@angular/router';
 
 import {
@@ -60,11 +59,10 @@ export class CloudFoundryServicesSignalComponent implements OnInit {
 
   /** Total service-instance count for the L5 sub-nav. */
   public totalServiceInstances!: Signal<number>;
-  /** Reactive permission flag for the Add Service Instance button. Built
-   *  in the constructor (injection context) so toSignal() resolves. */
-  public readonly canCreateServiceInstance: Signal<boolean> = toSignal(
-    this.permissionsService.can$(CfCurrentUserPermissions.SERVICE_INSTANCE_CREATE, this.cfEndpointService.cfGuid),
-    { initialValue: false },
+  /** Reactive permission flag for the Add Service Instance button. */
+  public readonly canCreateServiceInstance: Signal<boolean> = this.permissionsService.can(
+    CfCurrentUserPermissions.SERVICE_INSTANCE_CREATE,
+    this.cfEndpointService.cfGuid,
   );
   /** L5 primary action — navigates to the add-service-instance wizard's
    *  type selector (Managed Service vs User Provided). Forwards the cnsi

@@ -3,7 +3,6 @@ import { importProvidersFrom, provideZonelessChangeDetection, signal } from '@an
 import { provideHttpClient } from '@angular/common/http';
 import { provideHttpClientTesting } from '@angular/common/http/testing';
 import { provideRouter } from '@angular/router';
-import { of } from 'rxjs';
 import { describe, it, expect, beforeEach, vi } from 'vitest';
 
 import { CurrentUserPermissionsService, TabNavService } from '@stratosui/core';
@@ -73,7 +72,7 @@ describe('CloudFoundryServicesSignalComponent', () => {
         importProvidersFrom(generateCfBaseTestModulesNoShared()),
         TabNavService,
         { provide: CfServiceInstancesSignalConfigService, useValue: stubSignalConfig },
-        { provide: CurrentUserPermissionsService, useValue: { can$: () => of(true) } },
+        { provide: CurrentUserPermissionsService, useValue: { can: () => signal(true) } },
         { provide: CloudFoundryEndpointService, useValue: { cfGuid: 'cnsi-1' } },
       ],
     }).compileComponents();
