@@ -27,11 +27,10 @@ import { HomePageComponent } from './home-page.component';
 
 function makeStubEndpointsService(disablePersistenceFeatures: boolean, endpoints: Record<string, EndpointModel> = {}): Partial<EndpointsService> {
   return {
-    disablePersistenceFeatures$: of(disablePersistenceFeatures),
-    haveRegistered$: of(Object.keys(endpoints).length > 0),
-    haveConnected$: of(Object.values(endpoints).some(ep => ep.connectionStatus === 'connected')),
+    // The URL banner still reads the Observable.
     connectedEndpoints$: of(Object.values(endpoints).filter(ep => ep.connectionStatus === 'connected')),
-    endpoints$: of(endpoints),
+    connectedEndpoints: signal(Object.values(endpoints).filter(ep => ep.connectionStatus === 'connected')),
+    endpoints: signal(endpoints),
     disablePersistenceFeatures: signal(disablePersistenceFeatures),
     haveRegistered: signal(Object.keys(endpoints).length > 0),
     haveConnected: signal(Object.values(endpoints).some(ep => ep.connectionStatus === 'connected')),

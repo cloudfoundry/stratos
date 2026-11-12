@@ -1,6 +1,6 @@
 import { CommonModule } from '@angular/common';
 import { ChangeDetectionStrategy, Component, computed, HostListener, Injector, OnInit, Signal, effect, signal, inject } from '@angular/core';
-import { toSignal } from '@angular/core/rxjs-interop';
+import { toObservable, toSignal } from '@angular/core/rxjs-interop';
 import { Router } from '@angular/router';
 import {
   IUserFavoritesGroups,
@@ -8,7 +8,7 @@ import {
   entityCatalog,
   UserFavoriteManager } from '@stratosui/store';
 import { Observable } from 'rxjs';
-import { take, filter, map, switchMap } from 'rxjs/operators';
+import { filter } from 'rxjs/operators';
 
 import { EndpointsService } from '../../../core/endpoints.service';
 import { HomeShowMode, HomeSortDirection } from '../../../core/dashboard-preferences.service';
@@ -63,11 +63,9 @@ export class HomePageComponent implements OnInit {
   private registry = inject(EndpointDataRegistry);
   private injector = inject(Injector);
 
-  public allEndpointIds$: Observable<string[]>;
-  public haveRegistered: Signal<boolean> = toSignal(this.endpointsService.haveRegistered$, { initialValue: false });
+  public haveRegistered: Signal<boolean> = this.endpointsService.haveRegistered;
 
-  private connectedEndpointsRaw: Signal<EndpointModel[]> = toSignal(this.endpointsService.connectedEndpoints$, { initialValue: [] as EndpointModel[] });
-  private disablePersistenceFeatures: Signal<boolean | null> = toSignal(this.endpointsService.disablePersistenceFeatures$, { initialValue: null });
+  private connectedEndpointsRaw: Signal<EndpointModel[]> = this.endpointsService.connectedEndpoints;
   private allFavorites = toSignal(this.userFavoriteManager.getAllFavorites());
 
   private connectedEndpoints: Signal<EndpointModel[]> = computed(() =>
@@ -77,10 +75,7 @@ export class HomePageComponent implements OnInit {
   // Every registered endpoint, connection state ignored — source for the
   // starred-only view, where a starred endpoint that is down must still show
   // (as a Disconnected card) instead of silently disappearing (#5588).
-  private allEndpointsRaw: Signal<EndpointModel[]> = toSignal(
-    this.endpointsService.endpoints$.pipe(map(eps => Object.values(eps))),
-    { initialValue: [] as EndpointModel[] }
-  );
+  private allEndpointsRaw: Signal<EndpointModel[]> = computed(() => Object.values(this.endpointsService.endpoints()));
 
   private allEndpoints: Signal<EndpointModel[]> = computed(() =>
     this.haveRegistered() ? this.allEndpointsRaw() : []
@@ -144,22 +139,19 @@ export class HomePageComponent implements OnInit {
   private redirectChecked = false;
   private layoutInitialized = false;
 
-  constructor() {
-    // Wait for endpoints to be loaded before creating the endpoint IDs list
-    // (PageHeaderComponent currently consumes this as an Observable input)
-    this.allEndpointIds$ = this.endpointsService.haveRegistered$.pipe(
-      filter(haveRegistered => haveRegistered),
-      take(1),
-      switchMap(() => this.endpointsService.connectedEndpoints$),
-      map(endpoints => Object.values(endpoints)
-        .map(endpoint => endpoint.guid)
-        .filter((guid): guid is string => !!guid))
-    );
+  // Connected endpoint ids once any endpoint is registered. Stays an
+  // Observable while PageHeaderComponent takes endpointIds$ as one.
+  public allEndpointIds$: Observable<string[]> = toObservable(computed(() =>
+    this.haveRegistered()
+      ? this.connectedEndpointsRaw().map(endpoint => endpoint.guid).filter((guid): guid is string => !!guid)
+      : null
+  )).pipe(filter((ids): ids is string[] => ids !== null));
 
+  constructor() {
     // Redirect to /applications when persistence features are disabled
     effect(() => {
-      const off = this.disablePersistenceFeatures();
-      if (off === null || this.redirectChecked) {
+      const off = this.endpointsService.disablePersistenceFeatures();
+      if (this.redirectChecked) {
         return;
       }
       this.redirectChecked = true;
