@@ -1,6 +1,5 @@
-import { Directive, OnDestroy, OnInit, TemplateRef, ViewContainerRef, inject, input } from '@angular/core';
+import { Directive, OnDestroy, OnInit, TemplateRef, ViewContainerRef, computed, effect, inject, input, signal } from '@angular/core';
 import { Observable, of as observableOf, Subscription } from 'rxjs';
-import { switchMap } from 'rxjs/operators';
 
 import { CurrentUserPermissionsService } from '@stratosui/core';
 import { CfCurrentUserPermissions, CfCurrentUserRolesSignalService, waitForCFPermissions } from '@stratosui/cloud-foundry';
@@ -24,25 +23,33 @@ export class CfUserPermissionDirective implements OnDestroy, OnInit {
 
   protected readonly appCfUserPermissionSpaceGuid = input<string>();
 
-  private canSub!: Subscription;
+  // True once the endpoint's roles have loaded (at once without an endpoint).
+  private readonly ready = signal(false);
+  private readonly check = computed(() => this.currentUserPermissionsService.can(
+    this.appCfUserPermission(),
+    this.appCfUserPermissionEndpointGuid(),
+    this.getOrgOrSpaceGuid(),
+    this.getSpaceGuid()
+  ));
+  private hasView = false;
+  private readySub?: Subscription;
+
+  constructor() {
+    effect(() => {
+      const can = this.ready() && this.check()();
+      if (can && !this.hasView) {
+        this.viewContainer.createEmbeddedView(this.templateRef);
+        this.hasView = true;
+      } else if (!can && this.hasView) {
+        this.viewContainer.clear();
+        this.hasView = false;
+      }
+    });
+  }
 
   public ngOnInit() {
-    this.canSub = this.waitForEndpointPermissions(this.appCfUserPermissionEndpointGuid()).pipe(
-      switchMap(() => this.currentUserPermissionsService.can$(
-        this.appCfUserPermission(),
-        this.appCfUserPermissionEndpointGuid(),
-        this.getOrgOrSpaceGuid(),
-        this.getSpaceGuid()
-      ))
-    ).subscribe(
-      can => {
-        if (can) {
-          this.viewContainer.createEmbeddedView(this.templateRef);
-        } else {
-          this.viewContainer.clear();
-        }
-      }
-    );
+    this.readySub = this.waitForEndpointPermissions(this.appCfUserPermissionEndpointGuid())
+      .subscribe(() => this.ready.set(true));
   }
 
   private waitForEndpointPermissions(endpointGuid?: string): Observable<any> {
@@ -50,9 +57,7 @@ export class CfUserPermissionDirective implements OnDestroy, OnInit {
   }
 
   public ngOnDestroy() {
-    if (this.canSub) {
-      this.canSub.unsubscribe();
-    }
+    this.readySub?.unsubscribe();
   }
 
   private getOrgOrSpaceGuid() {
