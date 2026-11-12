@@ -41,7 +41,8 @@ describe('ApplicationTabsBaseComponent', () => {
     const disablePersistenceFeaturesSubject = new BehaviorSubject<boolean>(false);
     const mockEndpointsService = {
       hasMetrics: vi.fn().mockReturnValue(hasMetricsSubject.asObservable()),
-      disablePersistenceFeatures$: disablePersistenceFeaturesSubject.asObservable()
+      disablePersistenceFeatures$: disablePersistenceFeaturesSubject.asObservable(),
+      disablePersistenceFeatures: signal(false),
     };
 
     // Mock other required services

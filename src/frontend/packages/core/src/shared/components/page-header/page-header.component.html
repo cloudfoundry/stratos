@@ -212,7 +212,7 @@
                             (click)="closeUserMenu()">
                             <span>Profile</span>
                           </a>
-                          @if (canAPIKeys$ | async) {
+                          @if (canAPIKeys()) {
                             <a class="block px-3 py-2 text-sm text-content-text hover:bg-content-secondary rounded-md transition-colors"
                               routerLink="/api-keys"
                               (click)="closeUserMenu()"

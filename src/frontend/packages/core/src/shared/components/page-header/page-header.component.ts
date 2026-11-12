@@ -1,9 +1,9 @@
 import { Portal, TemplatePortal } from '@angular/cdk/portal';
 import { CommonModule } from '@angular/common';
 import { HttpClient } from '@angular/common/http';
-import { ChangeDetectionStrategy, AfterViewInit, Component, HostListener, OnDestroy, TemplateRef, ViewContainerRef, computed, effect, inject, input, linkedSignal, signal, untracked, viewChild } from '@angular/core';
+import { ChangeDetectionStrategy, AfterViewInit, Component, HostListener, OnDestroy, TemplateRef, ViewContainerRef, computed, effect, inject, input, linkedSignal, Signal, signal, untracked, viewChild } from '@angular/core';
 import { RouterModule, ActivatedRoute, Router } from '@angular/router';
-import { toObservable, takeUntilDestroyed } from '@angular/core/rxjs-interop';
+import { toObservable, toSignal, takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import {
   InternalEventSeverity,
   IFavoriteMetadata,
@@ -17,7 +17,7 @@ import { StratosBrandingService } from '../../../../../theme/stratos-branding.se
 import { DashboardSignalService } from '../../../core/signals/dashboard-signal.service';
 import { DashboardDataService } from '../../../core/dashboard-data.service';
 import { getTime } from 'date-fns';
-import { combineLatest, firstValueFrom, Observable, shareReplay } from 'rxjs';
+import { firstValueFrom, Observable, shareReplay } from 'rxjs';
 import { map, startWith } from 'rxjs/operators';
 import { TailwindSnackBarService } from '../../services/tailwind-snackbar.service';
 
@@ -115,7 +115,7 @@ export class PageHeaderComponent implements OnDestroy, AfterViewInit {
     window.open(url, DOCUMENTATION_WINDOW_NAME, 'width=1024,height=900');
   }
 
-  public canAPIKeys$: Observable<boolean>;
+  public canAPIKeys: Signal<boolean>;
   // Which of the bound breadcrumb sets to show: the URL's ?breadcrumbs= value.
   private breadcrumbKey = signal<string | null>(null);
   public eventSeverity = InternalEventSeverity;
@@ -313,12 +313,8 @@ export class PageHeaderComponent implements OnDestroy, AfterViewInit {
     this.allowGravatar$ = toObservable(this.dashboardSignals.gravatarEnabled);
 
     // Must be enabled and the user must have permission
-    this.canAPIKeys$ = combineLatest([
-      this.endpointsService.disablePersistenceFeatures$.pipe(startWith(true)),
-      this.cups.can(StratosCurrentUserPermissions.API_KEYS),
-    ]).pipe(
-      map(([disabled, permission]) => !disabled && permission)
-    );
+    const apiKeysPermission = toSignal(this.cups.can(StratosCurrentUserPermissions.API_KEYS), { initialValue: false });
+    this.canAPIKeys = computed(() => !this.endpointsService.disablePersistenceFeatures() && apiKeysPermission());
 
     this.canLogout$ = this.currentUserPermissionsService.can(StratosCurrentUserPermissions.CAN_NOT_LOGOUT).pipe(
       map(noLogout => !noLogout)
