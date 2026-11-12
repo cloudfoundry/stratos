@@ -30,7 +30,6 @@ export { createOrgQuotaDefinition } from './features/cf/services/cloud-foundry-o
 
 // Permissions
 export { CfCurrentUserPermissions, cfCurrentUserPermissionsService } from './user-permissions/cf-user-permissions-checkers';
-export { CfCurrentUserRolesSignalService } from './user-permissions/cf-current-user-roles-signal.service';
 export { CfCurrentUserRolesDataService } from './services/cf-current-user-roles-data.service';
 
 // Test helpers
