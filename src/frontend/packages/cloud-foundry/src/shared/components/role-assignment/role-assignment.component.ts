@@ -85,6 +85,8 @@ export class RoleAssignmentComponent implements OnInit, OnDestroy {
     guid: string;
     name: string;
 }>();
+  /** Set when the wizard opens at space scope: only this space is listed. */
+  readonly lockedSpaceGuid = input<string>();
 
   readonly changeSet = output<CfRoleChange[]>();
 
@@ -417,7 +419,9 @@ export class RoleAssignmentComponent implements OnInit, OnDestroy {
     // The spinner clears on every outcome: a value, an error, or completion without a value.
     const done = () => this.spacesLoading.update(s => { const next = new Set(s); next.delete(orgGuid); return next; });
     const spaceSub = this.cfRolesService.fetchSpacesForOrg(this.cfGuid(), orgGuid).subscribe({
-      next: spaces => {
+      next: all => {
+        const lock = this.lockedSpaceGuid();
+        const spaces = lock ? all.filter(s => s.guid === lock) : all;
         this.spacesByOrg.update(m => ({ ...m, [orgGuid]: spaces }));
         done();
         this.resolveSpacePermissions(orgGuid, spaces);
