@@ -38,10 +38,12 @@ describe('CustomCheckboxComponent as a form control', () => {
     await fixture.whenStable();
     expect(box().classList).not.toContain('disabled');
     expect(box().getAttribute('tabindex')).toBe('0');
+    expect(box().hasAttribute('aria-disabled')).toBe(false);
 
     control.disable();
     await fixture.whenStable();
     expect(box().classList).toContain('disabled');
+    expect(box().getAttribute('aria-disabled')).toBe('true');
   });
 
   it('shows a value the form sets', async () => {
@@ -54,5 +56,36 @@ describe('CustomCheckboxComponent as a form control', () => {
     control.setValue(false);
     await fixture.whenStable();
     expect(box().getAttribute('aria-checked')).toBe('false');
+  });
+
+  // WCAG 4.1.2: one checkbox, not a native one hidden inside the box
+  // (axe-core nested-interactive and label). The box carries the name,
+  // the state and the required flag.
+  it('is one checkbox with no native input inside', async () => {
+    const { box } = await setup();
+    expect(box().getAttribute('role')).toBe('checkbox');
+    expect(box().querySelector('input')).toBeNull();
+    expect(box().textContent!.trim()).toBe('Use it');
+  });
+});
+
+@Component({
+  standalone: true,
+  imports: [CustomCheckboxComponent],
+  changeDetection: ChangeDetectionStrategy.OnPush,
+  template: `<app-checkbox [required]="true">Agree</app-checkbox>`,
+})
+class RequiredHostComponent {}
+
+describe('CustomCheckboxComponent required', () => {
+  it('says it is required on the box', async () => {
+    TestBed.configureTestingModule({
+      imports: [RequiredHostComponent],
+      providers: [provideZonelessChangeDetection()],
+    });
+    const fixture = TestBed.createComponent(RequiredHostComponent);
+    await fixture.whenStable();
+    const box = fixture.nativeElement.querySelector('.custom-checkbox') as HTMLElement;
+    expect(box.getAttribute('aria-required')).toBe('true');
   });
 });

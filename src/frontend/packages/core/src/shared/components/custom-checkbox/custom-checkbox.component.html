@@ -9,6 +9,8 @@
     [class.color-primary]="color() === 'primary'"
     [class.color-accent]="color() === 'accent'"
     [class.color-warn]="color() === 'warn'"
+    [attr.aria-disabled]="disabled() || null"
+    [attr.aria-required]="required() || null"
     [attr.aria-invalid]="invalid() || null"
     [attr.aria-describedby]="invalid() && errorMessage() ? 'error-' + (id() || name()) : null"
     (click)="toggle()"
@@ -16,17 +18,6 @@
     (keydown.space)="toggle(); $event.preventDefault()">
 
     <div class="checkbox-container">
-      <input type="checkbox"
-        [attr.id]="id() ?? null"
-        [attr.name]="name() ?? null"
-        [checked]="checked()"
-        [disabled]="disabled()"
-        [required]="required()"
-        [value]="value()"
-        class="checkbox-input"
-        tabindex="-1"
-        (click)="$event.stopPropagation()">
-
       <div class="checkbox-frame">
         <svg class="checkbox-checkmark"
           [class.indeterminate]="indeterminate()"
