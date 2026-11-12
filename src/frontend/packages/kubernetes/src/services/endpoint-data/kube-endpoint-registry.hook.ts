@@ -1,5 +1,4 @@
-import { Injectable, OnDestroy, inject } from '@angular/core';
-import { Subscription } from 'rxjs';
+import { Injectable, effect, inject, untracked } from '@angular/core';
 
 import { EndpointModel } from '@stratosui/store';
 
@@ -40,12 +39,11 @@ import { KubeEndpointEviction } from './kube-endpoint-eviction';
 // user navigates into any kubernetes page.
 
 @Injectable({ providedIn: 'root' })
-export class KubeEndpointRegistryHook implements OnDestroy {
+export class KubeEndpointRegistryHook {
   private readonly endpointsService = inject(EndpointsService);
   private readonly registry = inject(KubeEndpointDataRegistry);
   private readonly eviction = inject(KubeEndpointEviction);
 
-  private readonly subs = new Subscription();
   private lastConnected: Set<string> = new Set();
 
   // Diagnostics counters — surfaced via `window.__stratosKubeDiag.lifecycle`
@@ -56,8 +54,9 @@ export class KubeEndpointRegistryHook implements OnDestroy {
   private _emissions = 0;
 
   constructor() {
-    this.subs.add(
-      this.endpointsService.endpoints$.subscribe(endpoints => {
+    effect(() => {
+      const endpoints = this.endpointsService.endpoints();
+      untracked(() => {
         this._emissions++;
         const current = this.computeConnectedKubeGuids(endpoints);
 
@@ -81,8 +80,8 @@ export class KubeEndpointRegistryHook implements OnDestroy {
         });
 
         this.lastConnected = current;
-      })
-    );
+      });
+    });
 
     if (typeof window !== 'undefined') {
       const diag = (window as unknown as { __stratosKubeDiag?: Record<string, unknown> }).__stratosKubeDiag;
@@ -115,9 +114,5 @@ export class KubeEndpointRegistryHook implements OnDestroy {
       }
     }
     return out;
-  }
-
-  ngOnDestroy(): void {
-    this.subs.unsubscribe();
   }
 }

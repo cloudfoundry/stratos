@@ -1,8 +1,7 @@
 import { provideHttpClient } from '@angular/common/http';
 import { HttpTestingController, provideHttpClientTesting } from '@angular/common/http/testing';
-import { provideZonelessChangeDetection } from '@angular/core';
+import { WritableSignal, provideZonelessChangeDetection, signal } from '@angular/core';
 import { TestBed } from '@angular/core/testing';
-import { BehaviorSubject } from 'rxjs';
 import { describe, it, expect, beforeEach } from 'vitest';
 
 import { EndpointModel } from '@stratosui/store';
@@ -43,18 +42,18 @@ function cfEp(guid: string, status: 'connected' | 'disconnected' = 'connected'):
 }
 
 describe('KubeEndpointRegistryHook', () => {
-  let endpoints$: BehaviorSubject<EndpointMap>;
+  let endpoints: WritableSignal<EndpointMap>;
   let registry: KubeEndpointDataRegistry;
 
   function init(initial: EndpointMap = {}) {
-    endpoints$ = new BehaviorSubject<EndpointMap>(initial);
+    endpoints = signal<EndpointMap>(initial);
     TestBed.resetTestingModule();
     TestBed.configureTestingModule({
       providers: [
         provideZonelessChangeDetection(),
         provideHttpClient(),
         provideHttpClientTesting(),
-        { provide: EndpointsService, useValue: { endpoints$ } },
+        { provide: EndpointsService, useValue: { endpoints } },
         KubeEndpointDataRegistry,
         KubeEndpointRegistryHook,
       ],
@@ -62,6 +61,7 @@ describe('KubeEndpointRegistryHook', () => {
     registry = TestBed.inject(KubeEndpointDataRegistry);
     // Force eager construction so the subscription is live.
     TestBed.inject(KubeEndpointRegistryHook);
+    TestBed.tick();
   }
 
   beforeEach(() => {
@@ -80,7 +80,8 @@ describe('KubeEndpointRegistryHook', () => {
     init({});
     expect(registry.getSnapshot().instances).toHaveLength(0);
 
-    endpoints$.next({ 'kube-a': kubeEp('kube-a') });
+    endpoints.set({ 'kube-a': kubeEp('kube-a') });
+    TestBed.tick();
 
     const snap = registry.getSnapshot();
     expect(snap.instances).toHaveLength(1);
@@ -91,7 +92,8 @@ describe('KubeEndpointRegistryHook', () => {
     init({ 'kube-a': kubeEp('kube-a') });
     expect(registry.getSnapshot().instances).toHaveLength(1);
 
-    endpoints$.next({ 'kube-a': kubeEp('kube-a', 'disconnected') });
+    endpoints.set({ 'kube-a': kubeEp('kube-a', 'disconnected') });
+    TestBed.tick();
 
     expect(registry.getSnapshot().instances).toHaveLength(0);
   });
@@ -100,7 +102,8 @@ describe('KubeEndpointRegistryHook', () => {
     init({ 'kube-a': kubeEp('kube-a') });
     expect(registry.getSnapshot().instances).toHaveLength(1);
 
-    endpoints$.next({});
+    endpoints.set({});
+    TestBed.tick();
 
     expect(registry.getSnapshot().instances).toHaveLength(0);
   });
@@ -109,7 +112,8 @@ describe('KubeEndpointRegistryHook', () => {
     init({ 'cf-a': cfEp('cf-a') });
     expect(registry.getSnapshot().instances).toHaveLength(0);
 
-    endpoints$.next({ 'cf-a': cfEp('cf-a'), 'cf-b': cfEp('cf-b') });
+    endpoints.set({ 'cf-a': cfEp('cf-a'), 'cf-b': cfEp('cf-b') });
+    TestBed.tick();
     expect(registry.getSnapshot().instances).toHaveLength(0);
   });
 
@@ -121,7 +125,8 @@ describe('KubeEndpointRegistryHook', () => {
 
     // Re-emit the same map shape — no new instance should be created and
     // no eviction should occur.
-    endpoints$.next({ 'kube-a': kubeEp('kube-a') });
+    endpoints.set({ 'kube-a': kubeEp('kube-a') });
+    TestBed.tick();
 
     const after = registry.getSnapshot();
     expect(after.instances).toHaveLength(1);
@@ -141,11 +146,12 @@ describe('KubeEndpointRegistryHook', () => {
     expect(snap.instances[0].kubeGuid).toBe('kube-a');
 
     // Connect kube-b, disconnect kube-a — net swap.
-    endpoints$.next({
+    endpoints.set({
       'kube-a': kubeEp('kube-a', 'disconnected'),
       'cf-a': cfEp('cf-a'),
       'kube-b': kubeEp('kube-b'),
     });
+    TestBed.tick();
 
     const after = registry.getSnapshot();
     const guids = after.instances.map(i => i.kubeGuid).sort();
@@ -159,25 +165,29 @@ describe('KubeEndpointRegistryHook', () => {
 describe('KubeEndpointRegistryHook domain cache eviction', () => {
   const A = 'kube-a';
   const B = 'kube-b';
-  let endpoints$: BehaviorSubject<EndpointMap>;
+  let endpoints: WritableSignal<EndpointMap>;
   let httpMock: HttpTestingController;
 
   beforeEach(() => {
-    endpoints$ = new BehaviorSubject<EndpointMap>({ [A]: kubeEp(A), [B]: kubeEp(B) });
+    endpoints = signal<EndpointMap>({ [A]: kubeEp(A), [B]: kubeEp(B) });
     TestBed.resetTestingModule();
     TestBed.configureTestingModule({
       providers: [
         provideZonelessChangeDetection(),
         provideHttpClient(),
         provideHttpClientTesting(),
-        { provide: EndpointsService, useValue: { endpoints$ } },
+        { provide: EndpointsService, useValue: { endpoints } },
       ],
     });
     httpMock = TestBed.inject(HttpTestingController);
     TestBed.inject(KubeEndpointRegistryHook);
+    TestBed.tick();
   });
 
-  const disconnectA = () => endpoints$.next({ [A]: kubeEp(A, 'disconnected'), [B]: kubeEp(B) });
+  const disconnectA = () => {
+    endpoints.set({ [A]: kubeEp(A, 'disconnected'), [B]: kubeEp(B) });
+    TestBed.tick();
+  };
 
   // Answer the pending list request for `guid` on `path` with one item.
   function flushList(path: string, guid: string, item: unknown): void {
