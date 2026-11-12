@@ -1,15 +1,15 @@
-import { CommonModule } from "@angular/common";
 import {
   Component,
   OnDestroy,
   OnInit,
   computed,
+  effect,
   inject,
+  linkedSignal,
+  untracked,
   ChangeDetectionStrategy,
 } from "@angular/core";
 import { Router } from "@angular/router";
-import { Observable } from "rxjs";
-import { take, filter, map } from "rxjs/operators";
 
 import { SignalListComponent } from "@stratosui/core";
 
@@ -28,14 +28,12 @@ import { KubernetesService } from "../services/kubernetes.service";
   standalone: true,
   changeDetection: ChangeDetectionStrategy.OnPush,
   imports: [
-    CommonModule,
     PageHeaderComponent,
     SignalListComponent,
     DuplicateUrlBannerComponent,
   ],
 })
 export class KubernetesComponent implements OnInit, OnDestroy {
-  connectedEndpoints$: Observable<number>;
   private kubeService = inject(KubernetesService);
   private router = inject(Router);
   private endpointsSignals = inject(EndpointsSignalService);
@@ -52,28 +50,28 @@ export class KubernetesComponent implements OnInit, OnDestroy {
     this.endpointsSignals.connectedEndpoints().filter(ep => ep?.cnsi_type === KUBERNETES_ENDPOINT_TYPE),
   );
 
+  // 'expired' deliberately excluded: a dead-token endpoint must not count
+  // as the "one connected endpoint" that triggers the auto-navigate below —
+  // entering it would just land on a broken view.
+  private readonly connectedKube = computed(() =>
+    this.kubeService.kubeEndpoints().filter(c => c.connectionStatus === "connected"),
+  );
+
+  // The list shows once more than one endpoint is connected and stays shown.
+  readonly showList = linkedSignal<boolean, boolean>({
+    source: () => this.connectedKube().length > 1,
+    computation: (many, previous) => many || (previous?.value ?? false),
+  });
+
   constructor() {
-    this.connectedEndpoints$ = this.kubeService.kubeEndpoints$.pipe(
-      map((kubeEndpoints) => {
-        // 'expired' deliberately excluded: a dead-token endpoint must not
-        // count as the "one connected endpoint" that triggers the
-        // auto-navigate below — entering it would just land on a broken view.
-        const connectedEndpoints = kubeEndpoints.filter(
-          (c) => c.connectionStatus === "connected",
-        );
-        const hasOne = connectedEndpoints.length === 1;
-        if (hasOne) {
-          // Single connected endpoint → auto-navigate into its detail
-          // page. Was previously a `RouterNav` ngrx action — flipped to
-          // the Angular Router directly so this component sheds its
-          // last ngrx/store import alongside the list config migration.
-          void this.router.navigate(["kubernetes", connectedEndpoints[0].guid]);
-        }
-        return connectedEndpoints.length;
-      }),
-      filter((connectedEndpointsCount) => connectedEndpointsCount > 1),
-      take(1),
-    );
+    // Single connected endpoint → go straight to its page, unless the list
+    // has already been shown.
+    effect(() => {
+      const connected = this.connectedKube();
+      if (connected.length === 1 && !untracked(this.showList)) {
+        untracked(() => void this.router.navigate(["kubernetes", connected[0].guid]));
+      }
+    });
   }
 
   ngOnInit(): void {
