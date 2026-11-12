@@ -234,7 +234,6 @@ export { AuthSignalService } from './core/signals/auth-signal.service';
 export { SessionSignalService } from './core/signals/session-signal.service';
 export { UserSignalService } from './core/signals/user-signal.service';
 export { EndpointsSignalService } from './core/signals/endpoints-signal.service';
-export { PermissionsSignalService } from './core/signals/permissions-signal.service';
 export { CurrentUserRolesSignalService } from './core/signals/current-user-roles-signal.service';
 
 // Helper Classes
