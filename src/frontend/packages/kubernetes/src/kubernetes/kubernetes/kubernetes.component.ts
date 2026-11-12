@@ -7,7 +7,6 @@ import {
   inject,
   ChangeDetectionStrategy,
 } from "@angular/core";
-import { toObservable } from "@angular/core/rxjs-interop";
 import { Router } from "@angular/router";
 import { Observable } from "rxjs";
 import { take, filter, map } from "rxjs/operators";
@@ -17,7 +16,6 @@ import { SignalListComponent } from "@stratosui/core";
 import { EndpointsSignalService } from "../../../../core/src/core/signals/endpoints-signal.service";
 import { DuplicateUrlBannerComponent } from "../../../../core/src/shared/components/duplicate-url-banner/duplicate-url-banner.component";
 import { PageHeaderComponent } from "../../../../core/src/shared/components/page-header/page-header.component";
-import { EndpointModel } from "../../../../store/src/public-api";
 import { KUBERNETES_ENDPOINT_TYPE } from "../kubernetes-entity-factory";
 import { KubernetesEndpointsSignalConfigService } from "../list-types/kubernetes-endpoints/kubernetes-endpoints-signal-config.service";
 import { KubernetesService } from "../services/kubernetes.service";
@@ -38,7 +36,6 @@ import { KubernetesService } from "../services/kubernetes.service";
 })
 export class KubernetesComponent implements OnInit, OnDestroy {
   connectedEndpoints$: Observable<number>;
-  connectedKubeEndpoints$: Observable<EndpointModel[]>;
   private kubeService = inject(KubernetesService);
   private router = inject(Router);
   private endpointsSignals = inject(EndpointsSignalService);
@@ -51,12 +48,11 @@ export class KubernetesComponent implements OnInit, OnDestroy {
 
   // Connected k8s endpoints for the duplicate-URL banner — scoped to k8s so
   // it never mentions unrelated CF/helm duplicates on this page.
-  private readonly connectedKubeEndpoints = computed(() =>
+  protected readonly connectedKubeEndpoints = computed(() =>
     this.endpointsSignals.connectedEndpoints().filter(ep => ep?.cnsi_type === KUBERNETES_ENDPOINT_TYPE),
   );
 
   constructor() {
-    this.connectedKubeEndpoints$ = toObservable(this.connectedKubeEndpoints);
     this.connectedEndpoints$ = this.kubeService.kubeEndpoints$.pipe(
       map((kubeEndpoints) => {
         // 'expired' deliberately excluded: a dead-token endpoint must not

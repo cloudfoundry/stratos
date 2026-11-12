@@ -2,7 +2,7 @@
   <h1>Kubernetes</h1>
 </app-page-header>
 <app-duplicate-url-banner
-  [endpoints$]="connectedKubeEndpoints$"
+  [endpoints]="connectedKubeEndpoints()"
   message="Several of the endpoints below are views of the same cluster.">
 </app-duplicate-url-banner>
 @if (((connectedEndpoints$ | async) ?? 0) > 1) {

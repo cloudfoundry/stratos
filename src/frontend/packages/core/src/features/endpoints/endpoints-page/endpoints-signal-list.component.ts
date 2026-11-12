@@ -1,6 +1,6 @@
 import { CommonModule } from '@angular/common';
 import { ChangeDetectionStrategy, Component, Signal, WritableSignal, inject, signal, input } from '@angular/core';
-import { toObservable, toSignal } from '@angular/core/rxjs-interop';
+import { toSignal } from '@angular/core/rxjs-interop';
 import { map } from 'rxjs/operators';
 
 import {
@@ -75,7 +75,7 @@ export class EndpointsSignalListComponent {
 
   // Every registered endpoint, connected or not: two registrations at one
   // URL are worth pointing out before anyone connects to them.
-  readonly registeredEndpoints$ = toObservable(this.endpointsData.endpointsList);
+  readonly registeredEndpoints = this.endpointsData.endpointsList;
 
   /**
    * Primary "Register Endpoint" action surfaced on the L5 sub-nav row above

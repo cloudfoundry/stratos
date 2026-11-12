@@ -69,11 +69,8 @@ export class CatalogTabComponent implements OnDestroy {
 
   // Connected helm endpoints for the duplicate-URL banner — scoped to helm
   // so it never mentions unrelated CF/k8s duplicates on this page.
-  private readonly connectedHelmEndpoints = computed(() =>
+  protected readonly connectedHelmEndpoints = computed(() =>
     this.endpointsSignals.connectedEndpoints().filter(ep => ep?.cnsi_type === HELM_ENDPOINT_TYPE),
-  );
-  readonly connectedHelmEndpoints$: Observable<EndpointModel[]> = toObservable(
-    this.connectedHelmEndpoints, { injector: this.injector },
   );
 
   readonly listConfig: WritableSignal<SignalListConfig<MonocularChart> | undefined> = signal(undefined);

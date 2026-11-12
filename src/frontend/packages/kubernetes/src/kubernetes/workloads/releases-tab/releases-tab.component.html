@@ -3,7 +3,7 @@
 </app-page-header>
 
 <app-duplicate-url-banner
-  [endpoints$]="connectedKubeEndpoints$"
+  [endpoints]="connectedKubeEndpoints()"
   nounPlural="Releases"></app-duplicate-url-banner>
 
 <div class="h-full flex flex-col">

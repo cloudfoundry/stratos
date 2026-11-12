@@ -1,14 +1,11 @@
-import { CommonModule } from '@angular/common';
-import { ChangeDetectionStrategy, Component, OnInit, input } from '@angular/core';
-import { Observable } from 'rxjs';
-import { map } from 'rxjs/operators';
+import { ChangeDetectionStrategy, Component, computed, input } from '@angular/core';
 
 import { EndpointModel, formatDuplicateUrlEndpointsMessage } from '@stratosui/store';
 
 // Shared dup-URL banner — surfaces when 2+ connected endpoints of the same
 // type point at the same api_url. Endpoint-type-agnostic: the host page
-// supplies the scoped endpoint stream via `endpoints$` (e.g. CF's
-// Application Wall/Marketplace/Services pass connectedCFEndpoints$, the
+// supplies the scoped endpoint list via `endpoints` (e.g. CF's
+// Application Wall/Marketplace/Services pass connectedCFEndpoints, the
 // Kubernetes workloads page passes its connected k8s endpoints, the Helm
 // catalog its connected helm endpoints) so the message only ever mentions
 // endpoints relevant to that page. Banner text is generic by design — each
@@ -17,9 +14,9 @@ import { EndpointModel, formatDuplicateUrlEndpointsMessage } from '@stratosui/st
   selector: 'app-duplicate-url-banner',
   standalone: true,
   changeDetection: ChangeDetectionStrategy.OnPush,
-  imports: [CommonModule],
+  imports: [],
   template: `
-    @if (sharedUrlMessage$ | async; as sharedUrlMsg) {
+    @if (sharedUrlMessage(); as sharedUrlMsg) {
       <div class="mx-4 mt-3 mb-2 px-3 py-2 rounded border flex items-start gap-2 text-sm bg-[var(--info-bg)] border-[var(--info-border)] text-[var(--info-text)]">
         <span class="material-icons text-base leading-5" aria-hidden="true">info</span>
         <span>
@@ -36,10 +33,10 @@ import { EndpointModel, formatDuplicateUrlEndpointsMessage } from '@stratosui/st
     }
   `,
 })
-export class DuplicateUrlBannerComponent implements OnInit {
-  // Scoped, connected-endpoint stream for the host page. Required — there's
+export class DuplicateUrlBannerComponent {
+  // Scoped, connected endpoints for the host page. Required — there's
   // no sensible default endpoint type to fall back to.
-  readonly endpoints$ = input.required<Observable<EndpointModel[]>>();
+  readonly endpoints = input.required<EndpointModel[]>();
 
   // Subject noun for the banner — each host page passes its own wording.
   readonly nounPlural = input<string>('Endpoints');
@@ -49,11 +46,5 @@ export class DuplicateUrlBannerComponent implements OnInit {
   // Cloud Foundry endpoint picker, which lists endpoints, not entities).
   readonly message = input<string>('');
 
-  sharedUrlMessage$!: Observable<string | null>;
-
-  ngOnInit(): void {
-    this.sharedUrlMessage$ = this.endpoints$().pipe(
-      map((endpoints: EndpointModel[]) => formatDuplicateUrlEndpointsMessage(endpoints)),
-    );
-  }
+  readonly sharedUrlMessage = computed(() => formatDuplicateUrlEndpointsMessage(this.endpoints()));
 }

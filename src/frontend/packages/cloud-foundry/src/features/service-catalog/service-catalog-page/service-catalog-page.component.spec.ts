@@ -71,6 +71,7 @@ describe('ServiceCatalogPageComponent', () => {
     const stubCloudFoundryService = {
       cFEndpoints$: of(endpoints),
       connectedCFEndpoints$: of(endpoints),
+      connectedCFEndpoints: signal(endpoints),
       hasConnectedCFEndpoints$: of(true),
       hasRegisteredCFEndpoints$: of(true),
     };

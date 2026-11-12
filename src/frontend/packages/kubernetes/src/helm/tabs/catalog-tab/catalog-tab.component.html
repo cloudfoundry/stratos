@@ -1,5 +1,5 @@
 <app-duplicate-url-banner
-  [endpoints$]="connectedHelmEndpoints$"
+  [endpoints]="connectedHelmEndpoints()"
   nounPlural="Charts"></app-duplicate-url-banner>
 <div class="flex flex-row max-h-full">
   @if (!hide()) {
