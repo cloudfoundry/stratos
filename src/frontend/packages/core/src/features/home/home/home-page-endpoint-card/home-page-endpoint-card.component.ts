@@ -1,5 +1,5 @@
 import { CommonModule } from '@angular/common';
-import { ChangeDetectionStrategy, AfterViewInit, Component, ComponentRef, OnChanges, OnDestroy, OnInit, SimpleChanges, ViewContainerRef, effect, signal, inject, output, input, untracked, viewChild } from '@angular/core';
+import { ChangeDetectionStrategy, AfterViewInit, Component, ComponentRef, OnChanges, OnDestroy, OnInit, SimpleChanges, ViewContainerRef, Injector, Signal, effect, signal, inject, output, input, untracked, viewChild } from '@angular/core';
 import { toObservable } from '@angular/core/rxjs-interop';
 import { RouterModule } from '@angular/router';
 import { combineLatest, Observable, of, Subscription } from 'rxjs';
@@ -21,7 +21,7 @@ import { isEndpointConnected } from '../../../endpoints/endpoint-helpers';
 import { FavoritesSidePanelComponent } from '../favorites-side-panel/favorites-side-panel.component';
 import { FavoritesMetaCardComponent } from '../favorites-meta-card/favorites-meta-card.component';
 import { HomeShortcutsComponent } from '../home-shortcuts/home-shortcuts.component';
-import { UserFavoriteEndpoint } from './../../../../../../store/src/types/user-favorites.types';
+import { IFavoriteMetadata, UserFavorite, UserFavoriteEndpoint } from './../../../../../../store/src/types/user-favorites.types';
 import { HomePageCardLayout, HomePageEndpointCard, LinkMetadata } from './../../home.types';
 import {
   DefaultEndpointHomeComponent } from './../default-endpoint-home-component/default-endpoint-home-component.component';
@@ -61,6 +61,7 @@ export class HomePageEndpointCardComponent implements OnInit, OnChanges, OnDestr
   private userFavoriteManager = inject(UserFavoriteManager);
   private sidePanelService = inject(SidePanelService);
   private dialog = inject(TailwindDialogService);
+  private injector = inject(Injector);
 
 
 
@@ -83,8 +84,9 @@ export class HomePageEndpointCardComponent implements OnInit, OnChanges, OnDestr
 
   readonly loaded = output<void>();
 
-  // strict: assigned in ngOnInit before the template subscribes
-  favorites$!: Observable<any>;
+  // strict: assigned in ngOnInit before the template reads it; undefined
+  // until the favorites have loaded
+  favorites!: Signal<UserFavorite<IFavoriteMetadata>[] | undefined>;
 
   private _layout = signal<HomePageCardLayout | null>(null);
   public layoutSignal = this._layout.asReadonly();
@@ -205,7 +207,7 @@ export class HomePageEndpointCardComponent implements OnInit, OnChanges, OnDestr
     // strict: cnsi_type/guid are populated on every bound endpoint; '' default keeps the lookups well-formed
     this.hasFavEntities = this.userFavoriteManager.endpointHasEntitiesThatCanFavorite(this.endpoint().cnsi_type ?? '');
     // Favorites for this endpoint
-    this.favorites$ = this.userFavoriteManager.getFavoritesForEndpoint(this.endpoint().guid ?? '');
+    this.favorites = this.userFavoriteManager.favoritesForEndpoint(this.endpoint().guid ?? '');
     this.entity = entityCatalog.getEndpoint(this.endpoint().cnsi_type ?? '', this.endpoint().sub_type);
     if (this.entity) {
       this.definition = this.entity.definition;
@@ -218,7 +220,11 @@ export class HomePageEndpointCardComponent implements OnInit, OnChanges, OnDestr
       this.updateLayout();
     }
 
-    this.links$ = combineLatest([this.favorites$, this.layout$]).pipe(
+    // The links wait for the favorites to load, as they did on the stream.
+    const favorites$ = toObservable(this.favorites, { injector: this.injector }).pipe(
+      filter((favs): favs is UserFavorite<IFavoriteMetadata>[] => !!favs)
+    );
+    this.links$ = combineLatest([favorites$, this.layout$]).pipe(
       filter((pair): pair is [any, HomePageCardLayout] => !!pair[1]),
       map(([favs, layout]) => {
         // Get the list of shortcuts for the endpoint for the given endpoint ID
@@ -349,7 +355,7 @@ export class HomePageEndpointCardComponent implements OnInit, OnChanges, OnDestr
   public showFavoritesPanel() {
     this.sidePanelService.showMode(SidePanelMode.Narrow, FavoritesSidePanelComponent, {
       endpoint: this.endpoint(),
-      favorites$: this.favorites$
+      favorites: this.favorites
     });
   }
 }
