@@ -11,22 +11,22 @@
           <input #localPathSelectFile fileread="localPathFile" type="file" class="hidden"
             name="localPathSelectFile" id="localPathSelectFile" (change)="onFileChange($event)" />
           <button (click)="localPathSelectFile.click()" class="btn btn-primary">Choose File</button>
-          @if (service.file$ | async; as file) {
+          @if (service.file(); as file) {
             <span class="text-sm text-content-muted">{{file.name}}</span>
           }
         </div>
       </div>
-      @if (service.file$ | async; as file) {
-        @if (!!service.unparsableFileContent || (service.validDb$ | async) === false) {
+      @if (service.file(); as file) {
+        @if (!!service.unparsableFileContent || !service.validDb()) {
           <div class="space-y-4">
-            @if (!service.unparsableFileContent && (service.validDb$ | async) === false) {
+            @if (!service.unparsableFileContent && !service.validDb()) {
               <div class="alert alert-warning">
                 <div class="flex items-start space-x-3">
                   <span aria-hidden="true" class="material-icons text-warning-shade-600 mt-0.5">warning</span>
                   <div class="flex-1">
                     <p class="text-warning-shade-800 mb-3">
                       The database version of <app-product-name></app-product-name>
-                      (<code class="bg-warning-shade-100 px-1 py-0.5 rounded text-xs">{{service.currentDbVersion$ | async}}</code>) and the backup
+                      (<code class="bg-warning-shade-100 px-1 py-0.5 rounded text-xs">{{service.currentDbVersion()}}</code>) and the backup
                       (<code class="bg-warning-shade-100 px-1 py-0.5 rounded text-xs">{{file.content?.dbVersion}}</code>) are different. Restoring this file may have adverse affects.
                     </p>
                     <label class="flex items-center space-x-2 cursor-pointer" for="restore-ignore-db">

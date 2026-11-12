@@ -8,6 +8,7 @@ import { entityCatalog, generateStratosEntities } from '@stratosui/store';
 import { createBasicStoreModule, STORE_TEST_PROVIDERS } from '@stratosui/store/testing';
 import { AppTestModule } from "@test-framework/core-test.helper";
 import { TabNavService } from '../../../../tab-nav.service';
+import { RestoreEndpointsService } from '../restore-endpoints.service';
 import { RestoreEndpointsComponent } from './restore-endpoints.component';
 
 describe('RestoreEndpointsComponent', () => {
@@ -43,5 +44,24 @@ describe('RestoreEndpointsComponent', () => {
 
   it('should create', () => {
     expect(component).toBeTruthy();
+  });
+
+  it('warns only when the backup database version differs', async () => {
+    fixture.detectChanges();
+    const service = fixture.debugElement.injector.get(RestoreEndpointsService);
+    const text = () => (fixture.nativeElement as HTMLElement).textContent ?? '';
+
+    // No session in the test: the current version is 0.
+    service['setFileResult'](JSON.stringify({ payload: 'p', dbVersion: 0 }), 'same.json');
+    fixture.detectChanges();
+    await fixture.whenStable();
+    expect(text()).toContain('same.json');
+    expect(text()).not.toContain('are different');
+
+    service['setFileResult'](JSON.stringify({ payload: 'p', dbVersion: 7 }), 'older.json');
+    fixture.detectChanges();
+    await fixture.whenStable();
+    expect(text()).toContain('older.json');
+    expect(text()).toContain('are different');
   });
 });
