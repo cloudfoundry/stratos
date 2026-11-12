@@ -1,4 +1,4 @@
-@if (tabNavService.pageHeader$ | async; as portal) {
+@if (tabNavService.pageHeader(); as portal) {
   <div>
     <ng-container [cdkPortalOutlet]="portal"></ng-container>
   </div>
