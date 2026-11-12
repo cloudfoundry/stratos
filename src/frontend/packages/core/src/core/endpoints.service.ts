@@ -277,17 +277,14 @@ export const endpointsGuard: CanActivateFn = (
       // Only proceed when logged in and endpoints are done loading
       return !!state && state.loggedIn && !endpointState.loading;
     }),
-    withLatestFrom(
-      endpointsService.haveRegistered$,
-      endpointsService.haveConnected$,
-      userService.isAdmin$,
-      userService.isEndpointAdmin$,
-      sessionService.userEndpointsEnabled(),
-      endpointsService.disablePersistenceFeatures$
-    ),
-    map(([state, haveRegistered, haveConnected, isAdmin, isEndpointAdmin, userEndpointsEnabled, disablePersistenceFeatures]
-      : [[any, EndpointStatusState], boolean, boolean, boolean, boolean, boolean, boolean]) => {
+    withLatestFrom(sessionService.userEndpointsEnabled()),
+    map(([state, userEndpointsEnabled]: [[any, EndpointStatusState], boolean]) => {
       const [authState] = state;
+      const haveRegistered = endpointsService.haveRegistered();
+      const haveConnected = endpointsService.haveConnected();
+      const isAdmin = userService.isAdmin();
+      const isEndpointAdmin = userService.isEndpointAdmin();
+      const disablePersistenceFeatures = endpointsService.disablePersistenceFeatures();
 
       if (authState.sessionData.valid) {
         // Redirect to endpoints if there's no connected endpoints

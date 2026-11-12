@@ -2,7 +2,7 @@ import { inject, TestBed } from '@angular/core/testing';
 import { ApplicationRef, provideZonelessChangeDetection, signal } from '@angular/core';
 import { ActivatedRouteSnapshot, Router, RouterStateSnapshot } from '@angular/router';
 import { describe, it, expect, beforeEach, vi } from 'vitest';
-import { defer, firstValueFrom, Observable, of } from 'rxjs';
+import { firstValueFrom, Observable, of } from 'rxjs';
 import { AuthDataService, AuthState, EndpointModel, EndpointsDataService } from '@stratosui/store';
 import { createBasicStoreModule, STORE_TEST_PROVIDERS } from '@stratosui/store/testing';
 import { CoreTestingModule } from '@test-framework/core-test.modules';
@@ -115,12 +115,12 @@ describe('endpointsGuard runs', () => {
         {
           provide: EndpointsService,
           useValue: {
-            haveRegistered$: defer(() => of(haveRegistered)),
-            haveConnected$: of(true),
-            disablePersistenceFeatures$: of(false),
+            haveRegistered: () => haveRegistered,
+            haveConnected: () => true,
+            disablePersistenceFeatures: () => false,
           },
         },
-        { provide: UserService, useValue: { isAdmin$: of(true), isEndpointAdmin$: of(false) } },
+        { provide: UserService, useValue: { isAdmin: () => true, isEndpointAdmin: () => false } },
         { provide: SessionService, useValue: { userEndpointsEnabled: () => of(false) } },
       ],
     });
