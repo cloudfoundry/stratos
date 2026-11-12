@@ -54,8 +54,8 @@ class UserFavoriteManagerMock {
     return 'prettyName';
   }
 
-  getIsFavoriteObservable() {
-    return of(true);
+  isFavorite() {
+    return true;
   }
 
   getFavorite() {
