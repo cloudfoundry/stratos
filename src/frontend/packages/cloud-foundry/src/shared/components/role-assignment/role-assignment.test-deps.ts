@@ -22,7 +22,7 @@
  *   driver.toggleOrgRole('o1', 'Manager');
  */
 
-import { Provider } from '@angular/core';
+import { Provider, signal } from '@angular/core';
 import { ComponentFixture } from '@angular/core/testing';
 import { By } from '@angular/platform-browser';
 import { of } from 'rxjs';
@@ -39,7 +39,7 @@ export interface RoleAssignmentTestCfg {
   spacesByOrg: Record<string, { guid: string; name: string }[]>;
   /**
    * Optional permission predicate.  Receives the same args as
-   * CurrentUserPermissionsService.can$().  Defaults to `() => true`.
+   * CurrentUserPermissionsService.can().  Defaults to `() => true`.
    */
   permissions?: (perm: unknown, cf: string, org?: string, space?: string) => boolean;
 }
@@ -64,8 +64,8 @@ export function provideRoleAssignmentTestDeps(cfg: RoleAssignmentTestCfg): Provi
     {
       provide: CurrentUserPermissionsService,
       useValue: {
-        can$: (perm: unknown, cf: string, org?: string, space?: string) =>
-          of(cfg.permissions ? cfg.permissions(perm, cf, org, space) : true),
+        can: (perm: unknown, cf: string, org?: string, space?: string) =>
+          signal(cfg.permissions ? cfg.permissions(perm, cf, org, space) : true),
       },
     },
   ];

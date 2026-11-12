@@ -3,6 +3,7 @@ import {
   Component,
   OnDestroy,
   OnInit,
+  Signal,
   computed,
   effect,
   inject,
@@ -11,8 +12,7 @@ import {
   output
 } from '@angular/core';
 import { NgTemplateOutlet } from '@angular/common';
-import { Subscription, combineLatest } from 'rxjs';
-import { map } from 'rxjs/operators';
+import { Subscription } from 'rxjs';
 
 import { CurrentUserPermissionsService } from '../../../../../core/src/core/permissions/current-user-permissions.service';
 import { APIResource } from '../../../../../store/src/types/api.types';
@@ -131,8 +131,10 @@ export class RoleAssignmentComponent implements OnInit, OnDestroy {
     return this.spacesFailed().has(orgGuid);
   }
 
+  /** Permission checks per org guid; canEditByOrg reads them. */
+  private readonly orgChecks = signal<Record<string, Signal<boolean>>>({});
   /** Permission map: orgGuid → can edit */
-  private readonly canEditByOrg = signal<Record<string, boolean>>({});
+  private readonly canEditByOrg = computed(() => readChecks(this.orgChecks()));
 
   /** Orgs the picker offers.
    *
@@ -144,8 +146,10 @@ export class RoleAssignmentComponent implements OnInit, OnDestroy {
    */
   readonly allowedOrgs = computed(() => this.allOrgs());
 
+  /** Permission checks per `${orgGuid}:${spaceGuid}`; canChangeSpaceByKey reads them. */
+  private readonly spaceChecks = signal<Record<string, Signal<boolean>>>({});
   /** Per-space permission map: `${orgGuid}:${spaceGuid}` → can change space roles */
-  private readonly canChangeSpaceByKey = signal<Record<string, boolean>>({});
+  private readonly canChangeSpaceByKey = computed(() => readChecks(this.spaceChecks()));
 
   /** The orgs the user has selected (or the locked org) */
   readonly pickedOrgs = signal<APIResource<IOrganization>[]>([]);
@@ -286,26 +290,17 @@ export class RoleAssignmentComponent implements OnInit, OnDestroy {
     if (!orgs.length) {
       return;
     }
-    // Build one combineLatest over all per-org observables, resolve once
-    const obs = orgs.map(o =>
-      this.userPerms.can$(CfCurrentUserPermissions.ORGANIZATION_CHANGE_ROLES, this.cfGuid(), o.metadata.guid).pipe(
-        map(can => ({ guid: o.metadata.guid, can })),
-      ),
-    );
+    const checks: Record<string, Signal<boolean>> = {};
+    for (const o of orgs) {
+      checks[o.metadata.guid] =
+        this.userPerms.can(CfCurrentUserPermissions.ORGANIZATION_CHANGE_ROLES, this.cfGuid(), o.metadata.guid);
+    }
+    this.orgChecks.set(checks);
 
-    const permSub = combineLatest(obs).subscribe(results => {
-      const map: Record<string, boolean> = {};
-      for (const { guid, can } of results) {
-        map[guid] = can;
-      }
-      this.canEditByOrg.set(map);
-
-      // If lockedOrg is set, seed from real org list once permissions resolved
-      if (this.lockedOrg() && this.pickedOrgs().length === 0) {
-        this.seedLockedOrg();
-      }
-    });
-    this.subs.add(permSub);
+    // If lockedOrg is set, seed from the real org list
+    if (this.lockedOrg() && this.pickedOrgs().length === 0) {
+      this.seedLockedOrg();
+    }
   }
 
   // --- Locked org seeding ---
@@ -440,21 +435,12 @@ export class RoleAssignmentComponent implements OnInit, OnDestroy {
     if (!spaces.length) {
       return;
     }
-    const obs = spaces.map(space =>
-      this.userPerms.can$(CfCurrentUserPermissions.SPACE_CHANGE_ROLES, this.cfGuid(), orgGuid, space.guid).pipe(
-        map(can => ({ key: `${orgGuid}:${space.guid}`, can })),
-      ),
-    );
-    const permSub = combineLatest(obs).subscribe(results => {
-      this.canChangeSpaceByKey.update(current => {
-        const next = { ...current };
-        for (const { key, can } of results) {
-          next[key] = can;
-        }
-        return next;
-      });
-    });
-    this.subs.add(permSub);
+    const checks: Record<string, Signal<boolean>> = {};
+    for (const space of spaces) {
+      checks[`${orgGuid}:${space.guid}`] =
+        this.userPerms.can(CfCurrentUserPermissions.SPACE_CHANGE_ROLES, this.cfGuid(), orgGuid, space.guid);
+    }
+    this.spaceChecks.update(current => ({ ...current, ...checks }));
   }
 
   spacesFor(orgGuid: string): SpaceEntry[] {
@@ -692,4 +678,12 @@ export class RoleAssignmentComponent implements OnInit, OnDestroy {
     });
     this.changeSet.emit(diffToChanges(this.users(), this.baseline(), this.selection()));
   }
+}
+
+function readChecks(checks: Record<string, Signal<boolean>>): Record<string, boolean> {
+  const read: Record<string, boolean> = {};
+  for (const [key, check] of Object.entries(checks)) {
+    read[key] = check();
+  }
+  return read;
 }

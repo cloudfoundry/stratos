@@ -1,7 +1,7 @@
 import { provideHttpClient } from '@angular/common/http';
 import { provideHttpClientTesting } from '@angular/common/http/testing';
 import { ComponentFixture, TestBed } from '@angular/core/testing';
-import { provideZonelessChangeDetection, importProvidersFrom } from '@angular/core';
+import { provideZonelessChangeDetection, importProvidersFrom, signal } from '@angular/core';
 import { provideNoopAnimations } from '@angular/platform-browser/animations';
 import { provideRouter } from '@angular/router';
 import { ActivatedRoute } from '@angular/router';
@@ -66,7 +66,7 @@ function buildTestBed(activeRoute: Partial<ActiveRouteCfOrgSpace>) {
   };
 
   const mockUserPerms = {
-    can$: vi.fn().mockReturnValue(of(true)),
+    can: vi.fn().mockReturnValue(signal(true)),
   };
 
   TestBed.configureTestingModule({

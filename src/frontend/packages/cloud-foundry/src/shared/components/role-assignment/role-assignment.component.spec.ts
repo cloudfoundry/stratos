@@ -1,10 +1,11 @@
 import { HttpErrorResponse } from '@angular/common/http';
 import { ComponentFixture, TestBed } from '@angular/core/testing';
-import { provideZonelessChangeDetection } from '@angular/core';
+import { provideZonelessChangeDetection, signal } from '@angular/core';
 import { By } from '@angular/platform-browser';
 import { describe, it, expect, beforeEach } from 'vitest';
 import { EMPTY, Observable, of, Subject, throwError } from 'rxjs';
 
+import { CurrentUserPermissionsService } from '../../../../../core/src/core/permissions/current-user-permissions.service';
 import { CfRolesService } from '../../../features/cf/users/manage-users/cf-roles.service';
 
 import { CfCurrentUserPermissions } from '../../../user-permissions/cf-user-permissions-checkers';
@@ -94,6 +95,27 @@ describe('RoleAssignmentComponent', () => {
     await fixture.whenStable();
     return fixture;
   }
+
+  it('follows an org check that answers after the orgs load', async () => {
+    const o2Check = signal(false);
+    await TestBed.configureTestingModule({
+      imports: [RoleAssignmentComponent],
+      providers: [
+        provideZonelessChangeDetection(),
+        ...provideRoleAssignmentTestDeps(defaultCfg),
+        {
+          provide: CurrentUserPermissionsService,
+          useValue: { can: (_perm: unknown, _cf: string, org?: string) => org === 'o2' ? o2Check : signal(true) },
+        },
+      ],
+    }).compileComponents();
+    const component = (await createFixture()).componentInstance;
+
+    expect(component.canEditOrg('o2')).toBe(false);
+    // The roles land after the orgs did.
+    o2Check.set(true);
+    expect(component.canEditOrg('o2')).toBe(true);
+  });
 
   it('picker shows all orgs that fetchOrgs returned (fetchOrgs owns the broadened filter)', async () => {
     // The widget trusts fetchOrgs to return only orgs the user can act on.
@@ -757,7 +779,7 @@ describe('RoleAssignmentComponent', () => {
         },
         {
           provide: (await import('../../../../../core/src/core/permissions/current-user-permissions.service')).CurrentUserPermissionsService,
-          useValue: { can$: () => of(true) },
+          useValue: { can: () => signal(true) },
         },
       ],
     }).compileComponents();
