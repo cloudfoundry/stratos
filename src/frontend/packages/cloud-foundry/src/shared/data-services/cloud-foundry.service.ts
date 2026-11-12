@@ -53,18 +53,12 @@ export class CloudFoundryService {
   readonly hasRegisteredCFEndpoints: Signal<boolean> = computed(() => this.cfEndpoints().length > 0);
   readonly hasConnectedCFEndpoints: Signal<boolean> = computed(() => this.connectedCFEndpoints().length > 0);
 
-  hasRegisteredCFEndpoints$: Observable<boolean>;
-  hasConnectedCFEndpoints$: Observable<boolean>;
-  connectedCFEndpoints$: Observable<EndpointModel[]>;
+  // Feeds the page header's Observable endpointIds$ input.
   cFEndpoints$: Observable<EndpointModel[]>;
   waitForAppEntity$!: Observable<EntityInfo<APIResource>>;
 
   constructor() {
     this.cFEndpoints$ = toObservable(this.cfEndpoints);
-    this.connectedCFEndpoints$ = toObservable(this.connectedCFEndpoints);
-
-    this.hasConnectedCFEndpoints$ = toObservable(this.hasConnectedCFEndpoints);
-    this.hasRegisteredCFEndpoints$ = toObservable(this.hasRegisteredCFEndpoints);
   }
 }
 
