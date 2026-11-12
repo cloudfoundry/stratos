@@ -1,4 +1,4 @@
-import { Injectable, inject } from '@angular/core';
+import { Injectable, Signal, computed, inject, linkedSignal } from '@angular/core';
 import { toObservable } from '@angular/core/rxjs-interop';
 import {
   ActionState,
@@ -32,6 +32,24 @@ export class UserProfileService {
   private userGuid$: Observable<string>;
 
   private fetchStarted = false;
+
+  /**
+   * The user's profile, null until it has loaded. Reading it does not fetch:
+   * call loadUserProfile() where the profile is shown.
+   */
+  readonly userProfile: Signal<UserProfileInfo | null> = computed(() => {
+    const profile = this.userProfileData.profile();
+    return profile && profile.id ? profile : null;
+  });
+
+  /**
+   * Whether the last fetch failed. While a fetch runs it keeps the previous
+   * answer, as the error is only known once the fetch has settled.
+   */
+  readonly isError: Signal<boolean> = linkedSignal<{ fetching: boolean; error: boolean; }, boolean>({
+    source: () => ({ fetching: this.userProfileData.fetching(), error: this.userProfileData.error() }),
+    computation: ({ fetching, error }, previous) => fetching ? (previous?.value ?? false) : error,
+  });
 
   constructor() {
     // Source the user GUID from the signal-native auth projection. The
@@ -69,6 +87,13 @@ export class UserProfileService {
       filter(([fetching]) => !fetching),
       map(([, error]) => error)
     );
+  }
+
+  /** Fetch the profile once, the first time any page asks for it. */
+  loadUserProfile() {
+    if (!this.fetchStarted) {
+      this.fetchUserProfile();
+    }
   }
 
   fetchUserProfile() {

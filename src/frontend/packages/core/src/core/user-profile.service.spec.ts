@@ -1,5 +1,5 @@
 import { TestBed } from '@angular/core/testing';
-import { provideZonelessChangeDetection, signal } from '@angular/core';
+import { ApplicationRef, provideZonelessChangeDetection, signal, WritableSignal } from '@angular/core';
 import { describe, it, expect, beforeEach, vi } from 'vitest';
 import type { SessionData, UserProfileInfo } from '@stratosui/store';
 import { UserProfileDataService } from '@stratosui/store';
@@ -22,6 +22,9 @@ const PROFILE = { id: 'user-1', userName: 'admin', emails: [] } as unknown as Us
 describe('UserProfileService', () => {
   let profile$: BehaviorSubject<UserProfileInfo | null>;
   let dataStub: {
+    profile: WritableSignal<UserProfileInfo | null>;
+    fetching: WritableSignal<boolean>;
+    error: WritableSignal<boolean>;
     profile$: BehaviorSubject<UserProfileInfo | null>;
     fetching$: BehaviorSubject<boolean>;
     error$: BehaviorSubject<boolean>;
@@ -30,11 +33,15 @@ describe('UserProfileService', () => {
 
   beforeEach(() => {
     profile$ = new BehaviorSubject<UserProfileInfo | null>(null);
+    const profile = signal<UserProfileInfo | null>(null);
     dataStub = {
+      profile,
+      fetching: signal(false),
+      error: signal(false),
       profile$,
       fetching$: new BehaviorSubject<boolean>(false),
       error$: new BehaviorSubject<boolean>(false),
-      fetch: vi.fn().mockImplementation(() => profile$.next(PROFILE)),
+      fetch: vi.fn().mockImplementation(() => { profile.set(PROFILE); profile$.next(PROFILE); }),
     };
     TestBed.configureTestingModule({
       providers: [
@@ -67,5 +74,30 @@ describe('UserProfileService', () => {
     await new Promise(resolve => service.userProfile$.pipe(first()).subscribe(resolve));
     service.fetchUserProfile();
     expect(dataStub.fetch).toHaveBeenCalledTimes(2);
+  });
+
+  it('gives no profile until one is loaded, and loads it once', async () => {
+    const service = TestBed.inject(UserProfileService);
+    expect(service.userProfile()).toBeNull();
+    expect(dataStub.fetch).not.toHaveBeenCalled();
+
+    service.loadUserProfile();
+    service.loadUserProfile();
+    await TestBed.inject(ApplicationRef).whenStable();
+    expect(dataStub.fetch).toHaveBeenCalledTimes(1);
+    expect(service.userProfile()?.id).toBe('user-1');
+  });
+
+  it('keeps the last error answer while a fetch runs', () => {
+    const service = TestBed.inject(UserProfileService);
+    dataStub.error.set(true);
+    expect(service.isError()).toBe(true);
+
+    dataStub.fetching.set(true);
+    dataStub.error.set(false);
+    expect(service.isError()).toBe(true);
+
+    dataStub.fetching.set(false);
+    expect(service.isError()).toBe(false);
   });
 });
