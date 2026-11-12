@@ -4,8 +4,7 @@
     type="button"
     class="theme-toggle-button"
     (click)="toggleTheme()"
-    [attr.aria-label]="'Toggle theme to ' + (isDarkMode() ? 'light' : 'dark') + ' mode'"
-    [attr.aria-pressed]="isDarkMode()"
+    [attr.aria-label]="getLabel() + ' theme, switch to ' + (isDarkMode() ? 'light' : 'dark') + ' mode'"
     title="Toggle theme ({{ getLabel() }})"
     >
     <!-- Sun icon for light mode -->
