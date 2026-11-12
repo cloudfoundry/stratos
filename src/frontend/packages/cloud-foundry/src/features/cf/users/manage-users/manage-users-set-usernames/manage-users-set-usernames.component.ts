@@ -1,5 +1,5 @@
 import { HttpClient } from '@angular/common/http';
-import { Component, OnInit, signal, ChangeDetectionStrategy, inject } from '@angular/core';
+import { Component, OnInit, signal, ChangeDetectionStrategy, inject, Injector } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { toObservable } from '@angular/core/rxjs-interop';
@@ -18,9 +18,9 @@ import {
   StepOnNextFunction,
 } from '@stratosui/core';
 import { CFFeatureFlagTypes } from '../../../../../cf-api.types';
+import { CfCurrentUserRolesDataService } from '../../../../../services/cf-current-user-roles-data.service';
 import { CfUsersRolesDataService } from '../../../../../services/domain-data/cf-users-roles-data.service';
 import { StUser } from '../../../../../services/endpoint-data/stratos-types';
-import { CfCurrentUserRolesSignalService } from '../../../../../user-permissions/cf-current-user-roles-signal.service';
 import { CfPermissionTypes } from '../../../../../user-permissions/cf-user-permissions-checkers';
 import { getFeatureFlagsSource } from '../../../../../user-permissions/feature-flags-cache';
 import { ActiveRouteCfOrgSpace } from '../../../cf-page.types';
@@ -79,7 +79,8 @@ export class ManageUsersSetUsernamesComponent implements OnInit {
 
   constructor() {
     const activeRouteCfOrgSpace = this.activeRouteCfOrgSpace;
-    const cfRoles = inject(CfCurrentUserRolesSignalService);
+    const rolesData = inject(CfCurrentUserRolesDataService);
+    const injector = inject(Injector);
     const userPerms = inject(CurrentUserPermissionsService);
     const http = inject(HttpClient);
 
@@ -90,7 +91,7 @@ export class ManageUsersSetUsernamesComponent implements OnInit {
     const canUnset = userPerms.can(ffRemovePermConfig, activeRouteCfOrgSpace.cfGuid);
     // The checks read false until the roles and the flags load, so each is
     // read once both have.
-    const flagsLoaded$ = waitForCFPermissions(cfRoles, activeRouteCfOrgSpace.cfGuid).pipe(
+    const flagsLoaded$ = waitForCFPermissions(rolesData, activeRouteCfOrgSpace.cfGuid, injector).pipe(
       switchMap(() => from(getFeatureFlagsSource(activeRouteCfOrgSpace.cfGuid, http).load())),
     );
     this.canAdd$ = flagsLoaded$.pipe(

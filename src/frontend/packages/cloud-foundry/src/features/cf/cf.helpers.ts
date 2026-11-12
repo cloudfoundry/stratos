@@ -1,7 +1,7 @@
-import { Signal, computed } from '@angular/core';
+import { Injector, Signal, computed } from '@angular/core';
 import { ActivatedRoute, Router } from '@angular/router';
 import { Observable } from 'rxjs';
-import { take, filter, map, shareReplay } from 'rxjs/operators';
+import { take, filter, shareReplay } from 'rxjs/operators';
 
 import {
   CurrentUserPermissionsService,
@@ -10,6 +10,7 @@ import {
 } from '@stratosui/core';
 import {
   APIResource,
+  observeSignal,
   PaginationEntityState
 } from '@stratosui/store';
 import { IServiceInstance, IUserProvidedServiceInstance } from '../../cf-api-svc.types';
@@ -17,7 +18,7 @@ import { IApp, IRoute, ISpace } from '../../cf-api.types';
 import { cfOsDebugLog } from '../../shared/data-services/cf-org-space-debug';
 import { CfAppsSignalConfigService } from '../../shared/signal-list-configs/app/cf-apps-signal-config.service';
 import { ICfRolesState } from '../../store/types/cf-current-user-roles.types';
-import { CfCurrentUserRolesSignalService } from '../../user-permissions/cf-current-user-roles-signal.service';
+import { CfCurrentUserRolesDataService } from '../../services/cf-current-user-roles-data.service';
 import {
   CfUser,
   CfUserRoleParams,
@@ -287,12 +288,17 @@ export function canUpdateOrgSpaceRoles(
   return computed(() => orgCheck() || spaceCheck());
 }
 
+/**
+ * Emits the endpoint's roles once they have loaded, then completes. The
+ * watch on the roles signal ends with the subscription.
+ */
 export function waitForCFPermissions(
-  cfRoles: CfCurrentUserRolesSignalService,
-  cfGuid: string
+  rolesData: CfCurrentUserRolesDataService,
+  cfGuid: string,
+  injector: Injector,
 ): Observable<ICfRolesState> {
-  return cfRoles.cfEndpointRolesState$(cfGuid).pipe(
-    filter(cf => cf && cf.state.initialised),
+  return observeSignal(rolesData.cfEndpointRolesState(cfGuid), injector).pipe(
+    filter((cf): cf is ICfRolesState => !!cf && cf.state.initialised),
     take(1),
     shareReplay({ bufferSize: 1, refCount: true }),
   );
