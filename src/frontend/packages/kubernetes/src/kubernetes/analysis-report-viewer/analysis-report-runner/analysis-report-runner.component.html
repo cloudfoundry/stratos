@@ -1,5 +1,5 @@
-@if (canShow$ | async) {
-  @if (analyzers$ | async; as analyzers) {
+@if (canShow()) {
+  @if (analyzers(); as analyzers) {
     <div class="flex items-center justify-center">
       <div class="relative inline-block">
         @if (analyzers.length > 0) {

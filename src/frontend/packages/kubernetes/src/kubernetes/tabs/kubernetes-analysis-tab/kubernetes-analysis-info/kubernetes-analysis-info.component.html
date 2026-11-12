@@ -1,11 +1,9 @@
 <app-sidepanel-preview title="Analyzers">
-  @if (analyzers$ | async; as analyzers) {
-    <div>
-      @for (a of analyzers; track a) {
-        <div>
-          <app-analysis-info-card [analyzer]="a"></app-analysis-info-card>
-        </div>
-      }
-    </div>
-  }
+  <div>
+    @for (a of analyzers(); track a) {
+      <div>
+        <app-analysis-info-card [analyzer]="a"></app-analysis-info-card>
+      </div>
+    }
+  </div>
 </app-sidepanel-preview>
