@@ -8,10 +8,8 @@ import {
   input,
   viewChild
 } from '@angular/core';
-import { toObservable, toSignal } from '@angular/core/rxjs-interop';
 import { FormsModule } from '@angular/forms';
 import { RouterLink } from '@angular/router';
-import { filter, switchMap } from 'rxjs/operators';
 
 import {
   AppInputDirective,
@@ -101,27 +99,18 @@ export class CardAppInstancesComponent implements OnDestroy {
   /** Disable scale buttons while an app-level update is in flight. */
   readonly isUpdating = computed(() => this.dataService.loading().app);
 
-  /**
-   * Edit-permission gate. Wraps the perm-check Observable into a signal
-   * so the template stays pipe-free. canEdit() is null while the perm
-   * check is pending and resolves to a boolean after it lands.
-   */
-  readonly canEdit = toSignal(
-    // can() is a stream (permissions are a later step), so the org and
-    // space are bridged for it once both are known.
-    toObservable(computed(() => ({ org: this.dataService.org(), space: this.dataService.space() }))).pipe(
-      filter(({ org, space }) => !!org && !!space),
-      switchMap(({ org, space }) =>
-        this.cups.can$(
-          CfCurrentUserPermissions.APPLICATION_EDIT,
-          this.appService.cfGuid,
-          org!.guid,
-          space!.guid,
-        ),
-      ),
-    ),
-    { initialValue: false },
-  );
+  /** Edit-permission gate, built once the org and space are known; false until then. */
+  private readonly editCheck = computed(() => {
+    const org = this.dataService.org();
+    const space = this.dataService.space();
+    return org && space ? this.cups.can(
+      CfCurrentUserPermissions.APPLICATION_EDIT,
+      this.appService.cfGuid,
+      org.guid,
+      space.guid,
+    ) : null;
+  });
+  readonly canEdit = computed(() => this.editCheck()?.() ?? false);
 
   // ---------------------------------------------------------------------------
   // Edit state
