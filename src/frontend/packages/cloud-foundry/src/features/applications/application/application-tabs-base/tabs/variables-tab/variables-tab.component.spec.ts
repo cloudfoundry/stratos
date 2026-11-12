@@ -128,6 +128,9 @@ describe('VariablesTabComponent', () => {
     error: vi.fn(),
   });
 
+  /** The save callback the tab handed to the editor dialog it opened. */
+  const dialogSave = () => dialogOpen.mock.calls[0][1].data.save as (r: { name: string; value: string }) => Promise<void>;
+
   /** Pull the Edit/Delete row actions for a given row off the list config. */
   const rowActionsFor = (row: any) => {
     const actionsCol = component.listConfig.columns.find(c => c.key === 'actions');
@@ -266,8 +269,7 @@ describe('VariablesTabComponent', () => {
     dialogResult = { name: 'NEW', value: 'v' };
 
     component.addVariableAction.invoke();
-    await Promise.resolve();
-    await Promise.resolve();
+    await dialogSave()(dialogResult);
 
     expect(addVariable).toHaveBeenCalledWith('NEW', 'v');
     expect(configRefresh).toHaveBeenCalled();
@@ -279,8 +281,7 @@ describe('VariablesTabComponent', () => {
     dialogResult = { name: 'FOO', value: 'changed' };
 
     rowActionsFor({ name: 'FOO', value: 'a' }).find(a => a.label === 'Edit')!.invoke({ name: 'FOO', value: 'a' } as any);
-    await Promise.resolve();
-    await Promise.resolve();
+    await dialogSave()(dialogResult);
 
     expect(updateVariable).toHaveBeenCalledWith('FOO', 'changed');
     expect(renameVariable).not.toHaveBeenCalled();
@@ -293,8 +294,7 @@ describe('VariablesTabComponent', () => {
     dialogResult = { name: 'RENAMED', value: 'a' };
 
     rowActionsFor({ name: 'FOO', value: 'a' }).find(a => a.label === 'Edit')!.invoke({ name: 'FOO', value: 'a' } as any);
-    await Promise.resolve();
-    await Promise.resolve();
+    await dialogSave()(dialogResult);
 
     expect(renameVariable).toHaveBeenCalledWith('FOO', 'RENAMED', 'a');
     expect(updateVariable).not.toHaveBeenCalled();
@@ -314,30 +314,16 @@ describe('VariablesTabComponent', () => {
     expect(renameVariable).not.toHaveBeenCalled();
   });
 
-  it('surfaces a snackbar error when the action service rejects', async () => {
+  it('hands a failed save back to the dialog, which stays open and says why', async () => {
     await fixture.whenStable();
-    dialogResult = { name: 'NEW', value: 'v' };
-    addVariable.mockRejectedValueOnce(new Error('CF-Boom'));
+    const failure = cfRequestFailure();
+    addVariable.mockRejectedValueOnce(failure);
     const snack = TestBed.inject(TailwindSnackBarService) as any;
 
     component.addVariableAction.invoke();
-    await Promise.resolve();
-    await Promise.resolve();
-    await Promise.resolve();
 
-    expect(snack.error).toHaveBeenCalled();
-  });
-
-  it('says why a save failed in Cloud Foundry\'s words', async () => {
-    await fixture.whenStable();
-    dialogResult = { name: 'NEW', value: 'v' };
-    addVariable.mockRejectedValueOnce(cfRequestFailure());
-    const snack = TestBed.inject(TailwindSnackBarService) as any;
-
-    component.addVariableAction.invoke();
-    await vi.waitFor(() => expect(snack.error).toHaveBeenCalled());
-
-    expect(snackText(snack.error.mock.calls[0][0])).toBe(`Save variable failed: ${CF_FAILURE_DETAIL}`);
+    await expect(dialogSave()({ name: 'NEW', value: 'v' })).rejects.toBe(failure);
+    expect(snack.error).not.toHaveBeenCalled();
   });
 
   it('says why a delete failed in Cloud Foundry\'s words', async () => {

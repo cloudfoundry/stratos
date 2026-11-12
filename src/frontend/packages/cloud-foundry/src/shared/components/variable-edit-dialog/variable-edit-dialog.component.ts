@@ -17,6 +17,7 @@ import {
   MonacoEditorOptions,
   TailwindDialogRef,
 } from '@stratosui/core';
+import { extractHttpErrorMessage } from '@stratosui/store';
 
 import {
   jsonModeWarning,
@@ -31,6 +32,9 @@ export interface VariableEditDialogData {
   name?: string;
   value?: string;
   existingNames?: string[];
+  /** Applies the result. When given, Save waits for it and closes only on
+   *  success; a failure is shown in the dialog, which keeps what was typed. */
+  save?: (result: VariableEditDialogResult) => Promise<void>;
 }
 
 /** Result returned via dialogRef.close(). undefined = cancelled. Rename vs
@@ -114,6 +118,11 @@ export class VariableEditDialogComponent {
 
   /** Save is gated solely by hard name errors — warnings never block. */
   readonly canSave: Signal<boolean> = computed(() => !this.nameValidation().hardError);
+
+  /** True while the caller's save runs. */
+  readonly saving: WritableSignal<boolean> = signal(false);
+  /** Why the last save failed; cleared on the next attempt. */
+  readonly saveError: WritableSignal<string | null> = signal(null);
 
   /** Whether anything has been typed that closing would throw away. Compared
    *  against what the dialog was opened with, so reverting an edit by hand
@@ -199,11 +208,25 @@ export class VariableEditDialogComponent {
     }
   }
 
-  save(): void {
-    if (!this.canSave()) {
+  async save(): Promise<void> {
+    if (!this.canSave() || this.saving()) {
       return;
     }
-    this.dialogRef.close({ name: this.name().trim(), value: this.canonicalValue() });
+    const result = { name: this.name().trim(), value: this.canonicalValue() };
+    if (!this.data.save) {
+      this.dialogRef.close(result);
+      return;
+    }
+    this.saving.set(true);
+    this.saveError.set(null);
+    try {
+      await this.data.save(result);
+      this.dialogRef.close(result);
+    } catch (err: unknown) {
+      this.saveError.set(extractHttpErrorMessage(err));
+    } finally {
+      this.saving.set(false);
+    }
   }
 
   cancel(): void {
