@@ -6,7 +6,6 @@ import { provideHttpClientTesting } from '@angular/common/http/testing';
 import { provideRouter } from '@angular/router';
 import { CdkPortalOutlet } from '@angular/cdk/portal';
 import { describe, it, expect, vi } from 'vitest';
-import { BehaviorSubject } from 'rxjs';
 
 import {
   ApplicationServiceMock,
@@ -96,10 +95,9 @@ describe('AppApplicationActionBarComponent', () => {
     };
 
     // Force *appCfUserPermission to render its template by saying "yes" to all
-    // permission checks. The directive subscribes to can() and only renders
-    // when the observable emits true.
+    // permission checks. The directive renders while can() reads true.
     const permissionsMock = {
-      can$: vi.fn().mockReturnValue(new BehaviorSubject<boolean>(true).asObservable()),
+      can: vi.fn().mockReturnValue(signal(true)),
     };
 
     await TestBed.configureTestingModule({
