@@ -17,5 +17,6 @@
   [baseline]="baseline()"
   [loading]="loadingRoles()"
   [lockedOrg]="lockedOrg()"
+  [lockedSpaceGuid]="activeRouteCfOrgSpace.spaceGuid || undefined"
   (changeSet)="onChangeSet($event)"
 ></app-role-assignment>

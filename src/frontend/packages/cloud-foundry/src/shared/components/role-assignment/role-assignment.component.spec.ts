@@ -190,6 +190,23 @@ describe('RoleAssignmentComponent', () => {
     expect(picker).toBeNull();
   });
 
+  it('lists only the locked space when the wizard opens at space scope', async () => {
+    await setup({
+      ...defaultCfg,
+      spacesByOrg: {
+        o1: [{ guid: 's1', name: 'Space One' }, { guid: 's2', name: 'Space Two' }],
+        o2: [],
+      },
+    });
+    const fixture = TestBed.createComponent(RoleAssignmentComponent);
+    fixture.componentRef.setInput('cfGuid', cfGuid);
+    fixture.componentRef.setInput('lockedOrg', { guid: 'o1', name: 'Org One' });
+    fixture.componentRef.setInput('lockedSpaceGuid', 's2');
+    await fixture.whenStable();
+
+    expect(fixture.componentInstance.filteredSpacesFor('o1').map(s => s.guid)).toEqual(['s2']);
+  });
+
   it('names the locked org in a change when the org list loads after the widget', async () => {
     // The wizard opens at org scope before the org's name or the org list
     // has arrived, so the widget first seeds a placeholder with no name.
