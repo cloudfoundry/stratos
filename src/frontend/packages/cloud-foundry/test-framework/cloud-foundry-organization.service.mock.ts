@@ -1,3 +1,4 @@
+import { signal } from '@angular/core';
 import { Observable, of as observableOf } from 'rxjs';
 
 import { getDefaultRequestState, APIResource, EntityInfo } from '@stratosui/store';
@@ -28,4 +29,7 @@ export class CloudFoundryOrganizationServiceMock {
   appCount$ = observableOf(0);
   serviceInstancesCount$ = observableOf(0);
   userProvidedServiceInstancesCount$ = observableOf(0);
+  userOrgRole = signal<string | null>(null);
+  quotaLink = signal<string[] | undefined>(undefined);
+  quotaDefinition$ = observableOf(null);
 }

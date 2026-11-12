@@ -1,7 +1,7 @@
 import { Component, inject, ChangeDetectionStrategy } from '@angular/core';
-import { CommonModule } from '@angular/common';
+import { DatePipe } from '@angular/common';
+import { toSignal } from '@angular/core/rxjs-interop';
 import { RouterModule } from '@angular/router';
-import { CloudFoundryEndpointService } from '../../../../features/cf/services/cloud-foundry-endpoint.service';
 import { CloudFoundryOrganizationService } from '../../../../features/cf/services/cloud-foundry-organization.service';
 import { MetadataItemComponent } from '../../../../../../core/src/shared/components/metadata-item/metadata-item.component';
 import { BooleanIndicatorComponent } from '../../../../../../core/src/shared/components/boolean-indicator/boolean-indicator.component';
@@ -13,7 +13,7 @@ import { CapitalizeFirstPipe } from '@stratosui/core';
   changeDetection: ChangeDetectionStrategy.OnPush,
   standalone: true,
   imports: [
-    CommonModule,
+    DatePipe,
     RouterModule,
     MetadataItemComponent,
     BooleanIndicatorComponent,
@@ -22,5 +22,5 @@ import { CapitalizeFirstPipe } from '@stratosui/core';
 })
 export class CardCfOrgUserDetailsComponent {
   public cfOrgService = inject(CloudFoundryOrganizationService);
-  public cfEndpointService = inject(CloudFoundryEndpointService);
+  readonly quota = toSignal(this.cfOrgService.quotaDefinition$, { initialValue: null });
 }

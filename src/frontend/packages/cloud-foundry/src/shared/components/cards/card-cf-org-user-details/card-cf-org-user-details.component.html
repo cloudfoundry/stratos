@@ -7,16 +7,16 @@
       <div class="flex flex-row">
         <div class="flex-1">
           <app-metadata-item class="mt-0" label="User Org Role">
-            {{ (cfOrgService.userOrgRole$ | async) ?? '–' }}
+            {{ cfOrgService.userOrgRole() ?? '–' }}
           </app-metadata-item>
           <app-metadata-item label="Quota Definition">
-            <a [routerLink]="cfOrgService.quotaLink$ | async">
-              {{ (cfOrgService.quotaDefinition$ | async)?.name }}
+            <a [routerLink]="cfOrgService.quotaLink()">
+              {{ quota()?.name }}
             </a>
           </app-metadata-item>
           <app-metadata-item label="Provision Paid Services">
             <app-boolean-indicator
-              [isTrue]="$safeNavigationMigration((cfOrgService.quotaDefinition$ | async)?.paidServicesAllowed)"
+              [isTrue]="$safeNavigationMigration(quota()?.paidServicesAllowed)"
               type="yes-no"
             >
             </app-boolean-indicator>

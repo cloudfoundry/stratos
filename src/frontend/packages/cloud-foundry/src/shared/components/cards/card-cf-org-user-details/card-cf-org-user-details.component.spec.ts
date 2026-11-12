@@ -54,13 +54,24 @@ describe('CardCfOrgUserDetailsComponent', () => {
     EntityCatalogHelpers.SetEntityCatalogHelper(helper);
   });
 
-  beforeEach(() => {
+  beforeEach(async () => {
     fixture = TestBed.createComponent(CardCfOrgUserDetailsComponent);
     component = fixture.componentInstance;
-    fixture.detectChanges();
+    await fixture.whenStable();
   });
+
+  const metadata = (label: string): string =>
+    Array.from((fixture.nativeElement as HTMLElement).querySelectorAll('app-metadata-item'))
+      .find(item => item.getAttribute('label') === label)?.textContent?.replace(/\s+/g, ' ').trim() ?? '';
 
   it('should create', () => {
     expect(component).toBeTruthy();
+  });
+
+  it('shows a placeholder for the role until it is known, then the role', async () => {
+    expect(metadata('User Org Role')).toBe('User Org Role –');
+    (component.cfOrgService as unknown as CloudFoundryOrganizationServiceMock).userOrgRole.set('Manager');
+    await fixture.whenStable();
+    expect(metadata('User Org Role')).toBe('User Org Role Manager');
   });
 });

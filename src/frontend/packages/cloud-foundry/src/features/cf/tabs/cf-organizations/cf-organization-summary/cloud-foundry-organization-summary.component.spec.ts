@@ -1,5 +1,5 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
-import { provideZonelessChangeDetection } from '@angular/core';
+import { provideZonelessChangeDetection, signal } from '@angular/core';
 import { provideRouter } from '@angular/router';
 import { provideHttpClient } from '@angular/common/http';
 import { provideHttpClientTesting } from '@angular/common/http/testing';
@@ -40,7 +40,10 @@ describe('CloudFoundryOrganizationSummaryComponent', () => {
       load: () => of(undefined),
     },
     serviceInstancesCount: (() => 0) as unknown as import('@angular/core').Signal<number>,
-    userProvidedServiceInstancesCount$: of(0)
+    userProvidedServiceInstancesCount$: of(0),
+    userOrgRole: signal(null),
+    quotaLink: signal(undefined),
+    quotaDefinition$: of(null),
   };
 
   const mockEndpointService = {
