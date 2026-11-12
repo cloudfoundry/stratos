@@ -1,7 +1,6 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { provideZonelessChangeDetection, signal, computed, WritableSignal } from '@angular/core';
 import { provideRouter } from '@angular/router';
-import { of } from 'rxjs';
 import { describe, it, expect, vi } from 'vitest';
 
 import { ConfirmationDialogService, CurrentUserPermissionsService, TailwindSnackBarService } from '@stratosui/core';
@@ -64,7 +63,7 @@ function makeAppsStub() {
 
 function makeCupsStub(canResult = true) {
   return {
-    can$: vi.fn().mockReturnValue(of(canResult)),
+    can: vi.fn().mockReturnValue(signal(canResult)),
   };
 }
 
