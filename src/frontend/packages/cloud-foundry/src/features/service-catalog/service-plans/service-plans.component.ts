@@ -79,7 +79,7 @@ export class ServicePlansComponent implements OnInit {
   // Reactive permission flag for the per-row Create Instance kebab item.
   // Disabled when the user lacks SERVICE_INSTANCE_CREATE on this CF.
   private readonly canCreateServiceInstance: Signal<boolean> = toSignal(
-    this.permissionsService.can(CfCurrentUserPermissions.SERVICE_INSTANCE_CREATE, this.cfGuid),
+    this.permissionsService.can$(CfCurrentUserPermissions.SERVICE_INSTANCE_CREATE, this.cfGuid),
     { initialValue: false },
   );
 

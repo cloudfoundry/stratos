@@ -55,7 +55,7 @@ describe('EndpointCardComponent', () => {
         {
           provide: CurrentUserPermissionsService,
           useValue: {
-            can: () => of(true)
+            can$: () => of(true)
           }
         },
       ],

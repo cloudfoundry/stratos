@@ -73,7 +73,7 @@ export class CloudFoundryTabsBaseComponent implements OnInit {
 
     // can() and hasMetrics() are streams; null until they answer.
     const firehoseHidden = toSignal(this.currentUserPermissionsService
-      .can(CfCurrentUserPermissions.FIREHOSE_VIEW, this.cfEndpointService.cfGuid)
+      .can$(CfCurrentUserPermissions.FIREHOSE_VIEW, this.cfEndpointService.cfGuid)
       .pipe(map(visible => !visible)), { initialValue: null });
 
     const usersHidden = computed(() => !cfEndpointService.usersCount());
@@ -120,7 +120,7 @@ export class CloudFoundryTabsBaseComponent implements OnInit {
 
   ngOnInit() {
     this.isFetching$ = observableOf(false);
-    this.canAddOrg$ = this.currentUserPermissionsService.can(CfCurrentUserPermissions.ORGANIZATION_CREATE, this.cfEndpointService.cfGuid);
+    this.canAddOrg$ = this.currentUserPermissionsService.can$(CfCurrentUserPermissions.ORGANIZATION_CREATE, this.cfEndpointService.cfGuid);
   }
 
 }

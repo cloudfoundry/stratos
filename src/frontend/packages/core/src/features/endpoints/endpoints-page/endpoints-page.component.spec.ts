@@ -57,7 +57,7 @@ describe('EndpointsPageComponent', () => {
   };
 
   const mockPermissionsService = {
-    can: () => of(true)
+    can$: () => of(true)
   };
 
   const mockEndpointStatusSignals = {
@@ -111,7 +111,7 @@ describe('EndpointsPageComponent', () => {
     mockEndpointsService.disablePersistenceFeatures.set(false);
     mockSnackBarService.show.mockClear();
     customizations = { noEndpointsComponent: null };
-    vi.spyOn(TestBed.inject(CurrentUserPermissionsService), 'can').mockReturnValue(perm$);
+    vi.spyOn(TestBed.inject(CurrentUserPermissionsService), 'can$').mockReturnValue(perm$);
     fixture = TestBed.createComponent(EndpointsPageComponent);
     component = fixture.componentInstance;
     await fixture.whenStable();

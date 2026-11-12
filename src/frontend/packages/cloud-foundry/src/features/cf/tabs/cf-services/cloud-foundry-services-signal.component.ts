@@ -63,7 +63,7 @@ export class CloudFoundryServicesSignalComponent implements OnInit {
   /** Reactive permission flag for the Add Service Instance button. Built
    *  in the constructor (injection context) so toSignal() resolves. */
   public readonly canCreateServiceInstance: Signal<boolean> = toSignal(
-    this.permissionsService.can(CfCurrentUserPermissions.SERVICE_INSTANCE_CREATE, this.cfEndpointService.cfGuid),
+    this.permissionsService.can$(CfCurrentUserPermissions.SERVICE_INSTANCE_CREATE, this.cfEndpointService.cfGuid),
     { initialValue: false },
   );
   /** L5 primary action — navigates to the add-service-instance wizard's

@@ -29,11 +29,11 @@ describe('ServicePlansComponent', () => {
         provideNoopAnimations(),
         // Stub the permissions service to short-circuit the
         // CurrentUserRolesDataService → ngrx Store chain. The per-row
-        // Create Instance action reads .can() to gate its disabled state;
+        // Create Instance action reads .can$() to gate its disabled state;
         // the spec just needs the signal to resolve without injection
         // errors. Default to false (lacking permission) so the kebab
         // item renders as disabled — matches the safer fallback.
-        { provide: CurrentUserPermissionsService, useValue: { can: () => of(false) } },
+        { provide: CurrentUserPermissionsService, useValue: { can$: () => of(false) } },
       ],
     }).compileComponents();
 

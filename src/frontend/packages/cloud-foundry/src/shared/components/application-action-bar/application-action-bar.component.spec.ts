@@ -99,7 +99,7 @@ describe('AppApplicationActionBarComponent', () => {
     // permission checks. The directive subscribes to can() and only renders
     // when the observable emits true.
     const permissionsMock = {
-      can: vi.fn().mockReturnValue(new BehaviorSubject<boolean>(true).asObservable()),
+      can$: vi.fn().mockReturnValue(new BehaviorSubject<boolean>(true).asObservable()),
     };
 
     await TestBed.configureTestingModule({

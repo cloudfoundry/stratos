@@ -288,7 +288,7 @@ export class RoleAssignmentComponent implements OnInit, OnDestroy {
     }
     // Build one combineLatest over all per-org observables, resolve once
     const obs = orgs.map(o =>
-      this.userPerms.can(CfCurrentUserPermissions.ORGANIZATION_CHANGE_ROLES, this.cfGuid(), o.metadata.guid).pipe(
+      this.userPerms.can$(CfCurrentUserPermissions.ORGANIZATION_CHANGE_ROLES, this.cfGuid(), o.metadata.guid).pipe(
         map(can => ({ guid: o.metadata.guid, can })),
       ),
     );
@@ -441,7 +441,7 @@ export class RoleAssignmentComponent implements OnInit, OnDestroy {
       return;
     }
     const obs = spaces.map(space =>
-      this.userPerms.can(CfCurrentUserPermissions.SPACE_CHANGE_ROLES, this.cfGuid(), orgGuid, space.guid).pipe(
+      this.userPerms.can$(CfCurrentUserPermissions.SPACE_CHANGE_ROLES, this.cfGuid(), orgGuid, space.guid).pipe(
         map(can => ({ key: `${orgGuid}:${space.guid}`, can })),
       ),
     );

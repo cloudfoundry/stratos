@@ -174,7 +174,7 @@ async function makeSubNavFixture(canReturn: boolean, filteredItems?: StUser[]): 
         provide: CloudFoundryOrganizationService,
         useValue: { orgGuid: 'org-1', cfGuid: 'cnsi-1', orgDataService: { org: signal(null) } },
       },
-      { provide: CurrentUserPermissionsService, useValue: { can: () => of(canReturn) } },
+      { provide: CurrentUserPermissionsService, useValue: { can$: () => of(canReturn) } },
       { provide: UserInviteService, useValue: { configured: signal(false) } },
     ],
   }).compileComponents();

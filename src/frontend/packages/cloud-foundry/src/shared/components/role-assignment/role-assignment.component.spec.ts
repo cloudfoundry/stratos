@@ -757,7 +757,7 @@ describe('RoleAssignmentComponent', () => {
         },
         {
           provide: (await import('../../../../../core/src/core/permissions/current-user-permissions.service')).CurrentUserPermissionsService,
-          useValue: { can: () => of(true) },
+          useValue: { can$: () => of(true) },
         },
       ],
     }).compileComponents();

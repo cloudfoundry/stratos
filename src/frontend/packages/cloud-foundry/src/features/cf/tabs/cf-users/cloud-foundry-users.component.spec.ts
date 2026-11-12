@@ -238,7 +238,7 @@ async function makeSubNavFixture(canReturn: boolean, filteredItems?: StUser[]): 
       TabNavService,
       { provide: CfUsersSignalConfigService, useValue: stubSignalConfig },
       { provide: CloudFoundryEndpointService, useValue: { cfGuid: 'cnsi-1' } },
-      { provide: CurrentUserPermissionsService, useValue: { can: () => of(canReturn) } },
+      { provide: CurrentUserPermissionsService, useValue: { can$: () => of(canReturn) } },
       { provide: UserInviteService, useValue: { configured: signal(false) } },
     ],
   }).compileComponents();

@@ -305,10 +305,10 @@ export class PageHeaderComponent implements OnDestroy, AfterViewInit {
     this.allowGravatar$ = toObservable(this.dashboardSignals.gravatarEnabled);
 
     // Must be enabled and the user must have permission
-    const apiKeysPermission = toSignal(this.cups.can(StratosCurrentUserPermissions.API_KEYS), { initialValue: false });
+    const apiKeysPermission = toSignal(this.cups.can$(StratosCurrentUserPermissions.API_KEYS), { initialValue: false });
     this.canAPIKeys = computed(() => !this.endpointsService.disablePersistenceFeatures() && apiKeysPermission());
 
-    this.canLogout$ = this.currentUserPermissionsService.can(StratosCurrentUserPermissions.CAN_NOT_LOGOUT).pipe(
+    this.canLogout$ = this.currentUserPermissionsService.can$(StratosCurrentUserPermissions.CAN_NOT_LOGOUT).pipe(
       map(noLogout => !noLogout)
     );
   }

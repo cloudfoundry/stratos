@@ -79,7 +79,7 @@ export class EndpointsPageComponent implements OnDestroy, OnInit {
         const perms = enabled
           ? [StratosCurrentUserPermissions.EDIT_ADMIN_ENDPOINT, StratosCurrentUserPermissions.EDIT_ENDPOINT]
           : [StratosCurrentUserPermissions.EDIT_ADMIN_ENDPOINT];
-        return combineLatest(perms.map(p => this.currentUserPermissionsService.can(p)));
+        return combineLatest(perms.map(p => this.currentUserPermissionsService.can$(p)));
       }),
       map(results => results.some(Boolean)),
       catchError(err => {
@@ -153,7 +153,7 @@ export class EndpointsPageComponent implements OnDestroy, OnInit {
       filter(sessionData => !!sessionData),
       take(1),
       map(sessionData => sessionData?.plugins?.backup || false),
-      switchMap(enabled => enabled ? this.currentUserPermissionsService.can(StratosCurrentUserPermissions.EDIT_ADMIN_ENDPOINT) : of(false))
+      switchMap(enabled => enabled ? this.currentUserPermissionsService.can$(StratosCurrentUserPermissions.EDIT_ADMIN_ENDPOINT) : of(false))
     );
 
     // Create an observable to track when endpoints are loaded and ready

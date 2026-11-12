@@ -79,7 +79,7 @@ export class SpaceQuotaDefinitionComponent extends QuotaDefinitionBaseComponent 
 
     const { cfGuid, orgGuid, spaceGuid } = activeRouteCfOrgSpace;
     this.canEditQuota = toSignal(
-      currentUserPermissionsService.can(CfCurrentUserPermissions.SPACE_QUOTA_EDIT, cfGuid, orgGuid),
+      currentUserPermissionsService.can$(CfCurrentUserPermissions.SPACE_QUOTA_EDIT, cfGuid, orgGuid),
       { initialValue: false },
     );
     this.isOrg = !spaceGuid;

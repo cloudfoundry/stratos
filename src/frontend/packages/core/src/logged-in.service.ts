@@ -65,7 +65,7 @@ export class LoggedInService {
       return fromEvent(this.document, eventName);
     });
 
-    const canNotLogout$ = this.currentUserPermissionsService.can(StratosCurrentUserPermissions.CAN_NOT_LOGOUT);
+    const canNotLogout$ = this.currentUserPermissionsService.can$(StratosCurrentUserPermissions.CAN_NOT_LOGOUT);
     this.sub = combineLatest([this.auth$, canNotLogout$]).subscribe(([auth, canNotLogout]) => {
       if (!auth) {
         return;

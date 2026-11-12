@@ -80,7 +80,7 @@ export class CloudFoundryOrganizationSpacesSignalComponent {
     // Creating a space is the org manager's; every other role sees the list
     // without the action, as the sibling create actions already do.
     const canCreateSpace = toSignal(
-      inject(CurrentUserPermissionsService).can(CfCurrentUserPermissions.SPACE_CREATE, cfGuid, orgGuid),
+      inject(CurrentUserPermissionsService).can$(CfCurrentUserPermissions.SPACE_CREATE, cfGuid, orgGuid),
       { initialValue: false },
     );
     this.createSpaceAction = {

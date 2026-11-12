@@ -204,7 +204,7 @@ describe('BuildTabComponent', () => {
       app = signal({ entity: { instances: 1 } });
       // The deploy source shows once the space allows env var reads.
       await configure({ stratosProject, app, space: signal({ guid: 'space-1' }) });
-      vi.spyOn(TestBed.inject(CurrentUserPermissionsService), 'can').mockReturnValue(of(true));
+      vi.spyOn(TestBed.inject(CurrentUserPermissionsService), 'can$').mockReturnValue(of(true));
       fixture = TestBed.createComponent(BuildTabComponent);
       component = fixture.componentInstance;
       await fixture.whenStable();

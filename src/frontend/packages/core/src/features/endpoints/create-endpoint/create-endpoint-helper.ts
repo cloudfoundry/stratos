@@ -68,7 +68,7 @@ export class CreateEndpointHelperComponent {
       }))
     );
 
-    const isAdmin = this.currentUserPermissionsService.can(StratosCurrentUserPermissions.EDIT_ADMIN_ENDPOINT);
+    const isAdmin = this.currentUserPermissionsService.can$(StratosCurrentUserPermissions.EDIT_ADMIN_ENDPOINT);
     const userEndpointsNotDisabled = this.sessionService.userEndpointsNotDisabled();
 
     this.userEndpointsAndIsAdmin = combineLatest([

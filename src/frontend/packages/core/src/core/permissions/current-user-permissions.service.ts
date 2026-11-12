@@ -78,6 +78,18 @@ export class CurrentUserPermissionsService {
       of(false);
   }
 
+  /**
+   * NOTE: temporary name for callers that use the Observable form while
+   * can() moves to a signal.
+   */
+  public can$(
+    action: CurrentUserPermissions | PermissionConfigType,
+    endpointGuid?: string,
+    ...args: any[]
+  ): Observable<boolean> {
+    return this.can(action, endpointGuid, ...args);
+  }
+
   private getCanObservable(
     actionConfig: PermissionConfig[] | PermissionConfig | undefined,
     endpointGuid?: string,

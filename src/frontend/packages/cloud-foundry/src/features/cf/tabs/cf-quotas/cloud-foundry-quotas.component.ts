@@ -70,15 +70,15 @@ export class CloudFoundryQuotasComponent {
     const cfGuid = this.cfEndpointService.cfGuid;
 
     this.canAddQuota = toSignal(
-      currentUserPermissionsService.can(CfCurrentUserPermissions.QUOTA_CREATE, cfGuid),
+      currentUserPermissionsService.can$(CfCurrentUserPermissions.QUOTA_CREATE, cfGuid),
       { initialValue: false },
     );
     this.canEditQuota = toSignal(
-      currentUserPermissionsService.can(CfCurrentUserPermissions.QUOTA_EDIT, cfGuid),
+      currentUserPermissionsService.can$(CfCurrentUserPermissions.QUOTA_EDIT, cfGuid),
       { initialValue: false },
     );
     this.canDeleteQuota = toSignal(
-      currentUserPermissionsService.can(CfCurrentUserPermissions.QUOTA_DELETE, cfGuid),
+      currentUserPermissionsService.can$(CfCurrentUserPermissions.QUOTA_DELETE, cfGuid),
       { initialValue: false },
     );
 

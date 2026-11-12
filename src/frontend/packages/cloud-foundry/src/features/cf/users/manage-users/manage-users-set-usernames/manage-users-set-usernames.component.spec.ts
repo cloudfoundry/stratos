@@ -21,7 +21,7 @@ describe('ManageUsersSetUsernamesComponent', () => {
     // Mock CurrentUserPermissionsService to return observables that emit immediately
     // This avoids having to wait for actual permission checks
     const mockPermissionsService = {
-      can: vi.fn().mockReturnValue(of(true))
+      can$: vi.fn().mockReturnValue(of(true))
     };
 
     await TestBed.configureTestingModule({

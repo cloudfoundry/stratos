@@ -180,7 +180,7 @@ export class ApplicationDeploySourceTypes {
         shareReplay({ bufferSize: 1, refCount: true }),
       );
 
-      const canDeployWithDocker$ = this.perms.can(
+      const canDeployWithDocker$ = this.perms.can$(
         new PermissionConfig(CfPermissionTypes.FEATURE_FLAG, CFFeatureFlagTypes.diego_docker), cfId
       ).pipe(
         shareReplay({ bufferSize: 1, refCount: true }),

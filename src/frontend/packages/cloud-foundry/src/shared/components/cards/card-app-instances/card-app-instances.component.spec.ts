@@ -64,7 +64,7 @@ function makeAppsStub() {
 
 function makeCupsStub(canResult = true) {
   return {
-    can: vi.fn().mockReturnValue(of(canResult)),
+    can$: vi.fn().mockReturnValue(of(canResult)),
   };
 }
 

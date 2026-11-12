@@ -78,7 +78,7 @@ export class CloudFoundryOrganizationSpaceQuotasComponent {
 
     const { cfGuid, orgGuid } = this.activeRouteCfOrgSpace;
     this.canAddSpaceQuota = toSignal(
-      currentUserPermissionsService.can(
+      currentUserPermissionsService.can$(
         CfCurrentUserPermissions.SPACE_QUOTA_CREATE,
         cfGuid,
         orgGuid,
@@ -86,7 +86,7 @@ export class CloudFoundryOrganizationSpaceQuotasComponent {
       { initialValue: false },
     );
     this.canEditSpaceQuota = toSignal(
-      currentUserPermissionsService.can(
+      currentUserPermissionsService.can$(
         CfCurrentUserPermissions.SPACE_QUOTA_EDIT,
         cfGuid,
         orgGuid,
@@ -94,7 +94,7 @@ export class CloudFoundryOrganizationSpaceQuotasComponent {
       { initialValue: false },
     );
     this.canDeleteSpaceQuota = toSignal(
-      currentUserPermissionsService.can(
+      currentUserPermissionsService.can$(
         CfCurrentUserPermissions.SPACE_QUOTA_DELETE,
         cfGuid,
         orgGuid,

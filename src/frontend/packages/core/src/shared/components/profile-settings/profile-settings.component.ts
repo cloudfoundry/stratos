@@ -75,7 +75,7 @@ export class ProfileSettingsComponent {
 
   private readonly userProfileService = inject(UserProfileService);
   private readonly hasEditPermission = toSignal(
-    this.currentUserPermissionsService.can(StratosCurrentUserPermissions.EDIT_PROFILE), { initialValue: false }
+    this.currentUserPermissionsService.can$(StratosCurrentUserPermissions.EDIT_PROFILE), { initialValue: false }
   );
   public readonly canEdit = computed(() => !this.userProfileService.isError() && this.hasEditPermission());
 

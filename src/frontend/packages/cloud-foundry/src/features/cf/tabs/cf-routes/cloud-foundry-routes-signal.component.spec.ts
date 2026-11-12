@@ -106,7 +106,7 @@ describe('CloudFoundryRoutesSignalComponent', () => {
         TabNavService,
         { provide: CfRoutesSignalConfigService, useValue: stubRoutesConfig },
         { provide: CloudFoundryEndpointService, useValue: stubEndpointService },
-        { provide: CurrentUserPermissionsService, useValue: { can: () => of(true) } },
+        { provide: CurrentUserPermissionsService, useValue: { can$: () => of(true) } },
         { provide: TailwindSnackBarService, useValue: snackBar },
         // The confirm dialog normally opens a modal and waits for the user;
         // the harness fires the confirm callback immediately so the bulk

@@ -49,7 +49,7 @@ export class SideNavComponent implements OnInit {
   // Same guard the page header uses: the 'stratos.noauth' scope means there
   // is no session to end, so offering Sign Out is meaningless.
   public canLogout$: Observable<boolean> = this.permissionsService
-    .can(StratosCurrentUserPermissions.CAN_NOT_LOGOUT)
+    .can$(StratosCurrentUserPermissions.CAN_NOT_LOGOUT)
     .pipe(map(noLogout => !noLogout));
 
   // HIDE_NAV_LOGOUT removes this button only. The header user menu keeps its

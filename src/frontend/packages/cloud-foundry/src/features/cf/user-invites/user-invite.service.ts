@@ -173,7 +173,7 @@ export class UserInviteService {
     return !orgGuid ? observableOf(false) : waitForCFPermissions(this.cfRoles, cfGuid).pipe(
       switchMap(() => combineLatest([
         this.configuredChanges,
-        this.currentUserPermissionsService.can(
+        this.currentUserPermissionsService.can$(
           CfCurrentUserPermissions.ORGANIZATION_CHANGE_ROLES,
           cfGuid,
           orgGuid,

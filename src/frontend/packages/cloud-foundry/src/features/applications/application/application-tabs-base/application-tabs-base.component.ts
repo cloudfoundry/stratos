@@ -107,7 +107,7 @@ export class ApplicationTabsBaseComponent implements OnInit, OnDestroy {
     // bridged for it; null until it answers.
     const appDoesNotHaveEnvVars = toSignal(toObservable(this.detail.space).pipe(
       filter((space): space is StSpace => !!space),
-      switchMap(space => this.currentUserPermissionsService.can(CfCurrentUserPermissions.APPLICATION_VIEW_ENV_VARS,
+      switchMap(space => this.currentUserPermissionsService.can$(CfCurrentUserPermissions.APPLICATION_VIEW_ENV_VARS,
         this.applicationService.cfGuid, space.guid)
       ),
       map(can => !can),

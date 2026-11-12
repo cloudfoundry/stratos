@@ -40,7 +40,7 @@ export class ProfileInfoComponent {
 
   private userProfileService = inject(UserProfileService);
   private readonly hasEditPermission = toSignal(
-    this.currentUserPermissionsService.can(StratosCurrentUserPermissions.EDIT_PROFILE), { initialValue: false }
+    this.currentUserPermissionsService.can$(StratosCurrentUserPermissions.EDIT_PROFILE), { initialValue: false }
   );
 
   readonly isError = this.userProfileService.isError;
