@@ -155,3 +155,10 @@ $app-header-height: 56px;
   outline: 2px solid var(--color-primary);
   outline-offset: 2px;
 }
+
+// main takes a tab stop only on a page that scrolls with nothing focusable
+// in it; then it shows the focus outline, drawn inside since main clips.
+#main-content[tabindex="0"]:focus-visible {
+  outline: 2px solid var(--color-primary);
+  outline-offset: -2px;
+}

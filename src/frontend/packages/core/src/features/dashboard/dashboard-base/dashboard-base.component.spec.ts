@@ -117,4 +117,45 @@ describe('DashboardBaseComponent', () => {
       expect(document.activeElement).toBe(root().querySelector('main#main-content'));
     });
   });
+
+  // WCAG 2.1.1 Keyboard: a page that scrolls but holds nothing focusable
+  // (build packs, feature flags, quotas) gives the keyboard no way to
+  // scroll it, so main joins the tab order for as long as that is true.
+  describe('scroll area', () => {
+    const main = (): HTMLElement => fixture.nativeElement.querySelector('main#main-content');
+    const scrolls = (el: HTMLElement, yes: boolean) => {
+      Object.defineProperty(el, 'clientHeight', { configurable: true, value: 100 });
+      Object.defineProperty(el, 'scrollHeight', { configurable: true, value: yes ? 500 : 100 });
+    };
+    const update = async () => {
+      component.onContentScroll({ target: main() } as unknown as Event);
+      await fixture.whenStable();
+    };
+
+    beforeEach(async () => {
+      fixture.detectChanges();
+      await fixture.whenStable();
+    });
+
+    it('takes a tab stop while it scrolls and holds nothing focusable', async () => {
+      scrolls(main(), true);
+      await update();
+      expect(main().getAttribute('tabindex')).toBe('0');
+    });
+
+    it('stays out of the tab order while it holds something focusable', async () => {
+      scrolls(main(), true);
+      main().firstElementChild!.appendChild(document.createElement('button'));
+      await update();
+      expect(main().getAttribute('tabindex')).toBe('-1');
+    });
+
+    it('leaves the tab order again when it stops scrolling', async () => {
+      scrolls(main(), true);
+      await update();
+      scrolls(main(), false);
+      await update();
+      expect(main().getAttribute('tabindex')).toBe('-1');
+    });
+  });
 });

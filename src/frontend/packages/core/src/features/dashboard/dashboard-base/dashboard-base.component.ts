@@ -26,6 +26,12 @@ import { SideNavComponent, SideNavItem } from './../side-nav/side-nav.component'
 import { RoutingIndicatorComponent } from '../../../shared/components/routing-indicator/routing-indicator.component';
 import { ShowPageHeaderComponent } from '../../../shared/components/page-header/show-page-header/show-page-header.component';
 
+// simplification: hidden or inert controls count as focusable, which keeps
+// main out of the tab order (as before); filter by visibility if a page
+// with only hidden controls turns up.
+const FOCUSABLE = 'a[href], button:not([disabled]), input:not([disabled]), select:not([disabled]), ' +
+  'textarea:not([disabled]), [tabindex]:not([tabindex="-1"]), [contenteditable]:not([contenteditable="false"])';
+
 @Component({
   selector: 'app-dashboard-base',
   templateUrl: './dashboard-base.component.html',
@@ -81,6 +87,7 @@ export class DashboardBaseComponent implements OnInit, OnDestroy, AfterViewInit 
   public readonly content = viewChild<ElementRef<HTMLElement>>('content');
 
   showScrollShadow = signal(false);
+  mainTabStop = signal(false);
 
   // Slide-in side panel mode
   sidePanelMode: SidePanelMode = SidePanelMode.Modal;
@@ -198,6 +205,15 @@ export class DashboardBaseComponent implements OnInit, OnDestroy, AfterViewInit 
     const hasMore = el.scrollHeight > el.clientHeight && el.scrollTop + el.clientHeight < el.scrollHeight - 4;
     if (this.showScrollShadow() !== hasMore) {
       this.showScrollShadow.set(hasMore);
+      this.cd.markForCheck();
+    }
+    // WCAG 2.1.1: a page that scrolls with nothing focusable in it can only
+    // be scrolled from the keyboard if main itself takes a tab stop. A page
+    // with controls keeps main out of the tab order: arrow keys scroll it
+    // once focus is inside.
+    const tabStop = el.scrollHeight > el.clientHeight && !el.querySelector(FOCUSABLE);
+    if (this.mainTabStop() !== tabStop) {
+      this.mainTabStop.set(tabStop);
       this.cd.markForCheck();
     }
   }
