@@ -165,46 +165,42 @@ export class KubernetesEndpointService {
     this.constructCoreObservables();
   }
 
-  getCaaspNodesData(nodes$: Observable<KubernetesNode[]>): Observable<CaaspNodesData | null> {
-    return nodes$.pipe(
-      map(nodes => {
-        const info: CaaspNodesData = {
-          version: 'Unknown',
-          versionMismatch: false,
-          updates: 0,
-          disruptiveUpdates: 0,
-          securityUpdates: 0
-        };
-        const versions: Record<string, number> = {};
+  getCaaspNodesData(nodes: KubernetesNode[]): CaaspNodesData | null {
+    const info: CaaspNodesData = {
+      version: 'Unknown',
+      versionMismatch: false,
+      updates: 0,
+      disruptiveUpdates: 0,
+      securityUpdates: 0
+    };
+    const versions: Record<string, number> = {};
 
-        nodes.forEach(n => {
-          const nodeData = this.getCaaspNodeData(n);
-          if (!nodeData) {
-            return;
-          }
+    nodes.forEach(n => {
+      const nodeData = this.getCaaspNodeData(n);
+      if (!nodeData) {
+        return;
+      }
 
-          // Only has a version if it is a CaaSP node
-          if (nodeData.version) {
-            if (!versions[nodeData.version]) {
-              versions[nodeData.version] = 0;
-            }
-            versions[nodeData.version]++;
-          }
-
-          info.updates += nodeData.updates ? 1 : 0;
-          info.disruptiveUpdates += nodeData.disruptiveUpdates ? 1 : 0;
-          info.securityUpdates += nodeData.securityUpdates ? 1 : 0;
-        });
-
-        if (Object.keys(versions).length === 0) {
-          return null;
+      // Only has a version if it is a CaaSP node
+      if (nodeData.version) {
+        if (!versions[nodeData.version]) {
+          versions[nodeData.version] = 0;
         }
+        versions[nodeData.version]++;
+      }
 
-        info.version = Object.keys(versions).join(', ');
-        info.versionMismatch = Object.keys(versions).length !== 1;
-        return info;
-      })
-    );
+      info.updates += nodeData.updates ? 1 : 0;
+      info.disruptiveUpdates += nodeData.disruptiveUpdates ? 1 : 0;
+      info.securityUpdates += nodeData.securityUpdates ? 1 : 0;
+    });
+
+    if (Object.keys(versions).length === 0) {
+      return null;
+    }
+
+    info.version = Object.keys(versions).join(', ');
+    info.versionMismatch = Object.keys(versions).length !== 1;
+    return info;
   }
 
   getCaaspNodeData(n: KubernetesNode): CaaspNodeData | undefined {
@@ -224,86 +220,58 @@ export class KubernetesEndpointService {
     return annotations[annotation] && annotations[annotation] === 'yes' ? true : false;
   }
 
-  getNodeKubeVersions(nodes$: Observable<KubernetesNode[]>): Observable<string> {
-    return nodes$.pipe(
-      map(nodes => {
-        const versions: Record<string, string> = {};
-        nodes.forEach(node => {
-          const v = node.status.nodeInfo?.kubeletVersion;
-          if (v && !versions[v]) {
-            versions[v] = v;
-          }
-        });
-        return Object.keys(versions).join(',');
-      })
-    );
-  }
-
-  getCountObservable(entities$: Observable<any[]>): Observable<number | null> {
-    return entities$.pipe(
-      map(entities => entities.length),
-      startWith(null)
-    );
-  }
-
-  getPodCapacity(nodes$: Observable<KubernetesNode[]>, pods$: Observable<KubernetesPod[]>) {
-    // Convert to signals within injection context
-    return runInInjectionContext(this.injector, () => {
-      const nodesSignal = toSignal(nodes$, { initialValue: [] as KubernetesNode[] });
-      const podsSignal = toSignal(pods$, { initialValue: [] as KubernetesPod[] });
-
-      // Compute capacity
-      const capacityComputed = computed(() => {
-        const nodes = nodesSignal();
-        const pods = podsSignal();
-        return {
-          total: nodes.reduce((cap, node) => {
-            const pods = node.status.capacity?.pods;
-            return cap + (pods ? parseInt(pods, 10) : 0);
-          }, 0),
-          used: pods.length
-        };
-      });
-
-      return toObservable(capacityComputed);
+  getNodeKubeVersions(nodes: KubernetesNode[]): string {
+    const versions: Record<string, string> = {};
+    nodes.forEach(node => {
+      const v = node.status.nodeInfo?.kubeletVersion;
+      if (v && !versions[v]) {
+        versions[v] = v;
+      }
     });
+    return Object.keys(versions).join(',');
+  }
+
+  getPodCapacity(nodes: KubernetesNode[], pods: KubernetesPod[]) {
+    return {
+      total: nodes.reduce((cap, node) => {
+        const podCapacity = node.status.capacity?.pods;
+        return cap + (podCapacity ? parseInt(podCapacity, 10) : 0);
+      }, 0),
+      used: pods.length
+    };
   }
 
   getNodeStatusCount(
-    nodes$: Observable<KubernetesNode[]>,
+    nodes: KubernetesNode[],
     conditionType: string,
     valueLabels: Record<string, any> = {},
     countStatus = 'True'
-  ): Observable<any> {
-    return nodes$.pipe(
-      map(nodes => {
-        const total = nodes.length;
-        const { unknown, unavailable, used } = nodes.reduce((cap, node) => {
-          const conditionStatus = node.status.conditions.find(con => con.type === conditionType);
-          if (!conditionStatus || !conditionStatus.status) {
-            ++cap.unavailable;
-          } else {
-            if (conditionStatus.status === countStatus) {
-              ++cap.used;
-            } else if (conditionStatus.status === 'Unknown') {
-              ++cap.unknown;
-            }
-          }
-          return cap;
-        }, { unavailable: 0, used: 0, unknown: 0 });
-        const result = {
-          total,
-          supported: total !== unavailable,
-          // Depends on K8S version as to what is supported
-          unavailable,
-          used,
-          unknown,
-          ...valueLabels
-        };
-        result.supported = result.total !== result.unavailable;
-        return result;
-      })
-    );
+  ): any {
+    const total = nodes.length;
+    const { unknown, unavailable, used } = nodes.reduce((cap, node) => {
+      const conditionStatus = node.status.conditions.find(con => con.type === conditionType);
+      if (!conditionStatus || !conditionStatus.status) {
+        ++cap.unavailable;
+      } else {
+        if (conditionStatus.status === countStatus) {
+          ++cap.used;
+        } else if (conditionStatus.status === 'Unknown') {
+          ++cap.unknown;
+        }
+      }
+      return cap;
+    }, { unavailable: 0, used: 0, unknown: 0 });
+    const result = {
+      total,
+      supported: total !== unavailable,
+      // Depends on K8S version as to what is supported
+      unavailable,
+      used,
+      unknown,
+      ...valueLabels
+    };
+    result.supported = result.total !== result.unavailable;
+    return result;
   }
 
   private constructCoreObservables() {
