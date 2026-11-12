@@ -1,0 +1,23 @@
+[Maintainability]
+- The services behind the Cloud Foundry, organization, space,
+  Kubernetes, endpoint list, shell (profile, notifications, tabs,
+  history, recent activity, favorites) and wizard pages expose their
+  state as signals, and the pages read the signals directly. The
+  Observable copies of that state are gone. Requests (counts, quotas,
+  dashboard status) stay streams that each page subscribes to.
+
+[BugFixes: Cloud Foundry]
+- "View organization's quota" on the space summary card navigates once
+  per click; it used to navigate again whenever the quota reloaded.
+- The space page and CLI Info breadcrumbs follow an organization or
+  space rename instead of keeping the first name.
+
+[BugFixes: Kubernetes]
+- The node tags card no longer fails on a node without that metadata.
+- The cluster summary shows "-" for the node version when no node
+  reports one, instead of a blank.
+
+[BugFixes: Core]
+- A failed favorites load no longer raises an error on every page that
+  reads favorites; they show as empty and the failure is logged once.
+- The favorite star shows its state from the first frame.
