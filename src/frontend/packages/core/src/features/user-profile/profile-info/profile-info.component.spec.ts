@@ -93,4 +93,14 @@ describe('ProfileInfoComponent', () => {
     expect(mockUserProfileService.loadUserProfile).toHaveBeenCalled();
     expect(fixture.nativeElement.textContent).toContain('test@test.com');
   });
+
+  // Edit shows to a user with 'scim.write' once the profile loaded.
+  it('offers Edit only with the profile permission', () => {
+    const canEdit = signal(false);
+    vi.spyOn(TestBed.inject(CurrentUserPermissionsService), 'can').mockReturnValue(canEdit);
+    const page = TestBed.createComponent(ProfileInfoComponent).componentInstance;
+    expect(page.canEdit()).toBe(false);
+    canEdit.set(true);
+    expect(page.canEdit()).toBe(true);
+  });
 });

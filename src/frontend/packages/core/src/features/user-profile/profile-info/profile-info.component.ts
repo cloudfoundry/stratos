@@ -1,5 +1,5 @@
 import { ChangeDetectionStrategy, Component, computed, inject } from '@angular/core';
-import { toObservable, toSignal } from '@angular/core/rxjs-interop';
+import { toObservable } from '@angular/core/rxjs-interop';
 import { CommonModule } from '@angular/common';
 import { RouterModule } from '@angular/router';
 import { Observable } from 'rxjs';
@@ -39,9 +39,7 @@ export class ProfileInfoComponent {
 
 
   private userProfileService = inject(UserProfileService);
-  private readonly hasEditPermission = toSignal(
-    this.currentUserPermissionsService.can$(StratosCurrentUserPermissions.EDIT_PROFILE), { initialValue: false }
-  );
+  private readonly hasEditPermission = this.currentUserPermissionsService.can(StratosCurrentUserPermissions.EDIT_PROFILE);
 
   readonly isError = this.userProfileService.isError;
   readonly userProfile = this.userProfileService.userProfile;
