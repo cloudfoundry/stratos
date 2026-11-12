@@ -1,8 +1,7 @@
 import { HttpClient, HttpParams } from '@angular/common/http';
-import { Injectable, signal, computed, Injector, inject } from '@angular/core';
+import { Injectable, signal, computed, inject } from '@angular/core';
 import { BrowserStandardEncoder } from '@stratosui/store';
 import { Observable } from 'rxjs';
-import { toObservable } from '@angular/core/rxjs-interop';
 
 import { AuthSignalService } from '../../../core/signals/auth-signal.service';
 
@@ -23,7 +22,6 @@ interface RestoreEndpointsData {
 export class RestoreEndpointsService {
   private authSignals = inject(AuthSignalService);
   private http = inject(HttpClient);
-  private injector = inject(Injector);
 
 
   // Step 1
@@ -58,23 +56,8 @@ export class RestoreEndpointsService {
     return !!fileValue && (ignoreDb || validDbValue);
   });
 
-  // Observable versions for template compatibility (deprecated, use signals directly)
-  public validFileContent$: Observable<boolean>;
-  public file$: Observable<{ name: string | null; content: BackupContent | null } | null>;
-  public validDb$: Observable<boolean>;
-  public ignoreDbVersion$: Observable<boolean>;
-  public currentDbVersion$: Observable<number>;
-
   // Step 2
   private password!: string;
-
-  constructor() {
-    this.validFileContent$ = toObservable(this.validFileContent, { injector: this.injector });
-    this.file$ = toObservable(this.file, { injector: this.injector });
-    this.validDb$ = toObservable(this.validDb, { injector: this.injector });
-    this.ignoreDbVersion$ = toObservable(this.ignoreDbVersion, { injector: this.injector });
-    this.currentDbVersion$ = toObservable(this.currentDbVersion, { injector: this.injector });
-  }
 
   setFile(file: any): Promise<string> {
     return new Promise((resolve, _reject) => {
