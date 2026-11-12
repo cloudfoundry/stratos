@@ -4,7 +4,6 @@ import { describe, it, expect, beforeEach, afterEach, beforeAll, afterAll, vi } 
 import { NoopAnimationsModule } from '@angular/platform-browser/animations';
 import { AuthState } from '@stratosui/store';
 import { createBasicStoreModule, STORE_TEST_PROVIDERS } from '@stratosui/store/testing';
-import { of } from 'rxjs';
 
 import { CoreTestingModule } from '@test-framework/core-test.modules';
 import { CoreModule } from './core/core.module';
@@ -40,16 +39,18 @@ describe('LoggedInService', () => {
 describe('LoggedInService activity tracking', () => {
   const validAuth = { loggedIn: true, sessionData: { valid: true }, error: false } as unknown as AuthState;
   const auth = signal<AuthState | undefined>(undefined);
+  const canNotLogout = signal(false);
   let service: LoggedInService;
 
   beforeEach(() => {
     auth.set(undefined);
+    canNotLogout.set(false);
     TestBed.configureTestingModule({
       providers: [
         provideZonelessChangeDetection(),
         { provide: AuthSignalService, useValue: { auth } },
         { provide: DashboardSignalService, useValue: { dashboard: signal({}) } },
-        { provide: CurrentUserPermissionsService, useValue: { can$: () => of(false) } },
+        { provide: CurrentUserPermissionsService, useValue: { can: () => canNotLogout } },
       ],
     });
     service = TestBed.inject(LoggedInService);
@@ -72,6 +73,23 @@ describe('LoggedInService activity tracking', () => {
     (service as any).lastUserInteraction = 0;
     document.dispatchEvent(new KeyboardEvent('keydown'));
 
+    expect((service as any).lastUserInteraction).toBeGreaterThan(0);
+  });
+
+  // A user who cannot log out (no session to end) is never timed out; the
+  // tracking follows that permission.
+  it('tracks activity only while the user can log out', () => {
+    canNotLogout.set(true);
+    service.init();
+    auth.set(validAuth);
+    TestBed.tick();
+    (service as any).lastUserInteraction = 0;
+    document.dispatchEvent(new KeyboardEvent('keydown'));
+    expect((service as any).lastUserInteraction).toBe(0);
+
+    canNotLogout.set(false);
+    TestBed.tick();
+    document.dispatchEvent(new KeyboardEvent('keydown'));
     expect((service as any).lastUserInteraction).toBeGreaterThan(0);
   });
 });
