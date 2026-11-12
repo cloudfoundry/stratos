@@ -1,11 +1,11 @@
-import { Injectable, computed, signal, Injector, inject } from '@angular/core';
+import { Injectable, Signal, computed, effect, signal, inject, untracked } from '@angular/core';
 import {
   StratosStatus, GeneralEntityAppState,
   EndpointsDataService, EndpointErrorEventsService,
 } from '@stratosui/store';
-import { toObservable } from '@angular/core/rxjs-interop';
-import { combineLatest, Observable, ReplaySubject } from 'rxjs';
-import { debounceTime, distinctUntilChanged, map, shareReplay, startWith } from 'rxjs/operators';
+import { toObservable, toSignal } from '@angular/core/rxjs-interop';
+import { Observable, ReplaySubject } from 'rxjs';
+import { debounceTime, map, startWith } from 'rxjs/operators';
 
 export type GlobalEventTypes = 'warning' | 'error' | 'process' | 'complete';
 
@@ -116,9 +116,6 @@ export class GlobalEventService {
   // driven and endpoint-error channels.
   private _staticEvents = signal<ReadonlyMap<string, IGlobalEvent>>(new Map());
 
-  public events$: Observable<IGlobalEvent[]>;
-  public priorityType$: Observable<GlobalEventTypes | null>;
-  public priorityStratosStatus$: Observable<StratosStatus | undefined>;
 
   public addEventConfig<SelectedState, EventState = SelectedState>(event: IGlobalEventConfig<SelectedState, EventState>) {
     this.eventConfigs.push(event);
@@ -312,59 +309,51 @@ export class GlobalEventService {
           return eventsAndPriority;
         }, [[], null] as [IGlobalEvent[], GlobalEventTypes | null]);
       }),
-      // refCount: false keeps the latest events across the moments when no
-      // page is subscribed: this is a root service, and every navigation
-      // drops its subscribers to zero. With refCount: true the next page
-      // would wait for the 100 ms debounce before it saw any event.
-      shareReplay({ bufferSize: 1, refCount: false }),
     );
   }
 
-  private injector = inject(Injector);
   private endpointErrorEvents = inject(EndpointErrorEventsService);
   private endpointsData = inject(EndpointsDataService);
 
-  constructor() {
-    const endpointErrorEvents$ = toObservable(this._endpointErrorEvents, { injector: this.injector });
-    const staticEvents$ = toObservable(this._staticEvents, { injector: this.injector });
-    const eventsAndPriority$ = combineLatest([
-      this.getEventsAndPriorityType(),
-      toObservable(this._readEvents, { injector: this.injector }),
-      endpointErrorEvents$,
-      staticEvents$,
-    ]).pipe(
-      map(([[ngrxEvents, types], readEvents, endpointErrors, staticEvents]) => {
-        // Merge ngrx-derived events with the signal-native endpoint-error
-        // events. Apply read state to all so the page-header banner's
-        // dismiss control works the same regardless of source.
-        const events = [...ngrxEvents, ...endpointErrors, ...Array.from(staticEvents.values())];
-        events.forEach(event => {
-          event.read = !!readEvents.get(event.key);
-        });
-        // Remove stale read markers
-        readEvents.forEach((a, key) => {
-          const oEvent = events.find(event => event.key === key);
-          if (!oEvent) {
-            this._readEvents.update(events => {
-              const newEvents = new Map(events);
-              newEvents.delete(key);
-              return newEvents;
-            });
-          }
-        });
-        return [events, types] as [IGlobalEvent[], GlobalEventTypes | null];
-      })
-    );
+  // The config channel's events and their highest priority type. A root
+  // service, so this one subscription lasts as long as the app.
+  private readonly configEventsAndPriority = toSignal(this.getEventsAndPriorityType(), {
+    initialValue: [[], null] as [IGlobalEvent[], GlobalEventTypes | null],
+  });
 
-    this.events$ = eventsAndPriority$.pipe(
-      map(eventsAndPriority => eventsAndPriority[0])
-    );
-    this.priorityType$ = eventsAndPriority$.pipe(
-      map(eventsAndPriority => eventsAndPriority[1]),
-      distinctUntilChanged()
-    );
-    this.priorityStratosStatus$ = this.priorityType$.pipe(
-      map(priorityEventType => this.eventTypeToStratosStatus(priorityEventType))
-    );
+  private readonly allEvents = computed(() => [
+    ...this.configEventsAndPriority()[0],
+    ...this._endpointErrorEvents(),
+    ...this._staticEvents().values(),
+  ]);
+
+  /** Every event, each marked with its read state. */
+  public readonly events: Signal<IGlobalEvent[]> = computed(() => {
+    const readEvents = this._readEvents();
+    return this.allEvents().map(event => ({ ...event, read: !!readEvents.get(event.key) }));
+  });
+
+  /** The status of the highest priority config-channel event, if any. */
+  public readonly priorityStratosStatus: Signal<StratosStatus | undefined> = computed(() =>
+    this.eventTypeToStratosStatus(this.configEventsAndPriority()[1])
+  );
+
+  public readonly events$: Observable<IGlobalEvent[]> = toObservable(this.events);
+  public readonly priorityStratosStatus$: Observable<StratosStatus | undefined> = toObservable(this.priorityStratosStatus);
+
+  constructor() {
+    // Drop the read marker of an event that has gone, so it shows unread if
+    // it comes back.
+    effect(() => {
+      const keys = new Set(this.allEvents().map(event => event.key));
+      const stale = [...untracked(this._readEvents).keys()].filter(key => !keys.has(key));
+      if (stale.length) {
+        this._readEvents.update(events => {
+          const newEvents = new Map(events);
+          stale.forEach(key => newEvents.delete(key));
+          return newEvents;
+        });
+      }
+    });
   }
 }

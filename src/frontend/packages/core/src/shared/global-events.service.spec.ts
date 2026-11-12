@@ -1,6 +1,6 @@
 import { TestBed } from '@angular/core/testing';
 import { provideZonelessChangeDetection } from '@angular/core';
-import { describe, it, expect, beforeEach, afterEach, beforeAll, afterAll, vi } from 'vitest';
+import { describe, it, expect, beforeEach } from 'vitest';
 import { createBasicStoreModule, STORE_TEST_PROVIDERS, CoreTestingModule } from '@test-framework';
 import { CoreModule } from '../core/core.module';
 import { GlobalEventService } from './global-events.service';
@@ -26,30 +26,27 @@ describe('GlobalEventsService', () => {
     expect(service).toBeTruthy();
   });
 
-  describe('events$ across page changes', () => {
-    afterEach(() => {
-      vi.useRealTimers();
+  describe('events', () => {
+    const warning = { key: 'ignored', message: 'Polling is off', link: '', type: 'warning' as const };
+
+    it('lists a static event at once, marked unread', () => {
+      const service = TestBed.inject(GlobalEventService);
+      service.setStaticEvent('polling', warning);
+      expect(service.events()).toEqual([expect.objectContaining({ key: 'polling', read: false })]);
     });
 
-    // Pages subscribe to events$ (the page-header banner, the events page)
-    // and unsubscribe when the user navigates away, so the subscriber count
-    // regularly drops to zero. The next page must get the current events at
-    // once, not after the event stream's 100 ms debounce.
-    it('replays the latest events to a subscriber that arrives after all others left', () => {
-      vi.useFakeTimers();
+    it('marks an event read, and forgets the mark once the event has gone', () => {
       const service = TestBed.inject(GlobalEventService);
+      service.setStaticEvent('polling', warning);
+      service.updateEventReadState(service.events()[0], true);
+      expect(service.events()[0].read).toBe(true);
 
-      let emissions = 0;
-      const first = service.events$.subscribe(() => emissions++);
+      service.setStaticEvent('polling', null);
       TestBed.tick();
-      vi.advanceTimersByTime(100);
-      expect(emissions).toBeGreaterThan(0);
-      first.unsubscribe();
+      expect(service.readEvents().has('polling')).toBe(false);
 
-      emissions = 0;
-      const second = service.events$.subscribe(() => emissions++);
-      expect(emissions).toBe(1);
-      second.unsubscribe();
+      service.setStaticEvent('polling', warning);
+      expect(service.events()[0].read).toBe(false);
     });
   });
 });
