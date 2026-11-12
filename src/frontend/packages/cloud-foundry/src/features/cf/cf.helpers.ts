@@ -298,12 +298,6 @@ export function waitForCFPermissions(
   );
 }
 
-export function haveMultiConnectedCfs(cfRoles: CfCurrentUserRolesSignalService): Observable<boolean> {
-  return cfRoles.connectedCfEndpointGuids$().pipe(
-    map(guids => guids.length > 1)
-  );
-}
-
 export function filterEntitiesByGuid<T>(guid: string, array?: Array<APIResource<T>>): Array<APIResource<T>> | null {
   return array ? array.filter(entity => entity.metadata.guid === guid) : null;
 }

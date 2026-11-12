@@ -50,7 +50,7 @@
         <app-meta-card-value>{{ providerDisplayName() }}</app-meta-card-value>
       </app-meta-card-item>
     }
-    @if (cfOrgSpace().multipleConnectedEndpoints$ | async) {
+    @if (cfOrgSpace().multipleConnectedEndpoints()) {
       <app-meta-card-item>
         <app-meta-card-key>CF Endpoint</app-meta-card-key>
         <app-meta-card-value>

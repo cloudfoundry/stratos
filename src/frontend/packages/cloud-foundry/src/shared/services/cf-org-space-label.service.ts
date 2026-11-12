@@ -1,11 +1,11 @@
-import { combineLatest, Observable, of } from 'rxjs';
-import { take, filter, map } from 'rxjs/operators';
+import { computed, Signal } from '@angular/core';
+import { Observable, of } from 'rxjs';
+import { map } from 'rxjs/operators';
 
 import { APIResource, EndpointModel } from '@stratosui/store';
 import { EndpointsSignalService } from '@stratosui/core';
 import { IOrganization, ISpace } from '../../cf-api.types';
-import { haveMultiConnectedCfs } from '../../features/cf/cf.helpers';
-import { CfCurrentUserRolesSignalService } from '../../user-permissions/cf-current-user-roles-signal.service';
+import { CF_ENDPOINT_TYPE } from '../../cf-types';
 import { cfOsDebugLog } from '../data-services/cf-org-space-debug';
 
 /**
@@ -13,9 +13,8 @@ import { cfOsDebugLog } from '../data-services/cf-org-space-debug';
  *
  * The CF endpoint name is sourced from {@link EndpointsSignalService} rather
  * than the legacy ngrx `store.select(selectEntity(...))`. The public
- * observable interface (`getCfName`/`getOrgName`/`getSpaceName`/`getLabel`/
- * `getValue` + the `*URL` builders + `multipleConnectedEndpoints$`) is kept
- * byte-identical so the renderer `CfOrgSpaceLinksComponent` is untouched.
+ * name getters stay Observables; `multipleConnectedEndpoints` is a signal
+ * over the connected Cloud Foundry endpoints.
  *
  * Org/space resolution was only ever exercised by the now-dead app cells
  * (`card-app`, `TableCellAppCfOrgSpaceBase`, slated for workstream D); the
@@ -24,55 +23,33 @@ import { cfOsDebugLog } from '../data-services/cf-org-space-debug';
  */
 export class CfOrgSpaceLabelService {
 
-  public multipleConnectedEndpoints$: Observable<boolean>;
+  /** True while more than one Cloud Foundry endpoint is connected. */
+  public readonly multipleConnectedEndpoints: Signal<boolean>;
   private org$: Observable<APIResource<IOrganization> | null> = of(null);
   private space$: Observable<APIResource<ISpace> | null> = of(null);
 
   /**
    * @param endpoints Signal-native endpoints projection (CF name source)
-   * @param cfRoles Current-user CF roles (drives multipleConnectedEndpoints$)
-   * @param cfGuid Only important if using getValue
-   * @param orgGuid Only important if using getValue
-   * @param spaceGuid Only important if using getValue
+   * @param cfGuid Used by the URL builders and name getters
+   * @param orgGuid Used by the URL builders and name getters
+   * @param spaceGuid Used by the URL builders and name getters
    */
   constructor(
     private endpoints: EndpointsSignalService,
-    cfRoles: CfCurrentUserRolesSignalService,
     private cfGuid?: string,
     private orgGuid?: string,
     private spaceGuid?: string) {
     cfOsDebugLog('labelService:construct', { cfGuid, orgGuid, spaceGuid });
 
-    this.multipleConnectedEndpoints$ = haveMultiConnectedCfs(cfRoles);
+    this.multipleConnectedEndpoints = computed(() =>
+      Object.values(this.endpoints.endpoints()).filter(e =>
+        e.cnsi_type === CF_ENDPOINT_TYPE && e.connectionStatus === 'connected').length > 1);
   }
 
   // Read the endpoints signal on each access so the async-pipe binding picks
   // up the CF entity once the endpoints slice has hydrated.
   private get cf$(): Observable<EndpointModel | null> {
     return of(this.cfGuid ? this.endpoints.endpoints()[this.cfGuid] ?? null : null);
-  }
-
-  getLabel(): Observable<string> {
-    return this.multipleConnectedEndpoints$.pipe(
-      map(multipleConnectedEndpoints => multipleConnectedEndpoints ? 'CF/Org/Space' : 'Org/Space')
-    );
-  }
-
-  getValue(): Observable<string> {
-    return combineLatest([
-      this.cf$,
-      this.org$,
-      this.space$,
-      this.multipleConnectedEndpoints$
-    ]).pipe(
-      filter(([cf, org, space]) => !!cf && !!org && !!space),
-      take(1),
-      map(([cf, org, space, multipleConnectedEndpoints]) =>
-        multipleConnectedEndpoints
-          ? `${cf!.name}/${org!.entity.name}/${space!.entity.name}`
-          : `${org!.entity.name}/${space!.entity.name}`
-      )
-    );
   }
 
   getCfURL = () => ['/cloud-foundry', this.cfGuid, 'summary'];
