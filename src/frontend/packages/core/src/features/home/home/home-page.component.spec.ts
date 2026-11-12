@@ -27,8 +27,6 @@ import { HomePageComponent } from './home-page.component';
 
 function makeStubEndpointsService(disablePersistenceFeatures: boolean, endpoints: Record<string, EndpointModel> = {}): Partial<EndpointsService> {
   return {
-    // The URL banner still reads the Observable.
-    connectedEndpoints$: of(Object.values(endpoints).filter(ep => ep.connectionStatus === 'connected')),
     connectedEndpoints: signal(Object.values(endpoints).filter(ep => ep.connectionStatus === 'connected')),
     endpoints: signal(endpoints),
     disablePersistenceFeatures: signal(disablePersistenceFeatures),

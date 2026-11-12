@@ -1,6 +1,5 @@
-import { provideZonelessChangeDetection } from '@angular/core';
+import { WritableSignal, provideZonelessChangeDetection, signal } from '@angular/core';
 import { TestBed } from '@angular/core/testing';
-import { BehaviorSubject } from 'rxjs';
 import { describe, it, expect, beforeEach } from 'vitest';
 import type { EndpointModel } from '@stratosui/store';
 
@@ -12,14 +11,14 @@ function ep(host: string, type: string = 'cf'): EndpointModel {
 }
 
 describe('HomeUrlBannerComponent', () => {
-  let connected$: BehaviorSubject<EndpointModel[]>;
+  let connected: WritableSignal<EndpointModel[]>;
 
   beforeEach(() => {
-    connected$ = new BehaviorSubject<EndpointModel[]>([]);
+    connected = signal<EndpointModel[]>([]);
     TestBed.configureTestingModule({
       providers: [
         provideZonelessChangeDetection(),
-        { provide: EndpointsService, useValue: { connectedEndpoints$: connected$.asObservable() } },
+        { provide: EndpointsService, useValue: { connectedEndpoints: connected } },
       ],
     });
   });
@@ -32,7 +31,7 @@ describe('HomeUrlBannerComponent', () => {
   });
 
   it('shows the banner with the shared count when endpoints share a URL', () => {
-    connected$.next([ep('shared'), ep('shared'), ep('unique')]);
+    connected.set([ep('shared'), ep('shared'), ep('unique')]);
     const fixture = TestBed.createComponent(HomeUrlBannerComponent);
     fixture.detectChanges();
     expect(fixture.componentInstance.message()).toContain('2 endpoints');
@@ -40,7 +39,7 @@ describe('HomeUrlBannerComponent', () => {
   });
 
   it('reports mixed fleets per type as independent clauses, never a lump sum', () => {
-    connected$.next([
+    connected.set([
       ep('cf-shared'), ep('cf-shared'),
       ep('kube-shared', 'k8s'), ep('kube-shared', 'k8s'), ep('kube-shared', 'k8s'),
     ]);
@@ -56,7 +55,7 @@ describe('HomeUrlBannerComponent', () => {
   });
 
   it('gives each of three or more types its own clause', () => {
-    connected$.next([
+    connected.set([
       ep('cf-shared'), ep('cf-shared'),
       ep('kube-shared', 'k8s'), ep('kube-shared', 'k8s'),
       ep('metrics-shared', 'metrics'), ep('metrics-shared', 'metrics'),
@@ -68,7 +67,7 @@ describe('HomeUrlBannerComponent', () => {
   });
 
   it('does not treat same-URL endpoints of different types as duplicates', () => {
-    connected$.next([ep('same-host'), ep('same-host', 'k8s')]);
+    connected.set([ep('same-host'), ep('same-host', 'k8s')]);
     const fixture = TestBed.createComponent(HomeUrlBannerComponent);
     fixture.detectChanges();
     expect(fixture.componentInstance.message()).toBeNull();

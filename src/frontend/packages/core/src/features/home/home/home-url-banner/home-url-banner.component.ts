@@ -1,6 +1,4 @@
-import { ChangeDetectionStrategy, Component, Signal, inject } from '@angular/core';
-import { toSignal } from '@angular/core/rxjs-interop';
-import { map } from 'rxjs/operators';
+import { ChangeDetectionStrategy, Component, Signal, computed, inject } from '@angular/core';
 
 import { formatDuplicateUrlEndpointsMessage } from '@stratosui/store';
 
@@ -30,10 +28,7 @@ import { EndpointsService } from '../../../../core/endpoints.service';
 export class HomeUrlBannerComponent {
   private endpointsService = inject(EndpointsService);
 
-  readonly message: Signal<string | null> = toSignal(
-    this.endpointsService.connectedEndpoints$.pipe(
-      map(endpoints => formatDuplicateUrlEndpointsMessage(endpoints)),
-    ),
-    { initialValue: null },
+  readonly message: Signal<string | null> = computed(() =>
+    formatDuplicateUrlEndpointsMessage(this.endpointsService.connectedEndpoints())
   );
 }
