@@ -33,6 +33,13 @@ export class EndpointsService {
   private sessionService = inject(SessionService);
   private appRef = inject(ApplicationRef);
 
+  // Signal reads of the endpoint projections. The Observable members below
+  // are bridges over the same signals for the readers not yet moved.
+  readonly endpoints = this.endpointsSignals.endpoints;
+  readonly haveRegistered = this.endpointsSignals.haveRegistered;
+  readonly haveConnected = this.endpointsSignals.haveConnected;
+  readonly connectedEndpoints = this.endpointsSignals.connectedEndpoints;
+  readonly disablePersistenceFeatures = this.endpointsSignals.disablePersistenceFeatures;
 
   endpoints$: Observable<IRequestEntityTypeState<EndpointModel>>;
   haveRegistered$: Observable<boolean>;
