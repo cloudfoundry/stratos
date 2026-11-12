@@ -1,5 +1,5 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
-import { provideZonelessChangeDetection } from '@angular/core';
+import { provideZonelessChangeDetection, signal } from '@angular/core';
 import { ActivatedRoute } from '@angular/router';
 import { describe, it, expect, beforeEach, afterEach, beforeAll, afterAll, vi } from 'vitest';
 
@@ -50,5 +50,31 @@ describe('KubernetesNodeTagsCardComponent', () => {
 
   it('should create', () => {
     expect(component).toBeTruthy();
+  });
+});
+
+describe('KubernetesNodeTagsCardComponent chips', () => {
+  const node = signal<unknown>(undefined);
+
+  it('lists the chosen metadata as key:value chips, none while the node is missing', async () => {
+    await TestBed.configureTestingModule({
+      imports: [KubernetesNodeTagsCardComponent],
+      providers: [
+        provideZonelessChangeDetection(),
+        { provide: KubernetesNodeService, useValue: { node } },
+      ],
+    }).compileComponents();
+    const fixture = TestBed.createComponent(KubernetesNodeTagsCardComponent);
+    fixture.componentRef.setInput('title', 'Labels');
+    fixture.componentRef.setInput('mode', 'labels');
+    const component = fixture.componentInstance;
+    expect(component.chipTags()).toEqual([]);
+
+    node.set({ metadata: { labels: { zone: 'a', role: 'worker' } } });
+    expect(component.chipTags()).toEqual([{ value: 'zone:a' }, { value: 'role:worker' }]);
+
+    // A node without that metadata key has no chips.
+    fixture.componentRef.setInput('mode', 'annotations');
+    expect(component.chipTags()).toEqual([]);
   });
 });
