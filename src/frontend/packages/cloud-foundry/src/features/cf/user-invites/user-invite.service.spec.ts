@@ -19,7 +19,7 @@ const stubCfEndpoint = { endpoint: signal(undefined) };
 const stubActiveRoute = { cfGuid: '' };
 const stubCfRoles = { cfEndpointRolesState$: () => NEVER };
 const stubAuthData = { sessionData: signal(null) };
-const stubPermissions = { can$: () => NEVER };
+const stubPermissions = { can: () => signal(false) };
 
 describe('UserInviteService.invite', () => {
   let svc: UserInviteService;
@@ -107,9 +107,11 @@ describe('UserInviteService.configured', () => {
 
 describe('UserInviteService.canShowInviteUser', () => {
   const endpoint = signal<unknown>(undefined);
+  const canChangeRoles = signal(true);
 
   beforeEach(() => {
     endpoint.set(undefined);
+    canChangeRoles.set(true);
     TestBed.resetTestingModule();
     TestBed.configureTestingModule({
       providers: [
@@ -122,7 +124,7 @@ describe('UserInviteService.canShowInviteUser', () => {
           cfEndpointRolesState$: () => of({ state: { initialised: true } }),
         } },
         { provide: AuthDataService, useValue: stubAuthData },
-        { provide: CurrentUserPermissionsService, useValue: { can$: () => of(true) } },
+        { provide: CurrentUserPermissionsService, useValue: { can: () => canChangeRoles } },
         UserInviteService,
       ],
     });
@@ -138,5 +140,15 @@ describe('UserInviteService.canShowInviteUser', () => {
     endpoint.set({ entity: { metadata: { userInviteAllowed: 'true' } } });
     TestBed.tick();
     expect(seen).toEqual([true]);
+  });
+
+  it('does not offer invites without the org role-change permission', () => {
+    canChangeRoles.set(false);
+    const svc = TestBed.inject(UserInviteService);
+    const seen: boolean[] = [];
+    svc.canShowInviteUser('cf1', 'org1', '').subscribe(v => seen.push(v));
+    endpoint.set({ entity: { metadata: { userInviteAllowed: 'true' } } });
+    TestBed.tick();
+    expect(seen).toEqual([false]);
   });
 });

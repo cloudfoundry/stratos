@@ -170,17 +170,20 @@ export class UserInviteService {
 
   canShowInviteUser(cfGuid: string, orgGuid: string, spaceGuid: string): Observable<boolean> {
     // Can only invite someone to an org or space and user must be admin or org manager
-    return !orgGuid ? observableOf(false) : waitForCFPermissions(this.cfRoles, cfGuid).pipe(
-      switchMap(() => combineLatest([
-        this.configuredChanges,
-        this.currentUserPermissionsService.can$(
-          CfCurrentUserPermissions.ORGANIZATION_CHANGE_ROLES,
-          cfGuid,
-          orgGuid,
-          spaceGuid
-        )
-      ])),
-      map(([configured, canChangeRoles]) => !!configured && !!canChangeRoles)
+    if (!orgGuid) {
+      return observableOf(false);
+    }
+    const canChangeRoles = this.currentUserPermissionsService.can(
+      CfCurrentUserPermissions.ORGANIZATION_CHANGE_ROLES,
+      cfGuid,
+      orgGuid,
+      spaceGuid
+    );
+    // The roles have loaded once waitForCFPermissions emits, so the check
+    // is read as each configured value arrives.
+    return waitForCFPermissions(this.cfRoles, cfGuid).pipe(
+      switchMap(() => this.configuredChanges),
+      map(configured => !!configured && canChangeRoles())
     );
   }
 
