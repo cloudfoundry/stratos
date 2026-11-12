@@ -7,7 +7,6 @@ import { describe, it, expect, beforeEach, vi } from 'vitest';
 import { appLabelsFilterText } from '../../../../../../../shared/signal-list-configs/app/app-labels';
 
 import { ConfirmationDialogService, CurrentUserPermissionsService, TabNavService, TailwindSnackBarService } from '@stratosui/core';
-import { of } from 'rxjs';
 import { STORE_TEST_PROVIDERS } from '@stratosui/store/testing';
 import { CF_FAILURE_DETAIL, cfRequestFailure, snackText } from '@test-framework/cf';
 import { generateCfBaseTestModulesNoShared } from '@test-framework/cloud-foundry-endpoint-service.helper';
@@ -124,7 +123,7 @@ describe('CloudFoundrySpaceAppsSignalComponent', () => {
         { provide: CfAppsSignalConfigService, useValue: stubAppsConfig },
         { provide: CloudFoundryEndpointService, useValue: stubEndpointService },
         { provide: CloudFoundrySpaceService, useValue: stubSpaceService },
-        { provide: CurrentUserPermissionsService, useValue: { can$: () => of(true) } },
+        { provide: CurrentUserPermissionsService, useValue: { can: () => signal(true) } },
         { provide: TailwindSnackBarService, useValue: snackBar },
         // The confirm dialog normally opens a modal and waits for the user;
         // the harness fires the confirm callback immediately so the bulk
