@@ -2,7 +2,7 @@ import { CommonModule, DatePipe } from '@angular/common';
 import {
   Component, OnInit, ChangeDetectionStrategy, DestroyRef, Signal, computed, inject, signal, WritableSignal, Injector, effect,
 } from '@angular/core';
-import { takeUntilDestroyed, toSignal } from '@angular/core/rxjs-interop';
+import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { ActivatedRoute, Router, RouterModule } from '@angular/router';
 import { Observable } from 'rxjs';
 import { map } from 'rxjs/operators';
@@ -75,25 +75,8 @@ export class ApplicationWallComponent implements OnInit {
   // and exposed as a Signal so SignalListColumn.favorite can subscribe to
   // it directly. Recomputes when a favorite is added/removed anywhere,
   // which re-renders the affected star cells under OnPush.
-  private readonly favoriteAppRowKeys: Signal<ReadonlySet<string>> = toSignal(
-    this.userFavoriteManager.getAllFavorites().pipe(
-      map(([groups, entities]) => {
-        const out = new Set<string>();
-        if (!groups || !entities) return out;
-        for (const epFavGuid in groups) {
-          const g = groups[epFavGuid];
-          if (!g?.entitiesIds) continue;
-          for (const favId of g.entitiesIds) {
-            const fav = entities[favId];
-            if (fav && fav.entityType === applicationEntityType && fav.endpointType === 'cf') {
-              out.add(`${fav.endpointId}:${fav.entityId}`);
-            }
-          }
-        }
-        return out;
-      }),
-    ),
-    { initialValue: new Set<string>() },
+  private readonly favoriteAppRowKeys: Signal<ReadonlySet<string>> = computed(() =>
+    this.userFavoriteManager.entityFavoriteKeys('cf', [applicationEntityType]),
   );
 
   private toggleAppFavorite(app: StApp): void {

@@ -53,7 +53,7 @@ describe('CloudFoundryOrganizationsSignalComponent', () => {
         provideRouter([]),
         { provide: CloudFoundryEndpointService, useValue: { cfGuid: 'cnsi-1' } },
         { provide: CfOrgsSignalConfigService, useValue: orgsConfig },
-        { provide: UserFavoriteManager, useValue: { getAllFavorites: () => of([{}, {}]), toggleFavorite: vi.fn() } },
+        { provide: UserFavoriteManager, useValue: { entityFavoriteKeys: () => new Set<string>(), toggleFavorite: vi.fn() } },
         { provide: CurrentUserPermissionsService, useValue: { can: () => of(true) } },
         // The confirm dialog waits for the user; here it confirms at once.
         { provide: ConfirmationDialogService, useValue: { open: (_cfg: unknown, doFn: () => void) => doFn() } },

@@ -2,7 +2,6 @@ import { CommonModule } from '@angular/common';
 import { Component, ChangeDetectionStrategy, Signal, WritableSignal, computed, inject, signal } from '@angular/core';
 import { toSignal } from '@angular/core/rxjs-interop';
 import { Router, RouterModule } from '@angular/router';
-import { map } from 'rxjs/operators';
 
 import {
   ConfirmationDialogConfig,
@@ -57,25 +56,8 @@ export class CloudFoundryOrganizationsSignalComponent {
   // Favorite keys in rowKey format (${cnsiGuid}:${orgGuid}). Mirrors the
   // app-wall treatment: read the favorites store once, rebuild the set
   // on every change, and the star cells re-render via OnPush.
-  private readonly favoriteOrgRowKeys: Signal<ReadonlySet<string>> = toSignal(
-    this.userFavoriteManager.getAllFavorites().pipe(
-      map(([groups, entities]) => {
-        const out = new Set<string>();
-        if (!groups || !entities) return out;
-        for (const epFavGuid in groups) {
-          const g = groups[epFavGuid];
-          if (!g?.entitiesIds) continue;
-          for (const favId of g.entitiesIds) {
-            const fav = entities[favId];
-            if (fav && fav.entityType === 'organization' && fav.endpointType === 'cf') {
-              out.add(`${fav.endpointId}:${fav.entityId}`);
-            }
-          }
-        }
-        return out;
-      }),
-    ),
-    { initialValue: new Set<string>() },
+  private readonly favoriteOrgRowKeys: Signal<ReadonlySet<string>> = computed(() =>
+    this.userFavoriteManager.entityFavoriteKeys('cf', ['organization']),
   );
 
   public listConfig: WritableSignal<SignalListConfig<StOrg> | undefined> = signal(undefined);

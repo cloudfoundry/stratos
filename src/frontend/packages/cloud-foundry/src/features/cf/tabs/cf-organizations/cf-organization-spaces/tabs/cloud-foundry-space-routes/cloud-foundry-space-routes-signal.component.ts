@@ -1,9 +1,7 @@
 import { CommonModule } from '@angular/common';
 import { HttpClient } from '@angular/common/http';
 import { Component, ChangeDetectionStrategy, Signal, WritableSignal, computed, inject, signal } from '@angular/core';
-import { toSignal } from '@angular/core/rxjs-interop';
 import { RouterModule } from '@angular/router';
-import { map } from 'rxjs/operators';
 
 import {
   ConfirmationDialogConfig,
@@ -62,25 +60,8 @@ export class CloudFoundrySpaceRoutesSignalComponent {
   // Favorite keys in rowKey format (${cnsi}:${routeGuid}). Reads route
   // favorites from the manager and projects to the row-key set the
   // SignalListColumn.favorite binding expects.
-  private readonly favoriteRouteRowKeys: Signal<ReadonlySet<string>> = toSignal(
-    this.userFavoriteManager.getAllFavorites().pipe(
-      map(([groups, entities]) => {
-        const out = new Set<string>();
-        if (!groups || !entities) return out;
-        for (const epFavGuid in groups) {
-          const g = groups[epFavGuid];
-          if (!g?.entitiesIds) continue;
-          for (const favId of g.entitiesIds) {
-            const fav = entities[favId];
-            if (fav && fav.entityType === 'route' && fav.endpointType === 'cf') {
-              out.add(`${fav.endpointId}:${fav.entityId}`);
-            }
-          }
-        }
-        return out;
-      }),
-    ),
-    { initialValue: new Set<string>() },
+  private readonly favoriteRouteRowKeys: Signal<ReadonlySet<string>> = computed(() =>
+    this.userFavoriteManager.entityFavoriteKeys('cf', ['route']),
   );
 
   // Map of appGuid -> appName, derived from the endpoint-data service's

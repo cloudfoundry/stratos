@@ -1,6 +1,5 @@
 import { CommonModule, DatePipe } from '@angular/common';
-import { DestroyRef, Component, OnInit, ChangeDetectionStrategy, Signal, inject, signal, WritableSignal } from '@angular/core';
-import { toSignal } from '@angular/core/rxjs-interop';
+import { DestroyRef, Component, OnInit, ChangeDetectionStrategy, Signal, inject, signal, WritableSignal, computed } from '@angular/core';
 import { Router, RouterModule } from '@angular/router';
 import { Observable } from 'rxjs';
 import { map } from 'rxjs/operators';
@@ -81,27 +80,8 @@ export class ServicesWallComponent implements OnInit {
   // separate favorite entityTypes for managed (`serviceInstance`) and
   // user-provided (`userProvidedServiceInstance`); we OR them so existing
   // favorites of either kind light up here.
-  private readonly favoriteInstanceRowKeys: Signal<ReadonlySet<string>> = toSignal(
-    this.userFavoriteManager.getAllFavorites().pipe(
-      map(([groups, entities]) => {
-        const out = new Set<string>();
-        if (!groups || !entities) return out;
-        for (const epFavGuid in groups) {
-          const g = groups[epFavGuid];
-          if (!g?.entitiesIds) continue;
-          for (const favId of g.entitiesIds) {
-            const fav = entities[favId];
-            if (!fav || fav.endpointType !== 'cf') continue;
-            if (fav.entityType === serviceInstancesEntityType
-              || fav.entityType === userProvidedServiceInstanceEntityType) {
-              out.add(`${fav.endpointId}:${fav.entityId}`);
-            }
-          }
-        }
-        return out;
-      }),
-    ),
-    { initialValue: new Set<string>() },
+  private readonly favoriteInstanceRowKeys: Signal<ReadonlySet<string>> = computed(() =>
+    this.userFavoriteManager.entityFavoriteKeys('cf', [serviceInstancesEntityType, userProvidedServiceInstanceEntityType]),
   );
 
   private toggleInstanceFavorite(si: StServiceInstance): void {

@@ -2,7 +2,6 @@ import { CommonModule } from '@angular/common';
 import { DestroyRef, ChangeDetectionStrategy, Component, Signal, WritableSignal, computed, inject, signal } from '@angular/core';
 import { toSignal } from '@angular/core/rxjs-interop';
 import { Router, RouterModule } from '@angular/router';
-import { map } from 'rxjs/operators';
 
 import {
   ConfirmationDialogService,
@@ -99,26 +98,8 @@ export class CloudFoundrySpaceUserServiceInstancesSignalComponent {
   // service-instance favorites only. The wall ORs both managed and
   // user-provided entity types because either kind shows up there;
   // here we narrow to the user-provided bucket since the page is too.
-  private readonly favoriteRowKeys: Signal<ReadonlySet<string>> = toSignal(
-    this.userFavoriteManager.getAllFavorites().pipe(
-      map(([groups, entities]) => {
-        const out = new Set<string>();
-        if (!groups || !entities) return out;
-        for (const epFavGuid in groups) {
-          const g = groups[epFavGuid];
-          if (!g?.entitiesIds) continue;
-          for (const favId of g.entitiesIds) {
-            const fav = entities[favId];
-            if (!fav || fav.endpointType !== 'cf') continue;
-            if (fav.entityType === userProvidedServiceInstanceEntityType) {
-              out.add(`${fav.endpointId}:${fav.entityId}`);
-            }
-          }
-        }
-        return out;
-      }),
-    ),
-    { initialValue: new Set<string>() },
+  private readonly favoriteRowKeys: Signal<ReadonlySet<string>> = computed(() =>
+    this.userFavoriteManager.entityFavoriteKeys('cf', [userProvidedServiceInstanceEntityType]),
   );
 
   public listConfig: WritableSignal<SignalListConfig<StServiceInstance> | undefined> = signal(undefined);

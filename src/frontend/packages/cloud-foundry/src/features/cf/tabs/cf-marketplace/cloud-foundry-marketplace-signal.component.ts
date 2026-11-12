@@ -1,8 +1,7 @@
 import { CommonModule } from '@angular/common';
-import { Component, ChangeDetectionStrategy, OnInit, Signal, WritableSignal, inject, signal } from '@angular/core';
+import { Component, ChangeDetectionStrategy, OnInit, Signal, WritableSignal, inject, signal, computed } from '@angular/core';
 import { toSignal } from '@angular/core/rxjs-interop';
 import { Router, RouterModule } from '@angular/router';
-import { map } from 'rxjs/operators';
 
 import {
   CurrentUserPermissionsService,
@@ -69,25 +68,8 @@ export class CloudFoundryMarketplaceSignalComponent implements OnInit {
       { queryParams: { 'auto-select-endpoint': this.cfEndpointService.cfGuid } }),
   };
 
-  private readonly favoriteOfferingRowKeys: Signal<ReadonlySet<string>> = toSignal(
-    this.userFavoriteManager.getAllFavorites().pipe(
-      map(([groups, entities]) => {
-        const out = new Set<string>();
-        if (!groups || !entities) return out;
-        for (const epFavGuid in groups) {
-          const g = groups[epFavGuid];
-          if (!g?.entitiesIds) continue;
-          for (const favId of g.entitiesIds) {
-            const fav = entities[favId];
-            if (fav && fav.entityType === serviceEntityType && fav.endpointType === 'cf') {
-              out.add(`${fav.endpointId}:${fav.entityId}`);
-            }
-          }
-        }
-        return out;
-      }),
-    ),
-    { initialValue: new Set<string>() },
+  private readonly favoriteOfferingRowKeys: Signal<ReadonlySet<string>> = computed(() =>
+    this.userFavoriteManager.entityFavoriteKeys('cf', [serviceEntityType]),
   );
 
   private toggleOfferingFavorite(o: StServiceOffering): void {

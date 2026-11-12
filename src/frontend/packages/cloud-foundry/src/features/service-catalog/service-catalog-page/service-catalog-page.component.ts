@@ -1,6 +1,5 @@
 import { CommonModule, DatePipe } from '@angular/common';
-import { Component, OnInit, ChangeDetectionStrategy, Signal, inject, signal, WritableSignal } from '@angular/core';
-import { toSignal } from '@angular/core/rxjs-interop';
+import { Component, OnInit, ChangeDetectionStrategy, Signal, inject, signal, WritableSignal, computed } from '@angular/core';
 import { Router, RouterModule } from '@angular/router';
 import { Observable } from 'rxjs';
 import { map } from 'rxjs/operators';
@@ -63,25 +62,8 @@ export class ServiceCatalogPageComponent implements OnInit {
   // as a Signal so SignalListColumn.favorite can subscribe directly. The
   // legacy 481 catalog page used the same `serviceEntityType = 'service'`
   // key, so existing favorites carry over.
-  private readonly favoriteOfferingRowKeys: Signal<ReadonlySet<string>> = toSignal(
-    this.userFavoriteManager.getAllFavorites().pipe(
-      map(([groups, entities]) => {
-        const out = new Set<string>();
-        if (!groups || !entities) return out;
-        for (const epFavGuid in groups) {
-          const g = groups[epFavGuid];
-          if (!g?.entitiesIds) continue;
-          for (const favId of g.entitiesIds) {
-            const fav = entities[favId];
-            if (fav && fav.entityType === serviceEntityType && fav.endpointType === 'cf') {
-              out.add(`${fav.endpointId}:${fav.entityId}`);
-            }
-          }
-        }
-        return out;
-      }),
-    ),
-    { initialValue: new Set<string>() },
+  private readonly favoriteOfferingRowKeys: Signal<ReadonlySet<string>> = computed(() =>
+    this.userFavoriteManager.entityFavoriteKeys('cf', [serviceEntityType]),
   );
 
   private toggleOfferingFavorite(o: StServiceOffering): void {
