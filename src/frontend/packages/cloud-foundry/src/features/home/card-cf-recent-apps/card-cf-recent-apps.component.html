@@ -1,14 +1,14 @@
 @if (!placeholderMode()) {
-  @if (show$() | async) {
-    <app-card class="recent-apps-card" [ngClass]="{'recent-apps-card__plain': mode() === 'plain'}">
+  @if (show()) {
+    <app-card class="recent-apps-card" [class.recent-apps-card__plain]="mode() === 'plain'">
       <app-card-header plain class="recent-apps-card__header">
         <app-card-title class="recent-apps-card__title">Recently updated applications</app-card-title>
         @if (canRefresh) {
-          <app-polling-indicator [manualPoll]="(appsLoading$() | async) === false" [isPolling]="(appsLoading$() | async) ?? false"
+          <app-polling-indicator [manualPoll]="!appsLoading()" [isPolling]="appsLoading()"
           (poll)="refresh$.next()"></app-polling-indicator>
         }
       </app-card-header>
-      @if (recentApps$() | async; as apps) {
+      @if (recentApps(); as apps) {
         <app-card-content class="recent-apps-card__content custom-scrollbar">
           @if (apps.length === 0) {
             <div>
@@ -27,7 +27,7 @@
     </app-card>
   }
 } @else {
-  <app-card class="recent-apps-card" [ngClass]="{'recent-apps-card__plain': mode() === 'plain'}">
+  <app-card class="recent-apps-card" [class.recent-apps-card__plain]="mode() === 'plain'">
     <app-card-header plain class="recent-apps-card__header">
       <app-card-title class="recent-apps-card__title">Recently updated applications</app-card-title>
     </app-card-header>

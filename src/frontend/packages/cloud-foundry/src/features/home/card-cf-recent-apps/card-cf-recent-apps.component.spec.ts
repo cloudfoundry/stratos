@@ -5,7 +5,6 @@ import { provideRouter } from '@angular/router';
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { provideZonelessChangeDetection } from '@angular/core';
 import { describe, it, expect, beforeEach, vi } from 'vitest';
-import { of as observableOf } from 'rxjs';
 
 import { CardCfRecentAppsComponent } from './card-cf-recent-apps.component';
 import { EndpointDataRegistry } from '../../../services/endpoint-data/endpoint-data.registry';
@@ -38,8 +37,8 @@ describe('CardCfRecentAppsComponent', () => {
   beforeEach(() => {
     fixture = TestBed.createComponent(CardCfRecentAppsComponent);
     component = fixture.componentInstance;
-    fixture.componentRef.setInput('allApps$', observableOf([]));
-    fixture.componentRef.setInput('loading$', observableOf(false));
+    fixture.componentRef.setInput('allApps$', []);
+    fixture.componentRef.setInput('loading$', false);
     fixture.componentRef.setInput('placeholderMode', true);
 
     // Don't call detectChanges() to avoid rendering child components
@@ -80,13 +79,6 @@ describe('CardCfRecentAppsComponent stats requests', () => {
   const statsRequests = () => httpMock.match(req => req.url.startsWith('/pp/v1/cf/app-stats/')).map(r => r.request.url);
 
   it('loads stats once per started app', async () => {
-    fixture.componentRef.setInput('endpoint', 'ep-1');
-    fixture.componentRef.setInput('allApps$', observableOf([app('a-started', 'STARTED'), app('b-stopped', 'STOPPED')]));
-    await fixture.whenStable();
-    expect(statsRequests()).toEqual(['/pp/v1/cf/app-stats/ep-1/a-started']);
-  });
-
-  it('takes the app list as a plain value', async () => {
     fixture.componentRef.setInput('endpoint', 'ep-1');
     fixture.componentRef.setInput('allApps$', [app('a-started', 'STARTED'), app('b-stopped', 'STOPPED')]);
     await fixture.whenStable();
