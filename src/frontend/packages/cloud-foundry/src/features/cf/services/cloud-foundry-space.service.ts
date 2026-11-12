@@ -1,4 +1,4 @@
-import { DestroyRef, Injectable, Injector, Signal, inject } from '@angular/core';
+import { DestroyRef, Injectable, Injector, Signal, computed, inject } from '@angular/core';
 import { takeUntilDestroyed, toObservable } from '@angular/core/rxjs-interop';
 import { observeSignal } from '@stratosui/store';
 import { combineLatest, Observable, of } from 'rxjs';
@@ -47,6 +47,20 @@ export class CloudFoundrySpaceService {
   cfGuid: string;
   orgGuid: string;
   spaceGuid: string;
+
+  // Signal members for template reads; the `*$` members beside them go once
+  // no reader is left. The HTTP-backed members (quota, app count fallback and
+  // user-provided service count) stay Observables: this service lives on
+  // every space page, so a reader turns them into signals where it needs them
+  // and the requests go out only from the pages that show them.
+  apps!: Signal<APIResource<IApp>[]>;
+  appInstances!: Signal<number>;
+  totalMem!: Signal<number>;
+  loadingApps!: Signal<boolean>;
+  usersCount!: Signal<number | null>;
+  userRole!: Signal<string | null>;
+  routesCount!: Signal<number | null>;
+
   userRole$!: Observable<string | null>;
   /**
    * Sensible quota to use for space. If there's no specific space quota set this will be the org quota. If there's no org quota
@@ -105,7 +119,27 @@ export class CloudFoundrySpaceService {
     // V3-native: read role buckets from the StUser cache (lazy fetch of
     // /pp/v1/cf/users/:cnsi). V2 helpers inspect user.managed_spaces etc. —
     // fields the V3 wire no longer carries.
-    const users$ = toObservable(this.cnsiUsers.users(this.cfGuid), { injector: this.injector });
+    const users = this.cnsiUsers.users(this.cfGuid);
+    this.userRole = computed(() => {
+      const all = users();
+      const currentUser = this.cfEndpointService.endpoint()?.entity.user;
+      // Still loading: the tile shows its placeholder, not 'None'.
+      if (!all || !currentUser) return null;
+      const me = all.find(u => u.guid === currentUser.guid);
+      const roles = me?.spaceRoles.find(r => r.spaceGuid === this.spaceGuid)?.roles ?? [];
+      return getSpaceRolesString(createUserRoleInSpace(
+        roles.includes('manager'),
+        roles.includes('auditor'),
+        roles.includes('developer'),
+      ));
+    });
+    this.usersCount = computed(() => {
+      const all = users();
+      if (!all) return null;
+      return all.filter(u => u.spaceRoles.some(r => r.spaceGuid === this.spaceGuid)).length;
+    });
+
+    const users$ = toObservable(users, { injector: this.injector });
     this.userRole$ = combineLatest([this.cfEndpointService.currentUser$, users$]).pipe(
       map(([currentUser, users]) => {
         // Still loading: the tile shows its placeholder, not 'None'.
@@ -138,6 +172,10 @@ export class CloudFoundrySpaceService {
     this.serviceInstancesCount = this.serviceCatalog.serviceInstanceCount(this.cfGuid, this.orgGuid, this.spaceGuid, 'managed').value;
     this.userProvidedServiceInstancesCount$ =
       this.cfUserProvidedServicesService.fetchUserProvidedServiceInstancesCount(this.cfGuid, this.orgGuid, this.spaceGuid);
+    this.routesCount = computed(() => {
+      const space = this.spaceDataService.space();
+      return space ? space.routeCount ?? 0 : null;
+    });
     this.routesCount$ = space$.pipe(map(s => s.routeCount ?? 0));
     this.allowSsh$ = space$.pipe(map(s => s.allowSsh ? 'true' : 'false'));
     // V3-native space-quota lookup. quotaGuid mapped from V3
@@ -204,6 +242,11 @@ export class CloudFoundrySpaceService {
     // stream filtered by space_guid (mirrors the cf-org-service pattern).
     // Old getAppsInSpaceViaAllApps required an APIResource<ISpace> envelope
     // which we no longer carry.
+    this.apps = computed(() => this.cfEndpointService.apps().filter(a => a.entity.space_guid === this.spaceGuid));
+    this.appInstances = computed(() => getStartedAppInstanceCount(this.apps()));
+    this.totalMem = computed(() => this.cfEndpointService.getMetricFromApps(this.apps(), 'memory'));
+    this.loadingApps = this.cfEndpointService.appsLoading;
+
     this.apps$ = this.cfEndpointService.apps$.pipe(
       filter(apps => !!apps),
       map(allApps => allApps.filter(a => a.entity.space_guid === this.spaceGuid)),
