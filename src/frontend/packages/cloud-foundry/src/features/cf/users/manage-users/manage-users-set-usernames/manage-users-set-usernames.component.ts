@@ -84,21 +84,21 @@ export class ManageUsersSetUsernamesComponent implements OnInit {
     const http = inject(HttpClient);
 
     this.stateIn$ = toObservable(this.stateIn);
-    // The checks read false until the flags load; take(1) below must see
-    // the loaded value, so wait for the load first.
+    const ffSetPermConfig = new PermissionConfig(CfPermissionTypes.FEATURE_FLAG, CFFeatureFlagTypes.set_roles_by_username);
+    const ffRemovePermConfig = new PermissionConfig(CfPermissionTypes.FEATURE_FLAG, CFFeatureFlagTypes.unset_roles_by_username);
+    const canSet = userPerms.can(ffSetPermConfig, activeRouteCfOrgSpace.cfGuid);
+    const canUnset = userPerms.can(ffRemovePermConfig, activeRouteCfOrgSpace.cfGuid);
+    // The checks read false until the roles and the flags load, so each is
+    // read once both have.
     const flagsLoaded$ = waitForCFPermissions(cfRoles, activeRouteCfOrgSpace.cfGuid).pipe(
       switchMap(() => from(getFeatureFlagsSource(activeRouteCfOrgSpace.cfGuid, http).load())),
     );
-    const ffSetPermConfig = new PermissionConfig(CfPermissionTypes.FEATURE_FLAG, CFFeatureFlagTypes.set_roles_by_username);
-    const ffRemovePermConfig = new PermissionConfig(CfPermissionTypes.FEATURE_FLAG, CFFeatureFlagTypes.unset_roles_by_username);
     this.canAdd$ = flagsLoaded$.pipe(
-      switchMap(() => userPerms.can$(ffSetPermConfig, activeRouteCfOrgSpace.cfGuid)),
-      take(1),
+      map(() => canSet()),
       shareReplay({ bufferSize: 1, refCount: true })
     );
     this.canRemove$ = flagsLoaded$.pipe(
-      switchMap(() => userPerms.can$(ffRemovePermConfig, activeRouteCfOrgSpace.cfGuid)),
-      take(1),
+      map(() => canUnset()),
       shareReplay({ bufferSize: 1, refCount: true })
     );
 
