@@ -1,8 +1,8 @@
 import { HttpClient, HttpParams, HttpRequest, HttpResponse } from '@angular/common/http';
 import { Directive, forwardRef, input, OnInit, inject } from '@angular/core';
 import { AbstractControl, AsyncValidator, NG_ASYNC_VALIDATORS, ValidationErrors } from '@angular/forms';
-import { Observable, of as observableOf, timer as observableTimer } from 'rxjs';
-import { catchError, filter, map, switchMap, take } from 'rxjs/operators';
+import { defer, Observable, of as observableOf, timer as observableTimer } from 'rxjs';
+import { catchError, filter, map, switchMap } from 'rxjs/operators';
 
 import { environment } from '@stratosui/core';
 import { StratosStatus } from '@stratosui/store';
@@ -114,20 +114,18 @@ export class AppNameUniqueDirective implements AsyncValidator, OnInit {
   }
 
   private getDefaultRequestData(name: string) {
-    return this.createAppState.cloudFoundryDetails$.pipe(
-      take(1),
-      switchMap(
-        cloudFoundryDetails => {
-          const cfGuid = cloudFoundryDetails!.cloudFoundry;
-          const spaceGuid = cloudFoundryDetails!.space;
-          const request = this.getDefaultRequest(cfGuid, spaceGuid, name);
-          return this.nameTaken(
-            request,
-            this.appApplicationNameUniqueValidator()
-          );
-        }
-      )
-    );
+    // defer: read the selection when the check runs, and keep a missing
+    // selection an error of the returned stream
+    return defer(() => {
+      const cloudFoundryDetails = this.createAppState.cloudFoundryDetails();
+      const cfGuid = cloudFoundryDetails!.cloudFoundry;
+      const spaceGuid = cloudFoundryDetails!.space;
+      const request = this.getDefaultRequest(cfGuid, spaceGuid, name);
+      return this.nameTaken(
+        request,
+        this.appApplicationNameUniqueValidator()
+      );
+    });
   }
 
   private nameTaken(requestData: HttpRequest<any>, taken: NameTaken) {
