@@ -1,8 +1,6 @@
 import { Injectable, inject } from '@angular/core';
 import { toObservable } from '@angular/core/rxjs-interop';
 import {
-  APIResource,
-  EntityInfo,
   EndpointModel,
   EndpointsDataService,
   getFullEndpointApiUrl,
@@ -28,7 +26,6 @@ export class MetricsService {
   private endpoints$ = toObservable(this.endpointsData.endpointsList);
 
   metricsEndpoints$!: Observable<MetricsEndpointProvider[]>;
-  waitForAppEntity$!: Observable<EntityInfo<APIResource>>;
   haveNoMetricsEndpoints$!: Observable<boolean>;
   haveNoConnectedMetricsEndpoints$!: Observable<boolean>;
 
