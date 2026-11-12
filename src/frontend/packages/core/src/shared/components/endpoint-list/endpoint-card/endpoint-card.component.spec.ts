@@ -1,5 +1,5 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
-import { NO_ERRORS_SCHEMA, provideZonelessChangeDetection } from '@angular/core';
+import { NO_ERRORS_SCHEMA, provideZonelessChangeDetection, signal } from '@angular/core';
 import { NoopAnimationsModule } from '@angular/platform-browser/animations';
 import { RouterTestingModule } from '@angular/router/testing';
 import { provideHttpClient } from '@angular/common/http';
@@ -55,7 +55,7 @@ describe('EndpointCardComponent', () => {
         {
           provide: CurrentUserPermissionsService,
           useValue: {
-            can$: () => of(true)
+            can: () => signal(true)
           }
         },
       ],
@@ -79,6 +79,21 @@ describe('EndpointCardComponent', () => {
 
   it('should create', () => {
     expect(component).toBeTruthy();
+  });
+
+  // The creator shows to an admin; it follows the permission.
+  it('shows the creator only to an admin', async () => {
+    const isAdmin = signal(false);
+    vi.spyOn(TestBed.inject(CurrentUserPermissionsService), 'can').mockReturnValue(isAdmin);
+    const card = TestBed.createComponent(EndpointCardComponent);
+    card.componentRef.setInput('row', component.row());
+    await card.whenStable();
+    const text = () => (card.nativeElement as HTMLElement).textContent ?? '';
+    expect(text()).not.toContain('Creator');
+
+    isAdmin.set(true);
+    await card.whenStable();
+    expect(text()).toContain('Creator');
   });
 
   // The card navigated on click only: no link, role or tab stop, so keyboard
