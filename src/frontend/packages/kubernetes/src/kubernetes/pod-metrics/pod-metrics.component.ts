@@ -1,8 +1,5 @@
-import { AsyncPipe } from '@angular/common';
-import {Component, inject, ChangeDetectionStrategy } from '@angular/core';
+import { Component, Signal, computed, inject, signal, ChangeDetectionStrategy } from '@angular/core';
 import { ActivatedRoute } from '@angular/router';
-import { Observable } from 'rxjs';
-import { map } from 'rxjs/operators';
 
 import { getIdFromRoute } from '../../../../core/src/core/utils.service';
 import { MetricsChartComponent, MetricsConfig } from '../../../../core/src/shared/components/metrics-chart/metrics-chart.component';
@@ -44,7 +41,6 @@ function buildPodMetricRequest(podName: string, endpointGuid: string, query: str
   changeDetection: ChangeDetectionStrategy.OnPush,
   standalone: true,
   imports: [
-    AsyncPipe,
     PageHeaderComponent,
     MetricsParentRangeSelectorComponent,
     MetricsChartComponent
@@ -68,7 +64,7 @@ function buildPodMetricRequest(podName: string, endpointGuid: string, query: str
 export class PodMetricsComponent {
   podName: string;
   namespaceName: string;
-  public breadcrumbs$: Observable<IHeaderBreadcrumb[]>;
+  public breadcrumbs: Signal<IHeaderBreadcrumb[]> = signal([]);
 
   public instanceMetricConfigs: [
     MetricsConfig<IMetricMatrixResult<IKubernetesMetric>>,
@@ -155,44 +151,45 @@ export class PodMetricsComponent {
     ];
 
 
-    this.breadcrumbs$ = this.kubeEndpointService.endpoint$.pipe(
-      map(endpoint => {
-
-        // check if this is being invoked from the node path
-        const nodeName = getIdFromRoute(this.activatedRoute, 'nodeName');
-        if (nodeName) {
-          return [{
-            breadcrumbs: [
-              { value: endpoint.entity.name, routerLink: `/kubernetes/${endpoint.entity.guid}/nodes` },
-              { value: nodeName, routerLink: `/kubernetes/${endpoint.entity.guid}/nodes/${nodeName}/pods` },
-            ]
-          }];
-        }
-        // check if this is being invoked from the namespace path
-        if (this.namespaceName) {
-          return [{
-            breadcrumbs: [
-              { value: endpoint.entity.name, routerLink: `/kubernetes/${endpoint.entity.guid}/namespaces` },
-              { value: this.namespaceName, routerLink: `/kubernetes/${endpoint.entity.guid}/namespaces/${this.namespaceName}/pods` },
-            ]
-          }];
-        }
-        // Finally, check if this is being invoked from the helm-release path
-        const releaseName = getIdFromRoute(this.activatedRoute, 'releaseName');
-        if (releaseName) {
-          return [{
-            breadcrumbs: [
-              { value: endpoint.entity.name, routerLink: `/kubernetes/${endpoint.entity.guid}/apps` },
-              { value: releaseName, routerLink: `/kubernetes/${endpoint.entity.guid}/apps/${releaseName}/pods` },
-            ]
-          }];
-        }
+    this.breadcrumbs = computed((): IHeaderBreadcrumb[] => {
+      const endpoint = this.kubeEndpointService.endpoint();
+      if (!endpoint) {
+        return [];
+      }
+      // check if this is being invoked from the node path
+      const nodeName = getIdFromRoute(this.activatedRoute, 'nodeName');
+      if (nodeName) {
         return [{
           breadcrumbs: [
-            { value: endpoint.entity.name, routerLink: `/kubernetes/${endpoint.entity.guid}/pods` },
+            { value: endpoint.name, routerLink: `/kubernetes/${endpoint.guid}/nodes` },
+            { value: nodeName, routerLink: `/kubernetes/${endpoint.guid}/nodes/${nodeName}/pods` },
           ]
         }];
-      })
-    );
+      }
+      // check if this is being invoked from the namespace path
+      if (this.namespaceName) {
+        return [{
+          breadcrumbs: [
+            { value: endpoint.name, routerLink: `/kubernetes/${endpoint.guid}/namespaces` },
+            { value: this.namespaceName, routerLink: `/kubernetes/${endpoint.guid}/namespaces/${this.namespaceName}/pods` },
+          ]
+        }];
+      }
+      // Finally, check if this is being invoked from the helm-release path
+      const releaseName = getIdFromRoute(this.activatedRoute, 'releaseName');
+      if (releaseName) {
+        return [{
+          breadcrumbs: [
+            { value: endpoint.name, routerLink: `/kubernetes/${endpoint.guid}/apps` },
+            { value: releaseName, routerLink: `/kubernetes/${endpoint.guid}/apps/${releaseName}/pods` },
+          ]
+        }];
+      }
+      return [{
+        breadcrumbs: [
+          { value: endpoint.name, routerLink: `/kubernetes/${endpoint.guid}/pods` },
+        ]
+      }];
+    });
   }
 }
