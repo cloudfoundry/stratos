@@ -35,9 +35,9 @@
 
         <div class="dashboard-inner flex-1 flex min-h-0 overflow-hidden bg-content-bg">
           <!-- Page tabs navigation -->
-          @if (tabNavService.tabNavs$ | async; as tabs) {
+          @if (tabNavService.tabNavs(); as tabs) {
             <div class="dashboard-page-tabs">
-              <app-page-side-nav [header]="tabNavService.tabHeader$ | async" [tabs]="tabs"
+              <app-page-side-nav [header]="tabNavService.tabHeader()" [tabs]="tabs"
                 class="w-64 border-r border-content-border bg-content-secondary shadow-sm">
               </app-page-side-nav>
             </div>
@@ -46,7 +46,7 @@
           <!-- Main content -->
           <div class="dashboard-main flex-1 flex flex-col min-w-0 min-h-0 overflow-hidden bg-content-bg">
             <!-- Sub navigation breadcrumbs -->
-            @if (subNavData$ | async; as data) {
+            @if (subNavData(); as data) {
               <div>
                 @if (data[0] || data[1] || data[3]) {
                   <div class="page-header-sub-nav bg-content-secondary border-b border-content-border px-6 py-4">
