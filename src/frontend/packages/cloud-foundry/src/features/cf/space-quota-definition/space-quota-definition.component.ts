@@ -1,6 +1,5 @@
 import { CommonModule } from '@angular/common';
 import { Component, ChangeDetectionStrategy, Signal, computed, inject } from '@angular/core';
-import { toSignal } from '@angular/core/rxjs-interop';
 import { ActivatedRoute, RouterModule } from '@angular/router';
 
 import {
@@ -78,10 +77,7 @@ export class SpaceQuotaDefinitionComponent extends QuotaDefinitionBaseComponent 
     super(endpoints, activeRouteCfOrgSpace, activatedRoute);
 
     const { cfGuid, orgGuid, spaceGuid } = activeRouteCfOrgSpace;
-    this.canEditQuota = toSignal(
-      currentUserPermissionsService.can$(CfCurrentUserPermissions.SPACE_QUOTA_EDIT, cfGuid, orgGuid),
-      { initialValue: false },
-    );
+    this.canEditQuota = currentUserPermissionsService.can(CfCurrentUserPermissions.SPACE_QUOTA_EDIT, cfGuid, orgGuid);
     this.isOrg = !spaceGuid;
     this.editParams = { [QUOTA_SPACE_GUID]: spaceGuid };
 
