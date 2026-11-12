@@ -1,5 +1,5 @@
 import { HttpClient } from '@angular/common/http';
-import { Injectable, computed, Injector, inject, runInInjectionContext } from '@angular/core';
+import { Injectable, Signal, computed, Injector, inject, runInInjectionContext, signal } from '@angular/core';
 import { toSignal, toObservable } from '@angular/core/rxjs-interop';
 import { Observable, defer, from, of } from 'rxjs';
 import { catchError, map, shareReplay, startWith } from 'rxjs/operators';
@@ -70,6 +70,23 @@ export interface KubeDashboardStatus {
   serviceAccount: any;
 }
 
+// Is the dashboard installed with a service account and a service?
+export function kubeDashboardConfigured(status: KubeDashboardStatus | null): boolean {
+  return !!(status && status.installed && !!status.serviceAccount && !!status.service);
+}
+
+// The dashboard's state as shown on the summary page.
+export function kubeDashboardLabel(status: KubeDashboardStatus | null): string {
+  if (!status) {
+    return '';
+  }
+  if (!status.installed) {
+    return 'Not installed';
+  } else if (!status.serviceAccount) {
+    return 'Not configured';
+  }
+  return status.version;
+}
 
 @Injectable({
   providedIn: 'root'
@@ -95,6 +112,13 @@ export class KubernetesEndpointService {
   kubeDashboardLabel$!: Observable<string>;
   kubeDashboardConfigured$!: Observable<boolean>;
   kubeTerminalEnabled$!: Observable<boolean>;
+
+  // Signal members. The endpoint is read from the endpoints map, so it
+  // follows later updates; it stays undefined without a kubeGuid.
+  endpoint: Signal<EndpointModel | undefined> = signal(undefined);
+  private readonly pluginConfig = computed(() => this.session.sessionData()?.['plugin-config']);
+  readonly kubeDashboardEnabled = computed(() => this.pluginConfig()?.kubeDashboardEnabled === 'true');
+  readonly kubeTerminalEnabled = computed(() => this.pluginConfig()?.kubeTerminalEnabled === 'true');
 
   private injector = inject(Injector);
 
@@ -283,6 +307,13 @@ export class KubernetesEndpointService {
   }
 
   private constructCoreObservables() {
+    const kubeGuid = this.kubeGuid;
+    if (!this.endpointsService.endpoints().has(kubeGuid)) {
+      // Loads the endpoints map if nothing has yet.
+      void this.endpointsService.whenReady();
+    }
+    this.endpoint = computed(() => this.endpointsService.endpoints().get(kubeGuid));
+
     // Wave 5 (W36-B): replaces the legacy `entityServiceFactory.create(guid,
     // new GetAllEndpoints()).waitForEntity$` chain. Resolves the endpoint
     // model directly off EndpointsDataService.waitFor (Promise) and wraps
