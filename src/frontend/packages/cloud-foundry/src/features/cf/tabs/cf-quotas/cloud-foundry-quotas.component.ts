@@ -1,6 +1,5 @@
 import { CommonModule } from '@angular/common';
 import { Component, ChangeDetectionStrategy, Signal, WritableSignal, inject, signal } from '@angular/core';
-import { toSignal } from '@angular/core/rxjs-interop';
 import { Router, RouterModule } from '@angular/router';
 
 import {
@@ -69,18 +68,9 @@ export class CloudFoundryQuotasComponent {
     const router = inject(Router);
     const cfGuid = this.cfEndpointService.cfGuid;
 
-    this.canAddQuota = toSignal(
-      currentUserPermissionsService.can$(CfCurrentUserPermissions.QUOTA_CREATE, cfGuid),
-      { initialValue: false },
-    );
-    this.canEditQuota = toSignal(
-      currentUserPermissionsService.can$(CfCurrentUserPermissions.QUOTA_EDIT, cfGuid),
-      { initialValue: false },
-    );
-    this.canDeleteQuota = toSignal(
-      currentUserPermissionsService.can$(CfCurrentUserPermissions.QUOTA_DELETE, cfGuid),
-      { initialValue: false },
-    );
+    this.canAddQuota = currentUserPermissionsService.can(CfCurrentUserPermissions.QUOTA_CREATE, cfGuid);
+    this.canEditQuota = currentUserPermissionsService.can(CfCurrentUserPermissions.QUOTA_EDIT, cfGuid);
+    this.canDeleteQuota = currentUserPermissionsService.can(CfCurrentUserPermissions.QUOTA_DELETE, cfGuid);
 
     this.quotasConfig.initialize(cfGuid);
     void this.quotasConfig.loadAll();
