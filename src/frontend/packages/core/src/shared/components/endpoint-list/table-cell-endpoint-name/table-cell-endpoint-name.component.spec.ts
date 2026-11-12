@@ -5,7 +5,7 @@ import { provideRouter } from '@angular/router';
 import { provideHttpClient } from '@angular/common/http';
 import { provideHttpClientTesting } from '@angular/common/http/testing';
 import { provideNoopAnimations } from '@angular/platform-browser/animations';
-import { describe, it, expect, beforeEach } from 'vitest';
+import { describe, it, expect, beforeEach, vi } from 'vitest';
 import {
   EndpointModel,
   EndpointsDataService,
@@ -15,10 +15,13 @@ import {
   generateStratosEntities,
 } from '@stratosui/store';
 import { seedEndpointsDataService, STORE_TEST_PROVIDERS } from '@stratosui/store/testing';
+import { EndpointsService } from '../../../../core/endpoints.service';
 import { TableCellEndpointNameComponent } from './table-cell-endpoint-name.component';
 
 const endpointOne = { guid: 'ep-1', name: 'Endpoint One', connectionStatus: 'connected' } as EndpointModel;
 const endpointTwo = { guid: 'ep-2', name: 'Endpoint Two', connectionStatus: 'disconnected' } as EndpointModel;
+// Connected, but its type has no page of its own (GitHub, the autoscaler).
+const endpointNoPage = { guid: 'ep-4', name: 'Endpoint No Page', connectionStatus: 'connected' } as EndpointModel;
 const endpointShared = {
   guid: 'ep-3', name: 'Endpoint Shared', connectionStatus: 'connected', system_shared_token: true,
 } as unknown as EndpointModel;
@@ -68,7 +71,10 @@ describe('TableCellEndpointNameComponent', () => {
     const helper = TestBed.inject(EntityCatalogHelper);
     EntityCatalogHelpers.SetEntityCatalogHelper(helper);
 
-    seedEndpointsDataService([endpointOne, endpointTwo, endpointShared]);
+    seedEndpointsDataService([endpointOne, endpointTwo, endpointShared, endpointNoPage]);
+    // The endpoint types' link builders are not registered here; give every
+    // endpoint but ep-4 a page.
+    vi.spyOn(EndpointsService, 'getLinkForEndpoint').mockImplementation(ep => ep.guid === 'ep-4' ? '' : `/ep/${ep.guid}`);
   });
 
   beforeEach(() => {
@@ -88,6 +94,14 @@ describe('TableCellEndpointNameComponent', () => {
 
     const link = fixture.nativeElement.querySelector('a');
     expect(link?.textContent?.trim()).toBe('Endpoint One');
+    expect(link?.getAttribute('href')).toBe('/ep/ep-1');
+  });
+
+  it('shows the name as plain text when the endpoint has no page', async () => {
+    fixture.componentRef.setInput('row', endpointNoPage);
+    await fixture.whenStable();
+    expect(fixture.nativeElement.querySelector('a')).toBeNull();
+    expect(fixture.nativeElement.querySelector('span')?.textContent?.trim()).toBe('Endpoint No Page');
   });
 
   it('marks a connection the administrator shares', async () => {

@@ -39,10 +39,13 @@ export class TableCellEndpointNameComponent extends TableCellCustom<EndpointMode
       return undefined;
     }
     const ep = data.cnsi_type ? entityCatalog.getEndpoint(data.cnsi_type, data.sub_type)?.definition : undefined;
+    // A type with no page of its own (GitHub, the autoscaler) has no link;
+    // like the endpoint card, show its name as plain text.
+    const link = EndpointsService.getLinkForEndpoint(data);
     return {
       ...data,
-      canShowLink: data.connectionStatus === 'connected' || !!ep?.unConnectable,
-      link: EndpointsService.getLinkForEndpoint(data)
+      canShowLink: !!link && (data.connectionStatus === 'connected' || !!ep?.unConnectable),
+      link
     };
   });
 }
