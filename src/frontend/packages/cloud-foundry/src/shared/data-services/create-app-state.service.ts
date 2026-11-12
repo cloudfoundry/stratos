@@ -1,16 +1,8 @@
 import { Injectable, signal } from '@angular/core';
-import { toObservable } from '@angular/core/rxjs-interop';
-import { Observable, combineLatest } from 'rxjs';
-import { map } from 'rxjs/operators';
 
 import { NewAppCFDetails } from '../../store/types/create-application.types';
 
 export type { NewAppCFDetails };
-
-export interface CreateAppState {
-  cloudFoundryDetails: NewAppCFDetails | null;
-  name: string;
-}
 
 /**
  * Signal-native store for the "create application" wizard's cross-step
@@ -29,15 +21,6 @@ export class CreateAppStateService {
 
   readonly cloudFoundryDetails = this.cfDetails.asReadonly();
   readonly name = this.appName.asReadonly();
-
-  // Observable mirrors for the remaining rxjs consumers (the create
-  // wizard's step3 domains pipeline and the app-name-unique async
-  // validator), which still compose with HttpClient streams.
-  readonly cloudFoundryDetails$: Observable<NewAppCFDetails | null> = toObservable(this.cfDetails);
-  readonly state$: Observable<CreateAppState> = combineLatest([
-    this.cloudFoundryDetails$,
-    toObservable(this.appName),
-  ]).pipe(map(([cloudFoundryDetails, name]) => ({ cloudFoundryDetails, name })));
 
   setCFDetails(details: NewAppCFDetails): void {
     this.cfDetails.set(details);
