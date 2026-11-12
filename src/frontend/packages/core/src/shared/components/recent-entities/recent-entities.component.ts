@@ -1,5 +1,4 @@
-import { Component, effect, inject, ChangeDetectionStrategy, input } from '@angular/core';
-import { toObservable } from '@angular/core/rxjs-interop';
+import { Component, Signal, computed, effect, inject, signal, ChangeDetectionStrategy, input } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { RouterModule } from '@angular/router';
 import { CustomIconComponent } from '../custom-material/custom-material.component';
@@ -10,8 +9,6 @@ import {
   entityCatalog,
   MAX_RECENT_COUNT,
 } from '@stratosui/store';
-import { Observable, of as observableOf } from 'rxjs';
-import { map } from 'rxjs/operators';
 
 import { EndpointsSignalService } from '../../../core/signals/endpoints-signal.service';
 import { FreshEntityNameService } from '../../../core/signals/fresh-entity-name.service';
@@ -20,12 +17,12 @@ import { NoContentMessageComponent } from '../no-content-message/no-content-mess
 
 class RenderableRecent {
   public mostRecentHit?: Date;
-  public subText$: Observable<string>;
+  public subText: Signal<string>;
   public icon?: string;
   public iconFont?: string;
   constructor(
     readonly entity: IRecentlyVisitedEntity,
-    endpointEntities$: Observable<Record<string, { name?: string }>>,
+    endpointEntities: Signal<Record<string, { name?: string }>>,
   ) {
     const catalogEntity = entityCatalog.getEntity(entity.endpointType, entity.entityType);
     this.icon = catalogEntity.definition.icon;
@@ -34,16 +31,15 @@ class RenderableRecent {
       console.error(`Entity ${entity.guid} does not contain a value for endpointId - recent metadata is malformed`);
     }
     if (entity.entityType === endpointEntityType) {
-      this.subText$ = observableOf(entity.prettyType);
+      this.subText = signal(entity.prettyType);
     } else {
-      this.subText$ = endpointEntities$.pipe(
-        map(endpoints => {
-          if (entity.endpointId && Object.keys(endpoints).length > 1) {
-            return `${entity.prettyType} - ${endpoints[entity.endpointId].name}`;
-          }
-          return entity.prettyType;
-        })
-      );
+      this.subText = computed(() => {
+        const endpoints = endpointEntities();
+        if (entity.endpointId && Object.keys(endpoints).length > 1) {
+          return `${entity.prettyType} - ${endpoints[entity.endpointId].name}`;
+        }
+        return entity.prettyType;
+      });
     }
   }
 }
@@ -75,32 +71,19 @@ export class RecentEntitiesComponent {
 
   readonly mode = input<string>();
 
-  public recentEntities$: Observable<RenderableRecent[]>;
-  public hasHits$: Observable<boolean>;
-
-  // Bridge endpoints signal → observable in injection context. Captured
-  // once and reused for every RenderableRecent so we don't re-bind per row.
-  private endpointEntities$ = toObservable(this.endpointsSignals.endpoints);
+  // Most recent first, capped at the maximum we can display.
+  public readonly recentEntities = computed(() => Object.values(this.recents.state())
+    .sort((a, b) => b.date - a.date)
+    .slice(0, MAX_RECENT_COUNT)
+    .map(entity => new RenderableRecent(entity, this.endpointsSignals.endpoints))
+  );
+  public readonly hasHits = computed(() => this.recentEntities().length > 0);
 
   constructor() {
-    const recentEntities$ = this.recents.state$;
-    this.recentEntities$ = recentEntities$.pipe(
-      map(entities => Object.values(entities)),
-      map((entities: IRecentlyVisitedEntity[]) => {
-        // Sort them - most recent first
-        // Cap the list at the maximum we can display
-        const sorted = entities.sort((a, b) => b.date - a.date).slice(0, MAX_RECENT_COUNT);
-        return sorted.map(entity => new RenderableRecent(entity, this.endpointEntities$));
-      })
-    );
-
-    this.hasHits$ = this.recentEntities$.pipe(
-      map(recentEntities => recentEntities && recentEntities.length > 0)
-    );
 
     // Signal-native name refresh (replaces the deleted ngrx requestData sync):
     // when a recent's freshly-fetched entity name diverges from the stored one,
-    // write it back through the recents store. The update flows through state$
+    // write it back through the recents store. The update flows through state
     // to the rendered list, so no render-path change is needed. The guard +
     // lastPersisted map make this converge after a single write per rename.
     effect(() => {

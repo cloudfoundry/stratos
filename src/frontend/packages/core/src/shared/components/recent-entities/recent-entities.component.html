@@ -1,18 +1,18 @@
 <!-- history is set when used in the dropdown menu to only show recent history-->
 
-@if (!history() && ((hasHits$ | async) === true)) {
+@if (!history() && hasHits()) {
   <app-card>
     <ng-container *ngTemplateOutlet="historyTemplate"></ng-container>
   </app-card>
 }
 
-@if (!history() && ((hasHits$ | async) === false)) {
+@if (!history() && !hasHits()) {
   <ng-container *ngTemplateOutlet="noActivity"></ng-container>
 }
 
 @if (history()) {
   <div>
-    @if ((hasHits$ | async) === true) {
+    @if (hasHits()) {
       <div>
         <ng-container *ngTemplateOutlet="historyTemplate"></ng-container>
       </div>
@@ -23,7 +23,7 @@
 }
 
 <ng-template #historyTemplate>
-  @if (recentEntities$ | async; as recentEntities) {
+  @if (recentEntities(); as recentEntities) {
     <div class="recent-tab" [ngClass]="{standalone: !!history()}">
       @if (recentEntities && recentEntities.length > 0) {
         <div class="recent-entities">
@@ -40,7 +40,7 @@
               <div>
                 <div class="recent-entity--name">{{ countedEntity.entity.name }}</div>
                 <div class="type-info text-content-muted">
-                  <span>{{ countedEntity.subText$ | async }}</span>
+                  <span>{{ countedEntity.subText() }}</span>
                 </div>
               </div>
             </a>
