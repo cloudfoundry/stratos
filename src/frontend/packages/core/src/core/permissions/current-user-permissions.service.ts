@@ -21,11 +21,8 @@ export const CUSTOM_USER_PERMISSION_CHECKERS = 'custom_user_perm_checkers';
   providedIn: 'root'
 })
 export class CurrentUserPermissionsService {
-  // Capture the injection context so checkers — which call `inject(...)` for
-  // their signal-mirror dependencies — can be constructed lazily on the first
-  // permission check. Eager construction would pull in `Store` at root
-  // injection time, breaking component specs that transitively reference this
-  // service but never invoke a permission check.
+  // The checkers call `inject(...)` for the roles data services; they are
+  // built on the first permission check, in this captured injection context.
   private injector = inject(EnvironmentInjector);
   private endpointsData = inject(EndpointsDataService);
   private _allCheckers: ICurrentUserPermissionsChecker[] | null = null;

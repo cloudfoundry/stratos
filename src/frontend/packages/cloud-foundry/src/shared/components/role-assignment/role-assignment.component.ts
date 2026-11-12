@@ -612,7 +612,7 @@ export class RoleAssignmentComponent implements OnInit, OnDestroy {
   /** Returns true if the logged-in user may change roles in the given space.
    * Resolves to true for org managers (ORGANIZATION_CHANGE_ROLES arm) and
    * space managers of that specific space (SPACE_MANAGER arm).
-   * Defaults to false until the space-permission observable fires.
+   * False until that space's check reads true.
    */
   canChangeSpaceRoles(orgGuid: string, spaceGuid: string): boolean {
     return this.canChangeSpaceByKey()[`${orgGuid}:${spaceGuid}`] ?? false;
