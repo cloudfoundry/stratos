@@ -1,4 +1,3 @@
-import { firstValueFrom, combineLatest, of, map } from 'rxjs';
 import type { StUser } from '../../../services/endpoint-data/stratos-types';
 import { CfUsersRolesDataService } from '../../../services/domain-data/cf-users-roles-data.service';
 import { CfRoleChange } from '../../../store/types/users-roles.types';
@@ -107,15 +106,10 @@ export async function bulkRemoveUsers(deps: BulkRemoveDeps, req: BulkRemoveReque
     return;
   }
 
-  // Permission-filter per change.
-  const checks = candidates.map(c => {
-    const can$ = c.spaceGuid
-      ? deps.userPerms.can$(CfCurrentUserPermissions.SPACE_CHANGE_ROLES, deps.cfGuid, c.orgGuid, c.spaceGuid)
-      : deps.userPerms.can$(CfCurrentUserPermissions.ORGANIZATION_CHANGE_ROLES, deps.cfGuid, c.orgGuid);
-    return can$.pipe(map(can => ({ can, change: c })));
-  });
-  const verdicts = await firstValueFrom(checks.length ? combineLatest(checks) : of([]));
-  const allowed = verdicts.filter(v => v.can).map(v => v.change);
+  // Permission-filter per change, read at the moment of the action.
+  const allowed = candidates.filter(c => (c.spaceGuid
+    ? deps.userPerms.can(CfCurrentUserPermissions.SPACE_CHANGE_ROLES, deps.cfGuid, c.orgGuid, c.spaceGuid)
+    : deps.userPerms.can(CfCurrentUserPermissions.ORGANIZATION_CHANGE_ROLES, deps.cfGuid, c.orgGuid))());
   const skipped = candidates.length - allowed.length;
   if (allowed.length === 0) {
     deps.snackBar.error('You do not have permission to remove the selected roles');
