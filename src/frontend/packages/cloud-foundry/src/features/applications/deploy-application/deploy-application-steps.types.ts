@@ -2,17 +2,17 @@ import { HttpClient } from '@angular/common/http';
 import { Injectable, Injector, inject } from '@angular/core';
 import { toObservable } from '@angular/core/rxjs-interop';
 import { ActivatedRoute } from '@angular/router';
-import { Observable, of } from 'rxjs';
-import { filter, map, shareReplay, switchMap } from 'rxjs/operators';
+import { from, Observable, of } from 'rxjs';
+import { filter, map, shareReplay } from 'rxjs/operators';
 
 import { PermissionConfig, CurrentUserPermissionsService } from '@stratosui/core';
 import { GitSCM, GitSCMService, GIT_ENDPOINT_SUB_TYPES, GIT_ENDPOINT_TYPE } from '@stratosui/git';
 import { EndpointsDataService, getFullEndpointApiUrl } from '@stratosui/store';
 
 import { CFFeatureFlagTypes } from '../../../cf-api.types';
-import { StFeatureFlagsResponse } from '../../../services/endpoint-data/stratos-types';
 import { SourceType } from '../../../store/types/deploy-application.types';
 import { CfPermissionTypes } from '../../../user-permissions/cf-user-permissions-checkers';
+import { getFeatureFlagsSource } from '../../../user-permissions/feature-flags-cache';
 
 export enum DEPLOY_TYPES_IDS {
   GITLAB = 'gitlab',
@@ -172,22 +172,14 @@ export class ApplicationDeploySourceTypes {
 
   canDeployType(cfId: string, sourceId: string): Observable<boolean> {
     if (sourceId === DEPLOY_TYPES_IDS.DOCKER_IMG) {
-      // We don't want to return until we have a trusted response (there's a `startsWith(false)` in the `.can`), otherwise we return false
-      // then, if different, send the actual response (this leads to flashing misleading info in ux)
-      // So fetch the feature flags for the cf, which is the blocker, first before checking if we `.can`
-      const fetchedFeatureFlags$ = this.http.get<StFeatureFlagsResponse>(`/pp/v1/cf/feature_flags/${cfId}`).pipe(
-        map(resp => !!resp),
-        shareReplay({ bufferSize: 1, refCount: true }),
-      );
-
-      const canDeployWithDocker$ = this.perms.can$(
+      // The check reads false until the CF's feature flags load, and a false
+      // that later turns true flashes misleading text. So wait for the shared
+      // flags load (the one the check itself starts), then read the check.
+      const canDeployWithDocker = this.perms.can(
         new PermissionConfig(CfPermissionTypes.FEATURE_FLAG, CFFeatureFlagTypes.diego_docker), cfId
-      ).pipe(
-        shareReplay({ bufferSize: 1, refCount: true }),
       );
-
-      return fetchedFeatureFlags$.pipe(
-        switchMap(() => canDeployWithDocker$),
+      return from(getFeatureFlagsSource(cfId, this.http).load()).pipe(
+        map(() => canDeployWithDocker()),
       );
     }
     return of(true);
