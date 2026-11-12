@@ -23,6 +23,7 @@ function makeStubSignalConfigService() {
   const sortSig = signal({ field: 'name' as const, direction: 'asc' as const });
   const view = {
     pagedItems: signal([]).asReadonly(),
+    totalItems: signal(0).asReadonly(),
     totalFilteredResults: signal(0).asReadonly(),
     totalPages: signal(1).asReadonly(),
   };
@@ -79,10 +80,7 @@ describe('ServicesWallComponent', () => {
     ];
     const stubCloudFoundryService = {
       cFEndpoints$: of(endpoints),
-      connectedCFEndpoints$: of(endpoints),
       connectedCFEndpoints: signal(endpoints),
-      hasConnectedCFEndpoints$: of(true),
-      hasRegisteredCFEndpoints$: of(true),
       hasConnectedCFEndpoints: signal(true),
       hasRegisteredCFEndpoints: signal(true),
     };
