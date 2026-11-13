@@ -1,6 +1,6 @@
 import { HttpClient } from '@angular/common/http';
 import { signal, Signal } from '@angular/core';
-import { EMPTY, Observable, of, ReplaySubject } from 'rxjs';
+import { EMPTY, Observable, of } from 'rxjs';
 import { catchError, finalize, map, shareReplay, tap, timeout } from 'rxjs/operators';
 
 import { ICfV2Info } from '../../cf-api.types';
@@ -26,8 +26,6 @@ export class CfInfoDataService {
   readonly isLoading: Signal<boolean> = this._isLoading.asReadonly();
   readonly errors: Signal<StError[]> = this._errors.asReadonly();
   readonly lastFetched: Signal<Date | null> = this._lastFetched.asReadonly();
-
-  readonly loaded$ = new ReplaySubject<void>(1);
 
   private _inFlightLoad: Observable<void> | null = null;
 
@@ -69,7 +67,6 @@ export class CfInfoDataService {
       finalize(() => {
         this._isLoading.set(false);
         this._lastFetched.set(new Date());
-        this.loaded$.next();
         this._inFlightLoad = null;
       }),
       shareReplay({ bufferSize: 1, refCount: false }),

@@ -1,14 +1,14 @@
 import { AsyncPipe, CommonModule } from '@angular/common';
-import { Component, ChangeDetectionStrategy, computed, inject, input, OnDestroy, signal } from '@angular/core';
+import { Component, ChangeDetectionStrategy, computed, inject, Injector, input, OnDestroy, signal } from '@angular/core';
 import { Router } from '@angular/router';
 import { Observable, of } from 'rxjs';
-import { map, take } from 'rxjs/operators';
+import { filter, map, take } from 'rxjs/operators';
 import { EndpointDataRegistry } from '../../../services/endpoint-data/endpoint-data.registry';
 import { EndpointDataService } from '../../../services/endpoint-data/endpoint-data.service';
 import { stAppToAPIResource } from '../../../services/endpoint-data/st-app-adapter';
 
 import { BASE_REDIRECT_QUERY } from '@stratosui/core';
-import { EndpointModel, APIResource } from '@stratosui/store';
+import { EndpointModel, APIResource, observeSignal } from '@stratosui/store';
 import { IApp } from '../../../cf-api.types';
 import {
   ApplicationDeploySourceTypes,
@@ -52,6 +52,7 @@ import { TileSelectorComponent } from '@stratosui/core';
 export class CFHomeCardComponent implements HomePageEndpointCard, OnDestroy {
   private router = inject(Router);
   private registry = inject(EndpointDataRegistry);
+  private injector = inject(Injector);
 
   // Set by load(); the template and the derived state below read it.
   readonly endpointDataService = signal<EndpointDataService | null>(null);
@@ -130,13 +131,13 @@ export class CFHomeCardComponent implements HomePageEndpointCard, OnDestroy {
     if (endpointDataService.lastFetched() !== null) {
       return of(true);
     }
-    return new Observable<boolean>(subscriber => {
-      const sub = endpointDataService.loaded$.pipe(take(1)).subscribe({
-        next: () => { subscriber.next(true); subscriber.complete(); },
-        error: () => { subscriber.next(true); subscriber.complete(); },
-      });
-      return () => sub.unsubscribe();
-    });
+    // loaded settles on failure too, so a failed first load still lets the
+    // card render its zero counts instead of waiting forever.
+    return observeSignal(endpointDataService.loaded, this.injector).pipe(
+      filter(Boolean),
+      take(1),
+      map(() => true),
+    );
   }
 
   ngOnDestroy(): void {
