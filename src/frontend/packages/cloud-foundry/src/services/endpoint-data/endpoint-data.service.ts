@@ -1,6 +1,6 @@
 import { HttpClient } from '@angular/common/http';
 import { signal, Signal } from '@angular/core';
-import { EMPTY, firstValueFrom, merge, Observable, of, ReplaySubject } from 'rxjs';
+import { EMPTY, firstValueFrom, merge, Observable, of } from 'rxjs';
 import { catchError, finalize, map, shareReplay, tap, timeout } from 'rxjs/operators';
 import { cascadeFor, CascadeKey, EntityKind } from '../data-sources/cascade-registry';
 import { StratosDiagnostics } from '../diagnostics/stratos-diagnostics.service';
@@ -156,11 +156,11 @@ export class EndpointDataService {
   readonly serviceBrokersStale: Signal<boolean> = this._serviceBrokersStale.asReadonly();
   readonly serviceCredentialBindingsStale: Signal<boolean> = this._serviceCredentialBindingsStale.asReadonly();
 
-  // ReplaySubject(1) — late subscribers (e.g. the home card's async pipe
-  // subscribing after the HTTP has already completed) immediately receive the
-  // last emission so they don't hang forever on a stream that already fired.
-  readonly loaded$ = new ReplaySubject<void>(1);
-  readonly detailsLoaded$ = new ReplaySubject<void>(1);
+  // True once the first load() has settled, whether it succeeded or failed.
+  // lastFetched is only stamped on success, so it can't say "settled" for a
+  // consumer that must stop waiting after a failure.
+  private readonly _loaded = signal(false);
+  readonly loaded: Signal<boolean> = this._loaded.asReadonly();
 
   // In-flight dedup. Concurrent callers before the first HTTP completes share
   // the same Observable instead of each firing their own fan-out — without
@@ -245,7 +245,7 @@ export class EndpointDataService {
         // apps populate service signals for the home card directly; the NGRX
         // pagination store only needs the full lists, which loadDetails()
         // dispatches via shim.write() in its own finalize().
-        this.loaded$.next();
+        this._loaded.set(true);
         this._inFlightLoad = null;
       }),
       shareReplay({ bufferSize: 1, refCount: false }),
@@ -293,7 +293,6 @@ export class EndpointDataService {
         this._isLoadingDetails.set(false);
         this._detailsLastFetched.set(new Date());
         this.shim.write(this.guid, this.currentData());
-        this.detailsLoaded$.next();
         this._inFlightLoadDetails = null;
       }),
       shareReplay({ bufferSize: 1, refCount: false }),
@@ -620,7 +619,6 @@ export class EndpointDataService {
         this._isLoadingDetails.set(false);
         this._detailsLastFetched.set(new Date());
         this.shim.write(this.guid, this.currentData());
-        this.detailsLoaded$.next();
       }),
       shareReplay({ bufferSize: 1, refCount: false }),
     ) as Observable<void>;

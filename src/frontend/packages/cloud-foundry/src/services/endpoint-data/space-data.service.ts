@@ -1,6 +1,6 @@
 import { HttpClient } from '@angular/common/http';
 import { signal, Signal } from '@angular/core';
-import { EMPTY, Observable, of, ReplaySubject } from 'rxjs';
+import { EMPTY, Observable, of } from 'rxjs';
 import { catchError, finalize, map, shareReplay, tap, timeout } from 'rxjs/operators';
 import { StratosDiagnostics } from '../diagnostics/stratos-diagnostics.service';
 import { StError, StSpace } from './stratos-types';
@@ -21,8 +21,6 @@ export class SpaceDataService {
   readonly isLoading: Signal<boolean> = this._isLoading.asReadonly();
   readonly errors: Signal<StError[]> = this._errors.asReadonly();
   readonly lastFetched: Signal<Date | null> = this._lastFetched.asReadonly();
-
-  readonly loaded$ = new ReplaySubject<void>(1);
 
   private _inFlightLoad: Observable<void> | null = null;
 
@@ -56,7 +54,6 @@ export class SpaceDataService {
       finalize(() => {
         this._isLoading.set(false);
         this._lastFetched.set(new Date());
-        this.loaded$.next();
         this._inFlightLoad = null;
       }),
       shareReplay({ bufferSize: 1, refCount: false }),

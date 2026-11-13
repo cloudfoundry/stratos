@@ -1,6 +1,6 @@
 import { HttpClient } from '@angular/common/http';
 import { computed, signal, Signal } from '@angular/core';
-import { EMPTY, merge, Observable, of, ReplaySubject } from 'rxjs';
+import { EMPTY, merge, Observable, of } from 'rxjs';
 import { catchError, finalize, map, shareReplay, tap, timeout } from 'rxjs/operators';
 import { StratosDiagnostics } from '../diagnostics/stratos-diagnostics.service';
 import { drainCfPages } from './drain-pages';
@@ -28,9 +28,6 @@ export class OrgDataService {
   readonly orgSettled: Signal<boolean> = this._orgSettled.asReadonly();
   readonly spacesSettled: Signal<boolean> = this._spacesSettled.asReadonly();
 
-  // ReplaySubject so late subscribers see the last completion immediately
-  // (matches EndpointDataService convention).
-  readonly loaded$ = new ReplaySubject<void>(1);
 
   // In-flight dedup. Concurrent callers before the first HTTP completes share
   // the same Observable instead of each firing their own fan-out — mirrors
@@ -73,7 +70,6 @@ export class OrgDataService {
       finalize(() => {
         this._isLoading.set(false);
         this._lastFetched.set(new Date());
-        this.loaded$.next();
         this._inFlightLoad = null;
       }),
       shareReplay({ bufferSize: 1, refCount: false }),

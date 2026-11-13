@@ -1,7 +1,7 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
-import { Component, Input, provideZonelessChangeDetection, CUSTOM_ELEMENTS_SCHEMA, ChangeDetectorRef, signal } from '@angular/core';
+import { Component, Input, provideZonelessChangeDetection, CUSTOM_ELEMENTS_SCHEMA, signal } from '@angular/core';
 import { describe, it, expect, beforeEach, vi } from 'vitest';
-import { of, Subject } from 'rxjs';
+import { of } from 'rxjs';
 
 import { ApplicationDeploySourceTypes } from '../../applications/deploy-application/deploy-application-steps.types';
 import { EndpointDataRegistry } from '../../../services/endpoint-data/endpoint-data.registry';
@@ -18,21 +18,13 @@ describe('CFHomeCardComponent', () => {
     types$: of([])
   };
 
-  const mockCdr = {
-    markForCheck: vi.fn(),
-    detectChanges: vi.fn(),
-    detach: vi.fn(),
-    reattach: vi.fn(),
-    checkNoChanges: vi.fn()
-  };
-
   const mockEndpointDataService = {
     appCount: signal(0),
     orgCount: signal(0),
     routeCount: signal(0),
     isLoading: signal(false),
     lastFetched: signal(null as Date | null),
-    loaded$: new Subject<void>(),
+    loaded: signal(false),
   };
 
   const mockEndpointDataRegistry = {
@@ -48,7 +40,6 @@ describe('CFHomeCardComponent', () => {
       ],
       providers: [
         provideZonelessChangeDetection(),
-        { provide: ChangeDetectorRef, useValue: mockCdr },
         { provide: EndpointDataRegistry, useValue: mockEndpointDataRegistry },
       ],
       schemas: [CUSTOM_ELEMENTS_SCHEMA]
@@ -105,7 +96,7 @@ describe('CFHomeCardComponent follows the endpoint data (#6021)', () => {
     routeCount: ReturnType<typeof signal<number>>;
     recentApps: ReturnType<typeof signal<StApp[]>>;
     lastFetched: ReturnType<typeof signal<Date | null>>;
-    loaded$: Subject<void>;
+    loaded: ReturnType<typeof signal<boolean>>;
   };
 
   beforeEach(async () => {
@@ -116,7 +107,7 @@ describe('CFHomeCardComponent follows the endpoint data (#6021)', () => {
       routeCount: signal(0),
       recentApps: signal([app('STARTED')]),
       lastFetched: signal<Date | null>(new Date()),
-      loaded$: new Subject<void>(),
+      loaded: signal(false),
     };
     await TestBed.configureTestingModule({
       imports: [CFHomeCardComponent],
@@ -160,5 +151,18 @@ describe('CFHomeCardComponent follows the endpoint data (#6021)', () => {
     eds.appCount.set(0);
     await fixture.whenStable();
     expect(noApps()).not.toBeNull();
+  });
+
+  it('waits for the first load to settle when the cache is cold', async () => {
+    eds.lastFetched.set(null);
+    const emitted: boolean[] = [];
+    fixture.componentInstance.load().subscribe(v => emitted.push(v));
+    await fixture.whenStable();
+    expect(emitted).toEqual([]);
+
+    // A failed load settles without stamping lastFetched; the card must still proceed.
+    eds.loaded.set(true);
+    await fixture.whenStable();
+    expect(emitted).toEqual([true]);
   });
 });
