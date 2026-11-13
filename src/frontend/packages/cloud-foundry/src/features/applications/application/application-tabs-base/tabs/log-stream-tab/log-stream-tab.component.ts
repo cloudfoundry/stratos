@@ -1,4 +1,4 @@
-import { Component, OnInit, OnDestroy, ChangeDetectionStrategy, ChangeDetectorRef, inject } from '@angular/core';
+import { Component, OnInit, OnDestroy, ChangeDetectionStrategy, inject } from '@angular/core';
 
 import { format } from 'date-fns';
 import { BehaviorSubject, EMPTY, NEVER, Observable, Subject, timer } from 'rxjs';
@@ -35,7 +35,6 @@ interface ConnectionError {
 })
 export class LogStreamTabComponent implements OnInit, OnDestroy {
   private applicationService = inject(ApplicationService);
-  private cdr = inject(ChangeDetectorRef);
 
   public messages!: Observable<string>;
   // 0 connecting, 1 connected, -2 retrying, -1 failed: the codes the log
@@ -72,7 +71,6 @@ export class LogStreamTabComponent implements OnInit, OnDestroy {
         timestamp: Date.now()
       };
       this.connectionStatusSubject.next(-1); // Indicate invalid configuration
-      this.cdr.markForCheck();
     } else {
       // Use window.location.protocol to construct proper WebSocket URL
       // This ensures we use the correct protocol (ws/wss) based on page protocol
@@ -91,7 +89,6 @@ export class LogStreamTabComponent implements OnInit, OnDestroy {
           this.lastError = null;
           this.connectionStatusSubject.next(1);
           console.log('WebSocket connected successfully');
-          this.cdr.markForCheck();
         }),
         // maxRetries attempts in all: the first connection and maxRetries - 1
         // retries. A successful connection starts the count again.
@@ -108,7 +105,6 @@ export class LogStreamTabComponent implements OnInit, OnDestroy {
             };
             // Inform user of retry attempt
             this.connectionStatusSubject.next(-2); // -2 indicates retrying
-            this.cdr.markForCheck();
             // Exponential backoff: 2s, then 4s
             const delay = this.retryDelayMs * Math.pow(2, retryCount - 1);
             console.log(`Retrying WebSocket connection in ${delay}ms...`);
@@ -127,7 +123,6 @@ export class LogStreamTabComponent implements OnInit, OnDestroy {
             timestamp: Date.now()
           };
           this.connectionStatusSubject.next(-1);
-          this.cdr.markForCheck();
           // Return EMPTY to complete the stream gracefully
           return EMPTY;
         }),
@@ -152,12 +147,7 @@ export class LogStreamTabComponent implements OnInit, OnDestroy {
             timestamp: Date.now()
           };
           this.connectionStatusSubject.next(-1);
-          this.cdr.markForCheck();
           return EMPTY;
-        }),
-        tap(() => {
-          // Mark for check on each message for real-time streaming
-          this.cdr.markForCheck();
         })
       );
     }
