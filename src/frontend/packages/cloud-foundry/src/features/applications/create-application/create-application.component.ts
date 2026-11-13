@@ -1,7 +1,6 @@
 import { CommonModule } from '@angular/common';
 import {
   ChangeDetectionStrategy,
-  ChangeDetectorRef,
   Component,
   OnInit,
   computed,
@@ -12,7 +11,6 @@ import {
   afterRenderEffect,
 } from '@angular/core';
 import { ActivatedRoute } from '@angular/router';
-import { firstValueFrom } from 'rxjs';
 
 import { PageHeaderComponent, SignalStepHandle, StepComponent, SteppersComponent } from '@stratosui/core';
 import { RETURN_URL_PARAM } from '../new-application-base-step/new-application-base-step.component';
@@ -40,7 +38,6 @@ import { CreateApplicationStep3Component } from './create-application-step3/crea
 })
 export class CreateApplicationComponent implements OnInit {
 
-  private cdr = inject(ChangeDetectorRef);
   public cfOrgSpaceService = inject(CfOrgSpaceDataService);
   private appsConfig = inject(CfAppsSignalConfigService);
   private route = inject(ActivatedRoute);
@@ -81,7 +78,6 @@ export class CreateApplicationComponent implements OnInit {
       }
       const sub = step.validate.subscribe(valid => {
         this.step1Valid.set(!!valid);
-        this.cdr.markForCheck();
       });
       onCleanup(() => sub.unsubscribe());
     });
@@ -100,7 +96,6 @@ export class CreateApplicationComponent implements OnInit {
       step.onEnter();
       const sub = step.validate.subscribe(valid => {
         this.step2Valid.set(!!valid);
-        this.cdr.markForCheck();
       });
       onCleanup(() => sub.unsubscribe());
     });
@@ -118,7 +113,6 @@ export class CreateApplicationComponent implements OnInit {
       this.step3Valid.set(step.validate());
       const sub = step.setDomainHost.statusChanges.subscribe(() => {
         this.step3Valid.set(step.validate());
-        this.cdr.markForCheck();
       });
       onCleanup(() => sub.unsubscribe());
     });
@@ -133,8 +127,8 @@ export class CreateApplicationComponent implements OnInit {
     valid: this.step1Valid.asReadonly(),
     blocked: computed(() => !!this.isLoadingSignal()),
     submit: async () => {
-      // step1.onNext stores the CF details via CreateAppStateService and returns of({ success: true }).
-      const result = await firstValueFrom(this.step1()!.onNext(0, null as any));
+      // step1.onNext stores the CF details via CreateAppStateService and resolves with success.
+      const result = await this.step1()!.onNext();
       if (!result.success) {
         throw new Error(result.message || 'Failed to save Cloud Foundry details');
       }
@@ -144,7 +138,7 @@ export class CreateApplicationComponent implements OnInit {
   step2Handle: SignalStepHandle = {
     valid: this.step2Valid.asReadonly(),
     submit: async () => {
-      const result = await firstValueFrom(this.step2()!.onNext(1, null as any));
+      const result = await this.step2()!.onNext();
       if (!result.success) {
         throw new Error(result.message || 'Failed to save application name');
       }
@@ -158,7 +152,7 @@ export class CreateApplicationComponent implements OnInit {
       // dispatches the navigation RouterNav action on success and maps
       // errors to { success: false, message }. The RouterNav drives
       // navigation, so no explicit Router.navigate replacement is needed.
-      const result = await firstValueFrom(this.step3()!.onNext(2, null as any));
+      const result = await this.step3()!.onNext();
       if (!result.success) {
         throw new Error(result.message || 'Failed to create application');
       }

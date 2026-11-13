@@ -3,11 +3,11 @@ import { AfterContentInit, Component, Injector, OnInit, Signal, ChangeDetectionS
 import { toObservable } from '@angular/core/rxjs-interop';
 import { FormsModule, NgForm } from '@angular/forms';
 import { ActivatedRoute } from '@angular/router';
-import { asapScheduler, Observable, of } from 'rxjs';
+import { asapScheduler, Observable } from 'rxjs';
 import { map, observeOn, startWith, switchMap, withLatestFrom } from 'rxjs/operators';
 
 import { observeSignal } from '@stratosui/store';
-import { AppErrorComponent, CustomFormFieldComponent, CustomSelectComponent, CustomOptionComponent, FocusDirective, StepOnNextFunction } from '@stratosui/core';
+import { AppErrorComponent, CustomFormFieldComponent, CustomSelectComponent, CustomOptionComponent, FocusDirective, StepOnNextResult } from '@stratosui/core';
 import { ISpace } from '../../../../cf-api.types';
 import { CfCurrentUserRolesDataService } from '../../../../services/cf-current-user-roles-data.service';
 import { CfPermissionStrings } from '../../../../user-permissions/cf-user-permissions-checkers';
@@ -133,14 +133,14 @@ export class CreateApplicationStep1Component implements OnInit, AfterContentInit
     }
   }
 
-  onNext: StepOnNextFunction = () => {
+  async onNext(): Promise<StepOnNextResult> {
     this.createAppState.setCFDetails({
       cloudFoundry: this.cfOrgSpaceService.cf.select(),
       org: this.cfOrgSpaceService.org.select(),
       space: this.cfOrgSpaceService.space.select()
     });
-    return of({ success: true });
-  };
+    return { success: true };
+  }
 
   ngOnInit() {
     if (this.route.root.snapshot.queryParams.endpointGuid) {
