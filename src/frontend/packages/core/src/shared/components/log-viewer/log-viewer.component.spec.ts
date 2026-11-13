@@ -204,3 +204,46 @@ describe('LogViewerComponent', () => {
   }, 5000);
 
 });
+
+describe('LogViewerComponent connection status', () => {
+  @Component({
+    standalone: true,
+    selector: 'app-status-host',
+    template: `<app-log-viewer [logStream]="stream" [status]="status"></app-log-viewer>`,
+    imports: [LogViewerComponent]
+  })
+  class StatusHostComponent {
+    stream = new Subject<string>();
+    status = new Subject<number>();
+  }
+
+  let fixture: ComponentFixture<StatusHostComponent>;
+  const statusText = () =>
+    (fixture.nativeElement as HTMLElement).querySelector('[role="status"]')?.textContent?.trim() ?? '';
+
+  beforeEach(async () => {
+    TestBed.configureTestingModule({ providers: [provideZonelessChangeDetection()] });
+    fixture = TestBed.createComponent(StatusHostComponent);
+    await fixture.whenStable();
+    vi.spyOn(console, 'log').mockImplementation(() => undefined);
+    vi.spyOn(console, 'error').mockImplementation(() => undefined);
+  });
+
+  it('shows what the connection is doing and clears the note once connected', async () => {
+    fixture.componentInstance.status.next(0);
+    await fixture.whenStable();
+    expect(statusText()).toBe('Connecting to log stream...');
+
+    fixture.componentInstance.status.next(1);
+    await fixture.whenStable();
+    expect(statusText()).toBe('');
+  });
+
+  it('shows a failure in the error style', async () => {
+    fixture.componentInstance.status.next(-1);
+    await fixture.whenStable();
+    const text = (fixture.nativeElement as HTMLElement).querySelector('.log-viewer__messageText');
+    expect(text?.textContent).toContain('Unable to connect to log stream.');
+    expect(text?.classList).toContain('text-danger');
+  });
+});
