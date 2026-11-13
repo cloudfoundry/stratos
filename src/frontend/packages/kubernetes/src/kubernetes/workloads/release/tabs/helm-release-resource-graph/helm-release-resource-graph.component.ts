@@ -6,8 +6,8 @@ import { CustomIconComponent } from '../../../../../../../core/src/shared/compon
 import { CustomTooltipDirective } from '../../../../../../../core/src/shared/components/custom-tooltip/custom-tooltip.directive';
 import { Edge, GraphComponent, LayoutService, NgxGraphZoomOptions } from '@swimlane/ngx-graph';
 import { SidePanelService } from '@stratosui/core';
-import { combineLatest, Observable, Subject, Subscription } from 'rxjs';
-import { take, distinctUntilChanged, filter, map, shareReplay, startWith } from 'rxjs/operators';
+import { combineLatest, Observable, Subscription } from 'rxjs';
+import { take, filter, map } from 'rxjs/operators';
 
 import { PageSubNavComponent } from '../../../../../../../core/src/shared/components/page-sub-nav/page-sub-nav.component';
 import { AnalysisReportRunnerComponent } from '../../../../analysis-report-viewer/analysis-report-runner/analysis-report-runner.component';
@@ -109,12 +109,9 @@ export class HelmReleaseResourceGraphComponent implements OnInit, OnDestroy {
 
   public path: string;
 
-  private analysisReportUpdated = new Subject<any>();
-  private analysisReportUpdated$ = this.analysisReportUpdated.pipe(
-    startWith(null),
-    distinctUntilChanged(),
-    shareReplay({ bufferSize: 1, refCount: true })
-  );
+  // The analysis report whose alerts are drawn on the nodes; null for none
+  private readonly analysisReport = signal<any>(null);
+  private readonly analysisReport$ = toObservable(this.analysisReport);
   protected helper = inject(HelmReleaseHelperService);
   public analyzerService = inject(KubernetesAnalysisService);
   private previewPanel = inject(SidePanelService);
@@ -134,7 +131,7 @@ export class HelmReleaseResourceGraphComponent implements OnInit, OnDestroy {
     // Listen for the graph
     this.graph = combineLatest([
       this.helper.fetchReleaseGraph(),
-      this.analysisReportUpdated$
+      this.analysisReport$
     ]).subscribe(([g, report]: [HelmReleaseGraph, any]) => {
       const newNodes: CustomHelmReleaseGraphNode[] = [];
       Object.values(g.nodes).forEach((node: HelmReleaseGraphNode) => {
@@ -218,18 +215,15 @@ export class HelmReleaseResourceGraphComponent implements OnInit, OnDestroy {
 
   // Open side panel when node is clicked
   public onNodeClick(node: CustomHelmReleaseGraphNode) {
-    this.analysisReportUpdated$.pipe(take(1)).subscribe((analysis: any) => {
-      this.previewPanel.show(
-        KubernetesResourceViewerComponent,
-        {
-          title: 'Helm Release Resource Preview',
-          resource$: this.getResource(node),
-          analysis,
-          resourceKind: node.data.kind
-        }
-      );
-    });
-
+    this.previewPanel.show(
+      KubernetesResourceViewerComponent,
+      {
+        title: 'Helm Release Resource Preview',
+        resource$: this.getResource(node),
+        analysis: this.analysisReport(),
+        resourceKind: node.data.kind
+      }
+    );
   }
 
   public fitGraph() {
@@ -282,10 +276,10 @@ export class HelmReleaseResourceGraphComponent implements OnInit, OnDestroy {
 
   public analysisChanged(report: any) {
     if (report === null) {
-      this.analysisReportUpdated.next(null);
+      this.analysisReport.set(null);
     } else {
       this.analyzerService.getByID(this.helper.endpointGuid, report.id).subscribe((results: any) => {
-        this.analysisReportUpdated.next(results);
+        this.analysisReport.set(results);
       });
     }
   }
