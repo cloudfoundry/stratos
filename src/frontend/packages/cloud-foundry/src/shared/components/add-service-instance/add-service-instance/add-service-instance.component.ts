@@ -306,7 +306,7 @@ export class AddServiceInstanceComponent implements OnInit, OnDestroy {
     valid: computed(() => !!this._selectService()?.validate()),
     blocked: this.selectServiceFetching.asReadonly(),
     submit: async () => {
-      const result = await firstValueFrom(this._selectService()!.onNext());
+      const result = await this._selectService()!.onNext();
       if (!result.success) {
         throw new Error(result.message || 'Failed to select service');
       }
