@@ -6,7 +6,7 @@ import { provideZonelessChangeDetection } from '@angular/core';
 import { HttpErrorResponse, provideHttpClient } from '@angular/common/http';
 import { provideHttpClientTesting } from '@angular/common/http/testing';
 import { describe, it, expect, beforeEach, afterEach, beforeAll, afterAll, vi } from 'vitest';
-import { NEVER, of, Subject } from 'rxjs';
+
 import { provideRouter, Router } from '@angular/router';
 import { RoutingHistoryService } from '@stratosui/store';
 import { RouterTestingModule } from '@angular/router/testing';
@@ -622,7 +622,7 @@ describe('SteppersComponent — failed step', () => {
     const reason = () => root.querySelector('[role="alert"] p');
     return { hostFixture, steppers, root, reason };
   };
-  const failed = (message: string) => of({ success: false, message, data: {}, redirect: false, ignoreSuccess: false });
+  const failed = (message: string) => Promise.resolve<StepOnNextResult>({ success: false, message, data: {}, redirect: false, ignoreSuccess: false });
 
   it('shows an HTML error page as its heading and message', async () => {
     const { hostFixture, steppers, reason } = await setUp();
@@ -651,7 +651,7 @@ describe('SteppersComponent — failed step', () => {
 
   it('shows what a step threw, and lets the user retry', async () => {
     const { hostFixture, steppers, reason } = await setUp();
-    steppers.steps[0].invokeNext = () => { throw new Error('boom'); };
+    steppers.steps[0].invokeNext = () => Promise.reject(new Error('boom'));
     steppers.goNext();
     await hostFixture.whenStable();
 
@@ -667,15 +667,49 @@ describe('SteppersComponent — failed step', () => {
     await hostFixture.whenStable();
     expect(reason()).not.toBeNull();
 
-    invokeNext.mockReturnValue(NEVER as never);
+    invokeNext.mockReturnValue(new Promise<StepOnNextResult>(() => { }));
     steppers.goNext();
     await hostFixture.whenStable();
     expect(reason()).toBeNull();
   });
 
+  it('drops the result of a try that a later try superseded', async () => {
+    const { hostFixture, steppers, reason } = await setUp();
+    let settleFirst!: (r: StepOnNextResult) => void;
+    const first = new Promise<StepOnNextResult>(r => settleFirst = r);
+    const invokeNext = vi.fn(() => first);
+    steppers.steps[0].invokeNext = invokeNext;
+    steppers.goNext();
+    invokeNext.mockReturnValue(failed('second'));
+    steppers.goNext();
+    await vi.waitFor(() => expect(steppers.stepError()).not.toBeNull());
+
+    settleFirst({ success: true });
+    await first;
+    await hostFixture.whenStable();
+    expect(steppers.currentIndex()).toBe(0);
+    expect(reason()!.textContent).toContain('second');
+    expect(steppers.steps[0].busy()).toBe(false);
+  });
+
+  it('drops a result that arrives after the stepper is destroyed', async () => {
+    const { hostFixture, steppers } = await setUp();
+    let settle!: (r: StepOnNextResult) => void;
+    const pending = new Promise<StepOnNextResult>(r => settle = r);
+    steppers.steps[0].invokeNext = () => pending;
+    const setActive = vi.spyOn(steppers, 'setActive');
+    steppers.goNext();
+    hostFixture.destroy();
+
+    settle({ success: true });
+    await pending;
+    await Promise.resolve();
+    expect(setActive).not.toHaveBeenCalled();
+  });
+
   it('clears the reason on going back from the step', async () => {
     const { hostFixture, steppers, reason } = await setUp();
-    steppers.steps[0].invokeNext = () => of({ success: true, message: '', data: {}, redirect: false, ignoreSuccess: false });
+    steppers.steps[0].invokeNext = () => Promise.resolve<StepOnNextResult>({ success: true, message: '', data: {}, redirect: false, ignoreSuccess: false });
     steppers.goNext();
     await hostFixture.whenStable();
     expect(steppers.currentIndex()).toBe(1);
@@ -717,7 +751,7 @@ describe('SteppersComponent — failed step', () => {
     expect(region.id).toBeTruthy();
     expect(next.getAttribute('aria-describedby')).toBe(region.id);
 
-    invokeNext.mockReturnValue(NEVER as never);
+    invokeNext.mockReturnValue(new Promise<StepOnNextResult>(() => { }));
     steppers.goNext();
     await hostFixture.whenStable();
     expect(next.hasAttribute('aria-describedby')).toBe(false);
@@ -729,7 +763,8 @@ describe('SteppersComponent — failed step', () => {
   it('gives focus back to Next when a step fails', async () => {
     const { hostFixture, steppers, root } = await setUp();
     const next = root.querySelector<HTMLButtonElement>('#stepper_next')!;
-    const result = new Subject<StepOnNextResult>();
+    let settle!: (r: StepOnNextResult) => void;
+    const result = new Promise<StepOnNextResult>(r => settle = r);
     steppers.steps[0].invokeNext = () => result;
     next.focus();
     steppers.goNext();
@@ -738,7 +773,8 @@ describe('SteppersComponent — failed step', () => {
     expect(next.disabled).toBe(true);
     expect(document.activeElement).toBe(document.body);
 
-    result.next({ success: false, message: 'nope', data: {}, redirect: false, ignoreSuccess: false });
+    settle({ success: false, message: 'nope', data: {}, redirect: false, ignoreSuccess: false });
+    await vi.waitFor(() => expect(steppers.steps[0].busy()).toBe(false));
     await hostFixture.whenStable();
 
     expect(next.disabled).toBe(false);
@@ -750,14 +786,16 @@ describe('SteppersComponent — failed step', () => {
     const next = root.querySelector<HTMLButtonElement>('#stepper_next')!;
     const field = document.createElement('input');
     root.appendChild(field);
-    const result = new Subject<StepOnNextResult>();
+    let settle!: (r: StepOnNextResult) => void;
+    const result = new Promise<StepOnNextResult>(r => settle = r);
     steppers.steps[0].invokeNext = () => result;
     next.focus();
     steppers.goNext();
     field.focus();
     await hostFixture.whenStable();
 
-    result.next({ success: false, message: 'nope', data: {}, redirect: false, ignoreSuccess: false });
+    settle({ success: false, message: 'nope', data: {}, redirect: false, ignoreSuccess: false });
+    await vi.waitFor(() => expect(steppers.steps[0].busy()).toBe(false));
     await hostFixture.whenStable();
 
     expect(document.activeElement).toBe(field);

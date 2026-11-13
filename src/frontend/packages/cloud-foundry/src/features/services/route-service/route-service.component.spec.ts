@@ -7,7 +7,6 @@ import { ActivatedRoute, provideRouter } from '@angular/router';
 import { provideNoopAnimations } from '@angular/platform-browser/animations';
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { describe, it, expect, beforeEach } from 'vitest';
-import { firstValueFrom } from 'rxjs';
 
 import { StepComponent } from '@stratosui/core';
 import { extractHttpErrorMessage } from '@stratosui/store';
@@ -119,7 +118,7 @@ describe('RouteServiceComponent — bind patches the binding from the response',
     const stepRef = TestBed.createComponent(StepComponent).componentRef;
     stepRef.setInput('signalHandle', component.bindStepHandle);
     const step = stepRef.instance;
-    const done = firstValueFrom(step.invokeNext(0));
+    const done = step.invokeNext();
     http.expectOne(r => r.method === 'POST' && r.url === '/pp/v1/cf/service_route_bindings/cf-1')
       .flush(page, { status: 502, statusText: 'Bad Gateway' });
 

@@ -1,5 +1,5 @@
 import { ChangeDetectionStrategy, Component, Signal, TemplateRef, input, signal, viewChild } from '@angular/core';
-import { from, Observable, of as observableOf } from 'rxjs';
+import { Observable } from 'rxjs';
 
 import { StepperRedirectPayload } from '../stepper.types';
 import { ErrorPiece, extractHttpErrorPieces, piecesToText } from '@stratosui/store';
@@ -194,10 +194,8 @@ export class StepComponent {
     return this.signalHandle()?.showBusy?.() ?? this.showBusy();
   }
 
-  // The three callbacks are inputs holding a function. Call them through
-  // invokeNext, pOnEnter and invokeLeave, which also honour the signalHandle.
-  readonly onNext = input<StepOnNextFunction>(() => observableOf({ success: true }));
-
+  // The two callbacks are inputs holding a function. Call them through
+  // pOnEnter and invokeLeave, which also honour the signalHandle.
   readonly onEnter = input<(data: any) => void>(() => { });
 
   readonly onLeave = input<(isNext?: boolean) => void>(() => { });
@@ -220,41 +218,27 @@ export class StepComponent {
   readonly signalHandle = input<SignalStepHandle>();
 
   /**
-   * Dispatch the step's submission. Signal-handle path wraps `submit()` as
-   * an Observable<StepOnNextResult> so SteppersComponent.goNext can consume
-   * both shapes uniformly. When `signalHandle` is set without `submit`, the
-   * step auto-succeeds (confirmation-screen pattern). Legacy path delegates
-   * to the existing `onNext(index, this)` contract.
+   * Runs the step's submission: the signalHandle's `submit`, or an
+   * immediate success for a step without one (a confirmation screen). It
+   * never rejects: a submit that throws or rejects gives
+   * `{ success: false }` with the error's message.
    */
-  invokeNext(index: number): Observable<StepOnNextResult> {
-    const handle = this.signalHandle();
-    const submit = handle?.submit;
-    if (submit) {
-      return from(
-        submit().then(
-          (resolved) => {
-            // resolved is `void | Partial<StepOnNextResult>`; void case
-            // (Promise.resolve()) isn't an object so guard before merge.
-            // Without spreading the resolved object the redirect / redirectPayload
-            // flags from routeToServices-style success returns are lost and the
-            // stepper can't navigate the user out of the wizard on completion.
-            const base = { success: true } as StepOnNextResult;
-            if (typeof resolved === 'object' && resolved !== null) {
-              return { ...base, ...resolved } as StepOnNextResult;
-            }
-            return base;
-          },
-          (err: unknown) => {
-            const messagePieces = extractHttpErrorPieces(err);
-            return { success: false, message: piecesToText(messagePieces), messagePieces } as StepOnNextResult;
-          },
-        ),
-      );
+  async invokeNext(): Promise<StepOnNextResult> {
+    const submit = this.signalHandle()?.submit;
+    if (!submit) {
+      return { success: true };
     }
-    if (handle) {
-      return observableOf({ success: true } as StepOnNextResult);
+    try {
+      const resolved = await submit();
+      // A resolved object carries flags such as redirect/redirectPayload,
+      // which take the user out of the wizard on completion.
+      return typeof resolved === 'object' && resolved !== null
+        ? { ...resolved, success: resolved.success ?? true }
+        : { success: true };
+    } catch (err) {
+      const messagePieces = extractHttpErrorPieces(err);
+      return { success: false, message: piecesToText(messagePieces), messagePieces };
     }
-    return this.onNext()(index, this);
   }
 
   constructor() {

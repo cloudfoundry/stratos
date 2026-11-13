@@ -2,8 +2,6 @@ import { ChangeDetectionStrategy, AfterContentInit, Component, ElementRef, Injec
 import { CommonModule } from '@angular/common';
 import { ActivatedRoute, Router, RouterModule } from '@angular/router';
 import { ErrorPiece, RoutingHistoryService } from '@stratosui/store';
-import { defer, Observable, of as observableOf, Subscription } from 'rxjs';
-import { take, catchError, defaultIfEmpty, finalize, switchMap } from 'rxjs/operators';
 
 import { BASE_REDIRECT_QUERY, StepperRedirectPayload } from '../stepper.types';
 import { SteppersService } from '../steppers.service';
@@ -40,8 +38,8 @@ export class SteppersComponent implements OnInit, AfterContentInit, OnDestroy {
   private route = inject(ActivatedRoute);
   private injector = inject(Injector);
 
-
-  private nextSub!: Subscription;
+  // Counts goNext tries; only the latest one's result is used.
+  private nextAttempt = 0;
 
   readonly stepComponents = contentChildren(StepComponent);
 
@@ -164,7 +162,8 @@ export class SteppersComponent implements OnInit, AfterContentInit, OnDestroy {
   ngOnInit() { }
 
   ngOnDestroy() {
-    this.unsubscribeNext();
+    // Drops the result of a submit still running.
+    this.nextAttempt++;
   }
 
   ngAfterContentInit() {
@@ -203,84 +202,43 @@ export class SteppersComponent implements OnInit, AfterContentInit, OnDestroy {
 
   goNext(): void {
     this.stepError.set(null);
-    this.unsubscribeNext();
-    if (this.currentIndex() < this.steps.length) {
-      const step = this.steps[this.currentIndex()];
-      step.busy.set(true);
+    const step = this.steps[this.currentIndex()];
+    if (!step) {
+      return;
+    }
+    // A later goNext, or the stepper's destruction, supersedes this try:
+    // its result is then dropped, as an unsubscribe used to drop it.
+    const attempt = ++this.nextAttempt;
+    step.busy.set(true);
+    this.showNextButtonProgress.set(this.nextButtonProgress());
+    step.invokeNext()
+      .catch((err: unknown): StepOnNextResult => {
+        console.error('Stepper next failed:', err);
+        return { success: false, message: `An error occurred: ${(err as Error)?.message || err || 'Unknown error'}` };
+      })
+      .then(result => {
+        if (attempt === this.nextAttempt) {
+          this.finishNext(step, result);
+        }
+      });
+  }
 
-      // Defensive: step.invokeNext may throw synchronously (runtime error
-      // before it returns an observable, or signal-handle.submit() throwing
-      // sync). Without a try/catch, the throw escapes goNext, step.busy
-      // stays true, and the Next/Finish button is stuck as a spinner
-      // forever. Catch, show the reason, reset busy.
-      let obs$: Observable<StepOnNextResult> | unknown;
-      try {
-        obs$ = step.invokeNext(this.currentIndex());
-      } catch (err) {
-        console.error('Stepper onNext threw synchronously:', err);
-        step.busy.set(false);
-        this.showNextButtonProgress.set(false);
-        this.stepError.set([{
-          text: `An error occurred: ${(err as Error)?.message || err || 'Unknown error'}`,
-          style: 'text',
-        }]);
-        return;
+  private finishNext(step: StepComponent, { success, data, message, messagePieces, redirect, redirectPayload, ignoreSuccess }: StepOnNextResult): void {
+    this.showNextButtonProgress.set(false);
+    step.error.set(!success);
+    step.busy.set(false);
+    this.enterData = data;
+    if (success && !ignoreSuccess) {
+      if (redirect) {
+        this.redirect(redirectPayload);
+      } else {
+        this.setActive(this.currentIndex() + 1);
       }
-
-      // Defensive: if onNext returns a non-Observable (legacy synchronous
-      // success pattern, or a Promise which we don't handle), reset busy
-      // before the early return. Previously this path left step.busy stuck
-      // at true even though navigation was effectively complete/no-op.
-      if (!(obs$ instanceof Observable)) {
-        step.busy.set(false);
-        return;
+    } else {
+      if (!success && (messagePieces?.length || message)) {
+        this.stepError.set(messagePieces?.length ? messagePieces : [{ text: message ?? '', style: 'text' }]);
       }
-
-      this.showNextButtonProgress.set(this.nextButtonProgress());
-      this.nextSub = obs$.pipe(
-        take(1),
-        defaultIfEmpty({ success: false, message: 'No response from step', data: {}, redirect: false, redirectPayload: undefined, ignoreSuccess: false } as StepOnNextResult),
-        catchError(err => {
-          console.warn('Stepper failed: ', err);
-          return observableOf({
-            success: false,
-            message: err || 'Failed',
-            redirectPayload: undefined,
-            redirect: false,
-            data: {},
-            ignoreSuccess: false
-          } as StepOnNextResult);
-        }),
-        switchMap(({ success, data, message, messagePieces, redirect, redirectPayload, ignoreSuccess }) => {
-          this.showNextButtonProgress.set(false);
-          step.error.set(!success);
-          step.busy.set(false);
-          this.enterData = data;
-          if (success && !ignoreSuccess) {
-            if (redirect) {
-              // Must sub to this
-              return this.redirect(redirectPayload);
-            } else {
-              this.setActive(this.currentIndex() + 1);
-            }
-          } else {
-            if (!success && (messagePieces?.length || message)) {
-              this.stepError.set(messagePieces?.length ? messagePieces : [{ text: message ?? '', style: 'text' }]);
-            }
-            this.restoreNextFocus();
-          }
-          return observableOf(undefined);
-        }),
-        // Defensive: guarantee busy state is cleared on ANY teardown path —
-        // completion, error escaping catchError, or unsubscribe (e.g. if
-        // the user clicks Cancel or navigates away mid-flight while the
-        // observable is in flight). Without finalize, the spinner could
-        // remain visible after the user abandoned the step.
-        finalize(() => {
-          step.busy.set(false);
-          this.showNextButtonProgress.set(false);
-        })
-      ).subscribe();
+      this.restoreNextFocus();
     }
   }
 
@@ -304,11 +262,8 @@ export class SteppersComponent implements OnInit, AfterContentInit, OnDestroy {
     }
   }
 
-  redirect(redirectPayload?: StepperRedirectPayload): Observable<void> {
-    if (redirectPayload) {
-      return observableOf(this.navigate(redirectPayload));
-    }
-    return defer(() => observableOf(this.navigate({ path: this.cancelLink(), query: this.cancelQueryParams() })));
+  redirect(redirectPayload?: StepperRedirectPayload): void {
+    this.navigate(redirectPayload ?? { path: this.cancelLink(), query: this.cancelQueryParams() });
   }
 
   // Direct Angular Router navigation, replacing the ngrx RouterNav dispatch +
@@ -496,11 +451,6 @@ export class SteppersComponent implements OnInit, AfterContentInit, OnDestroy {
       // Full page load restarts the wizard from a clean state; the template
       // drops routerLink when cancelReload so this is the only navigation.
       window.location.assign(cancel);
-    }
-  }
-  private unsubscribeNext() {
-    if (this.nextSub) {
-      this.nextSub.unsubscribe();
     }
   }
 }
