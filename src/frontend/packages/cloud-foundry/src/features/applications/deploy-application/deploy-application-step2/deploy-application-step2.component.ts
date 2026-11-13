@@ -17,6 +17,7 @@ import {
 import {
   combineLatest,
   combineLatest as observableCombineLatest,
+  firstValueFrom,
   Observable,
   of as observableOf,
   of,
@@ -40,7 +41,6 @@ import {
 import { CfDeployAppDataService } from '../../../../services/domain-data/cf-deploy-app-data.service';
 import { TruncatePipe } from '../../../../../../core/src/core/truncate.pipe';
 import {
-  StepOnNextFunction,
   StepOnNextResult,
 } from '../../../../../../core/src/shared/components/stepper/step/step.component';
 import { DeployApplicationState, ProjectExists, SourceType } from '../../../../store/types/deploy-application.types';
@@ -210,7 +210,7 @@ export class DeployApplicationStep2Component
     }
   }
 
-  onNext: StepOnNextFunction = () => {
+  async onNext(): Promise<StepOnNextResult> {
     // Set the details based on which source type is selected
     if (this.sourceType.group === 'gitscm') {
       const branch = this.repositoryBranch;
@@ -222,30 +222,31 @@ export class DeployApplicationStep2Component
       // branch that is gone from the repository is only caught here.
       if (!branch) {
         const branchName = this.deployData.deployBranchName();
-        return observableOf({
+        return {
           success: false,
           message: this.isRedeploy() && branchName ?
             `Branch ${branchName} was not found in ${this.repository}.` :
             `Select a branch to deploy from ${this.repository}.`,
-        });
+        };
       }
-      return this.gitData.getRepository(this.scm, this.repository).waitForValue$.pipe(
-        map((repo): StepOnNextResult => {
-          this.deployData.saveAppDetails({
-            projectName: this.repository,
-            branch,
-            url: repo.clone_url,
-            accessToken: this.accessToken,
-            commit: this.isRedeploy() ? this.redeployCommitSha : undefined,
-            endpointGuid,
-          }, null);
-          return { success: true, data };
-        }),
-        catchError((err: Error) => observableOf({
+      // waitForValue$ can stay open, so take its first value only
+      try {
+        const repo = await firstValueFrom(this.gitData.getRepository(this.scm, this.repository).waitForValue$);
+        this.deployData.saveAppDetails({
+          projectName: this.repository,
+          branch,
+          url: repo.clone_url,
+          accessToken: this.accessToken,
+          commit: this.isRedeploy() ? this.redeployCommitSha : undefined,
+          endpointGuid,
+        }, null);
+        return { success: true, data };
+      } catch (err) {
+        return {
           success: false,
-          message: `Unable to fetch ${this.scm.getLabel()} repository ${this.repository}: ${err.message}`,
-        }))
-      );
+          message: `Unable to fetch ${this.scm.getLabel()} repository ${this.repository}: ${(err as Error).message}`,
+        };
+      }
     } else if (this.sourceType.id === DEPLOY_TYPES_IDS.GIT_URL) {
       this.deployData.saveAppDetails({
         projectName: this.gitUrl,
@@ -265,8 +266,8 @@ export class DeployApplicationStep2Component
         dockerUsername: this.dockerUsername,
       });
     }
-    return observableOf({ success: true, data: this.sourceSelectionForm().form.value.fsLocalSource });
-  };
+    return { success: true, data: this.sourceSelectionForm().form.value.fsLocalSource };
+  }
 
   ngOnInit() {
     this.sourceType$ = combineLatest([

@@ -78,7 +78,7 @@ describe('DeployApplicationStep3Component', () => {
     const action = new Subject<void>();
     const show = vi.spyOn(TestBed.inject(TailwindSnackBarService), 'show').mockReturnValue({ onAction: () => action } as any);
     await enterConnected();
-    const deployer = component.deployer;
+    const deployer = component.deployer()!;
     deployer.processWebSocketMessage({
       type: SocketEventTypes.MANIFEST,
       message: JSON.stringify({ Applications: [{ Name: 'my-app' }] }),
@@ -100,7 +100,7 @@ describe('DeployApplicationStep3Component', () => {
 
   it('shows the manifest title before the push starts', async () => {
     await enterConnected();
-    const deployer = component.deployer;
+    const deployer = component.deployer()!;
     deployer.processWebSocketMessage({
       type: SocketEventTypes.MANIFEST,
       message: JSON.stringify({ Applications: [{ Name: 'a' }] }),
@@ -117,7 +117,7 @@ describe('DeployApplicationStep3Component', () => {
     const show = vi.spyOn(snackBar, 'show').mockReturnValue({ onAction: () => NEVER } as any);
 
     await enterConnected();
-    const deployer = component.deployer;
+    const deployer = component.deployer()!;
     const close = vi.spyOn(deployer, 'close');
     deployer.processWebSocketMessage({ type: SocketEventTypes.EVENT_PUSH_STARTED, message: '' });
     await fixture.whenStable();
@@ -135,7 +135,7 @@ describe('DeployApplicationStep3Component', () => {
 
   it('looks up the app GUID once when the deploy finishes on the page', async () => {
     await enterConnected();
-    const deployer = component.deployer;
+    const deployer = component.deployer()!;
     deployer.processWebSocketMessage({
       type: SocketEventTypes.MANIFEST,
       message: JSON.stringify({ Applications: [{ Name: 'my-app' }] }),
@@ -153,14 +153,8 @@ describe('DeployApplicationStep3Component', () => {
   });
 
   describe('the Previous button', () => {
-    let disabled: boolean[];
-    const locked = () => disabled.at(-1);
-    const fromServer = (type: SocketEventTypes, message = '') => component.deployer.processWebSocketMessage({ type, message });
-
-    beforeEach(() => {
-      disabled = [];
-      component.disablePrevious$.subscribe(d => disabled.push(d));
-    });
+    const locked = () => component.disablePrevious();
+    const fromServer = (type: SocketEventTypes, message = '') => component.deployer()!.processWebSocketMessage({ type, message });
 
     it('stays locked from entry until the deploy ends', async () => {
       await enterConnected();
@@ -187,7 +181,7 @@ describe('DeployApplicationStep3Component', () => {
       await enterConnected();
       socket.server.complete();
 
-      expect(component.deployer.finished).toBe(true);
+      expect(component.deployer()!.finished).toBe(true);
       expect(locked()).toBe(false);
     });
 
@@ -216,8 +210,8 @@ describe('DeployApplicationStep3Component', () => {
       component.onEnter(undefined as any);
       await fixture.whenStable();
 
-      expect(component.deployer.finished).toBe(true);
-      expect(component.deployer.status$().error).toBe(true);
+      expect(component.deployer()!.finished).toBe(true);
+      expect(component.deployer()!.status$().error).toBe(true);
       expect(locked()).toBe(false);
     });
   });
@@ -260,7 +254,7 @@ describe('DeployApplicationStep3Component', () => {
     fromServer(SocketEventTypes.SOURCE_FILE_ACK);
     expect(sentTypes(1).at(-1)).toBe(SocketEventTypes.SOURCE_WAIT_ACK);
     expect(sentTypes(1).filter(t => t === SocketEventTypes.SOURCE_WAIT_ACK).length).toBe(1);
-    expect(component.deployer.finished).toBe(false);
+    expect(component.deployer()!.finished).toBe(false);
     deployer.close();
   });
 
@@ -269,7 +263,7 @@ describe('DeployApplicationStep3Component', () => {
 
     // The deploy of the named app succeeds on the page
     const succeed = async (name: string) => {
-      const deployer = component.deployer;
+      const deployer = component.deployer()!;
       deployer.processWebSocketMessage({
         type: SocketEventTypes.MANIFEST,
         message: JSON.stringify({ Applications: [{ Name: name }] }),
@@ -300,17 +294,13 @@ describe('DeployApplicationStep3Component', () => {
     it('can be closed when the deployed app is not found', async () => {
       const show = vi.spyOn(TestBed.inject(TailwindSnackBarService), 'show').mockReturnValue({ onAction: () => NEVER } as any);
       const navigate = vi.spyOn(TestBed.inject(Router), 'navigate').mockResolvedValue(true);
-      let closeable: boolean | undefined;
-      let valid: boolean | undefined;
-      component.closeable$.subscribe(c => closeable = c);
-      component.valid$.subscribe(v => valid = v);
       await enterConnected();
       await succeed('my-app');
 
       TestBed.inject(HttpTestingController).expectOne(appsUrl).flush({ resources: [{ name: 'other', guid: 'g0' }] });
 
-      expect(closeable).toBe(true);
-      expect(valid).toBe(false);
+      expect(component.closeable()).toBe(true);
+      expect(component.valid()).toBe(false);
       expect(show).toHaveBeenCalledWith('Application my-app was deployed but could not be found in the space', 'Dismiss');
       expect(navigate).not.toHaveBeenCalled();
     });
@@ -318,17 +308,13 @@ describe('DeployApplicationStep3Component', () => {
     it('can be closed when the lookup of the deployed app fails', async () => {
       const show = vi.spyOn(TestBed.inject(TailwindSnackBarService), 'show').mockReturnValue({ onAction: () => NEVER } as any);
       const navigate = vi.spyOn(TestBed.inject(Router), 'navigate').mockResolvedValue(true);
-      let closeable: boolean | undefined;
-      let valid: boolean | undefined;
-      component.closeable$.subscribe(c => closeable = c);
-      component.valid$.subscribe(v => valid = v);
       await enterConnected();
       await succeed('my-app');
 
       TestBed.inject(HttpTestingController).expectOne(appsUrl).flush('boom', { status: 500, statusText: 'Server Error' });
 
-      expect(closeable).toBe(true);
-      expect(valid).toBe(false);
+      expect(component.closeable()).toBe(true);
+      expect(component.valid()).toBe(false);
       expect(show).toHaveBeenCalledWith('Application my-app was deployed but looking it up in the space failed', 'Dismiss');
       expect(navigate).not.toHaveBeenCalled();
     });
@@ -351,7 +337,7 @@ describe('DeployApplicationStep3Component', () => {
   describe('the log of a retry', () => {
     const logText = (): string => fixture.nativeElement.querySelector('.log-scroller__content').textContent;
     const log = async (line: string) => {
-      component.deployer.messages.next(`${line}\n`);
+      component.deployer()!.messages.next(`${line}\n`);
       await vi.waitFor(() => expect(logText()).toContain(line));
     };
 
@@ -399,7 +385,7 @@ describe('DeployApplicationStep3Component', () => {
     const httpMock = TestBed.inject(HttpTestingController);
 
     await enterConnected();
-    const deployer = component.deployer;
+    const deployer = component.deployer()!;
     deployer.processWebSocketMessage({ type: SocketEventTypes.EVENT_PUSH_STARTED, message: '' });
     deployer.processWebSocketMessage({
       type: SocketEventTypes.MANIFEST,
@@ -437,7 +423,7 @@ describe('DeployApplicationStep3Component', () => {
     const show = vi.spyOn(snackBar, 'show').mockReturnValue({ onAction: () => NEVER } as any);
 
     await enterConnected();
-    const deployer = component.deployer;
+    const deployer = component.deployer()!;
     const close = vi.spyOn(deployer, 'close');
     deployer.processWebSocketMessage({ type: SocketEventTypes.EVENT_PUSH_STARTED, message: '' });
     await fixture.whenStable();
@@ -455,7 +441,7 @@ describe('DeployApplicationStep3Component', () => {
     const show = vi.spyOn(snackBar, 'show').mockReturnValue({ onAction: () => NEVER } as any);
 
     await enterConnected();
-    const deployer = component.deployer;
+    const deployer = component.deployer()!;
     const close = vi.spyOn(deployer, 'close');
 
     // Leave during the clone, then let the deploy fail.
@@ -478,7 +464,7 @@ describe('DeployApplicationStep3Component', () => {
     // Leave before the deployer has read the deploy details, so it is
     // still waiting to connect; leaving clears them, so it never would.
     component.onEnter(undefined as any);
-    const close = vi.spyOn(component.deployer, 'close');
+    const close = vi.spyOn(component.deployer()!, 'close');
 
     fixture.destroy();
     await TestBed.inject(ApplicationRef).whenStable();
@@ -492,7 +478,7 @@ describe('DeployApplicationStep3Component', () => {
     const show = vi.spyOn(snackBar, 'show').mockReturnValue({ onAction: () => NEVER } as any);
 
     await enterConnected();
-    const deployer = component.deployer;
+    const deployer = component.deployer()!;
     const close = vi.spyOn(deployer, 'close');
     deployer.processWebSocketMessage({ type: SocketEventTypes.EVENT_PUSH_STARTED, message: '' });
     deployer.processWebSocketMessage({ type: SocketEventTypes.EVENT_PUSH_COMPLETED, message: '' });

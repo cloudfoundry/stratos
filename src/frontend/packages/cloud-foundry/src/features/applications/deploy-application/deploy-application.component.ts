@@ -1,6 +1,5 @@
 import {
   ChangeDetectionStrategy,
-  ChangeDetectorRef,
   Component,
   OnDestroy,
   OnInit,
@@ -14,7 +13,7 @@ import {
 import { toObservable } from '@angular/core/rxjs-interop';
 import { ErrorStateMatcher, ShowOnDirtyErrorStateMatcher } from '@stratosui/core';
 import { ActivatedRoute, Router } from '@angular/router';
-import { Observable, Subscription, of, of as observableOf, firstValueFrom } from 'rxjs';
+import { Observable, Subscription, of, of as observableOf } from 'rxjs';
 import { take, filter, map, tap } from 'rxjs/operators';
 import { AsyncPipe } from '@angular/common';
 
@@ -60,7 +59,6 @@ export class DeployApplicationComponent implements OnInit, OnDestroy {
   cfOrgSpaceService = inject(CfOrgSpaceDataService);
   private appsConfig = inject(CfAppsSignalConfigService);
   private activatedRoute = inject(ActivatedRoute);
-  private cdr = inject(ChangeDetectorRef);
   private deployData = inject(CfDeployAppDataService);
   private cfDetails$ = toObservable(this.deployData.cfDetails);
 
@@ -114,12 +112,14 @@ export class DeployApplicationComponent implements OnInit, OnDestroy {
 
   private step1Valid = signal<boolean>(false);
   private step2Valid = signal<boolean>(false);
-  private step2_1Valid = signal<boolean>(false);
+  // Steps 2_1 and 3 keep their state in signals, so the parent reads it
+  // straight from the step once its view query resolves.
+  private step2_1Valid = computed(() => this.step2_1()?.validate() ?? false);
   private step2_2Valid = signal<boolean>(false);
   private step4Valid = signal<boolean>(false);
-  private step3Valid = signal<boolean>(false);
-  private step3Closeable = signal<boolean>(false);
-  private step3DisablePrevious = signal<boolean>(true);
+  private step3Valid = computed(() => this.step3()?.valid() ?? false);
+  private step3Closeable = computed(() => this.step3()?.closeable() ?? false);
+  private step3DisablePrevious = computed(() => this.step3()?.disablePrevious() ?? true);
 
   // Carries the deployer instance forward from step2_2 (source-upload)
   // to step3 (deploy progress). The legacy stepper relayed this via
@@ -154,10 +154,8 @@ export class DeployApplicationComponent implements OnInit, OnDestroy {
 
   private readonly step1Bridge = this.bridge(this.step1, v => this.wireStep1(v));
   private readonly step2Bridge = this.bridge(this.step2, v => this.wireStep2(v));
-  private readonly step2_1Bridge = this.bridge(this.step2_1, v => this.wireStep2_1(v));
   private readonly step2_2Bridge = this.bridge(this.step2_2, v => this.wireStep2_2(v));
   private readonly step4Bridge = this.bridge(this.step4, v => this.wireStep4(v));
-  private readonly step3Bridge = this.bridge(this.step3, v => this.wireStep3(v));
 
   private wireStep1(v: CreateApplicationStep1Component | undefined): Subscription | undefined {
     if (!v) {
@@ -166,7 +164,6 @@ export class DeployApplicationComponent implements OnInit, OnDestroy {
     }
     return v.validate.subscribe(valid => {
       this.step1Valid.set(!!valid);
-      this.cdr.markForCheck();
     });
   }
 
@@ -177,27 +174,6 @@ export class DeployApplicationComponent implements OnInit, OnDestroy {
     }
     return v.validate.subscribe(valid => {
       this.step2Valid.set(!!valid);
-      this.cdr.markForCheck();
-    });
-  }
-
-  private wireStep2_1(v: DeployApplicationStep21Component | undefined): Subscription | undefined {
-    if (!v) {
-      this.step2_1Valid.set(false);
-      return undefined;
-    }
-    // Subscription wiring only. The activation-time `onEnter` call (which
-    // builds the commit list from the git source populated by step 2's
-    // submit) lives on `step2_1Handle.onEnter` — see the `wireStep2_2`
-    // comment for why wiring time is the wrong hook: step 2_1 is rendered
-    // via `[hidden]` and so is instantiated up-front, before step 2 has
-    // saved any gitDetails. Calling `v.onEnter()` here ran the commit-list
-    // wrapper with an empty applicationSource, so it never resolved a
-    // project/branch — leaving "Source Config" with no options and the Next
-    // button disabled.
-    return v.validate.subscribe(valid => {
-      this.step2_1Valid.set(!!valid);
-      this.cdr.markForCheck();
     });
   }
 
@@ -215,7 +191,6 @@ export class DeployApplicationComponent implements OnInit, OnDestroy {
     // so this runs before step 2 ever submits.
     return v.valid$.subscribe(valid => {
       this.step2_2Valid.set(!!valid);
-      this.cdr.markForCheck();
     });
   }
 
@@ -231,33 +206,7 @@ export class DeployApplicationComponent implements OnInit, OnDestroy {
     v.onEnter(undefined);
     return v.valid$.subscribe(valid => {
       this.step4Valid.set(!!valid);
-      this.cdr.markForCheck();
     });
-  }
-
-  private wireStep3(v: DeployApplicationStep3Component | undefined): Subscription | undefined {
-    if (!v) {
-      this.step3Valid.set(false);
-      this.step3Closeable.set(false);
-      this.step3DisablePrevious.set(true);
-      return undefined;
-    }
-    // Subscription wiring only. The activation-time `onEnter` call that
-    // forwards `pendingDeployer` lives on `step3Handle.onEnter` — see the
-    // `wireStep2_2` comment above for why wiring time was the wrong hook.
-    const sub = v.valid$.subscribe(valid => {
-      this.step3Valid.set(!!valid);
-      this.cdr.markForCheck();
-    });
-    sub.add(v.closeable$.subscribe(c => {
-      this.step3Closeable.set(!!c);
-      this.cdr.markForCheck();
-    }));
-    sub.add(v.disablePrevious$.subscribe(d => {
-      this.step3DisablePrevious.set(!!d);
-      this.cdr.markForCheck();
-    }));
-    return sub;
   }
 
   step1Handle: SignalStepHandle = {
@@ -278,7 +227,7 @@ export class DeployApplicationComponent implements OnInit, OnDestroy {
   step2Handle: SignalStepHandle = {
     valid: this.step2Valid.asReadonly(),
     submit: async () => {
-      const result = await firstValueFrom(this.step2()!.onNext(0, null as any));
+      const result = await this.step2()!.onNext();
       if (!result.success) {
         throw new Error(result.message || 'Failed to save source type');
       }
@@ -293,7 +242,7 @@ export class DeployApplicationComponent implements OnInit, OnDestroy {
   };
 
   step2_1Handle: SignalStepHandle = {
-    valid: this.step2_1Valid.asReadonly(),
+    valid: this.step2_1Valid,
     // Activation-time build of the commit list. Runs on each entry (not at
     // ViewChild init) so it reads the git source that step 2's submit just
     // saved — the commit-list wrapper resolves project/branch from
@@ -302,7 +251,7 @@ export class DeployApplicationComponent implements OnInit, OnDestroy {
     onEnter: () => this.step2_1()?.onEnter(),
     onLeave: () => this.step2_1()?.onLeave(),
     submit: async () => {
-      const result = await firstValueFrom(this.step2_1()!.onNext(0, null as any));
+      const result = await this.step2_1()!.onNext();
       if (!result.success) {
         throw new Error(result.message || 'Failed to save source config');
       }
@@ -322,7 +271,7 @@ export class DeployApplicationComponent implements OnInit, OnDestroy {
     },
     onLeave: (isNext?: boolean) => this.step2_2()?.onLeave(!!isNext),
     submit: async () => {
-      const result = await firstValueFrom(this.step2_2()!.onNext(0, null as any));
+      const result = await this.step2_2()!.onNext();
       if (!result.success) {
         throw new Error(result.message || 'Failed to upload source');
       }
@@ -337,7 +286,7 @@ export class DeployApplicationComponent implements OnInit, OnDestroy {
     valid: this.step4Valid.asReadonly(),
     nextButtonText: this.deployButtonTextSignal.asReadonly(),
     submit: async () => {
-      const result = await firstValueFrom(this.step4()!.onNext(0, null as any));
+      const result = await this.step4()!.onNext();
       if (!result.success) {
         throw new Error(result.message || 'Failed to save deploy options');
       }
@@ -345,7 +294,7 @@ export class DeployApplicationComponent implements OnInit, OnDestroy {
   };
 
   step3Handle: SignalStepHandle = {
-    valid: this.step3Valid.asReadonly(),
+    valid: this.step3Valid,
     // Activation-time hand-off of step 2_2's deployer. Same rationale as
     // `step2_2Handle.onEnter` — ViewChild-time would run with
     // `pendingDeployer === undefined`. Source types that bypass step 2_2
@@ -359,16 +308,16 @@ export class DeployApplicationComponent implements OnInit, OnDestroy {
       this.deployButtonTextSignal.set('Deploy again');
       this.step3()?.onEnter(this.pendingDeployer as any);
     },
-    canClose: this.step3Closeable.asReadonly(),
-    disablePrevious: this.step3DisablePrevious.asReadonly(),
-    // step3.disablePrevious$ is true from entry until the deploy ends,
+    canClose: this.step3Closeable,
+    disablePrevious: this.step3DisablePrevious,
+    // step3.disablePrevious is true from entry until the deploy ends,
     // which is also when the step header should show it busy, so
     // showBusy reuses that signal.
-    showBusy: this.step3DisablePrevious.asReadonly(),
+    showBusy: this.step3DisablePrevious,
     cancelButtonText: signal('Close').asReadonly(),
     finishButtonText: signal('Go to App Summary').asReadonly(),
     submit: async () => {
-      const result = await firstValueFrom(this.step3()!.onNext(0, null as any));
+      const result = await this.step3()!.onNext();
       if (!result.success) {
         throw new Error(result.message || 'Deploy failed');
       }

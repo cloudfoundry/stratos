@@ -1,10 +1,11 @@
+@let d = deployer();
 <div class="flex items-center px-3 py-3 h-[43px] border-b border-content-border shrink-0">
-  <div class="flex-1 font-semibold">{{ deployer ? deployer.streamTitle() : 'Pending' }}</div>
-  @if (deployer && deployer.deploying) {
+  <div class="flex-1 font-semibold">{{ d ? d.streamTitle() : 'Pending' }}</div>
+  @if (d?.deploying()) {
     <app-busy class="text-primary" size="1.25rem" context="deploy"></app-busy>
   }
 </div>
-@if (deployer) {
-  <app-log-viewer class="flex-1 min-h-0 flex" [logStream]="deployer.messages.asObservable()">
+@if (d) {
+  <app-log-viewer class="flex-1 min-h-0 flex" [logStream]="logStream()">
   </app-log-viewer>
 }

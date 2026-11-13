@@ -96,22 +96,22 @@ describe('DeployApplicationStepSourceUploadComponent', () => {
       expect(closeSpy).toHaveBeenCalled();
     });
 
-    it('closes a handed-on deployer the deploy step never started', () => {
-      component.onNext(0, null as any).subscribe();
+    it('closes a handed-on deployer the deploy step never started', async () => {
+      await component.onNext();
       fixture.destroy();
       expect(closeSpy).toHaveBeenCalled();
     });
 
-    it('leaves the deployer open once the deploy step started it, before the push', () => {
-      component.onNext(0, null as any).subscribe();
+    it('leaves the deployer open once the deploy step started it, before the push', async () => {
+      await component.onNext();
       component.deployer.deploy();
       fixture.destroy();
       expect(closeSpy).not.toHaveBeenCalled();
       component.deployer.close();
     });
 
-    it('closes a started deploy that has finished', () => {
-      component.onNext(0, null as any).subscribe();
+    it('closes a started deploy that has finished', async () => {
+      await component.onNext();
       component.deployer.deploy();
       component.deployer.processWebSocketMessage({ type: SocketEventTypes.CLOSE_FAILURE, message: 'boom' });
       fixture.destroy();
@@ -147,7 +147,7 @@ describe('DeployApplicationStepSourceUploadComponent', () => {
       component.onEnter(oneFile());
       await appRef.whenStable();
       expect(socket.connections).toBe(1);
-      component.onNext(0, null as any).subscribe();
+      await component.onNext();
       component.deployer.deploy();
       fromServer(SocketEventTypes.CLOSE_FAILURE, 'boom');
       expect(component.deployer.finished).toBe(true);
