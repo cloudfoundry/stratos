@@ -14,14 +14,13 @@ import {
   IStratosEndpointDefinition,
   entityCatalog,
   ActionState } from '@stratosui/store';
-import { Observable, Subscription, firstValueFrom, from } from 'rxjs';
-import { take, filter, map, switchMap } from 'rxjs/operators';
+import { Observable, Subscription, firstValueFrom } from 'rxjs';
+import { take, filter, map } from 'rxjs/operators';
 
-import { StepOnNextFunction, StepComponent, StepOnNextResult, SignalStepHandle } from '../../../../shared/components/stepper/step/step.component';
+import { StepOnNextResult, SignalStepHandle } from '../../../../shared/components/stepper/step/step.component';
 import { EndpointCertificatesComponent } from '../../certificates/endpoint-certificates.component';
 import { getSSOClientRedirectURI } from '../../endpoint-helpers';
 import { getIdFromRoute, safeUnsubscribe } from './../../../../core/utils.service';
-import { IStepperStep } from './../../../../shared/components/stepper/step/step.component';
 import { UniqueDirective } from '../../../../shared/components/unique.directive';
 import { ProductNameComponent } from '../../../../shared/components/product-name.ccomponent';
 
@@ -60,7 +59,7 @@ interface EditEndpointForm {
   ],
   changeDetection: ChangeDetectionStrategy.OnPush
 })
-export class EditEndpointStepComponent implements OnDestroy, IStepperStep {
+export class EditEndpointStepComponent implements OnDestroy {
 
   endpointID: string;
   editEndpoint: FormGroup<EditEndpointForm>;
@@ -111,7 +110,7 @@ export class EditEndpointStepComponent implements OnDestroy, IStepperStep {
     this.signalHandle = {
       valid: validSignal,
       submit: async () => {
-        const result = await firstValueFrom(this.onNext(0, undefined as unknown as StepComponent));
+        const result = await this.onNext();
         if (!result.success) {
           throw new Error(result.message || 'Failed to update endpoint');
         }
@@ -203,38 +202,29 @@ export class EditEndpointStepComponent implements OnDestroy, IStepperStep {
     }
   }
 
-  onNext: StepOnNextFunction = (_index: number, _step: StepComponent): Observable<StepOnNextResult> => {
-    return this.endpoint$.pipe(
-      filter((endpoint): endpoint is EndpointModel => !!endpoint),
-      take(1),
-      switchMap(endpoint => {
-        const caCert = this.showCACertField() ? this.editEndpoint.value.caCert : undefined;
-        const skipSSL = this.showCACertField() ? false : this.editEndpoint.value.skipSSL ?? false;
-        // W36-B Wave 3: dispatch the update via EndpointsDataService.
-        // The service returns Promise<ActionState> with the resolved
-        // final state — the previous pairwise+busy-edge dance over the
-        // legacy ngrx update Observable collapses to a single await.
-        return from(this.endpointsData.update(this.endpointID, {
-          endpointType: endpoint.cnsi_type ?? '',
-          name: this.editEndpoint.value.name ?? '',
-          skipSSL,
-          setClientInfo: this.editEndpoint.value.setClientInfo ?? false,
-          clientID: this.editEndpoint.value.clientID ?? '',
-          clientSecret: this.editEndpoint.value.clientSecret ?? '',
-          allowSSO: this.editEndpoint.value.allowSSO ?? false,
-          caCert,
-        })).pipe(
-          map((o: ActionState): StepOnNextResult => {
-            return {
-              success: !o.error,
-              message: o.message,
-              redirect: !o.error
-            };
-          })
-        );
-      })
-    );
-  };
+  async onNext(): Promise<StepOnNextResult> {
+    // Waits for the endpoint to load if it has not yet
+    const endpoint = await firstValueFrom(this.endpoint$.pipe(
+      filter((ep): ep is EndpointModel => !!ep),
+    ));
+    const caCert = this.showCACertField() ? this.editEndpoint.value.caCert : undefined;
+    const skipSSL = this.showCACertField() ? false : this.editEndpoint.value.skipSSL ?? false;
+    const state: ActionState = await this.endpointsData.update(this.endpointID, {
+      endpointType: endpoint.cnsi_type ?? '',
+      name: this.editEndpoint.value.name ?? '',
+      skipSSL,
+      setClientInfo: this.editEndpoint.value.setClientInfo ?? false,
+      clientID: this.editEndpoint.value.clientID ?? '',
+      clientSecret: this.editEndpoint.value.clientSecret ?? '',
+      allowSSO: this.editEndpoint.value.allowSSO ?? false,
+      caCert,
+    });
+    return {
+      success: !state.error,
+      message: state.message,
+      redirect: !state.error
+    };
+  }
 
   ngOnDestroy(): void {
     safeUnsubscribe(this.formChangeSub);

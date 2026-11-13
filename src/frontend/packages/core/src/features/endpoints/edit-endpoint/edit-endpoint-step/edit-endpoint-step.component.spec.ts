@@ -1,7 +1,8 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { provideZonelessChangeDetection } from '@angular/core';
 import { ActivatedRoute } from '@angular/router';
-import { describe, it, expect, beforeEach, afterEach } from 'vitest';
+import { describe, it, expect, beforeEach, afterEach, vi } from 'vitest';
+import { EndpointsDataService } from '@stratosui/store';
 import {
   EntityCatalogHelper,
   EntityCatalogHelpers,
@@ -171,6 +172,26 @@ describe('EditEndpointStepComponent', () => {
       await fixture.whenStable();
       expect((cards().componentInstance as EndpointCertificatesComponent).pem()).toBe('');
       expect(fixture.nativeElement.textContent).toContain('Applies to the endpoint address and its login server (UAA).');
+    });
+  });
+
+  describe('onNext', () => {
+    it('saves the form and asks to leave when the update works', async () => {
+      const update = vi.spyOn(TestBed.inject(EndpointsDataService), 'update')
+        .mockResolvedValue({ error: false, message: '' } as never);
+      component.editEndpoint.controls.name.setValue('renamed');
+
+      const result = await component.onNext();
+
+      expect(update).toHaveBeenCalledWith(testSCFEndpointGuid, expect.objectContaining({ name: 'renamed' }));
+      expect(result).toEqual({ success: true, message: '', redirect: true });
+    });
+
+    it('reports the reason when the update fails', async () => {
+      vi.spyOn(TestBed.inject(EndpointsDataService), 'update')
+        .mockResolvedValue({ error: true, message: 'Name taken' } as never);
+
+      expect(await component.onNext()).toEqual({ success: false, message: 'Name taken', redirect: false });
     });
   });
 });

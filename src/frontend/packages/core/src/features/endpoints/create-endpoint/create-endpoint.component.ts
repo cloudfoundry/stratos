@@ -2,7 +2,6 @@ import { CommonModule } from '@angular/common';
 import {
   AfterViewInit,
   ChangeDetectionStrategy,
-  ChangeDetectorRef,
   Component,
   ComponentRef,
   OnDestroy,
@@ -16,7 +15,7 @@ import {
 } from '@angular/core';
 import { ActivatedRoute, Router } from '@angular/router';
 import { entityCatalog } from '@stratosui/store';
-import { firstValueFrom, Subscription } from 'rxjs';
+import { Subscription } from 'rxjs';
 
 import { getIdFromRoute } from '../../../core/utils.service';
 import { normalizeUrl } from '../../../shared/validators';
@@ -71,7 +70,6 @@ export class CreateEndpointComponent implements OnInit, AfterViewInit, OnDestroy
   private readonly _connect = viewChild<CreateEndpointConnectComponent>('connect');
 
   private router = inject(Router);
-  private cdr = inject(ChangeDetectorRef);
   // Present when hosted by the Register Endpoint dialog, which this form
   // closes instead of navigating to /endpoints (the page under the dialog).
   private registerHandle = inject(ENDPOINT_REGISTER_HANDLE, { optional: true });
@@ -101,7 +99,7 @@ export class CreateEndpointComponent implements OnInit, AfterViewInit, OnDestroy
     submit: async () => {
       // Delegate to the existing onNext to preserve all of its
       // side-effects (snackbar, dup-endpoint warning, store dispatch).
-      const result = await firstValueFrom(this.step1()!.onNext(0, {} as any));
+      const result = await this.step1()!.onNext();
       if (!result.success) {
         throw new Error(result.message || 'Failed to register endpoint');
       }
@@ -148,7 +146,7 @@ export class CreateEndpointComponent implements OnInit, AfterViewInit, OnDestroy
       }
     },
     submit: async () => {
-      const result = await firstValueFrom(this._connect()!.onNext());
+      const result = await this._connect()!.onNext();
       // The stepper gives the reason, in view: the dialog's body scrolls
       // under its button row.
       if (!result.success) {
@@ -197,7 +195,6 @@ export class CreateEndpointComponent implements OnInit, AfterViewInit, OnDestroy
         if (step1?.validate) {
           this.step1ValidateSub = step1.validate.subscribe(v => {
             this.step1Valid.set(!!v);
-            this.cdr.markForCheck();
           });
         }
       });

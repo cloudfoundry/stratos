@@ -194,7 +194,7 @@ export class GitRegistrationComponent extends CreateEndpointHelperComponent impl
       }
     },
     submit: async () => {
-      const result = await firstValueFrom(this._connect()!.onNext());
+      const result = await this._connect()!.onNext();
       // The stepper gives the reason, in view: the dialog's body scrolls
       // under its button row.
       if (!result.success) {

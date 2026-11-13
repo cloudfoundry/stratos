@@ -253,6 +253,33 @@ describe('CreateEndpointConnectComponent', () => {
     });
   });
 
+  describe('onNext', () => {
+    const config = { name: 'ep', guid: 'ep-1', type: 'cf', subType: null, ssoAllowed: false };
+
+    it('finishes without connecting while Connect now is off', async () => {
+      component.onEnter(config as any);
+      component.doConnect = false;
+
+      expect(await component.onNext()).toEqual({ success: true, redirect: true });
+    });
+
+    it('redirects when the connect succeeds', async () => {
+      component.onEnter(config as any);
+      component.doConnect = true;
+      vi.spyOn(component.connectService()!, 'submit').mockReturnValue(of({ success: true, errorMessage: '' }));
+
+      expect(await component.onNext()).toEqual({ success: true, message: '', redirect: true });
+    });
+
+    it('reports the reason when the connect fails', async () => {
+      component.onEnter(config as any);
+      component.doConnect = true;
+      vi.spyOn(component.connectService()!, 'submit').mockReturnValue(of({ success: false, errorMessage: 'Bad credentials' }));
+
+      expect(await component.onNext()).toEqual({ success: false, message: 'Bad credentials', redirect: false });
+    });
+  });
+
   describe('the Register strip', () => {
     const config = { name: 'ep', guid: 'ep-1', type: 'cf', subType: null, ssoAllowed: false };
     const strip = () => fixture.nativeElement.querySelector('.connect__strip') as HTMLElement | null;

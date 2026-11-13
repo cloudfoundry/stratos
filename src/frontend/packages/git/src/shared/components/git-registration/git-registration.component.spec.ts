@@ -126,7 +126,7 @@ describe('GitRegistrationComponent', () => {
   it('closes the dialog, reporting the registration, when the Connect step finishes', async () => {
     // Stands in for the `connect` view query, which the handle reads.
     (component as unknown as { _connect: () => unknown })._connect =
-      () => ({ onNext: () => of({ success: true, redirect: true }) });
+      () => ({ onNext: async () => ({ success: true, redirect: true }) });
     await component.connectStepHandle.submit!();
     expect(registerHandle.close).toHaveBeenCalledWith(true);
   });

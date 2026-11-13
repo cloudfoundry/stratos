@@ -246,7 +246,7 @@ describe('ConnectEndpointDialogComponent', () => {
     (fixture.nativeElement.querySelector('app-connect-endpoint form') as HTMLFormElement).dispatchEvent(new Event('submit'));
     const http = TestBed.inject(HttpTestingController);
     await vi.waitFor(() => http.expectOne(req => req.url.includes('tokens')));
-    expect(steppers().steps[1].busy).toBe(true);
+    expect(steppers().steps[1].busy()).toBe(true);
   });
 
   it('git endpoint: locked fields, no certificate cards', async () => {

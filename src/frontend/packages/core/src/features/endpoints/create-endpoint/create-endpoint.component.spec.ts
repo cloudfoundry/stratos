@@ -101,7 +101,7 @@ describe('CreateEndpointComponent', () => {
 
     it('closes the dialog, reporting the registration, when Register finishes the form', async () => {
       stubStep1({
-        onNext: () => of({ success: true, redirect: true }),
+        onNext: async () => ({ success: true, redirect: true }),
       });
       await component.step1StepHandle.submit!();
       expect(registerHandle.close).toHaveBeenCalledWith(true);
@@ -127,7 +127,7 @@ describe('CreateEndpointComponent', () => {
       unregister = vi.fn().mockResolvedValue({ error: false });
       vi.spyOn(TestBed.inject(EndpointsSignalConfigService), 'unregister').mockImplementation(unregister as never);
       stubStep1({
-        onNext: () => of({ success: true, data: { guid: 'new-guid', type: 'metrics', name: 'my-metrics' } }),
+        onNext: async () => ({ success: true, data: { guid: 'new-guid', type: 'metrics', name: 'my-metrics' } }),
       });
       await component.step1StepHandle.submit!();
     });
@@ -161,7 +161,7 @@ describe('CreateEndpointComponent', () => {
   it('shows a failed connect once, in the stepper', async () => {
     const error = vi.spyOn(TestBed.inject(TailwindSnackBarService), 'error');
     stubStep1({
-      onNext: () => of({ success: true, data: { guid: 'new-guid', type: 'metrics', name: 'my-metrics' } }),
+      onNext: async () => ({ success: true, data: { guid: 'new-guid', type: 'metrics', name: 'my-metrics' } }),
     });
     await component.step1StepHandle.submit!();
     component['step1Valid'].set(true);

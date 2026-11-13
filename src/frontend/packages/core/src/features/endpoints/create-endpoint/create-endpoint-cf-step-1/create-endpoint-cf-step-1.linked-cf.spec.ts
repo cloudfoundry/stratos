@@ -157,7 +157,7 @@ describe('CreateEndpointCfStep1Component: a type linked to a Cloud Foundry', () 
     await typeUrl('https://autoscaler.sys.x.com');
     await brokers('lab', [{ guid: 'b1', name: 'autoscaler', url: 'https://autoscalerservicebroker.sys.x.com' }]);
 
-    await firstValueFrom(component.onNext(0, {} as never));
+    await component.onNext();
     expect(register).toHaveBeenCalledWith(expect.objectContaining({
       endpointType: 'autoscaler', cfGuid: 'lab', brokerGuid: 'b1', brokerName: 'autoscaler',
     }));
@@ -171,7 +171,7 @@ describe('CreateEndpointCfStep1Component: a type linked to a Cloud Foundry', () 
     select('linked-broker')!.dispatchEvent(new Event('change'));
     await fixture.whenStable();
 
-    await firstValueFrom(component.onNext(0, {} as never));
+    await component.onNext();
     const opts = register.mock.calls[0][0];
     expect(opts.cfGuid).toBe('lab');
     expect(opts.brokerGuid).toBeUndefined();
