@@ -14,15 +14,18 @@
                trailing character. nbsp gives breathing room without using
                flex gap (which would re-introduce a separate baseline). -->
           <span class="metadata-item__copy-spacer">&nbsp;&nbsp;</span>
+          <!-- Says how the copy went: the glyph's change is not spoken.
+               There before the copy, so the change is announced. -->
+          <span class="sr-only" aria-live="polite">{{ copyState() === 'copied' ? 'Copied to clipboard' : copyState() === 'failed' ? 'Copy failed' : '' }}</span>
           <span
             class="material-icons metadata-item__copy"
             role="button"
             tabindex="0"
-            [title]="copied() ? 'Copied' : 'Copy to clipboard'"
-            [attr.aria-label]="copied() ? 'Copied' : 'Copy to clipboard'"
+            [title]="copyState() === 'copied' ? 'Copied' : 'Copy to clipboard'"
+            [attr.aria-label]="copyState() === 'copied' ? 'Copied' : 'Copy to clipboard'"
             (click)="copyToClipboard()"
             (keydown.enter)="copyToClipboard()"
-            (keydown.space)="copyToClipboard(); $event.preventDefault()">{{ copied() ? 'check_circle' : 'content_copy' }}</span>
+            (keydown.space)="copyToClipboard(); $event.preventDefault()">{{ copyState() === 'copied' ? 'check_circle' : 'content_copy' }}</span>
         }
       </div>
     }
