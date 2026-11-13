@@ -1,8 +1,8 @@
 import { CommonModule } from '@angular/common';
-import { AfterContentInit, Component, OnDestroy, signal, ChangeDetectionStrategy, inject, input } from '@angular/core';
+import { AfterContentInit, Component, DestroyRef, signal, ChangeDetectionStrategy, inject, input } from '@angular/core';
 import { ReactiveFormsModule, FormBuilder, FormControl, FormGroup } from '@angular/forms';
-import { Observable, of as observableOf, Subject } from 'rxjs';
-import { takeUntil } from 'rxjs/operators';
+import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
+import { Observable, of as observableOf } from 'rxjs';
 import { CustomFormFieldComponent, CustomSelectComponent, CustomOptionComponent, pathGet, StepOnNextResult } from '@stratosui/core';
 import { APIResource } from '@stratosui/store';
 import { IServicePlan } from '../../../../cf-api-svc.types';
@@ -29,7 +29,7 @@ interface BindAppsForm {
     SchemaFormComponent
   ]
 })
-export class BindAppsStepComponent implements OnDestroy, AfterContentInit {
+export class BindAppsStepComponent implements AfterContentInit {
   private csiState = inject(CsiStateService);
   private fb = inject(FormBuilder);
 
@@ -50,8 +50,7 @@ export class BindAppsStepComponent implements OnDestroy, AfterContentInit {
   // <app-schema-form> input.
   schemaFormConfig = signal<SchemaFormConfig | undefined>(undefined);
 
-  // Lifecycle management for subscriptions
-  private destroyed$ = new Subject<void>();
+  private destroyRef = inject(DestroyRef);
 
   get apps(): FormControl<string | null> {
     return this.stepperForm.get('apps') as FormControl<string | null>;
@@ -77,7 +76,7 @@ export class BindAppsStepComponent implements OnDestroy, AfterContentInit {
 
     // Validate step based on app selection
     this.apps.valueChanges.pipe(
-      takeUntil(this.destroyed$)
+      takeUntilDestroyed(this.destroyRef)
     ).subscribe(app => {
       if (!app) {
         // If there's no app selected the step will always be valid
@@ -135,11 +134,6 @@ export class BindAppsStepComponent implements OnDestroy, AfterContentInit {
       success: true,
       data: this.selectedServicePlan
     });
-  }
-
-  ngOnDestroy(): void {
-    this.destroyed$.next();
-    this.destroyed$.complete();
   }
 
 }
