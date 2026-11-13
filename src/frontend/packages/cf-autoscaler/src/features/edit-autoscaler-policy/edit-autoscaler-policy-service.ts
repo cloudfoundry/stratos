@@ -1,6 +1,7 @@
-import { effect, inject, Injectable, Injector, runInInjectionContext } from '@angular/core';
-import { BehaviorSubject, Observable } from 'rxjs';
-import { filter, switchMap, take } from 'rxjs/operators';
+import { computed, effect, inject, Injectable, Injector, runInInjectionContext, signal } from '@angular/core';
+import { toObservable } from '@angular/core/rxjs-interop';
+import { Observable } from 'rxjs';
+import { filter } from 'rxjs/operators';
 
 import { autoscalerTransformArrayToMap } from '../../core/autoscaler-helpers/autoscaler-transform-policy';
 import { AutoscalerPolicyDataService } from '../../services/domain-data/autoscaler-policy-data.service';
@@ -23,19 +24,20 @@ export class EditAutoscalerPolicyService {
     }
   });
 
-  private stateSubject = new BehaviorSubject(this.initialState);
+  private readonly state = signal(this.initialState);
   // The editor's steps see no state until the saved policy has loaded (or
   // is known not to exist), so nothing typed is replaced when it arrives.
-  private settled = new BehaviorSubject(false);
+  private readonly settled = signal(false);
+  private readonly settledState = computed(() => (this.settled() ? this.state() : undefined));
   private loadStarted = false;
 
   // FWT-959 Track A wave-3 (A-policy slice): replaced the EntityServiceFactory
   // + GetAppAutoscalerPolicyAction wiring with the signal-native
   // AutoscalerPolicyDataService. Behaviour preserved: load the policy from
   // the backend, then once it lands (success OR error) seed the local
-  // BehaviorSubject from the loaded entity. The legacy `take(1)` filter that
+  // state from the loaded entity. The legacy `take(1)` filter that
   // gated on (error || (!fetching && entity)) becomes a one-shot effect that
-  // copies the loaded policy into stateSubject the first time loading flips
+  // copies the loaded policy into the state the first time loading flips
   // false. Errors / no-policy leave the initial template state in place,
   // which matches the legacy behaviour (the take(1) filter only setState'd
   // when entity was present).
@@ -69,7 +71,7 @@ export class EditAutoscalerPolicyService {
         if (policy) {
           this.setState(policy);
         } else {
-          this.settled.next(true);
+          this.settled.set(true);
         }
         ref.destroy();
       });
@@ -78,15 +80,15 @@ export class EditAutoscalerPolicyService {
 
   setState(state: AppAutoscalerPolicyLocal) {
     const newState = JSON.parse(JSON.stringify(state));
-    this.stateSubject.next(newState);
-    this.settled.next(true);
+    this.state.set(newState);
+    this.settled.set(true);
   }
 
+  // Emits nothing until the state has settled, then the current state and
+  // each later change.
   getState(): Observable<AppAutoscalerPolicyLocal> {
-    return this.settled.pipe(
-      filter(Boolean),
-      take(1),
-      switchMap(() => this.stateSubject),
+    return toObservable(this.settledState, { injector: this.injector }).pipe(
+      filter((state): state is AppAutoscalerPolicyLocal => state !== undefined),
     );
   }
 
