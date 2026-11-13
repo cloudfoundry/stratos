@@ -4,7 +4,7 @@ import { provideHttpClient } from '@angular/common/http';
 import { HttpTestingController, provideHttpClientTesting } from '@angular/common/http/testing';
 import { ActivatedRoute } from '@angular/router';
 import { describe, it, expect, beforeEach, vi } from 'vitest';
-import { Subject, firstValueFrom, of } from 'rxjs';
+import { Subject, of } from 'rxjs';
 
 import { getGitHubAPIURL, GITHUB_API_URL, GitDataService, GitSCMService, GitHubSCM } from '@stratosui/git';
 import {
@@ -330,7 +330,7 @@ describe('DeployApplicationStep2Component', () => {
       const save = vi.spyOn(TestBed.inject(CfDeployAppDataService), 'saveAppDetails');
       component.sourceType = { id: 'github', group: 'gitscm', name: 'GitHub' } as any;
       component.gitMode = 'public';
-      const result = await firstValueFrom(component.onNext(0, null as any));
+      const result = await component.onNext();
       expect(result.success).toBe(true);
       expect(save).toHaveBeenCalledWith(
         expect.objectContaining({ projectName: 'o/r', url: 'https://github.com/o/r.git', endpointGuid: '' }),
@@ -342,7 +342,7 @@ describe('DeployApplicationStep2Component', () => {
       const save = vi.spyOn(TestBed.inject(CfDeployAppDataService), 'saveAppDetails');
       component.sourceType = { id: 'github', group: 'gitscm', name: 'GitHub', endpointGuid: 'ep-1' } as any;
       component.gitMode = 'public';
-      await firstValueFrom(component.onNext(0, null as any));
+      await component.onNext();
       expect(save).toHaveBeenCalledWith(expect.objectContaining({ endpointGuid: 'ep-1' }), null);
     });
   });
@@ -366,24 +366,22 @@ describe('DeployApplicationStep2Component', () => {
       deployData.setSourceType(component.sourceType);
       deployData.setDeployBranch('gone');
       fixture.componentRef.setInput('isRedeploy', true);
-      const results: { success: boolean; message?: string }[] = [];
-      component.onNext(0, null as any).subscribe(r => results.push(r));
+      const pending = component.onNext();
 
       TestBed.inject(HttpTestingController).match(() => true).forEach(r => r.flush({ clone_url: 'u' }));
       await fixture.whenStable();
 
-      expect(results).toEqual([{ success: false, message: 'Branch gone was not found in o/r.' }]);
+      expect(await pending).toEqual({ success: false, message: 'Branch gone was not found in o/r.' });
       expect(save).not.toHaveBeenCalled();
     });
 
     it('asks for a branch outside a redeploy', async () => {
-      const results: { success: boolean; message?: string }[] = [];
-      component.onNext(0, null as any).subscribe(r => results.push(r));
+      const pending = component.onNext();
 
       TestBed.inject(HttpTestingController).match(() => true).forEach(r => r.flush({ clone_url: 'u' }));
       await fixture.whenStable();
 
-      expect(results).toEqual([{ success: false, message: 'Select a branch to deploy from o/r.' }]);
+      expect(await pending).toEqual({ success: false, message: 'Select a branch to deploy from o/r.' });
     });
   });
 
@@ -402,15 +400,14 @@ describe('DeployApplicationStep2Component', () => {
 
     it('reports failure with the message and saves nothing', async () => {
       const save = vi.spyOn(TestBed.inject(CfDeployAppDataService), 'saveAppDetails');
-      const results: { success: boolean; message?: string }[] = [];
-      component.onNext(0, null as any).subscribe(r => results.push(r));
+      const pending = component.onNext();
 
       TestBed.inject(HttpTestingController)
         .expectOne('https://api.github.com/repos/o/missing')
         .flush('nope', { status: 404, statusText: 'Not Found' });
       await fixture.whenStable();
 
-      expect(results).toEqual([{ success: false, message: expect.stringContaining('Git request failed(404)') }]);
+      expect(await pending).toEqual({ success: false, message: expect.stringContaining('Git request failed(404)') });
       expect(save).not.toHaveBeenCalled();
     });
   });
@@ -470,14 +467,14 @@ describe('DeployApplicationStep2Component', () => {
 
     it('saves the recorded commit when Next is pressed before the lookup resolves', async () => {
       const save = vi.spyOn(TestBed.inject(CfDeployAppDataService), 'saveAppDetails');
-      await firstValueFrom(component.onNext(0, null as any));
+      await component.onNext();
       expect(save).toHaveBeenCalledWith(expect.objectContaining({ commit: 'rec1234abcd' }), null);
     });
 
     it('saves the recorded commit when the lookup fails', async () => {
       commit$.error(new Error('gone'));
       const save = vi.spyOn(TestBed.inject(CfDeployAppDataService), 'saveAppDetails');
-      await firstValueFrom(component.onNext(0, null as any));
+      await component.onNext();
       expect(save).toHaveBeenCalledWith(expect.objectContaining({ commit: 'rec1234abcd' }), null);
     });
   });

@@ -5,10 +5,10 @@ import { toObservable } from '@angular/core/rxjs-interop';
 import { ReactiveFormsModule, Validators, FormBuilder, FormControl, FormGroup } from '@angular/forms';
 import { ErrorStateMatcher, ShowOnDirtyErrorStateMatcher } from '@stratosui/core';
 import { ActivatedRoute } from '@angular/router';
-import { combineLatest, Observable, of as observableOf, Subscription } from 'rxjs';
+import { combineLatest, Observable, Subscription } from 'rxjs';
 import { take, filter, map, share, startWith, switchMap } from 'rxjs/operators';
 
-import { StepOnNextFunction } from '@stratosui/core';
+import { StepOnNextResult } from '@stratosui/core';
 import { CfDeployAppDataService } from '../../../../services/domain-data/cf-deploy-app-data.service';
 import { NewAppCFDetails } from '../../../../store/types/create-application.types';
 import {
@@ -289,10 +289,10 @@ export class DeployApplicationOptionsStepComponent implements OnInit, OnDestroy 
     this.stepOpts = opts;
   }
 
-  onNext: StepOnNextFunction = () => {
+  async onNext(): Promise<StepOnNextResult> {
     this.deployData.saveAppOverrides(this.formToObj(this.deployOptionsForm.controls));
-    return observableOf({
+    return {
       success: true, data: this.stepOpts
-    });
+    };
   }
 }

@@ -99,7 +99,7 @@ export class DeployApplicationDeployer {
   public messages: ReturnType<typeof createSignalWrapper<string>>;
 
   // Are we deploying?
-  deploying = false;
+  deploying = signal(false);
 
   private inputStream: any;
 
@@ -156,7 +156,7 @@ export class DeployApplicationDeployer {
     this.status$.next({
       error,
       errorMsg,
-      deploying: this.deploying
+      deploying: this.deploying()
     });
   }
 
@@ -196,7 +196,7 @@ export class DeployApplicationDeployer {
     this.closeReported = false;
     this.started = !this.fsFileInfo;
     // A reopened deployer runs a new deploy: drop what the last one reported
-    this.deploying = false;
+    this.deploying.set(false);
     this.updateStatus();
     this.streamTitle.set('Preparing...');
     this.appData = undefined;
@@ -406,13 +406,13 @@ export class DeployApplicationDeployer {
         break;
       case SocketEventTypes.EVENT_PUSH_STARTED:
         this.streamTitle.set('Deploying...');
-        this.deploying = true;
+        this.deploying.set(true);
         this.updateStatus();
         break;
       case SocketEventTypes.EVENT_PUSH_COMPLETED:
         // Done
         this.streamTitle.set('Deployed');
-        this.deploying = false;
+        this.deploying.set(false);
         this.updateStatus();
         break;
       case SocketEventTypes.CLOSE_SUCCESS:
@@ -520,7 +520,7 @@ export class DeployApplicationDeployer {
     if (title) {
       this.streamTitle.set(title);
     }
-    this.deploying = false;
+    this.deploying.set(false);
     this.updateStatus(
       !!error,
       error && log.message ? `${error}\nReason: ${log.message}` : error || undefined

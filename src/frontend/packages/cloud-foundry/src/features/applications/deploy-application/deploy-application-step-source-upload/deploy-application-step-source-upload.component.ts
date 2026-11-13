@@ -1,9 +1,9 @@
 import { CommonModule } from '@angular/common';
 import { Component, EnvironmentInjector, OnDestroy, ChangeDetectionStrategy, inject } from '@angular/core';
-import { Observable, of as observableOf } from 'rxjs';
+import { Observable } from 'rxjs';
 import { map } from 'rxjs/operators';
 
-import { BytesToHumanSize, StepOnNextFunction, UploadProgressIndicatorComponent } from '@stratosui/core';
+import { BytesToHumanSize, StepOnNextResult, UploadProgressIndicatorComponent } from '@stratosui/core';
 import { CfOrgSpaceDataService } from '../../../../shared/data-services/cf-org-space-service.service';
 import { DeployApplicationDeployer } from '../deploy-application-deployer';
 import { FileScannerInfo } from '../deploy-application-step2/deploy-application-fs/deploy-application-fs-scanner';
@@ -65,8 +65,8 @@ export class DeployApplicationStepSourceUploadComponent implements OnDestroy {
   }
 
   // Make the deployer available to the next step
-  onNext: StepOnNextFunction = () => {
-    return observableOf({ success: true, data: this.deployer });
+  async onNext(): Promise<StepOnNextResult> {
+    return { success: true, data: this.deployer };
   }
 
   // A deploy the deploy step started belongs to it, which reports its end;
