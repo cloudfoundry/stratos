@@ -1,6 +1,6 @@
 import { BreakpointObserver, Breakpoints } from '@angular/cdk/layout';
 import { Portal, PortalModule } from '@angular/cdk/portal';
-import { ChangeDetectionStrategy, AfterViewInit, ChangeDetectorRef, Component, ElementRef, OnDestroy, OnInit, computed, signal, ViewContainerRef, inject, viewChild } from '@angular/core';
+import { ChangeDetectionStrategy, AfterViewInit, Component, ElementRef, OnDestroy, OnInit, computed, signal, ViewContainerRef, inject, viewChild } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { ActivatedRoute, ActivatedRouteSnapshot, NavigationEnd, Route, Router, RouterModule } from '@angular/router';
 import { toObservable } from '@angular/core/rxjs-interop';
@@ -58,7 +58,6 @@ export class DashboardBaseComponent implements OnInit, OnDestroy, AfterViewInit 
   tabNavService = inject(TabNavService);
   sidePanelService = inject(SidePanelService);
   private cs = inject(CustomizationService);
-  private cd = inject(ChangeDetectorRef);
   private dashboardSignals = inject(DashboardSignalService);
   private dashboardData = inject(DashboardDataService);
   private userFavorites = inject(UserFavoritesDataService);
@@ -200,7 +199,6 @@ export class DashboardBaseComponent implements OnInit, OnDestroy, AfterViewInit 
     const hasMore = el.scrollHeight > el.clientHeight && el.scrollTop + el.clientHeight < el.scrollHeight - 4;
     if (this.showScrollShadow() !== hasMore) {
       this.showScrollShadow.set(hasMore);
-      this.cd.markForCheck();
     }
     // WCAG 2.1.1: a page that scrolls with nothing focusable in it can only
     // be scrolled from the keyboard if main itself takes a tab stop. A page
@@ -209,7 +207,6 @@ export class DashboardBaseComponent implements OnInit, OnDestroy, AfterViewInit 
     const tabStop = el.scrollHeight > el.clientHeight && !el.querySelector(FOCUSABLE);
     if (this.mainTabStop() !== tabStop) {
       this.mainTabStop.set(tabStop);
-      this.cd.markForCheck();
     }
   }
 
