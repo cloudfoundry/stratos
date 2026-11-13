@@ -1,7 +1,6 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { provideZonelessChangeDetection, signal } from '@angular/core';
 import { describe, it, expect, beforeEach, vi } from 'vitest';
-import { firstValueFrom } from 'rxjs';
 import { provideRouter } from '@angular/router';
 
 import { TabNavService } from '@stratosui/core';
@@ -92,7 +91,7 @@ describe('EditApplicationComponent labels', () => {
     expect(component.signalHandle.valid()).toBe(true);
     fixture.nativeElement.querySelector('[aria-label="Remove label team"]').click();
     expect(component.editAppForm.controls.labels.value.team).toBeUndefined();
-    expect(await firstValueFrom(component.updateApp(0, undefined as any))).toMatchObject({ success: true });
+    expect(await component.updateApp()).toMatchObject({ success: true });
     expect(update).toHaveBeenCalledWith({ labels: { team: null, 'example.com/team': 'platform' } });
   });
 
@@ -169,6 +168,6 @@ describe('EditApplicationComponent labels', () => {
   it('keeps form open when the labels request fails', async () => {
     update.mockRejectedValue(new Error('CF rejected the label'));
     component.removeLabel('team');
-    await expect(firstValueFrom(component.updateApp(0, undefined as any))).rejects.toThrow('CF rejected the label');
+    await expect(component.updateApp()).rejects.toThrow('CF rejected the label');
   });
 });

@@ -18,7 +18,7 @@ import { StatefulIconComponent } from '../../../../../core/src/core/stateful-ico
 import { FocusDirective } from '../../../../../core/src/shared/components/focus.directive';
 import { PageHeaderComponent } from '../../../../../core/src/shared/components/page-header/page-header.component';
 import { StepComponent, SignalStepHandle } from '../../../../../core/src/shared/components/stepper/step/step.component';
-import { StepOnNextFunction } from '../../../../../core/src/shared/components/stepper/step/step.component';
+import { StepOnNextResult } from '../../../../../core/src/shared/components/stepper/step/step.component';
 import { SteppersComponent } from '../../../../../core/src/shared/components/stepper/steppers/steppers.component';
 import {
   AppNameUniqueChecking,
@@ -137,7 +137,7 @@ export class EditApplicationComponent implements OnInit {
         return this.editAppForm.valid && this.editAppForm.dirty;
       }),
       submit: async () => {
-        const result = await firstValueFrom(this.updateApp(0, undefined as any));
+        const result = await this.updateApp();
         if (!result.success) {
           throw new Error(result.message || 'Failed to update application');
         }
@@ -225,7 +225,7 @@ export class EditApplicationComponent implements OnInit {
     }, { injector: this.injector });
   }
 
-  updateApp: StepOnNextFunction = () => {
+  async updateApp(): Promise<StepOnNextResult> {
     // Split the dirty form fields into scale (instances/memory/disk_quota,
     // handled by the Stratos async-job contract via scaleApp) and non-scale
     // (name/enable_ssh, still routed through the legacy updateApplication
@@ -260,7 +260,7 @@ export class EditApplicationComponent implements OnInit {
     const hasScale = Object.keys(scaleUpdate).length > 0;
     const hasOther = Object.keys(otherUpdates).length > 0;
     if (!hasScale && !hasOther) {
-      return observableOf({ success: true, redirect: true });
+      return { success: true, redirect: true };
     }
 
     const { cfGuid, appGuid } = this.applicationService;
@@ -284,7 +284,7 @@ export class EditApplicationComponent implements OnInit {
         )
       : observableOf({ success: true });
 
-    return scale$.pipe(
+    return firstValueFrom(scale$.pipe(
       take(1),
       // After scale resolves, run the name/ssh/labels PATCH (if any). A scale
       // failure short-circuits the other update so we don't half-persist.
@@ -303,7 +303,7 @@ export class EditApplicationComponent implements OnInit {
         }
       }),
       map(res => ({ ...res, redirect: res.success })),
-    );
+    ));
   }
 
 }
