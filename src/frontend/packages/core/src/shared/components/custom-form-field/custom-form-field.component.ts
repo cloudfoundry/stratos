@@ -11,12 +11,13 @@ import {
   forwardRef,
   contentChildren,
   input,
-  contentChild
+  contentChild,
+  signal,
+  DestroyRef
 } from "@angular/core";
-import { outputToObservable } from "@angular/core/rxjs-interop";
+import { outputToObservable, takeUntilDestroyed } from "@angular/core/rxjs-interop";
 import { FormControl, NgControl } from "@angular/forms";
 
-import { Subject, takeUntil } from "rxjs";
 import { CustomSelectComponent } from "../custom-select/custom-select.component";
 
 /*
@@ -106,12 +107,12 @@ export class CustomFormFieldComponent
 
   public focused = false;
   public hasValue = false;
-  public placeholder = "";
+  readonly placeholder = signal("");
   public errorMessage = "";
   public isRequired = false;
   public inputId = "";
 
-  private destroy$ = new Subject<void>();
+  private destroyRef = inject(DestroyRef);
   private isInitialized = false;
 
   private cdr = inject(ChangeDetectorRef);
@@ -122,7 +123,7 @@ export class CustomFormFieldComponent
     const selectComponent = this.selectComponent();
     const inputElement = this.inputElement();
     if (selectComponent) {
-      this.placeholder = selectComponent.placeholder() || "";
+      this.placeholder.set(selectComponent.placeholder() || "");
       this.isRequired = selectComponent.required();
       this.inputId =
         selectComponent.id() ||
@@ -136,7 +137,7 @@ export class CustomFormFieldComponent
 
       // Monitor select value changes
       outputToObservable(selectComponent.valueChange)
-        .pipe(takeUntil(this.destroy$))
+        .pipe(takeUntilDestroyed(this.destroyRef))
         .subscribe(() => {
           this.hasValue =
             selectComponent.selectedValue != null &&
@@ -156,13 +157,12 @@ export class CustomFormFieldComponent
     // Handle native input/textarea/select elements
     else if (inputElement) {
       const input = inputElement.nativeElement;
-      this.placeholder = input.placeholder || "";
+      this.placeholder.set(input.placeholder || "");
       // The placeholder is the label. A bound placeholder can arrive after
       // this read (the Connect dialog's credentials name their fields from
       // the endpoint type), so follow it.
       this.placeholderObserver = new MutationObserver(() => {
-        this.placeholder = input.placeholder || "";
-        this.cdr.markForCheck();
+        this.placeholder.set(input.placeholder || "");
       });
       this.placeholderObserver.observe(input, { attributes: true, attributeFilter: ["placeholder"] });
       this.isRequired = input.required;
@@ -207,7 +207,7 @@ export class CustomFormFieldComponent
     const ngControl = this.ngControl();
     if (ngControl && ngControl.statusChanges) {
       ngControl.statusChanges
-        .pipe(takeUntil(this.destroy$))
+        .pipe(takeUntilDestroyed(this.destroyRef))
         .subscribe(() => {
           this.updateErrorMessage();
           this.updateAriaAttributes();
@@ -235,8 +235,6 @@ export class CustomFormFieldComponent
 
   ngOnDestroy() {
     this.placeholderObserver?.disconnect();
-    this.destroy$.next();
-    this.destroy$.complete();
   }
 
   get shouldFloatLabel(): boolean {
