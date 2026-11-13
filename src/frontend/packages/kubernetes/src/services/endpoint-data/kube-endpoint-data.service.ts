@@ -1,7 +1,7 @@
 import { HttpClient, HttpErrorResponse, HttpHeaders } from '@angular/common/http';
 import { Signal, computed, signal } from '@angular/core';
-import { defer, firstValueFrom, Observable, of, ReplaySubject } from 'rxjs';
-import { catchError, finalize, map, tap } from 'rxjs/operators';
+import { defer, firstValueFrom, Observable, of } from 'rxjs';
+import { catchError, finalize, map, shareReplay, tap } from 'rxjs/operators';
 
 import { KubeListResponse, KUBE_LIST_DEFAULT_LIMIT } from './kube-paged-response';
 import { KubeLoadTracker } from './kube-load-tracker';
@@ -58,9 +58,8 @@ export class KubeEndpointDataService {
   // The namespace list is loading (load() or refresh('namespaces')).
   readonly namespacesLoading: Signal<boolean> = computed(() => this.loads.isLoading('namespaces'));
 
-  // ReplaySubject(1) — late subscribers get the last emission so they
-  // don't hang on a stream that already completed before they wired up.
-  readonly loaded$ = new ReplaySubject<void>(1);
+  // The load in progress. A load() made while one runs joins it.
+  private inFlight?: Observable<void>;
 
   // `clusterName` is just the kubeGuid for now — k8s has no global
   // "cluster name" field on /version, so the human-friendly endpoint
@@ -82,13 +81,8 @@ export class KubeEndpointDataService {
   // namespace list. Each leg is independently catchable so a 403 on
   // /version doesn't kill the namespace fetch.
   load(): Observable<void> {
-    if (this._isLoading()) {
-      // Already loading — return the in-flight loaded$ stream so the
-      // caller resolves on the same completion.
-      return new Observable<void>(sub => {
-        const inner = this.loaded$.subscribe(() => { sub.next(); sub.complete(); });
-        return () => inner.unsubscribe();
-      });
+    if (this.inFlight) {
+      return this.inFlight;
     }
     this._isLoading.set(true);
     this._errors.set([]);
@@ -161,11 +155,11 @@ export class KubeEndpointDataService {
       firstValueFrom(nodesReq),
     ]);
 
-    return new Observable<void>(sub => {
+    const done = new Observable<void>(sub => {
       all.then(() => {
         this._isLoading.set(false);
         this._lastFetched.set(new Date());
-        this.loaded$.next();
+        this.inFlight = undefined;
         sub.next();
         sub.complete();
       }).catch((err) => {
@@ -180,11 +174,13 @@ export class KubeEndpointDataService {
         });
         this._isLoading.set(false);
         this._lastFetched.set(new Date());
-        this.loaded$.next();
+        this.inFlight = undefined;
         sub.next();
         sub.complete();
       });
-    }).pipe(finalize(() => undefined));
+    }).pipe(shareReplay({ bufferSize: 1, refCount: false }));
+    this.inFlight = done;
+    return done;
   }
 
   // refresh() re-runs load() (or a scoped subset). For wave-1 we only
