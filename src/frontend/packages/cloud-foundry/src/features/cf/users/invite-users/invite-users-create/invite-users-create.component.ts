@@ -12,7 +12,7 @@ import {
   StackedInputActionsComponent,
   StackedInputActionsState,
   StackedInputActionsUpdate,
-  StepOnNextFunction,
+  StepOnNextResult,
 } from '@stratosui/core';
 import { CfUsersPagedDataService } from '../../../../../shared/data-services/cf-users-paged-data.service';
 import { OrgDataRegistry } from '../../../../../services/endpoint-data/org-data.registry';
@@ -129,7 +129,7 @@ export class InviteUsersCreateComponent implements OnInit {
   /**
    * FWT-957 helper: runs the invite request and applies per-user state
    * updates / madeChanges side effects. Returns the invite response so
-   * both the legacy onNext map and the new SignalStepHandle.submit path
+   * both onNext and the SignalStepHandle.submit path
    * can branch on res.error uniformly.
    */
   private runInvite() {
@@ -196,12 +196,13 @@ export class InviteUsersCreateComponent implements OnInit {
       );
   }
 
-  onNext: StepOnNextFunction = () => this.runInvite().pipe(
-    map(res => ({
+  async onNext(): Promise<StepOnNextResult> {
+    const res = await firstValueFrom(this.runInvite());
+    return {
       success: !res.error,
       message: res.errorMessage,
       redirect: !res.error
-    })),
-  );
+    };
+  }
 
 }
