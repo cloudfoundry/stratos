@@ -2,7 +2,6 @@ import { CommonModule } from '@angular/common';
 import {
   AfterViewInit,
   ChangeDetectionStrategy,
-  ChangeDetectorRef,
   Component,
   Injector,
   OnDestroy,
@@ -98,7 +97,6 @@ export class GitRegistrationComponent extends CreateEndpointHelperComponent impl
   private snackBarService = inject(TailwindSnackBarService);
   private endpointsService = inject(EndpointsService);
   private router = inject(Router);
-  private cdr = inject(ChangeDetectorRef);
   private endpointsSignalConfig = inject(EndpointsSignalConfigService);
   private confirmDialog = inject(ConfirmationDialogService);
   private endpointsData = inject(EndpointsDataService);
@@ -119,16 +117,20 @@ export class GitRegistrationComponent extends CreateEndpointHelperComponent impl
   // subscription before the template binds the form.
   registerForm!: FormGroup<GitRegistrationForm>;
 
+  // Set once init() has built the form. The form is a plain field, so this
+  // is what makes the template render it (init runs after the first render).
+  protected readonly formReady = signal(false);
+
   private sub?: Subscription;
   private validateSub?: Subscription;
 
-  public showEndpointFields = false;
+  public readonly showEndpointFields = signal(false);
 
   // Surfaces a one-line note above the radios when an option was auto-
   // skipped due to existing registration ("github.com is already
   // registered. Defaulted to GitHub Enterprise."). null when nothing
   // was skipped.
-  public autoSelectNote: string | null = null;
+  public readonly autoSelectNote = signal<string | null>(null);
 
   // strict: assigned in init() before any consumer subscribes.
   validate!: Observable<boolean>;
@@ -329,9 +331,9 @@ export class GitRegistrationComponent extends CreateEndpointHelperComponent impl
       .filter(([, item]) => item.exists && !!item.url)
       .map(([, item]) => item.url);
     const defaulted = defaultSelection ? this.gitTypes[this.epSubType].types[defaultSelection].label : '';
-    this.autoSelectNote = (skippedUrls.length > 0 && defaulted)
+    this.autoSelectNote.set((skippedUrls.length > 0 && defaulted)
       ? `An endpoint at ${skippedUrls.join(', ')} is already registered — defaulted to ${defaulted}.`
-      : null;
+      : null);
 
     this.registerForm = this.fb.group<GitRegistrationForm>({
       selectedType: new FormControl(defaultSelection || '', { nonNullable: true, validators: [] }),
@@ -371,8 +373,9 @@ export class GitRegistrationComponent extends CreateEndpointHelperComponent impl
     this.registerValid.set(!!initialDefn?.url || this.registerForm.valid);
     this.validateSub = this.validate.subscribe(v => {
       this.registerValid.set(!!v);
-      this.cdr.markForCheck();
     });
+
+    this.formReady.set(true);
 
     // Ensure the form validity is updates once the dust settles
     setTimeout(() => this.registerForm.updateValueAndValidity(), 0);
@@ -387,7 +390,7 @@ export class GitRegistrationComponent extends CreateEndpointHelperComponent impl
   private updateType(value?: string) {
     const typ = value ?? this.registerForm.value.selectedType ?? '';
     const defn = this.gitTypes[this.epSubType].types[typ];
-    this.showEndpointFields = !defn.url;
+    this.showEndpointFields.set(!defn.url);
 
     const entityDefn = entityCatalog.getEndpoint(GIT_ENDPOINT_TYPE, this.epSubType);
     this.urlValidation = entityDefn?.definition?.urlValidationRegexString;
@@ -468,7 +471,6 @@ export class GitRegistrationComponent extends CreateEndpointHelperComponent impl
     }
     this.registered.set(null);
     this.registerForm.enable();
-    this.cdr.markForCheck();
   }
 
   private updateUrlWithSuffix(url: string, defn: GithubType): string {
