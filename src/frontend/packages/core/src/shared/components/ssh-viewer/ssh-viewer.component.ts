@@ -1,6 +1,7 @@
 import { CommonModule } from '@angular/common';
-import { Component, ElementRef, OnDestroy, OnInit, computed, inject, signal, ChangeDetectionStrategy, input, viewChild } from '@angular/core';
-import { Observable, Subject, Subscription, takeUntil } from 'rxjs';
+import { Component, DestroyRef, ElementRef, OnDestroy, OnInit, computed, inject, signal, ChangeDetectionStrategy, input, viewChild } from '@angular/core';
+import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
+import { Observable, Subject, Subscription } from 'rxjs';
 import { Terminal } from 'xterm';
 import { FitAddon } from 'xterm-addon-fit';
 
@@ -65,7 +66,7 @@ export class SshViewerComponent implements OnInit, OnDestroy {
   private connectSubscription!: Subscription;
   private resizeSubscription!: Subscription;
   private resizeTimers: ReturnType<typeof setTimeout>[] = [];
-  private destroy$ = new Subject<void>();
+  private destroyRef = inject(DestroyRef);
 
   ngOnInit() {
     const connectionStatus = this.connectionStatus();
@@ -74,7 +75,7 @@ export class SshViewerComponent implements OnInit, OnDestroy {
     }
 
     this.resizeSubscription = this.resizer.resizeEvent$
-      .pipe(takeUntil(this.destroy$))
+      .pipe(takeUntilDestroyed(this.destroyRef))
       .subscribe(_r => {
         if (this.xtermFitAddon) {
           this.resize();
@@ -82,7 +83,7 @@ export class SshViewerComponent implements OnInit, OnDestroy {
       });
 
     this.connectSubscription = connectionStatus
-      .pipe(takeUntil(this.destroy$))
+      .pipe(takeUntilDestroyed(this.destroyRef))
       .subscribe((count: number) => {
         this.isConnected.set(count !== 0);
         if (this.isConnected()) {
@@ -135,9 +136,6 @@ export class SshViewerComponent implements OnInit, OnDestroy {
   }
 
   ngOnDestroy() {
-    this.destroy$.next();
-    this.destroy$.complete();
-
     // Clear all pending timers
     this.resizeTimers.forEach(timerId => clearTimeout(timerId));
     this.resizeTimers = [];
@@ -174,7 +172,7 @@ export class SshViewerComponent implements OnInit, OnDestroy {
     this.message.set('');
     this.xterm.reset();
     this.msgSubscription = this.sshStream()
-      .pipe(takeUntil(this.destroy$))
+      .pipe(takeUntilDestroyed(this.destroyRef))
       .subscribe({
         next: (data: string) => {
           // Check for a window title message
