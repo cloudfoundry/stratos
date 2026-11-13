@@ -1,7 +1,7 @@
 import { ChangeDetectionStrategy, Component, EnvironmentInjector, Injector, OnDestroy, Signal, WritableSignal, computed, inject, signal } from '@angular/core';
 
 import { UntypedFormBuilder } from '@angular/forms';
-import { Observable, of as observableOf, Subscription } from 'rxjs';
+import { Observable, Subscription } from 'rxjs';
 import { filter, map, startWith, take } from 'rxjs/operators';
 
 import { createSignalWrapper, EndpointsDataService } from '@stratosui/store';
@@ -30,7 +30,7 @@ import {
 import {
   SignalListCellTemplateDirective,
 } from '../../../../../core/src/shared/components/signal-list/signal-list-cell-template.directive';
-import { StepOnNextFunction } from '../../../../../core/src/shared/components/stepper/step/step.component';
+import { StepOnNextResult } from '../../../../../core/src/shared/components/stepper/step/step.component';
 import { KUBERNETES_ENDPOINT_TYPE } from '../../kubernetes-entity-factory';
 import { KubeConfigAuthHelper } from '../kube-config-auth.helper';
 import { KubeConfigFileCluster, KubeConfigImportAction } from '../kube-config.types';
@@ -362,9 +362,9 @@ export class KubeConfigImportComponent implements OnDestroy {
   };
 
   // Finish - go back to the endpoints view
-  onNext: StepOnNextFunction = () => {
+  async onNext(): Promise<StepOnNextResult> {
     if (this.applyStarted) {
-      return observableOf({ success: true, redirect: true });
+      return { success: true, redirect: true };
 
     } else {
       this.applyStarted = true;
@@ -376,9 +376,9 @@ export class KubeConfigImportComponent implements OnDestroy {
         // Go through the imports and dispatch the actions to perform them in sequence
         this.processAction([...imports]);
       });
-      return observableOf({ success: true, ignoreSuccess: true });
+      return { success: true, ignoreSuccess: true };
     }
-  };
+  }
 
 }
 

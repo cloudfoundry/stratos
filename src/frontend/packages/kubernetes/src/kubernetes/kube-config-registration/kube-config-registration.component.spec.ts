@@ -64,7 +64,7 @@ describe('KubeConfigRegistrationComponent', () => {
   it('closes the dialog on Close after the import', async () => {
     // Stands in for the `importer` view query, which the handle reads.
     (component as unknown as { _importer: () => unknown })._importer =
-      () => ({ onNext: () => of({ success: true, redirect: true }), busy$: of(false) });
+      () => ({ onNext: async () => ({ success: true, redirect: true }), busy$: of(false) });
     await component.reviewStepHandle.submit!();
     expect(registerHandle.close).toHaveBeenCalledWith(false);
   });

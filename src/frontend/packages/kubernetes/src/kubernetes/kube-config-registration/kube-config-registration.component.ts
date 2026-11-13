@@ -1,6 +1,5 @@
 import {
   ChangeDetectionStrategy,
-  ChangeDetectorRef,
   Component,
   computed,
   inject,
@@ -61,7 +60,6 @@ export class KubeConfigRegistrationComponent implements OnDestroy {
   // child).
   private helper = inject(KubeConfigHelper);
   private router = inject(Router);
-  private cdr = inject(ChangeDetectorRef);
 
   // Cancel target of the stepper on the /endpoints/new page.
   readonly cancelUrl = '/endpoints';
@@ -96,7 +94,6 @@ export class KubeConfigRegistrationComponent implements OnDestroy {
       if (v) {
         this.selectorSub = v.valid$.subscribe(valid => {
           this.selectionValid.set(!!valid);
-          this.cdr.markForCheck();
         });
       }
     });
@@ -110,7 +107,6 @@ export class KubeConfigRegistrationComponent implements OnDestroy {
       if (v) {
         this.importerSub = v.busy$.subscribe(b => {
           this.importerBusy.set(!!b);
-          this.cdr.markForCheck();
         });
       }
     });
@@ -147,7 +143,7 @@ export class KubeConfigRegistrationComponent implements OnDestroy {
       // ignoreSuccess, second-click returns redirect). We delegate to it
       // to preserve the side-effects (busy flag, processAction kickoff)
       // and translate its result into the signal-handle Promise contract.
-      const result = await firstValueFrom(this._importer()!.onNext(0, null as any));
+      const result = await this._importer()!.onNext();
       if (!result.success) {
         throw new Error(result.message || 'Failed to import kube config');
       }
