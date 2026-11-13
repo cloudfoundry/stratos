@@ -8,6 +8,7 @@ import (
 	"net/http/httptest"
 	"testing"
 
+	"github.com/cloudfoundry/stratos/src/jetstream/plugins/stratosjobs"
 	"github.com/labstack/echo/v5"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
@@ -307,4 +308,77 @@ func TestOrderRoleChanges(t *testing.T) {
 		got := orderRoleChanges([]nativeRoleChange{space, space})
 		assert.Equal(t, []int{0, 1}, got)
 	})
+}
+
+// CF deletes a role in a background job and refuses to delete a user's
+// org User role while they still hold a role in one of its spaces. When a
+// batch removes both, the org User delete must wait for the space role's
+// job, even when that job outlasts the usual fast-path window.
+func TestApplyNativeRoleChanges_OrgUserRemoveWaitsForSpaceRoleJob(t *testing.T) {
+	const jobDoneOnFetch = 9 // past the 3 s fast-path window at 500 ms a poll
+	jobFetches := 0
+	jobFetchesAtOrgUserDelete := -1
+	ts := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		w.Header().Set("Content-Type", "application/json")
+		switch {
+		case r.URL.Path == "/v3":
+			_, _ = w.Write([]byte(`{"links":{}}`))
+		case r.Method == http.MethodGet && r.URL.Path == "/v3/roles":
+			guid := "role-space"
+			if r.URL.Query().Get("types") == orgUserRoleType {
+				guid = "role-org-user"
+			}
+			_ = json.NewEncoder(w).Encode(map[string]interface{}{
+				"pagination": map[string]interface{}{"total_pages": 1},
+				"resources":  []map[string]interface{}{{"guid": guid}},
+			})
+		case r.Method == http.MethodDelete && r.URL.Path == "/v3/roles/role-space":
+			w.Header().Set("Location", "/v3/jobs/job-space")
+			w.WriteHeader(http.StatusAccepted)
+		case r.Method == http.MethodDelete && r.URL.Path == "/v3/roles/role-org-user":
+			jobFetchesAtOrgUserDelete = jobFetches
+			w.Header().Set("Location", "/v3/jobs/job-org-user")
+			w.WriteHeader(http.StatusAccepted)
+		case r.Method == http.MethodGet && r.URL.Path == "/v3/jobs/job-space":
+			jobFetches++
+			state := "PROCESSING"
+			if jobFetches >= jobDoneOnFetch {
+				state = "COMPLETE"
+			}
+			_ = json.NewEncoder(w).Encode(map[string]interface{}{"guid": "job-space", "state": state})
+		case r.Method == http.MethodGet && r.URL.Path == "/v3/jobs/job-org-user":
+			_ = json.NewEncoder(w).Encode(map[string]interface{}{"guid": "job-org-user", "state": "COMPLETE"})
+		default:
+			http.NotFound(w, r)
+		}
+	}))
+	defer ts.Close()
+
+	body := `{"changes":[` +
+		`{"userGuid":"u1","orgGuid":"o1","type":"organization_user","add":false},` +
+		`{"userGuid":"u1","spaceGuid":"sp1","type":"space_developer","add":false}` +
+		`]}`
+	e := echo.New()
+	ctx, rec := newPhase1CContext(e, http.MethodPost, "/pp/v1/cf/roles/cnsi-1/changes", body)
+	ctx.SetPathValues(echo.PathValues{{Name: "cnsiGuid", Value: "cnsi-1"}})
+
+	plugin := newPhase1CPlugin(ts.URL)
+	plugin.asyncTracker = stratosjobs.NewInMemoryTracker(stratosjobs.InMemoryTrackerConfig{})
+	plugin.asyncTranslator = NewCFJobTranslator(plugin)
+
+	require.NoError(t, plugin.applyNativeRoleChanges(ctx))
+	assert.Equal(t, http.StatusOK, rec.Code)
+	assert.Equal(t, jobDoneOnFetch, jobFetchesAtOrgUserDelete,
+		"org User must be deleted once the space role's job is complete, not before")
+
+	var resp struct {
+		Results []struct {
+			Index int    `json:"index"`
+			State string `json:"state"`
+		} `json:"results"`
+	}
+	require.NoError(t, json.Unmarshal(rec.Body.Bytes(), &resp))
+	require.Len(t, resp.Results, 2)
+	assert.Equal(t, 1, resp.Results[0].Index)
+	assert.Equal(t, "COMPLETE", resp.Results[0].State)
 }

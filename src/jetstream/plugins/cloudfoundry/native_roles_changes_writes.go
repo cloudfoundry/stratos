@@ -7,6 +7,7 @@ import (
 	"errors"
 	"fmt"
 	"net/http"
+	"time"
 
 	"github.com/cloudfoundry/stratos/src/jetstream/plugins/stratosjobs"
 	"github.com/fivetwenty-io/capi/v3/pkg/capi"
@@ -74,6 +75,15 @@ func (cf *CloudFoundrySpecification) applyNativeRoleChanges(c *echo.Context) err
 		return err
 	}
 
+	// CF refuses to delete an org User role while the user still holds a
+	// space role in that org, and it deletes roles in background jobs. When
+	// the batch removes an org User, the deletes ordered before it wait for
+	// their jobs to finish rather than the usual fast-path window.
+	deleteWait := stratosjobs.FastPathOptions{Kind: "cf.role.delete"}
+	if removesOrgUser(reqBody.Changes) {
+		deleteWait.Window = orgUserRemovalWait
+	}
+
 	results := make([]nativeRoleChangeResult, 0, len(reqBody.Changes))
 	for _, i := range orderRoleChanges(reqBody.Changes) {
 		ch := reqBody.Changes[i]
@@ -124,9 +134,7 @@ func (cf *CloudFoundrySpecification) applyNativeRoleChanges(c *echo.Context) err
 		// frontend can poll /pp/v1/stratos/jobs/{id}. Mirrors deleteNativeRole.
 		if cf.asyncTracker != nil && cf.asyncTranslator != nil && job != nil && job.GUID != "" {
 			ref := CFJobRef{CnsiGUID: cnsiGUID, UserGUID: userGUID, JobGUID: job.GUID}
-			fp := stratosjobs.RunFastPath(reqCtx, cf.asyncTracker, cf.asyncTranslator, ref, stratosjobs.FastPathOptions{
-				Kind: "cf.role.delete",
-			})
+			fp := stratosjobs.RunFastPath(reqCtx, cf.asyncTracker, cf.asyncTranslator, ref, deleteWait)
 			res.State = string(fp.State)
 			if fp.State == stratosjobs.JobStateFailed {
 				res.Success = false
@@ -144,6 +152,23 @@ func (cf *CloudFoundrySpecification) applyNativeRoleChanges(c *echo.Context) err
 // requires it to exist before any space role is assigned to the user.
 const orgUserRoleType = "organization_user"
 
+// orgUserRemovalWait bounds how long a role delete waits for its CF job when
+// an org User removal follows it in the same batch.
+const orgUserRemovalWait = 30 * time.Second
+
+func isOrgUserChange(ch nativeRoleChange) bool {
+	return ch.OrgGUID != "" && ch.SpaceGUID == "" && ch.Type == orgUserRoleType
+}
+
+func removesOrgUser(changes []nativeRoleChange) bool {
+	for _, ch := range changes {
+		if isOrgUserChange(ch) && !ch.Add {
+			return true
+		}
+	}
+	return false
+}
+
 // orderRoleChanges returns indices into changes in execution order. The
 // org-user (membership) role must be created before other roles and removed
 // after them, mirroring the legacy executeUsersRolesChange$ ordering — CF
@@ -153,7 +178,7 @@ func orderRoleChanges(changes []nativeRoleChange) []int {
 	orgUser := make([]int, 0, len(changes))
 	other := make([]int, 0, len(changes))
 	for i, ch := range changes {
-		if ch.OrgGUID != "" && ch.SpaceGUID == "" && ch.Type == orgUserRoleType {
+		if isOrgUserChange(ch) {
 			orgUser = append(orgUser, i)
 		} else {
 			other = append(other, i)
