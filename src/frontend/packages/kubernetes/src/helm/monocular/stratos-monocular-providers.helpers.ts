@@ -3,7 +3,6 @@ import { HttpClient, HttpHandler } from '@angular/common/http';
 import { MonocularInterceptor } from '../monocular.interceptor';
 import { ChartsService } from './shared/services/charts.service';
 import { ConfigService } from './shared/services/config.service';
-import { MenuService } from './shared/services/menu.service';
 
 /**
  * Helm Method to ensure http client with custom monocular interceptor is used in the monocular services
@@ -15,7 +14,6 @@ import { MenuService } from './shared/services/menu.service';
 export const createMonocularProviders = () => [
   ChartsService,
   ConfigService,
-  MenuService,
   MonocularInterceptor,
   {
     provide: HttpClient,

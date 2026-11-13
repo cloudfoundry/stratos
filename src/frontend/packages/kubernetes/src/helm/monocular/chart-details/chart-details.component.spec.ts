@@ -15,7 +15,6 @@ import { PanelComponent } from '../panel/panel.component';
 import { MockChartService } from '../shared/services/chart.service.mock';
 import { ChartsService } from '../shared/services/charts.service';
 import { ConfigService } from '../shared/services/config.service';
-import { MenuService } from '../shared/services/menu.service';
 import { ChartDetailsInfoComponent } from './chart-details-info/chart-details-info.component';
 import { ChartDetailsReadmeComponent } from './chart-details-readme/chart-details-readme.component';
 import { ChartDetailsUsageComponent } from './chart-details-usage/chart-details-usage.component';
@@ -46,7 +45,6 @@ describe('ChartDetailsComponent', () => {
         ...STORE_TEST_PROVIDERS,
         { provide: ChartsService, useValue: new MockChartService() },
         { provide: ConfigService, useValue: { appName: 'appName' } },
-        { provide: MenuService },
         { provide: ActivatedRoute, useValue: {
           params: {
             forEach: (fn: any) => fn({}),
