@@ -3,7 +3,7 @@ import { Component, OnInit, signal, ChangeDetectionStrategy, inject, Injector } 
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { toObservable } from '@angular/core/rxjs-interop';
-import { combineLatest, from, Observable, of } from 'rxjs';
+import { combineLatest, from, Observable } from 'rxjs';
 import { take, defaultIfEmpty, map, shareReplay, startWith, switchMap } from 'rxjs/operators';
 
 import {
@@ -15,7 +15,7 @@ import {
   StackedInputActionsComponent,
   StackedInputActionsState,
   StackedInputActionsUpdate,
-  StepOnNextFunction,
+  StepOnNextResult,
 } from '@stratosui/core';
 import { CFFeatureFlagTypes } from '../../../../../cf-api.types';
 import { CfCurrentUserRolesDataService } from '../../../../../services/cf-current-user-roles-data.service';
@@ -141,7 +141,7 @@ export class ManageUsersSetUsernamesComponent implements OnInit {
     this.currentValue = event.value;
   }
 
-  onNext: StepOnNextFunction = () => {
+  async onNext(): Promise<StepOnNextResult> {
     // Set-by-username seeds synthetic StUser rows: the username is the real
     // identity and `guid` is the composite (username/cfGuid/orgGuid) the
     // executeChanges payload keys off. There's no fetched CF user yet, so the
@@ -156,8 +156,6 @@ export class ManageUsersSetUsernamesComponent implements OnInit {
       } as StUser;
     });
     this.rolesData.setUsers(this.activeRouteCfOrgSpace.cfGuid, users, this.origin);
-    return of({
-      success: true
-    });
-  };
+    return { success: true };
+  }
 }
