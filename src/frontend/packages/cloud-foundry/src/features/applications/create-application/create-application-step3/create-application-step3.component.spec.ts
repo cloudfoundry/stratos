@@ -5,7 +5,6 @@ import { provideZonelessChangeDetection } from '@angular/core';
 import { provideNoopAnimations } from '@angular/platform-browser/animations';
 import { provideRouter } from '@angular/router';
 import { HttpClientTestingModule, HttpTestingController, TestRequest } from '@angular/common/http/testing';
-import { firstValueFrom, Observable } from 'rxjs';
 
 import { generateCfStoreModules } from '@test-framework/cf';
 import type { NewAppCFDetails } from '../../../../shared/data-services/create-app-state.service';
@@ -41,7 +40,7 @@ describe('CreateApplicationStep3Component', () => {
       cloudFoundryDetails: { cloudFoundry: 'cf1', org: 'org-1', space: 'space-1' } as NewAppCFDetails,
       name: 'my-app',
     };
-    const result = firstValueFrom((component.onNext as () => Observable<{ success: boolean; message?: string }>)());
+    const result = component.onNext();
     const http = TestBed.inject(HttpTestingController);
     let post: TestRequest | undefined;
     await vi.waitFor(() => {

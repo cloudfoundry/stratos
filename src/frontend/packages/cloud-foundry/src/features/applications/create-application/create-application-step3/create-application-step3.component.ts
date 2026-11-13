@@ -4,10 +4,10 @@ import { CommonModule } from '@angular/common';
 import { HttpClient } from '@angular/common/http';
 import { AbstractControl, ReactiveFormsModule, FormControl, FormGroup, Validators } from '@angular/forms';
 import { ActivatedRoute, Router } from '@angular/router';
-import { from, Observable, of as observableOf, throwError } from 'rxjs';
+import { firstValueFrom, from, Observable, of as observableOf, throwError } from 'rxjs';
 import { catchError, filter, map, mergeMap, switchMap } from 'rxjs/operators';
 
-import { AppErrorComponent, AppInputDirective, CustomFormFieldComponent, CustomSelectComponent, CustomOptionComponent, ErrorStateMatcher, ShowOnDirtyErrorStateMatcher, StepOnNextFunction } from '@stratosui/core';
+import { AppErrorComponent, AppInputDirective, CustomFormFieldComponent, CustomSelectComponent, CustomOptionComponent, ErrorStateMatcher, ShowOnDirtyErrorStateMatcher, StepOnNextResult } from '@stratosui/core';
 import { extractHttpErrorMessage } from '@stratosui/store';
 import { CnsiAppsSource } from '../../../../services/data-sources/cnsi-apps-source';
 import { CnsiRoutesSource } from '../../../../services/data-sources/cnsi-routes-source';
@@ -73,10 +73,10 @@ export class CreateApplicationStep3Component implements OnInit, OnDestroy {
   message: any = null;
 
   newAppData!: { cloudFoundryDetails: NewAppCFDetails; name: string };
-  onNext: StepOnNextFunction = () => {
+  async onNext(): Promise<StepOnNextResult> {
     const { cloudFoundryDetails } = this.newAppData;
     const { cloudFoundry } = cloudFoundryDetails;
-    return this.createApp().pipe(
+    const created$ = this.createApp().pipe(
       switchMap(appGuid => this.createRoute().pipe(
         map(routeGuid => ({ appGuid, routeGuid })),
       )),
@@ -96,9 +96,13 @@ export class CreateApplicationStep3Component implements OnInit, OnDestroy {
         );
         return { success: true };
       }),
-      catchError((err: unknown) => observableOf({ success: false, message: extractHttpErrorMessage(err) })),
     );
-  };
+    try {
+      return await firstValueFrom(created$);
+    } catch (err: unknown) {
+      return { success: false, message: extractHttpErrorMessage(err) };
+    }
+  }
 
   validate(): boolean {
     return this.setDomainHost.valid;
