@@ -236,6 +236,60 @@ func TestApplyNativeRoleChanges_AddByUsernameCFRejects(t *testing.T) {
 	assert.Contains(t, resp.Results[0].Error, "No user exists")
 }
 
+// A space role brings the org User role with it, and the Add User dialog
+// cannot know who is already a member, so it may ask for an org User role
+// the user already holds. CF refuses that add; the role the change asked
+// for exists, so the change has succeeded.
+func TestApplyNativeRoleChanges_AddOfHeldRoleSucceeds(t *testing.T) {
+	var roleQuery string
+	ts := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		w.Header().Set("Content-Type", "application/json")
+		_, _ = io.ReadAll(r.Body)
+		switch {
+		case r.URL.Path == "/v3":
+			_, _ = w.Write([]byte(`{"links":{}}`))
+		case r.Method == http.MethodPost && r.URL.Path == "/v3/roles":
+			w.WriteHeader(http.StatusUnprocessableEntity)
+			_, _ = w.Write([]byte(`{"errors":[{"detail":"User 'bob' already has 'organization_user' role in organization 'org-one'.","title":"CF-UnprocessableEntity","code":10008}]}`))
+		case r.Method == http.MethodGet && r.URL.Path == "/v3/users":
+			_ = json.NewEncoder(w).Encode(map[string]interface{}{
+				"pagination": map[string]interface{}{"total_pages": 1},
+				"resources":  []map[string]interface{}{{"guid": "user-x", "username": "bob"}},
+			})
+		case r.Method == http.MethodGet && r.URL.Path == "/v3/roles":
+			roleQuery = r.URL.RawQuery
+			_ = json.NewEncoder(w).Encode(map[string]interface{}{
+				"pagination": map[string]interface{}{"total_pages": 1},
+				"resources":  []map[string]interface{}{{"guid": "role-5", "type": "organization_user"}},
+			})
+		default:
+			http.NotFound(w, r)
+		}
+	}))
+	defer ts.Close()
+
+	body := `{"changes":[{"username":"bob","origin":"uaa","orgGuid":"org-1","type":"organization_user","add":true}]}`
+	e := echo.New()
+	ctx, rec := newPhase1CContext(e, http.MethodPost, "/pp/v1/cf/roles/cnsi-1/changes", body)
+	ctx.SetPathValues(echo.PathValues{{Name: "cnsiGuid", Value: "cnsi-1"}})
+
+	require.NoError(t, newPhase1CPlugin(ts.URL).applyNativeRoleChanges(ctx))
+	assert.Equal(t, http.StatusOK, rec.Code)
+	assert.Contains(t, roleQuery, "user_guids=user-x")
+	assert.Contains(t, roleQuery, "organization_guids=org-1")
+
+	var resp struct {
+		Results []struct {
+			Success bool   `json:"success"`
+			Error   string `json:"error"`
+		} `json:"results"`
+	}
+	require.NoError(t, json.Unmarshal(rec.Body.Bytes(), &resp))
+	require.Len(t, resp.Results, 1)
+	assert.True(t, resp.Results[0].Success)
+	assert.Empty(t, resp.Results[0].Error)
+}
+
 // Remove-by-username (lost legacy functionality, restored): resolve the user
 // GUID via a username lookup, then resolve the role GUID and delete it. No
 // user record is created on a remove.

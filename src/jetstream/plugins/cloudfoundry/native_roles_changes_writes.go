@@ -95,6 +95,9 @@ func (cf *CloudFoundrySpecification) applyNativeRoleChanges(c *echo.Context) err
 
 		if ch.Add {
 			role, addErr := cfClient.Roles().Create(reqCtx, roleCreateRequestFor(ch))
+			if addErr != nil && roleAlreadyHeld(reqCtx, cfClient, ch, addErr) {
+				addErr = nil
+			}
 			res := nativeRoleChangeResult{Index: i, Action: "add", Success: addErr == nil, Role: role}
 			if addErr != nil {
 				res.Error = addErr.Error()
@@ -210,6 +213,28 @@ func findUserGUID(ctx context.Context, cfClient capi.Client, username, origin st
 		return "", fmt.Errorf("%w: %s", errUserNotFound, username)
 	}
 	return list.Resources[0].GUID, nil
+}
+
+// roleAlreadyHeld reports whether a refused add asked for a role the user
+// already holds. CF answers that with the generic unprocessable-entity code,
+// so the role is looked up rather than the message read. A space role
+// brings the org User role with it, and the Add User dialog cannot tell
+// whether the user is already a member, so this case is routine.
+func roleAlreadyHeld(ctx context.Context, cfClient capi.Client, ch nativeRoleChange, addErr error) bool {
+	var respErr *capi.ResponseError
+	if !errors.As(addErr, &respErr) || respErr.FirstError() == nil ||
+		respErr.FirstError().Code != capi.ErrorCodeUnprocessableEntity {
+		return false
+	}
+	if ch.Username != "" {
+		guid, err := findUserGUID(ctx, cfClient, ch.Username, ch.Origin)
+		if err != nil {
+			return false
+		}
+		ch.UserGUID = guid
+	}
+	_, err := resolveRoleGUID(ctx, cfClient, ch)
+	return err == nil
 }
 
 // errUserNotFound is findUserGUID's answer when the lookup succeeded but
