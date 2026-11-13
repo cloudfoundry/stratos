@@ -5,7 +5,7 @@
   <div class="flex flex-wrap gap-2 my-[5px]"
     [ngClass]="{'flex-col': stacked(), 'flex-row-reverse': orientation()==='rtl'}"
     >
-    @for (chip of chips() | slice:0:limit; track chip.key ?? chip.value; let i = $index) {
+    @for (chip of chips() | slice:0:limit(); track chip.key ?? chip.value; let i = $index) {
       <div class="chip app-chip inline-flex items-center gap-2 px-3 py-1 text-sm rounded-full border"
         [ngClass]="getChipClasses(chip.color)">
         <div class="flex items-center gap-1">
@@ -43,10 +43,10 @@
       <button class="btn btn-sm btn-primary cursor-pointer font-light min-w-0 px-[5px]"
         (click)="toggleLimit()"
         appClickStopPropagation>
-        @if (atLowerLimit) {
-          <span>+{{ chips().length - limit }}</span>
+        @if (atLowerLimit()) {
+          <span>+{{ chips().length - limit() }}</span>
         }
-        @if (!atLowerLimit) {
+        @if (!atLowerLimit()) {
           <span>Show less</span>
         }
       </button>

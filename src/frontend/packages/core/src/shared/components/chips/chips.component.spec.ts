@@ -60,6 +60,18 @@ describe('AppChipsComponent', () => {
     expect(element.textContent).toContain('Show less');
   });
 
+  it('should reveal every chip when expanded and hide them again when collapsed', async () => {
+    component.toggleLimit();
+    await fixture.whenStable();
+    expect(element.textContent).toContain('value4');
+    expect(element.textContent).toContain('value5');
+
+    component.toggleLimit();
+    await fixture.whenStable();
+    expect(element.textContent).not.toContain('value4');
+    expect(element.textContent).toContain('+2');
+  });
+
   it('should display custom object property', async () => {
     fixture.componentRef.setInput('displayProperty', 'custom');
     await fixture.whenStable();

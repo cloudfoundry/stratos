@@ -1,5 +1,5 @@
 import { CommonModule } from '@angular/common';
-import { ChangeDetectionStrategy, ChangeDetectorRef, Component, OnInit, inject, input } from '@angular/core';
+import { ChangeDetectionStrategy, Component, computed, input, signal } from '@angular/core';
 import { RouterModule } from '@angular/router';
 import { Observable } from 'rxjs';
 
@@ -39,11 +39,7 @@ export class AppChip<T = string> implements IAppChip<T> {
   templateUrl: './chips.component.html',
   changeDetection: ChangeDetectionStrategy.OnPush
 })
-export class AppChipsComponent implements OnInit {
-  private cdr = inject(ChangeDetectorRef);
-
-  public atLowerLimit = true;
-
+export class AppChipsComponent {
   readonly chips = input<AppChip[]>([]);
 
   readonly stacked = input(false);
@@ -54,22 +50,14 @@ export class AppChipsComponent implements OnInit {
 
   readonly displayProperty = input('value');
 
-  public limit!: number;
+  private readonly expanded = signal(false);
 
-  ngOnInit() {
-    this.limit = this.lowerLimit();
-  }
+  readonly atLowerLimit = computed(() => !this.expanded());
+
+  readonly limit = computed(() => this.expanded() ? this.chips().length : this.lowerLimit());
 
   public toggleLimit() {
-    const lowerLimit = this.lowerLimit();
-    if (this.limit === lowerLimit) {
-      this.limit = this.chips().length;
-      this.atLowerLimit = false;
-    } else {
-      this.limit = lowerLimit;
-      this.atLowerLimit = true;
-    }
-    this.cdr.markForCheck();
+    this.expanded.update(expanded => !expanded);
   }
 
   // displayProperty allows callers to render arbitrary chip-shaped objects,
