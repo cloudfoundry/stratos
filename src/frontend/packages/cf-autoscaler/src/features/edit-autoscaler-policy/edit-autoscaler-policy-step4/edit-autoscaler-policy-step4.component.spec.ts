@@ -5,7 +5,6 @@ import { HttpErrorResponse } from '@angular/common/http';
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { provideZonelessChangeDetection } from '@angular/core';
 import { describe, it, expect, beforeEach, vi } from 'vitest';
-import { firstValueFrom } from 'rxjs';
 import { addDays, format, setHours, setMinutes } from 'date-fns';
 import { NoopAnimationsModule } from '@angular/platform-browser/animations';
 import { RouterTestingModule } from '@angular/router/testing';
@@ -248,7 +247,7 @@ describe('EditAutoscalerPolicyStep4Component', () => {
       component.addSpecificDate();
       component.finishSpecificDate();
 
-      const result = await firstValueFrom(component.updatePolicy(3, null as never));
+      const result = await component.updatePolicy();
 
       expect(update).toHaveBeenCalledWith(ApplicationServiceMock.cfGuid, ApplicationServiceMock.appGuid, component.currentPolicy);
       const sent = update.mock.calls[0][2];
@@ -263,7 +262,7 @@ describe('EditAutoscalerPolicyStep4Component', () => {
       const update = spyOnUpdate();
       create();
 
-      const result = await firstValueFrom(component.updatePolicy(3, null as never));
+      const result = await component.updatePolicy();
 
       expect(update).not.toHaveBeenCalled();
       expect(result.success).toBe(false);
@@ -274,7 +273,7 @@ describe('EditAutoscalerPolicyStep4Component', () => {
       spyOnUpdate().mockRejectedValue(new Error('network down'));
       create([specific()]);
 
-      const result = await firstValueFrom(component.updatePolicy(3, null as never));
+      const result = await component.updatePolicy();
 
       expect(result).toEqual({
         success: false,
@@ -295,7 +294,7 @@ describe('EditAutoscalerPolicyStep4Component', () => {
       }));
       create([specific()]);
 
-      const result = await firstValueFrom(component.updatePolicy(3, null as never));
+      const result = await component.updatePolicy();
 
       expect(result.success).toBe(false);
       expect(result.message).toBe('Could not update policy: instance_min_count: Must be greater than or equal to 1');
@@ -307,7 +306,7 @@ describe('EditAutoscalerPolicyStep4Component', () => {
       spyOnUpdate().mockRejectedValue(new HttpErrorResponse({ error: page, status: 502, statusText: 'Bad Gateway' }));
       create([specific()]);
 
-      const result = await firstValueFrom(component.updatePolicy(3, null as never));
+      const result = await component.updatePolicy();
 
       expect(result.success).toBe(false);
       expect(result.message).toBe('Could not update policy: 502 Bad Gateway\nnginx/1.28.0');
@@ -323,7 +322,7 @@ describe('EditAutoscalerPolicyStep4Component', () => {
       spyOnUpdate().mockRejectedValue(new Error('network down'));
       create([specific()]);
 
-      const result = await firstValueFrom(component.updatePolicy(3, null as never));
+      const result = await component.updatePolicy();
 
       expect(result.message).toBe('Could not create policy: network down');
     });

@@ -1,11 +1,11 @@
 import { CommonModule } from '@angular/common';
-import { ChangeDetectionStrategy, ChangeDetectorRef, Component, OnInit, inject } from '@angular/core';
+import { ChangeDetectionStrategy, Component, OnInit, inject } from '@angular/core';
 import { AbstractControl, FormBuilder, FormControl, FormGroup, ReactiveFormsModule, ValidationErrors, ValidatorFn, Validators } from '@angular/forms';
-import { defer, Observable, of as observableOf } from 'rxjs';
+import { defer, Observable } from 'rxjs';
 import { map, startWith } from 'rxjs/operators';
 import { TailwindErrorStateMatcher, TailwindShowOnDirtyErrorStateMatcher } from '@stratosui/core';
 import { ApplicationService } from '@stratosui/cloud-foundry';
-import { StepOnNextFunction } from '@stratosui/core';
+import { StepOnNextResult } from '@stratosui/core';
 import { autoscalerTransformArrayToMap } from '../../../core/autoscaler-helpers/autoscaler-transform-policy';
 import { PolicyAlert } from '../../../core/autoscaler-helpers/autoscaler-util';
 import { numberWithFractionOrExceedRange } from '../../../core/autoscaler-helpers/autoscaler-validation';
@@ -34,7 +34,6 @@ interface EditLimitForm {
 export class EditAutoscalerPolicyStep1Component extends EditAutoscalerPolicyDirective implements OnInit {
   applicationService = inject(ApplicationService);
   private fb = inject(FormBuilder);
-  private cdr = inject(ChangeDetectorRef);
 
 
   policyAlert = PolicyAlert;
@@ -76,21 +75,20 @@ export class EditAutoscalerPolicyStep1Component extends EditAutoscalerPolicyDire
         // while the maximum was still unset, so check both again now.
         this.editLimitForm.controls.instance_min_count.updateValueAndValidity();
         this.editLimitForm.controls.instance_max_count.updateValueAndValidity();
-        this.cdr.markForCheck();
         return this.currentPolicy;
       })
     );
   }
 
-  onNext: StepOnNextFunction = () => {
+  override async onNext(): Promise<StepOnNextResult> {
     this.currentPolicy.instance_min_count = Math.floor(this.editLimitForm.get('instance_min_count')?.value ?? 0);
     this.currentPolicy.instance_max_count = Math.floor(this.editLimitForm.get('instance_max_count')?.value ?? 0);
     if (this.currentPolicy.schedules) {
       this.currentPolicy.schedules.timezone = this.editLimitForm.get('timezone')?.value ?? '';
     }
     this.service.setState(this.currentPolicy);
-    return observableOf({ success: true });
-  };
+    return { success: true };
+  }
 
   validateGlobalLimitMin(): ValidatorFn {
     return (control: AbstractControl): ValidationErrors | null => {
