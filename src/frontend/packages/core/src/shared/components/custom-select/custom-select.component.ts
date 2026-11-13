@@ -1,4 +1,4 @@
-import { ChangeDetectionStrategy, ChangeDetectorRef, Component, forwardRef, ElementRef, AfterContentInit, AfterViewInit, HostListener, booleanAttribute, contentChildren, effect, inject, input, model, output, untracked, viewChild } from '@angular/core';
+import { ChangeDetectionStrategy, Component, forwardRef, ElementRef, AfterContentInit, AfterViewInit, HostListener, booleanAttribute, computed, contentChildren, effect, inject, input, model, output, signal, untracked, viewChild } from '@angular/core';
 import { NgClass } from '@angular/common';
 import { ControlValueAccessor, NG_VALUE_ACCESSOR } from '@angular/forms';
 import { AppBusyComponent } from '../busy-indicator/busy-indicator.component';
@@ -35,8 +35,6 @@ export interface MatSelectChange {
   },
 })
 export class CustomOptionComponent implements AfterViewInit {
-  private cdr = inject(ChangeDetectorRef);
-
   readonly value = input<any>();
   readonly label = input<string>();
   readonly disabled = input(false);
@@ -45,13 +43,14 @@ export class CustomOptionComponent implements AfterViewInit {
 
   readonly optionContent = viewChild<ElementRef>('optionContent');
 
-  private _displayText?: string;
+  // The text projected into the option, read from the DOM once it renders.
+  // A signal, so a select that shows it updates when it arrives.
+  private readonly _displayText = signal<string | undefined>(undefined);
 
   ngAfterViewInit() {
     const optionContent = this.optionContent();
     if (!this.label() && optionContent) {
-      this._displayText = optionContent.nativeElement.textContent?.trim();
-      this.cdr.markForCheck();
+      this._displayText.set(optionContent.nativeElement.textContent?.trim());
     }
   }
 
@@ -61,7 +60,7 @@ export class CustomOptionComponent implements AfterViewInit {
     // here crashed applyOptionFilter's .toLowerCase() the moment such an
     // option had empty projected text.
     const value = this.value();
-    return this.label() || this._displayText || (typeof value === 'string' ? value : '');
+    return this.label() || this._displayText() || (typeof value === 'string' ? value : '');
   }
 }
 
@@ -81,7 +80,6 @@ export class CustomOptionComponent implements AfterViewInit {
   ]
 })
 export class CustomSelectComponent implements ControlValueAccessor, AfterContentInit {
-  private cdr = inject(ChangeDetectorRef);
   private elementRef = inject(ElementRef);
 
   // A model: a parent binds it and the form disables the select through it.
@@ -109,7 +107,8 @@ export class CustomSelectComponent implements ControlValueAccessor, AfterContent
   // selectedValues; selectedValue returns it in the shape of this input.
   readonly value = input<any>();
   get selectedValue(): any {
-    return this.multiple() ? this.selectedValues : this.selectedValues[0];
+    const selected = this.selectedValues();
+    return this.multiple() ? selected : selected[0];
   }
 
   constructor() {
@@ -136,10 +135,6 @@ export class CustomSelectComponent implements ControlValueAccessor, AfterContent
         this.syncedOptions = options;
         this.checkAutoSelect();
         this.updateOptions();
-        setTimeout(() => {
-          this.updateDisplayValue();
-          this.cdr.markForCheck();
-        });
       });
     });
   }
@@ -154,10 +149,26 @@ export class CustomSelectComponent implements ControlValueAccessor, AfterContent
   readonly selectTrigger = viewChild.required<ElementRef>('selectTrigger');
   readonly selectOptions = viewChild.required<ElementRef>('selectOptions');
 
-  isOpen = false;
-  selectedValues: any[] = [];
-  displayValue = '';
-  searchTerm = '';
+  readonly isOpen = signal(false);
+  readonly selectedValues = signal<any[]>([]);
+  readonly searchTerm = signal('');
+
+  // Follows the selection and the option list, so text that an option only
+  // learns after it renders reaches the trigger without a refresh call.
+  // When the matching option isn't found yet (async @for not rendered), it
+  // is empty so the placeholder displays instead of a raw value/GUID.
+  readonly displayValue = computed(() => {
+    const selected = this.selectedValues();
+    if (selected.length === 0) {
+      return '';
+    }
+    if (this.multiple() && selected.length > 1) {
+      return `${selected.length} selected`;
+    }
+    // Single selection, or multi with exactly 1 selected: show the item name.
+    const selectedOption = this.options().find(opt => opt.value() === selected[0]);
+    return selectedOption ? selectedOption.displayText : '';
+  });
   // Show the type-to-filter input once the list crosses this length —
   // a 5-option select stays clean without it; a 50-org list desperately
   // needs it.
@@ -178,9 +189,9 @@ export class CustomSelectComponent implements ControlValueAccessor, AfterContent
     });
     return longest;
   }
-  dropdownTop = '0px';
-  dropdownLeft = '0px';
-  dropdownWidth = '0px';
+  readonly dropdownTop = signal('0px');
+  readonly dropdownLeft = signal('0px');
+  readonly dropdownWidth = signal('0px');
 
   // Interaction lock: ignore external writeValue while user is actively selecting in multi-select
   private _interacting = false;
@@ -191,7 +202,6 @@ export class CustomSelectComponent implements ControlValueAccessor, AfterContent
   ngAfterContentInit() {
     this.syncedOptions = this.options();
     this.checkAutoSelect();
-    this.updateDisplayValue();
     this.updateOptions();
   }
 
@@ -200,7 +210,7 @@ export class CustomSelectComponent implements ControlValueAccessor, AfterContent
     const options = this.options();
     if (this.autoSelectSingleOption() &&
         !this.multiple() &&
-        this.selectedValues.length === 0 &&
+        this.selectedValues().length === 0 &&
         options.length === 1) {
       const singleOption = options[0];
       if (singleOption && !singleOption.disabled()) {
@@ -213,24 +223,23 @@ export class CustomSelectComponent implements ControlValueAccessor, AfterContent
   toggle() {
     if (this.disabled()) return;
 
-    if (!this.isOpen) {
+    if (!this.isOpen()) {
       // Calculate position BEFORE opening dropdown to prevent flash at wrong position
       const rect = this.selectTrigger().nativeElement.getBoundingClientRect();
-      this.dropdownTop = `${rect.bottom + 4}px`;  // Add 4px gap for better spacing
-      this.dropdownLeft = `${rect.left}px`;
+      this.dropdownTop.set(`${rect.bottom + 4}px`);  // Add 4px gap for better spacing
+      this.dropdownLeft.set(`${rect.left}px`);
       // Use trigger width as minimum, but allow dropdown to expand for content
-      this.dropdownWidth = `${rect.width}px`;
+      this.dropdownWidth.set(`${rect.width}px`);
     }
 
-    this.isOpen = !this.isOpen;
-    this._interacting = this.isOpen && this.multiple();
-    if (!this.isOpen) {
+    this.isOpen.update(open => !open);
+    this._interacting = this.isOpen() && this.multiple();
+    if (!this.isOpen()) {
       // Clear filter on close so the next open shows the full list.
-      this.searchTerm = '';
+      this.searchTerm.set('');
       this.applyOptionFilter();
     }
     this._onTouched();
-    this.cdr.markForCheck();
   }
 
   /** True once the option list crosses the threshold worth showing a
@@ -240,7 +249,7 @@ export class CustomSelectComponent implements ControlValueAccessor, AfterContent
   }
 
   onSearchInput(event: Event) {
-    this.searchTerm = (event.target as HTMLInputElement).value ?? '';
+    this.searchTerm.set((event.target as HTMLInputElement).value ?? '');
     this.applyOptionFilter();
   }
 
@@ -249,7 +258,7 @@ export class CustomSelectComponent implements ControlValueAccessor, AfterContent
    *  element so we don't need to re-render projected content — selection
    *  / focus / visual state stay intact. */
   private applyOptionFilter() {
-    const q = this.searchTerm.trim().toLowerCase();
+    const q = this.searchTerm().trim().toLowerCase();
     this.options().forEach(opt => {
       const el = opt.optionContent()?.nativeElement as HTMLElement | undefined;
       if (!el) return;
@@ -283,26 +292,27 @@ export class CustomSelectComponent implements ControlValueAccessor, AfterContent
 
     const multiple = this.multiple();
     if (multiple) {
-      const index = this.selectedValues.indexOf(option.value());
+      const current = this.selectedValues();
+      const index = current.indexOf(option.value());
       if (index === -1) {
-        this.selectedValues = [...this.selectedValues, option.value()];
+        this.selectedValues.set([...current, option.value()]);
       } else {
-        this.selectedValues = this.selectedValues.filter((_, i) => i !== index);
+        this.selectedValues.set(current.filter((_, i) => i !== index));
       }
     } else {
       const valueValue = option.value();
       if (valueValue === null || valueValue === undefined) {
-        this.selectedValues = [];
+        this.selectedValues.set([]);
       } else {
-        this.selectedValues = [valueValue];
+        this.selectedValues.set([valueValue]);
       }
-      this.isOpen = false;
+      this.isOpen.set(false);
     }
 
-    this.updateDisplayValue();
     this.updateOptions();
 
-    const value = multiple ? this.selectedValues : (this.selectedValues[0] ?? null);
+    const selected = this.selectedValues();
+    const value = multiple ? selected : (selected[0] ?? null);
     this._onChange(value);
 
     this.selectionChange.emit({
@@ -311,27 +321,11 @@ export class CustomSelectComponent implements ControlValueAccessor, AfterContent
     });
 
     this.valueChange.emit(value);
-    this.cdr.markForCheck();
-  }
-
-  private updateDisplayValue() {
-    if (this.selectedValues.length === 0) {
-      this.displayValue = '';
-    } else if (this.multiple() && this.selectedValues.length > 1) {
-      this.displayValue = `${this.selectedValues.length} selected`;
-    } else {
-      // Single selection, or multi with exactly 1 selected — show the item name.
-      // When the matching option isn't found yet (async @for not rendered), show
-      // empty so the placeholder displays instead of flashing a raw value/GUID.
-      const selectedOption = this.options().find(opt => opt.value() === this.selectedValues[0]);
-      this.displayValue = selectedOption ? selectedOption.displayText : '';
-    }
-    this.cdr.markForCheck();
   }
 
   private updateOptions() {
     this.options().forEach(option => {
-      const isSelected = this.selectedValues.includes(option.value());
+      const isSelected = this.selectedValues().includes(option.value());
       if (option.selected() !== isSelected) {
         option.selected.set(isSelected);
       }
@@ -349,13 +343,12 @@ export class CustomSelectComponent implements ControlValueAccessor, AfterContent
 
     const multiple = this.multiple();
     if (multiple && Array.isArray(value)) {
-      this.selectedValues = value || [];
+      this.selectedValues.set(value || []);
     } else if (!multiple && value !== undefined && value !== null) {
-      this.selectedValues = [value];
+      this.selectedValues.set([value]);
     } else {
-      this.selectedValues = [];
+      this.selectedValues.set([]);
     }
-    this.updateDisplayValue();
     this.updateOptions();
   }
 
@@ -378,7 +371,7 @@ export class CustomSelectComponent implements ControlValueAccessor, AfterContent
   // close the innermost popup. With the list closed, Escape passes through.
   @HostListener('keydown.escape', ['$event'])
   onEscape(event: Event) {
-    if (!this.isOpen) return;
+    if (!this.isOpen()) return;
     event.stopPropagation();
     this.toggle();
     this.selectTrigger().nativeElement.focus();
@@ -392,7 +385,7 @@ export class CustomSelectComponent implements ControlValueAccessor, AfterContent
 
   @HostListener('document:click', ['$event'])
   onDocumentClick(event: MouseEvent) {
-    if (!this.isOpen) return;
+    if (!this.isOpen()) return;
 
     const target = event.target as HTMLElement;
 
@@ -404,8 +397,7 @@ export class CustomSelectComponent implements ControlValueAccessor, AfterContent
       return;
     }
 
-    this.isOpen = false;
+    this.isOpen.set(false);
     this._interacting = false;
-    this.cdr.markForCheck();
   }
 }

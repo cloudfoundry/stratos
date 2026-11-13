@@ -350,3 +350,44 @@ describe('CustomSelectComponent value sources', () => {
     expect(selected('form')).toEqual(['B']);
   });
 });
+
+// The trigger shows the text of the selected option, which an option only
+// knows once its projected content has rendered.
+@Component({
+  standalone: true,
+  imports: [CustomSelectComponent, CustomOptionComponent],
+  template: `
+    <app-select placeholder="Pick one" [value]="'b'">
+      <app-option value="a">Alpha</app-option>
+      <app-option value="b">Bravo</app-option>
+    </app-select>
+  `,
+})
+class TriggerTextHostComponent {}
+
+describe('CustomSelectComponent trigger text', () => {
+  async function render() {
+    TestBed.configureTestingModule({ providers: [provideZonelessChangeDetection()] });
+    const fixture = TestBed.createComponent(TriggerTextHostComponent);
+    await fixture.whenStable();
+    const el: HTMLElement = fixture.nativeElement;
+    const shown = () => el.querySelector('.select-trigger-value, .select-trigger-placeholder')?.textContent?.trim();
+    return { fixture, el, shown };
+  }
+
+  it('shows the projected text of the selected option', async () => {
+    const { shown } = await render();
+    expect(shown()).toBe('Bravo');
+  });
+
+  it('follows a pick made from the list', async () => {
+    const { fixture, el, shown } = await render();
+    el.querySelector<HTMLElement>('[role="combobox"]')!.click();
+    await fixture.whenStable();
+    el.querySelectorAll<HTMLElement>('.custom-option-content')[0].click();
+    await fixture.whenStable();
+
+    expect(shown()).toBe('Alpha');
+    expect(el.querySelector('[role="combobox"]')!.getAttribute('aria-expanded')).toBe('false');
+  });
+});
