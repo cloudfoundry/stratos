@@ -663,6 +663,11 @@ export class RoleAssignmentComponent implements OnInit, OnDestroy {
         ...sel,
         [orgGuid]: {
           ...sel[orgGuid],
+          // Cloud Foundry gives a space role only to a member of the org, so
+          // a space role brings the org User role with it.
+          orgRoles: value
+            ? { ...sel[orgGuid].orgRoles, [OrgUserRoleNames.USER]: true }
+            : sel[orgGuid].orgRoles,
           spaces: {
             ...existingSpaces,
             [space.guid]: {
