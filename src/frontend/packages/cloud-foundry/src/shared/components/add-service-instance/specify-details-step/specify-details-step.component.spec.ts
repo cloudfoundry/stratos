@@ -5,7 +5,7 @@ import { importProvidersFrom, provideZonelessChangeDetection } from '@angular/co
 import { HttpErrorResponse, provideHttpClient } from '@angular/common/http';
 import { HttpTestingController, provideHttpClientTesting } from '@angular/common/http/testing';
 import { provideRouter } from '@angular/router';
-import { firstValueFrom, of } from 'rxjs';
+import { of } from 'rxjs';
 import { describe, it, expect, beforeEach, vi } from 'vitest';
 
 import { STORE_TEST_PROVIDERS } from '@stratosui/store/testing';
@@ -28,6 +28,14 @@ import { setJobTrackingLimit } from '../../../../services/async-jobs/write-with-
 import type { StServicePlan } from '../../../../services/endpoint-data/stratos-types';
 import { SpecifyDetailsStepComponent } from './specify-details-step.component';
 import { EndpointDataRegistry } from '../../../../services/endpoint-data/endpoint-data.registry';
+
+// onNext waits for the wizard state on a microtask before it sends anything,
+// so a spec that answers the request right after calling it lets that settle
+const settle = async () => {
+  for (let i = 0; i < 5; i++) {
+    await Promise.resolve();
+  }
+};
 
 // nginx's own 502 page.
 const nginx502 = (): string =>
@@ -311,7 +319,8 @@ describe('SpecifyDetailsStepComponent.onNext (v3 + writeWithJob)', () => {
 
     it('after a create', async () => {
       const { component, httpMock, endpointData, registryStub } = await setup();
-      const done = firstValueFrom(component.onNext());
+      const done = component.onNext();
+      await settle();
       httpMock.expectOne('/pp/v1/cf/service_instances/cnsi-1').flush(
         { state: 'COMPLETE', result: { links: { service_instances: 'https://cf/v3/service_instances/si-new' } } },
         { status: 200, statusText: 'OK' },
@@ -324,7 +333,8 @@ describe('SpecifyDetailsStepComponent.onNext (v3 + writeWithJob)', () => {
 
     it('after an update', async () => {
       const { component, httpMock, endpointData } = await setup({ isEditMode: true });
-      const done = firstValueFrom(component.onNext());
+      const done = component.onNext();
+      await settle();
       httpMock.expectOne('/pp/v1/cf/service_instances/cnsi-1/si-existing').flush(
         { state: 'COMPLETE', result: {} }, { status: 200, statusText: 'OK' },
       );
@@ -335,7 +345,8 @@ describe('SpecifyDetailsStepComponent.onNext (v3 + writeWithJob)', () => {
 
     it('as soon as CF accepts a slow create, before it ends', async () => {
       const { fixture, component, httpMock, endpointData } = await setup();
-      const done = firstValueFrom(component.onNext());
+      const done = component.onNext();
+      await settle();
       httpMock.expectOne('/pp/v1/cf/service_instances/cnsi-1').flush(
         { id: 'job-3', state: 'PROCESSING', startedAt: '2026-10-20T00:00:00Z' },
         { status: 202, statusText: 'Accepted' },
@@ -351,7 +362,8 @@ describe('SpecifyDetailsStepComponent.onNext (v3 + writeWithJob)', () => {
 
     it('after a create that failed inside the fast-path window', async () => {
       const { component, httpMock, endpointData } = await setup();
-      const done = firstValueFrom(component.onNext());
+      const done = component.onNext();
+      await settle();
       httpMock.expectOne('/pp/v1/cf/service_instances/cnsi-1').flush(
         { errors: [{ code: 'CF-UnableToPerform', detail: 'the broker said no' }] },
         { status: 502, statusText: 'Bad Gateway' },
@@ -365,8 +377,8 @@ describe('SpecifyDetailsStepComponent.onNext (v3 + writeWithJob)', () => {
   it('POSTs the v3 managed body and returns success+redirect on create without bind', async () => {
     const { component, httpMock } = await setup();
     const snackBarOpen = vi.spyOn((component as any).snackBar, 'open');
-    const result$ = component.onNext();
-    const finalResult = firstValueFrom(result$);
+    const finalResult = component.onNext();
+    await settle();
 
     const req = httpMock.expectOne('/pp/v1/cf/service_instances/cnsi-1');
     expect(req.request.method).toBe('POST');
@@ -408,7 +420,7 @@ describe('SpecifyDetailsStepComponent.onNext (v3 + writeWithJob)', () => {
     ] as StServiceInstance[]);
     component.selectExistingInstanceForm.controls.serviceInstance.setValue('si-2');
 
-    await expect(firstValueFrom(component.onNext())).resolves.toEqual({ success: true, redirect: true });
+    await expect(component.onNext()).resolves.toEqual({ success: true, redirect: true });
     expect(modeServiceStub.createApplicationServiceBinding).toHaveBeenCalledWith('si-2', 'cnsi-1', 'app-1', undefined);
     expect(snackBarOpen).toHaveBeenCalledWith('Service instance "instance-two" bound to the application.', 'Dismiss', { duration: 4000 });
     httpMock.expectNone('/pp/v1/cf/service_instances/cnsi-1');
@@ -423,7 +435,7 @@ describe('SpecifyDetailsStepComponent.onNext (v3 + writeWithJob)', () => {
     component.bindableServiceInstances$ = of([{ guid: 'si-2', name: 'instance-two' }] as StServiceInstance[]);
     component.selectExistingInstanceForm.controls.serviceInstance.setValue('si-2');
 
-    await expect(firstValueFrom(component.onNext())).resolves.toEqual({ success: true, redirect: true });
+    await expect(component.onNext()).resolves.toEqual({ success: true, redirect: true });
     expect(snackBarOpen).toHaveBeenCalledWith(
       'Service instance "instance-two" is still provisioning. It will be bound to the application automatically when ready.',
       'Dismiss', { duration: 4000 });
@@ -434,7 +446,8 @@ describe('SpecifyDetailsStepComponent.onNext (v3 + writeWithJob)', () => {
     const { component, modeServiceStub, httpMock } = await setup({ bindAppGuid: 'app-1' });
     modeServiceStub.createApplicationServiceBinding.mockReturnValue(of({ success: true, deferred: true }));
     const snackBarOpen = vi.spyOn((component as any).snackBar, 'open');
-    const finalResult = firstValueFrom(component.onNext());
+    const finalResult = component.onNext();
+    await settle();
     httpMock.expectOne('/pp/v1/cf/service_instances/cnsi-1').flush(
       {
         state: 'COMPLETE',
@@ -453,8 +466,8 @@ describe('SpecifyDetailsStepComponent.onNext (v3 + writeWithJob)', () => {
   it('chains into bind when bindAppGuid is set and a SI guid is extractable', async () => {
     const { component, modeServiceStub, csiStateStub, httpMock } = await setup({ bindAppGuid: 'app-1' });
     const snackBarOpen = vi.spyOn((component as any).snackBar, 'open');
-    const result$ = component.onNext();
-    const finalResult = firstValueFrom(result$);
+    const finalResult = component.onNext();
+    await settle();
 
     const post = httpMock.expectOne('/pp/v1/cf/service_instances/cnsi-1');
     post.flush(
@@ -482,8 +495,8 @@ describe('SpecifyDetailsStepComponent.onNext (v3 + writeWithJob)', () => {
 
   it('reports a create that ended with an unknown result, and that the bind was not attempted', async () => {
     const { component, modeServiceStub, httpMock } = await setup({ bindAppGuid: 'app-1' });
-    const result$ = component.onNext();
-    const finalResult = firstValueFrom(result$);
+    const finalResult = component.onNext();
+    await settle();
 
     // 202 handoff with a job the backend no longer knows → UNKNOWN.
     const post = httpMock.expectOne('/pp/v1/cf/service_instances/cnsi-1');
@@ -509,7 +522,8 @@ describe('SpecifyDetailsStepComponent.onNext (v3 + writeWithJob)', () => {
 
   it('reports an update that ended with an unknown result, never as updated', async () => {
     const { component, httpMock } = await setup({ isEditMode: true });
-    const finalResult = firstValueFrom(component.onNext());
+    const finalResult = component.onNext();
+    await settle();
 
     httpMock.expectOne('/pp/v1/cf/service_instances/cnsi-1/si-existing').flush(null, { status: 202, statusText: 'Accepted' });
 
@@ -524,7 +538,8 @@ describe('SpecifyDetailsStepComponent.onNext (v3 + writeWithJob)', () => {
   it('reports a bind that ended with an unknown result after a create', async () => {
     const { component, modeServiceStub, httpMock } = await setup({ bindAppGuid: 'app-1' });
     modeServiceStub.createApplicationServiceBinding.mockReturnValue(of({ success: false, unknown: 'ended' }));
-    const finalResult = firstValueFrom(component.onNext());
+    const finalResult = component.onNext();
+    await settle();
 
     httpMock.expectOne('/pp/v1/cf/service_instances/cnsi-1').flush(
       {
@@ -545,7 +560,8 @@ describe('SpecifyDetailsStepComponent.onNext (v3 + writeWithJob)', () => {
   it('names the instance and says it was created when the bind after a create fails', async () => {
     const { component, modeServiceStub, httpMock } = await setup({ bindAppGuid: 'app-1' });
     modeServiceStub.createApplicationServiceBinding.mockReturnValue(of({ success: false, message: 'bind said no' }));
-    const finalResult = firstValueFrom(component.onNext());
+    const finalResult = component.onNext();
+    await settle();
 
     httpMock.expectOne('/pp/v1/cf/service_instances/cnsi-1').flush(
       {
@@ -568,7 +584,7 @@ describe('SpecifyDetailsStepComponent.onNext (v3 + writeWithJob)', () => {
     component.selectExistingInstanceForm.controls.serviceInstance.setValue('si-2');
 
     const message = 'Failed to bind service instance "instance-two" to the application: bind said no';
-    await expect(firstValueFrom(component.onNext())).resolves.toEqual({ success: false, message, messagePieces: [{ text: message, style: 'text' }] });
+    await expect(component.onNext()).resolves.toEqual({ success: false, message, messagePieces: [{ text: message, style: 'text' }] });
     httpMock.match(() => true).forEach(r => r.flush({}, { status: 200, statusText: 'OK' }));
   });
 
@@ -580,7 +596,7 @@ describe('SpecifyDetailsStepComponent.onNext (v3 + writeWithJob)', () => {
     component.bindableServiceInstances$ = of([{ guid: 'si-2', name: 'instance-two' }] as StServiceInstance[]);
     component.selectExistingInstanceForm.controls.serviceInstance.setValue('si-2');
 
-    const out = await firstValueFrom(component.onNext());
+    const out = await component.onNext();
 
     expect(out.message).toBe('Failed to bind service instance "instance-two" to the application: 502 Bad Gateway\nnginx/1.28.0');
     expect(out.messagePieces).toEqual([
@@ -594,8 +610,8 @@ describe('SpecifyDetailsStepComponent.onNext (v3 + writeWithJob)', () => {
   it('PATCHes the v3 endpoint and returns success+redirect on update', async () => {
     const { component, httpMock } = await setup({ isEditMode: true });
     const snackBarOpen = vi.spyOn((component as any).snackBar, 'open');
-    const result$ = component.onNext();
-    const finalResult = firstValueFrom(result$);
+    const finalResult = component.onNext();
+    await settle();
 
     const req = httpMock.expectOne('/pp/v1/cf/service_instances/cnsi-1/si-existing');
     expect(req.request.method).toBe('PATCH');
@@ -637,7 +653,8 @@ describe('SpecifyDetailsStepComponent.onNext (v3 + writeWithJob)', () => {
       });
       const open = vi.spyOn((ctx.component as any).snackBar, 'open');
       const error = vi.spyOn((ctx.component as any).snackBar, 'error');
-      const result = firstValueFrom(ctx.component.onNext());
+      const result = ctx.component.onNext();
+      await settle();
       ctx.httpMock.expectOne('/pp/v1/cf/service_instances/cnsi-1').flush(
         { id: 'job-slow', state: 'PROCESSING', startedAt: '2026-10-15T00:00:00Z' },
         { status: 202, statusText: 'Accepted' },
@@ -1020,8 +1037,8 @@ describe('SpecifyDetailsStepComponent.onNext (v3 + writeWithJob)', () => {
 
   it('surfaces CF detail message on 4xx create failure', async () => {
     const { component, httpMock } = await setup();
-    const result$ = component.onNext();
-    const finalResult = firstValueFrom(result$);
+    const finalResult = component.onNext();
+    await settle();
 
     const req = httpMock.expectOne('/pp/v1/cf/service_instances/cnsi-1');
     req.flush(
@@ -1040,7 +1057,8 @@ describe('SpecifyDetailsStepComponent.onNext (v3 + writeWithJob)', () => {
   // CF quotes the broker's own page in the error detail.
   it('keeps an error page\'s heading when the create fails', async () => {
     const { component, httpMock } = await setup();
-    const finalResult = firstValueFrom(component.onNext());
+    const finalResult = component.onNext();
+    await settle();
 
     httpMock.expectOne('/pp/v1/cf/service_instances/cnsi-1').flush(
       { errors: [{ code: 10001, title: 'CF-ServiceBrokerBadResponse', detail: nginx502() }] },
@@ -1066,7 +1084,8 @@ describe('SpecifyDetailsStepComponent.onNext (v3 + writeWithJob)', () => {
 
     async function runOnNext(opts: Parameters<typeof setup>[0], url: string, contract: ServiceWriteContract, path: ResolvePath) {
       const ctx = await setup(opts);
-      const finalResult = firstValueFrom(ctx.component.onNext());
+      const finalResult = ctx.component.onNext();
+      await settle();
       await answerServiceWrite(ctx.httpMock, url, contract, path);
       const out = await finalResult;
       // Drain unrelated background loaders the cf test module fires on bootstrap.

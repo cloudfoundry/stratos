@@ -1,11 +1,10 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
-import { importProvidersFrom, provideZonelessChangeDetection, signal } from '@angular/core';
+import { importProvidersFrom, provideZonelessChangeDetection, signal, WritableSignal } from '@angular/core';
 import { provideHttpClient } from '@angular/common/http';
 import { provideHttpClientTesting } from '@angular/common/http/testing';
 import { By } from '@angular/platform-browser';
 import { provideRouter } from '@angular/router';
 import { describe, it, expect, beforeEach } from 'vitest';
-import { of } from 'rxjs';
 import { STORE_TEST_PROVIDERS } from '@stratosui/store/testing';
 import { PageHeaderComponent, StepComponent, TabNavService } from '@stratosui/core';
 import { generateCfBaseTestModulesNoShared } from '@test-framework/cf';
@@ -155,7 +154,7 @@ describe('AddServiceInstanceComponent', () => {
       const child = {
         validate: signal(true),
         onEnter: () => undefined,
-        onNext: () => of({ success: true, data: plan }),
+        onNext: async () => ({ success: true, data: plan }),
       } as any;
       stubChild('_selectPlan', child);
 
@@ -212,7 +211,7 @@ describe('AddServiceInstanceComponent', () => {
   // exist, so the wizard stays put with no error.
   describe('supdHandle.submit', () => {
     async function stepResult(childResult: object) {
-      stubChild('_supd', { validate: signal(true), onNext: () => of(childResult) });
+      stubChild('_supd', { validate: signal(true), onNext: async () => childResult });
       const stepRef = TestBed.createComponent(StepComponent).componentRef;
       stepRef.setInput('signalHandle', component.supdHandle);
       const step = stepRef.instance;
@@ -226,6 +225,36 @@ describe('AddServiceInstanceComponent', () => {
     it('fails the step with the reason given', async () => {
       expect(await stepResult({ success: false, message: 'Name taken' }))
         .toMatchObject({ success: false, message: expect.stringContaining('Name taken') });
+    });
+  });
+
+  // The first step saves the picked CF, org and space, then waits for the
+  // space's apps to finish loading (appsLoading$ never completes).
+  describe('onNext of the Cloud Foundry step', () => {
+    it('fails without a selected endpoint', async () => {
+      expect(await component.onNext()).toEqual({ success: false });
+    });
+
+    it('succeeds once the apps have loaded', async () => {
+      const spaces = component.cfOrgSpaceService;
+      spaces.cf.select.set('cf-1');
+      spaces.org.select.set('org-1');
+      spaces.space.select.set('space-1');
+      const loading = (component as unknown as { _appsLoading: WritableSignal<boolean> })._appsLoading;
+      loading.set(true);
+      await fixture.whenStable();
+
+      let done = false;
+      const pending = component.onNext().then(result => {
+        done = true;
+        return result;
+      });
+      await new Promise(resolve => setTimeout(resolve, 20));
+      expect(done).toBe(false);
+
+      loading.set(false);
+      await fixture.whenStable();
+      expect(await pending).toEqual({ success: true });
     });
   });
 });

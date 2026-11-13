@@ -2,8 +2,8 @@ import { AsyncPipe, CommonModule, TitleCasePipe } from '@angular/common';
 import { HttpClient } from '@angular/common/http';
 import {
   ChangeDetectionStrategy,
-  ChangeDetectorRef,
   Component,
+  DestroyRef,
   Injector,
   OnDestroy,
   OnInit,
@@ -17,9 +17,9 @@ import {
   viewChild,
   afterRenderEffect,
 } from '@angular/core';
-import { toObservable } from '@angular/core/rxjs-interop';
+import { takeUntilDestroyed, toObservable } from '@angular/core/rxjs-interop';
 import { ActivatedRoute } from '@angular/router';
-import { Observable, of as observableOf, Subject, Subscription, firstValueFrom } from 'rxjs';
+import { Observable, of as observableOf, Subscription, firstValueFrom } from 'rxjs';
 import {
   catchError,
   delay,
@@ -28,7 +28,6 @@ import {
   map,
   shareReplay,
   switchMap,
-  takeUntil,
   tap,
 } from 'rxjs/operators';
 
@@ -37,7 +36,7 @@ import {
 } from '../../../../../../cloud-foundry/src/shared/data-services/cf-org-space-service.service';
 import { getIdFromRoute } from '../../../../../../core/src/core/utils.service';
 import { PageHeaderComponent } from '../../../../../../core/src/shared/components/page-header/page-header.component';
-import { SignalStepHandle, StepComponent } from '../../../../../../core/src/shared/components/stepper/step/step.component';
+import { SignalStepHandle, StepComponent, StepOnNextResult } from '../../../../../../core/src/shared/components/stepper/step/step.component';
 import { SteppersComponent } from '../../../../../../core/src/shared/components/stepper/steppers/steppers.component';
 import { APIResource } from '../../../../../../store/src/types/api.types';
 import { IApp } from '../../../../cf-api.types';
@@ -93,7 +92,6 @@ export class AddServiceInstanceComponent implements OnInit, OnDestroy {
   private csiGuidsService = inject(CsiGuidsService);
   private csiState = inject(CsiStateService);
   modeService = inject(CsiModeService);
-  private cdr = inject(ChangeDetectorRef);
   private http = inject(HttpClient);
   private serviceCatalog = inject(ServiceCatalogDataService);
   private spaceRegistry = inject(SpaceDataRegistry);
@@ -144,8 +142,8 @@ export class AddServiceInstanceComponent implements OnInit, OnDestroy {
   public serviceType: SERVICE_INSTANCE_TYPES;
   public serviceTypes = SERVICE_INSTANCE_TYPES;
   private cfDetails$ = toObservable(this.csiState.state);
-  // Lifecycle management for subscriptions - must be declared before use in property initializers
-  private destroyed$ = new Subject<void>();
+  // Declared before the field initializers that end their streams with it
+  private destroyRef = inject(DestroyRef);
   // Loading state for applications - used to track async app fetching
   private _appsLoading = signal<boolean>(false);
   // toObservable() must run inside an injection context (constructor /
@@ -165,7 +163,7 @@ export class AddServiceInstanceComponent implements OnInit, OnDestroy {
   public cfGuid$: Observable<string | null | undefined>;
   public spaceGuid$ = this.cfDetails$.pipe(
     map(details => details?.spaceGuid),
-    takeUntil(this.destroyed$)
+    takeUntilDestroyed(this.destroyRef)
   );
   public errorMessage: string | null = null;
 
@@ -245,7 +243,6 @@ export class AddServiceInstanceComponent implements OnInit, OnDestroy {
         this.resetStoreData();
         this.selectCFSub = v.validate.subscribe(valid => {
           this.selectCFValid.set(!!valid);
-          this.cdr.markForCheck();
         });
       } else {
         this.selectCFValid.set(false);
@@ -263,7 +260,6 @@ export class AddServiceInstanceComponent implements OnInit, OnDestroy {
       if (v) {
         this.selectServiceFetchSub = v.isFetching$.subscribe(b => {
           this.selectServiceFetching.set(!!b);
-          this.cdr.markForCheck();
         });
       } else {
         this.selectServiceFetching.set(false);
@@ -281,11 +277,9 @@ export class AddServiceInstanceComponent implements OnInit, OnDestroy {
       if (v) {
         this.specifyDetailsValidSub = v.validate.subscribe(valid => {
           this.specifyDetailsValid.set(!!valid);
-          this.cdr.markForCheck();
         });
         this.specifyDetailsInitSub = v.serviceInstancesInit$.subscribe(init => {
           this.specifyDetailsInit.set(!!init);
-          this.cdr.markForCheck();
         });
       } else {
         this.specifyDetailsValid.set(false);
@@ -298,7 +292,7 @@ export class AddServiceInstanceComponent implements OnInit, OnDestroy {
     valid: this.selectCFValid.asReadonly(),
     blocked: computed(() => !!this.isLoadingSignal()),
     submit: async () => {
-      const result = await firstValueFrom(this.onNext());
+      const result = await this.onNext();
       if (!result.success) {
         throw new Error(this.errorMessage || 'Failed to save Cloud Foundry details');
       }
@@ -325,7 +319,7 @@ export class AddServiceInstanceComponent implements OnInit, OnDestroy {
     cancelButtonText: signal('Cancel').asReadonly(),
     onEnter: () => this._selectPlan()?.onEnter(),
     submit: async () => {
-      const result = await firstValueFrom(this._selectPlan()!.onNext());
+      const result = await this._selectPlan()!.onNext();
       if (!result.success) {
         throw new Error(result.message || 'Failed to select plan');
       }
@@ -359,7 +353,7 @@ export class AddServiceInstanceComponent implements OnInit, OnDestroy {
     nextButtonText: signal('Create ').asReadonly(),
     onEnter: (plan) => this._specifyDetails()?.onEnter(plan as any),
     submit: async () => {
-      const result = await firstValueFrom(this._specifyDetails()!.onNext());
+      const result = await this._specifyDetails()!.onNext();
       if (!result.success) {
         throw new Error(result.message || 'Failed to create service instance');
       }
@@ -374,7 +368,7 @@ export class AddServiceInstanceComponent implements OnInit, OnDestroy {
   supdHandle: SignalStepHandle = {
     valid: computed(() => !!this._supd()?.validate()),
     submit: async () => {
-      const result = await firstValueFrom(this._supd()!.onNext());
+      const result = await this._supd()!.onNext();
       if (!result.success) {
         throw new Error(result.message || 'Failed to create user-provided service instance');
       }
@@ -395,7 +389,7 @@ export class AddServiceInstanceComponent implements OnInit, OnDestroy {
         this.errorMessage = 'Failed to retrieve Cloud Foundry endpoint information';
         return observableOf(null);
       }),
-      takeUntil(this.destroyed$)
+      takeUntilDestroyed(this.destroyRef)
     );
     this.inMarketplaceMode = this.modeService.isMarketplaceMode();
     this.serviceType = route.snapshot.params.type || SERVICE_INSTANCE_TYPES.SERVICE;
@@ -438,19 +432,18 @@ export class AddServiceInstanceComponent implements OnInit, OnDestroy {
         return observableOf([]);
       }),
       shareReplay({ bufferSize: 1, refCount: true }),
-      takeUntil(this.destroyed$)
+      takeUntilDestroyed(this.destroyRef)
     );
     this.skipApps$ = this.apps$.pipe(
       map(apps => apps?.length === 0),
       catchError(() => observableOf(true)),
       shareReplay({ bufferSize: 1, refCount: true }),
-      takeUntil(this.destroyed$)
+      takeUntilDestroyed(this.destroyRef)
     );
     // Mirror skipApps$ into a signal so bindAppHandle.skipIf stays
     // reactive without leaking an async pipe into the template.
     this.skipAppsSub = this.skipApps$.subscribe(skip => {
       this.skipAppsSignal.set(!!skip);
-      this.cdr.markForCheck();
     });
 
     // Mode-specific initialisation runs as an async chain that resolves
@@ -479,12 +472,10 @@ export class AddServiceInstanceComponent implements OnInit, OnDestroy {
         setTimeout(() => this.title.set('Create Service Instance'), 0);
       }
       this._initialisedService.set(ok);
-      this.cdr.markForCheck();
     } catch (error) {
       console.error('runInitialisation: error during mode setup', error);
       this.errorMessage = 'Failed to initialize service instance creation';
       this._initialisedService.set(false);
-      this.cdr.markForCheck();
     }
   }
 
@@ -550,7 +541,7 @@ export class AddServiceInstanceComponent implements OnInit, OnDestroy {
   // Step-driven event handlers
   // ─────────────────────────────────────────────────────────────────────
 
-  onNext = () => {
+  async onNext(): Promise<StepOnNextResult> {
     try {
       const cfGuid = this.cfOrgSpaceService.cf.select();
       const orgGuid = this.cfOrgSpaceService.org.select();
@@ -559,29 +550,30 @@ export class AddServiceInstanceComponent implements OnInit, OnDestroy {
       if (!cfGuid) {
         console.error('onNext: Cloud Foundry endpoint not selected');
         this.errorMessage = 'Please select a Cloud Foundry endpoint';
-        return observableOf({ success: false });
+        return { success: false };
       }
 
       if (!orgGuid) {
         console.error('onNext: Organization not selected');
         this.errorMessage = 'Please select an organization';
-        return observableOf({ success: false });
+        return { success: false };
       }
 
       if (!spaceGuid) {
         console.error('onNext: Space not selected');
         this.errorMessage = 'Please select a space';
-        return observableOf({ success: false });
+        return { success: false };
       }
 
       this.csiState.setCFDetails(cfGuid, orgGuid, spaceGuid);
     } catch (error) {
       console.error('onNext: Error dispatching CF details', error);
       this.errorMessage = 'Failed to save Cloud Foundry details';
-      return observableOf({ success: false });
+      return { success: false };
     }
 
-    return this.appsLoading$.pipe(
+    // appsLoading$ stays open, so take its first not-loading value only
+    return firstValueFrom(this.appsLoading$.pipe(
       filter(loading => !loading),
       delay(1),
       map(() => ({ success: true })),
@@ -590,8 +582,8 @@ export class AddServiceInstanceComponent implements OnInit, OnDestroy {
         this.errorMessage = 'Failed to load applications';
         return observableOf({ success: false });
       }),
-      takeUntil(this.destroyed$)
-    );
+      takeUntilDestroyed(this.destroyRef),
+    ));
   }
 
   resetStoreData = () => {
@@ -869,8 +861,6 @@ export class AddServiceInstanceComponent implements OnInit, OnDestroy {
   }
 
   ngOnDestroy(): void {
-    this.destroyed$.next();
-    this.destroyed$.complete();
     this.selectCFSub?.unsubscribe();
     this.selectServiceFetchSub?.unsubscribe();
     this.specifyDetailsValidSub?.unsubscribe();
