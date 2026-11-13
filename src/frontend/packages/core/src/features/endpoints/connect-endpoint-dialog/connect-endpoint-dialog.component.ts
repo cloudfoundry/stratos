@@ -1,6 +1,6 @@
 import { ChangeDetectionStrategy, Component, ElementRef, OnDestroy, afterNextRender, computed, inject, signal, viewChild } from '@angular/core';
 import { ActivatedRoute, ActivatedRouteSnapshot, Params } from '@angular/router';
-import { firstValueFrom, of, Subscription } from 'rxjs';
+import { of, Subscription } from 'rxjs';
 
 import { EndpointsDataService, getFullEndpointApiUrl } from '@stratosui/store';
 
@@ -101,7 +101,7 @@ export class ConnectEndpointDialogComponent implements OnDestroy {
       if (!register) {
         throw new Error('Failed to save the endpoint');
       }
-      const result = await firstValueFrom(register.onNext(0, {} as never));
+      const result = await register.onNext();
       if (!result.success) {
         throw new Error(result.message || 'Failed to save the endpoint');
       }
@@ -143,7 +143,7 @@ export class ConnectEndpointDialogComponent implements OnDestroy {
         this.close();
         return { ignoreSuccess: true };
       }
-      const result = await firstValueFrom(connect.onNext());
+      const result = await connect.onNext();
       // Success closes the dialog once the endpoint reads connected
       // (hasConnected$). The stepper gives a failure's reason.
       return result.success ? { ignoreSuccess: true } : { success: false, message: result.message };

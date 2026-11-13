@@ -3,14 +3,13 @@ import { AsyncPipe } from '@angular/common';
 import { ChangeDetectionStrategy, Component, Injector, OnDestroy, effect, inject, input, output, signal } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { CustomCheckboxComponent } from '../../../../shared/components/custom-checkbox/custom-checkbox.component';
-import { Observable, of } from 'rxjs';
-import { map } from 'rxjs/operators';
+import { firstValueFrom, Observable } from 'rxjs';
 import { EndpointAuthTypeConfig, EndpointsDataService } from '@stratosui/store';
 
 import { EndpointsService } from '../../../../core/endpoints.service';
 import { BlurDirective } from '../../../../shared/components/blur.directive';
 import { MarkdownPreviewComponent } from '../../../../shared/components/markdown-preview/markdown-preview.component';
-import { IStepperStep, StepOnNextResult } from '../../../../shared/components/stepper/step/step.component';
+import { StepOnNextResult } from '../../../../shared/components/stepper/step/step.component';
 import { SidePanelService } from '../../../../shared/services/side-panel.service';
 import { ConnectEndpointComponent } from '../../connect-endpoint/connect-endpoint.component';
 import { ConnectEndpointConfig, ConnectEndpointService } from '../../connect.service';
@@ -32,7 +31,7 @@ import { CustomIconComponent } from '../../../../shared/components/custom-materi
   ],
   changeDetection: ChangeDetectionStrategy.OnPush
 })
-export class CreateEndpointConnectComponent implements OnDestroy, IStepperStep {
+export class CreateEndpointConnectComponent implements OnDestroy {
   private endpointsService = inject(EndpointsService);
   private endpointsData = inject(EndpointsDataService);
   private injector = inject(Injector);
@@ -126,19 +125,19 @@ export class CreateEndpointConnectComponent implements OnDestroy, IStepperStep {
     this.credentialsTitle.set(CreateEndpointConnectComponent.defaultCredentialsTitle);
   };
 
-  onNext = (): Observable<StepOnNextResult> => {
+  async onNext(): Promise<StepOnNextResult> {
     const service = this.connectService();
-    return this.doConnect && service ? service.submit().pipe(
-      map(res => ({
-        success: res.success,
-        message: res.errorMessage,
-        redirect: res.success
-      }))
-    ) : of({
-      success: true,
-      redirect: true
-    });
-  };
+    if (!this.doConnect || !service) {
+      return { success: true, redirect: true };
+    }
+    // The shared connect finishes by itself; nothing to cancel on a Promise
+    const res = await firstValueFrom(service.submit());
+    return {
+      success: res.success,
+      message: res.errorMessage,
+      redirect: res.success
+    };
+  }
 
   ngOnDestroy() {
     this.connectService()?.destroy();

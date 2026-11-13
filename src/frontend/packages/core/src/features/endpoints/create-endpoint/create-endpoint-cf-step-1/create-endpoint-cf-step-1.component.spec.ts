@@ -425,7 +425,7 @@ describe('CreateEndpointCfStep1Component', () => {
       component.registerForm.controls.nameField.setValue('my-cf');
       component.registerForm.controls.urlField.setValue('api.example.com');
       stubSignalConfig.register.mockResolvedValue({ busy: false, error: false, message: '', guid: 'g1' });
-      await new Promise(resolve => component.onNext(0, {} as never).subscribe(resolve));
+      await component.onNext();
       await fixture.whenStable();
 
       expect(component.review()).toBe(true);
@@ -446,7 +446,7 @@ describe('CreateEndpointCfStep1Component', () => {
 
     it('saves nothing on Next when TLS is unchanged', async () => {
       await review(endpoint({ ca_cert: PEM }));
-      const result = await new Promise<any>(resolve => component.onNext(0, {} as never).subscribe(resolve));
+      const result = await component.onNext();
       expect(update).not.toHaveBeenCalled();
       expect(result.success).toBe(true);
       expect(result.data).toEqual(expect.objectContaining({ guid: 'ep-guid', name: 'my-cf', type: 'cf' }));
@@ -456,21 +456,21 @@ describe('CreateEndpointCfStep1Component', () => {
       // CA box off: the stored CA is empty, and the request must say so.
       await review(endpoint());
       component.registerForm.controls.skipSSLField.setValue(true);
-      await new Promise(resolve => component.onNext(0, {} as never).subscribe(resolve));
+      await component.onNext();
       expect(update).toHaveBeenCalledWith('ep-guid', expect.objectContaining({ skipSSL: true, caCert: '', setClientInfo: false }));
     });
 
     it('sends the stored PEM when something other than the PEM changes', async () => {
       // Stored with both a CA and skip-SSL; a CA wins, so Next normalises skip-SSL off.
       await review(endpoint({ ca_cert: PEM, skip_ssl_validation: true }));
-      await new Promise(resolve => component.onNext(0, {} as never).subscribe(resolve));
+      await component.onNext();
       expect(update).toHaveBeenCalledWith('ep-guid', expect.objectContaining({ skipSSL: false, caCert: PEM }));
     });
 
     it('sends an empty CA when the CA box is turned off', async () => {
       await review(endpoint({ ca_cert: PEM }));
       component.toggleCACertField();
-      await new Promise(resolve => component.onNext(0, {} as never).subscribe(resolve));
+      await component.onNext();
       expect(update).toHaveBeenCalledWith('ep-guid', expect.objectContaining({ caCert: '' }));
     });
 
@@ -478,7 +478,7 @@ describe('CreateEndpointCfStep1Component', () => {
       update.mockResolvedValue({ busy: false, error: true, message: 'nope' });
       await review(endpoint());
       component.registerForm.controls.skipSSLField.setValue(true);
-      const result = await new Promise<any>(resolve => component.onNext(0, {} as never).subscribe(resolve));
+      const result = await component.onNext();
       expect(result).toEqual(expect.objectContaining({ success: false, message: 'nope' }));
     });
 
@@ -551,7 +551,7 @@ describe('CreateEndpointCfStep1Component', () => {
       component.registerForm.controls.nameField.setValue('my-cf');
       component.registerForm.controls.urlField.setValue('api.example.com');
       stubSignalConfig.register.mockResolvedValue({ busy: false, error: false, message: '', guid: 'g1' });
-      await new Promise(resolve => component.onNext(0, {} as never).subscribe(resolve));
+      await component.onNext();
       const emitted = vi.fn();
       component.unregistered.subscribe(emitted);
 
@@ -577,7 +577,7 @@ describe('CreateEndpointCfStep1Component', () => {
         component.registerForm.controls.clientIDField.setValue(clientId);
         if (clientId) component.toggleAdvancedOptions();
         stubSignalConfig.register.mockResolvedValue({ busy: false, error: false, message: '', guid: 'g1' });
-        await new Promise(resolve => component.onNext(0, {} as never).subscribe(resolve));
+        await component.onNext();
         await fixture.whenStable();
         await component.unregister();
         await fixture.whenStable();
@@ -608,7 +608,7 @@ describe('CreateEndpointCfStep1Component', () => {
       expect(q('#unregister')).toBeTruthy();
 
       component.registerForm.controls.skipSSLField.setValue(true);
-      const result = await new Promise<any>(resolve => component.onNext(0, {} as never).subscribe(resolve));
+      const result = await component.onNext();
       expect(update).not.toHaveBeenCalled();
       expect(result).toEqual(expect.objectContaining({ success: true, data: expect.objectContaining({ type: 'git' }) }));
     });

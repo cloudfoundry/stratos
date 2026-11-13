@@ -15,11 +15,11 @@ import {
   entityCatalog,
   getFullEndpointApiUrl,
 } from '@stratosui/store';
-import { combineLatest, firstValueFrom, from, Observable, of } from 'rxjs';
+import { combineLatest, firstValueFrom, Observable, of } from 'rxjs';
 import { catchError, map, startWith, switchMap } from 'rxjs/operators';
 
 import { getIdFromRoute } from '../../../../core/utils.service';
-import { IStepperStep, StepOnNextFunction, StepOnNextResult } from '../../../../shared/components/stepper/step/step.component';
+import { StepOnNextResult } from '../../../../shared/components/stepper/step/step.component';
 import { SessionService } from '../../../../shared/services/session.service';
 import { CurrentUserPermissionsService } from '../../../../core/permissions/current-user-permissions.service';
 import { UserProfileService } from '../../../../core/user-profile.service';
@@ -102,7 +102,7 @@ interface CreateEndpointForm {
   ],
   changeDetection: ChangeDetectionStrategy.OnPush
 })
-export class CreateEndpointCfStep1Component extends CreateEndpointHelperComponent implements IStepperStep, AfterContentInit {
+export class CreateEndpointCfStep1Component extends CreateEndpointHelperComponent implements AfterContentInit {
   private fb = inject(FormBuilder);
   private snackBarService = inject(TailwindSnackBarService);
   private endpointsSignalConfig = inject(EndpointsSignalConfigService);
@@ -279,7 +279,9 @@ export class CreateEndpointCfStep1Component extends CreateEndpointHelperComponen
     this.setUrlValidation(endpoint);
   }
 
-  onNext: StepOnNextFunction = () => from(this.review() ? this.saveReview() : this.runRegistration());
+  async onNext(): Promise<StepOnNextResult> {
+    return this.review() ? this.saveReview() : this.runRegistration();
+  }
 
   // Fill the form from an endpoint that already exists and lock it.
   private reviewExisting(ep: EndpointModel) {
