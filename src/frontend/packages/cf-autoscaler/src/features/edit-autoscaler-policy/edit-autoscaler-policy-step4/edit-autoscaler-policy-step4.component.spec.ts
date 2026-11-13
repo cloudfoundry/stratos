@@ -3,7 +3,7 @@ import { join } from 'path';
 import { DatePipe } from '@angular/common';
 import { HttpErrorResponse } from '@angular/common/http';
 import { ComponentFixture, TestBed } from '@angular/core/testing';
-import { ChangeDetectorRef, provideZonelessChangeDetection } from '@angular/core';
+import { provideZonelessChangeDetection } from '@angular/core';
 import { describe, it, expect, beforeEach, vi } from 'vitest';
 import { firstValueFrom } from 'rxjs';
 import { addDays, format, setHours, setMinutes } from 'date-fns';
@@ -100,7 +100,7 @@ describe('EditAutoscalerPolicyStep4Component', () => {
       component.addSpecificDate();
 
       expect(dates()).toHaveLength(1);
-      expect(component.editIndex).toBe(0);
+      expect(component.editIndex()).toBe(0);
       expect(component.editSpecificDateForm.getRawValue()).toEqual({
         instance_min_count: 1,
         instance_max_count: 10,
@@ -120,7 +120,7 @@ describe('EditAutoscalerPolicyStep4Component', () => {
       setControl('initial_min_instance_count', 0);
       component.finishSpecificDate();
 
-      expect(component.editIndex).toBe(-1);
+      expect(component.editIndex()).toBe(-1);
       // An empty initial count is dropped rather than sent as 0.
       expect(dates()[0]).toEqual({
         start_date_time: at(4, 8),
@@ -134,7 +134,7 @@ describe('EditAutoscalerPolicyStep4Component', () => {
       create([specific({ initial_min_instance_count: 4 })]);
       component.editSpecificDate(0);
 
-      expect(component.editIndex).toBe(0);
+      expect(component.editIndex()).toBe(0);
       expect(component.editSpecificDateForm.getRawValue()).toEqual({
         instance_min_count: 2,
         instance_max_count: 6,
@@ -149,7 +149,7 @@ describe('EditAutoscalerPolicyStep4Component', () => {
       component.editSpecificDate(1);
       component.removeSpecificDate(1);
 
-      expect(component.editIndex).toBe(-1);
+      expect(component.editIndex()).toBe(-1);
       expect(dates()).toEqual([specific()]);
     });
   });
@@ -334,7 +334,6 @@ describe('EditAutoscalerPolicyStep4Component', () => {
       create();
       await fixture.whenStable();
       component.addSpecificDate();
-      fixture.componentRef.injector.get(ChangeDetectorRef).markForCheck();
       await fixture.whenStable();
 
       const form: HTMLElement = fixture.nativeElement.querySelector('form');

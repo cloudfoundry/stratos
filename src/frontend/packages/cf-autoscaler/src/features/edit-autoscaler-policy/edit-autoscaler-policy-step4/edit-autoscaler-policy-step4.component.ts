@@ -1,9 +1,9 @@
-import { ChangeDetectionStrategy, ChangeDetectorRef, Component, OnInit, inject } from '@angular/core';
+import { ChangeDetectionStrategy, Component, OnInit, inject, signal } from '@angular/core';
 import { AbstractControl, FormBuilder, FormControl, FormGroup, ReactiveFormsModule, ValidationErrors, ValidatorFn, Validators } from '@angular/forms';
 import { TailwindErrorStateMatcher, TailwindShowOnDirtyErrorStateMatcher } from '@stratosui/core';
 import { format } from 'date-fns';
 import { toZonedTime } from 'date-fns-tz';
-import { BehaviorSubject, from, of as observableOf } from 'rxjs';
+import { from, of as observableOf } from 'rxjs';
 import { catchError, map } from 'rxjs/operators';
 import { CommonModule } from '@angular/common';
 
@@ -56,7 +56,6 @@ interface EditSpecificDateForm {
 export class EditAutoscalerPolicyStep4Component extends EditAutoscalerPolicyDirective implements OnInit {
   applicationService = inject(ApplicationService);
   private fb = inject(FormBuilder);
-  private cdr = inject(ChangeDetectorRef);
   // FWT-959 Track A wave-3 (A-policy slice): replaced
   // CreateAppAutoscalerPolicyAction / UpdateAppAutoscalerPolicyAction +
   // EntityServiceFactory entityMonitor wiring with a direct call into
@@ -69,13 +68,9 @@ export class EditAutoscalerPolicyStep4Component extends EditAutoscalerPolicyDire
   editSpecificDateForm: FormGroup<EditSpecificDateForm>;
 
   public declare currentPolicy: AppAutoscalerPolicyLocal;
-  // FWT-959 Part 2: editIndex backed by a BehaviorSubject so the parent
-  // orchestrator can bridge editIndex changes into a signal for its
-  // signal-step handle (valid / disablePrevious). Templates still read
-  // `editIndex` (now via getter), call-sites still write `this.editIndex = N`.
-  readonly editIndex$ = new BehaviorSubject<number>(-1);
-  get editIndex(): number { return this.editIndex$.value; }
-  set editIndex(v: number) { this.editIndex$.next(v); }
+  // Index of the row being edited, -1 when none. The parent reads it to gate
+  // Next and Previous.
+  readonly editIndex = signal(-1);
   private editMutualValidation = {
     limit: true,
     datetime: true
@@ -140,8 +135,8 @@ export class EditAutoscalerPolicyStep4Component extends EditAutoscalerPolicyDire
   };
 
   removeSpecificDate(index: number) {
-    if (this.editIndex === index) {
-      this.editIndex = -1;
+    if (this.editIndex() === index) {
+      this.editIndex.set(-1);
     }
     // strict: transform pipeline always populates schedules.specific_date
     // before this step is reachable.
@@ -149,7 +144,7 @@ export class EditAutoscalerPolicyStep4Component extends EditAutoscalerPolicyDire
   }
 
   editSpecificDate(index: number) {
-    this.editIndex = index;
+    this.editIndex.set(index);
     // strict: transform pipeline always populates schedules.specific_date
     // before this step is reachable.
     const specificDate = this.currentPolicy.schedules!.specific_date![index];
@@ -166,7 +161,7 @@ export class EditAutoscalerPolicyStep4Component extends EditAutoscalerPolicyDire
   }
 
   finishSpecificDate() {
-    const specificDate = this.currentPolicy.schedules?.specific_date?.[this.editIndex];
+    const specificDate = this.currentPolicy.schedules?.specific_date?.[this.editIndex()];
     if (!specificDate) {
       return;
     }
@@ -182,7 +177,7 @@ export class EditAutoscalerPolicyStep4Component extends EditAutoscalerPolicyDire
       this.editSpecificDateForm.get('instance_max_count')?.value ?? 0;
     specificDate.start_date_time = this.editSpecificDateForm.get('start_date_time')?.value ?? '';
     specificDate.end_date_time = this.editSpecificDateForm.get('end_date_time')?.value ?? '';
-    this.editIndex = -1;
+    this.editIndex.set(-1);
   }
 
   validateSpecificDateInitialMin(): ValidatorFn {
@@ -218,7 +213,7 @@ export class EditAutoscalerPolicyStep4Component extends EditAutoscalerPolicyDire
         this.editMutualValidation.datetime = false;
         errors.alertInvalidPolicyScheduleEndDateTimeBeforeStartDateTime = { value: control.value };
       }
-      if (specificDateRangeOverlapping(newSchedule, this.editIndex, schedules.specific_date!)) {
+      if (specificDateRangeOverlapping(newSchedule, this.editIndex(), schedules.specific_date!)) {
         this.editMutualValidation.datetime = false;
         errors.alertInvalidPolicyScheduleSpecificConflict = { value: control.value };
       }
@@ -254,7 +249,7 @@ export class EditAutoscalerPolicyStep4Component extends EditAutoscalerPolicyDire
         this.editMutualValidation.datetime = false;
         errors.alertInvalidPolicyScheduleEndDateTimeBeforeStartDateTime = { value: control.value };
       }
-      if (specificDateRangeOverlapping(newSchedule, this.editIndex, schedules.specific_date!)) {
+      if (specificDateRangeOverlapping(newSchedule, this.editIndex(), schedules.specific_date!)) {
         this.editMutualValidation.datetime = false;
         errors.alertInvalidPolicyScheduleSpecificConflict = { value: control.value };
       }

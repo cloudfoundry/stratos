@@ -1,6 +1,5 @@
 import {
   ChangeDetectionStrategy,
-  ChangeDetectorRef,
   Component,
   OnInit,
   computed,
@@ -54,7 +53,6 @@ export class EditAutoscalerPolicyComponent implements OnInit {
   applicationService = inject(ApplicationService);
   readonly detail = inject(AppDetailDataService);
   private route = inject(ActivatedRoute);
-  private cdr = inject(ChangeDetectorRef);
   private router = inject(Router);
 
 
@@ -66,29 +64,22 @@ export class EditAutoscalerPolicyComponent implements OnInit {
   // continues to live in EditAutoscalerPolicyService — children read/write
   // it via setState/getState as before. The handles only need per-step
   // validity + the "currently editing a row" gate (editIndex !== -1) which
-  // the children now expose as editIndex$ BehaviorSubjects (steps 2/3/4)
-  // and a valid$ stream (step 1).
+  // the children expose as editIndex signals (steps 2/3/4) and a valid$
+  // stream (step 1).
   //
   // The steppers component renders only the active step's content template
   // at any given time, so child components for non-active steps are not
-  // instantiated. An effect on each view query wires the bridge
-  // subscription when the freshly-stamped child appears, and its cleanup
-  // tears it down when the query becomes undefined on step exit. Avoids the
-  // setTimeout(0) defer needed if the bridge is wired from
-  // signal-handle.onEnter (which fires synchronously inside setActive(),
-  // before the *ngTemplateOutlet swap).
+  // instantiated. Each view query is undefined while its step is inactive,
+  // and the handles below treat that as "not editing".
   private readonly step1 = viewChild<EditAutoscalerPolicyStep1Component>('step1');
   private readonly step2 = viewChild<EditAutoscalerPolicyStep2Component>('step2');
   private readonly step3 = viewChild<EditAutoscalerPolicyStep3Component>('step3');
   private readonly step4 = viewChild<EditAutoscalerPolicyStep4Component>('step4');
 
   private step1Valid = signal<boolean>(false);
-  private step2EditIndex = signal<number>(-1);
-  private step3EditIndex = signal<number>(-1);
-  private step4EditIndex = signal<number>(-1);
 
-  // The bridges run after render: a step's child creates its streams in
-  // its own init hooks, which run after this component's effects.
+  // Runs after render: step 1 creates its stream in its own init hook,
+  // which runs after this component's effects.
   private readonly step1Bridge = afterRenderEffect(onCleanup => {
     const step = this.step1();
     untracked(() => {
@@ -98,56 +89,15 @@ export class EditAutoscalerPolicyComponent implements OnInit {
       }
       const sub = step.valid$.subscribe(val => {
         this.step1Valid.set(!!val);
-        this.cdr.markForCheck();
       });
       onCleanup(() => sub.unsubscribe());
     });
   });
 
-  private readonly step2Bridge = afterRenderEffect(onCleanup => {
-    const step = this.step2();
-    untracked(() => {
-      this.step2EditIndex.set(-1);
-      if (!step) {
-        return;
-      }
-      const sub = step.editIndex$.subscribe(val => {
-        this.step2EditIndex.set(val);
-        this.cdr.markForCheck();
-      });
-      onCleanup(() => sub.unsubscribe());
-    });
-  });
-
-  private readonly step3Bridge = afterRenderEffect(onCleanup => {
-    const step = this.step3();
-    untracked(() => {
-      this.step3EditIndex.set(-1);
-      if (!step) {
-        return;
-      }
-      const sub = step.editIndex$.subscribe(val => {
-        this.step3EditIndex.set(val);
-        this.cdr.markForCheck();
-      });
-      onCleanup(() => sub.unsubscribe());
-    });
-  });
-
-  private readonly step4Bridge = afterRenderEffect(onCleanup => {
-    const step = this.step4();
-    untracked(() => {
-      this.step4EditIndex.set(-1);
-      if (!step) {
-        return;
-      }
-      const sub = step.editIndex$.subscribe(val => {
-        this.step4EditIndex.set(val);
-        this.cdr.markForCheck();
-      });
-      onCleanup(() => sub.unsubscribe());
-    });
-  });
+  // -1 while the step is not shown.
+  private readonly step2EditIndex = computed(() => this.step2()?.editIndex() ?? -1);
+  private readonly step3EditIndex = computed(() => this.step3()?.editIndex() ?? -1);
+  private readonly step4EditIndex = computed(() => this.step4()?.editIndex() ?? -1);
 
   step1Handle: SignalStepHandle = {
     valid: this.step1Valid.asReadonly(),
@@ -209,7 +159,6 @@ export class EditAutoscalerPolicyComponent implements OnInit {
 
   ngOnInit() {
     this.isCreate = this.route.snapshot.queryParams.create;
-    this.cdr.markForCheck();
   }
 
 }
