@@ -9,7 +9,6 @@ import { takeUntilDestroyed, toObservable } from '@angular/core/rxjs-interop';
 import {
   combineLatest as observableCombineLatest,
   firstValueFrom,
-  from,
   Observable,
   Subscription,
 } from 'rxjs';
@@ -389,13 +388,10 @@ export class SpecifyDetailsStepComponent implements AfterContentInit {
   // Single write path: POST or PATCH /pp/v1/cf/service_instances wrapped in
   // writeWithJob, whose fast-path-then-poll contract follows a long-running
   // write to its end.
-  onNext = (): Observable<StepOnNextResult> => {
-    return this.csiState$.pipe(
-      filter(p => !!p),
-      take(1),
-      switchMap(state => from(this.handOffIfSlow(this.executeWrite(state)))),
-    );
-  };
+  async onNext(): Promise<StepOnNextResult> {
+    const state = await firstValueFrom(this.csiState$.pipe(filter(p => !!p)));
+    return this.handOffIfSlow(this.executeWrite(state));
+  }
 
   // A write still running after HAND_OFF_AFTER_MS asks the user whether to
   // keep waiting, and for how long. Continue in background, or no answer,

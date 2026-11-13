@@ -5,7 +5,7 @@ import { importProvidersFrom, provideZonelessChangeDetection, signal } from '@an
 import { provideHttpClient } from '@angular/common/http';
 import { HttpTestingController, provideHttpClientTesting } from '@angular/common/http/testing';
 import { ActivatedRoute, provideRouter } from '@angular/router';
-import { firstValueFrom, of } from 'rxjs';
+import { of } from 'rxjs';
 import { describe, it, expect, beforeEach, vi } from 'vitest';
 
 import { generateCfBaseTestModulesNoShared } from "@test-framework/cf";
@@ -16,6 +16,14 @@ import { ServiceCatalogDataService } from '../../../../services/endpoint-data/se
 import { CreateServiceFormMode, CsiModeService } from '../csi-mode.service';
 import { CsiStateService } from '../csi-state.service';
 import { SpecifyUserProvidedDetailsComponent } from "./specify-user-provided-details.component";
+
+// onNext waits for the wizard state on a microtask before it sends anything,
+// so a spec that answers the request right after calling it lets that settle
+const settle = async () => {
+  for (let i = 0; i < 5; i++) {
+    await Promise.resolve();
+  }
+};
 
 describe('SpecifyUserProvidedDetailsComponent', () => {
   let component: SpecifyUserProvidedDetailsComponent;
@@ -113,7 +121,7 @@ describe('SpecifyUserProvidedDetailsComponent.onNextUpdate', () => {
       updateResult: { success: true },
     });
 
-    const result = await firstValueFrom(component.onNext());
+    const result = await component.onNext();
 
     expect(upsServiceStub.updateUserProvidedService).toHaveBeenCalledWith(
       'cf-1', 'si-1', expect.any(Object),
@@ -129,7 +137,7 @@ describe('SpecifyUserProvidedDetailsComponent.onNextUpdate', () => {
       withAppDetailData: false,
     });
 
-    const result = await firstValueFrom(component.onNext());
+    const result = await component.onNext();
 
     expect(upsServiceStub.updateUserProvidedService).toHaveBeenCalledTimes(1);
     expect(result).toEqual({ success: true, redirect: true });
@@ -140,7 +148,7 @@ describe('SpecifyUserProvidedDetailsComponent.onNextUpdate', () => {
       updateResult: { success: false, message: 'broker rejected the update' },
     });
 
-    const result = await firstValueFrom(component.onNext());
+    const result = await component.onNext();
 
     expect(refreshSpy).not.toHaveBeenCalled();
     expect(result).toEqual({
@@ -377,7 +385,7 @@ describe('SpecifyUserProvidedDetailsComponent create form', () => {
     const { component, upsServiceStub } = await setup();
     component.createEditServiceInstance.controls.name.setValue('my-ups');
 
-    const result = await firstValueFrom(component.onNext());
+    const result = await component.onNext();
 
     expect(upsServiceStub.createUserProvidedService).toHaveBeenCalledWith(
       'cf-1', expect.any(String), expect.objectContaining({ name: 'my-ups', spaceGuid: 'space-1' }));
@@ -392,7 +400,7 @@ describe('SpecifyUserProvidedDetailsComponent create form', () => {
     vi.spyOn(TestBed.inject(CsiModeService), 'createApplicationServiceBinding')
       .mockReturnValue(of({ success: false, unknown: 'still-running' }));
 
-    const result = await firstValueFrom(component.onNext());
+    const result = await component.onNext();
 
     expect(result.success).toBe(false);
     expect(result.message).toContain('User-provided service instance "my-ups" was created. Binding it to the application: still running in Cloud Foundry');
@@ -407,7 +415,7 @@ describe('SpecifyUserProvidedDetailsComponent create form', () => {
     vi.spyOn(TestBed.inject(CsiModeService), 'createApplicationServiceBinding')
       .mockReturnValue(of({ success: false, message: 'bind said no' }));
 
-    const result = await firstValueFrom(component.onNext());
+    const result = await component.onNext();
 
     expect(result.success).toBe(false);
     expect(result.message).toBe('User-provided service instance "my-ups" was created, but binding it to the application failed: bind said no');
@@ -421,7 +429,7 @@ describe('SpecifyUserProvidedDetailsComponent create form', () => {
     vi.spyOn(TestBed.inject(CsiModeService), 'createApplicationServiceBinding')
       .mockReturnValue(of({ success: false, unknown: 'ended' }));
 
-    const result = await firstValueFrom(component.onNext());
+    const result = await component.onNext();
 
     expect(result.message).toContain('Binding the service instance to the application: the operation ended, but its result could not be determined.');
   });
@@ -446,7 +454,8 @@ describe('SpecifyUserProvidedDetailsComponent create form', () => {
       (...args: Parameters<typeof real.createUserProvidedService>) => real.createUserProvidedService(...args));
     component.createEditServiceInstance.controls.name.setValue('my-ups');
 
-    const pending = firstValueFrom(component.onNext());
+    const pending = component.onNext();
+    await settle();
     answerWithErrorPage('POST');
     const result = await pending;
 
@@ -464,7 +473,8 @@ describe('SpecifyUserProvidedDetailsComponent create form', () => {
     component.isUpdate = true;
     fixture.componentRef.setInput('serviceInstanceId', 'ups-1');
 
-    const pending = firstValueFrom(component.onNext());
+    const pending = component.onNext();
+    await settle();
     answerWithErrorPage('PATCH');
     const result = await pending;
 

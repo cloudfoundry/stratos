@@ -24,7 +24,7 @@ import { leadPieces, piecesToText } from '@stratosui/store';
 import { unknownOutcomeMessage } from '../../../../services/async-jobs/unknown-outcome-message';
 import { AppNameUniqueDirective } from '../../../directives/app-name-unique.directive/app-name-unique.directive';
 import { toObservable } from '@angular/core/rxjs-interop';
-import { combineLatest as obsCombineLatest, Observable, of as observableOf, Subscription, from } from 'rxjs';
+import { combineLatest as obsCombineLatest, Observable, of as observableOf, Subscription, firstValueFrom, from } from 'rxjs';
 import { take, filter, map, shareReplay, startWith, switchMap, withLatestFrom } from 'rxjs/operators';
 
 import { IUserProvidedServiceInstanceData } from '../../../../cf-api-svc.types';
@@ -410,11 +410,12 @@ export class SpecifyUserProvidedDetailsComponent implements OnInit, OnDestroy {
     );
   };
 
-  public onNext = (): Observable<StepOnNextResult> => {
-    return this.isUpdate ?
+  // onNextBind follows csiState$, which never completes: take the first result only
+  public async onNext(): Promise<StepOnNextResult> {
+    return firstValueFrom(this.isUpdate ?
       this.onNextUpdate() :
-      this.formMode === CreateServiceFormMode.CreateServiceInstance ? this.onNextCreate() : this.onNextBind();
-  };
+      this.formMode === CreateServiceFormMode.CreateServiceInstance ? this.onNextCreate() : this.onNextBind());
+  }
 
   private onNextCreate(): Observable<StepOnNextResult> {
     const data = this.getServiceData();

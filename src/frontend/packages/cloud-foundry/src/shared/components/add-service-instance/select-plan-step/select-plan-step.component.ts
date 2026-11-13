@@ -5,7 +5,7 @@ import { CustomFormFieldComponent } from '@stratosui/core';
 import { CustomSelectComponent, CustomOptionComponent } from '@stratosui/core';
 import { naturalCompare } from '@stratosui/core';
 import { toObservable } from '@angular/core/rxjs-interop';
-import { combineLatest as observableCombineLatest, Observable, Subscription } from 'rxjs';
+import { combineLatest as observableCombineLatest, firstValueFrom, Observable, Subscription } from 'rxjs';
 import {
   distinctUntilChanged,
   filter,
@@ -211,14 +211,12 @@ export class SelectPlanStepComponent implements OnDestroy {
     ).subscribe();
   }
 
-  onNext = (): Observable<StepOnNextResult> => {
+  async onNext(): Promise<StepOnNextResult> {
     this.csiState.setServicePlan(this.stepperForm.controls.servicePlans.value);
-    return this.selectedPlan$.pipe(
-      map((selectedServicePlan: StServicePlan | undefined) => ({
-        success: true,
-        data: selectedServicePlan
-      }))
-    );
+    // selectedPlan$ follows the form and never completes, so take the first
+    // plan only
+    const selectedServicePlan: StServicePlan | undefined = await firstValueFrom(this.selectedPlan$);
+    return { success: true, data: selectedServicePlan };
   }
 
   ngOnDestroy(): void {

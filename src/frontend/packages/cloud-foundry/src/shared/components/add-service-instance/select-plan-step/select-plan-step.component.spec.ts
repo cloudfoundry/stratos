@@ -1,6 +1,7 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { provideZonelessChangeDetection } from '@angular/core';
 import { ActivatedRoute } from '@angular/router';
+import { Subject } from 'rxjs';
 import { describe, it, expect, beforeEach } from 'vitest';
 import { generateCfBaseTestModulesNoShared } from "@test-framework/cloud-foundry-endpoint-service.helper";
 import { ServicePlanPriceComponent } from '../../service-plan-price/service-plan-price.component';
@@ -87,5 +88,19 @@ describe('SelectPlanStepComponent', () => {
     expect(component.validate()).toBe(true);
     component.stepperForm.controls.servicePlans.setValue('');
     expect(component.validate()).toBe(false);
+  });
+
+  // selectedPlan$ follows the form and never completes, so onNext has to take
+  // the first plan and let go of the stream.
+  it('onNext resolves with the first selected plan and stops listening', async () => {
+    const plans = new Subject<unknown>();
+    (component as unknown as { selectedPlan$: Subject<unknown> }).selectedPlan$ = plans;
+    const plan = { guid: 'plan-1' };
+
+    const pending = component.onNext();
+    plans.next(plan);
+
+    expect(await pending).toEqual({ success: true, data: plan });
+    expect(plans.observed).toBe(false);
   });
 });
