@@ -12,14 +12,14 @@ import { CfUserPermissionDirective } from './cf-user-permission.directive';
 @Component({
   imports: [CfUserPermissionDirective],
   template: `
-    <div *appCfUserPermission="permission; endpointGuid: endpointGuid">
+    <div *appCfUserPermission="permission; endpointGuid: endpointGuid()">
       Test Content
     </div>
   `
 })
 class TestUserPermissionComponent {
   permission: any;
-  endpointGuid = '';
+  endpointGuid = signal('');
 }
 
 describe('CfUserPermissionDirective', () => {
@@ -69,9 +69,8 @@ describe('CfUserPermissionDirective', () => {
     const text = () => (fixture.nativeElement as HTMLElement).textContent?.trim();
     const roles = TestBed.inject(CfCurrentUserRolesDataService);
     roles.registerEndpoint('cf-1');
-    component.endpointGuid = 'cf-1';
+    component.endpointGuid.set('cf-1');
     allowed.set(true);
-    fixture.changeDetectorRef.markForCheck();
     await fixture.whenStable();
     expect(text()).toBe('');
 
