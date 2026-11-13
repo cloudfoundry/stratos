@@ -6,7 +6,6 @@ import {
   input
 } from "@angular/core";
 import { ControlValueAccessor, NG_VALUE_ACCESSOR } from "@angular/forms";
-import { take, filter } from "rxjs/operators";
 
 import { BytesToHumanSize } from "../../../../../../../core/src/core/byte-formatters.pipe";
 import { getEventFiles } from "../../../../../../../core/src/core/browser-helper";
@@ -42,16 +41,10 @@ export class DeployApplicationFsComponent implements ControlValueAccessor {
   onFileChange(event: any) {
     const files = getEventFiles(event);
     const utils = new DeployApplicationFsUtils();
-    utils
-      .handleFileInputSelection(files)
-      .pipe(
-        filter((res) => !!res),
-        take(1),
-      )
-      .subscribe((res) => {
-        this.propagateChange(res);
-        this.sourceData.set(res);
-      });
+    utils.handleFileInputSelection(files).then((res) => {
+      this.propagateChange(res);
+      this.sourceData.set(res);
+    });
   }
 
   // ControlValueAccessor interface - allows us to act as a control in the form for validation purposes
