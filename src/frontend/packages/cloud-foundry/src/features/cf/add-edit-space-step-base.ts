@@ -1,10 +1,7 @@
 import { AbstractControl, ValidationErrors, ValidatorFn } from '@angular/forms';
 import { ActivatedRoute } from '@angular/router';
 import { Signal, computed } from '@angular/core';
-import { Observable } from 'rxjs';
-import { map } from 'rxjs/operators';
 
-import { StepOnNextResult } from '@stratosui/core';
 import { OrgDataRegistry } from '../../services/endpoint-data/org-data.registry';
 import { QuotaDataService } from '../../services/endpoint-data/quota-data.service';
 import { StSpaceQuota } from '../../services/endpoint-data/stratos-types';
@@ -43,14 +40,5 @@ export class AddEditSpaceStepBase {
       const nameValid = this.isNameUnique(formField.value);
       return !nameValid ? { spaceNameTaken: { value: formField.value } } : null;
     };
-  }
-
-  protected map(errorMessage: string):
-    (source: Observable<{ error: boolean, message: string }>) => Observable<StepOnNextResult> {
-    return map(o => ({
-      success: !o.error,
-      redirect: !o.error,
-      message: o.error ? errorMessage + o.message : ''
-    }));
   }
 }
