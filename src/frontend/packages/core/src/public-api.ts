@@ -17,8 +17,8 @@ export {
   NO_SEPARATOR_PATTERN_THRESHOLD,
 } from './shared/utils/natural-sort';
 export type { NaturalSortContext } from './shared/utils/natural-sort';
-export { GlobalEventService, GlobalEventData, endpointEventKey } from './shared/global-events.service';
-export type { IGlobalEvent, IGlobalEventConfig, GlobalEventTypes } from './shared/global-events.service';
+export { GlobalEventService, endpointEventKey } from './shared/global-events.service';
+export type { IGlobalEvent, GlobalEventTypes } from './shared/global-events.service';
 export { environment } from './environments/environment';
 export { isValidJsonValidator } from './shared/form-validators';
 

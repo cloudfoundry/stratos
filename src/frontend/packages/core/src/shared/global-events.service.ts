@@ -1,51 +1,16 @@
 import { Injectable, Signal, computed, effect, signal, inject, untracked } from '@angular/core';
 import {
-  StratosStatus, GeneralEntityAppState,
+  StratosStatus,
   EndpointsDataService, EndpointErrorEventsService,
 } from '@stratosui/store';
-import { toSignal } from '@angular/core/rxjs-interop';
-import { ReplaySubject } from 'rxjs';
-import { debounceTime, map, startWith } from 'rxjs/operators';
 
 export type GlobalEventTypes = 'warning' | 'error' | 'process' | 'complete';
 
 export const endpointEventKey = 'endpointError';
 
-/**
- * Used to build the message or link for an event
- * @export
- */
-export class GlobalEventData<T = any> {
-  constructor(public triggered = true, public data?: T) { }
-}
-
 interface IGlobalEventType {
   type?: GlobalEventTypes;
   subType?: string;
-}
-
-/**
- * An global application wide event that is derived from data stored in the store.
- *
- * @export
- * @template SelectedState The root data that the event can be generated from. Will act as the EventData if no EventData is provided.
- * @template EventState This data can be used to generate the link or message for an event.
- */
-export interface IGlobalEventConfig<SelectedState, EventState = SelectedState> extends IGlobalEventType {
-
-  /**
-   * Can be used to generate the data for an event.
-   * If an array is passed then multiple events will be created of the type provided in the config.
-   */
-  eventTriggered: (state: SelectedState | GeneralEntityAppState) => GlobalEventData | GlobalEventData[];
-  message: ((data?: EventState, appState?: GeneralEntityAppState) => string) | string;
-  key?: ((data?: EventState, appState?: GeneralEntityAppState) => string) | string;
-
-  /**
-   * Used to get the part of the store the event may be built from.
-   */
-  selector?: (state: GeneralEntityAppState) => SelectedState;
-  link?: ((data?: EventState, appState?: GeneralEntityAppState) => string) | string;
 }
 
 export interface IGlobalEvent extends IGlobalEventType {
@@ -66,19 +31,14 @@ export interface IGlobalEvent extends IGlobalEventType {
   providedIn: 'root'
 })
 export class GlobalEventService {
-  private eventConfigs: IGlobalEventConfig<any>[] = [];
-  private eventConfigsSubject = new ReplaySubject<IGlobalEventConfig<any>[]>();
-
-  private dataCache = new Map<any, Map<any, IGlobalEvent[]>>();
-
   private _readEvents = signal<Map<string, IGlobalEvent>>(new Map<string, IGlobalEvent>());
   public readEvents = this._readEvents.asReadonly();
 
   // Endpoint-error banner events, derived from the signal-native
   // EndpointErrorEventsService (the single source for per-endpoint error
-  // history, fed centrally from the signal data layer). Replaces both the
+  // history, fed centrally from the signal data layer). Replaces the
   // former imperative publishEndpointErrors/_signalEvents channel and the
-  // ngrx app.module addEventConfig that read internalEventStateSelector.
+  // ngrx event-config channel that read internalEventStateSelector.
   // One event per endpoint with ≥1 backend (5xx) error; links to the
   // /errors/:id history page.
   private readonly _endpointErrorEvents = computed<IGlobalEvent[]>(() => {
@@ -108,15 +68,10 @@ export class GlobalEventService {
   // Per-key static events published from signal-driven sources (e.g.
   // app.module's timeout-session / polling-disabled banners that used to
   // observe `state.dashboard.*` via ngrx). Each entry is keyed; setting
-  // `null` removes that key. Merged into `events` alongside the ngrx-
-  // driven and endpoint-error channels.
+  // `null` removes that key. Merged into `events` alongside the
+  // endpoint-error channel.
   private _staticEvents = signal<ReadonlyMap<string, IGlobalEvent>>(new Map());
 
-
-  public addEventConfig<SelectedState, EventState = SelectedState>(event: IGlobalEventConfig<SelectedState, EventState>) {
-    this.eventConfigs.push(event);
-    this.eventConfigsSubject.next(this.eventConfigs);
-  }
 
   /**
    * Publish (or clear) a static global event keyed by `key`. Pass an
@@ -165,119 +120,10 @@ export class GlobalEventService {
     }
   }
 
-  // Get the event from the event config and event data.
-  private getEvent(eventData: any, config: IGlobalEventConfig<any>, appState: GeneralEntityAppState): IGlobalEvent {
-    // User-supplied callbacks can crash when eventData is undefined — e.g.
-    // an endpoint-error event whose entity never resolved. Treat any
-    // throw as "no link/message" so the event still emits its key/type
-    // and the row template's `@if (event.link)` guard hides the View
-    // button cleanly.
-    const safe = <T>(fn: () => T, fallback: T): T => {
-      try { return fn(); } catch { return fallback; }
-    };
-    const messageFn = config.message;
-    const linkFn = config.link;
-    const keyFn = config.key;
-    const message = typeof messageFn === 'function'
-      ? safe(() => messageFn(eventData, appState), '')
-      : messageFn;
-    const link = typeof linkFn === 'function'
-      ? safe(() => linkFn(eventData, appState), '')
-      : linkFn;
-    const key = typeof keyFn === 'function'
-      ? safe(() => keyFn(eventData, appState), '')
-      : keyFn || config.message;
-    const type = config.type || 'warning';
-    return {
-      message,
-      link,
-      key,
-      type,
-      stratosStatus: this.eventTypeToStratosStatus(type)
-    } as IGlobalEvent;
-  }
-
-  // Get the events from the event config and event data.
-  private getEvents(
-    eventData: GlobalEventData | GlobalEventData[],
-    selectedState: any,
-    config: IGlobalEventConfig<any>,
-    appState: GeneralEntityAppState
-  ): IGlobalEvent[] {
-    if (Array.isArray(eventData)) {
-      if (eventData.length) {
-        return eventData.map((data) => this.getEvent(data.data || selectedState, config, appState));
-      }
-      // Empty trigger array -> no events (previously fell through to
-      // undefined, which callers already coerced via `newEvents && ...`).
-      return [];
-    } else {
-      return [this.getEvent(eventData.data || selectedState, config, appState)];
-    }
-  }
-
-  // We cache the event results by keying them by the selectedState object.
-  private getNewTriggeredEventsOrCached(config: IGlobalEventConfig<any>, appState: GeneralEntityAppState): IGlobalEvent[] {
-    const selectedState = config.selector ? config.selector(appState) : appState;
-    const isEventTriggered = config.eventTriggered(selectedState);
-    if (!isEventTriggered) {
-      const dataToEventCache = new Map<any, any>();
-      // We should consider changing this, selectedState can be the entire store
-      dataToEventCache.set(selectedState, []);
-      this.dataCache.set(config, dataToEventCache);
-      return [];
-    }
-    if (Array.isArray(isEventTriggered)) {
-      return this.getNewEventsOrCached(isEventTriggered.filter(event => event.triggered), config, selectedState, appState);
-    }
-    return isEventTriggered.triggered ? this.getNewEventsOrCached(isEventTriggered, config, selectedState, appState) : [];
-  }
-
-  private getNewEventsOrCached(
-    eventData: GlobalEventData | GlobalEventData[],
-    config: IGlobalEventConfig<any>,
-    selectedState: any,
-    appState: GeneralEntityAppState
-  ): IGlobalEvent[] {
-    // We will get cached events if the data object matches exactly.
-    const cache = this.dataCache.get(config);
-    const cachedEvents = cache ? cache.get(selectedState) : null;
-    if (cachedEvents) {
-      return cachedEvents;
-    } else {
-      const events = this.getEvents(eventData, selectedState, config, appState);
-      const dataToEventCache = new Map<any, any>();
-      dataToEventCache.set(selectedState, events);
-      this.dataCache.set(config, dataToEventCache);
-      return events;
-    }
-  }
-
-  private getConfigEvents() {
-    // The legacy ngrx event-config channel: configs evaluated a `selector`
-    // against the root store state. The store is gone (#5413) and there are
-    // no live `addEventConfig` callers, so `appState` is null — configs (if
-    // ever registered) see what an empty store gave. Live banner events come
-    // from the signal channels (_endpointErrorEvents / _staticEvents).
-    return this.eventConfigsSubject.asObservable().pipe(
-      startWith(this.eventConfigs),
-      debounceTime(100),
-      map((configs) => {
-        const appState = null as unknown as GeneralEntityAppState;
-        return configs.flatMap(config => this.getNewTriggeredEventsOrCached(config, appState));
-      }),
-    );
-  }
-
   private endpointErrorEvents = inject(EndpointErrorEventsService);
   private endpointsData = inject(EndpointsDataService);
 
-  // The config channel's events. A root service, so this one subscription
-  // lasts as long as the app.
-  private readonly configEvents = toSignal(this.getConfigEvents(), { initialValue: [] as IGlobalEvent[] });
-
   private readonly allEvents = computed(() => [
-    ...this.configEvents(),
     ...this._endpointErrorEvents(),
     ...this._staticEvents().values(),
   ]);
