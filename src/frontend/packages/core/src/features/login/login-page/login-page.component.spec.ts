@@ -144,11 +144,17 @@ describe('LoginPageComponent', () => {
       expect(status?.textContent?.trim()).toBe('Signing in…');
     });
 
-    it('stops showing busy when Back restores the page from the browser cache', () => {
+    it('stops showing busy when Back restores the page from the browser cache', async () => {
       fixture.detectChanges();
-      (component as any).navigationInProgress$.next(true);
+      await fixture.whenStable();
+      const loading = () => fixture.nativeElement.querySelector('#login-loading') as HTMLElement;
+      (component as any).navigationInProgress.set(true);
+      await fixture.whenStable();
+      expect(loading().classList).not.toContain('hidden');
+
       component.onPageShow({ persisted: true } as PageTransitionEvent);
-      expect((component as any).navigationInProgress$.value).toBe(false);
+      await fixture.whenStable();
+      expect(loading().classList).toContain('hidden');
     });
 
     it('does NOT auto-redirect when the session is invalid but SSO is not configured', async () => {

@@ -1,10 +1,10 @@
-import { Component, OnInit, ChangeDetectionStrategy, computed, ApplicationRef, HostListener, inject } from '@angular/core';
+import { Component, OnInit, ChangeDetectionStrategy, computed, ApplicationRef, HostListener, inject, signal } from '@angular/core';
 import { toObservable } from '@angular/core/rxjs-interop';
 import { NgForm, FormsModule } from '@angular/forms';
 import { CommonModule } from '@angular/common';
 import { Router } from '@angular/router';
 import { AuthState, RouterRedirect } from '@stratosui/store';
-import { Observable, combineLatest, BehaviorSubject, firstValueFrom } from 'rxjs';
+import { Observable, combineLatest, firstValueFrom } from 'rxjs';
 import { map, startWith, distinctUntilChanged, shareReplay, filter, tap, switchMap, take } from 'rxjs/operators';
 import { StratosBrandingService } from '../../../../../theme/stratos-branding.service';
 
@@ -104,7 +104,7 @@ export class LoginPageComponent implements OnInit {
   private readonly loginCompletedAt$ = toObservable(this.authSignal.loginCompletedAt);
 
   // Track navigation state
-  private readonly navigationInProgress$ = new BehaviorSubject<boolean>(false);
+  private readonly navigationInProgress = signal(false);
 
   // App ready signal - wait for app to be stable before allowing navigation
   readonly appReady$ = this.appRef.isStable.pipe(
@@ -119,7 +119,7 @@ export class LoginPageComponent implements OnInit {
     this.appReady$.pipe(startWith(false)),
     this.auth$,
     this.endpoints$,
-    this.navigationInProgress$
+    toObservable(this.navigationInProgress)
   ]).pipe(
     map(([appReady, auth, endpoints, navigating]) =>
       !appReady ||           // App not ready yet
@@ -143,11 +143,11 @@ export class LoginPageComponent implements OnInit {
   );
 
   // Track redirect attempts changes reactively
-  private readonly redirectAttemptsSubject$ = new BehaviorSubject<number>(0);
+  private readonly redirectAttemptsSignal = signal(0);
 
   readonly showLoginButton$ = combineLatest([
     this.loggedIn$,
-    this.redirectAttemptsSubject$
+    toObservable(this.redirectAttemptsSignal)
   ]).pipe(
     map(([loggedIn, attempts]) => !loggedIn || attempts > this.MAX_REDIRECT_ATTEMPTS),
     distinctUntilChanged()
@@ -195,7 +195,7 @@ export class LoginPageComponent implements OnInit {
 
   private set redirectAttempts(value: number) {
     sessionStorage.setItem(this.REDIRECT_COUNTER_KEY, value.toString());
-    this.redirectAttemptsSubject$.next(value);
+    this.redirectAttemptsSignal.set(value);
   }
 
   // SSO_Message arrives via the /login query string and is attacker-controllable
@@ -209,7 +209,7 @@ export class LoginPageComponent implements OnInit {
 
   private clearRedirectAttempts() {
     sessionStorage.removeItem(this.REDIRECT_COUNTER_KEY);
-    this.redirectAttemptsSubject$.next(0);
+    this.redirectAttemptsSignal.set(0);
   }
 
   // Single cap check shared by every auto-redirect guard so there is one
@@ -223,13 +223,13 @@ export class LoginPageComponent implements OnInit {
   @HostListener('window:pageshow', ['$event'])
   onPageShow(event: PageTransitionEvent) {
     if (event.persisted) {
-      this.navigationInProgress$.next(false);
+      this.navigationInProgress.set(false);
     }
   }
 
   ngOnInit() {
-    // Initialize the BehaviorSubject with current value
-    this.redirectAttemptsSubject$.next(this.redirectAttempts);
+    // Start from the count kept in sessionStorage
+    this.redirectAttemptsSignal.set(this.redirectAttempts);
 
     // Trigger initial session verification
     this.authSignal.verifySession(true, true);
@@ -243,7 +243,7 @@ export class LoginPageComponent implements OnInit {
       take(1),  // Only check once on init
       switchMap(() => this.appReady$)  // Wait for app to be stable before navigating
     ).subscribe(async () => {
-      this.navigationInProgress$.next(true);
+      this.navigationInProgress.set(true);
       try {
         // Get current auth state
         const auth = await firstValueFrom(this.auth$, { defaultValue: undefined });
@@ -288,7 +288,7 @@ export class LoginPageComponent implements OnInit {
         // Normal redirect
         await this.handleSuccessfulLogin(auth);
       } finally {
-        this.navigationInProgress$.next(false);
+        this.navigationInProgress.set(false);
       }
     });
 
@@ -347,11 +347,11 @@ export class LoginPageComponent implements OnInit {
         take(1)
       ))
     ).subscribe(async auth => {
-      this.navigationInProgress$.next(true);
+      this.navigationInProgress.set(true);
       try {
         await this.handleSuccessfulLogin(auth);
       } finally {
-        this.navigationInProgress$.next(false);
+        this.navigationInProgress.set(false);
       }
     });
   }
@@ -433,7 +433,7 @@ export class LoginPageComponent implements OnInit {
         const redirect: RouterRedirect | undefined = auth.redirect;
         const returnUrl = this.formSSOredirectURL(redirect);
         // The page stays up until the IdP answers: keep showing that it is busy.
-        this.navigationInProgress$.next(true);
+        this.navigationInProgress.set(true);
         window.open('/pp/v1/auth/sso_login?state=' + encodeURIComponent(returnUrl), '_self');
       }),
       map((): null => null)
