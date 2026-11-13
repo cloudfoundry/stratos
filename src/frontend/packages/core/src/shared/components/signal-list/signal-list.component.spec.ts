@@ -190,6 +190,33 @@ describe('SignalListComponent', () => {
       }
     });
 
+    // A dialog an action opens hands focus back, when it closes, to what had
+    // focus when it opened. The menu item that was pressed is gone by then,
+    // so the action must start with focus on the kebab, not on the item.
+    it('runs an action with focus on its kebab, for a dialog to hand focus back to', async () => {
+      const fixture = TestBed.createComponent(Host);
+      let focusedAtInvoke: Element | null = null;
+      fixture.componentInstance.config = {
+        ...fixture.componentInstance.config,
+        columns: [
+          { header: 'Name', render: r => r.name },
+          { header: '', kind: 'actions', render: () => '', actions: () => [{ label: 'Delete', invoke: () => { focusedAtInvoke = document.activeElement; } }] },
+        ],
+      };
+      await fixture.whenStable();
+      const kebab = fixture.nativeElement.querySelector('[data-test="row-actions"]') as HTMLButtonElement;
+      kebab.click();
+      await fixture.whenStable();
+      const item = menu(fixture.nativeElement)!.querySelector('[data-test="row-action-Delete"]') as HTMLButtonElement;
+      item.focus();
+
+      item.click();
+      await fixture.whenStable();
+
+      expect(focusedAtInvoke).toBe(kebab);
+      expect(menu(fixture.nativeElement)).toBeNull();
+    });
+
     it('does nothing, and leaves focus alone, when no menu is open', async () => {
       const fixture = await withActions();
       const refresh = fixture.nativeElement.querySelector('[data-test="refresh"]') as HTMLButtonElement;

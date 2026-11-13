@@ -941,6 +941,11 @@ export class SignalListComponent<T> implements AfterViewInit {
   invokeAction(act: SignalListRowAction<T>, row: T, ev: Event): void {
     ev.stopPropagation();
     if (act.disabled) return;
+    // Focus goes back to the kebab before the menu closes: a dialog the
+    // action opens returns focus, when it closes, to what had focus when it
+    // opened, and the pressed menu item is gone by then (focus would fall to
+    // the page body).
+    this.host.nativeElement.querySelector<HTMLElement>('[data-test="row-actions"][aria-expanded="true"]')?.focus();
     this.openActionsRowKey.set(null);
     void act.invoke(row);
   }
