@@ -3,12 +3,10 @@ import { AbstractControl, FormBuilder, FormControl, FormGroup, ReactiveFormsModu
 import { TailwindErrorStateMatcher, TailwindShowOnDirtyErrorStateMatcher } from '@stratosui/core';
 import { format } from 'date-fns';
 import { toZonedTime } from 'date-fns-tz';
-import { from, of as observableOf } from 'rxjs';
-import { catchError, map } from 'rxjs/operators';
 import { CommonModule } from '@angular/common';
 
 import { ApplicationService } from '@stratosui/cloud-foundry';
-import { StepOnNextFunction, StepOnNextResult } from '@stratosui/core';
+import { StepOnNextResult } from '@stratosui/core';
 import { leadPieces, piecesToText } from '@stratosui/store';
 import { AutoscalerConstants, autoscalerReason, PolicyAlert } from '../../../core/autoscaler-helpers/autoscaler-util';
 import {
@@ -93,37 +91,33 @@ export class EditAutoscalerPolicyStep4Component extends EditAutoscalerPolicyDire
     this.createUpdateTest = this.isCreate ? 'create policy' : 'update policy';
   }
 
-  updatePolicy: StepOnNextFunction = () => {
+  async updatePolicy(): Promise<StepOnNextResult> {
     if (this.validateGlobalSetting()) {
-      return observableOf({
+      return {
         success: false,
-        message: `Could not ${this.createUpdateTest}: ${PolicyAlert.alertInvalidPolicyTriggerScheduleEmpty}` });
+        message: `Could not ${this.createUpdateTest}: ${PolicyAlert.alertInvalidPolicyTriggerScheduleEmpty}` };
     }
     const cfGuid = this.applicationService.cfGuid;
     const appGuid = this.applicationService.appGuid;
-    return from(this.policyData.update(cfGuid, appGuid, this.currentPolicy)).pipe(
-      map(() => ({
-        success: true,
-        redirect: true,
-        message: undefined as string | undefined,
-      })),
-      catchError(err => {
-        const lead = `Could not ${this.createUpdateTest}`;
-        if (!err) {
-          return observableOf<StepOnNextResult>({ success: false, redirect: false, message: lead });
-        }
-        // The autoscaler's reason; an HttpErrorResponse's own message only
-        // names the URL and the status.
-        const messagePieces = leadPieces(lead, autoscalerReason(err) ?? err);
-        return observableOf<StepOnNextResult>({
-          success: false,
-          redirect: false,
-          message: piecesToText(messagePieces),
-          messagePieces,
-        });
-      }),
-    );
-  };
+    try {
+      await this.policyData.update(cfGuid, appGuid, this.currentPolicy);
+      return { success: true, redirect: true, message: undefined };
+    } catch (err) {
+      const lead = `Could not ${this.createUpdateTest}`;
+      if (!err) {
+        return { success: false, redirect: false, message: lead };
+      }
+      // The autoscaler's reason; an HttpErrorResponse's own message only
+      // names the URL and the status.
+      const messagePieces = leadPieces(lead, autoscalerReason(err) ?? err);
+      return {
+        success: false,
+        redirect: false,
+        message: piecesToText(messagePieces),
+        messagePieces,
+      };
+    }
+  }
 
   addSpecificDate = () => {
     const { ...newSchedule } = AutoscalerConstants.PolicyDefaultSpecificDate;

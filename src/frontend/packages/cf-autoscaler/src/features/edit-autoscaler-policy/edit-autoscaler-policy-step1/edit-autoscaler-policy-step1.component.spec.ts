@@ -90,4 +90,22 @@ describe('EditAutoscalerPolicyStep1Component', () => {
     expect(min.hasError('alertInvalidPolicyMinimumRange')).toBe(true);
     expect(max.hasError('alertInvalidPolicyMaximumRange')).toBe(true);
   });
+
+  // Next stores the entered limits in the editor state, which the later
+  // steps and the final save read.
+  it('stores the entered limits in the editor state on next', async () => {
+    TestBed.inject(HttpTestingController).expectOne(r => r.url.endsWith('/policy'))
+      .flush('Policy Not Found', { status: 404, statusText: 'Not Found' });
+    await vi.waitFor(() => expect(component.editLimitForm.controls.instance_max_count.value).toBe(10));
+    component.editLimitForm.controls.instance_max_count.setValue(5);
+    component.editLimitForm.controls.instance_min_count.setValue(2);
+
+    const setState = vi.spyOn(TestBed.inject(EditAutoscalerPolicyService), 'setState');
+
+    const result = await component.onNext();
+
+    expect(result).toEqual({ success: true });
+    expect(setState).toHaveBeenCalledTimes(1);
+    expect(setState.mock.calls[0][0]).toMatchObject({ instance_min_count: 2, instance_max_count: 5 });
+  });
 });

@@ -11,7 +11,6 @@ import {
 } from '@angular/core';
 import { ActivatedRoute, Router, RouterModule } from '@angular/router';
 import { ErrorStateMatcher, ShowOnDirtyErrorStateMatcher } from '@stratosui/core';
-import { firstValueFrom } from 'rxjs';
 
 import { ApplicationService } from '@stratosui/cloud-foundry';
 import { AppDetailDataService } from '../../../../cloud-foundry/src/features/applications/app-detail-data.service';
@@ -102,9 +101,8 @@ export class EditAutoscalerPolicyComponent implements OnInit {
   step1Handle: SignalStepHandle = {
     valid: this.step1Valid.asReadonly(),
     submit: async () => {
-      // step1.onNext sets state into EditAutoscalerPolicyService and
-      // returns of({ success: true }) synchronously.
-      const result = await firstValueFrom(this.step1()!.onNext(0, null as any));
+      // step1.onNext sets state into EditAutoscalerPolicyService.
+      const result = await this.step1()!.onNext();
       if (!result.success) {
         throw new Error(result.message || 'Failed to save instance limits');
       }
@@ -116,7 +114,7 @@ export class EditAutoscalerPolicyComponent implements OnInit {
     disablePrevious: computed(() => this.step2EditIndex() !== -1),
     submit: async () => {
       // step2 inherits the base directive's onNext — setState + advance.
-      const result = await firstValueFrom(this.step2()!.onNext(1, null as any));
+      const result = await this.step2()!.onNext();
       if (!result.success) {
         throw new Error(result.message || 'Failed to save scaling rules');
       }
@@ -127,7 +125,7 @@ export class EditAutoscalerPolicyComponent implements OnInit {
     valid: computed(() => this.step3EditIndex() === -1),
     disablePrevious: computed(() => this.step3EditIndex() !== -1),
     submit: async () => {
-      const result = await firstValueFrom(this.step3()!.onNext(2, null as any));
+      const result = await this.step3()!.onNext();
       if (!result.success) {
         throw new Error(result.message || 'Failed to save recurring schedules');
       }
@@ -143,7 +141,7 @@ export class EditAutoscalerPolicyComponent implements OnInit {
       // { success, redirect, message }. Legacy `redirect: true` navigated
       // back to parentUrl via the steppers redirect plumbing — make that
       // explicit here.
-      const result = await firstValueFrom(this.step4()!.updatePolicy(3, null as any));
+      const result = await this.step4()!.updatePolicy();
       if (!result.success) {
         throw new Error(result.message || 'Failed to save policy');
       }

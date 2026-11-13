@@ -1,8 +1,8 @@
 import { Directive, inject, OnInit } from '@angular/core';
 import { ActivatedRoute } from '@angular/router';
-import { Observable, of } from 'rxjs';
+import { Observable } from 'rxjs';
 import { map } from 'rxjs/operators';
-import { StepOnNextFunction } from '@stratosui/core';
+import { StepOnNextResult } from '@stratosui/core';
 import { AppAutoscalerPolicyLocal } from '../../store/app-autoscaler.types';
 import { EditAutoscalerPolicyService } from './edit-autoscaler-policy-service';
 
@@ -28,8 +28,8 @@ export abstract class EditAutoscalerPolicyDirective implements OnInit {
     );
   }
 
-  onNext: StepOnNextFunction = () => {
+  async onNext(): Promise<StepOnNextResult> {
     this.service.setState(this.currentPolicy);
-    return of({ success: true });
-  };
+    return { success: true };
+  }
 }
