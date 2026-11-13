@@ -1,5 +1,5 @@
 import { CommonModule } from '@angular/common';
-import { ChangeDetectionStrategy, Component, ElementRef, OnDestroy, OnInit, effect, input, untracked, viewChild } from '@angular/core';
+import { ChangeDetectionStrategy, Component, ElementRef, OnDestroy, OnInit, effect, input, signal, untracked, viewChild } from '@angular/core';
 import {
   BehaviorSubject,
   combineLatest as observableCombineLatest,
@@ -103,8 +103,7 @@ export class LogViewerComponent implements OnInit, OnDestroy {
   public maxLogLines = 1000;
   public isHighThroughput$!: Observable<boolean>;
   public isLocked$!: Observable<boolean>;
-  public statusMessage$ = new BehaviorSubject<LogStreamMessage>({ message: '' });
-  public connectionErrorInfo$ = new BehaviorSubject<ConnectionErrorInfo | null>(null);
+  public readonly statusMessage = signal<LogStreamMessage>({ message: '' });
 
   public ngOnInit() {
     const contentElement = this.content().nativeElement;
@@ -131,8 +130,7 @@ export class LogViewerComponent implements OnInit, OnDestroy {
               // Connecting
               this.connectionAttempts = 0;
               this.lastConnectionError = null;
-              this.connectionErrorInfo$.next(null);
-              this.statusMessage$.next({
+              this.statusMessage.set({
                 message: 'Connecting to log stream...',
                 isError: false
               });
@@ -141,8 +139,7 @@ export class LogViewerComponent implements OnInit, OnDestroy {
               // Successfully connected
               this.connectionAttempts = 0;
               this.lastConnectionError = null;
-              this.connectionErrorInfo$.next(null);
-              this.statusMessage$.next({ message: '' });
+              this.statusMessage.set({ message: '' });
               console.log('Log stream connected successfully');
               break;
             case -1: {
@@ -156,8 +153,7 @@ export class LogViewerComponent implements OnInit, OnDestroy {
                 timestamp: Date.now(),
                 retryable: this.connectionAttempts < this.maxReconnectAttempts()
               };
-              this.connectionErrorInfo$.next(this.lastConnectionError);
-              this.statusMessage$.next({
+              this.statusMessage.set({
                 message: errorMsg,
                 isError: true
               });
@@ -168,7 +164,7 @@ export class LogViewerComponent implements OnInit, OnDestroy {
               // Retrying connection
               this.connectionAttempts++;
               const retryMsg = `Connection lost. Retrying (attempt ${this.connectionAttempts}/${this.maxReconnectAttempts()})...`;
-              this.statusMessage$.next({
+              this.statusMessage.set({
                 message: retryMsg,
                 isError: false
               });
@@ -176,7 +172,7 @@ export class LogViewerComponent implements OnInit, OnDestroy {
               break;
             }
             default:
-              this.statusMessage$.next({ message: '' });
+              this.statusMessage.set({ message: '' });
               break;
           }
         },
@@ -189,8 +185,7 @@ export class LogViewerComponent implements OnInit, OnDestroy {
             timestamp: Date.now(),
             retryable: false
           };
-          this.connectionErrorInfo$.next(this.lastConnectionError);
-          this.statusMessage$.next({
+          this.statusMessage.set({
             message: this.lastConnectionError.userMessage,
             isError: true
           });
@@ -302,8 +297,7 @@ export class LogViewerComponent implements OnInit, OnDestroy {
               timestamp: Date.now(),
               retryable: true
             };
-            this.connectionErrorInfo$.next(errorInfo);
-            this.statusMessage$.next({
+            this.statusMessage.set({
               message: errorInfo.userMessage,
               isError: true
             });
@@ -338,15 +332,14 @@ export class LogViewerComponent implements OnInit, OnDestroy {
             retryable: false
           };
           this.lastConnectionError = errorInfo;
-          this.connectionErrorInfo$.next(errorInfo);
-          this.statusMessage$.next({
+          this.statusMessage.set({
             message: errorInfo.userMessage,
             isError: true
           });
         },
         complete: () => {
           console.log('Log stream completed');
-          this.statusMessage$.next({
+          this.statusMessage.set({
             message: 'Log stream has been closed',
             isError: false
           });
@@ -436,8 +429,7 @@ export class LogViewerComponent implements OnInit, OnDestroy {
   public resetConnectionState(): void {
     this.connectionAttempts = 0;
     this.lastConnectionError = null;
-    this.connectionErrorInfo$.next(null);
-    this.statusMessage$.next({ message: '' });
+    this.statusMessage.set({ message: '' });
     console.log('Connection state reset - ready for retry');
   }
 
