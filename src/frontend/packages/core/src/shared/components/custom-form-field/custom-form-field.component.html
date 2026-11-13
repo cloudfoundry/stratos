@@ -47,7 +47,7 @@
         <ng-content select="input, textarea, select, app-select"></ng-content>
 
         <!-- Floating Label — suppressed for app-select; the select renders its own muted placeholder -->
-        @if (placeholder && !selectComponent()) {
+        @if (placeholder() && !selectComponent()) {
           <label
             [for]="inputId"
             [class]="labelClasses"
@@ -55,7 +55,7 @@
             @if (isRequired && !hideRequiredMarker()) {
               <span class="text-danger mr-0.5 font-medium" aria-label="required">*</span>
             }
-            {{ placeholder }}
+            {{ placeholder() }}
           </label>
         }
       </div>
