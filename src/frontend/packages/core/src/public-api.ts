@@ -59,7 +59,6 @@ export { AppProgressBarComponent } from './shared/components/progress-bar/app-pr
 export { InfoCardComponent } from './shared/components/info-card/info-card.component';
 export { PageHeaderComponent } from './shared/components/page-header/page-header.component';
 export { SteppersComponent } from './shared/components/stepper/steppers/steppers.component';
-export { StepComponent, StepOnNextFunction } from './shared/components/stepper/step/step.component';
 export { PageSubNavComponent } from './shared/components/page-sub-nav/page-sub-nav.component';
 export { PageSubNavSectionComponent } from './shared/components/page-sub-nav-section/page-sub-nav-section.component';
 export { ListSubNavComponent, ListSubNavAddAction, ListSubNavAction } from './shared/components/list-sub-nav/list-sub-nav.component';

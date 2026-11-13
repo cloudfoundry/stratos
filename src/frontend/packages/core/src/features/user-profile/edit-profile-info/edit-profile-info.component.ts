@@ -15,7 +15,6 @@ import { UserProfileService } from '../../../core/user-profile.service';
 import { ShowHideButtonComponent } from '../../../core/show-hide-button/show-hide-button.component';
 import { PageHeaderComponent } from '../../../shared/components/page-header/page-header.component';
 import { SignalStepHandle, StepComponent } from '../../../shared/components/stepper/step/step.component';
-// StepOnNextFunction no longer needed — submit lives on signalHandle.
 import { SteppersComponent } from '../../../shared/components/stepper/steppers/steppers.component';
 import { CustomIconComponent } from '../../../shared/components/custom-material/custom-material.component';
 

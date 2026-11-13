@@ -1,15 +1,8 @@
 import { ChangeDetectionStrategy, Component, Signal, TemplateRef, input, signal, viewChild } from '@angular/core';
-import { Observable } from 'rxjs';
 
 import { StepperRedirectPayload } from '../stepper.types';
 import { ErrorPiece, extractHttpErrorPieces, piecesToText } from '@stratosui/store';
 
-export interface IStepperStep {
-  validate: Observable<boolean>;
-  valid?: boolean;
-  onNext: StepOnNextFunction;
-  onEnter?: (data?: any) => void;
-}
 
 export interface StepOnNextResult {
   success: boolean;
@@ -24,8 +17,6 @@ export interface StepOnNextResult {
   ignoreSuccess?: boolean;
   data?: any;
 }
-
-export type StepOnNextFunction = (index: number, step: StepComponent) => Observable<StepOnNextResult>;
 
 /**
  * Signal-native step contract — additive shape introduced in FWT-956 and
