@@ -7,7 +7,6 @@ import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { provideRouter } from '@angular/router';
 import { provideNoopAnimations } from '@angular/platform-browser/animations';
 import { describe, it, expect, beforeEach, afterEach, vi } from 'vitest';
-import { firstValueFrom } from 'rxjs';
 
 import {
   TEST_CATALOGUE_ENTITIES,
@@ -115,7 +114,7 @@ describe('EditSpaceStepComponent', () => {
     vi.spyOn(CnsiSpacesSource.prototype, 'update')
       .mockRejectedValue(new HttpErrorResponse({ error: page(), status: 502, statusText: 'Bad Gateway' }));
 
-    const result = await firstValueFrom(stepFor().invokeNext(0));
+    const result = await stepFor().invokeNext();
 
     expect(result.success).toBe(false);
     expect(result.message).toBe('Failed to update space: 502 Bad Gateway\nnginx/1.28.0');
@@ -128,7 +127,7 @@ describe('EditSpaceStepComponent', () => {
     component.editSpaceForm.patchValue({ quotaDefinition: 'quota-1' });
     const httpMock = TestBed.inject(HttpTestingController);
 
-    const pending = firstValueFrom(stepFor().invokeNext(0));
+    const pending = stepFor().invokeNext();
     await vi.waitFor(() => httpMock.expectOne(r => r.method === 'POST')
       .flush(page(), { status: 502, statusText: 'Bad Gateway' }));
     const result = await pending;

@@ -1,7 +1,6 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { provideZonelessChangeDetection, signal } from '@angular/core';
 import { describe, it, expect, beforeEach, vi } from 'vitest';
-import { firstValueFrom, of as observableOf } from 'rxjs';
 import { HttpErrorResponse } from '@angular/common/http';
 
 import { StepComponent } from './step.component';
@@ -83,12 +82,19 @@ describe('StepComponent', () => {
   });
 
   describe('invokeNext dispatch', () => {
-    it('legacy path delegates to onNext(index, this)', async () => {
-      const onNext = vi.fn().mockReturnValue(observableOf({ success: true }));
-      fixture.componentRef.setInput('onNext', onNext);
-      const result = await firstValueFrom(component.invokeNext(2));
-      expect(onNext).toHaveBeenCalledWith(2, component);
+    it('a step without a signalHandle auto-succeeds', async () => {
+      const result = await component.invokeNext();
       expect(result.success).toBe(true);
+    });
+
+    it('signal-handle submit() throwing synchronously resolves to {success:false, message}', async () => {
+      fixture.componentRef.setInput('signalHandle', {
+        valid: signal(true).asReadonly(),
+        submit: () => { throw new Error('boom'); },
+      });
+      const result = await component.invokeNext();
+      expect(result.success).toBe(false);
+      expect(result.message).toBe('boom');
     });
 
     it('signal-handle with submit() resolves to {success:true}', async () => {
@@ -97,14 +103,14 @@ describe('StepComponent', () => {
         valid: signal(true).asReadonly(),
         submit,
       });
-      const result = await firstValueFrom(component.invokeNext(0));
+      const result = await component.invokeNext();
       expect(submit).toHaveBeenCalledOnce();
       expect(result.success).toBe(true);
     });
 
     it('signal-handle without submit auto-succeeds', async () => {
       fixture.componentRef.setInput('signalHandle', { valid: signal(true).asReadonly() });
-      const result = await firstValueFrom(component.invokeNext(0));
+      const result = await component.invokeNext();
       expect(result.success).toBe(true);
     });
 
@@ -113,7 +119,7 @@ describe('StepComponent', () => {
         valid: signal(true).asReadonly(),
         submit: () => Promise.reject(new Error('boom')),
       });
-      const result = await firstValueFrom(component.invokeNext(0));
+      const result = await component.invokeNext();
       expect(result.success).toBe(false);
       expect(result.message).toBe('boom');
     });
@@ -123,7 +129,7 @@ describe('StepComponent', () => {
         valid: signal(true).asReadonly(),
         submit: () => Promise.reject('plain string fail'),
       });
-      const result = await firstValueFrom(component.invokeNext(0));
+      const result = await component.invokeNext();
       expect(result.success).toBe(false);
       expect(result.message).toBe('plain string fail');
     });
@@ -133,7 +139,7 @@ describe('StepComponent', () => {
         valid: signal(true).asReadonly(),
         submit: () => Promise.reject(new HttpErrorResponse({ error: { errors: [{ code: 10008, title: 'CF-UnprocessableEntity', detail: 'Name must be unique' }] }, status: 422, statusText: 'Unprocessable Entity' })),
       });
-      const result = await firstValueFrom(component.invokeNext(0));
+      const result = await component.invokeNext();
       expect(result.success).toBe(false);
       expect(result.message).toBe('Name must be unique');
     });
@@ -143,7 +149,7 @@ describe('StepComponent', () => {
         valid: signal(true).asReadonly(),
         submit: () => Promise.reject(new HttpErrorResponse({ error: '<html><body><h1>503 Service Unavailable</h1>\nNo server is available to handle this request.\n</body></html>\n', status: 503, statusText: 'Service Unavailable' })),
       });
-      const result = await firstValueFrom(component.invokeNext(0));
+      const result = await component.invokeNext();
       expect(result.success).toBe(false);
       expect(result.message).toBe('503 Service Unavailable\nNo server is available to handle this request.');
       expect(result.messagePieces).toEqual([
@@ -157,7 +163,7 @@ describe('StepComponent', () => {
         valid: signal(true).asReadonly(),
         submit: () => Promise.resolve({ ignoreSuccess: true }),
       });
-      const result = await firstValueFrom(component.invokeNext(0));
+      const result = await component.invokeNext();
       expect(result.success).toBe(true);
       expect(result.ignoreSuccess).toBe(true);
     });
@@ -167,7 +173,7 @@ describe('StepComponent', () => {
         valid: signal(true).asReadonly(),
         submit: () => Promise.resolve(),
       });
-      const result = await firstValueFrom(component.invokeNext(0));
+      const result = await component.invokeNext();
       expect(result.success).toBe(true);
       expect(result.ignoreSuccess).toBeUndefined();
     });

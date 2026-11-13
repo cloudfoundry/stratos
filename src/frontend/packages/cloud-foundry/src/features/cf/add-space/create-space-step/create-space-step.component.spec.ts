@@ -7,7 +7,6 @@ import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { provideRouter } from '@angular/router';
 import { provideNoopAnimations } from '@angular/platform-browser/animations';
 import { describe, it, expect, beforeEach, afterEach, vi } from 'vitest';
-import { firstValueFrom } from 'rxjs';
 
 import {
   TEST_CATALOGUE_ENTITIES,
@@ -105,7 +104,7 @@ describe('CreateSpaceStepComponent', () => {
     stepRef.setInput('signalHandle', component.signalHandle);
     const step = stepRef.instance;
 
-    const result = await firstValueFrom(step.invokeNext(0));
+    const result = await step.invokeNext();
 
     expect(result.success).toBe(false);
     expect(result.message).toBe('Failed to create space: 502 Bad Gateway\nnginx/1.28.0');

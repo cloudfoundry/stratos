@@ -7,7 +7,6 @@ import { provideHttpClientTesting } from '@angular/common/http/testing';
 import { provideRouter, ActivatedRoute } from '@angular/router';
 import { provideNoopAnimations } from '@angular/platform-browser/animations';
 import { describe, it, expect, beforeEach, afterEach, vi } from 'vitest';
-import { firstValueFrom } from 'rxjs';
 
 import { cfCurrentUserPermissionsService } from '@stratosui/cloud-foundry';
 import { StepComponent } from '@stratosui/core';
@@ -102,7 +101,7 @@ describe('EditOrganizationStepComponent', () => {
     stepRef.setInput('signalHandle', component.signalHandle);
     const step = stepRef.instance;
 
-    const result = await firstValueFrom(step.invokeNext(0));
+    const result = await step.invokeNext();
 
     expect(result.success).toBe(false);
     expect(result.message).toBe('Failed to update organization: 502 Bad Gateway\nnginx/1.28.0');

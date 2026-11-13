@@ -6,7 +6,7 @@ import { provideRouter } from '@angular/router';
 import { HttpErrorResponse, provideHttpClient } from '@angular/common/http';
 import { provideHttpClientTesting } from '@angular/common/http/testing';
 import { describe, it, expect, beforeEach, vi } from 'vitest';
-import { firstValueFrom, throwError } from 'rxjs';
+import { throwError } from 'rxjs';
 
 import { StepComponent } from '@stratosui/core';
 
@@ -85,7 +85,7 @@ describe('CreateQuotaStepComponent', () => {
     stepRef.setInput('signalHandle', component.signalHandle);
     const step = stepRef.instance;
 
-    const result = await firstValueFrom(step.invokeNext(0));
+    const result = await step.invokeNext();
 
     expect(result.success).toBe(false);
     expect(result.message).toBe('Failed to create quota: 502 Bad Gateway\nnginx/1.28.0');

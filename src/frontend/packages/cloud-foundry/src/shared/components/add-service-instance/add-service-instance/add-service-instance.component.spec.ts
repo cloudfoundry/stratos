@@ -5,7 +5,7 @@ import { provideHttpClientTesting } from '@angular/common/http/testing';
 import { By } from '@angular/platform-browser';
 import { provideRouter } from '@angular/router';
 import { describe, it, expect, beforeEach } from 'vitest';
-import { firstValueFrom, of } from 'rxjs';
+import { of } from 'rxjs';
 import { STORE_TEST_PROVIDERS } from '@stratosui/store/testing';
 import { PageHeaderComponent, StepComponent, TabNavService } from '@stratosui/core';
 import { generateCfBaseTestModulesNoShared } from '@test-framework/cf';
@@ -216,7 +216,7 @@ describe('AddServiceInstanceComponent', () => {
       const stepRef = TestBed.createComponent(StepComponent).componentRef;
       stepRef.setInput('signalHandle', component.supdHandle);
       const step = stepRef.instance;
-      return firstValueFrom(step.invokeNext(0));
+      return step.invokeNext();
     }
 
     it('passes the create or update redirect on to the stepper', async () => {
