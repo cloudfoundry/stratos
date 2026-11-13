@@ -1,9 +1,8 @@
 import { CommonModule } from '@angular/common';
 import { Component, OnDestroy, OnInit, Signal, ChangeDetectionStrategy, inject, computed, signal, input } from '@angular/core';
 import { toObservable, toSignal } from '@angular/core/rxjs-interop';
-import { Observable, of as observableOf, Subscription } from 'rxjs';
+import { firstValueFrom, Observable, Subscription } from 'rxjs';
 import { take,
-  catchError,
   delay,
   distinctUntilChanged,
   filter,
@@ -16,6 +15,7 @@ import {
   TailwindSnackBarService,
   TailwindSnackBarRef,
   EnumerateComponent,
+  StepOnNextResult,
 } from '@stratosui/core';
 import { StUser } from '../../../../../services/endpoint-data/stratos-types';
 import { ActiveRouteCfOrgSpace } from '../../../cf-page.types';
@@ -179,16 +179,15 @@ export class UsersRolesModifyComponent implements OnInit, OnDestroy {
     }
   };
 
-  onNext = () => {
-    return this.isRemove$$.pipe(
-      take(1),
-      map(isRemove => {
-        if (isRemove) {
-          this.rolesData.flipSetRoles();
-        }
-        return { success: true };
-      }),
-      catchError(_err => observableOf({ success: false })),
-    );
-  };
+  async onNext(): Promise<StepOnNextResult> {
+    try {
+      const isRemove = await firstValueFrom(this.isRemove$$);
+      if (isRemove) {
+        this.rolesData.flipSetRoles();
+      }
+      return { success: true };
+    } catch {
+      return { success: false };
+    }
+  }
 }

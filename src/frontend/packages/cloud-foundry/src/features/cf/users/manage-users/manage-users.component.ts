@@ -2,7 +2,6 @@ import { CommonModule } from '@angular/common';
 import {
   AfterViewInit,
   ChangeDetectionStrategy,
-  ChangeDetectorRef,
   Component,
   computed,
   inject,
@@ -11,7 +10,7 @@ import {
   viewChild
 } from '@angular/core';
 import { ActivatedRoute, Router } from '@angular/router';
-import { firstValueFrom, forkJoin, of, Subscription } from 'rxjs';
+import { forkJoin, of, Subscription } from 'rxjs';
 import { catchError, map, take } from 'rxjs/operators';
 
 import {
@@ -61,7 +60,6 @@ export class UsersRolesComponent implements AfterViewInit, OnDestroy {
   private usersData = inject(CfUsersPagedDataService);
   private route = inject(ActivatedRoute);
   private router = inject(Router);
-  private cdr = inject(ChangeDetectorRef);
   private rolesData = inject(CfUsersRolesDataService);
 
   /** Users the wizard was opened for; null while the deep-link lookup runs. */
@@ -126,10 +124,10 @@ export class UsersRolesComponent implements AfterViewInit, OnDestroy {
     valid: this.setUsersValid.asReadonly(),
     blocked: this.setUsersBlocked.asReadonly(),
     submit: async () => {
-      // setUsers.onNext returns of({ success: true }) after seeding the
+      // setUsers.onNext resolves with success after seeding the
       // wizard service with the picked users — we wait for it so the
       // service is primed before the modify step's onEnter runs.
-      const result = await firstValueFrom(this.setUsers()!.onNext(0, null as any));
+      const result = await this.setUsers()!.onNext();
       if (!result.success) {
         throw new Error(result.message || 'Failed to set usernames');
       }
@@ -142,7 +140,7 @@ export class UsersRolesComponent implements AfterViewInit, OnDestroy {
     onEnter: () => this.modify()?.onEnter(),
     onLeave: (isNext?: boolean) => this.modify()?.onLeave(!!isNext),
     submit: async () => {
-      const result = await firstValueFrom(this.modify()!.onNext());
+      const result = await this.modify()!.onNext();
       if (!result.success) {
         throw new Error('Failed to update roles');
       }
@@ -224,13 +222,11 @@ export class UsersRolesComponent implements AfterViewInit, OnDestroy {
       this.bridgeSubs.push(
         setUsers.valid$.subscribe(v => {
           this.setUsersValid.set(!!v);
-          this.cdr.markForCheck();
         }),
       );
       this.bridgeSubs.push(
         setUsers.blocked$.subscribe(v => {
           this.setUsersBlocked.set(!!v);
-          this.cdr.markForCheck();
         }),
       );
     }
@@ -239,13 +235,11 @@ export class UsersRolesComponent implements AfterViewInit, OnDestroy {
       this.bridgeSubs.push(
         modify.valid$.subscribe(v => {
           this.modifyValid.set(!!v);
-          this.cdr.markForCheck();
         }),
       );
       this.bridgeSubs.push(
         modify.blocked$.subscribe(v => {
           this.modifyBlocked.set(!!v);
-          this.cdr.markForCheck();
         }),
       );
     }

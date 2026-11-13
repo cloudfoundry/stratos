@@ -9,9 +9,9 @@ import {
   signal,
 } from '@angular/core';
 import { toObservable } from '@angular/core/rxjs-interop';
-import { Observable, of } from 'rxjs';
+import { Observable } from 'rxjs';
 
-import { SignalListComponent, SignalListConfig } from '@stratosui/core';
+import { SignalListComponent, SignalListConfig, StepOnNextResult } from '@stratosui/core';
 
 import { CfUsersRolesDataService } from '../../../../../services/domain-data/cf-users-roles-data.service';
 import {
@@ -64,9 +64,9 @@ export class UsersRolesSelectComponent {
     });
   }
 
-  onNext = () => {
+  async onNext(): Promise<StepOnNextResult> {
     const users = this.selectedUsers();
     this.rolesData.setUsers(this.activeRouteCfOrgSpace.cfGuid, users);
-    return of({ success: true });
-  };
+    return { success: true };
+  }
 }
