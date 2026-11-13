@@ -1,5 +1,5 @@
 import { CommonModule } from '@angular/common';
-import { ChangeDetectorRef, Component, Directive, Input, OnChanges, signal } from '@angular/core';
+import { Component, Directive, Input, OnChanges, signal } from '@angular/core';
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { By } from '@angular/platform-browser';
 import { provideZonelessChangeDetection } from '@angular/core';
@@ -69,22 +69,25 @@ describe('SteppersComponent', () => {
   // zoneless-CD bug: a [hidden] change → filterSteps reassigns this.steps but
   // without markForCheck the template kept rendering the step list from
   // the initial filter. Routes step would never appear even after routes
-  // loaded. This test pins the filter path to mark for check.
-  it('re-filters visible steps and marks for check when a step unhides', () => {
-    const refA = makeStep('A', { hidden: true });
+  // loaded. This test pins the step bar to the re-filtered list.
+  it('re-filters visible steps and renders a step that unhides', async () => {
+    const refA = makeStep('Alpha', { hidden: true });
     const stepA = refA.instance;
-    const stepB = makeStep('B', { hidden: false }).instance;
-    const stepC = makeStep('C', { hidden: false }).instance;
+    const stepB = makeStep('Bravo', { hidden: false }).instance;
+    const stepC = makeStep('Charlie', { hidden: false }).instance;
     (component as any).allSteps = [stepA, stepB, stepC];
     (component as any).filterSteps();
+    await fixture.whenStable();
     expect(component.steps).toEqual([stepB, stepC]);
+    const text = () => (fixture.nativeElement as HTMLElement).textContent;
+    expect(text()).toContain('Bravo');
+    expect(text()).not.toContain('Alpha');
 
-    const cdr = (component as any).cdr as ChangeDetectorRef;
-    const markForCheck = vi.spyOn(cdr, 'markForCheck');
     refA.setInput('hidden', false);
     (component as any).filterSteps();
+    await fixture.whenStable();
     expect(component.steps).toEqual([stepA, stepB, stepC]);
-    expect(markForCheck).toHaveBeenCalled();
+    expect(text()).toContain('Alpha');
   });
 
   // Regression: step content is instantiated lazily (the ngTemplateOutlet
@@ -471,8 +474,8 @@ describe('SteppersComponent — current step across re-filters', () => {
     await hostFixture.whenStable();
     expect(steppers().steps.map(step => step.title())).toEqual(['One', 'Two']);
     expect(current().title()).toBe('Two');
-    expect(current().active).toBe(true);
-    expect(steppers().steps[0].active).toBe(false);
+    expect(current().active()).toBe(true);
+    expect(steppers().steps[0].active()).toBe(false);
     // Showing a step is not a transition: no extra onEnter.
     expect(host.entered).toEqual(['two']);
   });
@@ -488,7 +491,7 @@ describe('SteppersComponent — current step across re-filters', () => {
     await hostFixture.whenStable();
     expect(steppers().steps.map(step => step.title())).toEqual(['Two']);
     expect(current().title()).toBe('Two');
-    expect(current().active).toBe(true);
+    expect(current().active()).toBe(true);
   });
 
   it('enters the step shown in place of a current step that is hidden', async () => {
@@ -503,7 +506,7 @@ describe('SteppersComponent — current step across re-filters', () => {
     await hostFixture.whenStable();
     expect(steppers().steps.map(step => step.title())).toEqual(['One']);
     expect(current().title()).toBe('One');
-    expect(current().active).toBe(true);
+    expect(current().active()).toBe(true);
     expect(host.entered).toEqual(['one', 'two', 'one']);
   });
 });
@@ -551,7 +554,7 @@ describe('SteppersComponent — all steps hidden, then shown', () => {
     await settle();
     expect(steppers().steps.map(step => step.title())).toEqual(['Two']);
     expect(current().title()).toBe('Two');
-    expect(current().active).toBe(true);
+    expect(current().active()).toBe(true);
     expect(host.entered).toEqual(['one', 'two']);
   });
 
@@ -560,8 +563,8 @@ describe('SteppersComponent — all steps hidden, then shown', () => {
     host.secondHidden.set(false);
     await settle();
     expect(current().title()).toBe('Two');
-    expect(current().active).toBe(true);
-    expect(steppers().steps[0].active).toBe(false);
+    expect(current().active()).toBe(true);
+    expect(steppers().steps[0].active()).toBe(false);
     expect(host.entered).toEqual(['one', 'two']);
   });
 
@@ -570,8 +573,8 @@ describe('SteppersComponent — all steps hidden, then shown', () => {
     await settle();
     expect(steppers().steps.map(step => step.title())).toEqual(['One']);
     expect(current().title()).toBe('One');
-    expect(current().active).toBe(true);
-    expect(steppers().allSteps[1].active).toBe(false);
+    expect(current().active()).toBe(true);
+    expect(steppers().allSteps[1].active()).toBe(false);
     expect(host.entered).toEqual(['one', 'two', 'one']);
   });
 });
@@ -653,7 +656,7 @@ describe('SteppersComponent — failed step', () => {
     await hostFixture.whenStable();
 
     expect(reason()!.textContent).toContain('An error occurred: boom');
-    expect(steppers.steps[0].busy).toBe(false);
+    expect(steppers.steps[0].busy()).toBe(false);
   });
 
   it('clears the reason before the next try', async () => {
@@ -970,7 +973,7 @@ describe('SteppersComponent — first step and start index', () => {
   it('starts on startIndex with earlier steps complete', async () => {
     const { host, steppers } = await create(h => { h.startIndex = 1; h.startData = { n: 7 }; });
     expect(steppers.currentIndex()).toBe(1);
-    expect(steppers.steps[0].complete).toBe(true);
+    expect(steppers.steps[0].complete()).toBe(true);
     expect(host.secondEnter).toHaveBeenCalledWith({ n: 7 });
     expect(host.firstEnter).not.toHaveBeenCalled();
   });

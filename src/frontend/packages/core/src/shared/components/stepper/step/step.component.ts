@@ -1,4 +1,4 @@
-import { ChangeDetectionStrategy, Component, Signal, TemplateRef, input, output, viewChild } from '@angular/core';
+import { ChangeDetectionStrategy, Component, Signal, TemplateRef, input, signal, viewChild } from '@angular/core';
 import { from, Observable, of as observableOf } from 'rxjs';
 
 import { StepperRedirectPayload } from '../stepper.types';
@@ -98,27 +98,14 @@ export interface SignalStepHandle {
 export class StepComponent {
 
   public pOnEnter: (data?: any) => void;
-  active = false;
-  complete = false;
-  error = false;
-
-  // busy gates the parent stepper's Next/Apply [disabled] binding, but the
-  // steppers component is OnPush and busy mutations happen outside its CD
-  // scope (the destructive-entry timer below, goNext teardown). busy is a
-  // plain field, not a signal, so it emits a change event for the stepper to
-  // markForCheck — a bare property write is invisible to it (a step's
-  // markForCheck walks the declaration tree, which doesn't include the
-  // steppers view). Without this the destructive confirm step's Apply stayed
-  // disabled forever under zoneless.
-  readonly busyChange = output<boolean>();
-  set busy(v: boolean) {
-    if (this._busy !== v) {
-      this._busy = v;
-      this.busyChange.emit(v);
-    }
-  }
-  get busy(): boolean { return this._busy; }
-  private _busy = false;
+  // Set by the stepper, read by its template. Signals, so a write from a
+  // timer or a submit continuation re-renders the stepper by itself.
+  readonly active = signal(false);
+  readonly complete = signal(false);
+  readonly error = signal(false);
+  // Disables Next/Apply while a submit runs, and for a moment on entering a
+  // destructive or warning step.
+  readonly busy = signal(false);
 
   // Empty when not bound: the single-step base wizards give their step no title.
   readonly title = input('');
@@ -280,9 +267,9 @@ export class StepComponent {
       const enter = handleEnter ?? this.onEnter();
       if (enter) {
         if (this.effectiveDestructiveStep || this.effectiveWarningStep) {
-          this.busy = true;
+          this.busy.set(true);
           setTimeout(() => {
-            this.busy = false;
+            this.busy.set(false);
           }, 1000);
         }
         // Promise return values are fire-and-forget here — SteppersComponent
