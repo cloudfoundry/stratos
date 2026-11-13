@@ -4,7 +4,6 @@ import { ActivatedRoute, Router, RouterModule } from '@angular/router';
 import { ErrorPiece, RoutingHistoryService } from '@stratosui/store';
 
 import { BASE_REDIRECT_QUERY, StepperRedirectPayload } from '../stepper.types';
-import { SteppersService } from '../steppers.service';
 import { StepComponent, StepOnNextResult } from './../step/step.component';
 import { DotContentComponent } from '../../../../core/dot-content/dot-content.component';
 import { ErrorTextComponent } from '../../error-text/error-text.component';
@@ -14,7 +13,6 @@ import { AppBusyComponent } from '../../busy-indicator/busy-indicator.component'
   selector: 'app-steppers',
   templateUrl: './steppers.component.html',
   styleUrls: ['./steppers.component.scss'],
-  providers: [SteppersService],
   encapsulation: ViewEncapsulation.None,
   standalone: true,
   imports: [
@@ -32,7 +30,6 @@ import { AppBusyComponent } from '../../busy-indicator/busy-indicator.component'
   host: { class: 'flex flex-1 flex-col min-h-0' },
 })
 export class SteppersComponent implements OnInit, AfterContentInit, OnDestroy {
-  private steppersService = inject(SteppersService);
   private router = inject(Router);
   private routingHistory = inject(RoutingHistoryService);
   private route = inject(ActivatedRoute);
