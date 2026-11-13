@@ -1,7 +1,7 @@
 import { CommonModule } from '@angular/common';
 import { ChangeDetectionStrategy, Component, OnInit, inject, signal } from '@angular/core';
 import { ActivatedRoute } from '@angular/router';
-import { Observable, Subject, of } from 'rxjs';
+import { Observable, of } from 'rxjs';
 import { catchError, map, startWith, take } from 'rxjs/operators';
 
 import {
@@ -52,8 +52,7 @@ export class KubernetesAnalysisReportComponent implements OnInit {
   isLoading$!: Observable<boolean>;
 
   // null = no error to show; the template's @if guard filters it out
-  private errorMsg = new Subject<{ firstLine: string } | null>();
-  errorMsg$ = this.errorMsg.pipe(startWith(null));
+  readonly errorMsg = signal<{ firstLine: string } | null>(null);
 
   endpointID?: string;
   id: string;
@@ -83,18 +82,8 @@ export class KubernetesAnalysisReportComponent implements OnInit {
     const kubeGuid = this.kubeEndpointService.baseKube.guid;
 
     this.report$ = this.analysisData.reportById(kubeGuid, this.id).pipe(
-      map((report: AnalysisReport): AnalysisReport | false => {
-        if (!report || !report.type) {
-          this.error();
-          return false;
-        }
-        this.errorMsg.next(null);
-        return report;
-      }),
-      catchError(() => {
-        this.error();
-        return of<false>(false);
-      }),
+      map((report: AnalysisReport): AnalysisReport | false => report && report.type ? report : false),
+      catchError(() => of<false>(false)),
     );
 
     this.isLoading$ = this.report$.pipe(
@@ -103,18 +92,24 @@ export class KubernetesAnalysisReportComponent implements OnInit {
     );
 
     // Update the breadcrumbs once the report has resolved so the trail
-    // shows the report name rather than the static "Report" label.
+    // shows the report name rather than the static "Report" label. A report
+    // that did not load shows the error. This is the one place the error is
+    // written: report$ is also read by the async pipe during rendering, where
+    // a signal write is not allowed.
     this.report$.pipe(take(1)).subscribe((report) => {
-      if (report && typeof report !== 'boolean') {
-        this.breadcrumbs.set([
-          { value: 'Analysis', routerLink: getParentURL(this.route, 2) },
-          { value: report.name },
-        ]);
+      if (!report) {
+        this.error();
+        return;
       }
+      this.errorMsg.set(null);
+      this.breadcrumbs.set([
+        { value: 'Analysis', routerLink: getParentURL(this.route, 2) },
+        { value: report.name },
+      ]);
     });
   }
 
   error() {
-    this.errorMsg.next({ firstLine: 'Failed to load Analysis Report' });
+    this.errorMsg.set({ firstLine: 'Failed to load Analysis Report' });
   }
 }
