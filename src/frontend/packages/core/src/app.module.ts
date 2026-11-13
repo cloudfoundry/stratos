@@ -201,25 +201,6 @@ export class AppModule {
     // inside GlobalEventService from EndpointErrorEventsService (fed by the
     // signal data layer), replacing the ngrx internalEventStateSelector read
     // that used to live here.
-
-    // This should be brought back in in the future
-    // eventService.addEventConfig<IRequestEntityTypeState<EndpointModel>, EndpointModel>(
-    //   {
-    //     selector: (state: AppState) => state.requestData.endpoint,
-    //     eventTriggered: (state: IRequestEntityTypeState<EndpointModel>) => {
-    //       return Object.values(state).reduce((events, endpoint) => {
-    //         if (endpoint.connectionStatus === 'connecting') {
-    //           events.push(new GlobalEventData(true, endpoint));
-    //         }
-    //         return events;
-    //       }, []);
-    //     },
-    //     message: (endpoint: EndpointModel) => `Connecting endpoint ${endpoint.name}`,
-    //     link: '/endpoints',
-    //     key: 'endpoint-connect',
-    //     type: 'process'
-    //   }
-    // );
     ext.init();
     // Init Auth Types and Endpoint Types provided by extensions
     // Once the CF modules become an extension point, these should be moved to a CF specific module
