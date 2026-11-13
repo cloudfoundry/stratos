@@ -94,7 +94,7 @@ describe('EditAutoscalerPolicyStep2Component', () => {
 
       expect(component.currentPolicy.scaling_rules_form).toHaveLength(1);
       expect(component.currentPolicy.scaling_rules_form[0]).toEqual(AutoscalerConstants.PolicyDefaultTrigger);
-      expect(component.editIndex).toBe(0);
+      expect(component.editIndex()).toBe(0);
       expect(component.editTriggerForm.getRawValue()).toEqual({
         metric_type: 'memoryused',
         operator: '<=',
@@ -128,7 +128,7 @@ describe('EditAutoscalerPolicyStep2Component', () => {
       setControl('cool_down_secs', 900);
       component.finishTrigger();
 
-      expect(component.editIndex).toBe(-1);
+      expect(component.editIndex()).toBe(-1);
       expect(component.currentPolicy.scaling_rules_form[0]).toEqual({
         metric_type: 'cpu',
         operator: '>=',
@@ -167,7 +167,7 @@ describe('EditAutoscalerPolicyStep2Component', () => {
       create([rule({ metric_type: 'throughput', operator: '<', threshold: 30, adjustment: '-2' })]);
       component.editTrigger(0);
 
-      expect(component.editIndex).toBe(0);
+      expect(component.editIndex()).toBe(0);
       expect(component.editTriggerForm.getRawValue()).toEqual({
         metric_type: 'throughput',
         operator: '<',
@@ -212,7 +212,7 @@ describe('EditAutoscalerPolicyStep2Component', () => {
       component.addTrigger();
       component.removeTrigger(0);
 
-      expect(component.editIndex).toBe(-1);
+      expect(component.editIndex()).toBe(-1);
       expect(component.currentPolicy.scaling_rules_form).toHaveLength(0);
     });
 
@@ -221,7 +221,7 @@ describe('EditAutoscalerPolicyStep2Component', () => {
       component.addTrigger();
       component.removeTrigger(0);
 
-      expect(component.editIndex).toBe(1);
+      expect(component.editIndex()).toBe(1);
     });
   });
 
@@ -379,7 +379,6 @@ describe('EditAutoscalerPolicyStep2Component', () => {
     it('has no unit control in the form or the rendered edit row', () => {
       create();
       component.addTrigger();
-      fixture.componentRef.changeDetectorRef.markForCheck();
       fixture.detectChanges();
 
       expect(Object.keys(component.editTriggerForm.controls)).not.toContain('unit');
@@ -393,7 +392,6 @@ describe('EditAutoscalerPolicyStep2Component', () => {
     it('names every field of the edit row', () => {
       create();
       component.addTrigger();
-      fixture.componentRef.changeDetectorRef.markForCheck();
       fixture.detectChanges();
 
       const form: HTMLElement = fixture.nativeElement.querySelector('form');

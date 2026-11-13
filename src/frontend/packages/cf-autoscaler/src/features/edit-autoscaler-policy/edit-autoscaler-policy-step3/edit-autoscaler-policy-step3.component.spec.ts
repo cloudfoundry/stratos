@@ -1,6 +1,6 @@
 import { DatePipe } from '@angular/common';
 import { ComponentFixture, TestBed } from '@angular/core/testing';
-import { ChangeDetectorRef, Directive, forwardRef, provideZonelessChangeDetection } from '@angular/core';
+import { Directive, forwardRef, provideZonelessChangeDetection } from '@angular/core';
 import { ControlValueAccessor, NG_VALUE_ACCESSOR } from '@angular/forms';
 import { ActivatedRoute } from '@angular/router';
 import { describe, it, expect, beforeEach } from 'vitest';
@@ -110,7 +110,7 @@ describe('EditAutoscalerPolicyStep3Component', () => {
       component.addRecurringSchedule();
 
       expect(schedules()).toHaveLength(1);
-      expect(component.editIndex).toBe(0);
+      expect(component.editIndex()).toBe(0);
       expect(component.editRecurringScheduleForm.getRawValue()).toEqual({
         days_of_week: [0, 1, 2],
         days_of_month: [],
@@ -155,7 +155,7 @@ describe('EditAutoscalerPolicyStep3Component', () => {
       setControl('initial_min_instance_count', 0);
       component.finishRecurringSchedule();
 
-      expect(component.editIndex).toBe(-1);
+      expect(component.editIndex()).toBe(-1);
       // An empty initial count is dropped rather than sent as 0.
       expect(schedules()[0]).toEqual({
         start_time: '08:00',
@@ -234,7 +234,7 @@ describe('EditAutoscalerPolicyStep3Component', () => {
       component.editRecurringSchedule(0);
       component.removeRecurringSchedule(0);
 
-      expect(component.editIndex).toBe(-1);
+      expect(component.editIndex()).toBe(-1);
       expect(schedules().map(s => s.days_of_week)).toEqual([[2]]);
     });
   });
@@ -375,7 +375,6 @@ describe('EditAutoscalerPolicyStep3Component', () => {
       create([schedule]);
       await fixture.whenStable();
       component.editRecurringSchedule(0);
-      fixture.componentRef.injector.get(ChangeDetectorRef).markForCheck();
       await fixture.whenStable();
       return fixture.nativeElement.querySelector('form') as HTMLElement;
     }
