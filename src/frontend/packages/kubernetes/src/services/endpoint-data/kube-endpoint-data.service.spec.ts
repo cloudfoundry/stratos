@@ -57,6 +57,38 @@ describe('KubeEndpointDataService', () => {
     httpMock.expectOne(NODES_URL).flush({ [KUBE_GUID]: { items: [] } });
   });
 
+  it('joins a load made while one is in flight and finishes both together', async () => {
+    const first = firstValueFrom(service.load());
+    let secondDone = false;
+    const second = firstValueFrom(service.load()).then(() => { secondDone = true; });
+
+    httpMock.expectOne(VERSION_URL).flush({ [KUBE_GUID]: { gitVersion: 'v1.27.3' } });
+    httpMock.expectOne(NAMESPACES_URL).flush({ [KUBE_GUID]: { items: [] } });
+    await Promise.resolve();
+    expect(secondDone).toBe(false);
+    httpMock.expectOne(NODES_URL).flush({ [KUBE_GUID]: { items: [] } });
+    await Promise.all([first, second]);
+
+    expect(secondDone).toBe(true);
+    expect(service.isLoading()).toBe(false);
+  });
+
+  it('starts a new load once the previous one has finished', async () => {
+    const first = firstValueFrom(service.load());
+    httpMock.expectOne(VERSION_URL).flush({ [KUBE_GUID]: { gitVersion: 'v1.27.3' } });
+    httpMock.expectOne(NAMESPACES_URL).flush({ [KUBE_GUID]: { items: [] } });
+    httpMock.expectOne(NODES_URL).flush({ [KUBE_GUID]: { items: [] } });
+    await first;
+
+    const again = firstValueFrom(service.load());
+    httpMock.expectOne(VERSION_URL).flush({ [KUBE_GUID]: { gitVersion: 'v1.28.0' } });
+    httpMock.expectOne(NAMESPACES_URL).flush({ [KUBE_GUID]: { items: [] } });
+    httpMock.expectOne(NODES_URL).flush({ [KUBE_GUID]: { items: [] } });
+    await again;
+
+    expect(service.kubeVersion()).toBe('v1.28.0');
+  });
+
   it('populates kubeVersion + namespaces + nodeCount on a happy load()', async () => {
     const ns = {
       metadata: { name: 'default' },
