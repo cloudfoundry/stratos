@@ -75,6 +75,22 @@ describe('LogOutDialogComponent', () => {
     vi.useRealTimers();
   });
 
+  it('should advance the progress bar as the countdown runs', async () => {
+    vi.useFakeTimers();
+    component.data = { expiryDate: Date.now() + 10000 };
+    component.ngOnDestroy();
+    component.ngOnInit();
+
+    await vi.advanceTimersByTimeAsync(5000);
+    // whenStable never settles under fake timers; refresh the view directly
+    fixture.detectChanges();
+    const bar = _element.querySelector('[role="progressbar"]');
+    const value = Number(bar?.getAttribute('aria-valuenow'));
+    expect(value).toBeGreaterThan(40);
+    expect(value).toBeLessThan(60);
+    vi.useRealTimers();
+  });
+
   afterEach(() => {
     fixture.destroy();
   });
