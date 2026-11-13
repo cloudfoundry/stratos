@@ -81,6 +81,7 @@ describe('EditAutoscalerPolicyService', () => {
     TestBed.tick();
     let max = 0;
     service.getState().subscribe(s => max = s.instance_max_count);
+    TestBed.tick();
     expect(loads).toBe(1);
     expect(max).toBe(3);
   });
