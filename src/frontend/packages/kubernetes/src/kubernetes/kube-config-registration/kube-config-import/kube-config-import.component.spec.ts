@@ -104,11 +104,21 @@ describe('KubeConfigImportComponent', () => {
     async function runImport(clusters: KubeConfigFileCluster[]) {
       component.onEnter(clusters);
       const actions = [...component.data()];
-      component.onNext(1, undefined as any);
+      await component.onNext();
       await vi.waitFor(() => expect(component.done()).toBe(true));
       await fixture.whenStable();
       return actions;
     }
+
+    // Import starts on the first click; the second click closes.
+    it('starts the import on the first onNext and asks to leave on the second', async () => {
+      vi.spyOn(KubeConfigAuthHelper.prototype, 'getAuthDataForConnect').mockReturnValue(AUTH_DATA as any);
+      component.onEnter([makeCluster('a')]);
+
+      expect(await component.onNext()).toEqual({ success: true, ignoreSuccess: true });
+      await vi.waitFor(() => expect(component.done()).toBe(true));
+      expect(await component.onNext()).toEqual({ success: true, redirect: true });
+    });
 
     // A kubeconfig cluster may carry its CA as certificate-authority-data
     // (base64 PEM). Register it like the other register paths do: the CA

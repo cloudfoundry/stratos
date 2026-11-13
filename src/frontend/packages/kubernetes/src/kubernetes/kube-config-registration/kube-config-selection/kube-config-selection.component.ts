@@ -206,15 +206,6 @@ export class KubeConfigSelectionComponent {
     ).pipe(take(1)).subscribe(() => this.clustersChanged());
   }
 
-  // Save data for the next step to know the list of clusters to import.
-  onNext = () => this.helper.clusters$.pipe(
-    take(1),
-    map(clusters => ({
-      success: true,
-      data: clusters
-    }))
-  );
-
   // Only this step's own message: hide() would also dismiss other features'
   // messages.
   clustersParse(cluster: string) {
