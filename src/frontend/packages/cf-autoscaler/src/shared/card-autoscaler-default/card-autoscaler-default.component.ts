@@ -1,5 +1,5 @@
 import { CommonModule } from '@angular/common';
-import { ChangeDetectionStrategy, ChangeDetectorRef, Component, Injector, OnInit, computed, inject, input } from '@angular/core';
+import { ChangeDetectionStrategy, Component, Injector, OnInit, computed, inject, input } from '@angular/core';
 import { toObservable } from '@angular/core/rxjs-interop';
 import { Observable } from 'rxjs';
 import { shareReplay } from 'rxjs/operators';
@@ -36,7 +36,6 @@ export class CardAutoscalerDefaultComponent implements OnInit {
   private detail = inject(AppDetailDataService);
   private policyData = inject(AutoscalerPolicyDataService);
   private injector = inject(Injector);
-  private cdr = inject(ChangeDetectorRef);
 
   appAutoscalerPolicy$!: Observable<AppAutoscalerPolicyLocal | false | null>;
   readonly applicationInstances = computed(() => this.detail.app()?.entity?.instances ?? null);
@@ -65,8 +64,6 @@ export class CardAutoscalerDefaultComponent implements OnInit {
     this.appAutoscalerPolicy$ = toObservable(triState, { injector: this.injector }).pipe(
       shareReplay({ bufferSize: 1, refCount: true }),
     );
-
-    this.cdr.markForCheck();
   }
 
 }
