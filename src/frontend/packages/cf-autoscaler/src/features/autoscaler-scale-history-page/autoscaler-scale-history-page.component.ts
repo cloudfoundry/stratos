@@ -1,4 +1,4 @@
-import { ChangeDetectionStrategy, ChangeDetectorRef, Component, OnInit, WritableSignal, computed, inject, signal } from '@angular/core';
+import { ChangeDetectionStrategy, Component, OnInit, WritableSignal, computed, inject, signal } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { RouterModule } from '@angular/router';
 
@@ -27,7 +27,6 @@ import { AppAutoscalerEvent } from '../../store/app-autoscaler.types';
 export class AutoscalerScaleHistoryPageComponent implements OnInit {
   applicationService = inject(ApplicationService);
   private detail = inject(AppDetailDataService);
-  private cdr = inject(ChangeDetectorRef);
   private eventsConfig = inject(CfAppAutoscalerEventsSignalConfigService);
 
   parentUrl: string;
@@ -101,7 +100,6 @@ export class AutoscalerScaleHistoryPageComponent implements OnInit {
 
   ngOnInit() {
     void this.eventsConfig.loadAll();
-    this.cdr.markForCheck();
   }
 
   // Autoscaler timestamps are nanoseconds since the unix epoch — divide

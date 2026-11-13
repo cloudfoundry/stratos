@@ -1,4 +1,4 @@
-import { ChangeDetectionStrategy, ChangeDetectorRef, Component, ViewEncapsulation, OnChanges, inject, input, output } from '@angular/core';
+import { ChangeDetectionStrategy, Component, ViewEncapsulation, OnChanges, input, output } from '@angular/core';
 import { ChartConfiguration, ChartEvent } from 'chart.js';
 import { BaseChartDirective } from 'ng2-charts';
 
@@ -20,9 +20,6 @@ import {
   ]
 })
 export class AppAutoscalerComboChartComponent implements OnChanges {
-  private cdr = inject(ChangeDetectorRef);
-
-
   readonly width = input(400);
   readonly height = input(300);
   readonly legend = input(false);
@@ -63,7 +60,6 @@ export class AppAutoscalerComboChartComponent implements OnChanges {
 
   ngOnChanges() {
     this.updateChartData();
-    this.cdr.markForCheck();
   }
 
   private updateChartData() {

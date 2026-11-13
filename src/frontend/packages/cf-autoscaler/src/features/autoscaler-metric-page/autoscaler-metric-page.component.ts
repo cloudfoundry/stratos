@@ -1,5 +1,5 @@
 import { CommonModule } from '@angular/common';
-import { ChangeDetectionStrategy, ChangeDetectorRef, Component, OnInit, WritableSignal, computed, inject, signal } from '@angular/core';
+import { ChangeDetectionStrategy, Component, OnInit, WritableSignal, computed, inject, signal } from '@angular/core';
 import { RouterModule } from '@angular/router';
 
 import { ApplicationService } from '../../../../cloud-foundry/src/features/applications/application.service';
@@ -32,7 +32,6 @@ import { AutoscalerConstants } from '../../core/autoscaler-helpers/autoscaler-ut
 export class AutoscalerMetricPageComponent implements OnInit {
   applicationService = inject(ApplicationService);
   private detail = inject(AppDetailDataService);
-  private cdr = inject(ChangeDetectorRef);
   private chartConfig = inject(AppAutoscalerMetricChartSignalConfigService);
 
   parentUrl: string;
@@ -93,7 +92,6 @@ export class AutoscalerMetricPageComponent implements OnInit {
 
   ngOnInit() {
     void this.chartConfig.loadAll();
-    this.cdr.markForCheck();
   }
 
   onWindowChange(value: string): void {
