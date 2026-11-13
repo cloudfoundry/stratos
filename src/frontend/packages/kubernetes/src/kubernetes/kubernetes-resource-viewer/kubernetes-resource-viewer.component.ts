@@ -8,7 +8,7 @@ import {
   TemplateRef,
   ViewContainerRef,
   computed,
-  inject, ChangeDetectionStrategy, ChangeDetectorRef, signal, viewChild
+  inject, ChangeDetectionStrategy, signal, viewChild
 } from '@angular/core';
 import { RouterLink } from '@angular/router';
 import { formatDistance } from 'date-fns';
@@ -91,7 +91,6 @@ export class KubernetesResourceViewerComponent implements PreviewableComponent, 
   private confirmDialog = inject(ConfirmationDialogService);
   private sidePanelService = inject(SidePanelService);
   private snackBarService = inject(TailwindSnackBarService);
-  private cdr = inject(ChangeDetectorRef);
 
   // Signal-native delete: resolve the resource's data service by catalog type
   // and route favorites/recents cleanup through the shared store helper.
@@ -273,7 +272,6 @@ export class KubernetesResourceViewerComponent implements PreviewableComponent, 
       })
     );
     this.createCustomComponent();
-    this.cdr.markForCheck();
   }
 
   private getVersionFromSelfLink(url: string): string | undefined {
