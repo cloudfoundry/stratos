@@ -419,12 +419,53 @@ describe('RoleAssignmentComponent', () => {
     // Initially no roles set
     expect(component.roleCountForOrg('o1')).toBe(0);
 
-    // Toggle one org role (Manager) and one space role (Developer in s1)
+    // Toggle one org role (Manager) and one space role (Developer in s1);
+    // the space role also ticks org User.
     component.onToggleOrgRole(o1, OrgUserRoleNames.MANAGER, true);
     component.onToggleSpaceRole(o1, { guid: 's1', name: 'Space One' }, SpaceUserRoleNames.DEVELOPER, true);
     await fixture.whenStable();
 
-    expect(component.roleCountForOrg('o1')).toBe(2);
+    expect(component.roleCountForOrg('o1')).toBe(3);
+  });
+
+  it('a space role also adds the org User role the user does not hold', async () => {
+    await setup();
+    const fixture = TestBed.createComponent(RoleAssignmentComponent);
+    fixture.componentRef.setInput('cfGuid', cfGuid);
+    fixture.componentRef.setInput('users', [makeUser('u1')]);
+    fixture.componentRef.setInput('baseline', {});
+    await fixture.whenStable();
+
+    const component = fixture.componentInstance;
+    const emitted: CfRoleChange[][] = [];
+    component.changeSet.subscribe((v: CfRoleChange[]) => emitted.push(v));
+    component.pickOrg(o1);
+    await fixture.whenStable();
+
+    component.onToggleSpaceRole(o1, { guid: 's1', name: 'Space One' }, SpaceUserRoleNames.DEVELOPER, true);
+    await fixture.whenStable();
+
+    const changes = emitted[emitted.length - 1].map(c => `${c.add ? '+' : '-'}${c.role}@${c.spaceGuid ?? c.orgGuid}`);
+    expect(changes.sort()).toEqual([`+${SpaceUserRoleNames.DEVELOPER}@s1`, `+${OrgUserRoleNames.USER}@o1`].sort());
+    expect(component.checkedForOrg('o1', OrgUserRoleNames.USER)).toBe(true);
+  });
+
+  it('removing a space role leaves the org User role alone', async () => {
+    await setup();
+    const fixture = TestBed.createComponent(RoleAssignmentComponent);
+    fixture.componentRef.setInput('cfGuid', cfGuid);
+    fixture.componentRef.setInput('users', [makeUser('u1')]);
+    fixture.componentRef.setInput('baseline', {});
+    await fixture.whenStable();
+
+    const component = fixture.componentInstance;
+    component.pickOrg(o1);
+    await fixture.whenStable();
+
+    component.onToggleSpaceRole(o1, { guid: 's1', name: 'Space One' }, SpaceUserRoleNames.DEVELOPER, false);
+    await fixture.whenStable();
+
+    expect(component.checkedForOrg('o1', OrgUserRoleNames.USER)).toBe(false);
   });
 
   it('roleCountForOrg returns 1 for a single checked role', async () => {
