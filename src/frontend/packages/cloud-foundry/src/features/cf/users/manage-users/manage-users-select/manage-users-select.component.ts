@@ -8,8 +8,6 @@ import {
   inject,
   signal,
 } from '@angular/core';
-import { toObservable } from '@angular/core/rxjs-interop';
-import { Observable } from 'rxjs';
 
 import { SignalListComponent, SignalListConfig, StepOnNextResult } from '@stratosui/core';
 
@@ -47,10 +45,6 @@ export class UsersRolesSelectComponent {
   // The wizard's selection set, derived from the signal-config's
   // selectedKeys + users() each tick.
   readonly selectedUsers: Signal<StUser[]> = computed(() => this.selectConfig.resolveSelected());
-
-  // EnumerateComponent takes an Observable<any[]>; bridge the selection
-  // signal back to one for the existing label rendering.
-  readonly selectedUsers$: Observable<StUser[]> = toObservable(this.selectedUsers);
 
   readonly valid$ = signal<boolean>(false);
 

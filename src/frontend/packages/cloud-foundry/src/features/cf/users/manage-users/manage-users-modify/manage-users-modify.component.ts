@@ -1,7 +1,7 @@
 import { CommonModule } from '@angular/common';
 import { Component, OnDestroy, OnInit, Signal, ChangeDetectionStrategy, inject, computed, signal, input } from '@angular/core';
-import { toObservable, toSignal } from '@angular/core/rxjs-interop';
-import { Observable, Subscription } from 'rxjs';
+import { toSignal } from '@angular/core/rxjs-interop';
+import { Subscription } from 'rxjs';
 import { take, defaultIfEmpty, startWith } from 'rxjs/operators';
 
 import {
@@ -44,7 +44,7 @@ export class UsersRolesModifyComponent implements OnInit, OnDestroy {
 
   private readonly pickedUsers = computed<CfUserWithWarning[]>(() => (this.rolesData.users() ?? []).map(this.mapUser.bind(this)));
   /** Names of the picked users, starred when not all their roles are known. */
-  private readonly usersNames = computed(() => this.pickedUsers().map(user => user.showWarning ? '*' + user.username : user.username));
+  protected readonly usersNames = computed(() => this.pickedUsers().map(user => user.showWarning ? '*' + user.username : user.username));
   readonly usersWithWarning = computed(() => this.pickedUsers().filter(user => !!user.showWarning).map(user => user.username));
 
   readonly setUsernames = input(false);
@@ -75,8 +75,6 @@ export class UsersRolesModifyComponent implements OnInit, OnDestroy {
 
   private snackBarRef: TailwindSnackBarRef<any> | null = null;
 
-  /** The enumerate widget takes its list as an Observable. */
-  readonly usersNames$: Observable<string[]> = toObservable(this.usersNames);
   blocked = signal<boolean>(true);
   /** Inverse of blocked; the parent reads it to enable Next. */
   readonly valid = computed(() => !this.blocked());

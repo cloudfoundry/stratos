@@ -6,7 +6,7 @@
       Selected Users:
     }
   </div>
-  <app-enumerate [collection]="usersNames$"></app-enumerate>
+  <app-enumerate [collection]="usersNames()"></app-enumerate>
 </div>
 @if (usersWithWarning().length) {
   <div class="modify-users__users-warning"><i>* Not all roles are known for user.</i></div>
