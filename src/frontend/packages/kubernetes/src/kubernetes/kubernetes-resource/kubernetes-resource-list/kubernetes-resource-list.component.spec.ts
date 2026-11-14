@@ -152,17 +152,28 @@ describe('KubernetesResourceListComponent', () => {
     expect(component).toBeTruthy();
   });
 
-  it('sources the namespace dropdown from KubeNamespaceDataService (namespaced view)', () => {
+  it('sources the namespace dropdown from KubeNamespaceDataService (namespaced view)', async () => {
     namespacesSig.set([{ metadata: { name: 'alpha' } }, { metadata: { name: 'beta' } }]);
 
-    fixture.detectChanges(); // runs ngOnInit — namespaced (non-workload) path
+    await fixture.whenStable(); // renders the namespaced (non-workload) path
 
     expect(namespaceRefresh).toHaveBeenCalledWith({ kubeGuid: 'test-guid' });
-    let emitted: string[] | undefined;
-    // strict: this is the namespaced (non-workload) path; ngOnInit (run by the
-    // detectChanges above) always assigns namespaces$ here.
-    component.namespaces$!.subscribe(v => emitted = v);
-    expect(emitted).toEqual(['alpha', 'beta']);
+    // strict: this is the namespaced (non-workload) path; the constructor
+    // always assigns namespaces here.
+    expect(component.namespaces!()).toEqual(['alpha', 'beta']);
+  });
+
+  it('follows the namespace the user selects, and "All namespaces" clears it', async () => {
+    await fixture.whenStable();
+    expect(component.selectedNamespaceSignal()).toBeUndefined();
+
+    component.select('beta');
+    await fixture.whenStable();
+    expect(component.selectedNamespaceSignal()).toBe('beta');
+
+    component.select('*');
+    await fixture.whenStable();
+    expect(component.selectedNamespaceSignal()).toBeUndefined();
   });
 
   // -------------------------------------------------------------------------
@@ -311,9 +322,9 @@ describe('KubernetesResourceListComponent', () => {
       }
     });
 
-    it('renders only app-signal-list — no app-list-view in the template', () => {
+    it('renders only app-signal-list — no app-list-view in the template', async () => {
       signalFixture = TestBed.createComponent(KubernetesResourceListComponent);
-      signalFixture.detectChanges();
+      await signalFixture.whenStable();
       expect(signalFixture.componentInstance.signalListConfig()).toBeDefined();
       expect(signalFixture.nativeElement.querySelector('app-list-view')).toBeNull();
     });
@@ -391,9 +402,9 @@ describe('KubernetesResourceListComponent', () => {
       }
     });
 
-    it('redirects to cluster summary for an unregistered entity key (no ngrx provider built)', () => {
+    it('redirects to cluster summary for an unregistered entity key (no ngrx provider built)', async () => {
       unregFixture = TestBed.createComponent(KubernetesResourceListComponent);
-      unregFixture.detectChanges();
+      await unregFixture.whenStable();
       expect(unregFixture.componentInstance.signalListConfig()).toBeUndefined();
       expect((unregFixture.componentInstance as any).provider).toBeUndefined();
       expect(navigateSpy).toHaveBeenCalledWith(['/kubernetes', 'test-guid']);
