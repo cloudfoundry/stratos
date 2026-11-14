@@ -1,7 +1,6 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { provideZonelessChangeDetection, signal, WritableSignal } from '@angular/core';
 import { ActivatedRoute } from '@angular/router';
-import { Subject } from 'rxjs';
 import { describe, it, expect, beforeEach, vi } from 'vitest';
 import { generateCfBaseTestModulesNoShared } from "@test-framework/cloud-foundry-endpoint-service.helper";
 import { ServicePlanPriceComponent } from '../../service-plan-price/service-plan-price.component';
@@ -48,14 +47,24 @@ describe('SelectPlanStepComponent', () => {
       .compileComponents();
   });
 
-  beforeEach(() => {
+  beforeEach(async () => {
     fixture = TestBed.createComponent(SelectPlanStepComponent);
     component = fixture.componentInstance;
-    fixture.detectChanges();
+    await fixture.whenStable();
   });
 
   it('should create', () => {
     expect(component).toBeTruthy();
+  });
+
+  // The real helper acquires the endpoint's data, which writes signals, so
+  // it cannot be built inside a computed.
+  it('reads the plans of a picked service through the real helper', async () => {
+    const csi = TestBed.inject(CsiStateService);
+    csi.setCFDetails('cf-1', 'org-1', 'space-1');
+    csi.setServiceGuid('svc-1');
+    await fixture.whenStable();
+    expect(component.servicePlans()).toEqual([]);
   });
 
   // The caption is shown inside the empty drop-down and is also its name.
@@ -73,8 +82,8 @@ describe('SelectPlanStepComponent', () => {
    * the form control's value changes — the validate signal must follow
    * so the Next button activates.
    *
-   * Regression captured: the original code only set validate inside the
-   * one-shot servicePlans$ subscription in onEnter(); subsequent manual
+   * Regression captured: the original code only set validate when the
+   * plans arrived in onEnter(); subsequent manual
    * plan picks never updated it. After onEnter set validate=false on
    * empty plan list, picking a plan kept validate stuck at false.
    */
@@ -89,20 +98,6 @@ describe('SelectPlanStepComponent', () => {
     expect(component.validate()).toBe(true);
     component.stepperForm.controls.servicePlans.setValue('');
     expect(component.validate()).toBe(false);
-  });
-
-  // selectedPlan$ follows the form and never completes, so onNext has to take
-  // the first plan and let go of the stream.
-  it('onNext resolves with the first selected plan and stops listening', async () => {
-    const plans = new Subject<unknown>();
-    (component as unknown as { selectedPlan$: Subject<unknown> }).selectedPlan$ = plans;
-    const plan = { guid: 'plan-1' };
-
-    const pending = component.onNext();
-    plans.next(plan);
-
-    expect(await pending).toEqual({ success: true, data: plan });
-    expect(plans.observed).toBe(false);
   });
 });
 
@@ -149,5 +144,39 @@ describe('SelectPlanStepComponent plan list', () => {
     await fixture.whenStable();
 
     expect(setValue).toHaveBeenCalledTimes(1);
+  });
+
+  it('lists the plans in name order', async () => {
+    plans.set([plan('plan-b'), plan('plan-a')]);
+    await fixture.whenStable();
+    expect(component.servicePlans()!.map(p => p.guid)).toEqual(['plan-a', 'plan-b']);
+  });
+
+  it('follows the picked service when the pick is completed later', async () => {
+    const csi = TestBed.inject(CsiStateService);
+    csi.setServiceGuid(null);
+    await fixture.whenStable();
+    // An incomplete pick keeps the plans of the last complete one
+    expect(component.servicePlans()!.map(p => p.guid)).toEqual(['plan-a']);
+  });
+
+  it('selects the first plan on entry and answers it from onNext', async () => {
+    plans.set([plan('plan-b'), plan('plan-a')]);
+    component.onEnter();
+    await fixture.whenStable();
+
+    expect(component.stepperForm.controls.servicePlans.value).toBe('plan-a');
+    expect(component.selectedPlan()?.guid).toBe('plan-a');
+    expect(await component.onNext()).toEqual({ success: true, data: expect.objectContaining({ guid: 'plan-a' }) });
+  });
+
+  it('turns the plan pick off when the service has no plans', async () => {
+    plans.set([]);
+    await fixture.whenStable();
+    expect(component.stepperForm.controls.servicePlans.disabled).toBe(true);
+
+    plans.set([plan('plan-a')]);
+    await fixture.whenStable();
+    expect(component.stepperForm.controls.servicePlans.enabled).toBe(true);
   });
 });

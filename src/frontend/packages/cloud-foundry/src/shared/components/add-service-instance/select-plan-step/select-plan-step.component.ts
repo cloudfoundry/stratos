@@ -1,21 +1,10 @@
-import { AsyncPipe, CommonModule, TitleCasePipe } from '@angular/common';
-import { ChangeDetectionStrategy, Component, Injector, OnDestroy, ViewContainerRef, effect, inject, runInInjectionContext, signal, viewChild } from '@angular/core';
+import { CommonModule, TitleCasePipe } from '@angular/common';
+import { ChangeDetectionStrategy, Component, EffectRef, Injector, Signal, ViewContainerRef, afterRenderEffect, computed, effect, inject, linkedSignal, signal, untracked, viewChild } from '@angular/core';
 import { ReactiveFormsModule, FormControl, FormGroup, Validators } from '@angular/forms';
 import { CustomFormFieldComponent } from '@stratosui/core';
 import { CustomSelectComponent, CustomOptionComponent } from '@stratosui/core';
 import { naturalCompare } from '@stratosui/core';
-import { toObservable } from '@angular/core/rxjs-interop';
-import { combineLatest as observableCombineLatest, firstValueFrom, Observable, Subscription } from 'rxjs';
-import {
-  distinctUntilChanged,
-  filter,
-  map,
-  shareReplay,
-  startWith,
-  switchMap,
-  tap,
-  withLatestFrom,
-} from 'rxjs/operators';
+import { toSignal } from '@angular/core/rxjs-interop';
 
 import {
   canShowServicePlanCosts,
@@ -24,7 +13,6 @@ import {
 } from '../../../../../../cloud-foundry/src/features/service-catalog/services-helper';
 import { ServiceCatalogDataService, SignalSource } from '../../../../../../cloud-foundry/src/services/endpoint-data/service-catalog-data.service';
 import { StServicePlan, StServicePlanVisibility } from '../../../../../../cloud-foundry/src/services/endpoint-data/stratos-types';
-import { safeUnsubscribe } from '../../../../../../core/src/core/utils.service';
 import { CardWrapperComponent } from '../../../../../../core/src/shared/components/cards/card/card.component';
 import { CardStatusComponent } from '../../../../../../core/src/shared/components/cards/card-status/card-status.component';
 import { FocusDirective } from '../../../../../../core/src/shared/components/focus.directive';
@@ -34,7 +22,6 @@ import { StratosStatus } from '../../../../../../store/src/types/shared.types';
 import { ServicePlanPriceComponent } from '../../service-plan-price/service-plan-price.component';
 import { ServicePlanPublicComponent } from '../../service-plan-public/service-plan-public.component';
 import { CreateServiceInstanceHelperServiceFactory } from '../create-service-instance-helper-service-factory.service';
-import { CreateServiceInstanceHelper } from '../create-service-instance-helper.service';
 import { CsiModeService } from '../csi-mode.service';
 import { CsiState, CsiStateService } from '../csi-state.service';
 import { NoServicePlansComponent } from '../no-service-plans/no-service-plans.component';
@@ -58,7 +45,6 @@ interface SelectPlanForm {
     CustomFormFieldComponent,
     CustomSelectComponent,
     CustomOptionComponent,
-    AsyncPipe,
     FocusDirective,
     MetadataItemComponent,
     CardWrapperComponent,
@@ -67,7 +53,7 @@ interface SelectPlanForm {
     ServicePlanPriceComponent
 ]
 })
-export class SelectPlanStepComponent implements OnDestroy {
+export class SelectPlanStepComponent {
   private cSIHelperServiceFactory = inject(CreateServiceInstanceHelperServiceFactory);
   private modeService = inject(CsiModeService);
   private serviceCatalog = inject(ServiceCatalogDataService);
@@ -78,107 +64,119 @@ export class SelectPlanStepComponent implements OnDestroy {
   // selectedPlanAccessibility from this + the cached isPublic flag.
   private _planVisSource = signal<SignalSource<StServicePlanVisibility | null> | null>(null);
   private _planIsPublic = signal<boolean>(false);
-  // toObservable() must run inside an injection context — lift the
-  // bridge to a class field so downstream pipes can subscribe later.
-  private csiState$ = toObservable(this.csiState.state);
-
-  selectedPlan$!: Observable<StServicePlan | undefined>;
   private selectedPlanAccessibilitySignal = signal<StratosStatus | null>(null);
   selectedPlanAccessibility = this.selectedPlanAccessibilitySignal.asReadonly();
-  cSIHelperService!: CreateServiceInstanceHelper;
   readonly noPlansDiv = viewChild.required('noplans', { read: ViewContainerRef });
 
   validate = signal<boolean>(false);
-  subscription!: Subscription;
   stepperForm: FormGroup<SelectPlanForm>;
-  servicePlans$: Observable<StServicePlan[]>;
   displayNames: { [guid: string]: string } = {};
+
+  // The service the plans belong to. Stays on the last complete pick while
+  // the state is incomplete, and is the same object while the pick is
+  // unchanged.
+  private readonly planTarget = linkedSignal<CsiState, { cfGuid: string; serviceGuid: string } | undefined>({
+    source: this.csiState.state,
+    computation: (state, previous) => {
+      if (!state.orgGuid || !state.spaceGuid || !state.serviceGuid) {
+        return previous?.value;
+      }
+      const target = { cfGuid: state.cfGuid!, serviceGuid: state.serviceGuid };
+      const last = previous?.value;
+      return last && last.cfGuid === target.cfGuid && last.serviceGuid === target.serviceGuid ? last : target;
+    },
+  });
+  // strict: cfGuid is set alongside org/space before a service is
+  // pickable; create() itself throws if it is ever falsy.
+  private readonly helper = computed(() => {
+    const target = this.planTarget();
+    // Building the helper acquires the endpoint's data, which writes signals
+    return target ? untracked(() => this.cSIHelperServiceFactory.create(target.cfGuid, target.serviceGuid)) : undefined;
+  });
+  // The plans of the picked service, in display order; undefined until a
+  // service is picked.
+  readonly servicePlans = computed(() => {
+    const plans = this.helper()?.servicePlans();
+    return plans && [...plans].sort((a, b) => naturalCompare(this.getDisplayName(a), this.getDisplayName(b)));
+  });
+  private readonly planGuid: Signal<string>;
+  readonly selectedPlan = computed(() => this.servicePlans()?.find(s => s.guid === this.planGuid()));
+  private seedPlan?: EffectRef;
 
   constructor() {
     this.stepperForm = new FormGroup<SelectPlanForm>({
       servicePlans: new FormControl<string>('', { validators: Validators.required, nonNullable: true }),
     });
+    const planControl = this.stepperForm.controls.servicePlans;
+    this.planGuid = toSignal(planControl.valueChanges, { initialValue: planControl.value });
 
     // Keep `validate` synced with the form's actual validity. The parent
     // wizard's selectPlanHandle.valid reads this signal; if we only
-    // updated it inside the one-shot servicePlans$ subscription in
-    // onEnter, manual plan picks after that point would never re-flip
-    // validate to true and the Next button would stay disabled.
+    // updated it when the plans arrive, manual plan picks after that point
+    // would never re-flip validate to true and the Next button would stay
+    // disabled.
     this.stepperForm.statusChanges.subscribe(() => {
       this.validate.set(this.stepperForm.valid);
     });
 
     // Derive selectedPlanAccessibility from the active visibility fetch
-    // + cached isPublic flag. When the form selection changes, the tap()
+    // + cached isPublic flag. When the selected plan changes, the effect
     // below swaps _planVisSource and _planIsPublic; this effect re-runs
     // once the new source's value lands.
-    runInInjectionContext(this.injector, () => {
-      effect(() => {
-        const src = this._planVisSource();
-        if (!src) {
-          this.selectedPlanAccessibilitySignal.set(null);
-          return;
-        }
-        if (src.isLoading()) return;
-        this.selectedPlanAccessibilitySignal.set(
-          getPlanAccessibilityV3(this._planIsPublic(), src.value()),
-        );
-      });
+    effect(() => {
+      const src = this._planVisSource();
+      if (!src) {
+        this.selectedPlanAccessibilitySignal.set(null);
+        return;
+      }
+      if (src.isLoading()) return;
+      this.selectedPlanAccessibilitySignal.set(
+        getPlanAccessibilityV3(this._planIsPublic(), src.value()),
+      );
     });
 
-    this.servicePlans$ = this.csiState$.pipe(
-      filter((p): p is CsiState & { orgGuid: string; spaceGuid: string; serviceGuid: string } =>
-        !!p.orgGuid && !!p.spaceGuid && !!p.serviceGuid),
-      distinctUntilChanged((x, y) => {
-        return (x.cfGuid === y.cfGuid && x.spaceGuid === y.spaceGuid && x.orgGuid === y.orgGuid && x.serviceGuid === y.serviceGuid);
-      }),
-      switchMap(state => {
-        // strict: cfGuid is set alongside org/space before a service is
-        // pickable; create() itself throws if it is ever falsy, so the
-        // original throw-on-absent behavior is preserved.
-        this.cSIHelperService = this.cSIHelperServiceFactory.create(state.cfGuid!, state.serviceGuid);
-        // Trigger the per-CNSI services-details fetch (idempotent).
-        // Marketplace-mode init calls this elsewhere; bind-service mode
-        // (Applications → Bind Service) skips that init path so the
-        // helper had to drive the load itself or the plan dropdown
-        // would stay empty with "no visible plans".
-        void this.cSIHelperService.load();
-        // Bridged here, in the step's injector, so the bridge ends with
-        // the step; one per service picked while the step is open.
-        return toObservable(this.cSIHelperService.servicePlans, { injector: this.injector });
-      }),
-      tap(o => {
-        if (o.length === 0) {
+    // Trigger the per-CNSI services-details fetch (idempotent).
+    // Marketplace-mode init calls this elsewhere; bind-service mode
+    // (Applications → Bind Service) skips that init path so the
+    // helper had to drive the load itself or the plan dropdown
+    // would stay empty with "no visible plans".
+    effect(() => {
+      const helper = this.helper();
+      if (helper) {
+        untracked(() => void helper.load());
+      }
+    });
+
+    afterRenderEffect(() => {
+      const plans = this.servicePlans();
+      if (!plans) {
+        return;
+      }
+      untracked(() => {
+        if (plans.length === 0) {
           this.stepperForm.controls.servicePlans.disable();
           this.clearNoPlans();
           this.createNoPlansComponent();
           setTimeout(() => this.validate.set(false));
-        }
-        if (o.length > 0) {
+        } else {
           this.stepperForm.controls.servicePlans.enable();
           this.clearNoPlans();
         }
-      }),
-      map(plans => [...plans].sort((a, b) => naturalCompare(this.getDisplayName(a), this.getDisplayName(b)))),
-      shareReplay({ bufferSize: 1, refCount: true }),
-    );
+      });
+    });
 
-    this.selectedPlan$ = observableCombineLatest([
-      this.stepperForm.statusChanges.pipe(startWith(true)),
-      this.servicePlans$]).pipe(
-        filter(([, servicePlans]) => !!servicePlans && servicePlans.length > 0),
-        map(([, servicePlans]) => {
-          return servicePlans.find(s => s.guid === this.stepperForm.controls.servicePlans.value);
-        }),
-        filter(selectedServicePlan => !!selectedServicePlan),
-        tap(selectedServicePlan => {
-          this._planIsPublic.set(selectedServicePlan.visibilityType === 'public');
-          this._planVisSource.set(
-            this.serviceCatalog.planVisibility(selectedServicePlan.cnsiGuid, selectedServicePlan.guid),
-          );
-        })
-      );
-
+    effect(() => {
+      const selectedPlan = this.selectedPlan();
+      if (!selectedPlan) {
+        return;
+      }
+      untracked(() => {
+        this._planIsPublic.set(selectedPlan.visibilityType === 'public');
+        this._planVisSource.set(
+          this.serviceCatalog.planVisibility(selectedPlan.cnsiGuid, selectedPlan.guid),
+        );
+      });
+    });
   }
 
   getDisplayName = (selectedPlan: StServicePlan) => {
@@ -189,14 +187,16 @@ export class SelectPlanStepComponent implements OnDestroy {
   }
 
   onEnter = () => {
-    // Each entry replaces the last one's subscription, or both keep
-    // re-picking the plan
-    safeUnsubscribe(this.subscription);
-    this.subscription = this.servicePlans$.pipe(
-      filter(p => !!p && p.length > 0),
-      withLatestFrom(this.csiState$),
-      tap(([servicePlans, createServiceInstanceState]) => {
-        const preselect = createServiceInstanceState.servicePlanGuid;
+    // Each entry replaces the last one's pick, or both keep re-picking
+    // the plan
+    this.seedPlan?.destroy();
+    this.seedPlan = effect(() => {
+      const servicePlans = this.servicePlans();
+      if (!servicePlans?.length) {
+        return;
+      }
+      untracked(() => {
+        const preselect = this.csiState.state().servicePlanGuid;
         if (this.modeService.isEditServiceInstanceMode()) {
           this.stepperForm.controls.servicePlans.setValue(preselect ?? '');
         } else if (preselect && servicePlans.some(p => p.guid === preselect)) {
@@ -210,22 +210,14 @@ export class SelectPlanStepComponent implements OnDestroy {
         }
         this.stepperForm.updateValueAndValidity();
         this.validate.set(this.stepperForm.valid);
-      }),
-    ).subscribe();
+      });
+    }, { injector: this.injector });
   }
 
   async onNext(): Promise<StepOnNextResult> {
     this.csiState.setServicePlan(this.stepperForm.controls.servicePlans.value);
-    // selectedPlan$ follows the form and never completes, so take the first
-    // plan only
-    const selectedServicePlan: StServicePlan | undefined = await firstValueFrom(this.selectedPlan$);
-    return { success: true, data: selectedServicePlan };
+    return { success: true, data: this.selectedPlan() };
   }
-
-  ngOnDestroy(): void {
-    safeUnsubscribe(this.subscription);
-  }
-
 
   canShowCosts(selectedPlan: StServicePlan): boolean {
     return canShowServicePlanCosts(selectedPlan);
