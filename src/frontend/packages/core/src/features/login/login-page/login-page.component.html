@@ -1,7 +1,7 @@
 <app-intro-screen
   id="app-login-page"
   class="login-page min-h-screen flex items-center justify-center relative"
-  [ngClass]="{'opacity-50 pointer-events-none': busy$ | async }"
+  [ngClass]="{'opacity-50 pointer-events-none': busy() }"
   >
   <!-- Full-screen background -->
   <div
@@ -52,9 +52,9 @@
           {{ customMessage() }}
         </p>
       }
-      <div class="login-form-outer" [ngClass]="{'login-sso': (ssoLogin$ | async)}">
+      <div class="login-form-outer" [ngClass]="{'login-sso': ssoLogin()}">
         <form class="login-form space-y-6" name="loginForm" (ngSubmit)="login()" #loginForm="ngForm">
-          @if ((ssoLogin$ | async) === false) {
+          @if (ssoLogin() === false) {
             <div class="space-y-1">
               <label for="username" class="sr-only">Username</label>
               <input
@@ -70,7 +70,7 @@
             </div>
           }
 
-          @if ((ssoLogin$ | async) === false) {
+          @if (ssoLogin() === false) {
             <div class="space-y-1 relative">
               <label for="password" class="sr-only">Password</label>
               <input
@@ -89,11 +89,11 @@
             </div>
           }
 
-          @if (showLoginButton$ | async) {
+          @if (showLoginButton()) {
             <button
               class="btn btn-primary w-full py-3"
               type="submit"
-              [disabled]="(ssoLogin$ | async) === false && !loginForm.valid"
+              [disabled]="ssoLogin() === false && !loginForm.valid"
               >
               Sign In
             </button>
@@ -101,7 +101,7 @@
         </form>
       </div>
 
-      <div id="login-loading" class="login-loading mt-4" [class.hidden]="(busy$ | async) === false">
+      <div id="login-loading" class="login-loading mt-4" [class.hidden]="busy() === false">
         <div class="progress">
           <div class="progress-bar w-full animate-pulse"></div>
         </div>
@@ -110,7 +110,7 @@
     </div>
   </div>
 
-  @if (message$ | async; as displayMessage) {
+  @if (message(); as displayMessage) {
     <div
       id="login-error-message"
       class="fixed top-4 left-1/2 transform -translate-x-1/2 z-50 transition-all duration-300

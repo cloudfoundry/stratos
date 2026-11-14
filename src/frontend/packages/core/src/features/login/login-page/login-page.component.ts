@@ -1,11 +1,11 @@
 import { Component, OnInit, ChangeDetectionStrategy, computed, ApplicationRef, HostListener, inject, signal } from '@angular/core';
-import { toObservable } from '@angular/core/rxjs-interop';
+import { toObservable, toSignal } from '@angular/core/rxjs-interop';
 import { NgForm, FormsModule } from '@angular/forms';
 import { CommonModule } from '@angular/common';
 import { Router } from '@angular/router';
 import { AuthState, RouterRedirect } from '@stratosui/store';
-import { Observable, combineLatest, firstValueFrom } from 'rxjs';
-import { map, startWith, distinctUntilChanged, shareReplay, filter, tap, switchMap, take } from 'rxjs/operators';
+import { Observable, firstValueFrom } from 'rxjs';
+import { map, distinctUntilChanged, shareReplay, filter, tap, switchMap, take } from 'rxjs/operators';
 import { StratosBrandingService } from '../../../../../theme/stratos-branding.service';
 
 import { queryParamMap } from '../../../core/auth-guard.service';
@@ -78,7 +78,6 @@ export class LoginPageComponent implements OnInit {
   username = '';
   password = '';
   showPassword = false;
-  message = '';
 
   // Reactive state observables
   private readonly auth$ = toObservable(this.authSignal.auth).pipe(
@@ -90,11 +89,6 @@ export class LoginPageComponent implements OnInit {
       prev.error === curr.error &&
       prev.sessionData?.valid === curr.sessionData?.valid
     ),
-    shareReplay({ bufferSize: 1, refCount: false })
-  );
-
-  private readonly endpoints$ = toObservable(this.endpointStatusSignals.status).pipe(
-    distinctUntilChanged((prev, curr) => prev.loading === curr.loading),
     shareReplay({ bufferSize: 1, refCount: false })
   );
 
@@ -114,68 +108,56 @@ export class LoginPageComponent implements OnInit {
     shareReplay({ bufferSize: 1, refCount: false })
   );
 
-  // Public observables for template
-  readonly busy$ = combineLatest([
-    this.appReady$.pipe(startWith(false)),
-    this.auth$,
-    this.endpoints$,
-    toObservable(this.navigationInProgress)
-  ]).pipe(
-    map(([appReady, auth, endpoints, navigating]) =>
-      !appReady ||           // App not ready yet
-      auth.verifying ||      // Verifying session
-      auth.loggingIn ||      // Logging in
-      endpoints.loading ||   // Loading endpoints
-      navigating             // Navigating after login
-    ),
-    distinctUntilChanged(),
-    shareReplay({ bufferSize: 1, refCount: false })
-  );
-
-  readonly loggedIn$ = this.auth$.pipe(
-    map(auth => auth.loggedIn),
-    distinctUntilChanged()
-  );
-
-  readonly ssoLogin$ = this.auth$.pipe(
-    map(auth => !!(auth.sessionData && auth.sessionData.ssoOptions)),
-    distinctUntilChanged()
-  );
+  private readonly appReady = toSignal(this.appReady$, { initialValue: false });
 
   // Track redirect attempts changes reactively
   private readonly redirectAttemptsSignal = signal(0);
 
-  readonly showLoginButton$ = combineLatest([
-    this.loggedIn$,
-    toObservable(this.redirectAttemptsSignal)
-  ]).pipe(
-    map(([loggedIn, attempts]) => !loggedIn || attempts > this.MAX_REDIRECT_ATTEMPTS),
-    distinctUntilChanged()
-  );
+  // The template's state. Null until the auth state is known.
+  readonly busy = computed<boolean | null>(() => {
+    const auth = this.authSignal.auth();
+    return auth ? !!(
+      !this.appReady() ||                              // App not ready yet
+      auth.verifying ||                                // Verifying session
+      auth.loggingIn ||                                // Logging in
+      this.endpointStatusSignals.status().loading ||   // Loading endpoints
+      this.navigationInProgress()                      // Navigating after login
+    ) : null;
+  });
 
-  readonly message$ = this.auth$.pipe(
-    map(auth => {
-      const params = queryParamMap();
-      const ssoMessage = params.SSO_Message;
+  readonly ssoLogin = computed<boolean | null>(() => {
+    const auth = this.authSignal.auth();
+    return auth ? !!(auth.sessionData && auth.sessionData.ssoOptions) : null;
+  });
 
-      if (ssoMessage) {
-        return this.sanitizeSsoMessage(ssoMessage);
-      }
+  readonly showLoginButton = computed(() => {
+    const auth = this.authSignal.auth();
+    return !!auth && (!auth.loggedIn || this.redirectAttemptsSignal() > this.MAX_REDIRECT_ATTEMPTS);
+  });
 
-      if (auth.error && (!auth.sessionData || !auth.sessionData.valid) &&
-          !(auth.sessionData && auth.sessionData.ssoOptions)) {
-        return this.getErrorMessage(auth);
-      }
-
-      if (this.redirectAttempts > this.MAX_REDIRECT_ATTEMPTS) {
-        return 'Session expired. Please log in again.';
-      }
-
+  readonly message = computed(() => {
+    const auth = this.authSignal.auth();
+    if (!auth) {
       return '';
-    }),
-    tap(msg => this.message = msg),
-    distinctUntilChanged()
-  );
+    }
+    const params = queryParamMap();
+    const ssoMessage = params.SSO_Message;
+
+    if (ssoMessage) {
+      return this.sanitizeSsoMessage(ssoMessage);
+    }
+
+    if (auth.error && (!auth.sessionData || !auth.sessionData.valid) &&
+        !(auth.sessionData && auth.sessionData.ssoOptions)) {
+      return this.getErrorMessage(auth);
+    }
+
+    if (this.redirectAttemptsSignal() > this.MAX_REDIRECT_ATTEMPTS) {
+      return 'Session expired. Please log in again.';
+    }
+
+    return '';
+  });
 
   // Redirect loop protection
   private readonly MAX_REDIRECT_ATTEMPTS = 2;
@@ -315,9 +297,6 @@ export class LoginPageComponent implements OnInit {
       this.redirectAttempts++;  // survives the IdP round-trip via sessionStorage; breaks a silent redirect loop
       this.doSSOLoginReactive().subscribe();
     });
-
-    // Subscribe to message$ to keep it updated
-    this.message$.subscribe();
   }
 
   login() {
@@ -330,7 +309,6 @@ export class LoginPageComponent implements OnInit {
 
     // Clear redirect counter and start login
     this.clearRedirectAttempts();
-    this.message = '';
 
     // Capture the current completion marker so we react to the *next* login
     // completion, not a stale one from earlier in this app session.

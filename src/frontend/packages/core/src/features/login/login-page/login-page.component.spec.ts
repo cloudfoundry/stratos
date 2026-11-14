@@ -82,12 +82,12 @@ describe('LoginPageComponent', () => {
     component = fixture.componentInstance;
     // appReady$ gates navigation on ApplicationRef.isStable, which does not
     // reliably emit under the test harness. Stub it so the (post-init)
-    // subscriptions can proceed. Set before detectChanges()/ngOnInit.
+    // subscriptions can proceed. Set before the first render, which runs ngOnInit.
     (component as any).appReady$ = of(true);
   });
 
-  it('should be created', () => {
-    fixture.detectChanges();
+  it('should be created', async () => {
+    await fixture.whenStable();
     expect(component).toBeTruthy();
   });
 
@@ -99,7 +99,7 @@ describe('LoginPageComponent', () => {
 
       // ngOnInit subscribes to auth$ (toObservable(authSignal.auth)); spy must
       // be installed first.
-      fixture.detectChanges();
+      await fixture.whenStable();
 
       // Simulate the backend reporting an invalid session with SSO nosplash.
       authData.auth.set({
@@ -123,7 +123,7 @@ describe('LoginPageComponent', () => {
     // and no busy bar it read as stuck on the logo.
     it('says it is signing in while the browser goes to the IdP', async () => {
       const openSpy = vi.spyOn(window, 'open').mockReturnValue(null);
-      fixture.detectChanges();
+      await fixture.whenStable();
 
       authData.auth.set({
         loggedIn: false,
@@ -135,7 +135,7 @@ describe('LoginPageComponent', () => {
         sessionData: { valid: false, ssoOptions: 'nosplash,logout' } as any,
       });
       await fixture.whenStable();
-      fixture.detectChanges();
+      await fixture.whenStable();
 
       expect(openSpy).toHaveBeenCalledTimes(1);
       const loading: HTMLElement = fixture.nativeElement.querySelector('#login-loading');
@@ -145,7 +145,7 @@ describe('LoginPageComponent', () => {
     });
 
     it('stops showing busy when Back restores the page from the browser cache', async () => {
-      fixture.detectChanges();
+      await fixture.whenStable();
       await fixture.whenStable();
       const loading = () => fixture.nativeElement.querySelector('#login-loading') as HTMLElement;
       (component as any).navigationInProgress.set(true);
@@ -162,7 +162,7 @@ describe('LoginPageComponent', () => {
         .spyOn(component as any, 'doSSOLoginReactive')
         .mockReturnValue(of(null));
 
-      fixture.detectChanges();
+      await fixture.whenStable();
 
       // Invalid session, no ssoOptions -> user should see the login form.
       authData.auth.set({
@@ -188,7 +188,7 @@ describe('LoginPageComponent', () => {
       // Simulate returning from the IdP with an error message in the URL.
       history.replaceState({}, '', '/login?SSO_Message=Invalid+auth');
 
-      fixture.detectChanges();
+      await fixture.whenStable();
       authData.auth.set({
         loggedIn: false,
         loggingIn: false,
@@ -214,7 +214,7 @@ describe('LoginPageComponent', () => {
       // round-trip (MAX_REDIRECT_ATTEMPTS = 2).
       sessionStorage.setItem('stratos_login_redirect_attempts', '3');
 
-      fixture.detectChanges();
+      await fixture.whenStable();
       authData.auth.set({
         loggedIn: false,
         loggingIn: false,
@@ -236,7 +236,7 @@ describe('LoginPageComponent', () => {
       // Simulate a stale count left over from an earlier failed round-trip.
       sessionStorage.setItem('stratos_login_redirect_attempts', '2');
 
-      fixture.detectChanges();
+      await fixture.whenStable();
       authData.auth.set({
         loggedIn: true,
         loggingIn: false,
@@ -250,6 +250,55 @@ describe('LoginPageComponent', () => {
       await fixture.whenStable();
 
       expect(sessionStorage.getItem('stratos_login_redirect_attempts')).toBeNull();
+    });
+  });
+
+  describe('what the page shows', () => {
+    const state = (over: Partial<AuthState>): AuthState => ({
+      loggedIn: false, loggingIn: false, user: null, error: false, errorResponse: '', verifying: false,
+      sessionData: null, ...over,
+    } as AuthState);
+    const banner = () => fixture.nativeElement.querySelector('#login-error-message') as HTMLElement | null;
+    const loading = () => fixture.nativeElement.querySelector('#login-loading') as HTMLElement;
+    const signIn = () => Array.from(fixture.nativeElement.querySelectorAll('button') as NodeListOf<HTMLButtonElement>)
+      .find(b => b.textContent?.trim() === 'Sign In');
+
+    beforeEach(async () => {
+      await fixture.whenStable();
+    });
+
+    it('says why a login failed, and clears it with the error', async () => {
+      authData.auth.set(state({
+        error: true,
+        errorResponse: { status: 401, error: { error: 'Bad credentials' } } as any,
+        sessionData: { valid: false } as any,
+      }));
+      await fixture.whenStable();
+      expect(banner()?.textContent).toContain('Username and password combination incorrect');
+
+      authData.auth.set(state({}));
+      await fixture.whenStable();
+      expect(banner()).toBeNull();
+    });
+
+    it('shows the busy bar while the session is being verified', async () => {
+      authData.auth.set(state({ verifying: true }));
+      await fixture.whenStable();
+      expect(loading().classList).not.toContain('hidden');
+      expect(fixture.nativeElement.querySelector('#app-login-page').classList).toContain('opacity-50');
+    });
+
+    // Back at the login page again and again with a session: stop bouncing,
+    // say so, and let the user sign in by hand.
+    it('offers Sign In and says the session expired once redirects pass the cap', async () => {
+      authData.auth.set(state({ loggedIn: true, sessionData: { valid: true } as any }));
+      await fixture.whenStable();
+      expect(signIn()).toBeUndefined();
+
+      (component as any).redirectAttempts = 3;
+      await fixture.whenStable();
+      expect(signIn()).toBeDefined();
+      expect(banner()?.textContent).toContain('Session expired');
     });
   });
 
@@ -336,11 +385,11 @@ describe('LoginPageComponent — error banner branding', () => {
     fixture = TestBed.createComponent(LoginPageComponent);
   });
 
-  it('brands the login error banner via the semantic alert-danger surface', () => {
+  it('brands the login error banner via the semantic alert-danger surface', async () => {
     flushEffects();
-    fixture.detectChanges();
+    await fixture.whenStable();
     flushEffects();
-    fixture.detectChanges();
+    await fixture.whenStable();
     const banner = fixture.nativeElement.querySelector('#login-error-message');
     expect(banner).not.toBeNull();
     expect(banner.classList).toContain('alert-danger');
@@ -384,8 +433,8 @@ describe('LoginPageComponent — login-scoped input branding', () => {
     fixture = TestBed.createComponent(LoginPageComponent);
   });
 
-  it('applies login input branding scoped to the login card', () => {
-    fixture.detectChanges();
+  it('applies login input branding scoped to the login card', async () => {
+    await fixture.whenStable();
     const card = fixture.nativeElement.querySelector('.login-card');
     expect(card.style.getPropertyValue('--input-bg')).toBe('#222222');
     expect(card.style.getPropertyValue('--input-border')).toBe('#ff0000');
@@ -428,13 +477,13 @@ describe('LoginPageComponent — logo and title visibility', () => {
     fixture = TestBed.createComponent(LoginPageComponent);
   });
 
-  it('hides the login logo when showLogo is false', () => {
-    fixture.detectChanges();
+  it('hides the login logo when showLogo is false', async () => {
+    await fixture.whenStable();
     expect(fixture.nativeElement.querySelector('.login-logo')).toBeNull();
   });
 
-  it('hides the login title when showTitle is false', () => {
-    fixture.detectChanges();
+  it('hides the login title when showTitle is false', async () => {
+    await fixture.whenStable();
     expect(fixture.nativeElement.querySelector('.login-title')).toBeNull();
   });
 });
@@ -474,8 +523,8 @@ describe('LoginPageComponent — before-login notice', () => {
     fixture = TestBed.createComponent(LoginPageComponent);
   });
 
-  it('renders the before-login notice when a custom message is set', () => {
-    fixture.detectChanges();
+  it('renders the before-login notice when a custom message is set', async () => {
+    await fixture.whenStable();
     const el = fixture.nativeElement.querySelector('.login-message');
     expect(el).not.toBeNull();
     expect(el.textContent).toContain('Authorized users only');
@@ -506,8 +555,8 @@ describe('LoginPageComponent — before-login notice hidden when empty', () => {
     fixture = TestBed.createComponent(LoginPageComponent);
   });
 
-  it('hides the before-login notice when customMessage is empty', () => {
-    fixture.detectChanges();
+  it('hides the before-login notice when customMessage is empty', async () => {
+    await fixture.whenStable();
     expect(fixture.nativeElement.querySelector('.login-message')).toBeNull();
   });
 });
