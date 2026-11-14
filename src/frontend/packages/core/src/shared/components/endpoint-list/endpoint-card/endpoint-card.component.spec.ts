@@ -5,7 +5,6 @@ import { RouterTestingModule } from '@angular/router/testing';
 import { provideHttpClient } from '@angular/common/http';
 import { provideHttpClientTesting } from '@angular/common/http/testing';
 import { describe, it, expect, beforeEach, vi } from 'vitest';
-import { of } from 'rxjs';
 import { EndpointModel, UserFavoriteManager, entityCatalog, EntityCatalogTestModuleManualStore, generateStratosEntities, TEST_CATALOGUE_ENTITIES } from '@stratosui/store';
 import { createBasicStoreModule, seedEndpointsDataService, STORE_TEST_PROVIDERS } from '@stratosui/store/testing';
 import { CurrentUserPermissionsService } from '@stratosui/core';
@@ -42,11 +41,7 @@ describe('EndpointCardComponent', () => {
         UserFavoriteManager,
         {
           provide: MetricsService,
-          useValue: {
-            metricsEndpoints$: of([]),
-            haveNoMetricsEndpoints$: of(false),
-            haveNoConnectedMetricsEndpoints$: of(false)
-          }
+          useValue: { metricsEndpoints: signal([]) }
         },
         {
           provide: SessionSignalService,

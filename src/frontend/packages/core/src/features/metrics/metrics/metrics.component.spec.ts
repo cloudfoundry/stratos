@@ -1,8 +1,7 @@
 import { provideHttpClient } from '@angular/common/http';
 import { provideHttpClientTesting } from '@angular/common/http/testing';
 import { ComponentFixture, TestBed } from '@angular/core/testing';
-import { Injector, inject, provideZonelessChangeDetection, signal } from '@angular/core';
-import { toObservable } from '@angular/core/rxjs-interop';
+import { provideZonelessChangeDetection, signal } from '@angular/core';
 import { ActivatedRoute } from '@angular/router';
 import { By } from '@angular/platform-browser';
 import { NoopAnimationsModule } from '@angular/platform-browser/animations';
@@ -52,10 +51,7 @@ describe('MetricsComponent', () => {
         { provide: ActivatedRoute, useValue: { snapshot: { params: { metricsId: 'metrics-guid' } } } },
         {
           provide: MetricsService,
-          useFactory: () => ({
-            metricsEndpoints$: toObservable(metricsEndpoints, { injector: inject(Injector) }),
-            metricsEndpoints,
-          })
+          useValue: { metricsEndpoints }
         },
         TabNavService,
         CurrentUserPermissionsService,

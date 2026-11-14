@@ -1,8 +1,5 @@
 import { CommonModule } from '@angular/common';
 import { ChangeDetectionStrategy, Component, computed, inject } from '@angular/core';
-import { toObservable } from '@angular/core/rxjs-interop';
-import { combineLatest, Observable } from 'rxjs';
-import { distinctUntilChanged, filter, map, shareReplay } from 'rxjs/operators';
 
 import { EndpointListDetailsComponent } from '../../../shared/components/endpoint-list/endpoint-list.helpers';
 import { mapMetricsData } from '../metrics.helpers';
@@ -28,40 +25,17 @@ interface MetricsDetailsInfo {
 })
 export class MetricsEndpointDetailsComponent extends EndpointListDetailsComponent {
 
-  data$: Observable<MetricsDetailsInfo>;
-
   // The guid of the metrics endpoint that this row shows
   public guid = computed<string | undefined>(() => this.row().guid);
-  public guid$: Observable<string | undefined>;
 
   private metricsService = inject(MetricsService);
 
-  constructor() {
-    super();
-
-    const endpoints$ = this.metricsService.metricsEndpoints$.pipe(
-      filter(endpoints => !!endpoints),
-      distinctUntilChanged()
-    );
-
-    this.guid$ = toObservable(this.guid);
-    const guid$ = this.guid$.pipe(
-      filter(guid => !!guid),
-      distinctUntilChanged()
-    );
-
-    // Raw endpoint data for this metrics endpoint
-    this.data$ = combineLatest([
-      endpoints$,
-      guid$
-    ]).pipe(
-      map(([endpoints, guid]) => endpoints.find((item) => item.provider.guid === guid)),
-      filter(provider => !!provider),
-      filter(data => data.provider.connectionStatus === 'connected'),
-      map((provider) => this.processProvider(provider)),
-      shareReplay({ bufferSize: 1, refCount: true })
-    );
-  }
+  // The counts of what this metrics endpoint provides for, once it is connected.
+  public readonly data = computed<MetricsDetailsInfo | null>(() => {
+    const guid = this.guid();
+    const provider = guid ? this.metricsService.metricsEndpoints().find(item => item.provider.guid === guid) : undefined;
+    return provider?.provider.connectionStatus === 'connected' ? this.processProvider(provider) : null;
+  });
 
   private hasStratosData(provider: MetricsEndpointProvider): boolean {
     const data = provider.provider;
