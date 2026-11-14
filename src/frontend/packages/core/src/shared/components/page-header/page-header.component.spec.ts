@@ -98,6 +98,19 @@ describe('PageHeaderComponent', () => {
       expect(el('#tokenMenuPanel')).toBeNull();
     });
 
+    // The chosen button leaves the page with the panel; focus must not fall to the body.
+    it('returns focus to the token menu button after a token is chosen', async () => {
+      el('#tokenMenu')!.click();
+      await shown.whenStable();
+      const copy = Array.from(el('#tokenMenuPanel')!.querySelectorAll('button'))
+        .find(b => b.textContent?.trim() === 'Copy Auth Token')!;
+      copy.focus();
+      copy.click();
+      await shown.whenStable();
+      expect(el('#tokenMenuPanel')).toBeNull();
+      expect(document.activeElement).toBe(el('#tokenMenu'));
+    });
+
     it('opens one menu at a time', async () => {
       el('#userMenu')!.click();
       await shown.whenStable();

@@ -111,11 +111,11 @@
                       <h3 class="page-header-token-title text-lg font-semibold text-content-text mb-3">UAA Tokens</h3>
                       <div class="space-y-2">
                         <button class="w-full text-left px-3 py-2 text-sm text-content-text hover:bg-content-secondary rounded-md transition-colors border border-content-border"
-                          (click)="copyToken(authToken$, 'Auth token'); closeTokenMenu()">
+                          (click)="copyToken(authToken$, 'Auth token'); closeTokenMenu(true)">
                           Copy Auth Token
                         </button>
                         <button class="w-full text-left px-3 py-2 text-sm text-content-text hover:bg-content-secondary rounded-md transition-colors border border-content-border"
-                          (click)="copyToken(refreshToken$, 'Refresh token'); closeTokenMenu()">
+                          (click)="copyToken(refreshToken$, 'Refresh token'); closeTokenMenu(true)">
                           Copy Refresh Token
                         </button>
                       </div>

@@ -1,4 +1,4 @@
-import { ChangeDetectionStrategy, Component, ElementRef, HostListener, inject, input, signal } from '@angular/core';
+import { ChangeDetectionStrategy, Component, ElementRef, HostListener, inject, input, signal, viewChild } from '@angular/core';
 import { RouterLink } from '@angular/router';
 
 import { CustomTooltipDirective, TailwindSnackBarService } from '@stratosui/core';
@@ -24,18 +24,24 @@ export class CliMenuComponent {
   readonly allLink = input.required<string | any[]>();
 
   readonly open = signal(false);
+  private readonly trigger = viewChild.required<ElementRef<HTMLButtonElement>>('trigger');
 
   toggle(): void {
     this.open.update(open => !open);
   }
 
-  close(): void {
+  // returnFocus: the focused item leaves the page with the menu, so focus
+  // goes back to the menu button instead of falling to the page body.
+  close(returnFocus = false): void {
     this.open.set(false);
+    if (returnFocus) {
+      this.trigger().nativeElement.focus();
+    }
   }
 
   async copy(command: CliCommand): Promise<void> {
     const syntax = command.syntax(this.context());
-    this.close();
+    this.close(true);
     try {
       await navigator.clipboard.writeText(syntax);
       this.snackBar.show(`Copied ${syntax}`, 'Close');
@@ -53,6 +59,8 @@ export class CliMenuComponent {
 
   @HostListener('document:keydown.escape')
   onEscape(): void {
-    this.close();
+    if (this.open()) {
+      this.close(true);
+    }
   }
 }

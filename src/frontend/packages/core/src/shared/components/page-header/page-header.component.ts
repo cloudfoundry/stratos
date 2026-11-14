@@ -421,8 +421,13 @@ export class PageHeaderComponent implements OnDestroy, AfterViewInit {
     this.isHistoryMenuOpen.set(false);
   }
 
-  closeTokenMenu() {
+  // returnFocus: the chosen button leaves the page with the panel, so focus
+  // goes back to the menu button, as on Escape.
+  closeTokenMenu(returnFocus = false) {
     this.isTokenMenuOpen.set(false);
+    if (returnFocus) {
+      document.getElementById('tokenMenu')?.focus();
+    }
   }
 
 }

@@ -92,6 +92,16 @@ describe('CliMenuComponent (#6126)', () => {
     expect(el().querySelector('[role="menu"]')).toBeNull();
   });
 
+  // The chosen item leaves the page with the menu; focus must not fall to the body.
+  it('returns focus to the menu button after a command is chosen', async () => {
+    await render('variables');
+    await open();
+    items()[0].focus();
+    items()[0].click();
+    await fixture.whenStable();
+    expect(document.activeElement).toBe(trigger());
+  });
+
   it('offers only CF CLI All on a tab with no CLI equivalent', async () => {
     await render('metrics');
     await open();
@@ -113,6 +123,28 @@ describe('CliMenuComponent (#6126)', () => {
     await fixture.whenStable();
     expect(el().querySelector('[role="menu"]')).toBeNull();
     expect(trigger().getAttribute('aria-expanded')).toBe('false');
+  });
+
+  it('returns focus to the menu button on Escape', async () => {
+    await render('summary');
+    await open();
+    items()[0].focus();
+    document.dispatchEvent(new KeyboardEvent('keydown', { key: 'Escape', bubbles: true }));
+    await fixture.whenStable();
+    expect(document.activeElement).toBe(trigger());
+  });
+
+  it('leaves focus where it is on Escape while the menu is closed', async () => {
+    await render('summary');
+    const other = document.body.appendChild(document.createElement('button'));
+    try {
+      other.focus();
+      document.dispatchEvent(new KeyboardEvent('keydown', { key: 'Escape', bubbles: true }));
+      await fixture.whenStable();
+      expect(document.activeElement).toBe(other);
+    } finally {
+      other.remove();
+    }
   });
 
   it('closes on a click outside it', async () => {
