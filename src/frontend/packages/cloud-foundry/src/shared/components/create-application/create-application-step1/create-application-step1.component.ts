@@ -1,14 +1,11 @@
 import { CommonModule } from '@angular/common';
-import { AfterContentInit, Component, Injector, OnInit, Signal, ChangeDetectionStrategy, computed, inject, input, viewChild } from '@angular/core';
-import { toObservable } from '@angular/core/rxjs-interop';
+import { AfterContentInit, Component, OnInit, Signal, ChangeDetectionStrategy, computed, inject, input, untracked, viewChild } from '@angular/core';
 import { FormsModule, NgForm } from '@angular/forms';
 import { ActivatedRoute } from '@angular/router';
 import { asapScheduler, Observable } from 'rxjs';
-import { map, observeOn, startWith, switchMap, withLatestFrom } from 'rxjs/operators';
+import { map, observeOn, startWith } from 'rxjs/operators';
 
-import { observeSignal } from '@stratosui/store';
 import { AppErrorComponent, CustomFormFieldComponent, CustomSelectComponent, CustomOptionComponent, FocusDirective, StepOnNextResult } from '@stratosui/core';
-import { ISpace } from '../../../../cf-api.types';
 import { CfCurrentUserRolesDataService } from '../../../../services/cf-current-user-roles-data.service';
 import { CfPermissionStrings } from '../../../../user-permissions/cf-user-permissions-checkers';
 import { CfOrgSpaceDataService } from '../../../data-services/cf-org-space-service.service';
@@ -32,7 +29,6 @@ import { CreateAppStateService } from '../../../data-services/create-app-state.s
 })
 export class CreateApplicationStep1Component implements OnInit, AfterContentInit {
   private cfCurrentUserRoles = inject(CfCurrentUserRolesDataService);
-  private injector = inject(Injector);
   private createAppState = inject(CreateAppStateService);
   cfOrgSpaceService = inject(CfOrgSpaceDataService);
   route = inject(ActivatedRoute);
@@ -40,8 +36,18 @@ export class CreateApplicationStep1Component implements OnInit, AfterContentInit
 
   readonly isMarketplaceMode = input<boolean>();
 
-  public spaces$!: Observable<ISpace[]>;
-  public hasSpaces$!: Observable<boolean>;
+  // The spaces of the picked org the user can develop in: all of them when
+  // the roles are not known yet.
+  readonly spaces = computed(() => {
+    const spaces = this.cfOrgSpaceService.space.list();
+    const endpointGuid = this.cfOrgSpaceService.cf.select();
+    const orgGuid = this.cfOrgSpaceService.org.select();
+    const developerIn = untracked(() => this.cfCurrentUserRoles.spacesWithRoleInOrg(
+      endpointGuid!, orgGuid!, CfPermissionStrings.SPACE_DEVELOPER,
+    ))();
+    return developerIn === 'all' ? spaces : spaces.filter(space => developerIn.includes(space.guid));
+  });
+  readonly hasSpaces = computed(() => this.spaces().length > 0);
   // Signal-native — direct computed over the service's org.list signal.
   // Template reads as `hasOrgs()`.
   public hasOrgs: Signal<boolean> = computed(() => this.cfOrgSpaceService.org.list().length > 0);
@@ -147,10 +153,6 @@ export class CreateApplicationStep1Component implements OnInit, AfterContentInit
       this.cfOrgSpaceService.cf.select.set(this.route.root.snapshot.queryParams.endpointGuid);
       this.endpointScoped = true;
     }
-    this.spaces$ = this.getSpacesFromPermissions();
-    this.hasSpaces$ = this.spaces$.pipe(
-      map(spaces => !!spaces.length)
-    );
   }
 
   ngAfterContentInit() {
@@ -160,40 +162,6 @@ export class CreateApplicationStep1Component implements OnInit, AfterContentInit
       startWith(this.cfForm().valid || this.isRedeploy()),
       map(() => this.cfForm().valid || this.isRedeploy()),
       observeOn(asapScheduler)
-    );
-  }
-
-  // Signal-bridges captured at field-init time (toObservable requires an
-  // injection context — only ctor / field initializers / explicit
-  // runInInjectionContext satisfy that, not arbitrary methods). The
-  // chain still ends in `store.select(...)` which is ngrx-Observable,
-  // so we keep the rxjs composition here; only the CfOrgSpaceDataService
-  // signal reads are bridged.
-  private orgSelect$ = toObservable(this.cfOrgSpaceService.org.select);
-  private cfSelect$ = toObservable(this.cfOrgSpaceService.cf.select);
-  private spaceList$ = toObservable(this.cfOrgSpaceService.space.list);
-
-  private getSpacesFromPermissions() {
-    return this.orgSelect$.pipe(
-      withLatestFrom(this.cfSelect$),
-      switchMap(([orgGuid, endpointGuid]) => {
-        return observeSignal(
-          this.cfCurrentUserRoles.spacesWithRoleInOrg(endpointGuid!, orgGuid!, CfPermissionStrings.SPACE_DEVELOPER),
-          this.injector,
-        );
-      }),
-      switchMap((spacesOrAll => {
-        if (spacesOrAll === 'all') {
-          return this.spaceList$;
-        }
-        const spaceIds = spacesOrAll as string[];
-        return this.spaceList$.pipe(
-          map(spaces => {
-            const filteredSpaces = spaces.filter(space => spaceIds.find(spaceGuid => spaceGuid === space.guid));
-            return filteredSpaces;
-          })
-        );
-      }))
     );
   }
 }

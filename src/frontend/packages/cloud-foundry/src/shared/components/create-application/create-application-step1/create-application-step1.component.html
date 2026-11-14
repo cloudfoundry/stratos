@@ -41,13 +41,13 @@
       [ngModel]="cfOrgSpaceService.space.select()"
       (selectionChange)="onSpaceChange($event.value)" [required]="true" name="space">
       <app-option [value]="null">None</app-option>
-      @for (space of spaces$ | async; track space) {
+      @for (space of spaces(); track space) {
         <app-option [value]="space.guid" [label]="space.name">
           <span>{{ space.name }}</span>
         </app-option>
       }
     </app-select>
-    @if (cfOrgSpaceService.org.select() && !cfOrgSpaceService.space.loading() && (hasSpaces$ | async) === false) {
+    @if (cfOrgSpaceService.org.select() && !cfOrgSpaceService.space.loading() && !hasSpaces()) {
       <app-error>There are no spaces in this organization</app-error>
     }
   </app-form-field>
