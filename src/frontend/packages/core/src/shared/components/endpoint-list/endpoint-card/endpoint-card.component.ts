@@ -2,7 +2,7 @@ import { CommonModule } from '@angular/common';
 import { ChangeDetectionStrategy, Component, ComponentRef, OnDestroy, OnInit, ViewContainerRef, ChangeDetectorRef, computed, effect, inject, input, untracked, viewChild } from '@angular/core';
 import { CustomTooltipDirective } from '../../custom-tooltip/custom-tooltip.directive';
 import { RouterModule } from '@angular/router';
-import { toObservable, toSignal } from '@angular/core/rxjs-interop';
+import { toObservable } from '@angular/core/rxjs-interop';
 import {
   EndpointModel,
   entityCatalog,
@@ -24,7 +24,7 @@ import { CardCell } from '../../signal-list/cell-base';
 import { EndpointListDetailsComponent, EndpointListHelper } from '../endpoint-list.helpers';
 import { CopyToClipboardComponent } from '../../copy-to-clipboard/copy-to-clipboard.component';
 import { CustomIconComponent } from '../../custom-material/custom-material.component';
-import { SessionService } from '../../../services/session.service';
+import { SessionSignalService } from '../../../../core/signals/session-signal.service';
 import { CurrentUserPermissionsService } from '../../../../core/permissions/current-user-permissions.service';
 import { StratosCurrentUserPermissions } from '../../../../core/permissions/stratos-user-permissions.checker';
 import { MultilineTitleComponent } from '../../multiline-title/multiline-title.component';
@@ -70,7 +70,7 @@ export class EndpointCardComponent extends CardCell<EndpointModel> implements On
   private endpointListHelper = inject(EndpointListHelper);
   private userFavoriteManager = inject(UserFavoriteManager);
   private currentUserPermissionsService = inject(CurrentUserPermissionsService);
-  private sessionService = inject(SessionService);
+  private sessionSignals = inject(SessionSignalService);
   private cdr = inject(ChangeDetectorRef);
 
 
@@ -112,13 +112,13 @@ export class EndpointCardComponent extends CardCell<EndpointModel> implements On
   private subs: Subscription[] = [];
   // The creator shows to admins, and to endpoint admins while user
   // endpoints are enabled.
-  private readonly userEndpointsEnabled = toSignal(this.sessionService.userEndpointsEnabled());
-  private readonly userEndpointsNotDisabled = toSignal(this.sessionService.userEndpointsNotDisabled());
+  private readonly userEndpointsEnabled = this.sessionSignals.userEndpointsEnabled;
+  private readonly userEndpointsNotDisabled = this.sessionSignals.userEndpointsNotDisabled;
   private readonly isAdmin = this.currentUserPermissionsService.can(StratosCurrentUserPermissions.EDIT_ADMIN_ENDPOINT);
   private readonly isEndpointAdmin = this.currentUserPermissionsService.can(StratosCurrentUserPermissions.EDIT_ENDPOINT);
   public readonly viewCreator = computed(() =>
-    (!!this.userEndpointsEnabled() && (this.isAdmin() || this.isEndpointAdmin())) ||
-    (!!this.userEndpointsNotDisabled() && this.isAdmin()));
+    (this.userEndpointsEnabled() && (this.isAdmin() || this.isEndpointAdmin())) ||
+    (this.userEndpointsNotDisabled() && this.isAdmin()));
 
   private componentRef!: ComponentRef<EndpointListDetailsComponent>;
 

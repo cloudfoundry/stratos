@@ -8,7 +8,9 @@ import { describe, it, expect, beforeEach, vi } from 'vitest';
 import { of } from 'rxjs';
 import { EndpointModel, UserFavoriteManager, entityCatalog, EntityCatalogTestModuleManualStore, generateStratosEntities, TEST_CATALOGUE_ENTITIES } from '@stratosui/store';
 import { createBasicStoreModule, STORE_TEST_PROVIDERS } from '@stratosui/store/testing';
-import { CurrentUserPermissionsService, SessionService } from '@stratosui/core';
+import { CurrentUserPermissionsService } from '@stratosui/core';
+import { SessionSignalService } from '../../../../core/signals/session-signal.service';
+import { StratosCurrentUserPermissions } from '../../../../core/permissions/stratos-user-permissions.checker';
 import { EndpointListHelper } from '../endpoint-list.helpers';
 import { EndpointCardComponent } from './endpoint-card.component';
 import { MetricsService } from '../../../../features/metrics/services/metrics-service';
@@ -16,6 +18,7 @@ import { MetricsService } from '../../../../features/metrics/services/metrics-se
 describe('EndpointCardComponent', () => {
   let component: EndpointCardComponent;
   let fixture: ComponentFixture<EndpointCardComponent>;
+  const sessionSignals = { userEndpointsEnabled: signal(true), userEndpointsNotDisabled: signal(true) };
 
   beforeEach(async () => {
     await TestBed.configureTestingModule({
@@ -46,11 +49,8 @@ describe('EndpointCardComponent', () => {
           }
         },
         {
-          provide: SessionService,
-          useValue: {
-            userEndpointsEnabled: () => of(true),
-            userEndpointsNotDisabled: () => of(true)
-          }
+          provide: SessionSignalService,
+          useValue: sessionSignals
         },
         {
           provide: CurrentUserPermissionsService,
@@ -64,6 +64,8 @@ describe('EndpointCardComponent', () => {
   });
 
   beforeEach(async () => {
+    sessionSignals.userEndpointsEnabled.set(true);
+    sessionSignals.userEndpointsNotDisabled.set(true);
     fixture = TestBed.createComponent(EndpointCardComponent);
     component = fixture.componentInstance;
     fixture.componentRef.setInput('row', {
@@ -92,6 +94,24 @@ describe('EndpointCardComponent', () => {
     expect(text()).not.toContain('Creator');
 
     isAdmin.set(true);
+    await card.whenStable();
+    expect(text()).toContain('Creator');
+  });
+
+  // An endpoint admin sees the creator while user endpoints are enabled.
+  // The card kept the setting's first answer.
+  it('shows the creator to an endpoint admin while user endpoints are enabled', async () => {
+    sessionSignals.userEndpointsEnabled.set(false);
+    TestBed.tick();
+    vi.spyOn(TestBed.inject(CurrentUserPermissionsService), 'can')
+      .mockImplementation(((p: string) => signal(p === StratosCurrentUserPermissions.EDIT_ENDPOINT)) as never);
+    const card = TestBed.createComponent(EndpointCardComponent);
+    card.componentRef.setInput('row', component.row());
+    await card.whenStable();
+    const text = () => (card.nativeElement as HTMLElement).textContent ?? '';
+    expect(text()).not.toContain('Creator');
+
+    sessionSignals.userEndpointsEnabled.set(true);
     await card.whenStable();
     expect(text()).toContain('Creator');
   });
