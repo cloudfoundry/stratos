@@ -5,7 +5,7 @@ import { provideZonelessChangeDetection, signal, WritableSignal } from '@angular
 import { By } from '@angular/platform-browser';
 import { ActivatedRoute } from '@angular/router';
 import { CurrentUserPermissionsService } from '@stratosui/core';
-import { getGitHubAPIURL, GITHUB_API_URL } from '@stratosui/git';
+import { getGitHubAPIURL, GITHUB_API_URL, GitDataService } from '@stratosui/git';
 import { describe, it, expect, beforeEach, afterEach, beforeAll, afterAll, vi } from 'vitest';
 
 import { generateTestApplicationServiceProvider, generateCfStoreModules, ApplicationStateService, ApplicationEnvVarsHelper } from '@test-framework/cf';
@@ -261,6 +261,26 @@ describe('BuildTabComponent', () => {
       expect(httpMock.match(isRepo).length).toBe(0);
       expect(httpMock.match(isCommit).length).toBe(0);
       subs.forEach(sub => sub.unsubscribe());
+    });
+  });
+
+  // The repository and branch links both read the repository lookup.
+  describe('with a git deployed project on show', () => {
+    const source = { type: 'gitscm', scm: 'github', project: 'org/repo', branch: 'main', commit: 'abc', endpointGuid: '' };
+
+    it('looks the repository up once for all its links', async () => {
+      await configure({
+        stratosProject: signal({ deploySource: { ...source } }),
+        app: signal({ entity: { instances: 1 } }),
+        space: signal({ guid: 'space-1' }),
+      });
+      vi.spyOn(TestBed.inject(CurrentUserPermissionsService), 'can').mockReturnValue(signal(true));
+      const getRepository = vi.spyOn(TestBed.inject(GitDataService), 'getRepository');
+      fixture = TestBed.createComponent(BuildTabComponent);
+      await fixture.whenStable();
+
+      expect(fixture.nativeElement.textContent).toContain('org/repo');
+      expect(getRepository).toHaveBeenCalledTimes(1);
     });
   });
 });

@@ -131,7 +131,6 @@ export class BuildTabComponent implements OnInit {
   deploySource$!: Observable<DeploySourceView | null>;
 
   public gitRepo$!: Observable<GitRepo>;
-  public gitRepo: GitRepo | null = null;
 
   ngOnInit() {
     // Trigger the service-bindings fetch so the Summary card's Services
