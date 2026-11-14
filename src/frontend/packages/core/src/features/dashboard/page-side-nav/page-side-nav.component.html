@@ -1,4 +1,4 @@
-<nav class="page-side-nav" [ngClass]="{'page-side-nav__desktop': (isMobile$ | async) === false}"
+<nav class="page-side-nav" [ngClass]="{'page-side-nav__desktop': !isMobile()}"
   [attr.aria-label]="header() || null">
   <div class="page-side-nav__items-header">
     {{ header() }}

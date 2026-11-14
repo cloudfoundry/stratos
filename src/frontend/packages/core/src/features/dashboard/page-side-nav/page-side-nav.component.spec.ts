@@ -7,6 +7,7 @@ import { STORE_TEST_PROVIDERS, BASE_TEST_PROVIDERS } from "@test-framework/core-
 
 import { BaseTestModulesNoShared } from "@test-framework/core-test.helper";
 import { CurrentUserPermissionsService } from '@stratosui/core';
+import { DashboardDataService } from '../../../core/dashboard-data.service';
 import { TabNavService } from '../../../tab-nav.service';
 import { PageSideNavComponent } from './page-side-nav.component';
 
@@ -39,6 +40,20 @@ describe('PageSideNavComponent', () => {
 
   it('should create', () => {
     expect(component).toBeTruthy();
+  });
+
+  // The desktop layout applies from the first render and drops on a phone.
+  it('takes the desktop layout unless the dashboard is mobile', async () => {
+    const nav = () => fixture.nativeElement.querySelector('nav') as HTMLElement;
+    expect(nav().classList).toContain('page-side-nav__desktop');
+
+    TestBed.inject(DashboardDataService).enableMobileNav();
+    await fixture.whenStable();
+    expect(nav().classList).not.toContain('page-side-nav__desktop');
+
+    TestBed.inject(DashboardDataService).disableMobileNav();
+    await fixture.whenStable();
+    expect(nav().classList).toContain('page-side-nav__desktop');
   });
 
   // An extension tab's hidden() returns a stream; the side-nav reads it as a

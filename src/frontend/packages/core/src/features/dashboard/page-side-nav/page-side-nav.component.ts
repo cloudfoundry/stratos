@@ -1,7 +1,7 @@
 import { CommonModule } from '@angular/common';
 import { HttpClient } from '@angular/common/http';
 import { ChangeDetectionStrategy, Component, ElementRef, Injector, Signal, computed, inject, input, linkedSignal, runInInjectionContext, signal, untracked, viewChild } from '@angular/core';
-import { toObservable, toSignal } from '@angular/core/rxjs-interop';
+import { toSignal } from '@angular/core/rxjs-interop';
 import { ActivatedRoute, RouterModule } from '@angular/router';
 import { Observable } from 'rxjs';
 import { StratosTabMetadata } from '../../../core/extension/extension-service';
@@ -81,7 +81,7 @@ export class PageSideNavComponent {
   public readonly header = input<string | null>();
   public readonly activeTab = computed(() => this.tabNavService.currentTabHeader()?.label ?? null);
   public breadcrumbs$!: Observable<IBreadcrumb[]>;
-  public isMobile$: Observable<boolean>;
+  public readonly isMobile = this.dashboardSignals.isMobile;
   // The compact dropdown, opened by its button as well as by hover.
   public readonly open = signal(false);
   private readonly compactToggle = viewChild.required<ElementRef<HTMLButtonElement>>('compactToggle');
@@ -99,10 +99,6 @@ export class PageSideNavComponent {
     if (!this.el.nativeElement.contains(e.relatedTarget as Node | null)) {
       this.open.set(false);
     }
-  }
-
-  constructor() {
-    this.isMobile$ = toObservable(this.dashboardSignals.isMobile);
   }
 
 }
