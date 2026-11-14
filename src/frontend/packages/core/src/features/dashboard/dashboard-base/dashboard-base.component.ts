@@ -3,13 +3,12 @@ import { Portal, PortalModule } from '@angular/cdk/portal';
 import { ChangeDetectionStrategy, AfterViewInit, Component, ElementRef, OnDestroy, OnInit, computed, signal, ViewContainerRef, inject, viewChild } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { ActivatedRoute, ActivatedRouteSnapshot, NavigationEnd, Route, Router, RouterModule } from '@angular/router';
-import { toObservable } from '@angular/core/rxjs-interop';
 import {
   entityCatalog,
   UserFavoritesDataService,
 } from '@stratosui/store';
 import { DashboardSignalService } from '../../../core/signals/dashboard-signal.service';
-import { DashboardDataService, DashboardState } from '../../../core/dashboard-data.service';
+import { DashboardDataService } from '../../../core/dashboard-data.service';
 import { Observable, of, Subscription } from 'rxjs';
 import { distinctUntilChanged, filter, map, startWith } from 'rxjs/operators';
 
@@ -71,9 +70,13 @@ export class DashboardBaseComponent implements OnInit, OnDestroy, AfterViewInit 
   public isMobile$: Observable<boolean> = of(false);
   public sideNavMode$!: Observable<string>;
   public sideNavMode!: string;
-  public mainNavState$: Observable<{ mode: string; opened: boolean; iconMode: boolean, }> = of({ mode: 'side', opened: true, iconMode: false });
+  public readonly mainNavState = computed(() => {
+    const state = this.dashboardSignals.dashboard();
+    return state.isMobile
+      ? { mode: 'over', opened: state.isMobileNavOpen || false, iconMode: false }
+      : { mode: state.sideNavPinned ? 'side' : 'over', opened: true, iconMode: !state.sidenavOpen };
+  });
   public rightNavState$!: Observable<{ opened: boolean, component?: object, props?: object, }>;
-  private dashboardState$: Observable<DashboardState> = of({} as DashboardState);
   public noMargin$: Observable<boolean> = of(false);
   private mobileSub: Subscription;
   private resizeObserver?: ResizeObserver;
@@ -105,25 +108,6 @@ export class DashboardBaseComponent implements OnInit, OnDestroy, AfterViewInit 
       startWith(false),
       distinctUntilChanged()
     );
-    this.dashboardState$ = toObservable(this.dashboardSignals.dashboard);
-    this.mainNavState$ = this.dashboardState$.pipe(
-      map(state => {
-        if (state.isMobile) {
-          return {
-            mode: 'over',
-            opened: state.isMobileNavOpen || false,
-            iconMode: false
-          };
-        } else {
-          return {
-            mode: state.sideNavPinned ? 'side' : 'over',
-            opened: true,
-            iconMode: !state.sidenavOpen
-          };
-        }
-      })
-    );
-
     this.mobileSub = this.isMobile$
       .subscribe(isMobile => isMobile ? this.dashboardData.enableMobileNav() : this.dashboardData.disableMobileNav());
   }

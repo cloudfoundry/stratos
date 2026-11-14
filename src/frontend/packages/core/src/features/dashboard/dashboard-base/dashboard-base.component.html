@@ -8,7 +8,7 @@
   <div class="dashboard flex flex-row h-full min-h-0 w-full overflow-hidden"
     style="display: flex !important; flex-direction: row !important; width: 100% !important; height: 100vh !important;">
     <!-- Side navigation drawer -->
-    @if (mainNavState$ | async; as navState) {
+    @if (mainNavState(); as navState) {
       <div
         class="dashboard-side-nav bg-nav-bg text-nav-text h-full shrink-0 transition-all duration-300 ease-in-out shadow-lg"
          [ngClass]="{

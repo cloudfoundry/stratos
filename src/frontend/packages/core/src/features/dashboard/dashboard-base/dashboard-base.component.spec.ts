@@ -3,6 +3,7 @@ import { provideZonelessChangeDetection } from '@angular/core';
 import { afterEach, describe, it, expect, beforeEach, vi } from 'vitest';
 import { EntityCatalogHelper, EntityCatalogHelpers } from '@stratosui/store';
 import { BaseTestModulesNoShared, STORE_TEST_PROVIDERS, BASE_TEST_PROVIDERS } from '@test-framework/core-test.helper';
+import { DashboardDataService } from '../../../core/dashboard-data.service';
 import { PageHeaderService } from '../../../core/page-header-service/page-header.service';
 import { SidePanelService } from '../../../shared/services/side-panel.service';
 import { SharedModule } from '../../../shared/shared.module';
@@ -47,18 +48,30 @@ describe('DashboardBaseComponent', () => {
   beforeEach(() => {
     fixture = TestBed.createComponent(DashboardBaseComponent);
     component = fixture.componentInstance;
-    // Don't call fixture.detectChanges() here - it triggers ngOnInit which requires full catalog setup
+    // Not rendered here: the first render runs ngOnInit, which requires full catalog setup
   });
 
   it('should be created', () => {
     expect(component).toBeTruthy();
   });
 
+  // The main navigation follows the dashboard state: a drawer on a phone,
+  // pinned beside the page or over it on a desktop.
+  it('derives the main navigation from the dashboard state', () => {
+    const data = TestBed.inject(DashboardDataService);
+    data.setSideNavPinned(true);
+    expect(component.mainNavState().mode).toBe('side');
+    data.setSideNavPinned(false);
+    expect(component.mainNavState().mode).toBe('over');
+
+    data.enableMobileNav();
+    expect(component.mainNavState()).toEqual({ mode: 'over', opened: false, iconMode: false });
+  });
+
   describe('side panel', () => {
     const panel = (): HTMLElement => fixture.nativeElement.querySelector('.dashboard-side-help-outer');
 
     beforeEach(async () => {
-      fixture.detectChanges();
       await fixture.whenStable();
     });
 
@@ -90,7 +103,6 @@ describe('DashboardBaseComponent', () => {
 
     beforeEach(async () => {
       document.body.appendChild(root());
-      fixture.detectChanges();
       await fixture.whenStable();
     });
 
@@ -133,7 +145,6 @@ describe('DashboardBaseComponent', () => {
     };
 
     beforeEach(async () => {
-      fixture.detectChanges();
       await fixture.whenStable();
     });
 
