@@ -313,6 +313,29 @@ describe('AppDetailDataService', () => {
   // fetching() derived signal
   // -------------------------------------------------------------------------
 
+  it('traces each fetch only when localStorage.stratosDebug is set', async () => {
+    const debug = vi.spyOn(console, 'debug').mockImplementation(() => {});
+    try {
+      localStorage.removeItem('stratosDebug');
+      let done = svc.refresh('app');
+      await tick();
+      httpMock.expectOne(DETAIL_URL).flush(MOCK_APP_DETAIL);
+      await done;
+      expect(debug).not.toHaveBeenCalled();
+
+      localStorage.setItem('stratosDebug', '1');
+      done = svc.refresh('app');
+      await tick();
+      httpMock.expectOne(DETAIL_URL).flush(MOCK_APP_DETAIL);
+      await done;
+      await tick();
+      expect(debug).toHaveBeenCalledWith('[AppDetailData]', 'app', 'ok', expect.stringMatching(/ms$/), DETAIL_URL, '');
+    } finally {
+      localStorage.removeItem('stratosDebug');
+      debug.mockRestore();
+    }
+  });
+
   it('fetching() is true while any entity request is in flight', async () => {
     const done = svc.refresh('app');
     expect(svc.fetching()).toBe(true);

@@ -88,8 +88,9 @@ export class AppDetailDataService {
   // A kind is requested only once refresh() has asked for it ('all' covers all
   // but routes and serviceBindings, which wait for their own refresh(kind)).
   private readonly _wanted = signal<ReadonlySet<EntityKind>>(new Set());
+  private readonly _urls: Partial<Record<EntityKind, string>> = {};
   private want(kind: EntityKind, url: () => string | undefined): () => string | undefined {
-    return () => (this._wanted().has(kind) ? url() : undefined);
+    return () => (this._urls[kind] = this._wanted().has(kind) ? url() : undefined);
   }
   private appUrl(path = ''): string | undefined {
     const { cnsi, app } = this._ids();
@@ -474,6 +475,33 @@ export class AppDetailDataService {
         }
       }, { injector: this.injector });
     });
+  }
+
+  // Diagnostic trace per fetch (kind, url, outcome, duration), gated on
+  // localStorage.stratosDebug to keep the production console clean.
+  private readonly _traces = (Object.keys(this.resources) as EntityKind[]).map(kind => {
+    const res = this.resources[kind];
+    let t0 = 0;
+    return effect(() => {
+      const status = res.status();
+      if (res.isLoading()) {
+        t0 ||= performance.now();
+      } else if (t0) {
+        this.debugTrace(kind, this._urls[kind] ?? '', status === 'error' ? 'err' : 'ok', performance.now() - t0, res.error());
+        t0 = 0;
+      }
+    });
+  });
+
+  private debugTrace(kind: EntityKind, url: string, outcome: 'ok' | 'err', ms: number, err?: unknown): void {
+    try {
+      if (typeof localStorage === 'undefined' || !localStorage.getItem('stratosDebug')) {
+        return;
+      }
+      console.debug('[AppDetailData]', kind, outcome, `${ms.toFixed(0)}ms`, url, err ?? '');
+    } catch {
+      // localStorage may throw in private-mode browsers; ignore.
+    }
   }
 
   /** Stamp the fetch time and accumulate a usage sample for each stats response. */
