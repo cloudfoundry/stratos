@@ -423,14 +423,15 @@ export class AddServiceInstanceComponent implements OnInit, OnDestroy {
           metadata: { guid: r.guid, url: '', created_at: '', updated_at: '' },
           entity: { name: r.name } as IApp,
         }) as APIResource<IApp>)),
+        // Inside the switchMap, so a failed fetch only costs that space's apps
+        // and a later space change still fetches
+        catchError(error => {
+          console.error('Error fetching applications for space:', error);
+          this.errorMessage = 'Failed to fetch applications. Please try again.';
+          return observableOf([] as APIResource<IApp>[]);
+        }),
       )),
       tap(() => this._appsLoading.set(false)),
-      catchError(error => {
-        console.error('Error fetching applications for space:', error);
-        this.errorMessage = 'Failed to fetch applications. Please try again.';
-        this._appsLoading.set(false);
-        return observableOf([]);
-      }),
       shareReplay({ bufferSize: 1, refCount: true }),
       takeUntilDestroyed(this.destroyRef)
     );

@@ -1,15 +1,16 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { importProvidersFrom, provideZonelessChangeDetection, signal, WritableSignal } from '@angular/core';
 import { provideHttpClient } from '@angular/common/http';
-import { provideHttpClientTesting } from '@angular/common/http/testing';
+import { HttpTestingController, provideHttpClientTesting } from '@angular/common/http/testing';
 import { By } from '@angular/platform-browser';
 import { provideRouter } from '@angular/router';
-import { describe, it, expect, beforeEach } from 'vitest';
+import { describe, it, expect, beforeEach, vi } from 'vitest';
 import { STORE_TEST_PROVIDERS } from '@stratosui/store/testing';
 import { PageHeaderComponent, StepComponent, TabNavService } from '@stratosui/core';
 import { generateCfBaseTestModulesNoShared } from '@test-framework/cf';
 import { CfOrgSpaceDataService } from '../../../data-services/cf-org-space-service.service';
 import { CloudFoundryService } from '../../../data-services/cloud-foundry.service';
+import { CsiStateService } from '../csi-state.service';
 import { AddServiceInstanceComponent } from './add-service-instance.component';
 
 describe('AddServiceInstanceComponent', () => {
@@ -255,6 +256,31 @@ describe('AddServiceInstanceComponent', () => {
       loading.set(false);
       await fixture.whenStable();
       expect(await pending).toEqual({ success: true });
+    });
+  });
+
+  // The apps of the picked space feed the bind step. A failed fetch must not
+  // end the feed, or going back and picking another space shows no apps and
+  // skips the bind step.
+  describe('apps of the picked space', () => {
+    const appsUrl = (space: string) => `/pp/v1/cf/apps/cf-1?space_guids=${space}&per_page=500&page=1`;
+
+    it('fetches again for another space after one fetch failed', async () => {
+      vi.spyOn(console, 'error').mockImplementation(() => undefined);
+      const http = TestBed.inject(HttpTestingController);
+      const csi = fixture.debugElement.injector.get(CsiStateService);
+
+      csi.setCFDetails('cf-1', 'org-1', 'space-1');
+      await fixture.whenStable();
+      http.expectOne(appsUrl('space-1')).flush('boom', { status: 500, statusText: 'Server Error' });
+      await fixture.whenStable();
+
+      csi.setCFDetails('cf-1', 'org-1', 'space-2');
+      await fixture.whenStable();
+      http.expectOne(appsUrl('space-2')).flush({ resources: [{ guid: 'app-1', name: 'my-app' }] });
+      await fixture.whenStable();
+
+      expect(component.bindAppHandle.skipIf!()).toBe(false);
     });
   });
 });
