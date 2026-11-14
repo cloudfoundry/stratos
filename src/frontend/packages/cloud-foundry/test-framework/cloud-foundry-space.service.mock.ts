@@ -1,4 +1,4 @@
-import { signal } from '@angular/core';
+import { Signal, signal } from '@angular/core';
 import { Observable, of as observableOf } from 'rxjs';
 
 import { CloudFoundrySpaceService } from '../src/features/cf/services/cloud-foundry-space.service';
@@ -16,8 +16,8 @@ export class CloudFoundrySpaceServiceMock {
   routesCount = signal<number | null>(null);
   serviceInstancesCount = signal(0);
   userProvidedServiceInstancesCount$: Observable<number> = observableOf(0);
-  quotaDefinition$: Observable<unknown> = observableOf(null);
-  spaceQuotaDefinition$: Observable<unknown> = observableOf(null);
+  quotaDefinition: Signal<unknown> = signal(null);
+  spaceQuotaDefinition: Signal<unknown> = signal(null);
   fetchApps() {}
   // Signal-native shim: card-cf-space-details and other space-detail consumers
   // read scalar fields off cfSpaceService.spaceDataService.space() directly.

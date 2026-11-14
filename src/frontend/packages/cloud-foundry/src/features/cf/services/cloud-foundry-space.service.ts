@@ -1,13 +1,10 @@
-import { DestroyRef, Injectable, Injector, Signal, computed, inject } from '@angular/core';
-import { takeUntilDestroyed, toObservable } from '@angular/core/rxjs-interop';
-import { observeSignal } from '@stratosui/store';
-import { Observable, of } from 'rxjs';
-import { distinctUntilChanged, filter, map, shareReplay, switchMap } from 'rxjs/operators';
+import { Injectable, Injector, Signal, computed, effect, inject, signal, untracked } from '@angular/core';
+import { Observable } from 'rxjs';
 
 import { CfUsersPagedDataService } from '../../../shared/data-services/cf-users-paged-data.service';
-import { QuotaDataService } from '../../../services/endpoint-data/quota-data.service';
+import { QuotaDataService, SignalSource } from '../../../services/endpoint-data/quota-data.service';
 import { SpaceDataRegistry } from '../../../services/endpoint-data/space-data.registry';
-import { StOrgQuota, StSpace, StSpaceQuota } from '../../../services/endpoint-data/stratos-types';
+import { StOrgQuota, StSpaceQuota } from '../../../services/endpoint-data/stratos-types';
 import { createUserRoleInSpace } from '../../../store/types/cf-user.types';
 
 import { APIResource } from '../../../../../store/src/types/api.types';
@@ -35,7 +32,6 @@ export class CloudFoundrySpaceService {
   private cnsiUsers = inject(CfUsersPagedDataService);
   private spaceDataRegistry = inject(SpaceDataRegistry);
   private injector = inject(Injector);
-  private destroyRef = inject(DestroyRef);
 
   // Registry returns the same instance as the space-base component's provider,
   // so reads here hit the shared, in-flight-deduped signal — no extra HTTP.
@@ -69,9 +65,9 @@ export class CloudFoundrySpaceService {
   // read V3 camelCase fields (totalMemoryInMB etc.). Returns null if
   // neither quota is set — template branches replace the legacy
   // `createOrgQuotaDefinition()` mock with explicit "None" rendering.
-  quotaDefinition$!: Observable<StSpaceQuota | StOrgQuota | null>;
+  quotaDefinition!: Signal<StSpaceQuota | StOrgQuota | null>;
   /** Actual Space Quota (null when the space inherits the org quota). */
-  spaceQuotaDefinition$!: Observable<StSpaceQuota | null>;
+  spaceQuotaDefinition!: Signal<StSpaceQuota | null>;
   serviceInstancesCount!: Signal<number>;
   userProvidedServiceInstancesCount$!: Observable<number>;
 
@@ -126,10 +122,6 @@ export class CloudFoundrySpaceService {
   }
 
   private initialiseSpaceObservables() {
-    const space$ = toObservable(this.spaceDataService.space, { injector: this.injector }).pipe(
-      filter((s): s is StSpace => !!s),
-    );
-
     // Quota tile: managed only — user-provided instances don't count
     // against the service-instance quota (#5769); they get their own tile.
     this.serviceInstancesCount = this.serviceCatalog.serviceInstanceCount(this.cfGuid, this.orgGuid, this.spaceGuid, 'managed').value;
@@ -141,34 +133,20 @@ export class CloudFoundrySpaceService {
       const space = this.spaceDataService.space();
       return space ? space.routeCount ?? 0 : null;
     });
-    // V3-native space-quota lookup. quotaGuid mapped from V3
-    // relationships.quota.data.guid by getNativeSpaceDetail. The
-    // QuotaDataService returns a SignalSource; we bridge to Observable
-    // for backwards-compat templates and chain into the org-quota
-    // fallback below.
-    //
-    // observeSignal, not toObservable: toObservable's effect would outlive
-    // switchMap's unsubscribe, so each space re-emission (load, patch after
-    // an edit) would add one more effect for the life of the page.
-    this.spaceQuotaDefinition$ = space$.pipe(
-      map(s => s.quotaGuid || null),
-      // A rename patches the space but keeps its quota
-      distinctUntilChanged(),
-      switchMap(quotaGuid => quotaGuid
-        ? observeSignal(this.quotaData.spaceQuota(this.cfGuid, quotaGuid).value, this.injector)
-        : of(null as StSpaceQuota | null)),
-      // observeSignal ends only on unsubscribe and shareReplay keeps its one
-      // subscription, so end it with the page that owns this service.
-      takeUntilDestroyed(this.destroyRef),
-      shareReplay({ bufferSize: 1, refCount: false }),
-    );
+    // The space quota is looked up again only when the space's quota guid
+    // changes (a rename patches the space but keeps its quota).
+    const spaceQuotaGuid = computed(() => this.spaceDataService.space()?.quotaGuid || null);
+    const spaceQuotaSource = signal<SignalSource<StSpaceQuota | null> | null>(null);
+    effect(() => {
+      const guid = spaceQuotaGuid();
+      untracked(() => spaceQuotaSource.set(guid ? this.quotaData.spaceQuota(this.cfGuid, guid) : null));
+    }, { injector: this.injector });
+    this.spaceQuotaDefinition = computed(() => spaceQuotaSource()?.value() ?? null);
     // Effective quota: prefer space-specific, fall back to org. Org-quota
     // emission can itself be null (org has no quota set) — caller renders
     // that as "None" rather than substituting a fake "everything allowed"
     // shim (the V3 -1 = Unlimited semantics make the shim redundant).
-    this.quotaDefinition$ = this.spaceQuotaDefinition$.pipe(
-      switchMap(def => def ? of(def) : this.cfOrgService.quotaDefinition$.pipe(map(q => q ?? null))),
-    );
+    this.quotaDefinition = computed(() => this.spaceQuotaDefinition() ?? this.cfOrgService.quotaDefinition());
   }
 
   private initialiseAppObservables() {

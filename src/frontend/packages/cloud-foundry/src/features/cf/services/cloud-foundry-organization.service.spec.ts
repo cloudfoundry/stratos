@@ -23,10 +23,7 @@ import { CloudFoundryOrganizationService } from './cloud-foundry-organization.se
 describe('CloudFoundryOrganizationService', () => {
   let org: ReturnType<typeof signal<StOrgDetail | null>>;
   let quota: ReturnType<typeof signal<StOrgQuota | null>>;
-  // Each live signal-to-observable bridge reads the quota value once per
-  // write, so the read count after one write is the number of live bridges.
-  let quotaReads: number;
-  // quota lookups made, one per quota the stream switched to
+  // quota lookups made, one per quota the org switched to
   let lookups: number;
 
   let users: WritableSignal<StUser[] | null>;
@@ -41,12 +38,7 @@ describe('CloudFoundryOrganizationService', () => {
     spacesSettled = signal(false);
     org = signal<StOrgDetail | null>(null);
     quota = signal<StOrgQuota | null>(null);
-    quotaReads = 0;
     lookups = 0;
-    const countedQuota = (() => {
-      quotaReads++;
-      return quota();
-    }) as Signal<StOrgQuota | null>;
 
     TestBed.configureTestingModule({
       providers: [
@@ -57,7 +49,7 @@ describe('CloudFoundryOrganizationService', () => {
           provide: OrgDataRegistry,
           useValue: { acquire: () => ({ load: () => of(undefined), org, spaces, spacesSettled }) },
         },
-        { provide: QuotaDataService, useValue: { orgQuota: () => { lookups++; return { value: countedQuota }; } } },
+        { provide: QuotaDataService, useValue: { orgQuota: () => { lookups++; return { value: quota }; } } },
         { provide: CfUsersPagedDataService, useValue: { users: () => users } },
         { provide: ServiceCatalogDataService, useValue: { serviceInstanceCount: () => ({ value: signal(0) }) } },
         {
@@ -82,60 +74,58 @@ describe('CloudFoundryOrganizationService', () => {
 
   afterEach(() => TestBed.resetTestingModule());
 
-  it('keeps one quota bridge alive however often the org re-emits', () => {
+  it('gives the quota once it has loaded', () => {
     const svc = TestBed.inject(CloudFoundryOrganizationService);
-    const seen: StOrgQuota[] = [];
-    const sub = svc.quotaDefinition$.subscribe(q => seen.push(q));
-
-    // Each change of quota re-runs the switchMap, which builds a new
-    // bridge to the quota signal.
-    for (const quotaGuid of ['quota-a', 'quota-b', 'quota-1']) {
-      org.set({ guid: 'org-1', name: 'a', quotaGuid } as StOrgDetail);
-      TestBed.tick();
-    }
-
-    quotaReads = 0;
-    const q = { guid: 'quota-1', name: 'default' } as StOrgQuota;
-    quota.set(q);
+    org.set({ guid: 'org-1', name: 'a', quotaGuid: 'quota-1' } as never);
     TestBed.tick();
+    expect(svc.quotaDefinition()).toBeNull();
 
-    expect(quotaReads).toBe(1);
-    expect(seen).toEqual([q]);
-    sub.unsubscribe();
+    const q = { guid: 'quota-1', name: 'small' } as StOrgQuota;
+    quota.set(q);
+    expect(svc.quotaDefinition()).toEqual(q);
+  });
+
+  // The quota stayed on screen after it was taken off.
+  it('has no quota once the org has none', () => {
+    const svc = TestBed.inject(CloudFoundryOrganizationService);
+    org.set({ guid: 'org-1', name: 'a', quotaGuid: 'quota-1' } as never);
+    quota.set({ guid: 'quota-1', name: 'small' } as StOrgQuota);
+    TestBed.tick();
+    expect(svc.quotaDefinition()).not.toBeNull();
+
+    org.set({ guid: 'org-1', name: 'a' } as never);
+    TestBed.tick();
+    expect(svc.quotaDefinition()).toBeNull();
   });
 
   // The service is provided per org page. Each visit must leave nothing
   // behind once the page (and its service) is destroyed.
-  it('leaves no quota bridge alive after the page is destroyed', () => {
+  it('stops looking quotas up after the page is destroyed', () => {
     const root = TestBed.inject(EnvironmentInjector);
-    for (let visit = 0; visit < 5; visit++) {
-      const page = Injector.create({ providers: [{ provide: CloudFoundryOrganizationService }], parent: root }) as Injector & { destroy(): void };
-      const svc = page.get(CloudFoundryOrganizationService);
-      svc.quotaDefinition$.subscribe();
-      org.set({ guid: 'org-1', name: 'a', quotaGuid: 'quota-1' } as StOrgDetail);
-      TestBed.tick();
-      page.destroy();
-    }
+    const page = Injector.create({ providers: [{ provide: CloudFoundryOrganizationService }], parent: root }) as Injector & { destroy(): void };
+    page.get(CloudFoundryOrganizationService);
+    org.set({ guid: 'org-1', name: 'a', quotaGuid: 'quota-1' } as never);
+    TestBed.tick();
+    page.destroy();
 
-    quotaReads = 0;
-    quota.set({ guid: 'quota-1', name: 'default' } as StOrgQuota);
+    lookups = 0;
+    org.set({ guid: 'org-1', name: 'a', quotaGuid: 'quota-2' } as never);
     TestBed.tick();
 
-    expect(quotaReads).toBe(0);
+    expect(lookups).toBe(0);
   });
 
   it('looks the quota up again only when the quota changes', () => {
     const svc = TestBed.inject(CloudFoundryOrganizationService);
-    const sub = svc.quotaDefinition$.subscribe();
+    svc.quotaDefinition();
 
     // A rename patches the org but keeps its quota
     for (const name of ['a', 'b', 'c']) {
-      org.set({ guid: 'org-1', name, quotaGuid: 'quota-1' } as StOrgDetail);
+      org.set({ guid: 'org-1', name, quotaGuid: 'quota-1' } as never);
       TestBed.tick();
     }
 
     expect(lookups).toBe(1);
-    sub.unsubscribe();
   });
 
   // The tile shows a placeholder while the users cache loads; 'None' is

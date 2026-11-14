@@ -60,7 +60,7 @@ export class CloudFoundrySpaceSummaryComponent {
   // The HTTP-backed counts are subscribed here, by the page that shows them,
   // not in the space service that every space page holds.
   readonly userProvidedServiceInstancesCount = toSignal(this.cfSpaceService.userProvidedServiceInstancesCount$, { initialValue: null });
-  readonly quota = toSignal(this.cfSpaceService.quotaDefinition$, { initialValue: null });
+  readonly quota = this.cfSpaceService.quotaDefinition;
   // Without the full app list yet, ask Cloud Foundry for the space's count;
   // once the list is here, count the space's apps in it.
   private readonly fetchedAppCount = toSignal(

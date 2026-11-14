@@ -15,5 +15,5 @@ export class CloudFoundryOrganizationServiceMock {
   userProvidedServiceInstancesCount$ = observableOf(0);
   userOrgRole = signal<string | null>(null);
   quotaLink = signal<string[] | undefined>(undefined);
-  quotaDefinition$ = observableOf(null);
+  quotaDefinition = signal(null);
 }

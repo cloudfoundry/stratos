@@ -1,6 +1,5 @@
 import { DatePipe } from '@angular/common';
 import { Component, inject, ChangeDetectionStrategy, computed } from '@angular/core';
-import { toSignal } from '@angular/core/rxjs-interop';
 import { Router, RouterModule } from '@angular/router';
 
 import { MetadataItemComponent, BooleanIndicatorComponent, TailwindSnackBarService } from '@stratosui/core';
@@ -25,8 +24,8 @@ export class CardCfSpaceDetailsComponent {
 
   // The space's own quota, and the quota in effect (the org's when the space
   // has none).
-  readonly spaceQuota = toSignal(this.cfSpaceService.spaceQuotaDefinition$, { initialValue: null });
-  readonly quota = toSignal(this.cfSpaceService.quotaDefinition$, { initialValue: null });
+  readonly spaceQuota = this.cfSpaceService.spaceQuotaDefinition;
+  readonly quota = this.cfSpaceService.quotaDefinition;
   readonly spaceQuotaLink = [
     '/cloud-foundry', this.cfSpaceService.cfGuid,
     'organizations', this.cfSpaceService.orgGuid,

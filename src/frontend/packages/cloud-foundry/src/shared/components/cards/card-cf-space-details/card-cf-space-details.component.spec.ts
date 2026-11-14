@@ -1,10 +1,9 @@
 import { CUSTOM_ELEMENTS_SCHEMA, importProvidersFrom } from '@angular/core';
 import { ComponentFixture, TestBed } from '@angular/core/testing';
-import { provideZonelessChangeDetection } from '@angular/core';
+import { provideZonelessChangeDetection, signal } from '@angular/core';
 import { provideHttpClient } from '@angular/common/http';
 import { provideHttpClientTesting } from '@angular/common/http/testing';
 import { Router, provideRouter } from '@angular/router';
-import { of } from 'rxjs';
 import { describe, it, expect, beforeEach, vi } from 'vitest';
 
 import { STORE_TEST_PROVIDERS } from '@stratosui/store/testing';
@@ -49,14 +48,14 @@ describe('CardCfSpaceDetailsComponent', () => {
   });
 
   it('links the space\'s own quota to its quota page', () => {
-    create(svc => svc.spaceQuotaDefinition$ = of({ name: 'small' }) as never);
+    create(svc => svc.spaceQuotaDefinition = signal({ name: 'small' }) as never);
     const link = (fixture.nativeElement as HTMLElement).querySelector('a[href*="space-quota"]');
     expect(link?.getAttribute('href')).toBe('/cloud-foundry/cf-1/organizations/org-1/spaces/space-1/space-quota');
     expect(link?.textContent?.trim()).toBe('small');
   });
 
   it('sends a space without a quota to the organization\'s quota once', () => {
-    create(svc => svc.quotaDefinition$ = of({ name: 'org-quota' }) as never);
+    create(svc => svc.quotaDefinition = signal({ name: 'org-quota' }) as never);
     const navigate = vi.spyOn(TestBed.inject(Router), 'navigate').mockResolvedValue(true);
     expect(text()).toContain('None assigned');
     const link = Array.from((fixture.nativeElement as HTMLElement).querySelectorAll('a'))

@@ -1,14 +1,12 @@
 import { HttpClient } from '@angular/common/http';
-import { DestroyRef, Injectable, Injector, Signal, computed, inject } from '@angular/core';
-import { takeUntilDestroyed, toObservable } from '@angular/core/rxjs-interop';
-import { observeSignal } from '@stratosui/store';
+import { Injectable, Injector, Signal, computed, effect, inject, signal, untracked } from '@angular/core';
 import { EMPTY, Observable } from 'rxjs';
-import { catchError, distinctUntilChanged, filter, map, shareReplay, switchMap } from 'rxjs/operators';
+import { catchError, map, shareReplay } from 'rxjs/operators';
 
 import { CfUsersPagedDataService } from '../../../shared/data-services/cf-users-paged-data.service';
 import { OrgDataRegistry } from '../../../services/endpoint-data/org-data.registry';
-import { QuotaDataService } from '../../../services/endpoint-data/quota-data.service';
-import { StOrgDetail, StOrgQuota, StSpace } from '../../../services/endpoint-data/stratos-types';
+import { QuotaDataService, SignalSource } from '../../../services/endpoint-data/quota-data.service';
+import { StOrgQuota, StSpace } from '../../../services/endpoint-data/stratos-types';
 import { createUserRoleInOrg } from '../../../store/types/cf-user.types';
 
 import { APIResource } from '../../../../../store/src/types/api.types';
@@ -75,7 +73,6 @@ export class CloudFoundryOrganizationService {
   private cnsiUsers = inject(CfUsersPagedDataService);
   private orgDataRegistry = inject(OrgDataRegistry);
   private injector = inject(Injector);
-  private destroyRef = inject(DestroyRef);
 
   readonly orgDataService = this.orgDataRegistry.acquire(
     this.activeRouteCfOrgSpace.cfGuid,
@@ -98,12 +95,8 @@ export class CloudFoundryOrganizationService {
   userOrgRole!: Signal<string | null>;
   quotaLink!: Signal<string[] | undefined>;
 
-  // V3-shape — quotaDefinition$ now emits StOrgQuota directly. Consumers
-  // that previously read V2 fields (memory_limit, etc.) must read the V3
-  // camelCase equivalents (totalMemoryInMB, etc.). Backwards-compat shim
-  // lives in space-detail template which still mixes IOrgQuotaDefinition
-  // for the union with space-quota fallback.
-  quotaDefinition$!: Observable<StOrgQuota>;
+  /** The org's quota; null while it loads or when the org has none. */
+  quotaDefinition!: Signal<StOrgQuota | null>;
   // V3-native: signal of StPrivateDomain[] surfaced as Observable for
   // template binding compatibility. Downstream only reads .length.
   privateDomains$!: Observable<StPrivateDomain[]>;
@@ -204,31 +197,16 @@ export class CloudFoundryOrganizationService {
       shareReplay({ bufferSize: 1, refCount: false }),
     );
 
-    // V3-native: org quota lookup via QuotaDataService. The signal source
-    // returns null until the response lands; we filter to non-null so the
-    // Observable emission semantics match the legacy entity-service path.
-    const orgSnapshot$ = toObservable(this.orgDataService.org, { injector: this.injector }).pipe(
-      filter((o): o is StOrgDetail => !!o),
-    );
-    this.quotaDefinition$ = orgSnapshot$.pipe(
-      map(o => o.quotaGuid),
-      filter(quotaGuid => !!quotaGuid),
-      // A rename patches the org but keeps its quota
-      distinctUntilChanged(),
-      // observeSignal, not toObservable: toObservable's effect would outlive
-      // switchMap's unsubscribe, so each org re-emission (load, patch after
-      // an edit) would add one more effect for the life of the page.
-      switchMap(quotaGuid => {
-        const source = this.quotaData.orgQuota(this.cfGuid, quotaGuid);
-        return observeSignal(source.value, this.injector).pipe(
-          filter((q): q is StOrgQuota => !!q),
-        );
-      }),
-      // observeSignal ends only on unsubscribe and shareReplay keeps its one
-      // subscription, so end it with the page that owns this service.
-      takeUntilDestroyed(this.destroyRef),
-      shareReplay({ bufferSize: 1, refCount: false }),
-    );
+    // The quota is looked up again only when the org's quota guid changes
+    // (a rename patches the org but keeps its quota), and is null when the
+    // org has none.
+    const quotaGuid = computed(() => this.orgDataService.org()?.quotaGuid);
+    const quotaSource = signal<SignalSource<StOrgQuota | null> | null>(null);
+    effect(() => {
+      const guid = quotaGuid();
+      untracked(() => quotaSource.set(guid ? this.quotaData.orgQuota(this.cfGuid, guid) : null));
+    }, { injector: this.injector });
+    this.quotaDefinition = computed(() => quotaSource()?.value() ?? null);
 
     this.quotaLink = computed(() => this.orgDataService.org()?.quotaGuid ? [
       '/cloud-foundry',

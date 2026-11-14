@@ -1,6 +1,5 @@
 import { Component, inject, ChangeDetectionStrategy } from '@angular/core';
 import { DatePipe } from '@angular/common';
-import { toSignal } from '@angular/core/rxjs-interop';
 import { RouterModule } from '@angular/router';
 import { CloudFoundryOrganizationService } from '../../../../features/cf/services/cloud-foundry-organization.service';
 import { MetadataItemComponent } from '../../../../../../core/src/shared/components/metadata-item/metadata-item.component';
@@ -22,5 +21,5 @@ import { CapitalizeFirstPipe } from '@stratosui/core';
 })
 export class CardCfOrgUserDetailsComponent {
   public cfOrgService = inject(CloudFoundryOrganizationService);
-  readonly quota = toSignal(this.cfOrgService.quotaDefinition$, { initialValue: null });
+  readonly quota = this.cfOrgService.quotaDefinition;
 }

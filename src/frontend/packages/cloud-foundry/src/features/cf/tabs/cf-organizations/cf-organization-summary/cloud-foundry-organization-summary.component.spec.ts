@@ -43,7 +43,7 @@ describe('CloudFoundryOrganizationSummaryComponent', () => {
     userProvidedServiceInstancesCount$: new Subject<number>(),
     routesCount$: of(3),
     privateDomains$: of([]),
-    quotaDefinition$: of(null),
+    quotaDefinition: signal(null),
     loadingApps: signal(true),
     spaces: signal(null),
     apps: signal<unknown[] | null>(null),

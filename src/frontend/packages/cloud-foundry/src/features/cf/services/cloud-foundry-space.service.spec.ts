@@ -23,10 +23,7 @@ import { CloudFoundrySpaceService } from './cloud-foundry-space.service';
 describe('CloudFoundrySpaceService', () => {
   let space: ReturnType<typeof signal<StSpace | null>>;
   let quota: ReturnType<typeof signal<StSpaceQuota | null>>;
-  // Each live signal-to-observable bridge reads the quota value once per
-  // write, so the read count after one write is the number of live bridges.
-  let quotaReads: number;
-  // quota lookups made, one per quota the stream switched to
+  // quota lookups made, one per quota the space switched to
   let lookups: number;
 
   let users: WritableSignal<StUser[] | null>;
@@ -37,12 +34,7 @@ describe('CloudFoundrySpaceService', () => {
     users = signal<StUser[] | null>(null);
     space = signal<StSpace | null>(null);
     quota = signal<StSpaceQuota | null>(null);
-    quotaReads = 0;
     lookups = 0;
-    const countedQuota = (() => {
-      quotaReads++;
-      return quota();
-    }) as Signal<StSpaceQuota | null>;
 
     TestBed.configureTestingModule({
       providers: [
@@ -51,8 +43,8 @@ describe('CloudFoundrySpaceService', () => {
           provide: SpaceDataRegistry,
           useValue: { acquire: () => ({ load: () => of(undefined), space }) },
         },
-        { provide: QuotaDataService, useValue: { spaceQuota: () => { lookups++; return { value: countedQuota }; } } },
-        { provide: CloudFoundryOrganizationService, useValue: { quotaDefinition$: of(null) } },
+        { provide: QuotaDataService, useValue: { spaceQuota: () => { lookups++; return { value: quota }; } } },
+        { provide: CloudFoundryOrganizationService, useValue: { quotaDefinition: signal(null) } },
         { provide: CfUsersPagedDataService, useValue: { users: () => users } },
         { provide: ServiceCatalogDataService, useValue: { serviceInstanceCount: () => ({ value: signal(0) }) } },
         {
@@ -76,74 +68,58 @@ describe('CloudFoundrySpaceService', () => {
 
   afterEach(() => TestBed.resetTestingModule());
 
-  it('keeps one quota bridge alive however often the space re-emits', () => {
+  it('gives the quota once it has loaded', () => {
     const svc = TestBed.inject(CloudFoundrySpaceService);
-    const seen: (StSpaceQuota | null)[] = [];
-    const sub = svc.spaceQuotaDefinition$.subscribe(q => seen.push(q));
+    space.set({ guid: 'space-1', name: 'a', quotaGuid: 'quota-1' } as never);
+    TestBed.tick();
+    expect(svc.spaceQuotaDefinition()).toBeNull();
 
-    // Each change of quota re-runs the switchMap, which builds a new
-    // bridge to the quota signal.
-    for (const quotaGuid of ['quota-a', 'quota-b', 'quota-1']) {
-      space.set({ guid: 'space-1', name: 'a', quotaGuid } as StSpace);
-      TestBed.tick();
-    }
-
-    quotaReads = 0;
     const q = { guid: 'quota-1', name: 'small' } as StSpaceQuota;
     quota.set(q);
-    TestBed.tick();
+    expect(svc.spaceQuotaDefinition()).toEqual(q);
+  });
 
-    expect(quotaReads).toBe(1);
-    expect(seen.at(-1)).toEqual(q);
-    sub.unsubscribe();
+  // The quota stayed on screen after it was taken off.
+  it('has no quota once the space has none', () => {
+    const svc = TestBed.inject(CloudFoundrySpaceService);
+    space.set({ guid: 'space-1', name: 'a', quotaGuid: 'quota-1' } as never);
+    quota.set({ guid: 'quota-1', name: 'small' } as StSpaceQuota);
+    TestBed.tick();
+    expect(svc.spaceQuotaDefinition()).not.toBeNull();
+
+    space.set({ guid: 'space-1', name: 'a' } as never);
+    TestBed.tick();
+    expect(svc.spaceQuotaDefinition()).toBeNull();
   });
 
   // The service is provided per space page. Each visit must leave nothing
   // behind once the page (and its service) is destroyed.
-  it('leaves no quota bridge alive after the page is destroyed', () => {
+  it('stops looking quotas up after the page is destroyed', () => {
     const root = TestBed.inject(EnvironmentInjector);
-    for (let visit = 0; visit < 5; visit++) {
-      const page = Injector.create({ providers: [{ provide: CloudFoundrySpaceService }], parent: root }) as Injector & { destroy(): void };
-      const svc = page.get(CloudFoundrySpaceService);
-      svc.spaceQuotaDefinition$.subscribe();
-      space.set({ guid: 'space-1', name: 'a', quotaGuid: 'quota-1' } as StSpace);
-      TestBed.tick();
-      page.destroy();
-    }
+    const page = Injector.create({ providers: [{ provide: CloudFoundrySpaceService }], parent: root }) as Injector & { destroy(): void };
+    page.get(CloudFoundrySpaceService);
+    space.set({ guid: 'space-1', name: 'a', quotaGuid: 'quota-1' } as never);
+    TestBed.tick();
+    page.destroy();
 
-    quotaReads = 0;
-    quota.set({ guid: 'quota-1', name: 'small' } as StSpaceQuota);
+    lookups = 0;
+    space.set({ guid: 'space-1', name: 'a', quotaGuid: 'quota-2' } as never);
     TestBed.tick();
 
-    expect(quotaReads).toBe(0);
-  });
-
-  it('keeps the quota alive for a later subscriber while the page lives', () => {
-    const svc = TestBed.inject(CloudFoundrySpaceService);
-    space.set({ guid: 'space-1', name: 'a', quotaGuid: 'quota-1' } as StSpace);
-    svc.spaceQuotaDefinition$.subscribe().unsubscribe();
-    TestBed.tick();
-    const q = { guid: 'quota-1', name: 'small' } as StSpaceQuota;
-    quota.set(q);
-    TestBed.tick();
-
-    const seen: (StSpaceQuota | null)[] = [];
-    svc.spaceQuotaDefinition$.subscribe(v => seen.push(v));
-    expect(seen.at(-1)).toEqual(q);
+    expect(lookups).toBe(0);
   });
 
   it('looks the quota up again only when the quota changes', () => {
     const svc = TestBed.inject(CloudFoundrySpaceService);
-    const sub = svc.spaceQuotaDefinition$.subscribe();
+    svc.spaceQuotaDefinition();
 
     // A rename patches the space but keeps its quota
     for (const name of ['a', 'b', 'c']) {
-      space.set({ guid: 'space-1', name, quotaGuid: 'quota-1' } as StSpace);
+      space.set({ guid: 'space-1', name, quotaGuid: 'quota-1' } as never);
       TestBed.tick();
     }
 
     expect(lookups).toBe(1);
-    sub.unsubscribe();
   });
 
   // The tile shows a placeholder while the users cache loads; 'None' is

@@ -64,7 +64,7 @@ export class CloudFoundryOrganizationSummaryComponent {
   readonly userProvidedServiceInstancesCount = toSignal(this.cfOrgService.userProvidedServiceInstancesCount$, { initialValue: null });
   readonly routesCount = toSignal(this.cfOrgService.routesCount$, { initialValue: null });
   readonly privateDomainCount = toSignal(this.cfOrgService.privateDomains$.pipe(map(domains => domains.length)), { initialValue: null });
-  readonly quota = toSignal(this.cfOrgService.quotaDefinition$, { initialValue: null });
+  readonly quota = this.cfOrgService.quotaDefinition;
   // Without the full app list yet, ask Cloud Foundry for the org's count;
   // once the list is here, count the org's apps in it.
   private readonly fetchedAppCount = toSignal(
