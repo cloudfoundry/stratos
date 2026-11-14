@@ -10,9 +10,9 @@
       <div class="select-step">
         <p>Select the endpoints and connection details that you would like to backup</p>
         <div class="select-step__buttons">
-          <button class="btn btn-primary" type="button" [disabled]="disableSelectAll$ | async"
+          <button class="btn btn-primary" type="button" [disabled]="service.allChanged()"
           (click)="selectAll()">Select All</button>
-          <button class="btn btn-primary" type="button" [disabled]="disableSelectNone$ | async"
+          <button class="btn btn-primary" type="button" [disabled]="!service.hasChanges()"
           (click)="selectNone()">Select None</button>
         </div>
         <app-signal-list [config]="listConfig">
