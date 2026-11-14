@@ -1,10 +1,10 @@
 @if (!fabButton()) {
-  <button aria-label="Refresh" class="btn btn-icon" type="button" [disabled]="!manualPoll()" (click)="poll.emit()" matTooltip="Refresh"
+  <button aria-label="Refresh" class="btn btn-icon" type="button" [attr.aria-disabled]="!manualPoll() || null" (click)="manualPoll() && poll.emit()" matTooltip="Refresh"
     matTooltipShowDelay="1000">
     <app-custom-icon class="poll-icon" [ngClass]="{polling: isPolling()}">refresh</app-custom-icon>
   </button>
 } @else {
-  <button aria-label="Refresh" class="btn btn-icon btn-primary" type="button" [disabled]="!manualPoll()" (click)="poll.emit()" matTooltip="Refresh" matTooltipShowDelay="1000">
+  <button aria-label="Refresh" class="btn btn-icon btn-primary" type="button" [attr.aria-disabled]="!manualPoll() || null" (click)="manualPoll() && poll.emit()" matTooltip="Refresh" matTooltipShowDelay="1000">
     <app-custom-icon class="poll-icon" [ngClass]="{polling: isPolling()}">refresh</app-custom-icon>
   </button>
 }

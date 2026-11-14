@@ -19,6 +19,13 @@ beforeEach(() => {
   TestBed.configureTestingModule({ providers: [provideRouter([]), provideHttpClient(), provideHttpClientTesting()] });
 });
 
+// A button that can be off is never `disabled`: Chromium takes focus off a
+// focused button that becomes disabled and puts it on the page body (WCAG
+// 2.4.3), and pressing Refresh, Clear or Next page turns that button off.
+// It is aria-disabled instead, and its handler ignores the press.
+const isOff = (b: HTMLButtonElement) => !b.disabled && b.getAttribute('aria-disabled') === 'true';
+const isOn = (b: HTMLButtonElement) => !b.disabled && !b.hasAttribute('aria-disabled');
+
 @Component({
   standalone: true,
   imports: [SignalListComponent],
@@ -485,8 +492,8 @@ describe('SignalListComponent', () => {
       it('clamps effectivePageIndex and disables prev/next on the only page', async () => {
         const fixture = await staleFixture();
         expect(componentWith(fixture).effectivePageIndex()).toBe(0);
-        expect(fixture.nativeElement.querySelector('[title="Previous page"]').disabled).toBe(true);
-        expect(fixture.nativeElement.querySelector('[title="Next page"]').disabled).toBe(true);
+        expect(isOff(fixture.nativeElement.querySelector('[title="Previous page"]'))).toBe(true);
+        expect(isOff(fixture.nativeElement.querySelector('[title="Next page"]'))).toBe(true);
       });
     });
 
@@ -602,11 +609,11 @@ describe('SignalListComponent', () => {
     const btn = fixture.nativeElement.querySelector('[data-test="clear-filters"]');
     expect(btn).not.toBeNull();
     // Disabled when no filter is active.
-    expect(btn.disabled).toBe(true);
+    expect(isOff(btn)).toBe(true);
     // Setting nameFilter to a non-empty string activates the button.
     nameFilter.set('foo');
     await fixture.whenStable();
-    expect(btn.disabled).toBe(false);
+    expect(isOn(btn)).toBe(true);
   });
 
   it('clicking the Clear button invokes config.onClear', async () => {
@@ -639,10 +646,10 @@ describe('SignalListComponent', () => {
     };
     await fixture.whenStable();
     const btn = fixture.nativeElement.querySelector('[data-test="clear-filters"]');
-    expect(btn.disabled).toBe(false);
+    expect(isOn(btn)).toBe(true);
     selected.set(null);
     await fixture.whenStable();
-    expect(btn.disabled).toBe(true);
+    expect(isOff(btn)).toBe(true);
   });
 
   it('Clear button is enabled when a filterMultis selection is non-null (narrowed or explicitly empty)', async () => {
@@ -660,16 +667,16 @@ describe('SignalListComponent', () => {
     };
     await fixture.whenStable();
     const btn = fixture.nativeElement.querySelector('[data-test="clear-filters"]');
-    expect(btn.disabled).toBe(true);
+    expect(isOff(btn)).toBe(true);
     selected.set(['a']);
     await fixture.whenStable();
-    expect(btn.disabled).toBe(false);
+    expect(isOn(btn)).toBe(true);
     selected.set([]);
     await fixture.whenStable();
-    expect(btn.disabled).toBe(false);
+    expect(isOn(btn)).toBe(true);
     selected.set(null);
     await fixture.whenStable();
-    expect(btn.disabled).toBe(true);
+    expect(isOff(btn)).toBe(true);
   });
 
   // Note: SignalListConfig.headerActions was removed (see commit
@@ -1286,12 +1293,12 @@ describe('SignalListComponent', () => {
       await fixture.whenStable();
       const del = () => fixture.nativeElement.querySelector('[data-test="bulk-action-Delete"]') as HTMLButtonElement;
       expect(fixture.nativeElement.querySelector('[data-test="bulk-running"]')).not.toBeNull();
-      expect(del().disabled).toBe(true);
+      expect(isOff(del())).toBe(true);
 
       fixture.componentInstance.running.set(false);
       await fixture.whenStable();
       expect(fixture.nativeElement.querySelector('[data-test="bulk-running"]')).toBeNull();
-      expect(del().disabled).toBe(false);
+      expect(isOn(del())).toBe(true);
     });
   });
 
@@ -1571,7 +1578,7 @@ describe('SignalListComponent', () => {
       fixture.componentInstance.selected.set(new Set(['one']));
       await fixture.whenStable();
       const btn = fixture.nativeElement.querySelector('[data-test="bulk-action-Delete"]') as HTMLButtonElement;
-      expect(btn.disabled).toBe(true);
+      expect(isOff(btn)).toBe(true);
       btn.click();
       await fixture.whenStable();
       expect(spy).not.toHaveBeenCalled();
@@ -2056,7 +2063,7 @@ describe('SignalListComponent checklist-popup filter (filterMultis)', () => {
     it('is disabled while the filter is already inactive (null selection)', async () => {
       const fixture = TestBed.createComponent(MultiFilterHost);
       await fixture.whenStable();
-      expect((await openPopup(fixture)).disabled).toBe(true);
+      expect(isOff((await openPopup(fixture)))).toBe(true);
     });
 
     it('resets the selection to null, pages back to 0, and leaves the popup open', async () => {
@@ -2065,7 +2072,7 @@ describe('SignalListComponent checklist-popup filter (filterMultis)', () => {
       fixture.componentInstance.pageIndex.set(3);
       await fixture.whenStable();
       const clear = await openPopup(fixture);
-      expect(clear.disabled).toBe(false);
+      expect(isOn(clear)).toBe(true);
 
       clear.click();
       await fixture.whenStable();
@@ -2077,7 +2084,7 @@ describe('SignalListComponent checklist-popup filter (filterMultis)', () => {
       // Visible feedback: the popup stays up while the toggle summary and
       // the button's own disabled state flip to the neutral form
       expect(fixture.nativeElement.querySelector('[data-test="multi-filter-clear"]')).not.toBeNull();
-      expect((fixture.nativeElement.querySelector('[data-test="multi-filter-clear"]') as HTMLButtonElement).disabled).toBe(true);
+      expect(isOff((fixture.nativeElement.querySelector('[data-test="multi-filter-clear"]') as HTMLButtonElement))).toBe(true);
       expect(component.multiSummary(component.activeMulti()!)).toBe('All (3)');
     });
   });
@@ -2435,7 +2442,7 @@ describe('SignalListComponent range filter (filterRanges)', () => {
     it('is disabled while the filter is already inactive (null selection)', async () => {
       const fixture = TestBed.createComponent(RangeFilterHost);
       await fixture.whenStable();
-      expect((await openPopup(fixture)).disabled).toBe(true);
+      expect(isOff((await openPopup(fixture)))).toBe(true);
     });
 
     it('discards a configured relative range, pages back to 0, and leaves the popup open reading Any', async () => {
@@ -2447,7 +2454,7 @@ describe('SignalListComponent range filter (filterRanges)', () => {
       fixture.componentInstance.pageIndex.set(2);
       await fixture.whenStable();
       const clear = await openPopup(fixture);
-      expect(clear.disabled).toBe(false);
+      expect(isOn(clear)).toBe(true);
 
       clear.click();
       await fixture.whenStable();
@@ -2456,7 +2463,7 @@ describe('SignalListComponent range filter (filterRanges)', () => {
       expect(fixture.componentInstance.pageIndex()).toBe(0);
       const component = componentWith(fixture);
       expect(component.multiPopupOpen()).toBe(true);
-      expect((fixture.nativeElement.querySelector('[data-test="range-filter-clear"]') as HTMLButtonElement).disabled).toBe(true);
+      expect(isOff((fixture.nativeElement.querySelector('[data-test="range-filter-clear"]') as HTMLButtonElement))).toBe(true);
       expect(component.rangeSummary(component.activeRange()!)).toBe('Any');
     });
   });
@@ -2585,3 +2592,185 @@ describe('SignalListComponent icon glyphs and accessible names', () => {
     }
   });
 });
+
+// WCAG 2.4.3: a control that turns itself off, or goes away, when pressed
+// must not leave keyboard focus on the page body.
+describe('SignalListComponent keeps focus on a pressed control', () => {
+  const button = (root: HTMLElement, text: string) =>
+    Array.from(root.querySelectorAll('button')).find(b => b.textContent!.trim() === text) as HTMLButtonElement;
+
+  it('Refresh stays focusable while it works and ignores a second press', async () => {
+    let resolveRefresh!: () => void;
+    const onRefresh = vi.fn(() => new Promise<void>(r => { resolveRefresh = r; }));
+    const fixture = TestBed.createComponent(Host);
+    fixture.componentInstance.config = { ...fixture.componentInstance.config, onRefresh };
+    await fixture.whenStable();
+    const refresh = fixture.nativeElement.querySelector('[data-test="refresh"]') as HTMLButtonElement;
+    refresh.focus();
+
+    refresh.click();
+    await fixture.whenStable();
+    expect(isOff(refresh)).toBe(true);
+    expect(document.activeElement).toBe(refresh);
+    refresh.click();
+    expect(onRefresh).toHaveBeenCalledOnce();
+
+    resolveRefresh();
+    await fixture.whenStable();
+    expect(isOn(refresh)).toBe(true);
+  });
+
+  it('Clear filters and sort ignores a press while no filter is set', async () => {
+    const fixture = TestBed.createComponent(Host);
+    const onClear = vi.fn();
+    fixture.componentInstance.config = { ...fixture.componentInstance.config, nameFilter: signal(''), onClear };
+    await fixture.whenStable();
+    (fixture.nativeElement.querySelector('[data-test="clear-filters"]') as HTMLButtonElement).click();
+    expect(onClear).not.toHaveBeenCalled();
+  });
+
+  it('the pager buttons at either end ignore a press', async () => {
+    const fixture = TestBed.createComponent(Host);
+    fixture.componentInstance.config = { ...fixture.componentInstance.config, totalPages: signal(2).asReadonly() };
+    await fixture.whenStable();
+    const pager = (title: string) => fixture.nativeElement.querySelector(`[title="${title}"]`) as HTMLButtonElement;
+
+    // First and Last set the page they are already on, so only Previous and
+    // Next show the press is ignored; all four must be off.
+    expect(isOff(pager('First page'))).toBe(true);
+    expect(isOff(pager('Previous page'))).toBe(true);
+    pager('Previous page').click();
+    await fixture.whenStable();
+    expect(fixture.componentInstance.pageIndex()).toBe(0);
+
+    fixture.componentInstance.pageIndex.set(1);
+    await fixture.whenStable();
+    expect(isOff(pager('Next page'))).toBe(true);
+    expect(isOff(pager('Last page'))).toBe(true);
+    pager('Next page').click();
+    await fixture.whenStable();
+    expect(fixture.componentInstance.pageIndex()).toBe(1);
+  });
+
+  it('the checklist popup Clear ignores a press while the filter is not set', async () => {
+    const fixture = TestBed.createComponent(MultiFilterHost);
+    fixture.componentInstance.pageIndex.set(3);
+    await fixture.whenStable();
+    (fixture.nativeElement.querySelector('[data-test="multi-filter-toggle"]') as HTMLButtonElement).click();
+    await fixture.whenStable();
+    (fixture.nativeElement.querySelector('[data-test="multi-filter-clear"]') as HTMLButtonElement).click();
+    expect(fixture.componentInstance.pageIndex()).toBe(3);
+  });
+
+  it('the range popup Clear ignores a press while the filter is not set', async () => {
+    const fixture = TestBed.createComponent(RangeFilterHost);
+    fixture.componentInstance.pageIndex.set(3);
+    await fixture.whenStable();
+    (fixture.nativeElement.querySelector('[data-test="range-filter-toggle"]') as HTMLButtonElement).click();
+    await fixture.whenStable();
+    (fixture.nativeElement.querySelector('[data-test="range-filter-clear"]') as HTMLButtonElement).click();
+    expect(fixture.componentInstance.pageIndex()).toBe(3);
+  });
+
+  it('Close on the checklist popup puts focus back on the button that opened it', async () => {
+    const fixture = TestBed.createComponent(MultiFilterHost);
+    await fixture.whenStable();
+    const toggle = fixture.nativeElement.querySelector('[data-test="multi-filter-toggle"]') as HTMLButtonElement;
+    toggle.click();
+    await fixture.whenStable();
+    const close = button(fixture.nativeElement, 'Close');
+    close.focus();
+
+    close.click();
+    await fixture.whenStable();
+
+    expect(listOf(fixture).multiPopupOpen()).toBe(false);
+    expect(document.activeElement).toBe(toggle);
+  });
+
+  it('Escape in the checklist popup puts focus back on the button that opened it', async () => {
+    const fixture = TestBed.createComponent(MultiFilterHost);
+    await fixture.whenStable();
+    const toggle = fixture.nativeElement.querySelector('[data-test="multi-filter-toggle"]') as HTMLButtonElement;
+    toggle.click();
+    await fixture.whenStable();
+    const box = fixture.nativeElement.querySelector('[data-test="multi-filter-wrap"] input[type="checkbox"]') as HTMLInputElement;
+    box.focus();
+
+    box.dispatchEvent(new KeyboardEvent('keydown', { key: 'Escape', bubbles: true }));
+    await fixture.whenStable();
+
+    expect(listOf(fixture).multiPopupOpen()).toBe(false);
+    expect(document.activeElement).toBe(toggle);
+  });
+
+  it('Close on the range popup puts focus back on the button that opened it', async () => {
+    const fixture = TestBed.createComponent(RangeFilterHost);
+    await fixture.whenStable();
+    const toggle = fixture.nativeElement.querySelector('[data-test="range-filter-toggle"]') as HTMLButtonElement;
+    toggle.click();
+    await fixture.whenStable();
+    const close = button(fixture.nativeElement, 'Close');
+    close.focus();
+
+    close.click();
+    await fixture.whenStable();
+
+    expect(listOf(fixture).multiPopupOpen()).toBe(false);
+    expect(document.activeElement).toBe(toggle);
+  });
+
+  async function bulkFixture(selectAll: boolean) {
+    const fixture = TestBed.createComponent(SelectAllHost);
+    const running = signal(false);
+    const run = vi.fn();
+    const config = fixture.componentInstance.config;
+    const [sel, ...rest] = config.columns;
+    fixture.componentInstance.config = {
+      ...config,
+      columns: [selectAll ? sel : { ...sel, checkbox: { selectedKeys: sel.checkbox!.selectedKeys } }, ...rest],
+      bulkActions: [{ label: 'Delete', run }],
+      bulkRunning: running,
+    };
+    fixture.componentInstance.selected.set(new Set(['two']));
+    await fixture.whenStable();
+    return { fixture, running, run };
+  }
+
+  it('a bulk action stays focusable while one runs and ignores the press', async () => {
+    const { fixture, running, run } = await bulkFixture(true);
+    running.set(true);
+    await fixture.whenStable();
+    const del = fixture.nativeElement.querySelector('[data-test="bulk-action-Delete"]') as HTMLButtonElement;
+    expect(isOff(del)).toBe(true);
+    del.click();
+    expect(run).not.toHaveBeenCalled();
+  });
+
+  it('Clear in the bulk-action bar puts focus on Select all', async () => {
+    const { fixture } = await bulkFixture(true);
+    const clear = fixture.nativeElement.querySelector('[data-test="bulk-clear"]') as HTMLButtonElement;
+    clear.focus();
+
+    clear.click();
+    await fixture.whenStable();
+
+    expect(fixture.nativeElement.querySelector('[data-test="bulk-action-bar"]')).toBeNull();
+    expect(document.activeElement).toBe(fixture.nativeElement.querySelector('[data-test="select-all"]'));
+  });
+
+  it('Clear in the bulk-action bar puts focus on the first row checkbox when there is no Select all', async () => {
+    const { fixture } = await bulkFixture(false);
+    const clear = fixture.nativeElement.querySelector('[data-test="bulk-clear"]') as HTMLButtonElement;
+    clear.focus();
+
+    clear.click();
+    await fixture.whenStable();
+
+    expect(document.activeElement).toBe(fixture.nativeElement.querySelector('[data-test="row-checkbox"]'));
+  });
+});
+
+function listOf<H>(fixture: ReturnType<typeof TestBed.createComponent<H>>) {
+  return fixture.debugElement.children[0].componentInstance as SignalListComponent<any>;
+}

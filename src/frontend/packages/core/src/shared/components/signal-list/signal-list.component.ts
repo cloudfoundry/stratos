@@ -569,9 +569,26 @@ export class SignalListComponent<T> implements AfterViewInit {
   // wire onRefresh return either void or Promise<void>; either way the
   // refresh state clears once the promise resolves (or synchronously on
   // void return).
+  // A button that is off while it works, or at the end of what it can do,
+  // is aria-disabled, not disabled, and its handler ignores the press:
+  // Chromium takes focus off a focused button that becomes disabled and
+  // puts it on the page body (WCAG 2.4.3). Refresh, Clear, the pager and
+  // the bulk actions all turn off when pressed.
+  refreshBusy(): boolean {
+    return (this.config().isAnyLoading() || this.isRefreshing()) && this.config().totalFilteredResults() > 0;
+  }
+
+  onFirstPage(): boolean {
+    return this.effectivePageIndex() === 0;
+  }
+
+  onLastPage(): boolean {
+    return this.effectivePageIndex() + 1 >= Math.max(1, this.config().totalPages());
+  }
+
   async invokeRefresh(): Promise<void> {
     const fn = this.config()?.onRefresh;
-    if (!fn) return;
+    if (!fn || this.refreshBusy()) return;
     this.isRefreshing.set(true);
     try {
       await fn();
@@ -874,9 +891,19 @@ export class SignalListComponent<T> implements AfterViewInit {
   // Clears the checkbox column's selection. Used by the "Clear" button in
   // the bulk-action bar and is the recommended path for consumers to call
   // after a bulk action completes (delete-style actions especially).
+  // The bar goes away with the selection; focus in it moves to the first
+  // selection checkbox (Select all when shown) rather than the page body.
   clearBulkSelection(): void {
+    const host = this.host.nativeElement;
+    if (host.querySelector('[data-test="bulk-action-bar"]')?.contains(document.activeElement)) {
+      host.querySelector<HTMLElement>('[data-test="select-all"], [data-test="row-checkbox"], [data-test="card-select-checkbox"]')?.focus();
+    }
     const col = this.checkboxColumn();
     col?.checkbox?.selectedKeys.set(new Set());
+  }
+
+  bulkActionOff(act: SignalListBulkAction<T>): boolean {
+    return !!act.disabled?.() || !!this.config().bulkRunning?.();
   }
 
   // Invokes a bulk action, passing the current selection snapshot. Errors
@@ -885,7 +912,7 @@ export class SignalListComponent<T> implements AfterViewInit {
   // consumer decides whether the action invalidates the selection (delete:
   // yes; mark-favorite: no).
   async invokeBulkAction(act: SignalListBulkAction<T>): Promise<void> {
-    if (act.disabled?.()) return;
+    if (this.bulkActionOff(act)) return;
     const col = this.checkboxColumn();
     const keys = col?.checkbox?.selectedKeys() ?? new Set<string>();
     if (keys.size === 0) return;
@@ -1268,6 +1295,17 @@ export class SignalListComponent<T> implements AfterViewInit {
   // suffices rather than one open-flag per configured field.
   readonly multiPopupOpen = signal(false);
 
+  // Close and Escape: the popup goes away with the focused control in it,
+  // so focus goes back to the button that opened it.
+  closePopup(): void {
+    const wrap = this.host.nativeElement.querySelector('[data-test="multi-filter-wrap"], [data-test="range-filter-wrap"]');
+    const hadFocus = wrap?.contains(document.activeElement);
+    this.multiPopupOpen.set(false);
+    if (hadFocus) {
+      wrap!.querySelector<HTMLElement>('[data-test="multi-filter-toggle"], [data-test="range-filter-toggle"]')?.focus();
+    }
+  }
+
   // The filterMultis entry whose field matches the active filterField(),
   // or undefined when the current field uses the plain text input.
   activeMulti(): SignalListMultiFilter | undefined {
@@ -1356,6 +1394,7 @@ export class SignalListComponent<T> implements AfterViewInit {
   // one deliberate gesture that discards the stored configuration — the
   // implicit collapse rules in updateRange stay date-mode-only.
   clearPopupFilter(f: SignalListMultiFilter | SignalListRangeFilter): void {
+    if (f.selected() === null) return;
     f.selected.set(null);
     this.config().pageIndex.set(0);
   }

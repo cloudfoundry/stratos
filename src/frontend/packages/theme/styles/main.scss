@@ -345,6 +345,9 @@ router-outlet + * {
     @apply transition-all duration-200 cursor-pointer;
     @apply focus:outline-none focus:ring-2 focus:ring-offset-2;
     @apply disabled:opacity-50 disabled:cursor-not-allowed disabled:shadow-none;
+    /* A button that turns off while it works stays focusable: aria-disabled,
+       not disabled (a disabled button drops focus to the page body). */
+    @apply aria-disabled:opacity-50 aria-disabled:cursor-not-allowed aria-disabled:shadow-none;
   }
 
   /* Primary Button */
@@ -353,13 +356,13 @@ router-outlet + * {
     color: var(--color-on-primary);
     background-color: var(--color-primary);
 
-    &:hover:not(:disabled) {
+    &:hover:not(:disabled, [aria-disabled="true"]) {
       @apply shadow-md;
       background-color: color-mix(in srgb, var(--color-primary) 90%, black);
       transform: translateY(-1px);
     }
 
-    &:active:not(:disabled) {
+    &:active:not(:disabled, [aria-disabled="true"]) {
       transform: translateY(0);
     }
 
@@ -375,7 +378,7 @@ router-outlet + * {
     background-color: var(--card-bg);
     border-color: var(--content-border);
 
-    &:hover:not(:disabled) {
+    &:hover:not(:disabled, [aria-disabled="true"]) {
       @apply shadow;
       background-color: color-mix(in srgb, var(--card-bg) 95%, black);
       border-color: var(--content-border);
@@ -392,7 +395,7 @@ router-outlet + * {
     color: var(--color-on-success);
     background-color: var(--color-success);
 
-    &:hover:not(:disabled) {
+    &:hover:not(:disabled, [aria-disabled="true"]) {
       @apply shadow-md;
       background-color: color-mix(in srgb, var(--color-success) 90%, black);
       transform: translateY(-1px);
@@ -409,7 +412,7 @@ router-outlet + * {
     color: var(--color-on-warning);
     background-color: var(--color-warning);
 
-    &:hover:not(:disabled) {
+    &:hover:not(:disabled, [aria-disabled="true"]) {
       @apply shadow-md;
       background-color: color-mix(in srgb, var(--color-warning) 90%, black);
       transform: translateY(-1px);
@@ -426,7 +429,7 @@ router-outlet + * {
     color: var(--color-on-danger);
     background-color: var(--color-danger);
 
-    &:hover:not(:disabled) {
+    &:hover:not(:disabled, [aria-disabled="true"]) {
       @apply shadow-md;
       background-color: color-mix(in srgb, var(--color-danger) 90%, black);
       transform: translateY(-1px);
@@ -455,7 +458,7 @@ router-outlet + * {
     color: var(--color-on-primary);
     background-color: var(--color-info);
 
-    &:hover:not(:disabled) {
+    &:hover:not(:disabled, [aria-disabled="true"]) {
       @apply shadow-md;
       background-color: color-mix(in srgb, var(--color-info) 90%, black);
       transform: translateY(-1px);
@@ -472,7 +475,7 @@ router-outlet + * {
     color: var(--content-text);
     border-color: var(--content-border);
 
-    &:hover:not(:disabled) {
+    &:hover:not(:disabled, [aria-disabled="true"]) {
       background-color: color-mix(in srgb, var(--card-bg) 90%, var(--content-text));
       border-color: var(--content-text);
     }
@@ -484,7 +487,7 @@ router-outlet + * {
     border-color: var(--color-primary);
     color: var(--color-primary);
 
-    &:hover:not(:disabled) {
+    &:hover:not(:disabled, [aria-disabled="true"]) {
       background-color: var(--color-primary);
       color: var(--color-on-primary);
       @apply shadow-sm;
@@ -496,7 +499,7 @@ router-outlet + * {
     color: var(--content-text);
     border-color: var(--content-border);
 
-    &:hover:not(:disabled) {
+    &:hover:not(:disabled, [aria-disabled="true"]) {
       background-color: color-mix(in srgb, var(--card-bg) 90%, var(--content-text));
       border-color: var(--content-text);
     }
@@ -521,7 +524,7 @@ router-outlet + * {
   .btn-icon:not(:where(.btn-primary, .btn-success, .btn-warning, .btn-danger, .btn-info)) {
     color: var(--content-text);
 
-    &:hover:not(:disabled) {
+    &:hover:not(:disabled, [aria-disabled="true"]) {
       background-color: color-mix(in srgb, var(--card-bg) 90%, var(--content-text));
     }
   }

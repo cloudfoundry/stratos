@@ -41,7 +41,7 @@
         </select>
       }
       @if (activeMulti(); as fm) {
-        <div class="relative" data-test="multi-filter-wrap" tabindex="-1" (keydown.escape)="multiPopupOpen.set(false)">
+        <div class="relative" data-test="multi-filter-wrap" tabindex="-1" (keydown.escape)="closePopup()">
           <button
             type="button"
             data-test="multi-filter-toggle"
@@ -68,19 +68,19 @@
                 <button
                   type="button"
                   data-test="multi-filter-clear"
-                  [disabled]="fm.selected() === null"
+                  [attr.aria-disabled]="fm.selected() === null || null"
                   (click)="clearPopupFilter(fm)"
-                  class="flex-1 text-xs text-content-muted disabled:opacity-40">Clear</button>
+                  class="flex-1 text-xs text-content-muted aria-disabled:opacity-40">Clear</button>
                 <button
                   type="button"
-                  (click)="multiPopupOpen.set(false)"
+                  (click)="closePopup()"
                   class="flex-1 text-xs text-content-muted">Close</button>
               </div>
             </div>
           }
         </div>
       } @else if (activeRange(); as fr) {
-        <div class="relative" data-test="range-filter-wrap" tabindex="-1" (keydown.escape)="multiPopupOpen.set(false)">
+        <div class="relative" data-test="range-filter-wrap" tabindex="-1" (keydown.escape)="closePopup()">
           <button
             type="button"
             data-test="range-filter-toggle"
@@ -197,12 +197,12 @@
                 <button
                   type="button"
                   data-test="range-filter-clear"
-                  [disabled]="fr.selected() === null"
+                  [attr.aria-disabled]="fr.selected() === null || null"
                   (click)="clearPopupFilter(fr)"
-                  class="flex-1 text-xs text-content-muted disabled:opacity-40">Clear</button>
+                  class="flex-1 text-xs text-content-muted aria-disabled:opacity-40">Clear</button>
                 <button
                   type="button"
-                  (click)="multiPopupOpen.set(false)"
+                  (click)="closePopup()"
                   class="flex-1 text-xs text-content-muted">Close</button>
               </div>
             </div>
@@ -225,11 +225,11 @@
       <button
         data-test="clear-filters"
         type="button"
-        (click)="config().onClear!()"
-        [disabled]="!hasActiveFilter()"
+        (click)="hasActiveFilter() && config().onClear!()"
+        [attr.aria-disabled]="!hasActiveFilter() || null"
         title="Clear filters and sort"
         aria-label="Clear filters and sort"
-        class="px-2 py-1 text-sm border border-content-border rounded bg-content-bg text-content-text hover:bg-content-secondary disabled:opacity-40 disabled:cursor-not-allowed">
+        class="px-2 py-1 text-sm border border-content-border rounded bg-content-bg text-content-text hover:bg-content-secondary aria-disabled:opacity-40 aria-disabled:cursor-not-allowed">
         <span aria-hidden="true" class="material-icons text-base leading-5">highlight_off</span>
       </button>
     }
@@ -314,11 +314,11 @@
       <button
         type="button"
         (click)="invokeRefresh()"
-        [disabled]="(config().isAnyLoading() || isRefreshing()) && config().totalFilteredResults() > 0"
-        [attr.data-test]="((config().isAnyLoading() || isRefreshing()) && config().totalFilteredResults() > 0) ? 'refresh-loading' : 'refresh'"
-        [title]="((config().isAnyLoading() || isRefreshing()) && config().totalFilteredResults() > 0) ? 'Refreshing…' : 'Refresh'"
-        [attr.aria-label]="((config().isAnyLoading() || isRefreshing()) && config().totalFilteredResults() > 0) ? 'Refreshing…' : 'Refresh'"
-        class="px-2 py-1 border border-content-border rounded bg-content-bg hover:bg-content-secondary disabled:opacity-100">
+        [attr.aria-disabled]="refreshBusy() || null"
+        [attr.data-test]="refreshBusy() ? 'refresh-loading' : 'refresh'"
+        [title]="refreshBusy() ? 'Refreshing…' : 'Refresh'"
+        [attr.aria-label]="refreshBusy() ? 'Refreshing…' : 'Refresh'"
+        class="px-2 py-1 border border-content-border rounded bg-content-bg hover:bg-content-secondary">
         <!--
           Fixed h-5 w-5 (20×20) slot for the icon/spinner so peer toolbar
           items don't shift horizontally each refresh cycle. The material-
@@ -327,7 +327,7 @@
           button (and therefore the toolbar) layout stable.
         -->
         <span class="inline-flex items-center justify-center w-5 h-5 align-middle">
-          @if ((config().isAnyLoading() || isRefreshing()) && config().totalFilteredResults() > 0) {
+          @if (refreshBusy()) {
             <app-busy class="text-primary" size="1rem"></app-busy>
           } @else {
             <span aria-hidden="true" class="material-icons text-base leading-none">refresh</span>
@@ -365,10 +365,10 @@
         <button
           type="button"
           (click)="invokeBulkAction(act)"
-          [disabled]="(act.disabled ? act.disabled() : false) || (config().bulkRunning?.() ?? false)"
+          [attr.aria-disabled]="bulkActionOff(act) || null"
           [title]="act.title ?? act.label"
           [attr.data-test]="act.dataTest ?? ('bulk-action-' + act.label)"
-          [class]="'flex items-center gap-1 px-3 py-1 text-sm border rounded disabled:opacity-40 disabled:cursor-not-allowed ' +
+          [class]="'flex items-center gap-1 px-3 py-1 text-sm border rounded aria-disabled:opacity-40 aria-disabled:cursor-not-allowed ' +
             (act.danger
               ? 'border-danger bg-danger text-on-danger hover:bg-danger/90'
               : 'border-content-border bg-content-bg text-content-text hover:bg-content-secondary')">
@@ -943,36 +943,36 @@
     <div class="flex items-center gap-1">
       <button
         type="button"
-        class="p-1 border border-content-border rounded bg-content-bg hover:bg-content-secondary disabled:opacity-40 disabled:cursor-not-allowed"
-        [disabled]="effectivePageIndex() === 0"
-        (click)="config().pageIndex.set(0)"
+        class="p-1 border border-content-border rounded bg-content-bg hover:bg-content-secondary aria-disabled:opacity-40 aria-disabled:cursor-not-allowed"
+        [attr.aria-disabled]="onFirstPage() || null"
+        (click)="onFirstPage() || config().pageIndex.set(0)"
         title="First page"
         aria-label="First page">
         <span aria-hidden="true" class="material-icons text-base leading-5">first_page</span>
       </button>
       <button
         type="button"
-        class="p-1 border border-content-border rounded bg-content-bg hover:bg-content-secondary disabled:opacity-40 disabled:cursor-not-allowed"
-        [disabled]="effectivePageIndex() === 0"
-        (click)="config().pageIndex.set(effectivePageIndex() - 1)"
+        class="p-1 border border-content-border rounded bg-content-bg hover:bg-content-secondary aria-disabled:opacity-40 aria-disabled:cursor-not-allowed"
+        [attr.aria-disabled]="onFirstPage() || null"
+        (click)="onFirstPage() || config().pageIndex.set(effectivePageIndex() - 1)"
         title="Previous page"
         aria-label="Previous page">
         <span aria-hidden="true" class="material-icons text-base leading-5">chevron_left</span>
       </button>
       <button
         type="button"
-        class="p-1 border border-content-border rounded bg-content-bg hover:bg-content-secondary disabled:opacity-40 disabled:cursor-not-allowed"
-        [disabled]="effectivePageIndex() + 1 >= Math.max(1, config().totalPages())"
-        (click)="config().pageIndex.set(effectivePageIndex() + 1)"
+        class="p-1 border border-content-border rounded bg-content-bg hover:bg-content-secondary aria-disabled:opacity-40 aria-disabled:cursor-not-allowed"
+        [attr.aria-disabled]="onLastPage() || null"
+        (click)="onLastPage() || config().pageIndex.set(effectivePageIndex() + 1)"
         title="Next page"
         aria-label="Next page">
         <span aria-hidden="true" class="material-icons text-base leading-5">chevron_right</span>
       </button>
       <button
         type="button"
-        class="p-1 border border-content-border rounded bg-content-bg hover:bg-content-secondary disabled:opacity-40 disabled:cursor-not-allowed"
-        [disabled]="effectivePageIndex() + 1 >= Math.max(1, config().totalPages())"
-        (click)="config().pageIndex.set(Math.max(0, config().totalPages() - 1))"
+        class="p-1 border border-content-border rounded bg-content-bg hover:bg-content-secondary aria-disabled:opacity-40 aria-disabled:cursor-not-allowed"
+        [attr.aria-disabled]="onLastPage() || null"
+        (click)="onLastPage() || config().pageIndex.set(Math.max(0, config().totalPages() - 1))"
         title="Last page"
         aria-label="Last page">
         <span aria-hidden="true" class="material-icons text-base leading-5">last_page</span>

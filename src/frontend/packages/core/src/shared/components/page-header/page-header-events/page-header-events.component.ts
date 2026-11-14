@@ -1,5 +1,5 @@
 import { CommonModule } from '@angular/common';
-import { ChangeDetectionStrategy, Component, OnInit, computed, inject, input, signal } from '@angular/core';
+import { ChangeDetectionStrategy, Component, ElementRef, OnInit, computed, inject, input, signal } from '@angular/core';
 import { ActivatedRoute, RouterModule } from '@angular/router';
 
 import { endpointEventKey, GlobalEventService, IGlobalEvent } from '../../../global-events.service';
@@ -19,6 +19,7 @@ import { CustomIconComponent } from '../../../../shared/components/custom-materi
 export class PageHeaderEventsComponent implements OnInit {
   private activatedRoute = inject(ActivatedRoute);
   private eventService = inject(GlobalEventService);
+  private host: ElementRef<HTMLElement> = inject(ElementRef);
 
   public readonly endpointIds = input<string[]>();
   public readonly simpleErrorMessage = input(false);
@@ -73,6 +74,11 @@ export class PageHeaderEventsComponent implements OnInit {
   });
 
   public markEventsAsRead() {
+    // The message goes away with its Dismiss button. Focus goes to the main
+    // landmark, as the skip link does, rather than to the page body.
+    if (this.host.nativeElement.contains(document.activeElement)) {
+      document.getElementById('main-content')?.focus();
+    }
     this.events().forEach(event => this.eventService.updateEventReadState(event, true));
   }
 

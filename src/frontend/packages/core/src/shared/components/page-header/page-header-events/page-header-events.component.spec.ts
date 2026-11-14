@@ -67,6 +67,41 @@ describe('PageHeaderEventsComponent dismiss', () => {
     expect(updateEventReadState).toHaveBeenCalledWith(event, true);
   });
 
+  // The message goes away with its Dismiss button (WCAG 2.4.3): focus goes
+  // to the main landmark, where the skip link puts it, not the page body.
+  it('puts focus on the main content when Dismiss is pressed', async () => {
+    const event = { key: `${endpointEventKey}-ep-1`, endpointId: 'ep-1', message: 'Endpoint down', read: false };
+    const events = signal([event]);
+    TestBed.configureTestingModule({
+      imports: [PageHeaderEventsComponent],
+      providers: [
+        provideZonelessChangeDetection(),
+        provideRouter([]),
+        { provide: ActivatedRoute, useValue: { snapshot: { params: {} } } },
+        { provide: GlobalEventService, useValue: { events, updateEventReadState: () => events.set([]) } },
+      ],
+    });
+    const main = document.createElement('main');
+    main.id = 'main-content';
+    main.tabIndex = -1;
+    document.body.appendChild(main);
+    try {
+      const fixture = TestBed.createComponent(PageHeaderEventsComponent);
+      fixture.componentRef.setInput('endpointIds', ['ep-1']);
+      await fixture.whenStable();
+      const button = (fixture.nativeElement as HTMLElement).querySelector<HTMLButtonElement>('button[aria-label="Dismiss"]')!;
+      button.focus();
+
+      button.click();
+      await fixture.whenStable();
+
+      expect((fixture.nativeElement as HTMLElement).querySelector('button[aria-label="Dismiss"]')).toBeNull();
+      expect(document.activeElement).toBe(main);
+    } finally {
+      main.remove();
+    }
+  });
+
   // In dark mode the fixed danger shades put the banner text at 2.2-4.4:1
   // (#4166). The theme's alert tokens change with the mode; the link takes
   // the alert text color (the link blue is under 4.5:1 on the alert tint).
