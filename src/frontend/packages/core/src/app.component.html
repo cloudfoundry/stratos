@@ -1,7 +1,7 @@
 <span [ngClass]="branding.isDarkMode() ? 'dark-theme' : 'default-theme'">
 
   <router-outlet></router-outlet>
-  @if (userId$ | async; as userId) {
+  @if (userId(); as userId) {
     <div class="hidden" id="__stratos-userid__">{{userId}}</div>
   }
 </span>
