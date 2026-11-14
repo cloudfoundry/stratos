@@ -9,6 +9,8 @@ import {
   generateStratosEntities,
   EntityCatalogHelper,
   EntityCatalogHelpers,
+  EndpointErrorEventsService,
+  EndpointsDataService,
   RoutingHistoryService,
 } from '@stratosui/store';
 import { createBasicStoreModule, STORE_TEST_PROVIDERS } from '@test-framework';
@@ -43,10 +45,10 @@ describe('ErrorPageComponent', () => {
     EntityCatalogHelpers.SetEntityCatalogHelper(helper);
   });
 
-  beforeEach(() => {
+  beforeEach(async () => {
     fixture = TestBed.createComponent(ErrorPageComponent);
     component = fixture.componentInstance;
-    fixture.detectChanges();
+    await fixture.whenStable();
   });
 
   it('should create', () => {
@@ -76,5 +78,48 @@ describe('ErrorPageComponent Close link', () => {
     expect(component.backParams()).toEqual({ [eventReturnUrlParam]: '/applications' });
     previousState.set({ url: '/home' });
     expect(component.back()).toBe('/events');
+  });
+});
+
+describe('ErrorPageComponent for an endpoint', () => {
+  const errors = signal<any[]>([]);
+  const endpoint = signal<any>({ guid: 'ep-1', name: 'My CF' });
+
+  beforeEach(async () => {
+    errors.set([]);
+    endpoint.set({ guid: 'ep-1', name: 'My CF' });
+    await TestBed.configureTestingModule({
+      imports: [RouterTestingModule, NoopAnimationsModule, ErrorPageComponent],
+      providers: [
+        provideZonelessChangeDetection(),
+        { provide: ActivatedRoute, useValue: { snapshot: { params: { endpointId: 'ep-1' }, queryParams: {} } } },
+        { provide: RoutingHistoryService, useValue: { previousState: signal(null) } },
+        { provide: EndpointsDataService, useValue: { endpointById: () => endpoint, endpoints: () => new Map() } },
+        { provide: EndpointErrorEventsService, useValue: { errorsForEndpoint: () => errors, clearEndpoint: () => undefined, eventsByEndpoint: () => new Map() } },
+      ],
+    }).compileComponents();
+  });
+
+  // The page lists the endpoint's backend (5xx) errors of the last half hour
+  // and offers them as a download.
+  it('lists recent backend errors and follows the endpoint and its history', async () => {
+    const fixture = TestBed.createComponent(ErrorPageComponent);
+    await fixture.whenStable();
+    const text = () => (fixture.nativeElement as HTMLElement).textContent!.replace(/\s+/g, ' ');
+    expect(text()).toContain('No recent errors');
+
+    const recent = { eventCode: '502', message: 'Bad gateway', timestamp: Date.now(), metadata: {} };
+    const old = { eventCode: '500', message: 'Too old', timestamp: Date.now() - 3600_000, metadata: {} };
+    const client = { eventCode: '404', message: 'Not found', timestamp: Date.now(), metadata: {} };
+    errors.set([recent, old, client]);
+    await fixture.whenStable();
+    expect(text()).toContain('Bad gateway');
+    expect(text()).not.toContain('Too old');
+    expect(text()).not.toContain('Not found');
+    expect(fixture.nativeElement.querySelector('a[download]').getAttribute('href')).toContain('data:text/json');
+
+    endpoint.set({ guid: 'ep-1', name: 'Renamed' });
+    await fixture.whenStable();
+    expect(fixture.componentInstance.errorDetails()?.endpoint?.name).toBe('Renamed');
   });
 });

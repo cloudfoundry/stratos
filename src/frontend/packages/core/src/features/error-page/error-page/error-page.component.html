@@ -1,4 +1,4 @@
-@if (errorDetails$ | async; as errorDetails) {
+@if (errorDetails(); as errorDetails) {
   <app-page-header [hideEndpointErrors]="true">
     <h1>{{ errorDetails.endpoint?.name }} — Errors</h1>
     <div class="page-header-right">
@@ -16,7 +16,7 @@
           (click)="dismissEndpointErrors(errorDetails.endpoint?.guid)">
           Dismiss all
         </button>
-        <a class="btn btn-icon" [href]="jsonDownloadHref$ | async"
+        <a class="btn btn-icon" [href]="jsonDownloadHref()"
           download="endpoint-errors.json" title="Download endpoint error information"
           aria-label="Download endpoint error information">
           <app-custom-icon>cloud_download</app-custom-icon>
