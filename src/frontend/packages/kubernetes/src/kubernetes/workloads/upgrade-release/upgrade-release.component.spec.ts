@@ -19,6 +19,7 @@ import { kubeEntityCatalog } from '../../kubernetes-entity-generator';
 import { BaseKubeGuid } from '../../kubernetes-page.types';
 import { KubernetesEndpointService } from '../../services/kubernetes-endpoint.service';
 import { HelmReleaseHelperService } from '../release/tabs/helm-release-helper.service';
+import { HelmReleaseVersionsSignalConfigService } from './helm-release-versions-signal-config.service';
 import { UpgradeReleaseComponent } from './upgrade-release.component';
 
 
@@ -107,6 +108,8 @@ describe('UpgradeReleaseComponent', () => {
   });
 
   it('sets up the version list once the upgrade target resolves', () => {
+    // Loading the versions is HTTP; this test is about when the list is set up.
+    const loadAll = vi.spyOn(HelmReleaseVersionsSignalConfigService.prototype, 'loadAll').mockResolvedValue(undefined);
     const chart = signal<any>(null);
     (mockHelmReleaseHelper.upgrade as any).mockReturnValue(chart);
     const live = TestBed.createComponent(UpgradeReleaseComponent);
@@ -121,6 +124,7 @@ describe('UpgradeReleaseComponent', () => {
     TestBed.tick();
 
     expect(live.componentInstance.listConfig()).toBeDefined();
+    expect(loadAll).toHaveBeenCalledTimes(1);
   });
 
   // The upgrade target can resolve after the user has left the page. The
