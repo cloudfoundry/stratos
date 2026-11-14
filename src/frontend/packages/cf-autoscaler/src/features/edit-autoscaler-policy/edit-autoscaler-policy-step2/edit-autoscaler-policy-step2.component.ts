@@ -1,4 +1,4 @@
-import { ChangeDetectionStrategy, Component, OnInit, inject, signal } from '@angular/core';
+import { ChangeDetectionStrategy, Component, inject, signal } from '@angular/core';
 import { AbstractControl, FormBuilder, FormControl, FormGroup, ReactiveFormsModule, ValidationErrors, ValidatorFn, Validators } from '@angular/forms';
 import { TailwindErrorStateMatcher, TailwindShowOnDirtyErrorStateMatcher } from '@stratosui/core';
 import { Observable } from 'rxjs';
@@ -19,7 +19,7 @@ import {
   inValidMetricType,
   numberWithFractionOrExceedRange,
 } from '../../../core/autoscaler-helpers/autoscaler-validation';
-import { AppAutoscalerInvalidPolicyError, AppAutoscalerPolicyLocal } from '../../../store/app-autoscaler.types';
+import { AppAutoscalerInvalidPolicyError } from '../../../store/app-autoscaler.types';
 import { EditAutoscalerPolicyDirective } from '../edit-autoscaler-policy-base-step';
 
 interface EditTriggerForm {
@@ -48,7 +48,7 @@ interface EditTriggerForm {
     TileComponent
   ]
 })
-export class EditAutoscalerPolicyStep2Component extends EditAutoscalerPolicyDirective implements OnInit {
+export class EditAutoscalerPolicyStep2Component extends EditAutoscalerPolicyDirective {
   applicationService = inject(ApplicationService);
   private fb = inject(FormBuilder);
 

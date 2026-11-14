@@ -16,7 +16,6 @@ import {
 import { AutoscalerPolicyDataService } from '../../../services/domain-data/autoscaler-policy-data.service';
 import {
   AppAutoscalerInvalidPolicyError,
-  AppAutoscalerPolicyLocal,
   AppSpecificDate } from '../../../store/app-autoscaler.types';
 import { EditAutoscalerPolicyDirective } from '../edit-autoscaler-policy-base-step';
 import {
