@@ -13,11 +13,9 @@ export class CloudFoundryService {
   // signal is the authoritative source.
   private endpointsData = inject(EndpointsDataService);
 
-  // Signal form of the CF endpoint set. Callers that need to read a list at a
-  // known point in time — rather than react to it — must use these: the
-  // observables below are driven by toObservable(), which republishes on the
-  // next effect flush, so reading one immediately after
-  // EndpointsDataService.whenReady() still sees the pre-hydration value.
+  // The CF endpoint set as signals: read one at a known point in time, such
+  // as right after EndpointsDataService.whenReady(), or react to it in a
+  // computed or template.
   readonly cfEndpoints: Signal<EndpointModel[]> = computed(() =>
     this.endpointsData.endpointsList().filter(e => e.cnsi_type === 'cf')
   );
