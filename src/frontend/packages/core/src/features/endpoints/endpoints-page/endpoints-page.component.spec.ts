@@ -6,7 +6,6 @@ import { By } from '@angular/platform-browser';
 import { NoopAnimationsModule } from '@angular/platform-browser/animations';
 import { Router } from '@angular/router';
 import { RouterTestingModule } from '@angular/router/testing';
-import { of } from 'rxjs';
 import { AuthDataService, EndpointsDataService, EntityCatalogHelper, EntityCatalogHelpers } from '@stratosui/store';
 import { createBasicStoreModule, STORE_TEST_PROVIDERS } from '@stratosui/store/testing';
 import { CoreTestingModule } from "@test-framework/core-test.modules";
