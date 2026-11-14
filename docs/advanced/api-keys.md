@@ -26,11 +26,30 @@ The user menu offers **API Keys** only to users who can create keys.
 2. Click **+** (Create API Key) and give the key a description, such as the
    name of the tool that will use it. The description is only a label, so you
    can tell your keys apart later.
-3. Click **Create**. The page shows the key's secret with a copy button.
+3. Choose when the key expires: in 30, 90 (the default) or 365 days, on a
+   date you pick, or never.
+4. Click **Create**. The next step shows the key's secret, hidden until you
+   click the eye button, with a copy button beside it.
+5. Click **Done**.
 
 The secret is shown once. Stratos keeps no way to show it again, so copy it
-before you close the message. If you lose it, delete the key and create a new
+before you click **Done**. If you lose it, delete the key and create a new
 one.
+
+## When a key expires
+
+The API Keys page lists each key's expiry in its **Expires** column. From a
+day before a key expires until a week after, the page shows a message about it
+with **Create replacement**, which opens the create dialog with the same
+description. Put the new secret wherever the tool keeps it, then delete the
+old key.
+
+A request with an expired key is refused with `401` and the message
+`API key expired on <date and time in UTC>`. Keys created before expiry
+existed never expire.
+
+The latest expiry date accepted is 19 January 2038, because some databases
+Stratos supports cannot store a later one. **Never** is not affected.
 
 ## Using a key
 
