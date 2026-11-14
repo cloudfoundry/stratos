@@ -1,10 +1,10 @@
 import { CommonModule } from '@angular/common';
-import { Component, OnDestroy, signal, computed, inject, ChangeDetectionStrategy, Injector, runInInjectionContext, Signal } from '@angular/core';
+import { Component, OnDestroy, signal, computed, inject, ChangeDetectionStrategy, Signal } from '@angular/core';
 import { Router, RouterModule } from '@angular/router';
-import { takeUntilDestroyed, toObservable, toSignal } from '@angular/core/rxjs-interop';
+import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { ConfirmationDialogConfig, ConfirmationDialogService, EndpointsSignalService, SidePanelService, naturalCompare } from '@stratosui/core';
-import { EMPTY, Observable, of, Subject } from 'rxjs';
-import { catchError, distinctUntilChanged, map, switchMap } from 'rxjs/operators';
+import { EMPTY, of, Subject } from 'rxjs';
+import { catchError, switchMap } from 'rxjs/operators';
 
 import { KubeHelmDataService } from '../../../../../services/endpoint-data/kube-helm-data.service';
 
@@ -61,16 +61,9 @@ export class HelmReleaseSummaryTabComponent implements OnDestroy {
   deleteReleaseConfirmation: ConfirmationDialogConfig;
 
   private busyDeleting = signal<boolean>(false);
-  // strict: the following observables are assigned in the constructor inside
-  // runInInjectionContext, which TS can't see through the closure.
-  public isBusy!: Signal<boolean>;
-  public hasResources$!: Observable<boolean>;
-  public hasAllResources$!: Observable<boolean>;
+  public readonly isBusy: Signal<boolean>;
   private readonly DEFAULT_LOADING_MESSAGE = 'Retrieving Release Details';
-  public loadingMessage = this.DEFAULT_LOADING_MESSAGE;
-
-  public podsChartData: any[] = [];
-  public containersChartData: any[] = [];
+  public readonly loadingMessage = computed(() => this.busyDeleting() ? 'Deleting Release' : this.DEFAULT_LOADING_MESSAGE);
 
   // Resolve adaptive theme colors once at construction. These feed the ring
   // chart domains; the component is not rebuilt on a live theme toggle, so the
@@ -78,12 +71,7 @@ export class HelmReleaseSummaryTabComponent implements OnDestroy {
   private successChartColor = cssVar('--color-success');
   private completedChartColour = cssVar('--color-info');
 
-  public path!: string; // strict: assigned in the constructor inside runInInjectionContext
-
-  public hasUpgrade$!: Observable<string>; // strict: assigned in the constructor inside runInInjectionContext
-
-  // Can we upgrade? Yes as long as the Helm Chart can be found
-  public canUpgrade$!: Observable<boolean>; // strict: assigned in the constructor inside runInInjectionContext
+  public readonly path: string;
 
   public podChartColors = [
     {
@@ -114,21 +102,18 @@ export class HelmReleaseSummaryTabComponent implements OnDestroy {
   // The last "Failed to delete release" message, stale once a retry deletes
   // the release.
   private deleteFailedSnackBar?: TailwindSnackBarRef<unknown>;
-  // strict: assigned in the constructor inside runInInjectionContext.
-  public chartData$!: Observable<HelmReleaseChartData>;
-  public resources$!: Observable<any[]>;
-
   // The analysis report whose alerts are shown on the resource cards; null for none
   private readonly analysisReport = signal<any>(null);
   private readonly analysisPick = new Subject<string | null>();
   public helmReleaseHelper = inject(HelmReleaseHelperService);
+  private readonly newerChart = this.helmReleaseHelper.upgrade();
+  private readonly latestChart = this.helmReleaseHelper.upgrade(true);
   private router = inject(Router);
   private endpointsSignals = inject(EndpointsSignalService);
   private confirmDialog = inject(ConfirmationDialogService);
   private snackbarService = inject(TailwindSnackBarService);
   public analyzerService = inject(KubernetesAnalysisService);
   private previewPanel = inject(SidePanelService);
-  private injector = inject(Injector);
   private helmDataService = inject(KubeHelmDataService);
 
 
@@ -142,87 +127,11 @@ export class HelmReleaseSummaryTabComponent implements OnDestroy {
       takeUntilDestroyed()
     ).subscribe(results => this.analysisReport.set(results));
 
-    // Convert signals within injection context
-    runInInjectionContext(this.injector, () => {
-      this.isBusy = computed(() =>
-        this.helmReleaseHelper.isFetching() || this.busyDeleting()
-      );
+    this.isBusy = computed(() =>
+      this.helmReleaseHelper.isFetching() || this.busyDeleting()
+    );
 
-      this.path = `${this.helmReleaseHelper.namespace}/${this.helmReleaseHelper.releaseTitle}`;
-
-      this.chartData$ = this.helmReleaseHelper.fetchReleaseChartStats().pipe(
-        distinctUntilChanged(),
-        map((chartData: any) => ({
-          ...chartData,
-          containersChartData: chartData.containersChartData.sort((a: any, b: any) => naturalCompare(a.name, b.name)),
-          podsChartData: chartData.podsChartData.sort((a: any, b: any) => naturalCompare(a.name, b.name))
-        })
-        )
-      );
-
-      this.hasUpgrade$ = this.helmReleaseHelper.hasUpgrade().pipe(map((v: any) => v ? v.version : null));
-
-      // Can upgrade if the Chart is available
-      this.canUpgrade$ = this.helmReleaseHelper.hasUpgrade(true).pipe(map((v: any) => !!v));
-
-      // Convert release graph to signal
-      const releaseGraphSignal = toSignal(
-        this.helmReleaseHelper.fetchReleaseGraph(),
-        { initialValue: { nodes: {} } as any }
-      );
-
-      // Compute resources based on graph and analysis report
-      const resourcesComputed = computed(() => {
-        const graph = releaseGraphSignal();
-
-        const resources: Record<string, any> = {};
-        // Collect the resources
-        if (graph && graph.nodes) {
-          Object.values(graph.nodes).forEach((node: any) => {
-            if (!resources[node.data.kind]) {
-              resources[node.data.kind] = {
-                kind: node.data.kind,
-                label: `${node.data.kind}s`,
-                count: 0,
-                statuses: [],
-                icon: getIcon(node.data.kind)
-              };
-            }
-            resources[node.data.kind].count++;
-            resources[node.data.kind].statuses.push(node.data.status);
-          });
-        }
-        this.applyAnalysis(resources, this.analysisReport());
-        return Object.values(resources).sort((a: any, b: any) => naturalCompare(a.kind, b.kind));
-      });
-
-      this.resources$ = toObservable(resourcesComputed);
-
-
-      // Convert chart data to signal
-      const chartDataSignal = toSignal(
-        this.chartData$,
-        { initialValue: null as any }
-      );
-
-      // Compute hasResources
-      const hasResourcesComputed = computed(() => {
-        const chartData = chartDataSignal();
-        const resources = resourcesComputed();
-        return !!chartData && !!resources;
-      });
-
-      this.hasResources$ = toObservable(hasResourcesComputed);
-
-      // Compute hasAllResources
-      const hasAllResourcesComputed = computed(() => {
-        const resources = resourcesComputed();
-        const hasSome = hasResourcesComputed();
-        return hasSome && resources && resources.length > 0;
-      });
-
-      this.hasAllResources$ = toObservable(hasAllResourcesComputed);
-    });
+    this.path = `${this.helmReleaseHelper.namespace}/${this.helmReleaseHelper.releaseTitle}`;
 
     this.deleteReleaseConfirmation = new ConfirmationDialogConfig(
       `Delete Workload`,
@@ -235,17 +144,64 @@ export class HelmReleaseSummaryTabComponent implements OnDestroy {
 
   }
 
+  // The newer chart version the release can be upgraded to, if any
+  public readonly hasUpgrade = computed(() => this.newerChart()?.version ?? null);
+
+  // Can we upgrade? Yes as long as the Helm Chart can be found
+  public readonly canUpgrade = computed(() => !!this.latestChart());
+
+  public readonly clusterName = computed(() =>
+    // Empty until the endpoint has hydrated.
+    this.endpointsSignals.endpoints()[this.helmReleaseHelper.endpointGuid]?.name ?? ''
+  );
+
+  private readonly chartStats = this.helmReleaseHelper.chartStats();
+
+  // Pod and container counts, sorted for the ring charts
+  public readonly chartData = computed<HelmReleaseChartData>(() => {
+    const stats = this.chartStats();
+    return {
+      ...stats,
+      containersChartData: [...stats.containersChartData].sort((a, b) => naturalCompare(a.name, b.name)),
+      podsChartData: [...stats.podsChartData].sort((a, b) => naturalCompare(a.name, b.name))
+    };
+  });
+
+  // The release's resources by kind, with the chosen report's alerts
+  public readonly resources = computed(() => {
+    const graph = this.helmReleaseHelper.graph();
+    const resources: Record<string, any> = {};
+    // Collect the resources
+    Object.values(graph?.nodes ?? {}).forEach((node: any) => {
+      if (!resources[node.data.kind]) {
+        resources[node.data.kind] = {
+          kind: node.data.kind,
+          label: `${node.data.kind}s`,
+          count: 0,
+          statuses: [],
+          icon: getIcon(node.data.kind)
+        };
+      }
+      resources[node.data.kind].count++;
+      resources[node.data.kind].statuses.push(node.data.status);
+    });
+    this.applyAnalysis(resources, this.analysisReport());
+    return Object.values(resources).sort((a: any, b: any) => naturalCompare(a.kind, b.kind));
+  });
+
+  public readonly hasResources = computed(() => !!this.chartData() && !!this.resources());
+
+  public readonly hasAllResources = computed(() => this.hasResources() && this.resources().length > 0);
+
   public analysisChanged(report: any) {
     this.analysisPick.next(report === null ? null : report.id);
   }
 
   private startDelete() {
-    this.loadingMessage = 'Deleting Release';
     this.busyDeleting.set(true);
   }
 
   private endDelete() {
-    this.loadingMessage = this.DEFAULT_LOADING_MESSAGE;
     this.busyDeleting.set(false);
   }
 
@@ -298,15 +254,6 @@ export class HelmReleaseSummaryTabComponent implements OnDestroy {
       `/kubernetes`,
       this.helmReleaseHelper.endpointGuid,
     ];
-  }
-
-  public getClusterName(): Observable<string> {
-    // Read the endpoint name from EndpointsSignalService instead of the
-    // legacy `endpointsEntityRequestDataSelector`. Returns an empty string
-    // if the endpoint hasn't hydrated yet — matches legacy `filter(!!e)`
-    // behaviour by emitting a synchronous value the template can render.
-    const endpoint = this.endpointsSignals.endpoints()[this.helmReleaseHelper.endpointGuid];
-    return of(endpoint?.name ?? '');
   }
 
   private applyAnalysis(resources: any, report: any) {

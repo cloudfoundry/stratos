@@ -4,7 +4,7 @@
       <span aria-hidden="true" class="material-icons">delete</span>
       <span>Delete</span>
     </button>
-    @if (canUpgrade$ | async) {
+    @if (canUpgrade()) {
       <button class="btn btn-primary" name="upgrade" [routerLink]="['../upgrade']" title="Upgrade">
         <span aria-hidden="true" class="material-icons">vertical_align_top</span>
         <span>Upgrade</span>
@@ -21,10 +21,10 @@
   </app-page-sub-nav>
 }
 
-<app-loading-page [isLoading]="isBusy()" [text]="loadingMessage">
+<app-loading-page [isLoading]="isBusy()" [text]="loadingMessage()">
   @if (helmReleaseHelper.release(); as release) {
     <div>
-      @if (hasUpgrade$ | async; as upgrade) {
+      @if (hasUpgrade(); as upgrade) {
         <div class="float-right rounded-lg text-xs mr-2.5 px-2 py-0.5">
           Upgrade available: {{ upgrade }}
         </div>
@@ -40,7 +40,7 @@
               {{ release.chart.metadata.appVersion || '-' }}
             </app-metadata-item>
             <app-metadata-item class="mr-10" label="Cluster">
-              <a [routerLink]="createClusterLink()">{{ getClusterName() | async }}</a>
+              <a [routerLink]="createClusterLink()">{{ clusterName() }}</a>
             </app-metadata-item>
             <app-metadata-item class="mr-10" label="Namespace">
               <a [routerLink]="createNamespaceLink(release.namespace)">{{ release.namespace }}</a>
@@ -59,11 +59,11 @@
         </div>
       </app-entity-summary-title>
     </div>
-    @if (hasResources$ | async) {
+    @if (hasResources()) {
       <div class="px-2.5">
         <app-metadata-item class="mr-10" label="Pods and Containers"></app-metadata-item>
         <app-tile-grid>
-          @if (chartData$ | async; as chartData) {
+          @if (chartData(); as chartData) {
             <app-tile-group>
               <app-tile>
                 <div class="card full-card">
@@ -81,9 +81,9 @@
           }
         </app-tile-grid>
         <app-metadata-item class="mr-10" label="All Resources"></app-metadata-item>
-        @if (hasAllResources$ | async) {
+        @if (hasAllResources()) {
           <div>
-            @if (resources$ | async; as resources) {
+            @if (resources(); as resources) {
               <div class="grid grid-cols-1 gap-2.5 min-h-0 min-w-0 sm:gap-5 sm:grid-cols-2 lg:grid-cols-3 min-[1350px]:grid-cols-4 2xl:grid-cols-5">
                 @for (res of resources; track res) {
                   <app-card-number-metric label="{{ res.label }}" icon="{{ res.icon.name }}"
