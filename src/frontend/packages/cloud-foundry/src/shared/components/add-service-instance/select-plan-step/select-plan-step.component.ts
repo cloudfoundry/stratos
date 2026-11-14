@@ -189,6 +189,9 @@ export class SelectPlanStepComponent implements OnDestroy {
   }
 
   onEnter = () => {
+    // Each entry replaces the last one's subscription, or both keep
+    // re-picking the plan
+    safeUnsubscribe(this.subscription);
     this.subscription = this.servicePlans$.pipe(
       filter(p => !!p && p.length > 0),
       withLatestFrom(this.csiState$),

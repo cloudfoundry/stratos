@@ -1,8 +1,8 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
-import { provideZonelessChangeDetection } from '@angular/core';
+import { provideZonelessChangeDetection, signal, WritableSignal } from '@angular/core';
 import { ActivatedRoute } from '@angular/router';
 import { Subject } from 'rxjs';
-import { describe, it, expect, beforeEach } from 'vitest';
+import { describe, it, expect, beforeEach, vi } from 'vitest';
 import { generateCfBaseTestModulesNoShared } from "@test-framework/cloud-foundry-endpoint-service.helper";
 import { ServicePlanPriceComponent } from '../../service-plan-price/service-plan-price.component';
 import { ServicePlanPublicComponent } from '../../service-plan-public/service-plan-public.component';
@@ -10,6 +10,7 @@ import { CreateServiceInstanceHelperServiceFactory } from '../create-service-ins
 import { CsiGuidsService } from '../csi-guids.service';
 import { CsiModeService } from '../csi-mode.service';
 import { CsiStateService } from '../csi-state.service';
+import { StServicePlan } from '../../../../services/endpoint-data/stratos-types';
 import { SelectPlanStepComponent } from "./select-plan-step.component";
 
 describe('SelectPlanStepComponent', () => {
@@ -102,5 +103,51 @@ describe('SelectPlanStepComponent', () => {
 
     expect(await pending).toEqual({ success: true, data: plan });
     expect(plans.observed).toBe(false);
+  });
+});
+
+describe('SelectPlanStepComponent plan list', () => {
+  const plan = (guid: string) => ({ guid, name: guid, cnsiGuid: 'cf-1' }) as unknown as StServicePlan;
+  let plans: WritableSignal<StServicePlan[]>;
+  let fixture: ComponentFixture<SelectPlanStepComponent>;
+  let component: SelectPlanStepComponent;
+
+  beforeEach(async () => {
+    plans = signal([plan('plan-a')]);
+    TestBed.configureTestingModule({
+      imports: [SelectPlanStepComponent, ...generateCfBaseTestModulesNoShared()],
+      providers: [
+        { provide: ActivatedRoute, useValue: { snapshot: { params: {}, queryParams: {}, queryParamMap: { get: () => null } } } },
+        {
+          provide: CreateServiceInstanceHelperServiceFactory,
+          useValue: { create: () => ({ servicePlans: plans, load: () => Promise.resolve() }) },
+        },
+        CsiGuidsService,
+        CsiStateService,
+        CsiModeService,
+        provideZonelessChangeDetection(),
+      ],
+    }).compileComponents();
+    fixture = TestBed.createComponent(SelectPlanStepComponent);
+    component = fixture.componentInstance;
+    const csi = TestBed.inject(CsiStateService);
+    csi.setCFDetails('cf-1', 'org-1', 'space-1');
+    csi.setServiceGuid('svc-1');
+    await fixture.whenStable();
+  });
+
+  // Going back and forward again enters the step again; the earlier entry
+  // must not keep re-picking the plan too.
+  it('picks a plan once per plan list change after the step is entered twice', async () => {
+    component.onEnter();
+    await fixture.whenStable();
+    component.onEnter();
+    await fixture.whenStable();
+    const setValue = vi.spyOn(component.stepperForm.controls.servicePlans, 'setValue');
+
+    plans.set([plan('plan-a'), plan('plan-b')]);
+    await fixture.whenStable();
+
+    expect(setValue).toHaveBeenCalledTimes(1);
   });
 });
