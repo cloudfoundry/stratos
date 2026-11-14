@@ -17,13 +17,13 @@
 </app-page-header>
 
 <!-- Show loading while initializing -->
-@if ((isInitialised$ | async) === false) {
+@if (!initialised()) {
   <app-area-loader message="Loading endpoints..."></app-area-loader>
 }
 
 <!-- Show content once loaded -->
 <div class="endpoints-content flex flex-col flex-1 min-h-0">
-  @if (isInitialised$ | async) {
+  @if (initialised()) {
     @if (endpointsService.haveRegistered()) {
       <app-endpoints-signal-list [addAction]="registerEndpointAction" class="flex-1"></app-endpoints-signal-list>
     } @else {

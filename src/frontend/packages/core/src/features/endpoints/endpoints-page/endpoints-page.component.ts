@@ -6,8 +6,8 @@ import { Router, RouterModule } from '@angular/router';
 import {
   EndpointsDataService,
 } from '@stratosui/store';
-import { Observable, of, Subscription } from 'rxjs';
-import { catchError, take, delay, filter } from 'rxjs/operators';
+import { of, Subscription } from 'rxjs';
+import { catchError, take, filter } from 'rxjs/operators';
 
 import { CustomizationService, CustomizationsMetadata } from '../../../core/customizations.types';
 import { EndpointsService } from '../../../core/endpoints.service';
@@ -113,7 +113,7 @@ export class EndpointsPageComponent implements OnDestroy, OnInit {
   public readonly canBackupRestore = computed(() =>
     !!this.authSignal.sessionData()?.plugins?.backup && this.canEditAdminEndpoint());
   public readonly showRegisterModal = signal(false);
-  public isInitialised$: Observable<boolean>;
+  public readonly initialised = this.endpointStatusSignals.initialised;
 
   private snackBarText = {
     message: `There are no connected endpoints, connect with your personal credentials to get started.`,
@@ -148,12 +148,6 @@ export class EndpointsPageComponent implements OnDestroy, OnInit {
       const show = endpointsService.haveRegistered() && !endpointsService.haveConnected();
       untracked(() => this.showSnackBar(show));
     });
-
-    // Create an observable to track when endpoints are loaded and ready
-    // Defensive: Add null checks and error handling
-    this.isInitialised$ = toObservable(this.endpointStatusSignals.initialised).pipe(
-      delay(500) // Delay to ensure proper loading sequence
-    );
   }
 
   subs: Subscription[] = [];

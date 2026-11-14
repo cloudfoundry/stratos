@@ -85,11 +85,10 @@ describe('EndpointsPageComponent', () => {
         TabNavService,
         SidePanelService,
         { provide: CurrentUserPermissionsService, useValue: mockPermissionsService },
-        { provide: EndpointStatusSignalService, useValue: mockEndpointStatusSignals },
         { provide: SessionService, useValue: mockSessionService },
         { provide: EndpointsService, useValue: mockEndpointsService },
         // The real service waits on an endpoints request the test never answers.
-        { provide: EndpointStatusSignalService, useValue: { initialised: signal(true) } },
+        { provide: EndpointStatusSignalService, useValue: mockEndpointStatusSignals },
         { provide: CustomizationService, useValue: mockCustomizationService },
         { provide: TailwindSnackBarService, useValue: mockSnackBarService },
         { provide: EndpointModalService, useValue: mockEndpointModalService },
@@ -106,6 +105,7 @@ describe('EndpointsPageComponent', () => {
 
   beforeEach(async () => {
     perm = signal(false);
+    mockEndpointStatusSignals.initialised.set(true);
     mockEndpointsService.haveRegistered.set(false);
     mockEndpointsService.haveConnected.set(false);
     mockEndpointsService.disablePersistenceFeatures.set(false);
@@ -164,14 +164,33 @@ describe('EndpointsPageComponent', () => {
     expect(navigate).toHaveBeenCalledWith(['applications'], { replaceUrl: true });
   });
 
-  // The content waits for isInitialised$, which is delayed by 500ms.
   const renderEmptyPage = async () => {
     const page = TestBed.createComponent(EndpointsPageComponent);
     await page.whenStable();
-    await new Promise(resolve => setTimeout(resolve, 600));
-    await page.whenStable();
     return page.nativeElement as HTMLElement;
   };
+
+  // The page showed neither the loader nor the content for the first
+  // 500 ms, and lagged 500 ms behind every later change.
+  it('shows the content right away once the endpoints are loaded', async () => {
+    const el = await renderEmptyPage();
+    expect(el.querySelector('app-area-loader')).toBeNull();
+    expect(el.querySelector('app-endpoints-missing')).not.toBeNull();
+  });
+
+  it('shows the loader right away while the endpoints load, then the content', async () => {
+    mockEndpointStatusSignals.initialised.set(false);
+    const page = TestBed.createComponent(EndpointsPageComponent);
+    await page.whenStable();
+    const el = page.nativeElement as HTMLElement;
+    expect(el.querySelector('app-area-loader')).not.toBeNull();
+    expect(el.querySelector('app-endpoints-missing')).toBeNull();
+
+    mockEndpointStatusSignals.initialised.set(true);
+    await page.whenStable();
+    expect(el.querySelector('app-area-loader')).toBeNull();
+    expect(el.querySelector('app-endpoints-missing')).not.toBeNull();
+  });
 
   it('shows the default message with no endpoints', async () => {
     const el = await renderEmptyPage();
