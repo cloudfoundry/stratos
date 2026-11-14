@@ -226,7 +226,6 @@ export { PermissionConfig, PermissionConfigLink, IPermissionConfigs, PermissionT
 export { BaseCurrentUserPermissionsChecker, ICurrentUserPermissionsChecker, PERMISSION_DENIED, IPermissionCheckCombiner, IConfigGroup, IConfigGroups } from './core/permissions/current-user-permissions.types';
 export { StratosCurrentUserPermissions, StratosScopeStrings } from './core/permissions/stratos-user-permissions.checker';
 export { UserProfileService } from './core/user-profile.service';
-export { SessionService } from './shared/services/session.service';
 
 // Signal-native auth/session/endpoints/user/permissions shims (wave-3, consumers flip later)
 export { AuthSignalService } from './core/signals/auth-signal.service';

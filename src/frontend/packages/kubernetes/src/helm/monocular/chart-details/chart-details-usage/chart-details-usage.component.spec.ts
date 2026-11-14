@@ -1,7 +1,6 @@
 import {  NO_ERRORS_SCHEMA, provideZonelessChangeDetection, signal } from '@angular/core';
 import { TestBed } from '@angular/core/testing';
 import { describe, it, expect, beforeEach, afterEach, beforeAll, afterAll, vi } from 'vitest';
-import { SessionService } from '../../../../../../core/src/shared/services/session.service';
 
 import { EndpointsService } from '../../../../../../core/src/core/endpoints.service';
 import { UtilsService } from '../../../../../../core/src/core/utils.service';
@@ -17,7 +16,6 @@ describe('Component: ChartDetailsUsage', () => {
         HelmReleaseActivatedRouteMock,
         EndpointsService,
         UtilsService,
-        SessionService,
 
         provideZonelessChangeDetection(),
       ],

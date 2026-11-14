@@ -5,7 +5,6 @@ import { STORE_TEST_PROVIDERS, BaseTestModulesNoShared } from '@test-framework/c
 import { IFavoriteMetadata, UserFavorite, UserFavoriteManager } from '@stratosui/store';
 import { ConfirmationDialogService } from '../../shared/components/confirmation-dialog.service';
 import { DialogConfirmComponent } from '../../shared/components/dialog-confirm/dialog-confirm.component';
-import { SessionService } from '../../shared/services/session.service';
 import { EndpointsService } from '../endpoints.service';
 import { EntityFavoriteStarComponent } from './entity-favorite-star.component';
 
@@ -23,7 +22,6 @@ describe('EntityFavoriteStarComponent', () => {
         { provide: EndpointsService, useValue: { disablePersistenceFeatures } },
         ...(STORE_TEST_PROVIDERS || []),
         ConfirmationDialogService,
-        SessionService,
         provideZonelessChangeDetection(),
       ],
       imports: [

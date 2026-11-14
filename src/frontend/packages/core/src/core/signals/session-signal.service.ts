@@ -6,7 +6,7 @@ import { AuthSignalService } from './auth-signal.service';
 /**
  * Signal-native session helpers.
  *
- * Mirrors the legacy `shared/services/session.service.ts` API
+ * Mirrors the former `shared/services/session.service.ts` API
  * (`isTechPreview`, `userEndpointsEnabled`, `userEndpointsNotDisabled`) but
  * returns `Signal<boolean>` instead of `Observable<boolean>` so consumers can
  * compose without subscriptions.

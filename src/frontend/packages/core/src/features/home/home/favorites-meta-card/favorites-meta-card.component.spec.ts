@@ -5,7 +5,6 @@ import { of } from 'rxjs';
 import { IFavoriteMetadata, UserFavorite, UserFavoritesDataService } from '@stratosui/store';
 import { BaseTestModulesNoShared, STORE_TEST_PROVIDERS } from "@test-framework/core-test.helper";
 import { ConfirmationDialogService } from '../../../../shared/components/confirmation-dialog.service';
-import { SessionService } from '../../../../shared/services/session.service';
 import { FreshEntityNameService } from '../../../../core/signals/fresh-entity-name.service';
 import { FavoritesMetaCardComponent } from './favorites-meta-card.component';
 
@@ -33,7 +32,6 @@ describe('FavoritesMetaCardComponent', () => {
       providers: [
         ...(STORE_TEST_PROVIDERS || []),
         ConfirmationDialogService,
-        SessionService,
         { provide: FreshEntityNameService, useValue: { freshNameFor: () => freshName, fetchNameFor: () => of(fetchedName) } },
         provideZonelessChangeDetection(),
       ],
