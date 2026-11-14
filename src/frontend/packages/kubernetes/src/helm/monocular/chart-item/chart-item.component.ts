@@ -1,7 +1,6 @@
 
 import { Component, OnInit, inject, ChangeDetectionStrategy, input } from '@angular/core';
 import { RouterLink } from '@angular/router';
-import { Observable } from 'rxjs';
 
 import { Chart } from '../shared/models/chart';
 import { ChartsService } from '../shared/services/charts.service';
@@ -23,7 +22,8 @@ export class ChartItemComponent implements OnInit {
   // Truncate the description
   readonly showDescription = input(true);
 
-  readonly artifactHubAndHelmRepoTypes$ = input<Observable<boolean>>();
+  // Both Artifact Hub and a classic helm repository are connected
+  readonly artifactHubAndHelmRepoTypes = input(false);
 
   private chartsService = inject(ChartsService);
 

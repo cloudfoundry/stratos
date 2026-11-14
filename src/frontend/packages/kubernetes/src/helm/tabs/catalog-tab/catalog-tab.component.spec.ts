@@ -80,6 +80,15 @@ describe('CatalogTabComponent', () => {
     expect(component).toBeTruthy();
   });
   const helmEndpoint = (guid: string, subType: string) => ({ guid, cnsi_type: HELM_ENDPOINT_TYPE, sub_type: subType });
+  it('flags a source badge once Artifact Hub and a helm repository are both connected', async () => {
+    expect(component.artifactHubAndHelmRepoTypes()).toBe(false);
+
+    endpointsList.set([helmEndpoint('hub', HELM_HUB_ENDPOINT_TYPE), helmEndpoint('r1', HELM_REPO_ENDPOINT_TYPE)]);
+    await fixture.whenStable();
+
+    expect(component.artifactHubAndHelmRepoTypes()).toBe(true);
+  });
+
   const sidebar = (): HTMLElement | null => fixture.nativeElement.querySelector('[data-test="repo-sidebar"]');
 
   it('shows the repository sidebar when there are several helm repositories', async () => {
