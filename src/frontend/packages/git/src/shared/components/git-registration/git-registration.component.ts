@@ -6,8 +6,10 @@ import {
   Injector,
   OnDestroy,
   computed,
+  effect,
   inject,
   signal,
+  untracked,
   viewChild,
 } from '@angular/core';
 import { ReactiveFormsModule, Validators, FormBuilder, FormControl, FormGroup } from '@angular/forms';
@@ -15,8 +17,8 @@ import { ActivatedRoute, Router } from '@angular/router';
 import { gitRepositoryUrlValidator } from '../../../../../core/src/shared/validators';
 import {
   CreateEndpointHelperComponent } from '@stratosui/core';
-import { combineLatest, firstValueFrom, Observable, Subscription } from 'rxjs';
-import { take, map } from 'rxjs/operators';
+import { Observable, Subscription } from 'rxjs';
+import { map } from 'rxjs/operators';
 
 import { EndpointsService } from '../../../../../core/src/core/endpoints.service';
 import { getIdFromRoute } from '../../../../../core/src/core/utils.service';
@@ -32,7 +34,6 @@ import { EndpointsSignalConfigService } from '../../../../../core/src/features/e
 import { SignalStepHandle, StepComponent } from '../../../../../core/src/shared/components/stepper/step/step.component';
 import { SteppersComponent } from '../../../../../core/src/shared/components/stepper/steppers/steppers.component';
 import { UniqueDirective } from '../../../../../core/src/shared/components/unique.directive';
-import { SessionService } from '../../../../../core/src/shared/services/session.service';
 import { CurrentUserPermissionsService } from '../../../../../core/src/core/permissions/current-user-permissions.service';
 import { UserProfileService } from '../../../../../core/src/core/user-profile.service';
 import { TailwindSnackBarService } from '../../../../../core/src/shared/services/tailwind-snackbar.service';
@@ -104,7 +105,6 @@ export class GitRegistrationComponent extends CreateEndpointHelperComponent impl
   // closes instead of navigating to /endpoints (the page under the dialog).
   private registerHandle = inject(ENDPOINT_REGISTER_HANDLE, { optional: true });
   readonly cancelAction = this.registerHandle ? () => this.registerHandle!.close(false) : undefined;
-  sessionService: SessionService;
   currentUserPermissionsService: CurrentUserPermissionsService;
   userProfileService: UserProfileService;
 
@@ -213,18 +213,15 @@ export class GitRegistrationComponent extends CreateEndpointHelperComponent impl
   constructor() {
     const gitSCMService = inject(GitSCMService);
     const activatedRoute = inject(ActivatedRoute);
-    const sessionService = inject(SessionService);
     const currentUserPermissionsService = inject(CurrentUserPermissionsService);
     const userProfileService = inject(UserProfileService);
 
     super(
-      sessionService,
       currentUserPermissionsService,
       userProfileService,
       inject(EndpointsDataService),
       inject(Injector),
     );
-    this.sessionService = sessionService;
     this.currentUserPermissionsService = currentUserPermissionsService;
     this.userProfileService = userProfileService;
 
@@ -293,25 +290,32 @@ export class GitRegistrationComponent extends CreateEndpointHelperComponent impl
     // endpoints are disabled) get one slot. The original code iterated
     // `endpoints$` unscoped, which contradicted the URL input's scoped
     // `appUnique` validator and the backend's per-scope uniqueness.
-    combineLatest([
-      this.existingSystemEndpoints,
-      this.existingPersonalEndpoints,
-      this.userEndpointsAndIsAdmin,
-    ]).pipe(take(1)).subscribe(([systemEps, personalEps, isAdminWithUserEndpoints]) => {
-      const eps = this.endpointsService.endpoints();
-      Object.values(this.gitTypes[this.epSubType].types).forEach(type => {
-        if (!type.url) {
-          type.exists = false;
-          return;
-        }
-        if (isAdminWithUserEndpoints) {
-          // Admin has two slots: system + personal. Grey only when both filled.
-          type.exists = systemEps.urls.includes(endpointUrlKey(type.url)) && personalEps.urls.includes(endpointUrlKey(type.url));
-        } else {
-          type.exists = !!Object.values(eps).find(ep => endpointUrlKey(type.url) === endpointUrlKey(getFullEndpointApiUrl(ep)));
-        }
+    // Done once, when the user's profile is known: the personal list is null
+    // until then. The form's default choice is made from this snapshot.
+    const checkTaken = effect(() => {
+      const personalEps = this.existingPersonalEndpointsSignal();
+      if (!personalEps) {
+        return;
+      }
+      checkTaken.destroy();
+      untracked(() => {
+        const systemEps = this.existingSystemEndpointsSignal();
+        const isAdminWithUserEndpoints = this.userEndpointsAndIsAdminSignal();
+        const eps = this.endpointsService.endpoints();
+        Object.values(this.gitTypes[this.epSubType].types).forEach(type => {
+          if (!type.url) {
+            type.exists = false;
+            return;
+          }
+          if (isAdminWithUserEndpoints) {
+            // Admin has two slots: system + personal. Grey only when both filled.
+            type.exists = systemEps.urls.includes(endpointUrlKey(type.url)) && personalEps.urls.includes(endpointUrlKey(type.url));
+          } else {
+            type.exists = !!Object.values(eps).find(ep => endpointUrlKey(type.url) === endpointUrlKey(getFullEndpointApiUrl(ep)));
+          }
       });
       this.init();
+      });
     });
   }
 
@@ -437,7 +441,7 @@ export class GitRegistrationComponent extends CreateEndpointHelperComponent impl
     if (!result.error) {
       this.registered.set({ data, address: url, personal: isPersonalEndpoint(
         this.endpointsData.endpoints().get(data.guid),
-        await firstValueFrom(this.userEndpointsAndIsAdmin),
+        this.userEndpointsAndIsAdminSignal(),
         createSystemEndpoint,
       ),
     });

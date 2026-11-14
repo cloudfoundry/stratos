@@ -6,7 +6,6 @@ import { describe, expect, it } from 'vitest';
 import { CurrentUserPermissionsService } from '../../../core/permissions/current-user-permissions.service';
 import { SessionSignalService } from '../../../core/signals/session-signal.service';
 import { UserProfileService } from '../../../core/user-profile.service';
-import { SessionService } from '../../../shared/services/session.service';
 import { CreateEndpointHelperComponent } from './create-endpoint-helper';
 
 const endpoint = (guid: string, system: boolean, creator: string) => ({
@@ -29,7 +28,6 @@ describe('CreateEndpointHelperComponent', () => {
     const list = signal<EndpointModel[]>([]);
     const profile = signal<UserProfileInfo | null>(null);
     const helper = new CreateEndpointHelperComponent(
-      {} as SessionService,
       { can: () => isAdmin } as unknown as CurrentUserPermissionsService,
       { loadUserProfile: () => undefined, userProfile: profile } as unknown as UserProfileService,
       { endpointsList: list } as unknown as EndpointsDataService,
@@ -42,17 +40,10 @@ describe('CreateEndpointHelperComponent', () => {
   // the answer follows the admin permission.
   it('follows the admin permission for system endpoints', () => {
     const { helper, isAdmin } = setup();
-    const answers: boolean[] = [];
-    const sub = helper.userEndpointsAndIsAdmin.subscribe(v => answers.push(v));
-    TestBed.tick();
-    expect(answers.at(-1)).toBe(false);
     expect(helper.userEndpointsAndIsAdminSignal()).toBe(false);
 
     isAdmin.set(true);
-    TestBed.tick();
-    expect(answers.at(-1)).toBe(true);
     expect(helper.userEndpointsAndIsAdminSignal()).toBe(true);
-    sub.unsubscribe();
   });
 
   // Which endpoints a new one is compared with depends on the setting and

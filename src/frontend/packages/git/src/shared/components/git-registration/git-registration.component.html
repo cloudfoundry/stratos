@@ -60,8 +60,8 @@
                   class="input"
                   [appUnique]="
                     registerForm.value.createSystemEndpointField
-                      ? ($safeNavigationMigration((customEndpoints | async)?.names) ?? [])
-                      : ($safeNavigationMigration((existingPersonalEndpoints | async)?.names) ?? [])
+                      ? (customEndpointsSignal()?.names ?? [])
+                      : (existingPersonalEndpointsSignal()?.names ?? [])
                   "
                 />
                 @if (registerForm.controls.nameField.errors?.required) {
@@ -83,8 +83,8 @@
                   class="input"
                   [appUnique]="
                     registerForm.value.createSystemEndpointField
-                      ? ($safeNavigationMigration((customEndpoints | async)?.urls) ?? [])
-                      : ($safeNavigationMigration((existingPersonalEndpoints | async)?.urls) ?? [])
+                      ? (customEndpointsSignal()?.urls ?? [])
+                      : (existingPersonalEndpointsSignal()?.urls ?? [])
                   "
                   [appUniqueKey]="urlKey"
                 />
@@ -101,7 +101,7 @@
                 }
               </div>
               <div class="space-y-3">
-                @if (userEndpointsAndIsAdmin | async) {
+                @if (userEndpointsAndIsAdminSignal()) {
                   <label class="checkbox-label" for="git-create-system-endpoint">
                     <input
                       id="git-create-system-endpoint"

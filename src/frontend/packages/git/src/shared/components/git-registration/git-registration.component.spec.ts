@@ -1,5 +1,5 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
-import { provideZonelessChangeDetection, importProvidersFrom } from '@angular/core';
+import { provideZonelessChangeDetection, importProvidersFrom, signal } from '@angular/core';
 import { By } from '@angular/platform-browser';
 import { of } from 'rxjs';
 import { describe, it, expect, beforeEach, vi } from 'vitest';
@@ -18,6 +18,7 @@ import { EndpointsSignalConfigService } from '../../../../../core/src/features/e
 import { CreateEndpointConnectComponent } from '../../../../../core/src/features/endpoints/create-endpoint/create-endpoint-connect/create-endpoint-connect.component';
 import { SteppersComponent } from '../../../../../core/src/shared/components/stepper/steppers/steppers.component';
 import { TailwindSnackBarService } from '../../../../../core/src/shared/services/tailwind-snackbar.service';
+import { UserProfileService } from '../../../../../core/src/core/user-profile.service';
 import { GitRegistrationComponent } from './git-registration.component';
 
 function makeStubEndpointsSignalConfig() {
@@ -34,10 +35,12 @@ describe('GitRegistrationComponent', () => {
   let fixture: ComponentFixture<GitRegistrationComponent>;
   let stubSignalConfig: ReturnType<typeof makeStubEndpointsSignalConfig>;
   let registerHandle: { close: ReturnType<typeof vi.fn> };
+  let profile: ReturnType<typeof signal<{ userName: string } | null>>;
 
   beforeEach(() => {
     stubSignalConfig = makeStubEndpointsSignalConfig();
     registerHandle = { close: vi.fn() };
+    profile = signal<{ userName: string } | null>(null);
     TestBed.configureTestingModule({
       imports: [
         GitRegistrationComponent,
@@ -60,6 +63,7 @@ describe('GitRegistrationComponent', () => {
           ]
         },
         EntityCatalogHelper,
+        { provide: UserProfileService, useValue: { loadUserProfile: () => undefined, userProfile: profile } },
         { provide: GITHUB_API_URL, useFactory: getGitHubAPIURL },
         GitSCMService,
         { provide: EndpointsSignalConfigService, useValue: stubSignalConfig },
@@ -93,6 +97,18 @@ describe('GitRegistrationComponent', () => {
 
   it('should create', () => {
     expect(component).toBeTruthy();
+  });
+
+  // The registration options are offered once the user's profile is known:
+  // the personal endpoints are matched on the user's name.
+  it('offers the registration types once the profile is known', async () => {
+    const radios = () => fixture.nativeElement.querySelectorAll('input[type="radio"]').length;
+    expect(radios()).toBe(0);
+
+    profile.set({ userName: 'me' });
+    await fixture.whenStable();
+
+    expect(radios()).toBeGreaterThan(1);
   });
 
   // One group, so arrow keys move between the types.

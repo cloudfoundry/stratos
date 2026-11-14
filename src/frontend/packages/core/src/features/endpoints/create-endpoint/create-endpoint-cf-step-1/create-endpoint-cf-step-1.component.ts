@@ -20,7 +20,6 @@ import { catchError, map, startWith, switchMap } from 'rxjs/operators';
 
 import { getIdFromRoute } from '../../../../core/utils.service';
 import { StepOnNextResult } from '../../../../shared/components/stepper/step/step.component';
-import { SessionService } from '../../../../shared/services/session.service';
 import { CurrentUserPermissionsService } from '../../../../core/permissions/current-user-permissions.service';
 import { UserProfileService } from '../../../../core/user-profile.service';
 import { TailwindSnackBarService } from '../../../../shared/services/tailwind-snackbar.service';
@@ -204,12 +203,10 @@ export class CreateEndpointCfStep1Component extends CreateEndpointHelperComponen
 
   constructor() {
     const activatedRoute = inject(ActivatedRoute);
-    const sessionService = inject(SessionService);
     const currentUserPermissionsService = inject(CurrentUserPermissionsService);
     const userProfileService = inject(UserProfileService);
 
     super(
-      sessionService,
       currentUserPermissionsService,
       userProfileService,
       inject(EndpointsDataService),

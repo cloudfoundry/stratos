@@ -1,6 +1,3 @@
-import { Observable } from 'rxjs';
-import { filter } from 'rxjs/operators';
-import { toObservable } from '@angular/core/rxjs-interop';
 import { Injector, Signal, computed } from '@angular/core';
 
 import { EndpointModel, EndpointsDataService, endpointUrlKey, getFullEndpointApiUrl } from '@stratosui/store';
@@ -8,14 +5,12 @@ import { CurrentUserPermissionsService } from '../../../core/permissions/current
 import { StratosCurrentUserPermissions } from '../../../core/permissions/stratos-user-permissions.checker';
 import { SessionSignalService } from '../../../core/signals/session-signal.service';
 import { UserProfileService } from '../../../core/user-profile.service';
-import { SessionService } from '../../../shared/services/session.service';
 
 /** Endpoint names and address keys (endpointUrlKey: compare a typed address through urlKey). */
 export interface ExistingEndpoints {
   names: string[];
   urls: string[];
 }
-type EndpointObservable = Observable<ExistingEndpoints>;
 
 const summarize = (endpoints: EndpointModel[]): ExistingEndpoints => ({
   names: endpoints.map(ep => ep.name),
@@ -24,8 +19,6 @@ const summarize = (endpoints: EndpointModel[]): ExistingEndpoints => ({
 
 export class CreateEndpointHelperComponent {
 
-  // The signals are the source. The Observables are kept for the Git
-  // registration form, which has not moved to the signals yet.
   existingEndpointsSignal: Signal<ExistingEndpoints>;
   existingSystemEndpointsSignal: Signal<ExistingEndpoints>;
   /** Null until the user's profile is known. */
@@ -34,15 +27,9 @@ export class CreateEndpointHelperComponent {
   customEndpointsSignal: Signal<ExistingEndpoints | null>;
   userEndpointsAndIsAdminSignal: Signal<boolean>;
 
-  userEndpointsAndIsAdmin: Observable<boolean>;
-  customEndpoints: EndpointObservable;
-  existingSystemEndpoints: EndpointObservable;
-  existingPersonalEndpoints: EndpointObservable;
-  existingEndpoints: EndpointObservable;
   readonly urlKey = endpointUrlKey;
 
   constructor(
-    public sessionService: SessionService,
     public currentUserPermissionsService: CurrentUserPermissionsService,
     public userProfileService: UserProfileService,
     // W36-B Wave 3: optional EndpointsDataService + Injector params.
@@ -83,15 +70,5 @@ export class CreateEndpointHelperComponent {
       }
       return isAdmin() ? this.existingSystemEndpointsSignal() : personal;
     });
-
-    this.existingEndpoints = toObservable(this.existingEndpointsSignal, { injector });
-    this.existingSystemEndpoints = toObservable(this.existingSystemEndpointsSignal, { injector });
-    this.existingPersonalEndpoints = toObservable(this.existingPersonalEndpointsSignal, { injector }).pipe(
-      filter((personal): personal is ExistingEndpoints => !!personal)
-    );
-    this.userEndpointsAndIsAdmin = toObservable(this.userEndpointsAndIsAdminSignal, { injector });
-    this.customEndpoints = toObservable(this.customEndpointsSignal, { injector }).pipe(
-      filter((custom): custom is ExistingEndpoints => !!custom)
-    );
   }
 }
