@@ -141,8 +141,9 @@ func (p *portalProxy) DoRegisterEndpoint(cnsiName string, apiEndpoint string, sk
 		isAdmin = currentCreator.Admin
 	}
 
-	// Multiple registrations of the same URL are permitted — each gets a unique GUID.
-	// A follow-on ticket (FWT-TBD) adds UX warning when a duplicate URL is detected.
+	// Multiple registrations of the same URL are permitted — each gets a
+	// unique GUID. The Register step and the endpoint pages tell the user
+	// when an address is shared.
 	guid := uuid.New().String()
 
 	newCNSI, _, err := fetchInfo(apiEndpoint, skipSSLValidation, caCert)
