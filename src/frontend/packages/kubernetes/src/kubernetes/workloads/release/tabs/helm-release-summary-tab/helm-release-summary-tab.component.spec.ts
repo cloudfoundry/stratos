@@ -2,7 +2,7 @@ import { HttpClient, HttpHandler } from '@angular/common/http';
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { provideZonelessChangeDetection } from '@angular/core';
 import { Router } from '@angular/router';
-import { of } from 'rxjs';
+import { of, Subject } from 'rxjs';
 import { describe, it, expect, beforeEach, vi } from 'vitest';
 
 import {
@@ -74,6 +74,24 @@ describe('HelmReleaseSummaryTabComponent', () => {
 
   it('should create', () => {
     expect(component).toBeTruthy();
+  });
+
+  // Picking a report sends a request; a slow answer for an earlier pick must
+  // not replace the report picked last.
+  it('keeps the analysis report picked last when the first answers late', async () => {
+    const first = new Subject<unknown>();
+    const second = new Subject<unknown>();
+    vi.spyOn(component.analyzerService, 'getByID').mockImplementation(
+      (_ep: string, id: string) => (id === 'r1' ? first : second) as never);
+
+    component.analysisChanged({ id: 'r1' });
+    component.analysisChanged({ id: 'r2' });
+    second.next({ id: 'r2', alerts: {} });
+    first.next({ id: 'r1', alerts: {} });
+    await fixture.whenStable();
+
+    const shown = (component as unknown as { analysisReport: () => { id: string } | null }).analysisReport();
+    expect(shown?.id).toBe('r2');
   });
 
   // After a delete succeeds, leaving the page clears only an earlier

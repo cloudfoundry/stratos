@@ -1,10 +1,10 @@
 import { CommonModule } from '@angular/common';
 import { Component, OnDestroy, signal, computed, inject, ChangeDetectionStrategy, Injector, runInInjectionContext, Signal } from '@angular/core';
 import { Router, RouterModule } from '@angular/router';
-import { toObservable, toSignal } from '@angular/core/rxjs-interop';
+import { takeUntilDestroyed, toObservable, toSignal } from '@angular/core/rxjs-interop';
 import { ConfirmationDialogConfig, ConfirmationDialogService, EndpointsSignalService, SidePanelService, naturalCompare } from '@stratosui/core';
-import { Observable, of } from 'rxjs';
-import { distinctUntilChanged, map } from 'rxjs/operators';
+import { EMPTY, Observable, of, Subject } from 'rxjs';
+import { catchError, distinctUntilChanged, map, switchMap } from 'rxjs/operators';
 
 import { KubeHelmDataService } from '../../../../../services/endpoint-data/kube-helm-data.service';
 
@@ -118,11 +118,9 @@ export class HelmReleaseSummaryTabComponent implements OnDestroy {
   public chartData$!: Observable<HelmReleaseChartData>;
   public resources$!: Observable<any[]>;
 
-  // Cached analysis report
-  private analysisReport: any;
-
-  private analysisReportId = signal<string | null>(null);
-  private analysisReportUpdated$ = toObservable(this.analysisReportId).pipe(distinctUntilChanged());
+  // The analysis report whose alerts are shown on the resource cards; null for none
+  private readonly analysisReport = signal<any>(null);
+  private readonly analysisPick = new Subject<string | null>();
   public helmReleaseHelper = inject(HelmReleaseHelperService);
   private router = inject(Router);
   private endpointsSignals = inject(EndpointsSignalService);
@@ -135,6 +133,15 @@ export class HelmReleaseSummaryTabComponent implements OnDestroy {
 
 
   constructor() {
+    // Only the report picked last is kept: choosing another one cancels the
+    // request still in flight, so a slow answer cannot replace a newer pick.
+    this.analysisPick.pipe(
+      switchMap(id => id === null ? of(null) : this.analyzerService.getByID(this.helmReleaseHelper.endpointGuid, id).pipe(
+        catchError(() => EMPTY)
+      )),
+      takeUntilDestroyed()
+    ).subscribe(results => this.analysisReport.set(results));
+
     // Convert signals within injection context
     runInInjectionContext(this.injector, () => {
       this.isBusy = computed(() =>
@@ -167,7 +174,6 @@ export class HelmReleaseSummaryTabComponent implements OnDestroy {
       // Compute resources based on graph and analysis report
       const resourcesComputed = computed(() => {
         const graph = releaseGraphSignal();
-        const _ = this.analysisReportId(); // Dependency on analysis report changes
 
         const resources: Record<string, any> = {};
         // Collect the resources
@@ -186,7 +192,7 @@ export class HelmReleaseSummaryTabComponent implements OnDestroy {
             resources[node.data.kind].statuses.push(node.data.status);
           });
         }
-        this.applyAnalysis(resources, this.analysisReport);
+        this.applyAnalysis(resources, this.analysisReport());
         return Object.values(resources).sort((a: any, b: any) => naturalCompare(a.kind, b.kind));
       });
 
@@ -230,16 +236,7 @@ export class HelmReleaseSummaryTabComponent implements OnDestroy {
   }
 
   public analysisChanged(report: any) {
-    if (report === null) {
-      // No report selected
-      this.analysisReport = null;
-      this.analysisReportId.set(null);
-    } else {
-      this.analyzerService.getByID(this.helmReleaseHelper.endpointGuid, report.id).subscribe((results: any) => {
-        this.analysisReport = results;
-        this.analysisReportId.set(report.id);
-      });
-    }
+    this.analysisPick.next(report === null ? null : report.id);
   }
 
   private startDelete() {
