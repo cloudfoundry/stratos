@@ -22,7 +22,7 @@ import {
 import { CfIdentityProvidersService } from '../../../../shared/data-services/cf-identity-providers.service';
 import { CfUsersRolesDataService } from '../../../../services/domain-data/cf-users-roles-data.service';
 import { UserInviteService } from '../../user-invites/user-invite.service';
-import { TailwindSnackBarService } from '@stratosui/core';
+import { AppInputDirective, CustomFormFieldComponent, CustomOptionComponent, CustomSelectComponent, TailwindSnackBarService } from '@stratosui/core';
 import { EndpointsDataService } from '@stratosui/store';
 import { CfUsersPagedDataService } from '../../../../shared/data-services/cf-users-paged-data.service';
 import { CfRoleChange } from '../../../../store/types/users-roles.types';
@@ -59,6 +59,10 @@ export interface AddUserDialogData {
   imports: [
     CommonModule,
     FormsModule,
+    AppInputDirective,
+    CustomFormFieldComponent,
+    CustomOptionComponent,
+    CustomSelectComponent,
     StackedInputActionsComponent,
     RoleAssignmentComponent,
   ],

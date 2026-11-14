@@ -36,7 +36,8 @@ const TEST_HARNESS_CFG = {
 interface AddUserDialogTestView {
   data: AddUserDialogData;
   pendingUsers: StUser[];
-  origin: Signal<string>;
+  origin: WritableSignal<string>;
+  switchMode(mode: 'associate' | 'invite'): void;
   originOptions: Signal<string[]>;
   identities: WritableSignal<string[]>;
   identitiesValid: WritableSignal<boolean>;
@@ -160,6 +161,104 @@ describe('AddUserDialogComponent', () => {
       {}
     );
     expect(cmpEmpty.originOptions()).toEqual([]);
+  });
+
+  // ── Identity Provider Origin field (same field style as the others) ───────
+
+  describe('origin field', () => {
+    const DATA: AddUserDialogData = { cfGuid: CF_GUID, userInviteAllowed: true };
+
+    it('free text: names the input, floats the label over the prefilled value, and updates origin', async () => {
+      const { cmp, fixture } = make(DATA);
+      await fixture.whenStable();
+      const el = fixture.nativeElement as HTMLElement;
+
+      const input = el.querySelector('input#origin-input') as HTMLInputElement;
+      expect(input).toBeTruthy();
+      expect(input.getAttribute('aria-label')).toBe('Identity Provider Origin');
+      expect(input.value).toBe('uaa');
+
+      // The floating label sits above the value instead of over it.
+      const label = input.closest('app-form-field')!.querySelector('label') as HTMLLabelElement;
+      expect(label.textContent).toContain('Identity Provider Origin');
+      expect(label.className).toContain('-translate-y-');
+
+      // No boxed input any more.
+      expect(input.className).not.toContain('border');
+
+      input.value = 'ldap';
+      input.dispatchEvent(new Event('input'));
+      await fixture.whenStable();
+      expect(cmp.origin()).toBe('ldap');
+    });
+
+    it('options: renders a select named "Identity Provider Origin" and picking one updates origin', async () => {
+      const { cmp, fixture } = make(DATA, { idpsOrigins: ['uaa', 'ldap'] });
+      await fixture.whenStable();
+      const el = fixture.nativeElement as HTMLElement;
+
+      expect(el.querySelector('input#origin-input')).toBeNull();
+      const select = el.querySelector('app-select#origin-input') as HTMLElement;
+      expect(select).toBeTruthy();
+      const trigger = select.querySelector('[role="combobox"]') as HTMLElement;
+      expect(trigger.getAttribute('aria-label')).toBe('Identity Provider Origin');
+      // ngModel hands the value to the select in a microtask; the select
+      // then renders it in a second pass.
+      await fixture.whenStable();
+      expect(trigger.textContent).toContain('uaa');
+
+      const options = Array.from(select.querySelectorAll('.custom-option-content')) as HTMLElement[];
+      expect(options.map(o => o.textContent?.trim())).toEqual(['uaa', 'ldap']);
+      options[1].click();
+      await fixture.whenStable();
+      expect(cmp.origin()).toBe('ldap');
+    });
+
+    it('submit sends the origin chosen in the select', async () => {
+      const spy = vi.spyOn(addModule, 'addUsers').mockResolvedValue({ ok: true, total: 1, failed: 0 });
+      const { cmp, fixture } = make(DATA, { idpsOrigins: ['uaa', 'ldap'] });
+      await fixture.whenStable();
+      const options = Array.from(
+        (fixture.nativeElement as HTMLElement).querySelectorAll('app-select#origin-input .custom-option-content'),
+      ) as HTMLElement[];
+      options[1].click();
+      await fixture.whenStable();
+      cmp.identities.set(['alice']);
+      cmp.identitiesValid.set(true);
+      await cmp.submit();
+      expect(spy.mock.calls[0][1].origin).toBe('ldap');
+      spy.mockRestore();
+    });
+
+    it('submit sends the origin typed in the free-text field', async () => {
+      const spy = vi.spyOn(addModule, 'addUsers').mockResolvedValue({ ok: true, total: 1, failed: 0 });
+      const { cmp, fixture } = make(DATA);
+      await fixture.whenStable();
+      const input = (fixture.nativeElement as HTMLElement).querySelector('input#origin-input') as HTMLInputElement;
+      input.value = 'okta';
+      input.dispatchEvent(new Event('input'));
+      await fixture.whenStable();
+      cmp.identities.set(['alice']);
+      cmp.identitiesValid.set(true);
+      await cmp.submit();
+      expect(spy.mock.calls[0][1].origin).toBe('okta');
+      spy.mockRestore();
+    });
+
+    it('shows the origin field in associate mode only', async () => {
+      const { cmp, fixture } = make(DATA);
+      await fixture.whenStable();
+      const el = fixture.nativeElement as HTMLElement;
+      expect(el.querySelector('#origin-input')).toBeTruthy();
+
+      cmp.switchMode('invite');
+      await fixture.whenStable();
+      expect(el.querySelector('#origin-input')).toBeNull();
+
+      cmp.switchMode('associate');
+      await fixture.whenStable();
+      expect(el.querySelector('#origin-input')).toBeTruthy();
+    });
   });
 
   // ── Widget integration tests ───────────────────────────────────────────────
