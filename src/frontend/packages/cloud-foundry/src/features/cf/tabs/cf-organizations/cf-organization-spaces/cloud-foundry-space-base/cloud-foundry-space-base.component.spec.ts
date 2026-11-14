@@ -23,7 +23,7 @@ describe('CloudFoundrySpaceBaseComponent', () => {
   let fixture: ComponentFixture<CloudFoundrySpaceBaseComponent>;
 
   const mockSpaceDataService = {
-    space: signal(null),
+    space: signal<{ guid: string; name: string; quotaGuid?: string } | null>(null),
     isLoading: signal(false),
     load: () => of(undefined),
   };
@@ -108,10 +108,10 @@ describe('CloudFoundrySpaceBaseComponent', () => {
     EntityCatalogHelpers.SetEntityCatalogHelper(helper);
   });
 
-  beforeEach(() => {
+  beforeEach(async () => {
     fixture = TestBed.createComponent(CloudFoundrySpaceBaseComponent);
     component = fixture.componentInstance;
-    fixture.detectChanges();
+    await fixture.whenStable();
   });
 
   it('should create', () => {
@@ -127,5 +127,24 @@ describe('CloudFoundrySpaceBaseComponent', () => {
       { value: 'test-org', routerLink: '/cloud-foundry/cf-guid/organizations/org-guid/spaces' },
     ]);
     org.set(null);
+  });
+
+  // The Quota tab stayed hidden (or shown) as it was when the space first
+  // loaded, however the space's quota changed afterwards.
+  it('shows the Quota tab once the space gets a quota, and hides it again when it loses it', async () => {
+    const quotaTab = () => component.tabLinks().find(t => t.link === 'space-quota');
+    expect(quotaTab()).toBeUndefined();
+
+    mockSpaceDataService.space.set({ guid: 'space-guid', name: 's' });
+    await fixture.whenStable();
+    expect(quotaTab()?.isHidden?.()).toBe(true);
+
+    mockSpaceDataService.space.set({ guid: 'space-guid', name: 's', quotaGuid: 'quota-1' });
+    await fixture.whenStable();
+    expect(quotaTab()?.isHidden?.()).toBe(false);
+
+    mockSpaceDataService.space.set({ guid: 'space-guid', name: 's' });
+    await fixture.whenStable();
+    expect(quotaTab()?.isHidden?.()).toBe(true);
   });
 });

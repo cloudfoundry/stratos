@@ -1,7 +1,5 @@
-import { Component, ChangeDetectionStrategy, computed, Injector, OnInit, Signal, inject, signal } from '@angular/core';
-import { toObservable } from '@angular/core/rxjs-interop';
+import { Component, ChangeDetectionStrategy, computed, OnInit, Signal, inject } from '@angular/core';
 import { RouterModule } from '@angular/router';
-import { filter, take } from 'rxjs/operators';
 
 import {
   getActionsFromExtensions,
@@ -65,15 +63,13 @@ export class CloudFoundrySpaceBaseComponent implements OnInit {
   cfSpaceService = inject(CloudFoundrySpaceService);
   cfOrgService = inject(CloudFoundryOrganizationService);
   spaceDataService = inject(SpaceDataService);
-  private injector = inject(Injector);
 
   // Drives the loading-page overlay from the signal-native data service,
   // replacing the old ngrx EntityMonitor (entityId/entitySchema) path.
   isLoading = this.spaceDataService.isLoading;
 
 
-  // Signal: written after the first render; an OnPush view under zoneless CD only repaints for signal writes.
-  readonly tabLinks = signal<IPageSideNavTab[]>([
+  private readonly baseTabs: IPageSideNavTab[] = [
     {
       link: 'summary',
       label: 'Summary',
@@ -113,7 +109,28 @@ export class CloudFoundrySpaceBaseComponent implements OnInit {
       label: 'Events',
       icon: 'watch_later'
     }
-  ]);
+  ];
+
+  // The Quota tab joins once the space has loaded, and shows only while a
+  // space-specific quota is linked (quotaGuid set). Extension tabs are
+  // appended unconditionally to match the legacy ordering.
+  private readonly spaceLoaded = computed(() => !!this.spaceDataService.space());
+  private readonly hasSpaceQuota = computed(() => !!this.spaceDataService.space()?.quotaGuid);
+  readonly tabLinks = computed<IPageSideNavTab[]>(() => {
+    if (!this.spaceLoaded()) {
+      return this.baseTabs;
+    }
+    return [
+      ...this.baseTabs,
+      {
+        link: 'space-quota',
+        label: 'Quota',
+        icon: 'data_usage',
+        isHidden: computed(() => !this.hasSpaceQuota()),
+      },
+      ...getTabsFromExtensions(StratosTabType.CloudFoundrySpace),
+    ];
+  });
 
   // Back to the endpoint's organizations and to the org's spaces, once both
   // the endpoint and the org are in.
@@ -170,25 +187,6 @@ export class CloudFoundrySpaceBaseComponent implements OnInit {
       };
       return userFavoriteManager.getFavoriteFromEntity<ISpaceFavMetadata>(
         spaceEntityType, CF_ENDPOINT_TYPE, route.cfGuid, favEntity);
-    });
-
-    // Add the Quota tab once the space snapshot lands — only show it if a
-    // space-specific quota is linked (quotaGuid set). Extension tabs are
-    // appended unconditionally to match the legacy ordering.
-    toObservable(this.spaceDataService.space, { injector: this.injector }).pipe(
-      filter(s => !!s),
-      take(1),
-    ).subscribe(space => {
-      this.tabLinks.update(tabs => [
-        ...tabs,
-        {
-          link: 'space-quota',
-          label: 'Quota',
-          icon: 'data_usage',
-          isHidden: signal(!space!.quotaGuid),
-        },
-        ...getTabsFromExtensions(StratosTabType.CloudFoundrySpace),
-      ]);
     });
   }
 
