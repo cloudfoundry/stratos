@@ -89,7 +89,7 @@
           <div data-testid="org-role-cell" class="role-assignment__role-cell">
             <app-role-tristate-checkbox
               [checked]="checkedForOrg(org.metadata.guid, def.name)"
-              [disabled]="!canEditOrg(org.metadata.guid) || (def.name === orgUserRole && isOrgUserDisabled(org.metadata.guid))"
+              [disabled]="loading() || !canEditOrg(org.metadata.guid) || (def.name === orgUserRole && isOrgUserDisabled(org.metadata.guid))"
               [label]="def.label"
               (toggled)="onToggleOrgRole(org, def.name, $event)"
             ></app-role-tristate-checkbox>
@@ -136,7 +136,7 @@
                   <div data-testid="space-role-cell" class="role-assignment__role-cell">
                     <app-role-tristate-checkbox
                       [checked]="checkedForSpace(org.metadata.guid, space.guid, def.name)"
-                      [disabled]="!canChangeSpaceRoles(org.metadata.guid, space.guid)"
+                      [disabled]="loading() || !canChangeSpaceRoles(org.metadata.guid, space.guid)"
                       [label]="def.label"
                       (toggled)="onToggleSpaceRole(org, space, def.name, $event)"
                     ></app-role-tristate-checkbox>

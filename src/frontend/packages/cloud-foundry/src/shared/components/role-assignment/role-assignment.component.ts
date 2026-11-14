@@ -79,7 +79,7 @@ export class RoleAssignmentComponent implements OnInit, OnDestroy {
   readonly cfGuid = input.required<string>();
   readonly users = input<StUser[]>([]);
   readonly baseline = input<CfUserRolesSelected>({});
-  /** True while the host is still resolving existing roles (existingRoles$). */
+  /** True while the host is still resolving existing roles (existingRoles$); role cells stay disabled until it clears. */
   readonly loading = input<boolean>(false);
   readonly lockedOrg = input<{
     guid: string;
