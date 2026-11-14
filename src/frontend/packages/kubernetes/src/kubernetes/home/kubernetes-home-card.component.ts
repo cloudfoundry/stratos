@@ -69,12 +69,18 @@ export class KubernetesHomeCardComponent {
     return guid ? this.failures.any(guid) : undefined;
   });
 
-  // Preserves the original load() contract: emit once the counts are wired.
+  // True once none of the three lists is still being fetched. The counts
+  // are read first: the pod list starts loading on that read, so its
+  // loading flag is already set when it is checked.
   private readonly loaded = computed(() => {
     this.podCount();
     this.nodeCount();
     this.namespaceCount();
-    return true;
+    const guid = this.guidSig();
+    return !!guid
+      && !this.podData.scopeLoading({ kubeGuid: guid })
+      && !this.nodeData.loading(guid)
+      && !this.namespaceData.listLoading(guid)();
   });
   private readonly loaded$ = toObservable(this.loaded);
 

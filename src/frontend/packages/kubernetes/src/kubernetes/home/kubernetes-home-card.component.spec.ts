@@ -32,15 +32,22 @@ describe('KubernetesHomeCardComponent', () => {
   const nodeErrors = signal<StratosError[]>([]);
   const namespaceErrors = signal<StratosError[]>([]);
 
+  // Whether each list is still being fetched.
+  const nodeLoading = signal(false);
+  const namespaceLoading = signal(false);
+
   const podStub = {
+    scopeLoading: () => false,
     podsInCluster: (_g: string) => pods as Signal<unknown[]>, refresh: podRefresh,
     scopeErrors: () => podErrors(),
   };
   const nodeStub = {
+    loading: () => nodeLoading(),
     nodesInCluster: (_g: string) => nodes as Signal<unknown[]>, refresh: nodeRefresh,
     errors: () => nodeErrors.asReadonly(),
   };
   const namespaceStub = {
+    listLoading: () => namespaceLoading.asReadonly(),
     namespacesForEndpoint: (_g: string) => namespaces as Signal<unknown[]>, refresh: namespaceRefresh,
     namespaceListErrors: () => namespaceErrors(),
   };
@@ -52,6 +59,8 @@ describe('KubernetesHomeCardComponent', () => {
     podErrors.set([]);
     nodeErrors.set([]);
     namespaceErrors.set([]);
+    nodeLoading.set(false);
+    namespaceLoading.set(false);
     vi.clearAllMocks();
     await TestBed.configureTestingModule({imports: [...KubernetesBaseTestModules,
         KubernetesHomeCardComponent,
@@ -98,6 +107,25 @@ describe('KubernetesHomeCardComponent', () => {
     expect(component.podCount()).toBe(2);
     expect(component.nodeCount()).toBe(1);
     expect(component.namespaceCount()).toBe(3);
+  });
+
+  describe('load() result', () => {
+    // The host shows the card as loading until load() emits true.
+    async function loadedWhile(loading: { set(v: boolean): void }) {
+      loading.set(true);
+      fixture.componentRef.setInput('endpoint', { guid: 'k1' } as EndpointModel);
+      const seen: boolean[] = [];
+      component.load().subscribe(v => seen.push(v));
+      await fixture.whenStable();
+      expect(seen).not.toContain(true);
+
+      loading.set(false);
+      await fixture.whenStable();
+      expect(seen).toContain(true);
+    }
+
+    it('waits for the node list', () => loadedWhile(nodeLoading));
+    it('waits for the namespace list', () => loadedWhile(namespaceLoading));
   });
 
   it('triggers a refresh on the node and namespace services (pods auto-load)', () => {
