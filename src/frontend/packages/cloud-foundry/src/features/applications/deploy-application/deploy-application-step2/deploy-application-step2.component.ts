@@ -1,6 +1,6 @@
 import { CommonModule } from '@angular/common';
 import { HttpClient } from '@angular/common/http';
-import { AfterContentInit, Component, OnDestroy, OnInit, ChangeDetectionStrategy, inject, signal, input, viewChild } from '@angular/core';
+import { AfterContentInit, Component, Injector, OnDestroy, OnInit, ChangeDetectionStrategy, effect, inject, signal, input, untracked, viewChild } from '@angular/core';
 import { toObservable } from '@angular/core/rxjs-interop';
 import { AbstractControl, FormsModule, NgForm } from '@angular/forms';
 import { ActivatedRoute } from '@angular/router';
@@ -85,7 +85,7 @@ export class DeployApplicationStep2Component
   private projectExists$ = toObservable(this.deployData.projectExists);
   private deployBranchName$ = toObservable(this.deployData.deployBranchName);
   private deployCommit$ = toObservable(this.deployData.newProjectCommit);
-  private peProjectName$ = toObservable(this.deployData.projectName);
+  private injector = inject(Injector);
 
 
   readonly isRedeploy = input(false);
@@ -124,7 +124,9 @@ export class DeployApplicationStep2Component
   // (Next button / template reads) can fire.
   sourceType!: SourceType;
   repositoryBranch?: GitBranch;
-  repository = '';
+  // Signal: bound to the project field, and seeded once the deployed app's
+  // project is known, outside change detection
+  readonly repository = signal('');
 
   // Assigned in setupForGit's source-type subscription before repo/branch
   // lookups run; reads are all downstream of that assignment.
@@ -225,15 +227,15 @@ export class DeployApplicationStep2Component
         return {
           success: false,
           message: this.isRedeploy() && branchName ?
-            `Branch ${branchName} was not found in ${this.repository}.` :
-            `Select a branch to deploy from ${this.repository}.`,
+            `Branch ${branchName} was not found in ${this.repository()}.` :
+            `Select a branch to deploy from ${this.repository()}.`,
         };
       }
       // waitForValue$ can stay open, so take its first value only
       try {
-        const repo = await firstValueFrom(this.gitData.getRepository(this.scm, this.repository).waitForValue$);
+        const repo = await firstValueFrom(this.gitData.getRepository(this.scm, this.repository()).waitForValue$);
         this.deployData.saveAppDetails({
-          projectName: this.repository,
+          projectName: this.repository(),
           branch,
           url: repo.clone_url,
           accessToken: this.accessToken,
@@ -244,7 +246,7 @@ export class DeployApplicationStep2Component
       } catch (err) {
         return {
           success: false,
-          message: `Unable to fetch ${this.scm.getLabel()} repository ${this.repository}: ${(err as Error).message}`,
+          message: `Unable to fetch ${this.scm.getLabel()} repository ${this.repository()}: ${(err as Error).message}`,
         };
       }
     } else if (this.sourceType.id === DEPLOY_TYPES_IDS.GIT_URL) {
@@ -424,7 +426,7 @@ export class DeployApplicationStep2Component
           // User selected one of the SCM options
           if (this.scm && newScm.getType() !== this.scm.getType()) {
             // User changed the SCM type, so reset the project and branch
-            this.repository = '';
+            this.repository.set('');
             this.commitInfo.set(undefined);
             this.redeployCommitSha = undefined;
             this.repositoryBranch = undefined;
@@ -440,16 +442,16 @@ export class DeployApplicationStep2Component
       })
     );
 
-    const setProjectName = this.peProjectName$.pipe(
-      filter((p): p is string => !!p),
-      take(1),
-      tap(p => {
-        this.repository = p;
-      })
-    );
+    // Once, when the deployed app's project is known
+    const seedRepository = effect(() => {
+      const projectName = this.deployData.projectName();
+      if (projectName) {
+        seedRepository.destroy();
+        untracked(() => this.repository.set(projectName));
+      }
+    }, { injector: this.injector });
 
     this.subscriptions.push(setSourceTypeModel$.subscribe());
-    this.subscriptions.push(setProjectName.subscribe());
 
     // strict: NgForm.valueChanges is non-null once the form is initialised,
     // which holds by the time setupForGit runs after ngOnInit.
