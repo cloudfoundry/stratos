@@ -1,6 +1,7 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { importProvidersFrom, provideZonelessChangeDetection, APP_INITIALIZER } from '@angular/core';
 import { NoopAnimationsModule } from '@angular/platform-browser/animations';
+import { signal, WritableSignal } from '@angular/core';
 import { describe, it, expect, beforeEach } from 'vitest';
 
 import { EntityCatalogHelper, EntityCatalogHelpers } from '@stratosui/store';
@@ -44,10 +45,10 @@ describe('SelectServiceComponent', () => {
       .compileComponents();
   });
 
-  beforeEach(() => {
+  beforeEach(async () => {
     fixture = TestBed.createComponent(SelectServiceComponent);
     component = fixture.componentInstance;
-    fixture.detectChanges();
+    await fixture.whenStable();
   });
 
   it('should create', () => {
@@ -60,5 +61,20 @@ describe('SelectServiceComponent', () => {
     expect(trigger).toBeTruthy();
     expect(trigger!.getAttribute('aria-label')).toBe('Choose Service');
     expect(trigger!.textContent).toContain('Choose Service');
+  });
+
+  it('shows the card of the service picked in the list', async () => {
+    (component as unknown as { offeringsSource: WritableSignal<unknown> }).offeringsSource.set({
+      value: signal([
+        { guid: 'svc-a', name: 'alpha' },
+        { guid: 'svc-b', name: 'bravo' },
+      ]),
+      isLoading: signal(false),
+    });
+    component.stepperForm.controls.service.setValue('svc-b');
+    await fixture.whenStable();
+
+    expect(component.selectedService()?.name).toBe('bravo');
+    expect(fixture.nativeElement.querySelector('app-cf-service-card')).toBeTruthy();
   });
 });

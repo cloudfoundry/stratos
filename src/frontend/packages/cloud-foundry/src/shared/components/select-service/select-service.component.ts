@@ -11,9 +11,9 @@ import {
   signal,
 } from '@angular/core';
 import { FormControl, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
-import { takeUntilDestroyed, toObservable } from '@angular/core/rxjs-interop';
-import { combineLatest, Observable, of as observableOf } from 'rxjs';
-import { catchError, filter, map } from 'rxjs/operators';
+import { takeUntilDestroyed, toSignal } from '@angular/core/rxjs-interop';
+import { of as observableOf } from 'rxjs';
+import { catchError, map } from 'rxjs/operators';
 
 import { CustomFormFieldComponent, CustomSelectComponent, CustomOptionComponent, StepOnNextResult, naturalCompare } from '@stratosui/core';
 import { ServicesWallService } from '../../../features/services/services/services-wall.service';
@@ -65,17 +65,13 @@ export class SelectServiceComponent implements AfterContentInit {
     const offerings: StServiceOffering[] = source.value() ?? [];
     return [...offerings].sort((a, b) => naturalCompare(a?.name ?? '', b?.name ?? ''));
   });
-  // Bridge the signal to Observable for the template's `services$ |
-  // async` binding (and downstream RxJS composition below).
-  services$: Observable<StServiceOffering[]> = toObservable(this.services);
 
   readonly isFetching: Signal<boolean> = computed(() => !!this.offeringsSource()?.isLoading());
-  isFetching$: Observable<boolean> = toObservable(this.isFetching);
 
   cfGuid!: string;
   stepperForm: FormGroup<SelectServiceForm>;
   validate = signal<boolean>(false);
-  selectedService$: Observable<StServiceOffering>;
+  readonly selectedService: Signal<StServiceOffering | undefined>;
 
   private readonly destroyRef = inject(DestroyRef);
   public errorMessage: string | null = null;
@@ -133,14 +129,9 @@ export class SelectServiceComponent implements AfterContentInit {
       service: new FormControl<string>('', { validators: [Validators.required], nonNullable: true }),
     });
 
-    this.selectedService$ = combineLatest([
-      this.services$,
-      this.stepperForm.controls.service.statusChanges
-    ]).pipe(
-      map(([services, _change]) => services.filter(a => a?.guid === this.stepperForm.controls.service.value)[0]),
-      filter(p => !!p),
-      takeUntilDestroyed(this.destroyRef)
-    );
+    const serviceControl = this.stepperForm.controls.service;
+    const serviceGuid = toSignal(serviceControl.valueChanges, { initialValue: serviceControl.value });
+    this.selectedService = computed(() => this.services().find(a => a?.guid === serviceGuid()));
   }
 
   async onNext(): Promise<StepOnNextResult> {

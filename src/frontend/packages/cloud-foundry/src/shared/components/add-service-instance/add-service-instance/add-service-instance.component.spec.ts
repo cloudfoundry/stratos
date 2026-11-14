@@ -104,10 +104,20 @@ describe('AddServiceInstanceComponent', () => {
     it('selectServiceHandle.valid flips true when child validate flips true', () => {
       const ref = stubChild('_selectService');
       expect(component.selectServiceHandle.valid()).toBe(false);
-      const child = { validate: signal(false), isFetching$: { subscribe: () => ({ unsubscribe: () => {} }) } } as any;
+      const child = { validate: signal(false), isFetching: signal(false) } as any;
       ref.set(child);
       child.validate.set(true);
       expect(component.selectServiceHandle.valid()).toBe(true);
+    });
+
+    it('selectServiceHandle is blocked while the child fetches its services', () => {
+      const ref = stubChild('_selectService');
+      expect(component.selectServiceHandle.blocked!()).toBe(false);
+      const child = { validate: signal(false), isFetching: signal(true) } as any;
+      ref.set(child);
+      expect(component.selectServiceHandle.blocked!()).toBe(true);
+      child.isFetching.set(false);
+      expect(component.selectServiceHandle.blocked!()).toBe(false);
     });
 
     it('bindAppHandle.valid flips true when child validate flips true', () => {

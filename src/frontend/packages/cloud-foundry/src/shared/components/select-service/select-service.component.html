@@ -3,12 +3,12 @@
   <form class="stepper-form" [formGroup]="stepperForm">
     <app-form-field>
       <app-select class="form-control" formControlName="service" placeholder="Choose Service">
-        @for (service of services$ | async; track service.guid) {
+        @for (service of services(); track service.guid) {
           <app-option [value]="service.guid">{{ service.name }}</app-option>
         }
       </app-select>
     </app-form-field>
-    @if (selectedService$ | async; as selectedService) {
+    @if (selectedService(); as selectedService) {
       <app-cf-service-card disableCardClick="true" [row]="selectedService"></app-cf-service-card>
     }
   </form>

@@ -200,11 +200,9 @@ export class AddServiceInstanceComponent implements OnInit, OnDestroy {
   private readonly _supd = viewChild<SpecifyUserProvidedDetailsComponent>('supd');
 
   private selectCFValid = signal<boolean>(false);
-  private selectServiceFetching = signal<boolean>(false);
   private selectPlanFetching = signal<boolean>(false);
 
   private selectCFSub?: Subscription;
-  private selectServiceFetchSub?: Subscription;
 
   private isLoadingSignal = this.cfOrgSpaceService.isLoading;
   private skipAppsSignal = signal<boolean>(false);
@@ -242,23 +240,6 @@ export class AddServiceInstanceComponent implements OnInit, OnDestroy {
     });
   });
 
-  // SelectService.validate is already a Signal — the handle reads it
-  // directly. Only isFetching$ is bridged, for the blocked predicate.
-  private readonly selectServiceBridge = afterRenderEffect(() => {
-    const v = this._selectService();
-    untracked(() => {
-      this.selectServiceFetchSub?.unsubscribe();
-      this.selectServiceFetchSub = undefined;
-      if (v) {
-        this.selectServiceFetchSub = v.isFetching$.subscribe(b => {
-          this.selectServiceFetching.set(!!b);
-        });
-      } else {
-        this.selectServiceFetching.set(false);
-      }
-    });
-  });
-
   selectCFHandle: SignalStepHandle = {
     valid: this.selectCFValid.asReadonly(),
     blocked: computed(() => !!this.isLoadingSignal()),
@@ -275,7 +256,7 @@ export class AddServiceInstanceComponent implements OnInit, OnDestroy {
     // computed reads `this._selectService()` (the query signal), so it
     // re-evaluates when the child appears.
     valid: computed(() => !!this._selectService()?.validate()),
-    blocked: this.selectServiceFetching.asReadonly(),
+    blocked: computed(() => !!this._selectService()?.isFetching()),
     submit: async () => {
       const result = await this._selectService()!.onNext();
       if (!result.success) {
@@ -827,7 +808,6 @@ export class AddServiceInstanceComponent implements OnInit, OnDestroy {
 
   ngOnDestroy(): void {
     this.selectCFSub?.unsubscribe();
-    this.selectServiceFetchSub?.unsubscribe();
     this.skipAppsSub?.unsubscribe();
     try {
       this.csiState.reset();
