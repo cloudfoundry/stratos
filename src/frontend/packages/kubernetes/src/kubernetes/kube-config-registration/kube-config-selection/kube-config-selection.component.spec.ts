@@ -15,6 +15,26 @@ import { kubeEntityCatalog } from '../../kubernetes-entity-generator';
 import { KubeConfigHelper } from '../kube-config.helper';
 import { KubeConfigSelectionComponent } from './kube-config-selection.component';
 
+const KUBE_CONFIG = `
+apiVersion: v1
+kind: Config
+current-context: c1
+clusters:
+- name: c1
+  cluster:
+    server: https://1.2.3.4:6443
+contexts:
+- name: c1
+  context:
+    cluster: c1
+    user: u1
+users:
+- name: u1
+  user:
+    client-certificate-data: Y2VydA==
+    client-key-data: a2V5
+`;
+
 describe('KubeConfigSelectionComponent', () => {
   let component: KubeConfigSelectionComponent;
   let fixture: ComponentFixture<KubeConfigSelectionComponent>;
@@ -49,32 +69,30 @@ describe('KubeConfigSelectionComponent', () => {
     entityCatalog.register(kubeEntityCatalog.endpoint);
   });
 
-  beforeEach(() => {
+  beforeEach(async () => {
     fixture = TestBed.createComponent(KubeConfigSelectionComponent);
     component = fixture.componentInstance;
-    fixture.detectChanges();
+    await fixture.whenStable();
+  });
+
+  // The cluster list appears once a kube config has been parsed, and the step
+  // is valid only while the selected clusters are importable.
+  it('shows the list and becomes valid once a kube config is parsed', async () => {
+    const list = () => (fixture.nativeElement as HTMLElement).querySelector('app-signal-list');
+    expect(list()).toBeNull();
+    expect(component.valid()).toBe(false);
+
+    await firstValueFrom(TestBed.inject(KubeConfigHelper).parse(KUBE_CONFIG));
+    await fixture.whenStable();
+
+    expect(list()).not.toBeNull();
+    expect(component.valid()).toBe(true);
   });
 
   // The cell's edit box replaces the name text; it takes the column's name.
   it('names the inline cluster name box', async () => {
     const helper = TestBed.inject(KubeConfigHelper);
-    await firstValueFrom(helper.parse(`
-apiVersion: v1
-kind: Config
-clusters:
-- name: c1
-  cluster:
-    server: https://1.2.3.4:6443
-contexts:
-- name: c1
-  context:
-    cluster: c1
-    user: u1
-users:
-- name: u1
-  user:
-    token: t
-`));
+    await firstValueFrom(helper.parse(KUBE_CONFIG));
     await fixture.whenStable();
     const [cluster] = await firstValueFrom(helper.clusters$);
     component.startEdit(cluster);

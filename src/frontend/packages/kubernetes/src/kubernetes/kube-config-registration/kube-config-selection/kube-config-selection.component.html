@@ -1,4 +1,4 @@
-@if ((helper.clusters$ | async)) {
+@if (parsedClusters()) {
   <div class="flex-1">
     <app-signal-list [config]="listConfig">
       <ng-template appSignalListCell="name" let-row>

@@ -1,6 +1,6 @@
 import { ChangeDetectionStrategy, Component, Signal, WritableSignal, computed, inject, signal, input } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { toObservable, toSignal } from '@angular/core/rxjs-interop';
+import { toSignal } from '@angular/core/rxjs-interop';
 import { combineLatest, of } from 'rxjs';
 import { map, take } from 'rxjs/operators';
 
@@ -55,14 +55,16 @@ export class KubeConfigSelectionComponent {
   // The last "Failed to load Kube Config" message, cleared by the next parse.
   private parseErrorSnackBar?: TailwindSnackBarRef<unknown>;
 
-  // Clusters as a signal. `helper.clusters$` filters to truthy arrays, so
-  // this starts empty and populates once a kube config is parsed. Drives
-  // the signal-list paging signals below; per-row mutations (_selected,
+  // The parsed clusters. `helper.clusters$` filters to truthy arrays, so this
+  // is undefined until a kube config has been parsed; the template shows the
+  // list only from then on.
+  protected readonly parsedClusters = toSignal(this.helper.clusters$);
+
+  // Clusters as a list, empty until a kube config is parsed. Drives the
+  // signal-list paging signals below; per-row mutations (_selected,
   // _state) don't change the array identity — those re-render via the
   // checkbox selection signal and per-row rowState signal respectively.
-  private readonly clusters: Signal<KubeConfigFileCluster[]> = toSignal(
-    this.helper.clusters$, { initialValue: [] as KubeConfigFileCluster[] }
-  );
+  private readonly clusters: Signal<KubeConfigFileCluster[]> = computed(() => this.parsedClusters() ?? []);
 
   // Selection mirror. signal-list's `kind: 'checkbox'` column owns a set of
   // selected row keys (_id), but the source of truth stays each cluster's
@@ -116,10 +118,9 @@ export class KubeConfigSelectionComponent {
     columns: this.buildColumns(),
   };
 
-  // Is the import data valid? Bridged into the parent stepper's select-step
-  // handle via valid$.
-  private _valid = signal<boolean>(false);
-  valid$ = toObservable(this._valid);
+  // Is the import data valid? Read by the parent stepper's select-step handle.
+  private readonly _valid = signal<boolean>(false);
+  readonly valid = this._valid.asReadonly();
 
   constructor() {
     this.helper.clustersChanged = () => this.clustersChanged();
