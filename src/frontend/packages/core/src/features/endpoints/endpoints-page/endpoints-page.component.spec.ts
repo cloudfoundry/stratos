@@ -11,11 +11,12 @@ import { AuthDataService, EndpointsDataService, EntityCatalogHelper, EntityCatal
 import { createBasicStoreModule, STORE_TEST_PROVIDERS } from '@stratosui/store/testing';
 import { CoreTestingModule } from "@test-framework/core-test.modules";
 import { CoreModule } from '../../../core/core.module';
+import { StratosCurrentUserPermissions } from '../../../core/permissions/stratos-user-permissions.checker';
 import { CurrentUserPermissionsService } from '../../../core/permissions/current-user-permissions.service';
 import { SharedModule } from '../../../shared/shared.module';
 import { TabNavService } from '../../../tab-nav.service';
 import { SidePanelService } from './../../../shared/services/side-panel.service';
-import { SessionService } from '../../../shared/services/session.service';
+import { SessionSignalService } from '../../../core/signals/session-signal.service';
 import { EndpointsService } from '../../../core/endpoints.service';
 import { EndpointStatusSignalService } from '../../../core/signals/endpoint-status-signal.service';
 import { CustomizationService, CustomizationsMetadata } from '../../../core/customizations.types';
@@ -34,10 +35,10 @@ describe('EndpointsPageComponent', () => {
   let customizations: CustomizationsMetadata;
 
   // Mock services
-  const mockSessionService = {
-    userEndpointsEnabled: () => of(true),
-    userEndpointsNotDisabled: () => of(true),
-    isTechPreview: () => of(false)
+  const sessionSignals = {
+    userEndpointsEnabled: signal(true),
+    userEndpointsNotDisabled: signal(true),
+    isTechPreview: signal(false)
   };
 
   const mockEndpointsService = {
@@ -85,7 +86,7 @@ describe('EndpointsPageComponent', () => {
         TabNavService,
         SidePanelService,
         { provide: CurrentUserPermissionsService, useValue: mockPermissionsService },
-        { provide: SessionService, useValue: mockSessionService },
+        { provide: SessionSignalService, useValue: sessionSignals },
         { provide: EndpointsService, useValue: mockEndpointsService },
         // The real service waits on an endpoints request the test never answers.
         { provide: EndpointStatusSignalService, useValue: mockEndpointStatusSignals },
@@ -106,6 +107,7 @@ describe('EndpointsPageComponent', () => {
   beforeEach(async () => {
     perm = signal(false);
     mockEndpointStatusSignals.initialised.set(true);
+    sessionSignals.userEndpointsEnabled.set(true);
     mockEndpointsService.haveRegistered.set(false);
     mockEndpointsService.haveConnected.set(false);
     mockEndpointsService.disablePersistenceFeatures.set(false);
@@ -138,6 +140,23 @@ describe('EndpointsPageComponent', () => {
 
   // Backup and restore need the backend plugin and the admin permission;
   // the session may arrive after the page.
+  // An endpoint admin may register only while user endpoints are enabled;
+  // the button followed the first answer only.
+  it('follows the user-endpoints setting for an endpoint admin', async () => {
+    sessionSignals.userEndpointsEnabled.set(false);
+    TestBed.tick();
+    const can = vi.spyOn(TestBed.inject(CurrentUserPermissionsService), 'can')
+      .mockImplementation(((p: string) => signal(p === StratosCurrentUserPermissions.EDIT_ENDPOINT)) as any);
+    const page = TestBed.createComponent(EndpointsPageComponent);
+    await page.whenStable();
+    expect(page.componentInstance.canRegisterEndpoint()).toBe(false);
+
+    sessionSignals.userEndpointsEnabled.set(true);
+    await page.whenStable();
+    expect(page.componentInstance.canRegisterEndpoint()).toBe(true);
+    can.mockRestore();
+  });
+
   it('offers backup and restore once the session has the plugin', () => {
     perm.set(true);
     expect(component.canBackupRestore()).toBe(false);

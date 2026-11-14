@@ -1,13 +1,13 @@
 import { CommonModule } from '@angular/common';
 import { ChangeDetectionStrategy, Component, OnDestroy, OnInit, computed, effect, inject, signal, untracked } from '@angular/core';
-import { toObservable, toSignal } from '@angular/core/rxjs-interop';
+import { toObservable } from '@angular/core/rxjs-interop';
 import { CustomTooltipDirective } from '../../../shared/components/custom-tooltip/custom-tooltip.directive';
 import { Router, RouterModule } from '@angular/router';
 import {
   EndpointsDataService,
 } from '@stratosui/store';
-import { of, Subscription } from 'rxjs';
-import { catchError, take, filter } from 'rxjs/operators';
+import { Subscription } from 'rxjs';
+import { take, filter } from 'rxjs/operators';
 
 import { CustomizationService, CustomizationsMetadata } from '../../../core/customizations.types';
 import { EndpointsService } from '../../../core/endpoints.service';
@@ -25,7 +25,7 @@ import { PageHeaderComponent } from '../../../shared/components/page-header/page
 import { EndpointsMissingComponent } from '../../../shared/components/endpoints-missing/endpoints-missing.component';
 import { ListSubNavComponent } from '../../../shared/components/list-sub-nav/list-sub-nav.component';
 import { TailwindSnackBarRef, TailwindSnackBarService } from '../../../shared/services/tailwind-snackbar.service';
-import { SessionService } from '../../../shared/services/session.service';
+import { SessionSignalService } from '../../../core/signals/session-signal.service';
 import { EndpointModalService } from '../endpoint-register-modal/endpoint-modal.service';
 import { EndpointRegisterModalComponent } from '../endpoint-register-modal/endpoint-register-modal.component';
 import { EndpointsSignalListComponent } from './endpoints-signal-list.component';
@@ -55,7 +55,6 @@ export class EndpointsPageComponent implements OnDestroy, OnInit {
   private endpointsData = inject(EndpointsDataService);
   private authSignal = inject(AuthSignalService);
   private snackBarService = inject(TailwindSnackBarService);
-  sessionService = inject(SessionService);
   private endpointModalService = inject(EndpointModalService);
   private dashboardSignals = inject(DashboardSignalService);
   private endpointStatusSignals = inject(EndpointStatusSignalService);
@@ -73,21 +72,9 @@ export class EndpointsPageComponent implements OnDestroy, OnInit {
   // passes — matching the previous directive-based behavior.
   private readonly canEditAdminEndpoint = this.currentUserPermissionsService.can(StratosCurrentUserPermissions.EDIT_ADMIN_ENDPOINT);
   private readonly canEditEndpoint = this.currentUserPermissionsService.can(StratosCurrentUserPermissions.EDIT_ENDPOINT);
-  private readonly userEndpointsEnabled = toSignal(
-    this.sessionService.userEndpointsEnabled().pipe(
-      catchError(err => {
-        console.error('Error resolving register-endpoint permission:', err);
-        return of(null);
-      })
-    ),
-  );
-  public readonly canRegisterEndpoint = computed(() => {
-    const enabled = this.userEndpointsEnabled();
-    if (enabled === undefined || enabled === null) {
-      return false;
-    }
-    return this.canEditAdminEndpoint() || (enabled && this.canEditEndpoint());
-  });
+  private readonly userEndpointsEnabled = inject(SessionSignalService).userEndpointsEnabled;
+  public readonly canRegisterEndpoint = computed(() =>
+    this.canEditAdminEndpoint() || (this.userEndpointsEnabled() && this.canEditEndpoint()));
   private healthCheckTimeout!: number;
 
   /**
