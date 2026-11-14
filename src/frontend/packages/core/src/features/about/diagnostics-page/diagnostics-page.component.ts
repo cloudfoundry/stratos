@@ -1,10 +1,7 @@
-import { ChangeDetectionStrategy, Component, OnInit, VERSION, inject } from '@angular/core';
+import { ChangeDetectionStrategy, Component, OnInit, VERSION, computed, inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { toObservable } from '@angular/core/rxjs-interop';
 import { Meta } from '@angular/platform-browser';
 import { Diagnostics, SessionData } from '@stratosui/store';
-import { Observable } from 'rxjs';
-import { filter, map } from 'rxjs/operators';
 
 import { AuthSignalService } from '../../../core/signals/auth-signal.service';
 import { BooleanIndicatorComponent } from '../../../shared/components/boolean-indicator/boolean-indicator.component';
@@ -31,14 +28,16 @@ export class DiagnosticsPageComponent implements OnInit {
   private auth = inject(AuthSignalService);
 
 
-  // toObservable() requires an injection context — bridge the signal here
-  // (field initializer runs in DI context) rather than in ngOnInit (which is not).
-  sessionData$: Observable<SessionData & { diagnostics: Diagnostics; }> = toObservable(this.auth.sessionData).pipe(
-    filter((sessionData): sessionData is SessionData & { diagnostics: Diagnostics; } => !!sessionData && !!sessionData.diagnostics)
-  );
-  versionNumber$!: Observable<string>;
-  userIsAdmin$!: Observable<boolean>;
-  helmLastModified$!: Observable<Date>;
+  // The page renders once the session carries diagnostics.
+  readonly sessionData = computed(() => {
+    const sessionData = this.auth.sessionData();
+    return sessionData?.diagnostics ? sessionData as SessionData & { diagnostics: Diagnostics } : null;
+  });
+  readonly userIsAdmin = computed(() => !!this.sessionData()?.user?.admin);
+  readonly helmLastModified = computed(() => {
+    const match = /seconds:([0-9]*)/.exec(this.sessionData()?.diagnostics.helmLastModified ?? '');
+    return new Date(match?.length === 2 ? parseInt(match[1], 10) * 1000 : 0);
+  });
 
   angularVersion = VERSION.full;
   buildInfo = BUILD_INFO;
@@ -55,30 +54,6 @@ export class DiagnosticsPageComponent implements OnInit {
   public gitCommitLink?: string;
 
   ngOnInit() {
-
-    const helmLastModifiedRegEx = /seconds:([0-9]*)/;
-
-    this.userIsAdmin$ = this.sessionData$.pipe(
-      map(session => !!(session.user && session.user.admin))
-    );
-
-    this.versionNumber$ = this.sessionData$.pipe(
-      map((sessionData: SessionData) => {
-        const versionNumber = sessionData.version?.proxy_version ?? '';
-        return versionNumber.split('-')[0];
-      })
-    );
-
-    this.helmLastModified$ = this.sessionData$.pipe(
-      map((sessionData: SessionData) => {
-        const lastModified = sessionData.diagnostics?.helmLastModified;
-        const match = lastModified ? helmLastModifiedRegEx.exec(lastModified) : null;
-        if (match && match.length === 2) {
-          return new Date(parseInt(match[1], 10) * 1000);
-        }
-        return new Date(0);
-      })
-    );
 
     this.gitProject = this.buildInfo.gitProject || this.getMeta('stratos_git_project');
     this.gitBranch = this.buildInfo.gitBranch || this.getMeta('stratos_git_branch');
