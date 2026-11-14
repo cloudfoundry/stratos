@@ -369,3 +369,33 @@ func TestSameURLAlternatives(t *testing.T) {
 		})
 	}
 }
+
+// Disconnecting the auto-registered Cloud Foundry marks the token cleared,
+// so the next login does not connect it again. The endpoint counts as the
+// auto-registered one when its address matches AUTO_REG_CF_URL by
+// endpointURLKey, the comparison the login hook uses to find it.
+func TestClearCNSITokenKeepsAutoRegisteredCFClearedBySameAddress(t *testing.T) {
+	t.Parallel()
+
+	req := setupMockReq("POST", "", nil)
+	_, _, _, pp, db, mock := setupHTTPTest(req)
+	t.Cleanup(func() { _ = db.Close() })
+	pp.Config.AutoRegisterCFUrl = "https://api.example.com/"
+
+	apiURL, err := url.Parse("https://API.example.com:443")
+	if err != nil {
+		t.Fatal(err)
+	}
+	record := api.CNSIRecord{GUID: mockCNSIGUID, CNSIType: "cf", APIEndpoint: apiURL}
+
+	// Cleared: the token is saved as disconnected, not deleted.
+	mock.ExpectQuery(selectAnyFromTokens).WillReturnRows(testutils.ExpectNoRows())
+	mock.ExpectExec(insertIntoTokens).WillReturnResult(sqlmock.NewResult(1, 1))
+
+	if err := pp.ClearCNSIToken(record, mockUserGUID); err != nil {
+		t.Fatalf("ClearCNSIToken: %v", err)
+	}
+	if err := mock.ExpectationsWereMet(); err != nil {
+		t.Errorf("token not kept as cleared: %v", err)
+	}
+}

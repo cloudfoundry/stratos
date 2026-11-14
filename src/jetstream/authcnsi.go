@@ -433,9 +433,10 @@ func (p *portalProxy) DoAuthFlowRequest(cnsiRequest *api.CNSIRequest, req *http.
 
 // Clear the CNSI token
 func (p *portalProxy) ClearCNSIToken(cnsiRecord api.CNSIRecord, userGUID string) error {
-	// If cnsi is cf AND cf is auto-register only clear the entry
-	p.Config.AutoRegisterCFUrl = strings.TrimRight(p.Config.AutoRegisterCFUrl, "/")
-	if cnsiRecord.CNSIType == "cf" && p.GetConfig().AutoRegisterCFUrl == cnsiRecord.APIEndpoint.String() {
+	// The auto-registered Cloud Foundry keeps a cleared token, so the login
+	// hook does not connect it again. It is found by address the way the
+	// hook finds it (endpointURLKey).
+	if cnsiRecord.CNSIType == "cf" && cnsiRecord.APIEndpoint != nil && p.isAutoRegisterAddress(cnsiRecord.APIEndpoint) {
 		slog.Debug("Setting the token record as disconnected", "endpoint", cnsiRecord.GUID, "user", userGUID)
 
 		tokenRecord := p.InitEndpointTokenRecord(0, "cleared_token", "cleared_token", true)
@@ -450,6 +451,15 @@ func (p *portalProxy) ClearCNSIToken(cnsiRecord api.CNSIRecord, userGUID string)
 	}
 
 	return nil
+}
+
+// isAutoRegisterAddress reports whether u is AUTO_REG_CF_URL's address.
+func (p *portalProxy) isAutoRegisterAddress(u *url.URL) bool {
+	autoReg, err := url.Parse(p.GetConfig().AutoRegisterCFUrl)
+	if err != nil || autoReg.Host == "" {
+		return false
+	}
+	return endpointURLKey(autoReg) == endpointURLKey(u)
 }
 
 func (p *portalProxy) GetCNSIUser(cnsiGUID string, userGUID string) (*api.ConnectedUser, bool) {
