@@ -34,6 +34,8 @@
 - Manage Roles no longer accepts a role change while the user's roles
   are still loading. A change made then enabled Next and confirmed
   against an organization with no name.
+- Manage Roles keeps Next disabled until a role differs from what the
+  user holds, and disables it again when the changes are undone.
 ----
 [BugFixes: Kubernetes]
 - The Kubernetes home card waits for its pod, node and namespace counts
