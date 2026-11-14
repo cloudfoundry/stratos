@@ -1,7 +1,6 @@
 import { CommonModule } from '@angular/common';
 import { Component, OnDestroy, OnInit, Signal, ChangeDetectionStrategy, inject, computed, signal, input } from '@angular/core';
 import { toSignal } from '@angular/core/rxjs-interop';
-import { Subscription } from 'rxjs';
 import { take, defaultIfEmpty, startWith } from 'rxjs/operators';
 
 import {
@@ -75,19 +74,18 @@ export class UsersRolesModifyComponent implements OnInit, OnDestroy {
 
   private snackBarRef: TailwindSnackBarRef<any> | null = null;
 
-  blocked = signal<boolean>(true);
+  /** True once the widget has reported at least one pending role change. */
+  private readonly hasChanges = signal(false);
+
+  /**
+   * Next is blocked while the existing roles load (not in set-by-username
+   * mode, which has none to load) and while there is nothing to apply.
+   */
+  readonly blocked = computed(() => (!this.setUsernames() && this.loadingRoles()) || !this.hasChanges());
   /** Inverse of blocked; the parent reads it to enable Next. */
   readonly valid = computed(() => !this.blocked());
 
-  private subs: Subscription[] = [];
-
   ngOnInit() {
-    if (this.setUsernames()) {
-      this.blocked.set(false);
-    } else {
-      this.subs.push(this.cfRolesService.loading$.subscribe(loading => this.blocked.set(loading)));
-    }
-
     // Resolve org name for lockedOrg at org/space scope
     if (this.activeRouteCfOrgSpace.orgGuid) {
       this.cfRolesService.fetchOrgEntity(this.activeRouteCfOrgSpace.cfGuid, this.activeRouteCfOrgSpace.orgGuid).pipe(
@@ -116,7 +114,6 @@ export class UsersRolesModifyComponent implements OnInit, OnDestroy {
   }
 
   ngOnDestroy() {
-    this.subs.forEach(s => s.unsubscribe());
     if (this.snackBarRef) {
       this.snackBarRef.dismiss();
       this.snackBarRef = null;
@@ -126,7 +123,7 @@ export class UsersRolesModifyComponent implements OnInit, OnDestroy {
   /** Called by the role-assignment widget on every edit. */
   onChangeSet(changes: CfRoleChange[]): void {
     this.rolesData.setChanges(changes);
-    this.blocked.set(changes.length === 0);
+    this.hasChanges.set(changes.length > 0);
   }
 
   onEnter = () => {

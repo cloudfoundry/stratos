@@ -112,18 +112,18 @@ describe('UsersRolesComponent', () => {
   // The handles Next reads trailed the roles step by a timer tick, so
   // Next stayed disabled (or enabled) briefly after the roles changed.
   it('enables Next on the roles step as soon as roles are picked', async () => {
-    await setup({ user: 'g1' });
-    http.expectOne(userUrl('g1')).flush(stUser('g1', 'alice'));
-    await fixture.whenStable();
+    // Set-by-username mode has no existing roles to wait for, so only the
+    // pending changes decide.
+    await setup({ setByUsername: 'true' });
     const modify = component.modify()!;
     const handle = component.modifyStepHandle;
 
-    modify.blocked.set(false);
+    modify.onChangeSet([{ userGuid: 'g1', orgGuid: 'o1', add: true, role: 'managers' as any, orgName: 'O' }]);
     TestBed.tick();
     expect(handle.blocked!()).toBe(false);
     expect(handle.valid()).toBe(true);
 
-    modify.blocked.set(true);
+    modify.onChangeSet([]);
     TestBed.tick();
     expect(handle.blocked!()).toBe(true);
     expect(handle.valid()).toBe(false);

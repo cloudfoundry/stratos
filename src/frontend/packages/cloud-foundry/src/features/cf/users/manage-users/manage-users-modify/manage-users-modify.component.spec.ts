@@ -287,3 +287,30 @@ describe('UsersRolesModifyComponent — existing roles still loading', () => {
     expect(component.valid()).toBe(true);
   });
 });
+
+describe('UsersRolesModifyComponent — Next follows the pending changes', () => {
+  let component: UsersRolesModifyComponent;
+  let fixture: ComponentFixture<UsersRolesModifyComponent>;
+  let driver: RoleAssignmentDriver;
+
+  beforeEach(async () => {
+    buildTestBed({ orgGuid: 'org-guid', spaceGuid: '' });
+    fixture = TestBed.createComponent(UsersRolesModifyComponent);
+    component = fixture.componentInstance;
+    TestBed.inject(CfUsersRolesDataService).setUsers('cfGuid', [mockUser1]);
+    await fixture.whenStable();
+    driver = new RoleAssignmentDriver(fixture);
+  });
+
+  it('keeps Next disabled until a role is changed, and again once it is undone', async () => {
+    expect(component.valid()).toBe(false);
+
+    driver.toggleOrgRole('org-guid', 'Manager');
+    await fixture.whenStable();
+    expect(component.valid()).toBe(true);
+
+    driver.toggleOrgRole('org-guid', 'Manager');
+    await fixture.whenStable();
+    expect(component.valid()).toBe(false);
+  });
+});
