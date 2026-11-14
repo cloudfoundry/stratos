@@ -16,6 +16,8 @@ import { generateCFEntities, generateTestCfEndpointServiceProvider, CloudFoundry
 import { CnsiOrgsSource } from '../../../../services/data-sources/cnsi-orgs-source';
 import { CloudFoundryOrganizationService } from '../../services/cloud-foundry-organization.service';
 import { CloudFoundryUserProvidedServicesService } from '../../../../shared/services/cloud-foundry-user-provided-services.service';
+import { EndpointDataRegistry } from '../../../../services/endpoint-data/endpoint-data.registry';
+import { StOrg } from '../../../../services/endpoint-data/stratos-types';
 import { EditOrganizationStepComponent } from './edit-organization-step.component';
 
 describe('EditOrganizationStepComponent', () => {
@@ -66,10 +68,10 @@ describe('EditOrganizationStepComponent', () => {
     EntityCatalogHelpers.SetEntityCatalogHelper(ech);
   });
 
-  beforeEach(() => {
+  beforeEach(async () => {
     fixture = TestBed.createComponent(EditOrganizationStepComponent);
     component = fixture.componentInstance;
-    fixture.detectChanges();
+    await fixture.whenStable();
   });
 
   afterEach(() => vi.restoreAllMocks());
@@ -79,7 +81,7 @@ describe('EditOrganizationStepComponent', () => {
   });
   // app-form-field shows a field's <app-error> text as its error line.
   it('says a taken organization name exists', async () => {
-    component.allOrgsInEndpoint = ['taken'];
+    TestBed.inject(EndpointDataRegistry).acquire(testSCFEndpointGuid).addOrg({ name: 'taken' } as StOrg);
     const host: HTMLElement = fixture.nativeElement;
     const input = host.querySelector<HTMLInputElement>('input[formcontrolname="orgName"]')!;
     input.value = 'taken';

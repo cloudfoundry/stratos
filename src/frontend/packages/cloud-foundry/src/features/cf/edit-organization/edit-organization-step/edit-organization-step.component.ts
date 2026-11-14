@@ -1,15 +1,14 @@
 import { CommonModule } from '@angular/common';
-import { Component, Injector, OnDestroy, OnInit, ChangeDetectionStrategy, effect, inject, runInInjectionContext, signal, input } from '@angular/core';
-import { toObservable } from '@angular/core/rxjs-interop';
+import { Component, Injector, OnDestroy, OnInit, ChangeDetectionStrategy, effect, inject, runInInjectionContext, signal, input, untracked } from '@angular/core';
 import { AbstractControl, ReactiveFormsModule, ValidatorFn, Validators, FormBuilder, FormControl, FormGroup } from '@angular/forms';
 import { Router } from '@angular/router';
-import { firstValueFrom, Observable, Subscription } from 'rxjs';
-import { filter, map, take, tap } from 'rxjs/operators';
+import { firstValueFrom, Subscription } from 'rxjs';
 
 import { HttpClient } from '@angular/common/http';
-import { AppErrorComponent, AppInputDirective, CustomFormFieldComponent, CustomOptionComponent, CustomSelectComponent, FocusDirective, SignalStepHandle, safeUnsubscribe } from '@stratosui/core';
+import { AppErrorComponent, AppInputDirective, CustomFormFieldComponent, CustomOptionComponent, CustomSelectComponent, FocusDirective, SignalStepHandle } from '@stratosui/core';
 import { CnsiOrgsSource } from '../../../../services/data-sources/cnsi-orgs-source';
 import { EndpointDataRegistry } from '../../../../services/endpoint-data/endpoint-data.registry';
+import { EndpointDataService } from '../../../../services/endpoint-data/endpoint-data.service';
 import { QuotaDataService, SignalSource } from '../../../../services/endpoint-data/quota-data.service';
 import { StOrgQuota } from '../../../../services/endpoint-data/stratos-types';
 import {
@@ -81,7 +80,7 @@ export class EditOrganizationStepComponent implements OnInit, OnDestroy {
         const source = new CnsiOrgsSource(this.cfGuid, this.http, eds);
         await source.update(this.orgGuid, {
           name: newName,
-          suspended: !this.status,
+          suspended: !this.status(),
         });
         if (newQuotaGuid && newQuotaGuid !== this.originalQuotaGuid) {
           await firstValueFrom(this.quotaData.applyOrgQuotaToOrgs(this.cfGuid, newQuotaGuid, [this.orgGuid]));
@@ -107,16 +106,13 @@ export class EditOrganizationStepComponent implements OnInit, OnDestroy {
     },
   };
 
-  fetchOrgsSub!: Subscription;
-  allOrgsInEndpoint: string[] = [];
-  allOrgsInEndpoint$!: Observable<string[]>;
-  orgSubscription!: Subscription;
+  private endpointData?: EndpointDataService;
   currentStatus!: string;
   originalName!: string;
   originalQuotaGuid: string | null = null;
-  org$: Observable<{ name: string; status: string; quota_definition_guid: string | undefined }>;
   editOrgName: FormGroup<EditOrganizationForm>;
-  status: boolean;
+  /** True while the organization is active; set when the organization loads. */
+  readonly status = signal(false);
   cfGuid: string;
   orgGuid: string;
   quotaSource!: SignalSource<StOrgQuota[]>;
@@ -130,33 +126,29 @@ export class EditOrganizationStepComponent implements OnInit, OnDestroy {
 
     this.orgGuid = cfOrgService.orgGuid;
     this.cfGuid = cfOrgService.cfGuid;
-    this.status = false;
     this.editOrgName = this.fb.group<EditOrganizationForm>({
       orgName: new FormControl('', { nonNullable: true, validators: [Validators.required, this.nameTakenValidator()] }),
       quotaDefinition: new FormControl<string | null>(null),
     });
-    this.org$ = toObservable(this.cfOrgService.orgDataService.org, { injector: this.injector }).pipe(
-      filter((o): o is NonNullable<typeof o> => !!o),
-      map(o => ({
-        name: o.name,
-        status: o.status,
-        quota_definition_guid: o.quotaGuid || undefined,
-      })),
-      take(1),
-      tap(n => {
-        this.originalName = n.name;
-        this.originalQuotaGuid = n.quota_definition_guid ?? null;
-        this.status = n.status === OrgStatus.ACTIVE ? true : false;
-        this.currentStatus = n.status;
+    // Fill the form once, from the first organization that loads.
+    const prefill = effect(() => {
+      const org = this.cfOrgService.orgDataService.org();
+      if (!org) {
+        return;
+      }
+      untracked(() => {
+        this.originalName = org.name;
+        this.originalQuotaGuid = org.quotaGuid || null;
+        this.status.set(org.status === OrgStatus.ACTIVE);
+        this.currentStatus = org.status;
 
         this.editOrgName.patchValue({
-          orgName: n.name,
-          quotaDefinition: n.quota_definition_guid,
+          orgName: org.name,
+          quotaDefinition: org.quotaGuid || undefined,
         });
-      })
-    );
-
-    this.orgSubscription = this.org$.subscribe();
+      });
+      prefill.destroy();
+    });
   }
 
   nameTakenValidator = (): ValidatorFn => {
@@ -172,15 +164,9 @@ export class EditOrganizationStepComponent implements OnInit, OnDestroy {
       () => this.validSignal.set(this.editOrgName.valid && this.editOrgName.dirty)
     );
 
-    const endpointData = this.endpointDataRegistry.acquire(this.cfGuid);
+    const endpointData = this.endpointData = this.endpointDataRegistry.acquire(this.cfGuid);
     endpointData.load().subscribe({ error: () => {} });
     endpointData.loadDetails().subscribe({ error: () => {} });
-    this.allOrgsInEndpoint$ = toObservable(endpointData.orgs, { injector: this.injector }).pipe(
-      filter(orgs => !!orgs && orgs.length > 0),
-      map(orgs => orgs.map(o => o.name)),
-      tap(names => this.allOrgsInEndpoint = names),
-    );
-    this.fetchOrgsSub = this.allOrgsInEndpoint$.subscribe();
 
     this.quotaSource = this.quotaData.orgQuotas(this.cfGuid);
     // Trigger initial fetch so the SignalSource populates.
@@ -193,10 +179,9 @@ export class EditOrganizationStepComponent implements OnInit, OnDestroy {
   }
 
   isNameUnique = (value: string | null = null): boolean => {
-    if (this.allOrgsInEndpoint && this.editOrgName) {
-      return this.allOrgsInEndpoint
-        .filter((o: string) => o !== this.originalName)
-        .indexOf(value ? value : this.orgName.value) === -1;
+    if (this.endpointData && this.editOrgName) {
+      const name = value ? value : this.orgName.value;
+      return !this.endpointData.orgs().some(o => o.name !== this.originalName && o.name === name);
     }
     return true;
   }
@@ -204,7 +189,6 @@ export class EditOrganizationStepComponent implements OnInit, OnDestroy {
   validate = () => this.validSignal();
 
   ngOnDestroy(): void {
-    safeUnsubscribe(this.fetchOrgsSub, this.orgSubscription);
     this.formStatusSub?.unsubscribe();
     this.endpointDataRegistry.release(this.cfGuid);
   }
