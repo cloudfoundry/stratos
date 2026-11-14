@@ -1,17 +1,18 @@
-import { CUSTOM_ELEMENTS_SCHEMA } from '@angular/core';
+import { AsyncPipe } from '@angular/common';
+import { Component, CUSTOM_ELEMENTS_SCHEMA } from '@angular/core';
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { provideZonelessChangeDetection, signal } from '@angular/core';
 import { provideRouter, ActivatedRoute } from '@angular/router';
 import { provideHttpClient } from '@angular/common/http';
 import { provideHttpClientTesting } from '@angular/common/http/testing';
 import { NoopAnimationsModule } from '@angular/platform-browser/animations';
-import { describe, it, expect, beforeEach, vi } from 'vitest';
-import { of } from 'rxjs';
+import { describe, it, expect, beforeEach, afterEach, vi } from 'vitest';
+import { defer, of, Subject } from 'rxjs';
 
-import { EntityCatalogTestModule, TEST_CATALOGUE_ENTITIES, generateStratosEntities, EntityCatalogHelper, EntityCatalogHelpers } from '@stratosui/store';
+import { EntityCatalogTestModule, TEST_CATALOGUE_ENTITIES, generateStratosEntities, EntityCatalogHelper, EntityCatalogHelpers, EndpointsDataService } from '@stratosui/store';
 import { createEmptyStoreModule, STORE_TEST_PROVIDERS } from '@stratosui/store/testing';
 import { CoreModule } from '@stratosui/core';
-import { getGitHubAPIURL, GITHUB_API_URL } from '@stratosui/git';
+import { getGitHubAPIURL, GITHUB_API_URL, GitSCMService } from '@stratosui/git';
 
 import { generateCFEntities } from '../../../cf-entity-generator';
 import { CfOrgSpaceDataService } from '../../../shared/data-services/cf-org-space-service.service';
@@ -191,5 +192,95 @@ describe('DeployApplicationComponent', () => {
     expect(component.step3Handle.valid()).toBe(true);
     expect(component.step3Handle.canClose!()).toBe(true);
     expect(component.step3Handle.disablePrevious!()).toBe(false);
+  });
+});
+
+// Stands in for the page header and every wizard step, so the real template
+// renders without the steps' own dependencies.
+@Component({
+  selector: 'app-page-header, app-create-application-step1, app-deploy-application-step2, ' +
+    'app-deploy-application-step2-1, app-deploy-application-step-source-upload, ' +
+    'app-deploy-application-options-step, app-deploy-application-step3',
+  template: '<ng-content></ng-content>',
+})
+class StubWizardPartComponent {
+  validate = new Subject<boolean>();
+  valid$ = new Subject<boolean>();
+  onEnter() { }
+}
+
+describe('DeployApplicationComponent title', () => {
+  const githubEndpoints = signal<unknown[] | undefined>(undefined);
+
+  const render = async (queryParams: Record<string, string>) => {
+    TestBed.configureTestingModule({
+      imports: [createEmptyStoreModule(), EntityCatalogTestModule, CoreModule, NoopAnimationsModule, DeployApplicationComponent],
+      providers: [
+        ...STORE_TEST_PROVIDERS,
+        { provide: TEST_CATALOGUE_ENTITIES, useValue: [...generateStratosEntities(), ...generateCFEntities()] },
+        EntityCatalogHelper,
+        provideZonelessChangeDetection(),
+        provideRouter([{ path: '**', children: [] }]),
+        provideHttpClient(),
+        provideHttpClientTesting(),
+        { provide: ActivatedRoute, useValue: { snapshot: { params: {}, queryParams } } },
+        { provide: GITHUB_API_URL, useFactory: getGitHubAPIURL },
+        { provide: EndpointsDataService, useValue: { endpointsList: githubEndpoints, endpoints: signal({}) } },
+        { provide: GitSCMService, useValue: { getSCM: () => ({ getType: () => 'github', getPublicApi: () => 'https://api.github.com' }) } },
+      ],
+      schemas: [CUSTOM_ELEMENTS_SCHEMA],
+    });
+    // Only the heading is under test: render the real template without the wizard steps
+    TestBed.overrideComponent(DeployApplicationComponent, { set: { imports: [AsyncPipe, StubWizardPartComponent] } });
+    EntityCatalogHelpers.SetEntityCatalogHelper(TestBed.inject(EntityCatalogHelper));
+    // Counts how often the title's source is subscribed to
+    const lookUp = ApplicationDeploySourceTypes.prototype.getAutoSelectedType;
+    vi.spyOn(ApplicationDeploySourceTypes.prototype, 'getAutoSelectedType').mockImplementation(function (this: ApplicationDeploySourceTypes, route) {
+      const source = lookUp.call(this, route);
+      return defer(() => {
+        subscriptions++;
+        return source;
+      });
+    });
+    const fixture = TestBed.createComponent(DeployApplicationComponent);
+    await fixture.whenStable();
+    return fixture;
+  };
+  let subscriptions = 0;
+
+  const heading = (fixture: ComponentFixture<DeployApplicationComponent>) =>
+    (fixture.nativeElement.querySelector('h1')?.textContent ?? '').trim();
+
+  beforeEach(() => {
+    githubEndpoints.set(undefined);
+    subscriptions = 0;
+  });
+
+  afterEach(() => vi.restoreAllMocks());
+
+  it('shows the source type picked in the link once the endpoints load', async () => {
+    const fixture = await render({ 'auto-select-deploy': 'github' });
+    githubEndpoints.set([]);
+    await fixture.whenStable();
+    await fixture.whenStable();
+    expect(heading(fixture)).toBe('Deploy from GitHub');
+  });
+
+  it('looks the source type up once however often the view is checked', async () => {
+    const fixture = await render({ 'auto-select-deploy': 'github' });
+    githubEndpoints.set([]);
+    await fixture.whenStable();
+    for (let i = 0; i < 3; i++) {
+      fixture.componentRef.changeDetectorRef.markForCheck();
+      await fixture.whenStable();
+    }
+    expect(heading(fixture)).toBe('Deploy from GitHub');
+    // One look-up for the title, however often the view is checked
+    expect(subscriptions).toBeLessThanOrEqual(1);
+  });
+
+  it('titles a redeploy', async () => {
+    const fixture = await render({ appGuid: 'app-1' });
+    expect(heading(fixture)).toBe('Redeploy');
   });
 });

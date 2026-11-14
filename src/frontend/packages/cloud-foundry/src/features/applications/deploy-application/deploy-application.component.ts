@@ -3,6 +3,7 @@ import {
   Component,
   OnDestroy,
   OnInit,
+  Signal,
   computed,
   inject,
   signal,
@@ -10,11 +11,11 @@ import {
   viewChild,
   afterRenderEffect,
 } from '@angular/core';
-import { toObservable } from '@angular/core/rxjs-interop';
+import { toObservable, toSignal } from '@angular/core/rxjs-interop';
 import { ErrorStateMatcher, ShowOnDirtyErrorStateMatcher } from '@stratosui/core';
 import { ActivatedRoute, Router } from '@angular/router';
-import { Observable, Subscription, of, of as observableOf } from 'rxjs';
-import { take, filter, map, tap } from 'rxjs/operators';
+import { Observable, Subscription, of as observableOf } from 'rxjs';
+import { filter, map, tap } from 'rxjs/operators';
 import { AsyncPipe } from '@angular/common';
 
 import { SourceType } from '../../../store/types/deploy-application.types';
@@ -72,8 +73,10 @@ export class DeployApplicationComponent implements OnInit, OnDestroy {
   skipConfig$: Observable<boolean> = observableOf(false);
   isRedeploy: boolean;
   // undefined when the wizard is opened without an auto-select query param
-  // (getAutoSelectedType returns of(undefined)); the title consumer guards for it.
+  // (getAutoSelectedType returns of(undefined)); the title guards for it.
   selectedSourceType$: Observable<SourceType | undefined>;
+  // The source type is looked up once; the title follows it.
+  private readonly selectedSourceType: Signal<SourceType | undefined>;
 
   // Reactive deploy button text — switches to "Redeploy" when the
   // wizard is invoked with an existing appGuid, and to "Deploy again" once
@@ -332,6 +335,7 @@ export class DeployApplicationComponent implements OnInit, OnDestroy {
     this.isRedeploy = !!this.appGuid;
 
     this.selectedSourceType$ = appDeploySourceTypes.getAutoSelectedType(activatedRoute);
+    this.selectedSourceType = toSignal(this.selectedSourceType$);
 
     this.skipConfig$ = toObservable(this.deployData.applicationSource).pipe(
       map(appSource => appSource?.type?.id === 'giturl'),
@@ -391,13 +395,11 @@ export class DeployApplicationComponent implements OnInit, OnDestroy {
     }
   }
 
-  getTitle = (): Observable<string> => {
+  readonly title = computed(() => {
     if (this.appGuid) {
-      return of('Redeploy');
+      return 'Redeploy';
     }
-    return this.selectedSourceType$.pipe(
-      take(1),
-      map(selectedSourceType => `Deploy ${selectedSourceType ? 'from ' + selectedSourceType.name : ''}`)
-    );
-  };
+    const selectedSourceType = this.selectedSourceType();
+    return `Deploy ${selectedSourceType ? 'from ' + selectedSourceType.name : ''}`;
+  });
 }
