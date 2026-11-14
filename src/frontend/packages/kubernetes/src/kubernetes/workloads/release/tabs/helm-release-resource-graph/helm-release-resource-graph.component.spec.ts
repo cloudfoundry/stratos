@@ -1,6 +1,6 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { Component, input, output, provideZonelessChangeDetection } from '@angular/core';
-import { of } from 'rxjs';
+import { of, Subject } from 'rxjs';
 import { describe, it, expect, beforeEach, vi } from 'vitest';
 import { GraphComponent } from '@swimlane/ngx-graph';
 import { SidePanelService } from '@stratosui/core';
@@ -144,6 +144,23 @@ describe('HelmReleaseResourceGraphComponent', () => {
       component.analysisChanged(null);
       await fixture.whenStable();
       expect(alertsOf('a')).toBeNull();
+    });
+
+    it('keeps the report the user picked last when the first answers late', async () => {
+      await showGraph();
+      const first = new Subject<AnalysisReport>();
+      const second = new Subject<AnalysisReport>();
+      const pick = (id: string) => ({ id, alerts: { 'ns/web': [{ ...alert, message: id }] } }) as unknown as AnalysisReport;
+      vi.spyOn(component.analyzerService, 'getByID').mockImplementation(
+        (_ep: string, id: string) => (id === 'r1' ? first : second) as never);
+
+      component.analysisChanged({ id: 'r1' });
+      component.analysisChanged({ id: 'r2' });
+      second.next(pick('r2'));
+      first.next(pick('r1'));
+      await fixture.whenStable();
+
+      expect(alertsOf('a')?.[0].message).toBe('r2');
     });
 
     it('passes the current report to the resource preview', async () => {

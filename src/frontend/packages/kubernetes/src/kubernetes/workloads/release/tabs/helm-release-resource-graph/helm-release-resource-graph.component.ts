@@ -1,13 +1,13 @@
 import { CommonModule } from '@angular/common';
 import {Component, OnDestroy, OnInit, signal, WritableSignal, inject, ChangeDetectionStrategy } from '@angular/core';
-import { toObservable } from '@angular/core/rxjs-interop';
+import { takeUntilDestroyed, toObservable } from '@angular/core/rxjs-interop';
 import { AppProgressBarComponent } from '../../../../../../../core/src/shared/components/progress-bar/app-progress-bar.component';
 import { CustomIconComponent } from '../../../../../../../core/src/shared/components/custom-material/custom-material.component';
 import { CustomTooltipDirective } from '../../../../../../../core/src/shared/components/custom-tooltip/custom-tooltip.directive';
 import { Edge, GraphComponent, LayoutService, NgxGraphZoomOptions } from '@swimlane/ngx-graph';
 import { SidePanelService } from '@stratosui/core';
-import { combineLatest, Observable, Subject, Subscription } from 'rxjs';
-import { take, filter, map } from 'rxjs/operators';
+import { combineLatest, EMPTY, Observable, of, Subject, Subscription } from 'rxjs';
+import { catchError, take, filter, map, switchMap } from 'rxjs/operators';
 
 import { PageSubNavComponent } from '../../../../../../../core/src/shared/components/page-sub-nav/page-sub-nav.component';
 import { AnalysisReportRunnerComponent } from '../../../../analysis-report-viewer/analysis-report-runner/analysis-report-runner.component';
@@ -114,6 +114,7 @@ export class HelmReleaseResourceGraphComponent implements OnInit, OnDestroy {
   // The analysis report whose alerts are drawn on the nodes; null for none
   private readonly analysisReport = signal<any>(null);
   private readonly analysisReport$ = toObservable(this.analysisReport);
+  private readonly analysisPick = new Subject<string | null>();
   protected helper = inject(HelmReleaseHelperService);
   public analyzerService = inject(KubernetesAnalysisService);
   private previewPanel = inject(SidePanelService);
@@ -121,6 +122,14 @@ export class HelmReleaseResourceGraphComponent implements OnInit, OnDestroy {
 
 
   constructor() {
+    // Only the report picked last is kept: choosing another one cancels the
+    // request still in flight, so a slow answer cannot replace a newer pick.
+    this.analysisPick.pipe(
+      switchMap(id => id === null ? of(null) : this.analyzerService.getByID(this.helper.endpointGuid, id).pipe(
+        catchError(() => EMPTY)
+      )),
+      takeUntilDestroyed()
+    ).subscribe(results => this.analysisReport.set(results));
 
 
     this.path = `${this.helper.namespace}/${this.helper.releaseTitle}`;
@@ -277,13 +286,7 @@ export class HelmReleaseResourceGraphComponent implements OnInit, OnDestroy {
   }
 
   public analysisChanged(report: any) {
-    if (report === null) {
-      this.analysisReport.set(null);
-    } else {
-      this.analyzerService.getByID(this.helper.endpointGuid, report.id).subscribe((results: any) => {
-        this.analysisReport.set(results);
-      });
-    }
+    this.analysisPick.next(report === null ? null : report.id);
   }
 
 }
