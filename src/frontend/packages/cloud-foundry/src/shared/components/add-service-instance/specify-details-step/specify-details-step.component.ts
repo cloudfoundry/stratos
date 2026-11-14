@@ -1,29 +1,16 @@
 import { CommonModule } from '@angular/common';
 import { AppErrorComponent, AppInputDirective, CustomFormFieldComponent } from '@stratosui/core';
 import { HttpClient } from '@angular/common/http';
-import { AfterContentInit, Component, DestroyRef, ElementRef, Injector, afterNextRender, computed, effect, input, signal, viewChild, ChangeDetectionStrategy, inject } from '@angular/core';
+import { AfterContentInit, Component, DestroyRef, ElementRef, Injector, Signal, afterNextRender, computed, effect, input, linkedSignal, signal, untracked, viewChild, ChangeDetectionStrategy, inject } from '@angular/core';
 import { AbstractControl, ValidationErrors, ValidatorFn, Validators, ReactiveFormsModule, FormsModule, FormControl, FormGroup } from '@angular/forms';
 import { CustomSelectComponent, CustomOptionComponent } from '@stratosui/core';
 import { takeUntilDestroyed, toObservable } from '@angular/core/rxjs-interop';
+import { take } from 'rxjs/operators';
 
 import {
   combineLatest as observableCombineLatest,
   firstValueFrom,
-  Observable,
-  Subscription,
 } from 'rxjs';
-import {
-  combineLatestWith,
-  distinctUntilChanged,
-  filter,
-  map,
-  share,
-  shareReplay,
-  startWith,
-  switchMap,
-  take,
-  tap,
-} from 'rxjs/operators';
 
 import { safeStringToObj } from '../../../../../../core/src/core/utils.service';
 import { StepOnNextResult } from '../../../../../../core/src/shared/components/stepper/step/step.component';
@@ -105,19 +92,44 @@ export class SpecifyDetailsStepComponent implements AfterContentInit {
   private answerCountdown?: ReturnType<typeof setInterval>;
   // Snackbars stack: the hand-off notice comes down before the outcome shows.
   private handOffNotice?: TailwindSnackBarRef<unknown>;
-  // toObservable() must run inside an injection context — lift to a class
-  // field. Reused by selectCreateInstance$ and onNext below.
-  private csiState$ = toObservable(this.csiState.state);
-
-  serviceInstancesInit$: Observable<boolean>;
-  hasInstances$: Observable<boolean>;
+  // The plan and space the instance list is for. Stays on the last complete
+  // pick while the wizard state is incomplete, and is the same object while
+  // the pick is unchanged.
+  private readonly instancesTarget = linkedSignal<CsiState, {
+    cfGuid: string; serviceGuid: string; servicePlanGuid: string; spaceGuid: string;
+  } | undefined>({
+    source: this.csiState.state,
+    computation: (state, previous) => {
+      const { cfGuid, serviceGuid, servicePlanGuid, spaceGuid } = state;
+      if (!cfGuid || !serviceGuid || !servicePlanGuid || !spaceGuid) {
+        return previous?.value;
+      }
+      const last = previous?.value;
+      return last && last.cfGuid === cfGuid && last.serviceGuid === serviceGuid
+        && last.servicePlanGuid === servicePlanGuid && last.spaceGuid === spaceGuid
+        ? last
+        : { cfGuid, serviceGuid, servicePlanGuid, spaceGuid };
+    },
+  });
+  // V3 StServiceInstance doesn't carry inline service_bindings (bindings
+  // are loaded per-app via /cf/apps/:cnsiGuid/:appGuid/service_bindings).
+  // The legacy "(Already bound)" annotation is dropped here, so every
+  // instance is bindable; the bind call surfaces a clear error if the user
+  // picks an instance that is already bound. Re-introduce the annotation
+  // when this stepper integrates with the bindings-per-app signal.
+  readonly serviceInstances = computed<StServiceInstance[] | undefined>(() => {
+    const target = this.instancesTarget();
+    // Building the helper acquires the endpoint's data, which writes signals
+    return target
+      ? untracked(() => this.cSIHelperServiceFactory.create(target.cfGuid, target.serviceGuid))
+        .serviceInstances(target.servicePlanGuid, target.spaceGuid)()
+      : undefined;
+  });
+  readonly hasInstances = computed(() => !!this.serviceInstances()?.length);
   serviceInstanceName!: string;
   // Only populated in edit mode (from the wizard state, which may carry a
   // null/undefined guid until the SI is resolved).
   serviceInstanceGuid?: string | null;
-  selectCreateInstance$: Observable<CsiState & {
-    servicePlanGuid: string; spaceGuid: string; cfGuid: string; serviceGuid: string;
-  }>;
   formModes = [
     {
       label: 'Create and Bind to a new Service Instance',
@@ -147,13 +159,23 @@ export class SpecifyDetailsStepComponent implements AfterContentInit {
     params: FormControl<object>;
     tags: FormControl<string[]>;
   }>;
-  serviceInstances$: Observable<StServiceInstance[]>;
-  bindableServiceInstances$: Observable<StServiceInstance[]>;
   cSIHelperService!: CreateServiceInstanceHelper;
-  allServiceInstances$!: Observable<StServiceInstance[]>;
+  // Every instance of the service, once the step is entered
+  private readonly allInstances = signal<Signal<StServiceInstance[]> | undefined>(undefined);
+  // Names the new instance cannot take: the other instances in the space
+  private readonly allServiceInstanceNames = computed(() => {
+    const instances = this.allInstances()?.();
+    const state = this.csiState.state();
+    if (!instances || !state.spaceGuid) {
+      return undefined;
+    }
+    const editMode = this.modeService.isEditServiceInstanceMode();
+    return instances
+      .filter(s => s.space?.guid === state.spaceGuid && !(editMode && s.name === state.name))
+      .map(s => s.name);
+  });
   private _validate = signal<boolean>(false);
-  validate = toObservable(this._validate);
-  allServiceInstanceNames!: string[];
+  readonly validate = this._validate.asReadonly();
   tagsVisible = true;
   tagsSelectable = true;
   tagsRemovable = true;
@@ -162,7 +184,6 @@ export class SpecifyDetailsStepComponent implements AfterContentInit {
   // field would not re-render under zoneless+OnPush.
   readonly tags = signal<string[]>([]);
   bindExistingInstance = false;
-  private formValidatorData?: Subscription;
   private _serviceParamsValid = signal<boolean>(false);
   serviceParamsValid = toObservable(this._serviceParamsValid);
   serviceParams: object = {};
@@ -186,44 +207,6 @@ export class SpecifyDetailsStepComponent implements AfterContentInit {
 
   constructor() {
     this.setupForms();
-
-    this.selectCreateInstance$ = this.csiState$.pipe(
-      filter((p): p is CsiState & {
-        servicePlanGuid: string; spaceGuid: string; cfGuid: string; serviceGuid: string;
-      } => !!p && !!p.servicePlanGuid && !!p.spaceGuid && !!p.cfGuid && !!p.serviceGuid),
-      share(),
-    );
-    this.serviceInstances$ = this.selectCreateInstance$.pipe(
-      distinctUntilChanged((x, y) => {
-        return (x.servicePlanGuid === y.servicePlanGuid && x.spaceGuid === y.spaceGuid);
-      }),
-      switchMap(guids => {
-        this.cSIHelperService = this.cSIHelperServiceFactory.create(guids.cfGuid, guids.serviceGuid);
-        return toObservable(
-          this.cSIHelperService.serviceInstances(guids.servicePlanGuid, guids.spaceGuid),
-          { injector: this.injector },
-        );
-      }),
-      shareReplay({ bufferSize: 1, refCount: true }),
-    );
-
-    this.serviceInstancesInit$ = this.serviceInstances$.pipe(
-      filter(p => !!p),
-      map(_o => false),
-      startWith(false)
-    );
-    this.hasInstances$ = this.serviceInstances$.pipe(
-      filter(p => !!p),
-      map(p => p.length > 0),
-    );
-
-    // V3 StServiceInstance doesn't carry inline service_bindings (bindings
-    // are loaded per-app via /cf/apps/:cnsiGuid/:appGuid/service_bindings).
-    // The legacy "(Already bound)" annotation is dropped here; the bind
-    // call surfaces a clear error if the user picks an instance that is
-    // already bound. Re-introduce the annotation when this stepper
-    // integrates with the bindings-per-app signal.
-    this.bindableServiceInstances$ = this.serviceInstances$;
 
     // Graft the details-tier schema onto the form config once the plan
     // fetch kicked off in onEnter lands. Preserves any initialData the
@@ -249,16 +232,12 @@ export class SpecifyDetailsStepComponent implements AfterContentInit {
       plan?.schemas?.serviceInstance?.create?.parameters;
   }
 
-  // onEnter can run before the serviceInstances$ chain above (whose
-  // switchMap lazily constructs the helper on first subscription) has
-  // emitted — entering the step then dereferenced an undefined helper
-  // and threw. Build it deterministically from the wizard state instead.
+  // Build the helper deterministically from the wizard state, so entering
+  // the step never dereferences an undefined helper.
   private ensureHelper(): CreateServiceInstanceHelper | undefined {
-    if (!this.cSIHelperService) {
-      const state = this.csiState.state();
-      if (state?.cfGuid && state?.serviceGuid) {
-        this.cSIHelperService = this.cSIHelperServiceFactory.create(state.cfGuid, state.serviceGuid);
-      }
+    const state = this.csiState.state();
+    if (state?.cfGuid && state?.serviceGuid) {
+      this.cSIHelperService = this.cSIHelperServiceFactory.create(state.cfGuid, state.serviceGuid);
     }
     return this.cSIHelperService;
   }
@@ -291,30 +270,23 @@ export class SpecifyDetailsStepComponent implements AfterContentInit {
     this.formMode.set(CreateServiceFormMode.CreateServiceInstance);
     const helper = this.ensureHelper();
     if (helper) {
-      this.allServiceInstances$ = toObservable(helper.serviceInstances(), { injector: this.injector });
-      // Re-entering the step replaces the previous subscription.
-      this.formValidatorData?.unsubscribe();
-      this.formValidatorData = this.setupFormValidatorData();
+      this.allInstances.set(helper.serviceInstances());
     }
     if (this.modeService.isEditServiceInstanceMode()) {
-      this.csiState$.pipe(
-        take(1),
-        tap(state => {
-          this.createNewInstanceForm.controls.name.setValue(state.name);
+      const state = this.csiState.state();
+      this.createNewInstanceForm.controls.name.setValue(state.name);
 
-          this.schemaFormConfig.update(cfg => ({
-            ...(cfg ?? { schema }),
-            initialData: (state.parameters ? safeStringToObj(state.parameters) : null) || this.serviceParams,
-          }));
+      this.schemaFormConfig.update(cfg => ({
+        ...(cfg ?? { schema }),
+        initialData: (state.parameters ? safeStringToObj(state.parameters) : null) || this.serviceParams,
+      }));
 
-          this.serviceInstanceGuid = state.serviceInstanceGuid;
-          this.serviceInstanceName = state.name;
-          this.createNewInstanceForm.updateValueAndValidity();
-          if (state.tags) {
-            this.tags.set([...state.tags]);
-          }
-        })
-      ).subscribe();
+      this.serviceInstanceGuid = state.serviceInstanceGuid;
+      this.serviceInstanceName = state.name;
+      this.createNewInstanceForm.updateValueAndValidity();
+      if (state.tags) {
+        this.tags.set([...state.tags]);
+      }
     }
   };
 
@@ -349,23 +321,6 @@ export class SpecifyDetailsStepComponent implements AfterContentInit {
     }
   };
 
-  private setupFormValidatorData(): Subscription {
-    return this.allServiceInstances$.pipe(
-      combineLatestWith(this.csiState$),
-      filter(([, state]) => !!state.spaceGuid),
-      map(([instances, state]) => instances.filter(s => {
-        let filterSelf = false;
-        if (this.modeService.isEditServiceInstanceMode()) {
-          filterSelf = s.name === state.name;
-        }
-        return s.space?.guid === state.spaceGuid && !filterSelf;
-      })),
-      takeUntilDestroyed(this.destroyRef),
-    ).subscribe(o => {
-      this.allServiceInstanceNames = o.map(s => s.name);
-    });
-  }
-
   private setupForms() {
     this.createNewInstanceForm = new FormGroup({
       name: new FormControl('', { nonNullable: true, validators: [Validators.required, this.nameTakenValidator(), Validators.maxLength(50)] }),
@@ -389,7 +344,7 @@ export class SpecifyDetailsStepComponent implements AfterContentInit {
   // writeWithJob, whose fast-path-then-poll contract follows a long-running
   // write to its end.
   async onNext(): Promise<StepOnNextResult> {
-    const state = await firstValueFrom(this.csiState$.pipe(filter(p => !!p)));
+    const state = this.csiState.state();
     return this.handOffIfSlow(this.executeWrite(state));
   }
 
@@ -533,7 +488,7 @@ export class SpecifyDetailsStepComponent implements AfterContentInit {
     // selected instance already exists. Just trigger the bind flow.
     if (this.bindExistingInstance) {
       const existingGuid = this.selectExistingInstanceForm.controls.serviceInstance.value;
-      const instances = await firstValueFrom(this.bindableServiceInstances$);
+      const instances = this.serviceInstances() ?? [];
       const existingName = instances.find(si => si.guid === existingGuid)?.name ?? existingGuid;
       return this.bindAppIfRequested(existingGuid, state, existingName, false);
     }
@@ -753,12 +708,13 @@ export class SpecifyDetailsStepComponent implements AfterContentInit {
   }
 
   checkName = (value: string | null = null) => {
-    if (this.allServiceInstanceNames) {
+    const takenNames = this.allServiceInstanceNames();
+    if (takenNames) {
       const specifiedName = value || this.createNewInstanceForm.controls.name.value;
       if (this.modeService.isEditServiceInstanceMode() && specifiedName === this.serviceInstanceName) {
         return true;
       }
-      return this.allServiceInstanceNames.indexOf(value || this.createNewInstanceForm.controls.name.value) === -1;
+      return takenNames.indexOf(value || this.createNewInstanceForm.controls.name.value) === -1;
     }
     return true;
   };

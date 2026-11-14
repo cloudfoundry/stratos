@@ -206,13 +206,9 @@ export class AddServiceInstanceComponent implements OnInit, OnDestroy {
   private selectCFValid = signal<boolean>(false);
   private selectServiceFetching = signal<boolean>(false);
   private selectPlanFetching = signal<boolean>(false);
-  private specifyDetailsValid = signal<boolean>(false);
-  private specifyDetailsInit = signal<boolean>(true);
 
   private selectCFSub?: Subscription;
   private selectServiceFetchSub?: Subscription;
-  private specifyDetailsValidSub?: Subscription;
-  private specifyDetailsInitSub?: Subscription;
 
   private isLoadingSignal = this.cfOrgSpaceService.isLoading;
   private skipAppsSignal = signal<boolean>(false);
@@ -263,27 +259,6 @@ export class AddServiceInstanceComponent implements OnInit, OnDestroy {
         });
       } else {
         this.selectServiceFetching.set(false);
-      }
-    });
-  });
-
-  private readonly specifyDetailsBridge = afterRenderEffect(() => {
-    const v = this._specifyDetails();
-    untracked(() => {
-      this.specifyDetailsValidSub?.unsubscribe();
-      this.specifyDetailsInitSub?.unsubscribe();
-      this.specifyDetailsValidSub = undefined;
-      this.specifyDetailsInitSub = undefined;
-      if (v) {
-        this.specifyDetailsValidSub = v.validate.subscribe(valid => {
-          this.specifyDetailsValid.set(!!valid);
-        });
-        this.specifyDetailsInitSub = v.serviceInstancesInit$.subscribe(init => {
-          this.specifyDetailsInit.set(!!init);
-        });
-      } else {
-        this.specifyDetailsValid.set(false);
-        this.specifyDetailsInit.set(true);
       }
     });
   });
@@ -347,8 +322,9 @@ export class AddServiceInstanceComponent implements OnInit, OnDestroy {
   };
 
   specifyDetailsHandle: SignalStepHandle = {
-    valid: this.specifyDetailsValid.asReadonly(),
-    blocked: this.specifyDetailsInit.asReadonly(),
+    valid: computed(() => !!this._specifyDetails()?.validate()),
+    // Until the step's child exists
+    blocked: computed(() => !this._specifyDetails()),
     cancelButtonText: signal('Cancel ').asReadonly(),
     nextButtonText: signal('Create ').asReadonly(),
     onEnter: (plan) => this._specifyDetails()?.onEnter(plan as any),
@@ -864,8 +840,6 @@ export class AddServiceInstanceComponent implements OnInit, OnDestroy {
   ngOnDestroy(): void {
     this.selectCFSub?.unsubscribe();
     this.selectServiceFetchSub?.unsubscribe();
-    this.specifyDetailsValidSub?.unsubscribe();
-    this.specifyDetailsInitSub?.unsubscribe();
     this.skipAppsSub?.unsubscribe();
     try {
       this.csiState.reset();

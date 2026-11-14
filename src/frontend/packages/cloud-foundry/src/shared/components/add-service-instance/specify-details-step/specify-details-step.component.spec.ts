@@ -1,7 +1,7 @@
 import { readFileSync } from 'fs';
 import { join } from 'path';
 import { ComponentFixture, TestBed } from '@angular/core/testing';
-import { importProvidersFrom, provideZonelessChangeDetection } from '@angular/core';
+import { importProvidersFrom, provideZonelessChangeDetection, signal } from '@angular/core';
 import { HttpErrorResponse, provideHttpClient } from '@angular/common/http';
 import { HttpTestingController, provideHttpClientTesting } from '@angular/common/http/testing';
 import { provideRouter } from '@angular/router';
@@ -40,6 +40,12 @@ const settle = async () => {
 // nginx's own 502 page.
 const nginx502 = (): string =>
   readFileSync(join(import.meta.dirname, '../../../../../../store/src/testdata/upstream-errors/nginx-502.body'), 'utf8');
+
+// Makes the helper the step reads answer with these service instances
+const stubInstances = (instances: Array<Partial<StServiceInstance>>) => {
+  vi.spyOn(TestBed.inject(CreateServiceInstanceHelperServiceFactory), 'create')
+    .mockReturnValue({ serviceInstances: () => signal(instances) } as never);
+};
 
 describe('SpecifyDetailsStepComponent', () => {
   let component: SpecifyDetailsStepComponent;
@@ -90,7 +96,6 @@ describe('SpecifyDetailsStepComponent', () => {
     expect(component.cSIHelperService).toBeUndefined();
     expect(() => component.onEnter({ guid: 'plan-1', cnsiGuid: 'cf-1', name: 'small' } as any)).not.toThrow();
     expect(component.cSIHelperService).toBeDefined();
-    expect(component.allServiceInstances$).toBeDefined();
   });
 
   // Regression: the wizard's plan list is summary-tier (no `schemas`), so
@@ -143,9 +148,11 @@ describe('SpecifyDetailsStepComponent', () => {
       { guid: 'si-1', name: 'instance-one' },
       { guid: 'si-2', name: 'instance-two' },
     ] as StServiceInstance[];
-    component.serviceInstances$ = of(instances);
-    component.bindableServiceInstances$ = of(instances);
-    component.hasInstances$ = of(true);
+    stubInstances(instances);
+    const csiState = TestBed.inject(CsiStateService);
+    csiState.setCFDetails('cf-1', 'org-1', 'sp-1');
+    csiState.setServiceGuid('svc-1');
+    csiState.setServicePlan('plan-1');
     component.formMode.set(CreateServiceFormMode.BindServiceInstance);
     // setInput (not a plain field write) so the OnPush view is marked dirty,
     // same as the parent-template binding in the real wizard.
@@ -195,7 +202,11 @@ describe('SpecifyDetailsStepComponent', () => {
     }
 
     it('says a taken name already exists', async () => {
-      component.allServiceInstanceNames = ['my-db'];
+      stubInstances([{ guid: 'si-1', name: 'my-db', space: { guid: 'sp-1' } }]);
+      const csiState = TestBed.inject(CsiStateService);
+      csiState.setCFDetails('cf-1', 'org-1', 'sp-1');
+      csiState.setServiceGuid('svc-1');
+      component.onEnter({ guid: 'plan-1', cnsiGuid: 'cf-1', name: 'small' } as any);
       await typeName('my-db');
 
       expect(nameError()).toBe('A service instance with this name already exists. Please enter a different one.');
@@ -234,6 +245,7 @@ describe('SpecifyDetailsStepComponent.onNext (v3 + writeWithJob)', () => {
     bindAppGuid?: string;
     tags?: string[];
     csiBindParams?: object;
+    instances?: Array<Partial<StServiceInstance>>;
   } = {}) {
     const csiState = {
       cfGuid: 'cnsi-1',
@@ -295,6 +307,9 @@ describe('SpecifyDetailsStepComponent.onNext (v3 + writeWithJob)', () => {
     const registryStub = vi.spyOn(TestBed.inject(EndpointDataRegistry), 'peek')
       .mockReturnValue(endpointData as unknown as ReturnType<EndpointDataRegistry['peek']>);
 
+    if (opts.instances) {
+      stubInstances(opts.instances);
+    }
     const fixture = TestBed.createComponent(SpecifyDetailsStepComponent);
     const component = fixture.componentInstance;
     component.createNewInstanceForm.controls.name.setValue('my-instance');
@@ -411,13 +426,9 @@ describe('SpecifyDetailsStepComponent.onNext (v3 + writeWithJob)', () => {
   });
 
   it('binds an existing instance and names it, without claiming it was created', async () => {
-    const { component, modeServiceStub, httpMock } = await setup({ bindAppGuid: 'app-1' });
+    const { component, modeServiceStub, httpMock } = await setup({ bindAppGuid: 'app-1', instances: [ { guid: 'si-1', name: 'instance-one' }, { guid: 'si-2', name: 'instance-two' }, ] });
     const snackBarOpen = vi.spyOn((component as any).snackBar, 'open');
     component.bindExistingInstance = true;
-    component.bindableServiceInstances$ = of([
-      { guid: 'si-1', name: 'instance-one' },
-      { guid: 'si-2', name: 'instance-two' },
-    ] as StServiceInstance[]);
     component.selectExistingInstanceForm.controls.serviceInstance.setValue('si-2');
 
     await expect(component.onNext()).resolves.toEqual({ success: true, redirect: true });
@@ -428,11 +439,10 @@ describe('SpecifyDetailsStepComponent.onNext (v3 + writeWithJob)', () => {
   });
 
   it('does not say a deferred bind is done', async () => {
-    const { component, modeServiceStub, httpMock } = await setup({ bindAppGuid: 'app-1' });
+    const { component, modeServiceStub, httpMock } = await setup({ bindAppGuid: 'app-1', instances: [{ guid: 'si-2', name: 'instance-two' }] });
     modeServiceStub.createApplicationServiceBinding.mockReturnValue(of({ success: true, deferred: true }));
     const snackBarOpen = vi.spyOn((component as any).snackBar, 'open');
     component.bindExistingInstance = true;
-    component.bindableServiceInstances$ = of([{ guid: 'si-2', name: 'instance-two' }] as StServiceInstance[]);
     component.selectExistingInstanceForm.controls.serviceInstance.setValue('si-2');
 
     await expect(component.onNext()).resolves.toEqual({ success: true, redirect: true });
@@ -577,10 +587,9 @@ describe('SpecifyDetailsStepComponent.onNext (v3 + writeWithJob)', () => {
   });
 
   it('names the instance when binding an existing one fails', async () => {
-    const { component, modeServiceStub, httpMock } = await setup({ bindAppGuid: 'app-1' });
+    const { component, modeServiceStub, httpMock } = await setup({ bindAppGuid: 'app-1', instances: [{ guid: 'si-2', name: 'instance-two' }] });
     modeServiceStub.createApplicationServiceBinding.mockReturnValue(of({ success: false, message: 'bind said no' }));
     component.bindExistingInstance = true;
-    component.bindableServiceInstances$ = of([{ guid: 'si-2', name: 'instance-two' }] as StServiceInstance[]);
     component.selectExistingInstanceForm.controls.serviceInstance.setValue('si-2');
 
     const message = 'Failed to bind service instance "instance-two" to the application: bind said no';
@@ -589,11 +598,10 @@ describe('SpecifyDetailsStepComponent.onNext (v3 + writeWithJob)', () => {
   });
 
   it('keeps an error page\'s heading when binding an existing instance fails', async () => {
-    const { component, modeServiceStub, httpMock } = await setup({ bindAppGuid: 'app-1' });
+    const { component, modeServiceStub, httpMock } = await setup({ bindAppGuid: 'app-1', instances: [{ guid: 'si-2', name: 'instance-two' }] });
     const error = new HttpErrorResponse({ error: nginx502(), status: 502, statusText: 'Bad Gateway' });
     modeServiceStub.createApplicationServiceBinding.mockReturnValue(of({ success: false, message: '502 Bad Gateway\nnginx/1.28.0', error }));
     component.bindExistingInstance = true;
-    component.bindableServiceInstances$ = of([{ guid: 'si-2', name: 'instance-two' }] as StServiceInstance[]);
     component.selectExistingInstanceForm.controls.serviceInstance.setValue('si-2');
 
     const out = await component.onNext();
