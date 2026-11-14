@@ -1,5 +1,5 @@
 <div class="card editor-card">
-  @if (initing || (loading$ | async)) {
+  @if (initing() || (loading$ | async)) {
     <div class="absolute inset-0 flex items-center justify-center z-[100]">
       <div>
         <div class="text-center">Loading ...</div>
@@ -10,14 +10,14 @@
     </div>
   }
   <div class="toolbar editor-toolbar">
-    @if (schema) {
+    @if (schema()) {
       <div class="flex bg-content-secondary rounded-lg p-1" role="group" aria-label="Edit Mode">
         <button class="btn btn-toggle"
-          [class.btn-toggle-active]="mode === 'form'"
+          [class.btn-toggle-active]="mode() === 'form'"
           (click)="editModeChanged({value: 'form'})"
         name="edit-mode-form">Form</button>
         <button class="btn btn-toggle"
-          [class.btn-toggle-active]="mode === 'editor'"
+          [class.btn-toggle-active]="mode() === 'editor'"
           (click)="editModeChanged({value: 'editor'})"
         name="edit-mode-editor">YAML</button>
       </div>
@@ -41,10 +41,10 @@
             @if (releaseValues) {
               <button class="block w-full text-left px-4 py-2 hover:bg-content-secondary" (click)="copyReleaseValues(); closeMenu()">Copy from release values</button>
             }
-            @if (mode === 'editor') {
+            @if (mode() === 'editor') {
               <div class="border-t border-content-border my-1"></div>
             }
-            @if (mode === 'editor') {
+            @if (mode() === 'editor') {
               <button class="block w-full text-left px-4 py-2 hover:bg-content-secondary" (click)="diff(); closeMenu()">Diff with chart values</button>
             }
             <div class="border-t border-content-border my-1"></div>
@@ -55,7 +55,7 @@
     </div>
 
     <div class="flex">
-      @if (mode === 'editor') {
+      @if (mode() === 'editor') {
         <button type="button" aria-label="Line numbers" [attr.aria-pressed]="lineNumbers" class="btn btn-toggle"
           [class.btn-toggle-active]="lineNumbers"
           (click)="toggleLineNumbers()"
@@ -63,7 +63,7 @@
           <span aria-hidden="true" class="material-icons">format_list_numbered</span>
         </button>
       }
-      @if (mode === 'editor') {
+      @if (mode() === 'editor') {
         <button type="button" aria-label="Minimap" [attr.aria-pressed]="minimap" class="btn btn-toggle"
           [class.btn-toggle-active]="minimap"
           (click)="toggleMinimap()"
@@ -74,7 +74,7 @@
     </div>
 
   </div>
-  <div [ngClass]="{'editor-hidden': mode !== 'form'}" class="editor-form">
+  <div [ngClass]="{'editor-hidden': mode() !== 'form'}" class="editor-form">
     @if (yamlError) {
       <div class="absolute inset-0 flex items-center justify-center opacity-70 z-[100]">
         <div class="flex flex-row">
@@ -88,13 +88,13 @@
         </div>
       </div>
     }
-    @if (hasSchema) {
+    @if (hasSchema()) {
       <json-schema-form (changes)="formChanged($event)" #schemaForm loadExternalAssets="false"
-        [options]="{ addSubmit: false }" [schema]="schema" framework="tailwind" [data]="initialFormData">
+        [options]="{ addSubmit: false }" [schema]="schema()" framework="tailwind" [data]="initialFormData">
       </json-schema-form>
     }
   </div>
-  <div [ngClass]="{'editor-hidden': mode !== 'editor'}" class="editor-monaco" #monacoContainer>
+  <div [ngClass]="{'editor-hidden': mode() !== 'editor'}" class="editor-monaco" #monacoContainer>
     <app-monaco-editor #monacoEditor class="editor-monaco-edit " [options]="editorOptions" [model]="model"
     [(ngModel)]="code" (editorInit)="onMonacoInit($event)"></app-monaco-editor>
   </div>
