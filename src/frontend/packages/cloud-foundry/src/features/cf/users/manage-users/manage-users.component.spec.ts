@@ -109,6 +109,26 @@ describe('UsersRolesComponent', () => {
     expect(component.defaultCancelUrl).toBe(`/cloud-foundry/${CF}/users`);
   });
 
+  // The handles Next reads trailed the roles step by a timer tick, so
+  // Next stayed disabled (or enabled) briefly after the roles changed.
+  it('enables Next on the roles step as soon as roles are picked', async () => {
+    await setup({ user: 'g1' });
+    http.expectOne(userUrl('g1')).flush(stUser('g1', 'alice'));
+    await fixture.whenStable();
+    const modify = component.modify()!;
+    const handle = component.modifyStepHandle;
+
+    modify.blocked.set(false);
+    TestBed.tick();
+    expect(handle.blocked!()).toBe(false);
+    expect(handle.valid()).toBe(true);
+
+    modify.blocked.set(true);
+    TestBed.tick();
+    expect(handle.blocked!()).toBe(true);
+    expect(handle.valid()).toBe(false);
+  });
+
   describe('?users= deep link', () => {
     it('loads the good users and names the guid that failed', async () => {
       await setup({ users: 'good1,bad1,good2' });

@@ -1,14 +1,14 @@
 <div class="modify-users__selected-users">
   <div>
-    @if (isSetByUsername$ | async) {
-      Roles will be <i>{{ (isRemove$ | async) ? "removed from" : "added to" }}</i> the following users:
+    @if (isSetByUsername()) {
+      Roles will be <i>{{ isRemove() ? "removed from" : "added to" }}</i> the following users:
     } @else {
       Selected Users:
     }
   </div>
   <app-enumerate [collection]="usersNames$"></app-enumerate>
 </div>
-@if ((usersWithWarning$ | async)?.length) {
+@if (usersWithWarning().length) {
   <div class="modify-users__users-warning"><i>* Not all roles are known for user.</i></div>
 }
 <app-role-assignment

@@ -1,6 +1,5 @@
 import { CommonModule } from '@angular/common';
 import {
-  AfterViewInit,
   ChangeDetectionStrategy,
   Component,
   computed,
@@ -55,7 +54,7 @@ import { ManageUsersSetUsernamesComponent } from './manage-users-set-usernames/m
     CfRolesService
   ]
 })
-export class UsersRolesComponent implements AfterViewInit, OnDestroy {
+export class UsersRolesComponent implements OnDestroy {
   private activeRouteCfOrgSpace = inject(ActiveRouteCfOrgSpace);
   private usersData = inject(CfUsersPagedDataService);
   private route = inject(ActivatedRoute);
@@ -113,16 +112,15 @@ export class UsersRolesComponent implements AfterViewInit, OnDestroy {
   readonly modify = viewChild<UsersRolesModifyComponent>('modify');
   readonly confirm = viewChild<UsersRolesConfirmComponent>('confirm');
 
-  private setUsersValid = signal<boolean>(false);
-  private setUsersBlocked = signal<boolean>(false);
-  private modifyValid = signal<boolean>(false);
-  private modifyBlocked = signal<boolean>(true);
-  private bridgeSubs: Subscription[] = [];
+  private setUsersValid = computed(() => !!this.setUsers()?.stepValid());
+  private setUsersBlocked = computed(() => !!this.setUsers()?.blocked());
+  private modifyValid = computed(() => !!this.modify()?.valid());
+  private modifyBlocked = computed(() => this.modify()?.blocked() ?? true);
   private lookupSub?: Subscription;
 
   setUsernamesStepHandle: SignalStepHandle = {
-    valid: this.setUsersValid.asReadonly(),
-    blocked: this.setUsersBlocked.asReadonly(),
+    valid: this.setUsersValid,
+    blocked: this.setUsersBlocked,
     submit: async () => {
       // setUsers.onNext resolves with success after seeding the
       // wizard service with the picked users — we wait for it so the
@@ -135,8 +133,8 @@ export class UsersRolesComponent implements AfterViewInit, OnDestroy {
   };
 
   modifyStepHandle: SignalStepHandle = {
-    valid: this.modifyValid.asReadonly(),
-    blocked: this.modifyBlocked.asReadonly(),
+    valid: this.modifyValid,
+    blocked: this.modifyBlocked,
     onEnter: () => this.modify()?.onEnter(),
     onLeave: (isNext?: boolean) => this.modify()?.onLeave(!!isNext),
     submit: async () => {
@@ -214,40 +212,8 @@ export class UsersRolesComponent implements AfterViewInit, OnDestroy {
     }
   }
 
-  ngAfterViewInit(): void {
-    // Bridge child Observable surfaces into the local signals the handles
-    // read so the stepper re-evaluates blocked/valid reactively.
-    const setUsers = this.setUsers();
-    if (setUsers) {
-      this.bridgeSubs.push(
-        setUsers.valid$.subscribe(v => {
-          this.setUsersValid.set(!!v);
-        }),
-      );
-      this.bridgeSubs.push(
-        setUsers.blocked$.subscribe(v => {
-          this.setUsersBlocked.set(!!v);
-        }),
-      );
-    }
-    const modify = this.modify();
-    if (modify) {
-      this.bridgeSubs.push(
-        modify.valid$.subscribe(v => {
-          this.modifyValid.set(!!v);
-        }),
-      );
-      this.bridgeSubs.push(
-        modify.blocked$.subscribe(v => {
-          this.modifyBlocked.set(!!v);
-        }),
-      );
-    }
-  }
-
   ngOnDestroy(): void {
     this.lookupSub?.unsubscribe();
-    this.bridgeSubs.forEach(s => s.unsubscribe());
     this.rolesData.clear();
   }
 

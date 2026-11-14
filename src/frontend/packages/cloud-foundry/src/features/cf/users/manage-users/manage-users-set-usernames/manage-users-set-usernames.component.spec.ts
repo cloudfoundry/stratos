@@ -56,10 +56,10 @@ describe('ManageUsersSetUsernamesComponent', () => {
     }).compileComponents();
   });
 
-  beforeEach(() => {
+  beforeEach(async () => {
     fixture = TestBed.createComponent(ManageUsersSetUsernamesComponent);
     component = fixture.componentInstance;
-    fixture.detectChanges();
+    await fixture.whenStable();
   });
 
   it('should create', () => {
@@ -72,14 +72,22 @@ describe('ManageUsersSetUsernamesComponent', () => {
     vi.spyOn(src, 'load').mockReturnValue(new Promise<void>(resolve => finishLoad = resolve));
     const wizardStep = TestBed.createComponent(ManageUsersSetUsernamesComponent);
 
-    const seen: boolean[] = [];
-    const sub = wizardStep.componentInstance.canAdd$.subscribe(v => seen.push(v));
-    await Promise.resolve();
-    expect(seen).toEqual([]);
+    const step = wizardStep.componentInstance;
+    await wizardStep.whenStable();
+    expect(step.blocked()).toBe(true);
+    expect(step.currentValue()).toBeUndefined();
+    expect((wizardStep.nativeElement as HTMLElement).querySelector('.usernames')).toBeNull();
 
     finishLoad();
+    // The load's continuation runs in a microtask; the view refreshes after.
+    await Promise.resolve();
     await wizardStep.whenStable();
-    expect(seen).toEqual([true]);
-    sub.unsubscribe();
+    expect(step.blocked()).toBe(false);
+    expect(step.canAdd()).toBe(true);
+    expect(step.canRemove()).toBe(true);
+    // Adding is allowed, so the add choice is the one picked first.
+    expect(step.currentValue()).toBe(false);
+    const add = (wizardStep.nativeElement as HTMLElement).querySelector<HTMLInputElement>('#manage-add-roles');
+    expect(add?.checked).toBe(true);
   });
 });

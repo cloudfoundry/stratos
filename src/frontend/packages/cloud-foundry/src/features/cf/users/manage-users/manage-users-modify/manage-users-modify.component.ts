@@ -1,15 +1,8 @@
 import { CommonModule } from '@angular/common';
 import { Component, OnDestroy, OnInit, Signal, ChangeDetectionStrategy, inject, computed, signal, input } from '@angular/core';
 import { toObservable, toSignal } from '@angular/core/rxjs-interop';
-import { firstValueFrom, Observable, Subscription } from 'rxjs';
-import { take,
-  delay,
-  distinctUntilChanged,
-  filter,
-  defaultIfEmpty,
-  map,
-  startWith,
-} from 'rxjs/operators';
+import { Observable, Subscription } from 'rxjs';
+import { take, defaultIfEmpty, startWith } from 'rxjs/operators';
 
 import {
   TailwindSnackBarService,
@@ -46,9 +39,13 @@ export class UsersRolesModifyComponent implements OnInit, OnDestroy {
   private snackBar = inject(TailwindSnackBarService);
   private rolesData = inject(CfUsersRolesDataService);
 
-  private picked$ = toObservable(this.rolesData.users);
-  private isRemove$$ = toObservable(this.rolesData.isRemove);
-  private isSetByUsername$$ = toObservable(this.rolesData.isSetByUsername);
+  readonly isRemove = this.rolesData.isRemove;
+  readonly isSetByUsername = this.rolesData.isSetByUsername;
+
+  private readonly pickedUsers = computed<CfUserWithWarning[]>(() => (this.rolesData.users() ?? []).map(this.mapUser.bind(this)));
+  /** Names of the picked users, starred when not all their roles are known. */
+  private readonly usersNames = computed(() => this.pickedUsers().map(user => user.showWarning ? '*' + user.username : user.username));
+  readonly usersWithWarning = computed(() => this.pickedUsers().filter(user => !!user.showWarning).map(user => user.username));
 
   readonly setUsernames = input(false);
 
@@ -78,14 +75,11 @@ export class UsersRolesModifyComponent implements OnInit, OnDestroy {
 
   private snackBarRef: TailwindSnackBarRef<any> | null = null;
 
-  usersNames$!: Observable<string[]>;
+  /** The enumerate widget takes its list as an Observable. */
+  readonly usersNames$: Observable<string[]> = toObservable(this.usersNames);
   blocked = signal<boolean>(true);
-  blocked$: Observable<boolean> = toObservable(this.blocked).pipe(delay(0));
-  /** valid$ = inverse of blocked$; consumed by manage-users.component to enable Next. */
-  valid$: Observable<boolean> = toObservable(this.blocked).pipe(delay(0), map(b => !b));
-  isSetByUsername$!: Observable<boolean | undefined>;
-  isRemove$!: Observable<boolean | undefined>;
-  usersWithWarning$!: Observable<string[]>;
+  /** Inverse of blocked; the parent reads it to enable Next. */
+  readonly valid = computed(() => !this.blocked());
 
   private subs: Subscription[] = [];
 
@@ -108,23 +102,6 @@ export class UsersRolesModifyComponent implements OnInit, OnDestroy {
         }
       });
     }
-
-    const users$: Observable<CfUserWithWarning[]> = this.picked$.pipe(
-      filter(users => !!users),
-      distinctUntilChanged(),
-      map(users => users.map(this.mapUser.bind(this)))
-    );
-
-    this.usersNames$ = users$.pipe(
-      map(users => users.map(user => user.showWarning ? '*' + user.username : user.username))
-    );
-
-    this.usersWithWarning$ = users$.pipe(
-      map(users => users.filter(user => !!user.showWarning).map(user => user.username))
-    );
-
-    this.isSetByUsername$ = this.isSetByUsername$$;
-    this.isRemove$ = this.isRemove$$;
   }
 
   private mapUser(user: StUser): CfUserWithWarning {
@@ -156,20 +133,17 @@ export class UsersRolesModifyComponent implements OnInit, OnDestroy {
 
   onEnter = () => {
     if (!this.snackBarRef) {
-      this.usersWithWarning$.pipe(take(1)).subscribe((usersWithWarning => {
-        if (usersWithWarning && usersWithWarning.length) {
-          this.snackBarRef = this.snackBar.open(`Not all roles are shown for user/s - ${usersWithWarning.join(', ')}. To avoid this please
-          navigate to a specific organization or space`, 'Dismiss');
-        }
-      }));
+      const usersWithWarning = this.usersWithWarning();
+      if (usersWithWarning.length) {
+        this.snackBarRef = this.snackBar.open(`Not all roles are shown for user/s - ${usersWithWarning.join(', ')}. To avoid this please
+        navigate to a specific organization or space`, 'Dismiss');
+      }
     }
 
     // In order to show the removed roles correctly (as ticks) flip them from remove to add
-    this.isRemove$$.pipe(take(1)).subscribe(isRemove => {
-      if (isRemove) {
-        this.rolesData.flipSetRoles();
-      }
-    });
+    if (this.isRemove()) {
+      this.rolesData.flipSetRoles();
+    }
   };
 
   onLeave = (isNext: boolean) => {
@@ -180,14 +154,9 @@ export class UsersRolesModifyComponent implements OnInit, OnDestroy {
   };
 
   async onNext(): Promise<StepOnNextResult> {
-    try {
-      const isRemove = await firstValueFrom(this.isRemove$$);
-      if (isRemove) {
-        this.rolesData.flipSetRoles();
-      }
-      return { success: true };
-    } catch {
-      return { success: false };
+    if (this.isRemove()) {
+      this.rolesData.flipSetRoles();
     }
+    return { success: true };
   }
 }

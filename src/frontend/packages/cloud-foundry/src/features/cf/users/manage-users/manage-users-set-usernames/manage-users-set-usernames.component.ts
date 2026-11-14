@@ -1,10 +1,9 @@
 import { HttpClient } from '@angular/common/http';
-import { Component, OnInit, signal, ChangeDetectionStrategy, inject, Injector } from '@angular/core';
+import { Component, OnInit, Signal, signal, computed, effect, untracked, ChangeDetectionStrategy, inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { toObservable } from '@angular/core/rxjs-interop';
-import { combineLatest, from, Observable } from 'rxjs';
-import { take, defaultIfEmpty, map, shareReplay, startWith, switchMap } from 'rxjs/operators';
+import { Observable } from 'rxjs';
 
 import {
   AppInputDirective,
@@ -24,7 +23,6 @@ import { StUser } from '../../../../../services/endpoint-data/stratos-types';
 import { CfPermissionTypes } from '../../../../../user-permissions/cf-user-permissions-checkers';
 import { getFeatureFlagsSource } from '../../../../../user-permissions/feature-flags-cache';
 import { ActiveRouteCfOrgSpace } from '../../../cf-page.types';
-import { waitForCFPermissions } from '../../../cf.helpers';
 
 export class ManageUsersSetUsernamesHelper {
   static createGuid(username: string, cfGuid: string, orgGuid: string): string {
@@ -57,13 +55,14 @@ export class ManageUsersSetUsernamesComponent implements OnInit {
 
 
   public stepValid = signal<boolean>(false);
-  public valid$: Observable<boolean> = toObservable(this.stepValid);
   private usernames!: StackedInputActionsUpdate;
   public origin!: string;
-  public canAdd$: Observable<boolean>;
-  public canRemove$: Observable<boolean>;
-  public blocked$: Observable<boolean>;
-  public currentValue!: boolean;
+  public readonly canAdd: Signal<boolean>;
+  public readonly canRemove: Signal<boolean>;
+  /** True until the roles and the feature flags the add/remove choice depends on have loaded. */
+  public readonly blocked: Signal<boolean>;
+  /** The add/remove choice: true removes roles; undefined until it is first set. */
+  public readonly currentValue = signal<boolean | undefined>(undefined);
 
   public stackedActionConfig: StackedInputActionConfig = {
     isEmailInput: false,
@@ -80,7 +79,6 @@ export class ManageUsersSetUsernamesComponent implements OnInit {
   constructor() {
     const activeRouteCfOrgSpace = this.activeRouteCfOrgSpace;
     const rolesData = inject(CfCurrentUserRolesDataService);
-    const injector = inject(Injector);
     const userPerms = inject(CurrentUserPermissionsService);
     const http = inject(HttpClient);
 
@@ -89,33 +87,27 @@ export class ManageUsersSetUsernamesComponent implements OnInit {
     const ffRemovePermConfig = new PermissionConfig(CfPermissionTypes.FEATURE_FLAG, CFFeatureFlagTypes.unset_roles_by_username);
     const canSet = userPerms.can(ffSetPermConfig, activeRouteCfOrgSpace.cfGuid);
     const canUnset = userPerms.can(ffRemovePermConfig, activeRouteCfOrgSpace.cfGuid);
-    // The checks read false until the roles and the flags load, so each is
-    // read once both have.
-    const flagsLoaded$ = waitForCFPermissions(rolesData, activeRouteCfOrgSpace.cfGuid, injector).pipe(
-      switchMap(() => from(getFeatureFlagsSource(activeRouteCfOrgSpace.cfGuid, http).load())),
-    );
-    this.canAdd$ = flagsLoaded$.pipe(
-      map(() => canSet()),
-      shareReplay({ bufferSize: 1, refCount: true })
-    );
-    this.canRemove$ = flagsLoaded$.pipe(
-      map(() => canUnset()),
-      shareReplay({ bufferSize: 1, refCount: true })
-    );
+    this.canAdd = computed(() => canSet());
+    this.canRemove = computed(() => canUnset());
 
-    const canAddRemove = combineLatest([this.canAdd$, this.canRemove$]);
-
-    // Set starting value of add/remove radio button
-    canAddRemove.pipe(take(1), defaultIfEmpty([false, false] as [boolean, boolean])).subscribe(([canAdd]) => this.setIsRemove({ source: null, value: !canAdd }));
-
-    // Block content until we know the add/remove state
-    this.blocked$ = canAddRemove.pipe(
-      map(() => false),
-      take(1),
-      startWith(true),
-      shareReplay({ bufferSize: 1, refCount: true }),
-    );
-
+    // The checks read false until the roles and the flags load, so the
+    // choice is made, and the content shown, once both have.
+    const flagsLoaded = signal(false);
+    this.blocked = computed(() => !flagsLoaded());
+    const rolesState = rolesData.cfEndpointRolesState(activeRouteCfOrgSpace.cfGuid);
+    const loadFlags = effect(() => {
+      if (!rolesState()?.state.initialised) {
+        return;
+      }
+      untracked(() => {
+        void getFeatureFlagsSource(activeRouteCfOrgSpace.cfGuid, http).load().then(() => {
+          // Set starting value of add/remove radio button
+          this.setIsRemove({ source: null, value: !canSet() });
+          flagsLoaded.set(true);
+        });
+      });
+      loadFlags.destroy();
+    });
   }
 
   ngOnInit() {
@@ -138,7 +130,7 @@ export class ManageUsersSetUsernamesComponent implements OnInit {
 
   setIsRemove(event: {source: any, value: boolean}) {
     this.rolesData.setIsRemove(event.value);
-    this.currentValue = event.value;
+    this.currentValue.set(event.value);
   }
 
   async onNext(): Promise<StepOnNextResult> {
