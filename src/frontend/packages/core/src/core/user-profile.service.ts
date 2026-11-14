@@ -1,16 +1,13 @@
-import { Injectable, Signal, computed, inject, linkedSignal } from '@angular/core';
-import { toObservable } from '@angular/core/rxjs-interop';
+import { Injectable, Signal, computed, effect, inject, linkedSignal, signal, untracked } from '@angular/core';
 import {
   ActionState,
   getDefaultActionState,
-  SessionData,
-  SessionUser,
   UserProfileDataService,
   UserProfileInfo,
   UserProfileInfoEmail,
   UserProfileInfoUpdates } from '@stratosui/store';
 import { combineLatest, Observable, of as observableOf } from 'rxjs';
-import { take, filter, map } from 'rxjs/operators';
+import { filter } from 'rxjs/operators';
 
 import { AuthSignalService } from './signals/auth-signal.service';
 
@@ -23,9 +20,9 @@ export class UserProfileService {
   private userProfileData = inject(UserProfileDataService);
 
 
-  private userGuid$: Observable<string>;
-
   private fetchStarted = false;
+  // Counts the asks to fetch; the fetch itself waits for the user's guid.
+  private readonly fetchRequests = signal(0);
 
   /**
    * The user's profile, null until it has loaded. Reading it does not fetch:
@@ -46,15 +43,15 @@ export class UserProfileService {
   });
 
   constructor() {
-    // Source the user GUID from the signal-native auth projection. The
-    // upstream pipe order matches the legacy implementation: wait for
-    // populated sessionData, then a populated `user`, then take the first
-    // GUID and complete.
-    this.userGuid$ = toObservable(this.authSignals.sessionData).pipe(
-      filter((sessionData): sessionData is SessionData & { user: SessionUser } => !!sessionData?.user),
-      take(1),
-      map(data => data.user.guid)
-    );
+    // Once there is a request and the session has a user, fetch their profile.
+    const userGuid = computed(() => this.authSignals.sessionData()?.user?.guid);
+    effect(() => {
+      const requests = this.fetchRequests();
+      const guid = userGuid();
+      if (requests && guid) {
+        untracked(() => this.userProfileData.fetch(guid));
+      }
+    });
   }
 
   /** Fetch the profile once, the first time any page asks for it. */
@@ -66,10 +63,7 @@ export class UserProfileService {
 
   fetchUserProfile() {
     this.fetchStarted = true;
-    // Once we have the user's guid, fetch their profile
-    this.userGuid$.pipe(take(1)).subscribe(userGuid => {
-      if (userGuid) { this.userProfileData.fetch(userGuid); }
-    });
+    this.fetchRequests.update(n => n + 1);
   }
 
   getPrimaryEmailAddress(profile: UserProfileInfo): string {

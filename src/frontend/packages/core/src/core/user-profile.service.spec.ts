@@ -64,6 +64,29 @@ describe('UserProfileService', () => {
     expect(service.userProfile()?.id).toBe('user-1');
   });
 
+  // A page may ask before the session has its user; the fetch follows.
+  it('fetches once the session has a user, when asked before', async () => {
+    const sessionData = signal<SessionData | null>(null);
+    TestBed.resetTestingModule();
+    TestBed.configureTestingModule({
+      providers: [
+        provideZonelessChangeDetection(),
+        { provide: AuthSignalService, useValue: { sessionData } },
+        { provide: UserProfileDataService, useValue: dataStub },
+        UserProfileService,
+      ],
+    });
+    const service = TestBed.inject(UserProfileService);
+    service.loadUserProfile();
+    await TestBed.inject(ApplicationRef).whenStable();
+    expect(dataStub.fetch).not.toHaveBeenCalled();
+
+    sessionData.set(SESSION);
+    await TestBed.inject(ApplicationRef).whenStable();
+    expect(dataStub.fetch).toHaveBeenCalledTimes(1);
+    expect(dataStub.fetch).toHaveBeenCalledWith('user-1');
+  });
+
   it('keeps the last error answer while a fetch runs', () => {
     const service = TestBed.inject(UserProfileService);
     dataStub.error.set(true);
