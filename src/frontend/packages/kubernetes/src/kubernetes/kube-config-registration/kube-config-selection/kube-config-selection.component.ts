@@ -1,6 +1,5 @@
 import { ChangeDetectionStrategy, Component, Signal, WritableSignal, computed, inject, signal, input } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { toSignal } from '@angular/core/rxjs-interop';
 import { combineLatest, of } from 'rxjs';
 import { map, take } from 'rxjs/operators';
 
@@ -55,10 +54,9 @@ export class KubeConfigSelectionComponent {
   // The last "Failed to load Kube Config" message, cleared by the next parse.
   private parseErrorSnackBar?: TailwindSnackBarRef<unknown>;
 
-  // The parsed clusters. `helper.clusters$` filters to truthy arrays, so this
-  // is undefined until a kube config has been parsed; the template shows the
-  // list only from then on.
-  protected readonly parsedClusters = toSignal(this.helper.clusters$);
+  // The parsed clusters: null until a kube config has been parsed; the
+  // template shows the list only from then on.
+  protected readonly parsedClusters = this.helper.clusters;
 
   // Clusters as a list, empty until a kube config is parsed. Drives the
   // signal-list paging signals below; per-row mutations (_selected,
@@ -224,26 +222,24 @@ export class KubeConfigSelectionComponent {
       return;
     }
     // Handle back from review step (ensure newly registered endpoints are taken into account)
-    this.helper.updateAll().pipe(take(1)).subscribe(() => { });
+    this.helper.updateAll();
   };
 
   // Row changed event — rebuild the selection mirror from the per-row
-  // `_selected` flags and update the next button. Uses `clusters$` (not the
-  // signal) so it observes the freshly-emitted array: the helper invokes
-  // this BEFORE pushing the new clusters during the initial parse.
+  // `_selected` flags and update the next button.
   clustersChanged() {
-    this.helper.clusters$.pipe(
-      take(1)
-    ).subscribe(clusters => {
-      const keys = new Set<string>();
-      clusters.forEach(c => {
-        if (c._selected && !c._invalid) {
-          keys.add(c._id);
-        }
-      });
-      this.selectedKeys.set(keys);
-      this.checkCanGoNext(clusters);
+    const clusters = this.helper.clusters();
+    if (!clusters) {
+      return;
+    }
+    const keys = new Set<string>();
+    clusters.forEach(c => {
+      if (c._selected && !c._invalid) {
+        keys.add(c._id);
+      }
     });
+    this.selectedKeys.set(keys);
+    this.checkCanGoNext(clusters);
   }
 
   // Can we proceed?

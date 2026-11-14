@@ -1,7 +1,7 @@
-import { Injectable, inject } from '@angular/core';
+import { Injectable, Signal, inject, signal } from '@angular/core';
 import * as yaml from 'js-yaml';
-import { combineLatest, Observable, of } from 'rxjs';
-import { filter, map, take, tap } from 'rxjs/operators';
+import { combineLatest, defer, Observable, of } from 'rxjs';
+import { map } from 'rxjs/operators';
 
 import { EndpointsService } from '../../../../core/src/core/endpoints.service';
 import { createGuid } from '../../../../core/src/core/utils.service';
@@ -25,20 +25,17 @@ export class KubeConfigHelper {
 
   authHelper = new KubeConfigAuthHelper();
 
-  private _clusters = createSignalWrapper<KubeConfigFileCluster[] | null>(null);
-  clusters$ = this._clusters.asObservable().pipe(
-    filter(clusters => !!clusters)
-  );
+  private _clusters = signal<KubeConfigFileCluster[] | null>(null);
+  /** The parsed clusters; null until a kube config has been parsed. */
+  readonly clusters: Signal<KubeConfigFileCluster[] | null> = this._clusters.asReadonly();
 
   public clustersChanged!: () => void;
   public update = (cluster: KubeConfigFileCluster) => {
     this.checkValidity(cluster).subscribe(() => this.clustersChanged());
   };
 
-  public updateAll(): Observable<KubeConfigFileCluster[]> {
-    return this.clusters$.pipe(
-      tap(clusters => clusters.forEach(cluster => this.update(cluster))),
-    );
+  public updateAll(): void {
+    this._clusters()?.forEach(cluster => this.update(cluster));
   }
 
   public parse(config: string): Observable<string> {
@@ -102,9 +99,10 @@ export class KubeConfigHelper {
       clustersArray.map(cluster => this.checkValidity(cluster))
     ).pipe(
       map(() => {
-        // Notify cluster changes
+        // The new clusters are set before the change is announced, so the
+        // listener reads them.
+        this._clusters.set(Object.values(clusters));
         this.clustersChanged();
-        this._clusters.next(Object.values(clusters));
         return '';
       })
     );
@@ -114,11 +112,8 @@ export class KubeConfigHelper {
   // Check the validity of a cluster for import
   public checkValidity(cluster: KubeConfigFileCluster): Observable<any> {
     // Check endpoint name
-    // Might be called before we've loaded clusters, so used the non-filtered one
-    return this._clusters.asObservable().pipe(
-      take(1),
-      map(clusters => this.validate(Object.values(this.endpointsService.endpoints()), cluster, clusters))
-    );
+    // Might be called before we've loaded clusters, so they may be null
+    return defer(() => of(this.validate(Object.values(this.endpointsService.endpoints()), cluster, this._clusters())));
   }
 
   private validate(endpoints: EndpointModel[], cluster: KubeConfigFileCluster, clusters: KubeConfigFileCluster[] | null) {

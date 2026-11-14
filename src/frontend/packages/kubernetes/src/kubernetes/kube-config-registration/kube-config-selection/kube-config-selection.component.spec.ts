@@ -94,7 +94,7 @@ describe('KubeConfigSelectionComponent', () => {
     const helper = TestBed.inject(KubeConfigHelper);
     await firstValueFrom(helper.parse(KUBE_CONFIG));
     await fixture.whenStable();
-    const [cluster] = await firstValueFrom(helper.clusters$);
+    const [cluster] = helper.clusters()!;
     component.startEdit(cluster);
     await fixture.whenStable();
     const box = (fixture.nativeElement as HTMLElement).querySelector('[data-test="row"] input:not([type])');

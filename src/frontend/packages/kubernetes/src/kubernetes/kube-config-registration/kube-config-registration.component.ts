@@ -12,8 +12,7 @@ import {
 } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { Router } from '@angular/router';
-import { firstValueFrom, Subscription } from 'rxjs';
-import { take } from 'rxjs/operators';
+import { Subscription } from 'rxjs';
 
 import {
   SignalStepHandle,
@@ -126,8 +125,7 @@ export class KubeConfigRegistrationComponent implements OnDestroy {
       // via pOnEnter). The importer resets its applyStarted flag in
       // onEnter — mirror that here.
       this.applyStarted.set(false);
-      const clusters = await firstValueFrom(this.helper.clusters$.pipe(take(1)));
-      this._importer()?.onEnter(clusters);
+      this._importer()?.onEnter(this.helper.clusters() ?? []);
     },
     submit: async () => {
       // Two-click "Import then Close" semantic. The importer's existing
