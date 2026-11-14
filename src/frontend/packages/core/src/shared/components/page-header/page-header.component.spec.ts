@@ -63,6 +63,14 @@ describe('PageHeaderComponent', () => {
     expect(component).toBeTruthy();
   });
 
+  // The avatar shows a Gravatar only while the dashboard allows it.
+  it('follows the dashboard gravatar setting', () => {
+    TestBed.inject(DashboardDataService).setGravatarEnabled(false);
+    expect(component.allowGravatar()).toBe(false);
+    TestBed.inject(DashboardDataService).setGravatarEnabled(true);
+    expect(component.allowGravatar()).toBe(true);
+  });
+
   // API Keys and Sign Out in the user menu follow their permissions.
   it('gates API Keys and Sign Out on their permissions', async () => {
     const apiKeys = signal(false);

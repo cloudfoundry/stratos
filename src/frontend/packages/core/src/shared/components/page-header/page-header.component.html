@@ -184,7 +184,7 @@
                   aria-controls="userMenuPanel"
                   [attr.aria-expanded]="isUserMenuOpen"
                   (click)="toggleUserMenu()">
-                  <app-user-avatar color="header" [allowGravatar]="allowGravatar$ | async" [user]="user()">
+                  <app-user-avatar color="header" [allowGravatar]="allowGravatar()" [user]="user()">
                   </app-user-avatar>
                 </button>
                 <!-- User dropdown menu -->
@@ -194,7 +194,7 @@
                     <div class="page-header-menu-inner p-4 w-64">
                       <!-- User info -->
                       <div class="page-header-username flex items-center space-x-3 pb-4 border-b border-content-border mb-4">
-                        <app-user-avatar [allowGravatar]="allowGravatar$ | async" [user]="user()"></app-user-avatar>
+                        <app-user-avatar [allowGravatar]="allowGravatar()" [user]="user()"></app-user-avatar>
                         <div class="page-header-username-text">
                           <div class="font-medium text-content-text">{{ username() }}</div>
                         </div>
