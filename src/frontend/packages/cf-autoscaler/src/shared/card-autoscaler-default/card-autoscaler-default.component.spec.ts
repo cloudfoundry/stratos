@@ -48,10 +48,10 @@ describe('CardAutoscalerDefaultComponent', () => {
     }).compileComponents();
   });
 
-  beforeEach(() => {
+  beforeEach(async () => {
     fixture = TestBed.createComponent(CardAutoscalerDefaultComponent);
     component = fixture.componentInstance;
-    fixture.detectChanges();
+    await fixture.whenStable();
   });
 
   afterEach(() => {

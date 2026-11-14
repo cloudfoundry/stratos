@@ -10,22 +10,22 @@
     </app-metadata-item>
     <div class="grid grid-cols-2 gap-4">
       <app-metadata-item label="Minimum">
-        @if (appAutoscalerPolicy$ | async; as policy) {
+        @if (appAutoscalerPolicy(); as policy) {
           <div class="text-lg font-semibold">
             {{ policy.instance_min_count }}
           </div>
         }
-        @if ((appAutoscalerPolicy$ | async) === false) {
+        @if (appAutoscalerPolicy() === false) {
           <div class="text-content-muted">-</div>
         }
       </app-metadata-item>
       <app-metadata-item label="Maximum">
-        @if (appAutoscalerPolicy$ | async; as policy) {
+        @if (appAutoscalerPolicy(); as policy) {
           <div class="text-lg font-semibold">
             {{ policy.instance_max_count }}
           </div>
         }
-        @if ((appAutoscalerPolicy$ | async) === false) {
+        @if (appAutoscalerPolicy() === false) {
           <div class="text-content-muted">-</div>
         }
       </app-metadata-item>
