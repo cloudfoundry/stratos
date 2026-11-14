@@ -189,23 +189,90 @@ describe('CardAppInstancesComponent', () => {
     });
   });
 
-  describe('button disabled state', () => {
-    it('disables scale buttons while loading.app is true', async () => {
-      const { fixture } = await setup({ showActions: true, loadingApp: true });
+  // The buttons turn off while the app updates, which a press on one of
+  // them starts. A disabled button that held focus drops it to the page body
+  // (WCAG 2.4.3), so they are aria-disabled and ignore the press instead.
+  describe('button off state', () => {
+    it('turns the buttons off, focusable, while loading.app is true', async () => {
+      const { fixture, appsStub } = await setup({ showActions: true, loadingApp: true });
       const buttons: HTMLButtonElement[] = Array.from(fixture.nativeElement.querySelectorAll('button'));
-      expect(buttons.length).toBeGreaterThan(0);
-      for (const b of buttons) {
-        expect(b.disabled).toBe(true);
-      }
-    });
-
-    it('enables scale buttons when not loading', async () => {
-      const { fixture } = await setup({ showActions: true, loadingApp: false });
-      const buttons: HTMLButtonElement[] = Array.from(fixture.nativeElement.querySelectorAll('button'));
-      expect(buttons.length).toBeGreaterThan(0);
+      expect(buttons.length).toBe(3);
       for (const b of buttons) {
         expect(b.disabled).toBe(false);
+        expect(b.getAttribute('aria-disabled')).toBe('true');
+        b.click();
       }
+      await fixture.whenStable();
+      expect(appsStub.scaleApp).not.toHaveBeenCalled();
+      expect(fixture.componentInstance.isEditing).toBe(false);
+    });
+
+    it('turns Cancel and Save off while loading.app is true', async () => {
+      const { fixture, dataStub, appsStub } = await setup({ showActions: true });
+      (fixture.nativeElement.querySelector('button[aria-label="Edit instance count"]') as HTMLButtonElement).click();
+      await fixture.whenStable();
+      dataStub._loadingSig.set({ app: true });
+      await fixture.whenStable();
+      const save = fixture.nativeElement.querySelector('button[aria-label="Save"]') as HTMLButtonElement;
+      expect(save.disabled).toBe(false);
+      expect(save.getAttribute('aria-disabled')).toBe('true');
+      save.click();
+      expect(appsStub.scaleApp).not.toHaveBeenCalled();
+      expect(fixture.componentInstance.isEditing).toBe(true);
+    });
+
+    it('turns the buttons on when not loading', async () => {
+      const { fixture } = await setup({ showActions: true, loadingApp: false });
+      const buttons: HTMLButtonElement[] = Array.from(fixture.nativeElement.querySelectorAll('button'));
+      expect(buttons.length).toBe(3);
+      for (const b of buttons) {
+        expect(b.disabled).toBe(false);
+        expect(b.hasAttribute('aria-disabled')).toBe(false);
+      }
+    });
+  });
+
+  // Cancel and Save go away when the edit ends; focus goes back to Edit.
+  describe('focus when the edit ends', () => {
+    async function editing(desired = 2) {
+      const ctx = await setup({ showActions: true, desired });
+      (ctx.fixture.nativeElement.querySelector('button[aria-label="Edit instance count"]') as HTMLButtonElement).click();
+      await ctx.fixture.whenStable();
+      // edit() focuses the field on a timer; let it run first.
+      await new Promise(r => setTimeout(r));
+      const press = async (label: string) => {
+        const b = ctx.fixture.nativeElement.querySelector(`button[aria-label="${label}"]`) as HTMLButtonElement;
+        b.focus();
+        b.click();
+        await ctx.fixture.whenStable();
+      };
+      const edit = () => ctx.fixture.nativeElement.querySelector('button[aria-label="Edit instance count"]');
+      return { ...ctx, press, edit };
+    }
+
+    it('Cancel puts focus on Edit instance count', async () => {
+      const { press, edit } = await editing();
+      await press('Cancel');
+      expect(document.activeElement).toBe(edit());
+    });
+
+    it('Save puts focus on Edit instance count', async () => {
+      const { press, edit, appsStub } = await editing();
+      await press('Save');
+      expect(appsStub.scaleApp).toHaveBeenCalled();
+      expect(document.activeElement).toBe(edit());
+    });
+
+    // The confirmation returns focus, when it closes, to what had focus when
+    // it opened: that must be Edit, not the Save button that is gone.
+    it('Save to 0 has focus on Edit when the confirmation opens', async () => {
+      const { fixture, press, edit, confirmStub } = await editing(1);
+      let focusedAtOpen: Element | null = null;
+      confirmStub.open.mockImplementation(() => { focusedAtOpen = document.activeElement; });
+      fixture.componentInstance.editValue = '0';
+      await press('Save');
+      expect(confirmStub.open).toHaveBeenCalled();
+      expect(focusedAtOpen).toBe(edit());
     });
   });
 

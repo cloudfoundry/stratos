@@ -1,5 +1,6 @@
 import {
   ChangeDetectionStrategy,
+  ChangeDetectorRef,
   Component,
   ElementRef,
   OnDestroy,
@@ -70,6 +71,8 @@ export class CardAppInstancesComponent implements OnDestroy {
   private confirmDialog = inject(ConfirmationDialogService);
   private snackBar = inject(TailwindSnackBarService);
   private cups = inject(CurrentUserPermissionsService);
+  private host: ElementRef<HTMLElement> = inject(ElementRef);
+  private cdr = inject(ChangeDetectorRef);
 
   /** Should the card show the scale/edit actions? */
   readonly showActions = input(false);
@@ -78,6 +81,7 @@ export class CardAppInstancesComponent implements OnDestroy {
 
   // Optional: the field sits in a conditional block of the template.
   readonly instanceField = viewChild<ElementRef>('instanceField');
+  readonly editButton = viewChild<ElementRef<HTMLButtonElement>>('editButton');
 
   // ---------------------------------------------------------------------------
   // Signal-native reads
@@ -96,7 +100,11 @@ export class CardAppInstancesComponent implements OnDestroy {
   /** Card status indicator: feeds the colored bar. */
   readonly status = computed(() => this.dataService.state()?.indicator);
 
-  /** Disable scale buttons while an app-level update is in flight. */
+  /**
+   * Turns the buttons off while an app-level update is in flight. They are
+   * aria-disabled and the handlers ignore the press: a press starts the
+   * update, and a disabled button that held focus drops it to the page body.
+   */
   readonly isUpdating = computed(() => this.dataService.loading().app);
 
   /** Edit-permission gate, built once the org and space are known; false until then. */
@@ -128,14 +136,17 @@ export class CardAppInstancesComponent implements OnDestroy {
   }
 
   scaleUp() {
+    if (this.isUpdating()) return;
     this.setInstanceCount(this.desiredCount() + 1);
   }
 
   scaleDown() {
+    if (this.isUpdating()) return;
     this.setInstanceCount(Math.max(0, this.desiredCount() - 1));
   }
 
   edit() {
+    if (this.isUpdating()) return;
     this.editValue = this.desiredCount();
     this.isEditing = true;
     setTimeout(() => {
@@ -146,7 +157,16 @@ export class CardAppInstancesComponent implements OnDestroy {
   }
 
   finishEdit(ok: boolean) {
+    if (this.isUpdating()) return;
+    // Cancel and Save go away with the edit, so focus goes to Edit. It is
+    // drawn and focused now, before a scale-to-zero confirmation opens: the
+    // dialog gives focus back, when it closes, to what had it when it opened.
+    const hadFocus = this.host.nativeElement.contains(document.activeElement);
     this.isEditing = false;
+    if (hadFocus) {
+      this.cdr.detectChanges();
+      this.editButton()?.nativeElement.focus();
+    }
     if (ok) {
       this.setInstanceCount(parseInt(this.editValue, 10));
     }
