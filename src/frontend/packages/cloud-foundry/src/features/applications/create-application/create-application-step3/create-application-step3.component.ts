@@ -5,7 +5,7 @@ import { HttpClient } from '@angular/common/http';
 import { AbstractControl, ReactiveFormsModule, FormControl, FormGroup, Validators } from '@angular/forms';
 import { ActivatedRoute, Router } from '@angular/router';
 import { firstValueFrom, from, Observable, of as observableOf, throwError } from 'rxjs';
-import { catchError, filter, map, mergeMap, switchMap } from 'rxjs/operators';
+import { catchError, filter, map, switchMap } from 'rxjs/operators';
 
 import { AppErrorComponent, AppInputDirective, CustomFormFieldComponent, CustomSelectComponent, CustomOptionComponent, ErrorStateMatcher, ShowOnDirtyErrorStateMatcher, StepOnNextResult } from '@stratosui/core';
 import { extractHttpErrorMessage } from '@stratosui/store';
@@ -176,7 +176,7 @@ export class CreateApplicationStep3Component implements OnInit, OnDestroy {
   ngOnInit() {
     this.domains$ = this.appState$.pipe(
       filter(state => !!state.cloudFoundryDetails?.cloudFoundry && !!state.cloudFoundryDetails?.org),
-      mergeMap(state => {
+      switchMap(state => {
         this.hostControl().setValue(state.name.split(' ').join('-').toLowerCase());
         this.hostControl().markAsDirty();
         this.newAppData = state as { cloudFoundryDetails: NewAppCFDetails; name: string };

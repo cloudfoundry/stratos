@@ -7,7 +7,7 @@ import { provideRouter } from '@angular/router';
 import { HttpClientTestingModule, HttpTestingController, TestRequest } from '@angular/common/http/testing';
 
 import { generateCfStoreModules } from '@test-framework/cf';
-import type { NewAppCFDetails } from '../../../../shared/data-services/create-app-state.service';
+import { CreateAppStateService, type NewAppCFDetails } from '../../../../shared/data-services/create-app-state.service';
 import { CreateApplicationStep3Component } from './create-application-step3.component';
 describe('CreateApplicationStep3Component', () => {
   let component: CreateApplicationStep3Component;
@@ -70,5 +70,34 @@ describe('CreateApplicationStep3Component', () => {
 
     const id = input.getAttribute('aria-errormessage');
     expect(id && host.querySelector(`#${id}`)?.textContent?.trim()).toBe('Host cannot exceed 63 characters');
+  });
+
+  // Going back to pick another org while the first org's domains are still
+  // loading: the late answer must not replace the new org's domains.
+  it('lists the domains of the org picked last when an earlier answer comes in late', async () => {
+    const http = TestBed.inject(HttpTestingController);
+    const state = TestBed.inject(CreateAppStateService);
+    const domainsUrl = (org: string) => `/pp/v1/cf/org/cf1/${org}/private_domains`;
+    const optionTexts = () => Array.from(fixture.nativeElement.querySelectorAll('app-option') as NodeListOf<HTMLElement>)
+      .map(o => o.textContent?.trim());
+
+    state.setName('my-app');
+    state.setCFDetails({ cloudFoundry: 'cf1', org: 'org-a', space: 'space-a' } as NewAppCFDetails);
+    await fixture.whenStable();
+    const first = http.expectOne(domainsUrl('org-a'));
+
+    state.setCFDetails({ cloudFoundry: 'cf1', org: 'org-b', space: 'space-b' } as NewAppCFDetails);
+    await fixture.whenStable();
+    const second = http.expectOne(domainsUrl('org-b'));
+
+    second.flush({ resources: [{ guid: 'd-b', name: 'b.example.com' }] });
+    await fixture.whenStable();
+    // A cancelled request can no longer be answered
+    if (!first.cancelled) {
+      first.flush({ resources: [{ guid: 'd-a', name: 'a.example.com' }] });
+    }
+    await fixture.whenStable();
+
+    expect(optionTexts()).toEqual(['b.example.com']);
   });
 });
