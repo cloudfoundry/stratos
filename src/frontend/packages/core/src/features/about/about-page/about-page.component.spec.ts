@@ -36,10 +36,10 @@ describe('AboutPageComponent', () => {
     }).compileComponents();
   });
 
-  beforeEach(() => {
+  beforeEach(async () => {
     fixture = TestBed.createComponent(AboutPageComponent);
     component = fixture.componentInstance;
-    fixture.detectChanges();
+    await fixture.whenStable();
   });
 
   it('should create', () => {
@@ -77,16 +77,9 @@ describe('AboutPageComponent', () => {
     expect(component.buildInfo.buildDate.length).toBeGreaterThan(0);
   });
 
-  it('should expose sessionData$ observable', () => {
-    expect(component.sessionData$).toBeDefined();
-  });
-
-  it('should expose userIsAdmin$ observable', () => {
-    expect(component.userIsAdmin$).toBeDefined();
-  });
-
-  it('should expose versionNumber$ observable', () => {
-    expect(component.versionNumber$).toBeDefined();
+  it('should derive the version and admin flag from the session', () => {
+    expect(component.versionNumber()).toBe('1.0.0');
+    expect(component.userIsAdmin()).toBe(false);
   });
 
   it('should expose angularVersion matching semver', () => {
