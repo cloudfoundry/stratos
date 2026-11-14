@@ -107,10 +107,12 @@ describe('UserInviteService.configured', () => {
 describe('UserInviteService.canShowInviteUser', () => {
   const endpoint = signal<unknown>(undefined);
   const canChangeRoles = signal(true);
+  const roles = signal<unknown>({ state: { initialised: true } });
 
   beforeEach(() => {
     endpoint.set(undefined);
     canChangeRoles.set(true);
+    roles.set({ state: { initialised: true } });
     TestBed.resetTestingModule();
     TestBed.configureTestingModule({
       providers: [
@@ -120,7 +122,7 @@ describe('UserInviteService.canShowInviteUser', () => {
         { provide: CloudFoundryEndpointService, useValue: { endpoint } },
         { provide: ActiveRouteCfOrgSpace, useValue: stubActiveRoute },
         { provide: CfCurrentUserRolesDataService, useValue: {
-          cfEndpointRolesState: () => signal({ state: { initialised: true } }),
+          cfEndpointRolesState: () => roles,
         } },
         { provide: AuthDataService, useValue: stubAuthData },
         { provide: CurrentUserPermissionsService, useValue: { can: () => canChangeRoles } },
@@ -131,23 +133,33 @@ describe('UserInviteService.canShowInviteUser', () => {
 
   it('waits for the endpoint before answering', () => {
     const svc = TestBed.inject(UserInviteService);
-    const seen: boolean[] = [];
-    svc.canShowInviteUser('cf1', 'org1', '').subscribe(v => seen.push(v));
-    TestBed.tick();
-    expect(seen).toEqual([]);
+    const can = svc.canShowInviteUser('cf1', 'org1', '');
+    expect(can()).toBeNull();
 
     endpoint.set({ entity: { metadata: { userInviteAllowed: 'true' } } });
-    TestBed.tick();
-    expect(seen).toEqual([true]);
+    expect(can()).toBe(true);
+  });
+
+  it('waits for the roles before answering', () => {
+    roles.set(null);
+    endpoint.set({ entity: { metadata: { userInviteAllowed: 'true' } } });
+    const svc = TestBed.inject(UserInviteService);
+    const can = svc.canShowInviteUser('cf1', 'org1', '');
+    expect(can()).toBeNull();
+
+    roles.set({ state: { initialised: true } });
+    expect(can()).toBe(true);
   });
 
   it('does not offer invites without the org role-change permission', () => {
     canChangeRoles.set(false);
     const svc = TestBed.inject(UserInviteService);
-    const seen: boolean[] = [];
-    svc.canShowInviteUser('cf1', 'org1', '').subscribe(v => seen.push(v));
     endpoint.set({ entity: { metadata: { userInviteAllowed: 'true' } } });
-    TestBed.tick();
-    expect(seen).toEqual([false]);
+    expect(svc.canShowInviteUser('cf1', 'org1', '')()).toBe(false);
+  });
+
+  it('offers invites to no one outside an organization', () => {
+    const svc = TestBed.inject(UserInviteService);
+    expect(svc.canShowInviteUser('cf1', '', '')()).toBe(false);
   });
 });

@@ -1,11 +1,10 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
-import { provideZonelessChangeDetection } from '@angular/core';
+import { provideZonelessChangeDetection, signal } from '@angular/core';
 import { provideRouter } from '@angular/router';
 import { provideHttpClient } from '@angular/common/http';
 import { provideHttpClientTesting } from '@angular/common/http/testing';
 import { NoopAnimationsModule } from '@angular/platform-browser/animations';
 import { describe, it, expect, beforeEach, vi } from 'vitest';
-import { of } from 'rxjs';
 
 import { CoreModule } from '@stratosui/core';
 import { EntityCatalogTestModule, TEST_CATALOGUE_ENTITIES, generateStratosEntities } from '@stratosui/store';
@@ -26,8 +25,8 @@ describe('CloudFoundryInviteUserLinkComponent', () => {
   };
 
   const mockUserInviteService = {
-    canShowInviteUser: vi.fn().mockReturnValue(of(true)),
-    canConfigure$: of(true)
+    canShowInviteUser: vi.fn().mockReturnValue(signal(true)),
+    canConfigure: signal(true)
   };
 
   beforeEach(() => {
@@ -59,10 +58,10 @@ describe('CloudFoundryInviteUserLinkComponent', () => {
       .compileComponents();
   });
 
-  beforeEach(() => {
+  beforeEach(async () => {
     fixture = TestBed.createComponent(CloudFoundryInviteUserLinkComponent);
     component = fixture.componentInstance;
-    fixture.detectChanges();
+    await fixture.whenStable();
   });
 
   it('should create', () => {

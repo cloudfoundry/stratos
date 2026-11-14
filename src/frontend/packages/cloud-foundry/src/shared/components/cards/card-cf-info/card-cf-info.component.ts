@@ -1,5 +1,4 @@
 import { Component, inject, ChangeDetectionStrategy, OnInit, computed } from '@angular/core';
-import { toSignal } from '@angular/core/rxjs-interop';
 
 import { TailwindDialogService, MetadataItemComponent, UrlPartsPipe } from '@stratosui/core';
 import { AutoscalerInfoDataService } from '@stratosui/cf-autoscaler';
@@ -35,7 +34,7 @@ export class CardCfInfoComponent implements OnInit {
   readonly endpointInfo = this.cfEndpointService.endpoint;
   readonly info = this.cfEndpointService.info;
   readonly hasSSHAccess = this.cfEndpointService.hasSSHAccess;
-  readonly canConfigureInvites = toSignal(this.userInviteService.canConfigure$, { initialValue: false });
+  readonly canConfigureInvites = this.userInviteService.canConfigure;
   readonly invitesConfigured = this.userInviteService.configured;
 
   // Autoscaler version comes from the cf-autoscaler signal-native data
