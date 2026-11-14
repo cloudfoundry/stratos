@@ -137,11 +137,12 @@ const MOCK_DOMAINS_RESPONSE = {
 };
 
 /**
- * Yield to the microtask queue so that Promise.all / await chains inside
- * AppDetailDataService can advance between HTTP-flush phases.
+ * Flush effects (resource requests start there) and yield to the microtask
+ * queue so AppDetailDataService can advance between HTTP-flush phases.
  */
 async function tick(times = 4): Promise<void> {
   for (let i = 0; i < times; i++) {
+    TestBed.tick();
     await Promise.resolve();
   }
 }
@@ -312,10 +313,12 @@ describe('AppDetailDataService', () => {
   // fetching() derived signal
   // -------------------------------------------------------------------------
 
-  it('fetching() is true while any entity loading flag is set', () => {
-    svc['_loading'].update(m => ({ ...m, app: true }));
+  it('fetching() is true while any entity request is in flight', async () => {
+    const done = svc.refresh('app');
     expect(svc.fetching()).toBe(true);
-    svc['_loading'].update(m => ({ ...m, app: false }));
+    await tick();
+    httpMock.expectOne(DETAIL_URL).flush(MOCK_APP_DETAIL);
+    await done;
     expect(svc.fetching()).toBe(false);
   });
 
@@ -757,7 +760,7 @@ describe('AppDetailDataService', () => {
 
   it('addRoute(stRoute) appends to _routes signal (Routes tab list)', () => {
     svc['_appDetail'].set(MOCK_APP_DETAIL);
-    svc['_routes'].set([]);
+    svc['routesRes'].set({ resources: [], totalResults: 0 });
     expect(svc.routes()).toEqual([]);
 
     svc.addRoute(MOCK_NEW_ROUTE);
@@ -768,7 +771,7 @@ describe('AppDetailDataService', () => {
 
   it('addRoute(stRoute) is idempotent on _routes signal too', () => {
     svc['_appDetail'].set(MOCK_APP_DETAIL);
-    svc['_routes'].set([MOCK_NEW_ROUTE]);
+    svc['routesRes'].set({ resources: [MOCK_NEW_ROUTE], totalResults: 1 });
     const before = svc.routes();
 
     svc.addRoute(MOCK_NEW_ROUTE);
@@ -802,7 +805,7 @@ describe('AppDetailDataService', () => {
       app: { ...MOCK_APP_DETAIL.app, routes: [...MOCK_APP_DETAIL.app.routes, MOCK_NEW_ROUTE] },
     };
     svc['_appDetail'].set(detailWithNewRoute);
-    svc['_routes'].set([]);
+    svc['routesRes'].set({ resources: [], totalResults: 0 });
 
     svc.addRoute(MOCK_NEW_ROUTE);
 
@@ -858,6 +861,7 @@ describe('AppDetailDataService', () => {
 
       // After a further 5s (10s total) the re-armed interval fires.
       await vi.advanceTimersByTimeAsync(5000);
+      TestBed.tick();
       httpMock.expectOne(STATS_URL).flush(MOCK_STATS_RESPONSE);
 
       release();
@@ -887,10 +891,12 @@ describe('AppDetailDataService', () => {
 
       // Advance 5s — first interval fires refresh('stats').
       await vi.advanceTimersByTimeAsync(5000);
+      TestBed.tick();
       httpMock.expectOne(STATS_URL).flush(MOCK_STATS_RESPONSE);
 
       // Advance another 5s — second tick fires.
       await vi.advanceTimersByTimeAsync(5000);
+      TestBed.tick();
       httpMock.expectOne(STATS_URL).flush(MOCK_STATS_RESPONSE);
 
       // Release focus — effect cleanup clears the interval.

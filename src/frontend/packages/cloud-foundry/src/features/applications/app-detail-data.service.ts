@@ -1,6 +1,5 @@
-import { Injectable, computed, effect, inject, signal, Signal } from '@angular/core';
-import { HttpClient } from '@angular/common/http';
-import { firstValueFrom } from 'rxjs';
+import { Injectable, Injector, Resource, ResourceRef, computed, effect, inject, linkedSignal, signal, Signal, untracked, WritableSignal } from '@angular/core';
+import { HttpClient, httpResource } from '@angular/common/http';
 
 import { AppDetailPrefs } from './app-detail-prefs.service';
 import { AppLifecycleStateService } from './app-lifecycle-state.service';
@@ -73,40 +72,96 @@ export class AppDetailDataService {
   private readonly appStateService = inject(ApplicationStateService);
   private readonly endpointDataRegistry = inject(EndpointDataRegistry);
 
-  cnsiGuid!: string;
-  appGuid!: string;
+  private readonly injector = inject(Injector);
 
-  // ---------------------------------------------------------------------------
-  // Primary signal sources — V3-shaped, writable inside the service.
-  // ---------------------------------------------------------------------------
-  private readonly _appDetail = signal<StAppDetail | undefined>(undefined);
-  private readonly _envVars = signal<StEnvVars | undefined>(undefined);
-  private readonly _stats = signal<StAppStat[]>([]);
+  private readonly _ids = signal({ cnsi: '', app: '' });
+  get cnsiGuid(): string { return this._ids().cnsi; }
+  set cnsiGuid(cnsi: string) { this._ids.update(i => ({ ...i, cnsi })); }
+  get appGuid(): string { return this._ids().app; }
+  set appGuid(app: string) { this._ids.update(i => ({ ...i, app })); }
 
-  // Space / org / domains — Stratos-native shapes from Jetstream native
-  // handlers. Backend translates v2/v3 under the hood; the frontend never
-  // touches `/pp/v1/proxy/v2/...` directly.
-  private readonly _space = signal<StSpace | undefined>(undefined);
-  private readonly _org = signal<StOrg | undefined>(undefined);
-  private readonly _domains = signal<StDomain[]>([]);
+  // All entity fetches hit Jetstream native handlers: cnsi is in the path and
+  // responses come back as Stratos-native shapes (no v2 wire, no passthrough
+  // header). Each read is an httpResource; a dependent URL (space from
+  // app.spaceGuid, org from space.orgGuid, domains from org.guid) is a
+  // computed request, so a changed parameter aborts the in-flight request.
+  // A kind is requested only once refresh() has asked for it ('all' covers all
+  // but routes and serviceBindings, which wait for their own refresh(kind)).
+  private readonly _wanted = signal<ReadonlySet<EntityKind>>(new Set());
+  private want(kind: EntityKind, url: () => string | undefined): () => string | undefined {
+    return () => (this._wanted().has(kind) ? url() : undefined);
+  }
+  private appUrl(path = ''): string | undefined {
+    const { cnsi, app } = this._ids();
+    return cnsi && app ? `/pp/v1/cf/apps/${cnsi}/${app}${path}` : undefined;
+  }
 
-  // Per-app routes — V3-shaped via the native handler. Null until first load
-  // so consumers can distinguish "haven't fetched yet" from "fetched, empty".
-  private readonly _routes = signal<StRoute[] | null>(null);
+  private readonly appRes = httpResource<StAppDetail>(this.want('app', () => this.appUrl('?return=details')));
+  private readonly envRes = httpResource<StEnvVars>(this.want('envVars', () => this.appUrl('/env')));
+  // Stats wait for the first app response, and are skipped for a state that
+  // has none (STOPPED etc.), avoiding CF's noisy CF-AppStoppedStatsError 400.
+  private readonly statsRes = httpResource<StAppStatsResponse>(this.want('stats', () =>
+    this.appRes.status() !== 'loading' && this.shouldFetchStats()
+      ? `/pp/v1/cf/app-stats/${this.cnsiGuid}/${this.appGuid}` : undefined));
+  private readonly spaceRes = httpResource<StSpace>(this.want('space', () => {
+    const guid = this._appDetail()?.app.spaceGuid;
+    return guid ? `/pp/v1/cf/spaces/${this.cnsiGuid}/${guid}` : undefined;
+  }));
+  private readonly orgRes = httpResource<StOrg>(this.want('org', () => {
+    const guid = this._space()?.orgGuid;
+    return guid ? `/pp/v1/cf/org/${this.cnsiGuid}/${guid}` : undefined;
+  }));
+  private readonly domainsRes = httpResource<StratosPagedResponse<StDomain>>(this.want('domains', () => {
+    const guid = this._org()?.guid;
+    return guid ? `/pp/v1/cf/org/${this.cnsiGuid}/${guid}/private_domains` : undefined;
+  }));
+  private readonly routesRes = httpResource<StAppRoutesResponse>(this.want('routes', () => this.appUrl('/routes')));
+  // Backend returns ?return=summary so serviceInstance.{name,type} + app.name
+  // come back inline via v3's `included` block — one CAPI call.
+  private readonly bindingsRes = httpResource<StServiceCredentialBindingsResponse>(
+    this.want('serviceBindings', () => this.appUrl('/service_bindings?return=summary')));
 
-  // Per-app service credential bindings (type=app only) — populated by
-  // loadServiceBindings(). Null until first load so consumers can
-  // distinguish "haven't fetched yet" from "fetched, empty".
-  private readonly _serviceBindings = signal<StServiceCredentialBinding[] | null>(null);
+  private readonly resources: Record<EntityKind, ResourceRef<unknown>> = {
+    app: this.appRes, stats: this.statsRes, envVars: this.envRes, space: this.spaceRes,
+    org: this.orgRes, domains: this.domainsRes, routes: this.routesRes, serviceBindings: this.bindingsRes,
+  };
 
-  private readonly _loading = signal<Record<EntityKind, boolean>>({
-    app: false, stats: false, envVars: false,
-    space: false, org: false, domains: false, routes: false, serviceBindings: false,
-  });
-  private readonly _errors = signal<Record<EntityKind, StratosError | null>>({
-    app: null, stats: null, envVars: null,
-    space: null, org: null, domains: null, routes: null, serviceBindings: null,
-  });
+  /** The resource's value, kept across a failed reload (value() is unusable in the error state). */
+  private latest<T>(res: Resource<T | undefined>): WritableSignal<T | undefined> {
+    return linkedSignal<{ v: T | undefined; failed: boolean }, T | undefined>({
+      source: () => ({ v: res.hasValue() ? res.value() : undefined, failed: res.status() === 'error' }),
+      computation: (src, prev) => src.v ?? (src.failed ? prev?.value : undefined),
+    });
+  }
+
+  private readonly _appDetail = this.latest(this.appRes);
+  private readonly _envVars = this.latest(this.envRes);
+  private readonly _space = this.latest(this.spaceRes);
+  private readonly _org = this.latest(this.orgRes);
+  private readonly _domainsRaw = this.latest(this.domainsRes);
+  private readonly _domains = computed(() => this._domainsRaw()?.resources ?? []);
+  private readonly _routesRaw = this.latest(this.routesRes);
+  private readonly _bindingsRaw = this.latest(this.bindingsRes);
+
+  // Per-app routes — null until first load so consumers can distinguish
+  // "haven't fetched yet" from "fetched, empty". Same for service bindings
+  // (type=app only).
+  private readonly _routes = computed(() => this._routesRaw() ? this._routesRaw()!.resources ?? [] : null);
+  private readonly _serviceBindings = computed(() => this._bindingsRaw() ? this._bindingsRaw()!.resources ?? [] : null);
+
+  private readonly _loading = computed(() => this.perKind(res => res.isLoading()));
+  // A resource wraps a non-Error rejection (an HttpErrorResponse) with the original as `cause`.
+  private readonly _errors = computed(() => this.perKind((res, kind) => {
+    const err = (res.error() as { cause?: unknown } | undefined)?.cause ?? res.error();
+    return res.status() === 'error' && !(kind === 'stats' && this.isStoppedAppError(err))
+      ? this.toStratosError(kind, err) : null;
+  }));
+
+  private perKind<T>(fn: (res: Resource<unknown>, kind: EntityKind) => T): Record<EntityKind, T> {
+    return Object.fromEntries(
+      (Object.keys(this.resources) as EntityKind[]).map(kind => [kind, fn(this.resources[kind], kind)]),
+    ) as Record<EntityKind, T>;
+  }
 
   // lastPolledAt — consumed by card-app-status "updating…" threshold.
   private readonly _lastPolledAt = signal<Date | null>(null);
@@ -149,13 +204,13 @@ export class AppDetailDataService {
   // ---------------------------------------------------------------------------
 
   /** Stratos-shape composed app detail. Primary V3 signal — Task F templates read this directly. */
-  readonly appDetail: Signal<StAppDetail | undefined> = this._appDetail.asReadonly();
+  readonly appDetail: Signal<StAppDetail | undefined> = this._appDetail;
 
   /** V3-shape env vars envelope. */
-  readonly envVars: Signal<StEnvVars | undefined> = this._envVars.asReadonly();
+  readonly envVars: Signal<StEnvVars | undefined> = this._envVars;
 
   /** Trimmed V3 stats — one row per running instance with `{ index, state }`. */
-  readonly stats: Signal<StAppStat[]> = this._stats.asReadonly();
+  readonly stats: Signal<StAppStat[]> = computed(() => (this.statsRes.hasValue() ? this.statsRes.value()?.instances : undefined) ?? []);
 
   /** Per-instance usage history ring buffer — feeds live trend charts. Grows
    *  only while stats focus is raised; frozen on accordion collapse. */
@@ -163,11 +218,11 @@ export class AppDetailDataService {
   /** Timestamp of the last successful stats fetch — drives "updated Ns ago". */
   readonly statsFetchedAt: Signal<Date | null> = this._statsFetchedAt.asReadonly();
 
-  readonly space: Signal<StSpace | undefined> = this._space.asReadonly();
-  readonly org: Signal<StOrg | undefined> = this._org.asReadonly();
-  readonly domains: Signal<StDomain[]> = this._domains.asReadonly();
-  readonly loading: Signal<Record<EntityKind, boolean>> = this._loading.asReadonly();
-  readonly errors: Signal<Record<EntityKind, StratosError | null>> = this._errors.asReadonly();
+  readonly space: Signal<StSpace | undefined> = this._space;
+  readonly org: Signal<StOrg | undefined> = this._org;
+  readonly domains: Signal<StDomain[]> = this._domains;
+  readonly loading: Signal<Record<EntityKind, boolean>> = this._loading;
+  readonly errors: Signal<Record<EntityKind, StratosError | null>> = this._errors;
   readonly lastPolledAt: Signal<Date | null> = this._lastPolledAt.asReadonly();
   readonly updating: Signal<boolean> = this._updating.asReadonly();
 
@@ -177,12 +232,12 @@ export class AppDetailDataService {
    * Mutations land via `removeRoute(guid)` — single-CNSI, in-memory cache
    * eviction called from `AppRouteActionsService` on verb success (slice 3).
    */
-  readonly routes: Signal<StRoute[] | null> = this._routes.asReadonly();
+  readonly routes: Signal<StRoute[] | null> = this._routes;
   readonly routesLoading: Signal<boolean> = computed(() => this._loading().routes);
   readonly routesError: Signal<unknown | null> = computed(() => this._errors().routes);
 
   /** Per-app service credential bindings. Null = not yet fetched. */
-  readonly serviceBindings: Signal<StServiceCredentialBinding[] | null> = this._serviceBindings.asReadonly();
+  readonly serviceBindings: Signal<StServiceCredentialBinding[] | null> = this._serviceBindings;
   readonly serviceBindingsLoading: Signal<boolean> = computed(() => this._loading().serviceBindings);
   readonly serviceBindingsError: Signal<unknown | null> = computed(() => this._errors().serviceBindings);
   /** Reactive count of attached service bindings — drives the L5 sub-nav
@@ -273,7 +328,7 @@ export class AppDetailDataService {
   readonly state = computed((): ApplicationStateData => {
     const detail = this._appDetail();
     const legacyApp = detail ? stToLegacy.appDetail(detail)?.entity ?? null : null;
-    const stats = this._stats();
+    const stats = this.stats();
     const legacyStats = stats.length
       ? stToLegacy.appStats(stats, this.cnsiGuid, this.appGuid)
       : null;
@@ -288,8 +343,7 @@ export class AppDetailDataService {
   // ---------------------------------------------------------------------------
 
   initialize(cnsi: string, appGuid: string): void {
-    this.cnsiGuid = cnsi;
-    this.appGuid = appGuid;
+    this._ids.set({ cnsi, app: appGuid });
     // Reset per-app live state so a new app doesn't inherit the prior app's
     // usage samples or stale stats timestamp.
     this._usageHistory.set(new Map());
@@ -362,33 +416,12 @@ export class AppDetailDataService {
    *     space.orgGuid), then domains (needs org.guid).
    */
   async refresh(scope: EntityKind | 'all' = 'all'): Promise<void> {
-    if (scope === 'all') {
-      await Promise.all([
-        this.fetchAppDetail(),
-        this.fetchEnvVars(),
-      ]);
-
-      if (this.shouldFetchStats()) {
-        await this.fetchStats();
-      } else {
-        this._stats.set([]);
-      }
-
-      await this.fetchSpace();
-      await this.fetchOrg();
-      await this.fetchDomains();
-    } else {
-      const fetchers: Record<EntityKind, () => Promise<void>> = {
-        app:             () => this.fetchAppDetail(),
-        stats:           () => this.shouldFetchStats() ? this.fetchStats() : (this._stats.set([]), Promise.resolve()),
-        envVars:         () => this.fetchEnvVars(),
-        space:           () => this.fetchSpace(),
-        org:             () => this.fetchOrg(),
-        domains:         () => this.fetchDomains(),
-        routes:          () => this.fetchRoutes(),
-        serviceBindings: () => this.fetchServiceBindings(),
-      };
-      await fetchers[scope]();
+    // app + envVars in parallel, then each kind that depends on the one before.
+    const phases: EntityKind[][] = scope === 'all'
+      ? [['app', 'envVars'], ['stats'], ['space'], ['org'], ['domains']] : [[scope]];
+    this._wanted.update(kinds => new Set([...kinds, ...phases.flat()]));
+    for (const phase of phases) {
+      await Promise.all(phase.map(kind => this.run(this.resources[kind])));
     }
 
     this._lastPolledAt.set(new Date());
@@ -430,109 +463,29 @@ export class AppDetailDataService {
     }
   }
 
-  // ---------------------------------------------------------------------------
-  // URL helpers
-  //
-  // All entity fetches hit Jetstream native handlers — cnsi is in the
-  // path and responses come back as Stratos-native shapes. No
-  // `x-cap-passthrough` header needed; the frontend never talks v2 wire.
-  // ---------------------------------------------------------------------------
-
-  private nativeAppDetailUrl(): string {
-    return `/pp/v1/cf/apps/${this.cnsiGuid}/${this.appGuid}?return=details`;
+  /** Reload a resource and wait until it settles (an idle or already-loading one just settles). */
+  private run(res: ResourceRef<unknown>): Promise<void> {
+    res.reload();
+    return new Promise(resolve => {
+      const watcher = effect(() => {
+        if (!res.isLoading()) {
+          watcher.destroy();
+          resolve();
+        }
+      }, { injector: this.injector });
+    });
   }
 
-  private nativeAppEnvUrl(): string {
-    return `/pp/v1/cf/apps/${this.cnsiGuid}/${this.appGuid}/env`;
-  }
-
-  private nativeAppStatsUrl(): string {
-    return `/pp/v1/cf/app-stats/${this.cnsiGuid}/${this.appGuid}`;
-  }
-
-  private nativeAppRoutesUrl(): string {
-    return `/pp/v1/cf/apps/${this.cnsiGuid}/${this.appGuid}/routes`;
-  }
-
-  private spaceUrl(spaceGuid: string): string {
-    return `/pp/v1/cf/spaces/${this.cnsiGuid}/${spaceGuid}`;
-  }
-
-  private orgUrl(orgGuid: string): string {
-    return `/pp/v1/cf/org/${this.cnsiGuid}/${orgGuid}`;
-  }
-
-  private orgDomainsUrl(orgGuid: string): string {
-    return `/pp/v1/cf/org/${this.cnsiGuid}/${orgGuid}/private_domains`;
-  }
-
-  // ---------------------------------------------------------------------------
-  // Fetch helpers
-  // ---------------------------------------------------------------------------
-
-  private async fetchAppDetail(): Promise<void> {
-    this._loading.update(m => ({ ...m, app: true }));
-    this._errors.update(m => ({ ...m, app: null }));
-    const t0 = performance.now();
-    const url = this.nativeAppDetailUrl();
-    try {
-      const value = await firstValueFrom(this.http.get<StAppDetail>(url));
-      this._appDetail.set(value);
-      this.debugTrace('app', url, 'ok', performance.now() - t0);
-    } catch (err: unknown) {
-      this._errors.update(m => ({ ...m, app: this.toStratosError('app', err) }));
-      this.debugTrace('app', url, 'err', performance.now() - t0, err);
-    } finally {
-      this._loading.update(m => ({ ...m, app: false }));
+  /** Stamp the fetch time and accumulate a usage sample for each stats response. */
+  private readonly _statsEffect = effect(() => {
+    const raw = this.statsRes.hasValue() ? this.statsRes.value() : undefined;
+    if (raw) {
+      untracked(() => {
+        this._statsFetchedAt.set(new Date());
+        this.appendUsageSample(raw.instances ?? []);
+      });
     }
-  }
-
-  private async fetchEnvVars(): Promise<void> {
-    this._loading.update(m => ({ ...m, envVars: true }));
-    this._errors.update(m => ({ ...m, envVars: null }));
-    const t0 = performance.now();
-    const url = this.nativeAppEnvUrl();
-    try {
-      const value = await firstValueFrom(this.http.get<StEnvVars>(url));
-      this._envVars.set(value);
-      this.debugTrace('envVars', url, 'ok', performance.now() - t0);
-    } catch (err: unknown) {
-      this._errors.update(m => ({ ...m, envVars: this.toStratosError('envVars', err) }));
-      this.debugTrace('envVars', url, 'err', performance.now() - t0, err);
-    } finally {
-      this._loading.update(m => ({ ...m, envVars: false }));
-    }
-  }
-
-  /**
-   * Fetch /cf/app-stats/{cnsi}/{appGuid}. The native handler returns
-   * `{ instances: [{ index, state }] }` — extract the array. Apps in
-   * states that don't support stats (STOPPED, etc.) are filtered out
-   * before the request via shouldFetchStats(); a residual 4xx still
-   * lands here harmlessly because the handler swallows that case
-   * server-side.
-   */
-  private async fetchStats(): Promise<void> {
-    this._loading.update(m => ({ ...m, stats: true }));
-    this._errors.update(m => ({ ...m, stats: null }));
-    const t0 = performance.now();
-    const url = this.nativeAppStatsUrl();
-    try {
-      const raw = await firstValueFrom(this.http.get<StAppStatsResponse>(url));
-      this._stats.set(raw?.instances ?? []);
-      this._statsFetchedAt.set(new Date());
-      this.appendUsageSample(raw?.instances ?? []);
-      this.debugTrace('stats', url, 'ok', performance.now() - t0);
-    } catch (err: unknown) {
-      this._stats.set([]);
-      if (!this.isStoppedAppError(err)) {
-        this._errors.update(m => ({ ...m, stats: this.toStratosError('stats', err) }));
-      }
-      this.debugTrace('stats', url, 'err', performance.now() - t0, err);
-    } finally {
-      this._loading.update(m => ({ ...m, stats: false }));
-    }
-  }
+  });
 
   /**
    * Append one usage point per instance — only while a consumer holds stats
@@ -562,96 +515,6 @@ export class AppDetailDataService {
   }
 
   /**
-   * Diagnostic trace. Gated on localStorage.stratosDebug to keep the
-   * production console clean.
-   */
-  private debugTrace(kind: EntityKind, url: string, outcome: 'ok' | 'err', ms: number, err?: unknown): void {
-    try {
-      if (typeof localStorage === 'undefined' || !localStorage.getItem('stratosDebug')) {
-        return;
-      }
-      console.debug('[AppDetailData]', kind, outcome, `${ms.toFixed(0)}ms`, url, err ?? '');
-    } catch {
-      // localStorage may throw in private-mode browsers; ignore.
-    }
-  }
-
-  private async fetchSpace(): Promise<void> {
-    const spaceGuid = this._appDetail()?.app.spaceGuid;
-    if (!spaceGuid) {
-      return;
-    }
-    this._loading.update(m => ({ ...m, space: true }));
-    this._errors.update(m => ({ ...m, space: null }));
-    try {
-      const value = await firstValueFrom(
-        this.http.get<StSpace>(this.spaceUrl(spaceGuid))
-      );
-      this._space.set(value);
-    } catch (err: unknown) {
-      this._errors.update(m => ({ ...m, space: this.toStratosError('space', err) }));
-    } finally {
-      this._loading.update(m => ({ ...m, space: false }));
-    }
-  }
-
-  private async fetchOrg(): Promise<void> {
-    const orgGuid = this._space()?.orgGuid;
-    if (!orgGuid) {
-      return;
-    }
-    this._loading.update(m => ({ ...m, org: true }));
-    this._errors.update(m => ({ ...m, org: null }));
-    try {
-      const value = await firstValueFrom(
-        this.http.get<StOrg>(this.orgUrl(orgGuid))
-      );
-      this._org.set(value);
-    } catch (err: unknown) {
-      this._errors.update(m => ({ ...m, org: this.toStratosError('org', err) }));
-    } finally {
-      this._loading.update(m => ({ ...m, org: false }));
-    }
-  }
-
-  private async fetchRoutes(): Promise<void> {
-    this._loading.update(m => ({ ...m, routes: true }));
-    this._errors.update(m => ({ ...m, routes: null }));
-    const t0 = performance.now();
-    const url = this.nativeAppRoutesUrl();
-    try {
-      const value = await firstValueFrom(this.http.get<StAppRoutesResponse>(url));
-      this._routes.set(value?.resources ?? []);
-      this.debugTrace('routes', url, 'ok', performance.now() - t0);
-    } catch (err: unknown) {
-      this._errors.update(m => ({ ...m, routes: this.toStratosError('routes', err) }));
-      this.debugTrace('routes', url, 'err', performance.now() - t0, err);
-    } finally {
-      this._loading.update(m => ({ ...m, routes: false }));
-    }
-  }
-
-  // Per-app service credential bindings (type=app only). Backend handler
-  // returns ?return=summary so serviceInstance.{name,type} + app.name
-  // come back inline via v3's `included` block — one CAPI call.
-  private async fetchServiceBindings(): Promise<void> {
-    this._loading.update(m => ({ ...m, serviceBindings: true }));
-    this._errors.update(m => ({ ...m, serviceBindings: null }));
-    const t0 = performance.now();
-    const url = `/pp/v1/cf/apps/${this.cnsiGuid}/${this.appGuid}/service_bindings?return=summary`;
-    try {
-      const value = await firstValueFrom(this.http.get<StServiceCredentialBindingsResponse>(url));
-      this._serviceBindings.set(value?.resources ?? []);
-      this.debugTrace('serviceBindings', url, 'ok', performance.now() - t0);
-    } catch (err: unknown) {
-      this._errors.update(m => ({ ...m, serviceBindings: this.toStratosError('serviceBindings', err) }));
-      this.debugTrace('serviceBindings', url, 'err', performance.now() - t0, err);
-    } finally {
-      this._loading.update(m => ({ ...m, serviceBindings: false }));
-    }
-  }
-
-  /**
    * Remove a service binding from the local cache without re-fetching.
    * Called from the unbind action after async-job resolves. Idempotent.
    */
@@ -664,7 +527,7 @@ export class AppDetailDataService {
     if (next.length === current.length) {
       return;
     }
-    this._serviceBindings.set(next);
+    this.bindingsRes.set({ ...this._bindingsRaw()!, resources: next });
   }
 
   /**
@@ -682,7 +545,7 @@ export class AppDetailDataService {
     if (next.length === current.length) {
       return;
     }
-    this._routes.set(next);
+    this.routesRes.set({ ...this._routesRaw()!, resources: next });
   }
 
   /**
@@ -703,38 +566,14 @@ export class AppDetailDataService {
    * is null; no-op on `_routes` when `_routes()` is null.
    */
   addRoute(route: StRoute): void {
-    this._appDetail.update(detail => {
-      if (!detail) {
-        return detail;
-      }
-      const existing = detail.app.routes ?? [];
-      if (existing.some(r => r.guid === route.guid)) {
-        return detail;
-      }
-      return { ...detail, app: { ...detail.app, routes: [...existing, route] } };
-    });
+    const detail = this._appDetail();
+    const existing = detail?.app.routes ?? [];
+    if (detail && !existing.some(r => r.guid === route.guid)) {
+      this.appRes.set({ ...detail, app: { ...detail.app, routes: [...existing, route] } });
+    }
     const currentRoutes = this._routes();
     if (currentRoutes && !currentRoutes.some(r => r.guid === route.guid)) {
-      this._routes.set([...currentRoutes, route]);
-    }
-  }
-
-  private async fetchDomains(): Promise<void> {
-    const orgGuid = this._org()?.guid;
-    if (!orgGuid) {
-      return;
-    }
-    this._loading.update(m => ({ ...m, domains: true }));
-    this._errors.update(m => ({ ...m, domains: null }));
-    try {
-      const result = await firstValueFrom(
-        this.http.get<StratosPagedResponse<StDomain>>(this.orgDomainsUrl(orgGuid))
-      );
-      this._domains.set(result?.resources ?? []);
-    } catch (err: unknown) {
-      this._errors.update(m => ({ ...m, domains: this.toStratosError('domains', err) }));
-    } finally {
-      this._loading.update(m => ({ ...m, domains: false }));
+      this.routesRes.set({ ...this._routesRaw()!, resources: [...currentRoutes, route] });
     }
   }
 
