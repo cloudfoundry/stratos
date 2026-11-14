@@ -8,7 +8,7 @@
       <div class="form-group">
         <select class="select w-full" formControlName="endpoint" name="endpoint" aria-label="Kubernetes cluster">
           <option value="" disabled>Select a Kubernetes cluster</option>
-          @for (kube of kubeEndpoints$ | async; track kube) {
+          @for (kube of kubeEndpoints(); track kube) {
             <option [value]="kube.guid">
               {{ kube.name }}
             </option>

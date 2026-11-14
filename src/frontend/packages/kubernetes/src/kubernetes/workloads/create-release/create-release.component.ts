@@ -7,6 +7,7 @@ import {
   inject,
   OnDestroy,
   OnInit,
+  Signal,
   signal,
   viewChild
 } from '@angular/core';
@@ -18,7 +19,7 @@ import {
   Validators,
 } from '@angular/forms';
 import { ActivatedRoute, Router } from '@angular/router';
-import { combineLatest, firstValueFrom, from, Observable, of, Subscription } from 'rxjs';
+import { combineLatest, defer, firstValueFrom, from, Observable, of, Subscription } from 'rxjs';
 import {
   catchError,
   distinctUntilChanged,
@@ -77,7 +78,7 @@ export class CreateReleaseComponent implements OnInit, OnDestroy {
   paginationStateSub?: Subscription;
 
   public cancelUrl: string;
-  kubeEndpoints$!: Observable<any>; // strict: assigned in setupDetailsStep() from the constructor
+  kubeEndpoints!: Signal<EndpointModel[]>; // strict: assigned in setupDetailsStep() from the constructor
   validate$!: Observable<boolean>; // strict: assigned in setupDetailsStep() from the constructor
 
   details!: FormGroup<CreateReleaseForm>; // strict: assigned in setupDetailsStep() from the constructor
@@ -152,19 +153,16 @@ export class CreateReleaseComponent implements OnInit, OnDestroy {
       createNamespace: new FormControl(false, { nonNullable: true }) });
     this.details.controls.createNamespace.disable();
 
-    this.kubeEndpoints$ = this.endpointsService.connectedEndpointsOfTypes(KUBERNETES_ENDPOINT_TYPE);
+    this.kubeEndpoints = this.endpointsService.connectedEndpointsOfTypes(KUBERNETES_ENDPOINT_TYPE);
 
     // All namespaces across the connected kube endpoints, sourced from the
     // signal data service: refresh each endpoint once, then read the
     // aggregate signal. Replaces the legacy getPaginationService(null) read.
-    const allNamespaces$ = this.kubeEndpoints$.pipe(
-      take(1),
-      switchMap(async (endpoints: EndpointModel[]) => {
-        const guids = endpoints.map(e => e.guid).filter((g): g is string => !!g);
-        await Promise.all(guids.map((g: string) => this.namespaceData.refresh({ kubeGuid: g })));
-        return this.namespaceData.allNamespacesAcrossEndpoints(guids)();
-      }),
-    );
+    const allNamespaces$ = defer(async () => {
+      const guids = this.kubeEndpoints().map(e => e.guid).filter((g): g is string => !!g);
+      await Promise.all(guids.map((g: string) => this.namespaceData.refresh({ kubeGuid: g })));
+      return this.namespaceData.allNamespacesAcrossEndpoints(guids)();
+    });
     this.namespaces$ = combineLatest([
       allNamespaces$,
       this.details.controls.endpoint.valueChanges.pipe(startWith('')),
@@ -227,11 +225,10 @@ export class CreateReleaseComponent implements OnInit, OnDestroy {
     );
 
     // Auto select endpoint if there is only one
-    this.kubeEndpoints$.pipe(take(1)).subscribe(endpoints => {
-      if (endpoints.length === 1) {
-        this.details.controls.endpoint.setValue(endpoints[0].guid);
-      }
-    });
+    const endpoints = this.kubeEndpoints();
+    if (endpoints.length === 1) {
+      this.details.controls.endpoint.setValue(endpoints[0].guid ?? '');
+    }
   }
 
   private setupStepHandles() {
@@ -273,14 +270,13 @@ export class CreateReleaseComponent implements OnInit, OnDestroy {
   ngOnInit() {
     // Preselect the first endpoint if there are several (a single endpoint
     // is auto selected in setupDetailsStep)
-    this.kubeEndpoints$.pipe(take(1)).subscribe(ep => {
-      if (ep.length > 1) {
-        this.details.controls.endpoint.setValue(ep[0].guid, { onlySelf: true });
-        setTimeout(() => {
-          this.releaseNameInputField().nativeElement.focus();
-        }, 1);
-      }
-    });
+    const ep = this.kubeEndpoints();
+    if (ep.length > 1) {
+      this.details.controls.endpoint.setValue(ep[0].guid ?? '', { onlySelf: true });
+      setTimeout(() => {
+        this.releaseNameInputField().nativeElement.focus();
+      }, 1);
+    }
   }
 
   // The full submit pipeline used by the signal-handle. Returns the legacy

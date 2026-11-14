@@ -82,6 +82,23 @@ describe('EndpointsService', () => {
     list.set(new Map([['cf-1', { guid: 'cf-1', cnsi_type: 'cf', connectionStatus: 'connected' } as EndpointModel]]));
     expect(none()).toBe(false);
   });
+
+  // The install page lists the connected clusters; the list follows them.
+  it('lists the connected endpoints of a type as they connect', async () => {
+    const data = TestBed.inject(EndpointsDataService);
+    const list = signal(new Map([
+      ['k8s-1', { guid: 'k8s-1', cnsi_type: 'k8s', connectionStatus: 'connected' } as EndpointModel],
+      ['k8s-2', { guid: 'k8s-2', cnsi_type: 'k8s', connectionStatus: 'disconnected' } as EndpointModel],
+      ['cf-1', { guid: 'cf-1', cnsi_type: 'cf', connectionStatus: 'connected' } as EndpointModel],
+    ]));
+    vi.spyOn(data, 'endpoints').mockImplementation(() => list());
+    vi.spyOn(entityCatalog, 'getEndpoint').mockReturnValue({ definition: { unConnectable: false } } as never);
+    const connected = TestBed.inject(EndpointsService).connectedEndpointsOfTypes('k8s');
+
+    expect(connected().map(e => e.guid)).toEqual(['k8s-1']);
+    list.set(new Map([['k8s-2', { guid: 'k8s-2', cnsi_type: 'k8s', connectionStatus: 'connected' } as EndpointModel]]));
+    expect(connected().map(e => e.guid)).toEqual(['k8s-2']);
+  });
 });
 
 describe('endpointsGuard runs', () => {

@@ -4,7 +4,7 @@ import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { NO_ERRORS_SCHEMA, Signal, provideZonelessChangeDetection, signal } from '@angular/core';
 import { provideNoopAnimations } from '@angular/platform-browser/animations';
 import { ActivatedRoute, provideRouter } from '@angular/router';
-import { firstValueFrom, Observable, of } from 'rxjs';
+import { firstValueFrom, Observable } from 'rxjs';
 import { describe, it, expect, beforeEach, afterEach, vi } from 'vitest';
 
 import { EndpointsService } from '../../../../../core/src/core/endpoints.service';
@@ -104,14 +104,14 @@ describe('CreateReleaseComponent', () => {
     }).compileComponents();
   });
 
-  beforeEach(() => {
+  beforeEach(async () => {
     httpMock = TestBed.inject(HttpTestingController);
     fixture = TestBed.createComponent(CreateReleaseComponent);
     component = fixture.componentInstance;
 
     // Don't flush the HTTP request yet - this prevents the config from being set
     // which would trigger the ChartValuesEditorComponent initialization
-    fixture.detectChanges();
+    await fixture.whenStable();
 
     // Now flush the chart version request
     const req = httpMock.match('/pp/v1/chartsvc/v1/charts/test-repo/test-chart/versions/test-version')[0];
@@ -172,22 +172,22 @@ describe('CreateReleaseComponent', () => {
 
   // Endpoint preselection: a single cluster is selected outright, and with
   // several the first one is preselected.
-  const createWithEndpoints = (guids: string[]) => {
+  const createWithEndpoints = async (guids: string[]) => {
     vi.spyOn(TestBed.inject(EndpointsService), 'connectedEndpointsOfTypes')
-      .mockReturnValue(of(guids.map(guid => ({ guid, name: guid }))) as any);
+      .mockReturnValue(signal(guids.map(guid => ({ guid, name: guid }))) as any);
     const created = TestBed.createComponent(CreateReleaseComponent);
-    created.detectChanges();
+    await created.whenStable();
     // Drop the second component's chart requests; only the form matters here.
     httpMock.match(() => true);
     return created.componentInstance;
   };
 
-  it('selects the only kubernetes endpoint', () => {
-    expect(createWithEndpoints(['k1']).details.controls.endpoint.value).toBe('k1');
+  it('selects the only kubernetes endpoint', async () => {
+    expect((await createWithEndpoints(['k1'])).details.controls.endpoint.value).toBe('k1');
   });
 
-  it('preselects the first of several kubernetes endpoints', () => {
-    expect(createWithEndpoints(['k1', 'k2']).details.controls.endpoint.value).toBe('k1');
+  it('preselects the first of several kubernetes endpoints', async () => {
+    expect((await createWithEndpoints(['k1', 'k2'])).details.controls.endpoint.value).toBe('k1');
   });
 
   it('createNamespace delegates to KubeNamespaceDataService.create on success', async () => {
@@ -266,9 +266,9 @@ describe('CreateReleaseComponent without a version in the route', () => {
 
   // Regression: `install/:endpoint/:repo/:name` (no version) used to request
   // `versions/undefined` and 500. Resolve the chart's latest version instead.
-  it('resolves the latest chart version for the values URL', () => {
+  it('resolves the latest chart version for the values URL', async () => {
     const fixture = TestBed.createComponent(CreateReleaseComponent);
-    fixture.detectChanges();
+    await fixture.whenStable();
 
     // The component provides its own ChartsService, so drive it over HTTP.
     const httpMock = TestBed.inject(HttpTestingController);
