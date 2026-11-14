@@ -1,7 +1,5 @@
 import { ChangeDetectionStrategy, Component, Signal, WritableSignal, computed, inject, signal } from '@angular/core';
-import { toSignal } from '@angular/core/rxjs-interop';
 import { format } from 'date-fns';
-import { map } from 'rxjs/operators';
 
 import {
   SignalListColumn,
@@ -32,14 +30,12 @@ export class HelmReleaseHistoryTabComponent {
 
   // Newest revision first — matches the Helm CLI history ordering. Fixed
   // sort, no interactive re-sort (the legacy table offered none either).
-  private readonly history: Signal<HelmReleaseHistoryRow[]> = toSignal(
-    this.helmReleaseHelper.fetchReleaseHistory().pipe(
-      map(history => ([...history] as HelmReleaseHistoryRow[]).sort((a, b) => b.revision - a.revision)),
-    ),
-    { initialValue: [] as HelmReleaseHistoryRow[] },
+  private readonly revisions = this.helmReleaseHelper.history();
+  private readonly history: Signal<HelmReleaseHistoryRow[]> = computed(() =>
+    ([...(this.revisions() ?? [])] as HelmReleaseHistoryRow[]).sort((a, b) => b.revision - a.revision),
   );
 
-  // fetchReleaseHistory emits exactly once; "loading" is simply "no rows yet".
+  // The history loads once; "loading" is simply "no rows yet".
   private readonly loading: Signal<boolean> = computed(() => this.history().length === 0);
 
   readonly pageSize: WritableSignal<number> = signal(50);

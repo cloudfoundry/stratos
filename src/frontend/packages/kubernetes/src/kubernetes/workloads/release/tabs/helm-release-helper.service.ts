@@ -106,6 +106,11 @@ export class HelmReleaseHelperService {
   readonly release: Signal<HelmRelease | undefined>;
   readonly isFetching: Signal<boolean>;
 
+  // Socket-fed graph and resources of the release (written by
+  // HelmReleaseSocketService); undefined until the first message.
+  readonly graph: Signal<HelmReleaseGraph | undefined>;
+  readonly resources: Signal<HelmReleaseResources | undefined>;
+
   public guid: string;
   public endpointGuid: string;
   public namespace: string;
@@ -147,6 +152,9 @@ export class HelmReleaseHelperService {
     this.release$ = toObservable(this.release, { injector: this.injector }).pipe(
       filter((item): item is HelmRelease => !!item),
     );
+
+    this.graph = this.releaseData.graph(this.guid);
+    this.resources = this.releaseData.resources(this.guid);
   }
 
   public guidAsUrlFragment(): string {
@@ -194,6 +202,19 @@ export class HelmReleaseHelperService {
     return observeSignal(this.releaseData.history(this.guid), this.injector).pipe(
       filter((revisions): revisions is HelmReleaseRevision[] => !!revisions)
     );
+  }
+
+  // Pod and container counts for the release's workload.
+  public chartStats(): Signal<HelmReleaseChartData> {
+    const pods = this.podData.podsInWorkload(this.endpointGuid, this.namespace, this.releaseTitle);
+    return computed(() => this.mapPods(pods() as any));
+  }
+
+  // Get the history for a Helm release (signal-native; replaces the ngrx
+  // `history` entity-catalog getEntityService). Undefined until it loads.
+  public history(): Signal<HelmReleaseRevision[] | undefined> {
+    void this.releaseData.loadHistory(this.endpointGuid, this.namespace, this.releaseTitle);
+    return this.releaseData.history(this.guid);
   }
 
   private mapPods(pods: KubernetesPod[]): HelmReleaseChartData {
@@ -257,49 +278,62 @@ export class HelmReleaseHelperService {
   public hasUpgrade(returnLatest = false): Observable<InternalHelmUpgrade | null> {
     const updates = combineLatest([this.getCharts(), this.release$]);
     return updates.pipe(
-      map(([charts, release]: [any, any]) => {
-        let score = -1;
-        let match;
-        for (const c of charts) {
-          const matchScore = this.compareCharts(c.attributes, release.chart.metadata);
-          if (matchScore > score) {
-            score = matchScore;
-            if (c.relationships && c.relationships.latestChartVersion && c.relationships.latestChartVersion.data) {
-              const latest = new Version(c.relationships.latestChartVersion.data.version);
-              const current = new Version(release.chart.metadata.version);
-              if (latest.isNewer(current)) {
-                match = {
-                  release,
-                  upgrade: c.attributes,
-                  version: c.relationships.latestChartVersion.data.version,
-                  monocularEndpointId: c.monocularEndpointId
-                };
-              }
-            }
-          }
-        }
-        // Did we find a matching chart? If so, return it
-        if (match) {
-          return match;
-        }
-        // No newer release, so return the release itself if that is what was requested and we can find the chart
-        // NOTE: If the helm repository is removed that we installed from, we won't be able to find the chart
-        if (returnLatest) {
-          // Need to check that the chart is probably the same
-          const releaseChart = charts.find((c: any) => this.compareCharts(c.attributes, release.chart.metadata) !== -1 &&
-            c.relationships.latestChartVersion.data.version === release.chart.metadata.version);
-          if (releaseChart) {
-            return {
+      map(([charts, release]: [any, any]) => this.findUpgrade(charts, release, returnLatest))
+    );
+  }
+
+  // Check to see if a workload has updates available. Null while the charts
+  // or the release are still loading, and when no chart matches.
+  public upgrade(returnLatest = false): Signal<InternalHelmUpgrade | null> {
+    void this.helmData.loadCharts();
+    const charts = this.helmData.monocularCharts();
+    return computed(() => {
+      const release = this.release();
+      return release ? this.findUpgrade(charts(), release, returnLatest) : null;
+    });
+  }
+
+  private findUpgrade(charts: any[], release: HelmRelease, returnLatest: boolean): InternalHelmUpgrade | null {
+    let score = -1;
+    let match;
+    for (const c of charts) {
+      const matchScore = this.compareCharts(c.attributes, release.chart.metadata);
+      if (matchScore > score) {
+        score = matchScore;
+        if (c.relationships && c.relationships.latestChartVersion && c.relationships.latestChartVersion.data) {
+          const latest = new Version(c.relationships.latestChartVersion.data.version);
+          const current = new Version(release.chart.metadata.version);
+          if (latest.isNewer(current)) {
+            match = {
               release,
-              upgrade: releaseChart.attributes,
-              version: releaseChart.relationships.latestChartVersion.data.version,
-              monocularEndpointId: releaseChart.monocularEndpointId
+              upgrade: c.attributes,
+              version: c.relationships.latestChartVersion.data.version,
+              monocularEndpointId: c.monocularEndpointId
             };
           }
         }
-        return null;
-      })
-    );
+      }
+    }
+    // Did we find a matching chart? If so, return it
+    if (match) {
+      return match;
+    }
+    // No newer release, so return the release itself if that is what was requested and we can find the chart
+    // NOTE: If the helm repository is removed that we installed from, we won't be able to find the chart
+    if (returnLatest) {
+      // Need to check that the chart is probably the same
+      const releaseChart = charts.find((c: any) => this.compareCharts(c.attributes, release.chart.metadata) !== -1 &&
+        c.relationships.latestChartVersion.data.version === release.chart.metadata.version);
+      if (releaseChart) {
+        return {
+          release,
+          upgrade: releaseChart.attributes,
+          version: releaseChart.relationships.latestChartVersion.data.version,
+          monocularEndpointId: releaseChart.monocularEndpointId
+        };
+      }
+    }
+    return null;
   }
 
   // We might have a chart with the same name in multiple repositories - we only have chart metadata
