@@ -61,4 +61,23 @@ describe('TableCellEndpointAddressComponent', () => {
     expect(fixture.nativeElement.textContent).toContain('https://two.example.com');
     expect(fixture.nativeElement.textContent).not.toContain('one.example.com');
   });
+
+  it('warns while another endpoint shares the address, and stops when it goes', async () => {
+    const warning = () => fixture.nativeElement.querySelector('span[aria-label="Another endpoint is registered at this URL"]');
+    await fixture.whenStable();
+    expect(warning()).toBeNull();
+
+    seedEndpointsDataService([
+      { guid: 'ep-1', api_endpoint: { Scheme: 'https', Host: 'one.example.com', Path: '' } },
+      { guid: 'ep-3', api_endpoint: { Scheme: 'https', Host: 'one.example.com', Path: '' } },
+    ] as EndpointModel[]);
+    await fixture.whenStable();
+    expect(warning()).not.toBeNull();
+
+    seedEndpointsDataService([
+      { guid: 'ep-1', api_endpoint: { Scheme: 'https', Host: 'one.example.com', Path: '' } },
+    ] as EndpointModel[]);
+    await fixture.whenStable();
+    expect(warning()).toBeNull();
+  });
 });
