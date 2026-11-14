@@ -46,7 +46,6 @@ export class InviteUsersCreateComponent implements OnInit {
 
 
   public stepValid = signal<boolean>(false);
-  public valid$: Observable<boolean>;
 
   /** FWT-957: post-success navigation target supplied by parent. */
   // The one host stepper binds where to go on success.
@@ -82,7 +81,6 @@ export class InviteUsersCreateComponent implements OnInit {
   private users!: StackedInputActionsUpdate;
 
   constructor() {
-    this.valid$ = toObservable(this.stepValid);
     this.stateIn$ = toObservable(this.stateIn);
     this.spaceRoles.push(
       {
