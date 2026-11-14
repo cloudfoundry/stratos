@@ -81,13 +81,11 @@ export class CommitListWrapperComponent {
         return;
       }
       resolveSource.destroy();
-      // strict: deploy-application-step2 always writes endpointGuid (real guid
-      // or '') alongside projectName when saving a github/gitlab gitDetails, so
-      // a source that has passed the projectName/sha guard above carries a
-      // string endpointGuid; the `?.` only widens it to undefined.
+      // deploy-application-step2 always writes endpointGuid (real guid or '')
+      // alongside projectName when saving a github/gitlab gitDetails.
       untracked(() => {
         const scm = this.scmService.getSCM(
-          appSource.type.id as GitSCMType, appSource.gitDetails?.endpointGuid!, appSource.gitDetails?.accessToken,
+          appSource.type.id as GitSCMType, appSource.gitDetails?.endpointGuid ?? '', appSource.gitDetails?.accessToken,
         );
         this.branchName.set(sha);
         this.signalConfig.initialize(scm, projectName, sha);

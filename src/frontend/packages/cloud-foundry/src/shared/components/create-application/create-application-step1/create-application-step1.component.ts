@@ -45,7 +45,7 @@ export class CreateApplicationStep1Component implements OnInit, AfterContentInit
     const developerIn = untracked(() => this.cfCurrentUserRoles.spacesWithRoleInOrg(
       endpointGuid!, orgGuid!, CfPermissionStrings.SPACE_DEVELOPER,
     ))();
-    return developerIn === 'all' ? spaces : spaces.filter(space => developerIn.includes(space.guid));
+    return developerIn === 'all' ? spaces : spaces.filter(space => developerIn.some(guid => guid === space.guid));
   });
   readonly hasSpaces = computed(() => this.spaces().length > 0);
   // Signal-native — direct computed over the service's org.list signal.

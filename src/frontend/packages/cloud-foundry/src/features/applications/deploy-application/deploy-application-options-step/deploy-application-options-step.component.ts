@@ -12,9 +12,6 @@ import { StepOnNextResult } from '@stratosui/core';
 import { CfDeployAppDataService } from '../../../../services/domain-data/cf-deploy-app-data.service';
 import { NewAppCFDetails } from '../../../../store/types/create-application.types';
 import {
-  DeployApplicationSource,
-  DeployApplicationState,
-  DockerAppDetails,
   OverrideAppDetails,
 } from '../../../../store/types/deploy-application.types';
 import {
@@ -109,7 +106,7 @@ export class DeployApplicationOptionsStepComponent implements OnInit, OnDestroy 
     effect(() => {
       const source = this.deployData.state()?.applicationSource;
       const docker = source?.dockerDetails;
-      if (!docker?.applicationName) {
+      if (!source || !docker?.applicationName) {
         return;
       }
       untracked(() => {
