@@ -2,7 +2,7 @@ import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { provideZonelessChangeDetection } from '@angular/core';
 import { ActivatedRoute } from '@angular/router';
 import { describe, it, expect, beforeEach, afterEach, vi } from 'vitest';
-import { EndpointsDataService } from '@stratosui/store';
+import { EndpointModel, EndpointsDataService } from '@stratosui/store';
 import {
   EntityCatalogHelper,
   EntityCatalogHelpers,
@@ -173,6 +173,22 @@ describe('EditEndpointStepComponent', () => {
       expect((cards().componentInstance as EndpointCertificatesComponent).pem()).toBe('');
       expect(fixture.nativeElement.textContent).toContain('Applies to the endpoint address and its login server (UAA).');
     });
+  });
+
+  // The name must differ from every other endpoint's; and later updates of
+  // the list leave what the user typed alone.
+  it('lists the other endpoints names, and keeps the edits when the list changes', async () => {
+    expect(component.existingEndpointNames()).toEqual([]);
+    component.editEndpoint.controls.name.setValue('typed');
+
+    seedEndpointsDataService([
+      { ...component.endpoint()!, name: 'renamed elsewhere' },
+      { guid: 'other', name: 'other endpoint', cnsi_type: 'cf' } as EndpointModel,
+    ]);
+    await fixture.whenStable();
+
+    expect(component.existingEndpointNames()).toEqual(['other endpoint']);
+    expect(component.editEndpoint.controls.name.value).toBe('typed');
   });
 
   describe('onNext', () => {

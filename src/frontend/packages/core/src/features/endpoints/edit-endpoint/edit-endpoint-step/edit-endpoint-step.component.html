@@ -1,11 +1,11 @@
-@if (endpoint$ | async; as endpoint) {
+@if (endpoint(); as endpoint) {
   <div class="edit-endpoint">
-    @if (definition$ | async; as definition) {
+    @if (definition(); as definition) {
       <form [formGroup]="editEndpoint" class="stepper-form">
         <h1 class="edit-endpoint__section-title text-base font-medium mb-4 text-[var(--content-text)]">{{definition.label}} Information</h1>
         <app-form-field>
           <input class="w-full placeholder:!text-transparent focus:outline-none" appInput id="name" name="name" formControlName="name" required placeholder="Name"
-            [appUnique]="(existingEndpointNames$ | async) ?? []">
+            [appUnique]="existingEndpointNames()">
           @if (name.errors && name.errors.required) {
             <app-error>Name is required</app-error>
           }
