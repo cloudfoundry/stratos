@@ -69,10 +69,10 @@ describe('EditSpaceStepComponent', () => {
     populateStoreWithTestEndpoint();
   });
 
-  beforeEach(() => {
+  beforeEach(async () => {
     fixture = TestBed.createComponent(EditSpaceStepComponent);
     component = fixture.componentInstance;
-    fixture.detectChanges();
+    await fixture.whenStable();
   });
 
   afterEach(() => vi.restoreAllMocks());

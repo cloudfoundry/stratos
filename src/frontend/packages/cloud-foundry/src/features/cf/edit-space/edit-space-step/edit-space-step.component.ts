@@ -1,11 +1,10 @@
 import { CommonModule } from '@angular/common';
 import { HttpClient } from '@angular/common/http';
-import { Component, OnDestroy, OnInit, ChangeDetectionStrategy, Injector, inject, signal, input } from '@angular/core';
-import { toObservable } from '@angular/core/rxjs-interop';
+import { Component, OnDestroy, OnInit, ChangeDetectionStrategy, effect, inject, signal, input, untracked } from '@angular/core';
 import { FormsModule, ReactiveFormsModule, FormControl, FormGroup } from '@angular/forms';
 import { ActivatedRoute, Router } from '@angular/router';
 import { firstValueFrom, from, Observable, of, Subscription } from 'rxjs';
-import { filter, finalize, map, switchMap, take, tap } from 'rxjs/operators';
+import { finalize, map, switchMap, tap } from 'rxjs/operators';
 
 import {
   AppErrorComponent,
@@ -54,7 +53,6 @@ interface EditSpaceForm {
 })
 export class EditSpaceStepComponent extends AddEditSpaceStepBase implements OnInit, OnDestroy {
   private cfSpaceService = inject(CloudFoundrySpaceService);
-  private injector = inject(Injector);
   private router = inject(Router);
   private http = inject(HttpClient);
   private endpointDataRegistry = inject(EndpointDataRegistry);
@@ -93,9 +91,6 @@ export class EditSpaceStepComponent extends AddEditSpaceStepBase implements OnIn
 
   originalName: any;
   originalAllowSsh = false;
-  spaceSubscription!: Subscription;
-  space!: string;
-  space$: Observable<any>;
   spaceGuid: string;
   editSpaceForm: FormGroup<EditSpaceForm>;
   originalSpaceQuotaGuid?: string;
@@ -117,29 +112,26 @@ export class EditSpaceStepComponent extends AddEditSpaceStepBase implements OnIn
     // Map V3 field names (allowSsh, quotaGuid) back onto the form's V2 keys
     // (allow_ssh, space_quota_definition_guid) so the rest of the form
     // pipeline stays unchanged.
-    this.space$ = toObservable(this.cfSpaceService.spaceDataService.space, { injector: this.injector }).pipe(
-      filter((o): o is NonNullable<typeof o> => !!o),
-      map(o => ({
-        name: o.name,
-        allow_ssh: o.allowSsh,
-        space_quota_definition_guid: o.quotaGuid || undefined,
-      })),
-      take(1),
-      tap(n => {
-        this.originalName = n.name;
-        this.originalAllowSsh = !!n.allow_ssh;
-        this.originalSpaceQuotaGuid = n.space_quota_definition_guid;
+    // Fill the form once, from the first space that loads.
+    const prefill = effect(() => {
+      const space = this.cfSpaceService.spaceDataService.space();
+      if (!space) {
+        return;
+      }
+      untracked(() => {
+        const spaceQuotaGuid = space.quotaGuid || undefined;
+        this.originalName = space.name;
+        this.originalAllowSsh = !!space.allowSsh;
+        this.originalSpaceQuotaGuid = spaceQuotaGuid;
 
-        const spaceQuotaGuid = n.space_quota_definition_guid ? n.space_quota_definition_guid : 0;
         this.editSpaceForm.patchValue({
-          spaceName: n.name,
-          toggleSsh: n.allow_ssh,
-          quotaDefinition: spaceQuotaGuid,
+          spaceName: space.name,
+          toggleSsh: space.allowSsh,
+          quotaDefinition: spaceQuotaGuid ? spaceQuotaGuid : 0,
         });
-      })
-    );
-
-    this.spaceSubscription = this.space$.subscribe();
+      });
+      prefill.destroy();
+    });
   }
 
   /** Name uniqueness check used by the base class's spaceNameTakenValidator. */
@@ -248,7 +240,6 @@ export class EditSpaceStepComponent extends AddEditSpaceStepBase implements OnIn
   }
 
   ngOnDestroy() {
-    this.spaceSubscription.unsubscribe();
     this.formStatusSub?.unsubscribe();
   }
 }

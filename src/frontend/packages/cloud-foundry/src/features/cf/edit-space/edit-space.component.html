@@ -1,6 +1,6 @@
 <div class="h-full">
   <app-page-header>
-    Edit {{spaceName$ | async}}
+    Edit {{ space()?.name }}
   </app-page-header>
   <app-steppers [cancel]="spaceUrl">
     <app-step title="Edit Space" [signalHandle]="step1.signalHandle" cancelButtonText="Cancel" finishButtonText="Update">
