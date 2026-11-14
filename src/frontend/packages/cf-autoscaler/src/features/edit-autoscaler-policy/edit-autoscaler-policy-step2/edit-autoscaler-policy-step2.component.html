@@ -1,4 +1,4 @@
-@if (appAutoscalerPolicy$ | async; as policy) {
+@if (appAutoscalerPolicy(); as policy) {
   <div class="p-6">
     <p class="text-content-text mb-6">Add scaling rules that work with built-in metrics to scale your application. Metrics are averaged over all the
     instances of your application.</p>

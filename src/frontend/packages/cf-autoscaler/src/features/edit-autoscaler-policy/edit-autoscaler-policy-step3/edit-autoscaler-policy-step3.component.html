@@ -1,4 +1,4 @@
-@if (appAutoscalerPolicy$ | async; as policy) {
+@if (appAutoscalerPolicy(); as policy) {
   <div class="p-6">
     <p class="text-content-text mb-6">Add schedules that reoccur to overwrite the default instance limits for specific time periods. During these time
     periods, all dynamic scaling rules are still effective.</p>

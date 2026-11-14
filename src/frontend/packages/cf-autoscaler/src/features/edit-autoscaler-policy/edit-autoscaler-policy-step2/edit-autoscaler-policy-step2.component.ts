@@ -58,9 +58,7 @@ export class EditAutoscalerPolicyStep2Component extends EditAutoscalerPolicyDire
   filteredMetricTypes$: Observable<string[]>;
   operatorTypes = AutoscalerConstants.UpperOperators.concat(AutoscalerConstants.LowerOperators);
   editTriggerForm: FormGroup<EditTriggerForm>;
-  // appAutoscalerPolicy$: Observable<AppAutoscalerPolicy>;
 
-  public declare currentPolicy: AppAutoscalerPolicyLocal;
   public testing = false;
   // Index of the row being edited, -1 when none. The parent reads it to gate
   // Next and Previous.

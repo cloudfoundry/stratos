@@ -60,7 +60,6 @@ export class EditAutoscalerPolicyStep3Component extends EditAutoscalerPolicyDire
   monthdayOptions = AutoscalerConstants.MonthdayOptions;
   editRecurringScheduleForm: FormGroup<EditRecurringScheduleForm>;
 
-  public declare currentPolicy: AppAutoscalerPolicyLocal;
   // Index of the row being edited, -1 when none. The parent reads it to gate
   // Next and Previous.
   readonly editIndex = signal(-1);

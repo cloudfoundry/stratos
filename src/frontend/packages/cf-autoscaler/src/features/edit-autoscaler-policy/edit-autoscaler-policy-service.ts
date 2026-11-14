@@ -1,7 +1,4 @@
 import { computed, effect, inject, Injectable, Injector, runInInjectionContext, signal } from '@angular/core';
-import { toObservable } from '@angular/core/rxjs-interop';
-import { Observable } from 'rxjs';
-import { filter } from 'rxjs/operators';
 
 import { autoscalerTransformArrayToMap } from '../../core/autoscaler-helpers/autoscaler-transform-policy';
 import { AutoscalerPolicyDataService } from '../../services/domain-data/autoscaler-policy-data.service';
@@ -28,7 +25,17 @@ export class EditAutoscalerPolicyService {
   // The editor's steps see no state until the saved policy has loaded (or
   // is known not to exist), so nothing typed is replaced when it arrives.
   private readonly settled = signal(false);
-  private readonly settledState = computed(() => (this.settled() ? this.state() : undefined));
+  /**
+   * Undefined until the state has settled, then the current state; a saved
+   * policy that has no form rows yet is converted to the form shape.
+   */
+  readonly policy = computed<AppAutoscalerPolicyLocal | undefined>(() => {
+    if (!this.settled()) {
+      return undefined;
+    }
+    const state = this.state();
+    return state.scaling_rules_form ? state : autoscalerTransformArrayToMap(state);
+  });
   private loadStarted = false;
 
   // FWT-959 Track A wave-3 (A-policy slice): replaced the EntityServiceFactory
@@ -83,13 +90,4 @@ export class EditAutoscalerPolicyService {
     this.state.set(newState);
     this.settled.set(true);
   }
-
-  // Emits nothing until the state has settled, then the current state and
-  // each later change.
-  getState(): Observable<AppAutoscalerPolicyLocal> {
-    return toObservable(this.settledState, { injector: this.injector }).pipe(
-      filter((state): state is AppAutoscalerPolicyLocal => state !== undefined),
-    );
-  }
-
 }

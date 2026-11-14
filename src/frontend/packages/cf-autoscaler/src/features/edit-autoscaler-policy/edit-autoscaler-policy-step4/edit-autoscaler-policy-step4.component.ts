@@ -65,7 +65,6 @@ export class EditAutoscalerPolicyStep4Component extends EditAutoscalerPolicyDire
   policyAlert = PolicyAlert;
   editSpecificDateForm: FormGroup<EditSpecificDateForm>;
 
-  public declare currentPolicy: AppAutoscalerPolicyLocal;
   // Index of the row being edited, -1 when none. The parent reads it to gate
   // Next and Previous.
   readonly editIndex = signal(-1);
@@ -87,7 +86,6 @@ export class EditAutoscalerPolicyStep4Component extends EditAutoscalerPolicyDire
   }
 
   ngOnInit() {
-    super.ngOnInit();
     this.createUpdateTest = this.isCreate ? 'create policy' : 'update policy';
   }
 

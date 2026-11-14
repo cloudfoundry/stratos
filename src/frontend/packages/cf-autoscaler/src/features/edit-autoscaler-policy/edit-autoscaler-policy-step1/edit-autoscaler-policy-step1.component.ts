@@ -1,12 +1,11 @@
 import { CommonModule } from '@angular/common';
-import { ChangeDetectionStrategy, Component, OnInit, inject } from '@angular/core';
+import { ChangeDetectionStrategy, Component, OnInit, effect, inject, untracked } from '@angular/core';
 import { AbstractControl, FormBuilder, FormControl, FormGroup, ReactiveFormsModule, ValidationErrors, ValidatorFn, Validators } from '@angular/forms';
 import { defer, Observable } from 'rxjs';
 import { map, startWith } from 'rxjs/operators';
 import { TailwindErrorStateMatcher, TailwindShowOnDirtyErrorStateMatcher } from '@stratosui/core';
 import { ApplicationService } from '@stratosui/cloud-foundry';
 import { StepOnNextResult } from '@stratosui/core';
-import { autoscalerTransformArrayToMap } from '../../../core/autoscaler-helpers/autoscaler-transform-policy';
 import { PolicyAlert } from '../../../core/autoscaler-helpers/autoscaler-util';
 import { numberWithFractionOrExceedRange } from '../../../core/autoscaler-helpers/autoscaler-validation';
 import { EditAutoscalerPolicyDirective } from '../edit-autoscaler-policy-base-step';
@@ -54,6 +53,22 @@ export class EditAutoscalerPolicyStep1Component extends EditAutoscalerPolicyDire
       timezone: this.fb.nonNullable.control('', [Validators.required])
     });
     // defer: start from the status when subscribed, not when built.
+    // The form follows the shared policy each time it settles or changes.
+    effect(() => {
+      const policy = this.appAutoscalerPolicy();
+      if (!policy) {
+        return;
+      }
+      untracked(() => {
+        this.editLimitForm.controls.timezone.setValue(policy.schedules?.timezone ?? '');
+        this.editLimitForm.controls.instance_min_count.setValue(policy.instance_min_count);
+        this.editLimitForm.controls.instance_max_count.setValue(policy.instance_max_count);
+        // Each count is checked against the other. The minimum was checked
+        // while the maximum was still unset, so check both again now.
+        this.editLimitForm.controls.instance_min_count.updateValueAndValidity();
+        this.editLimitForm.controls.instance_max_count.updateValueAndValidity();
+      });
+    });
     this.valid$ = defer(() => this.editLimitForm.statusChanges.pipe(
       startWith(this.editLimitForm.status),
       map(status => status === 'VALID'),
@@ -62,22 +77,6 @@ export class EditAutoscalerPolicyStep1Component extends EditAutoscalerPolicyDire
 
   ngOnInit() {
     this.service.updateFromStore(this.applicationService.appGuid, this.applicationService.cfGuid);
-    this.appAutoscalerPolicy$ = this.service.getState().pipe(
-      map(policy => {
-        this.currentPolicy = policy;
-        if (!this.currentPolicy.scaling_rules_form) {
-          this.currentPolicy = autoscalerTransformArrayToMap(this.currentPolicy);
-        }
-        this.editLimitForm.controls.timezone.setValue(this.currentPolicy.schedules?.timezone ?? '');
-        this.editLimitForm.controls.instance_min_count.setValue(this.currentPolicy.instance_min_count);
-        this.editLimitForm.controls.instance_max_count.setValue(this.currentPolicy.instance_max_count);
-        // Each count is checked against the other. The minimum was checked
-        // while the maximum was still unset, so check both again now.
-        this.editLimitForm.controls.instance_min_count.updateValueAndValidity();
-        this.editLimitForm.controls.instance_max_count.updateValueAndValidity();
-        return this.currentPolicy;
-      })
-    );
   }
 
   override async onNext(): Promise<StepOnNextResult> {

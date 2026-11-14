@@ -44,27 +44,23 @@ describe('EditAutoscalerPolicyService', () => {
   // them when it arrived, wiping anything typed in between.
   it('emits no state until the saved policy has loaded', () => {
     const service = TestBed.inject(EditAutoscalerPolicyService);
-    const seen: number[] = [];
     service.updateFromStore('app', 'cf');
-    service.getState().subscribe(s => seen.push(s.instance_max_count));
     TestBed.tick();
-    expect(seen).toEqual([]);
+    expect(service.policy()).toBeUndefined();
 
     policy.set(saved);
     loading.set(false);
     TestBed.tick();
-    expect(seen).toEqual([7]);
+    expect(service.policy()?.instance_max_count).toBe(7);
   });
 
   it('emits the defaults once the load finds no policy', () => {
     const service = TestBed.inject(EditAutoscalerPolicyService);
-    const seen: number[] = [];
     service.updateFromStore('app', 'cf');
-    service.getState().subscribe(s => seen.push(s.instance_max_count));
     TestBed.tick();
     loading.set(false);
     TestBed.tick();
-    expect(seen).toEqual([10]);
+    expect(service.policy()?.instance_max_count).toBe(10);
   });
 
   // Step 1 runs updateFromStore each time it is entered; going back to it
@@ -79,10 +75,7 @@ describe('EditAutoscalerPolicyService', () => {
 
     service.updateFromStore('app', 'cf');
     TestBed.tick();
-    let max = 0;
-    service.getState().subscribe(s => max = s.instance_max_count);
-    TestBed.tick();
     expect(loads).toBe(1);
-    expect(max).toBe(3);
+    expect(service.policy()?.instance_max_count).toBe(3);
   });
 });
