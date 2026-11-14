@@ -1,6 +1,6 @@
 import { describe, it, expect, beforeEach, vi } from 'vitest';
 import { ComponentFixture, TestBed } from '@angular/core/testing';
-import { provideZonelessChangeDetection, WritableSignal } from '@angular/core';
+import { provideZonelessChangeDetection, signal, WritableSignal } from '@angular/core';
 
 import { GitCommit } from '@stratosui/git';
 import { CfDeployAppDataService } from '../../../../services/domain-data/cf-deploy-app-data.service';
@@ -47,32 +47,34 @@ describe('DeployApplicationStep21Component', () => {
       expect(DeployApplicationStep21Component.isStepValid(false, null)).toBe(false);
     });
 
-    type Internals = {
-      selectedCommit: WritableSignal<GitCommit | null>;
-      useLatestHead: WritableSignal<boolean>;
+    // Stands in for the commit list wrapper the step enters with
+    const enterWith = (selected: GitCommit | null, latestHead: boolean) => {
+      const wrapper = { selectedCommit: signal(selected), useLatestHead: signal(latestHead) };
+      (component as unknown as { wrapper: WritableSignal<unknown> }).wrapper.set(wrapper);
+      return wrapper;
     };
 
     it('onNext pins the selected commit SHA when not deploying latest HEAD', async () => {
-      (component as unknown as Internals).selectedCommit.set(commit);
+      enterWith(commit, false);
       await component.onNext();
       expect(deployData.setDeployCommit).toHaveBeenCalledWith('abc123def456');
     });
 
     it('onNext sends an empty commit (deploy latest HEAD) when that option is chosen', async () => {
       // Even with a commit still selected underneath, latest-HEAD wins and unpins.
-      (component as unknown as Internals).selectedCommit.set(commit);
-      (component as unknown as Internals).useLatestHead.set(true);
+      enterWith(commit, true);
       await component.onNext();
       expect(deployData.setDeployCommit).toHaveBeenCalledWith('');
     });
 
-    it('validate follows the selection', () => {
-      const internals = component as unknown as Internals;
+    it('validate follows the wrapper\'s selection', () => {
       expect(component.validate()).toBe(false);
-      internals.selectedCommit.set(commit);
+      const wrapper = enterWith(null, false);
+      expect(component.validate()).toBe(false);
+      wrapper.selectedCommit.set(commit);
       expect(component.validate()).toBe(true);
-      internals.selectedCommit.set(null);
-      internals.useLatestHead.set(true);
+      wrapper.selectedCommit.set(null);
+      wrapper.useLatestHead.set(true);
       expect(component.validate()).toBe(true);
     });
   });

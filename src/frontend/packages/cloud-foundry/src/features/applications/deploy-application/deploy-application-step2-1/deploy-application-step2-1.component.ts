@@ -1,6 +1,5 @@
 
 import { Component, ComponentRef, ViewContainerRef, ChangeDetectionStrategy, computed, inject, signal, viewChild } from '@angular/core';
-import { combineLatest, Subscription } from 'rxjs';
 
 import { StepOnNextResult } from '@stratosui/core';
 import { GitCommit } from '@stratosui/git';
@@ -18,9 +17,10 @@ import { CommitListWrapperComponent } from './commit-list-wrapper/commit-list-wr
 export class DeployApplicationStep21Component {
   private deployData = inject(CfDeployAppDataService);
 
-  // Set from the commit list wrapper, which is recreated on every onEnter.
-  private readonly selectedCommit = signal<GitCommit | null>(null);
-  private readonly useLatestHead = signal(false);
+  // The commit list wrapper, which is recreated on every onEnter.
+  private readonly wrapper = signal<CommitListWrapperComponent | undefined>(undefined);
+  private readonly selectedCommit = computed<GitCommit | null>(() => this.wrapper()?.selectedCommit() ?? null);
+  private readonly useLatestHead = computed(() => !!this.wrapper()?.useLatestHead());
   // The step is valid when the user has picked a specific commit OR opted to
   // deploy the latest commit on the branch (HEAD) without pinning one.
   static isStepValid(useLatestHead: boolean, commit: GitCommit | null): boolean {
@@ -32,13 +32,8 @@ export class DeployApplicationStep21Component {
   readonly target = viewChild.required('target', { read: ViewContainerRef });
   wrapperRef!: ComponentRef<CommitListWrapperComponent>;
 
-  private wrapperSub?: Subscription;
-
   onLeave = () => {
-    this.wrapperSub?.unsubscribe();
-    this.wrapperSub = undefined;
-    this.selectedCommit.set(null);
-    this.useLatestHead.set(false);
+    this.wrapper.set(undefined);
     this.wrapperRef.destroy();
     this.target().clear();
   };
@@ -46,16 +41,9 @@ export class DeployApplicationStep21Component {
   onEnter = () => {
     // Wrap the list component in another component. This means it's recreated every time to include changes in the github repo
     this.wrapperRef = this.target().createComponent(CommitListWrapperComponent);
-    const wrapper = this.wrapperRef.instance as CommitListWrapperComponent;
-    this.wrapperSub?.unsubscribe();
     // Validity is driven by either a pinned commit OR the deploy-latest-HEAD
-    // toggle — combine both wrapper streams so the step settles correctly when
-    // the user flips the toggle on/off.
-    this.wrapperSub = combineLatest([wrapper.selectedCommit$, wrapper.useLatestHead$])
-      .subscribe(([commit, useLatestHead]) => {
-        this.selectedCommit.set(commit ?? null);
-        this.useLatestHead.set(useLatestHead);
-      });
+    // toggle, both read from the wrapper.
+    this.wrapper.set(this.wrapperRef.instance);
   };
 
   async onNext(): Promise<StepOnNextResult> {
