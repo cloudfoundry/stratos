@@ -6,7 +6,7 @@ import { CustomIconComponent } from '../../../../../../../core/src/shared/compon
 import { CustomTooltipDirective } from '../../../../../../../core/src/shared/components/custom-tooltip/custom-tooltip.directive';
 import { Edge, GraphComponent, LayoutService, NgxGraphZoomOptions } from '@swimlane/ngx-graph';
 import { SidePanelService } from '@stratosui/core';
-import { combineLatest, Observable, Subscription } from 'rxjs';
+import { combineLatest, Observable, Subject, Subscription } from 'rxjs';
 import { take, filter, map } from 'rxjs/operators';
 
 import { PageSubNavComponent } from '../../../../../../../core/src/shared/components/page-sub-nav/page-sub-nav.component';
@@ -93,8 +93,10 @@ export class HelmReleaseResourceGraphComponent implements OnInit, OnDestroy {
   public nodes = signal<CustomHelmReleaseGraphNode[]>([]);
   public links = signal<Edge[]>([]);
 
-  private updateSignal: WritableSignal<boolean> = signal<boolean>(false);
-  update$ = toObservable(this.updateSignal);
+  // An event trigger: every emission makes ngx-graph redraw. A signal would
+  // drop every set after the first, because the value never changes.
+  private readonly update = new Subject<boolean>();
+  update$ = this.update.asObservable();
 
   // ngx-graph zooms-to-fit on every emission; the options object matches
   // the [zoomToFit$] input's Observable<NgxGraphZoomOptions> type.
@@ -170,7 +172,7 @@ export class HelmReleaseResourceGraphComponent implements OnInit, OnDestroy {
         });
       });
       this.links.set(newLinks);
-      this.updateSignal.set(true);
+      this.update.next(true);
     });
   }
 

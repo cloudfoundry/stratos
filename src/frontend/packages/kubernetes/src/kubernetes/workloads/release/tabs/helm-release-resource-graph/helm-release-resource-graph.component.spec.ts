@@ -91,6 +91,28 @@ describe('HelmReleaseResourceGraphComponent', () => {
     expect(fixture.nativeElement.querySelector('ngx-graph')).not.toBeNull();
   });
 
+  // Regression: ngx-graph redraws on every [update$] emission. A later socket
+  // update (a resource changed status) has to reach it, not only the first.
+  it('asks the graph to redraw on every socket update, not just the first', async () => {
+    const guid = (component as unknown as { helper: { guid: string } }).helper.guid;
+    const graphOf = (status: string) => ({
+      endpointId: 'kube', releaseTitle: 'rel',
+      nodes: { a: { id: 'a', label: 'web', data: { kind: 'Deployment', status, metadata: { name: 'web', namespace: 'ns' } } } },
+      links: {},
+    } as unknown as HelmReleaseGraph);
+    let redraws = 0;
+    component.update$.subscribe(() => redraws++);
+    const data = TestBed.inject(HelmReleaseDataService);
+
+    data.setGraph(guid, graphOf('ok'));
+    await fixture.whenStable();
+    const afterFirst = redraws;
+    data.setGraph(guid, graphOf('error'));
+    await fixture.whenStable();
+
+    expect(redraws).toBe(afterFirst + 1);
+  });
+
   describe('analysis report', () => {
     const alert = { kind: 'deployment', name: 'web', level: 2, message: 'no limits' };
     const report = { id: 'r1', alerts: { 'ns/web': [alert] } } as unknown as AnalysisReport;
