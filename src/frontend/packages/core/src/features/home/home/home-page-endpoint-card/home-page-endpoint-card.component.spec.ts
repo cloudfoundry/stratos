@@ -181,6 +181,47 @@ describe('HomePageEndpointCardComponent', () => {
     expect(cardLayout()).toEqual(new HomePageCardLayout(3, 2));
   });
 
+  // With nothing to favorite and no shortcuts, the links panel has nothing to
+  // list, and the card uses the whole width. The width was set from a timer
+  // and only showed with the next unrelated repaint.
+  it('drops the links panel once it is known there is nothing to list', async () => {
+    fixture.componentRef.setInput('layout', new HomePageCardLayout(1, 1));
+    await fixture.whenStable();
+    await new Promise(resolve => setTimeout(resolve, 20));
+    await fixture.whenStable();
+    expect(fixture.nativeElement.querySelector('.sidebar-panel')).toBeNull();
+  });
+
+  // The "N more ..." link counts the favorites that do not fit the layout,
+  // and the shortcuts move to the main panel once many favorites show.
+  it('counts the favorites that do not fit, and places the shortcuts by how many show', async () => {
+    const favs = signal<unknown[]>([]);
+    vi.spyOn(userFavoriteManager, 'favoritesForEndpoint').mockReturnValue(favs as never);
+    vi.spyOn(userFavoriteManager, 'endpointHasEntitiesThatCanFavorite').mockReturnValue(true);
+    const card = TestBed.createComponent(HomePageEndpointCardComponent);
+    card.componentRef.setInput('endpoint', { cnsi_type: 'metrics', guid: 'g', name: 'n' } as EndpointModel);
+    card.componentRef.setInput('layout', new HomePageCardLayout(1, 1));
+    await card.whenStable();
+    const c = card.componentInstance;
+    expect(c.hiddenFavorites()).toBe(-15);
+    expect(c.showShortcutsOnSide()).toBe(true);
+
+    favs.set(Array.from({ length: 20 }, (_, i) => ({
+      id: i, getPrettyTypeName: () => 'App', getLink: () => '/x', getIcon: () => 'apps', metadata: { name: `app-${i}` },
+    })));
+    await card.whenStable();
+    expect(c.hiddenFavorites()).toBe(5);
+    expect(c.links()!.favs.length).toBe(20);
+    expect(c.showShortcutsOnSide()).toBe(false);
+
+    card.componentRef.setInput('layout', new HomePageCardLayout(1, 2));
+    await card.whenStable();
+    expect(c.hiddenFavorites()).toBe(15);
+    expect(c.links()!.favs.length).toBe(5);
+    expect(c.showShortcutsOnSide()).toBe(true);
+    card.destroy();
+  });
+
   // A type with no image file, such as the autoscaler, has only a font icon.
   it('draws the font icon when the type has no image', async () => {
     const getEndpoint = vi.spyOn(entityCatalog, 'getEndpoint').mockReturnValue({

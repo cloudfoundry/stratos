@@ -24,7 +24,7 @@
           </div>
         </a>
         <div class="flex items-center space-x-2">
-          @if ((status$ | async); as status) {
+          @if (statusSignal(); as status) {
             <div>
               @if (status === Status.Loading) {
                 <app-busy class="text-primary" size="1.25rem" [context]="endpoint().name"></app-busy>
@@ -56,31 +56,31 @@
          Two layouts, chosen per endpoint via homeCard.linksBelow: the classic
          right-hand sidebar, or a Favorites/Shortcuts strip below the content
          (suits content-light cards like kubernetes). -->
-    <div class="flex h-full" [class.hidden]="disconnected" [class.flex-col]="fullView || linksBelow" [class.flex-row]="!fullView && !linksBelow">
+    <div class="flex h-full" [class.hidden]="disconnected" [class.flex-col]="fullView() || linksBelow" [class.flex-row]="!fullView() && !linksBelow">
       <div class="flex-1 p-6">
         <div>
           <ng-template #customCard></ng-template>
         </div>
-        @if (!linksBelow && !showShortcutsOnSide) {
+        @if (!linksBelow && !showShortcutsOnSide()) {
           <div class="mt-6">
-            @if (links$ | async; as links) {
+            @if (links(); as links) {
               <app-home-shortcuts [shortcuts]="links.shortcuts"></app-home-shortcuts>
             }
           </div>
         }
       </div>
-      @if (!fullView && !linksBelow) {
+      @if (!fullView() && !linksBelow) {
         <div class="border-l sidebar-panel" [class.w-80]="(layoutSignal()?.x ?? 1) <= 1" [class.w-48]="layoutSignal()?.x === 2" [class.w-64]="(layoutSignal()?.x ?? 0) >= 3">
-          @if (links$ | async; as links) {
+          @if (links(); as links) {
             <div class="p-6">
               <div class="flex items-center justify-between mb-4">
                 <h3 class="text-sm font-medium sidebar-title">Favorites</h3>
-                @if (hiddenFavorites > 0) {
+                @if (hiddenFavorites() > 0) {
                   <div class="text-xs cursor-pointer sidebar-link" role="button" tabindex="0"
                     (click)="showFavoritesPanel()"
                     (keydown.enter)="showFavoritesPanel()"
                     (keydown.space)="showFavoritesPanel(); $event.preventDefault()">
-                    {{hiddenFavorites}} more ...
+                    {{hiddenFavorites()}} more ...
                   </div>
                 }
               </div>
@@ -96,7 +96,7 @@
                   <div class="text-sm">No favorites</div>
                 </div>
               }
-              @if (showShortcutsOnSide) {
+              @if (showShortcutsOnSide()) {
                 <div class="mt-6">
                   <app-home-shortcuts [shortcuts]="links.shortcuts"></app-home-shortcuts>
                 </div>
@@ -105,19 +105,19 @@
           }
         </div>
       }
-      @if (!fullView && linksBelow) {
+      @if (!fullView() && linksBelow) {
         <div class="border-t sidebar-panel">
-          @if (links$ | async; as links) {
+          @if (links(); as links) {
             <div class="p-6 pt-2 flex flex-row gap-8">
               <div class="flex-1 min-w-0">
                 <div class="flex items-center justify-between mt-5 mb-2.5">
                   <h3 class="text-sm font-medium sidebar-title">Favorites</h3>
-                  @if (hiddenFavorites > 0) {
+                  @if (hiddenFavorites() > 0) {
                     <div class="text-xs cursor-pointer sidebar-link" role="button" tabindex="0"
                       (click)="showFavoritesPanel()"
                       (keydown.enter)="showFavoritesPanel()"
                       (keydown.space)="showFavoritesPanel(); $event.preventDefault()">
-                      {{hiddenFavorites}} more ...
+                      {{hiddenFavorites()}} more ...
                     </div>
                   }
                 </div>

@@ -1,9 +1,8 @@
 import { CommonModule } from '@angular/common';
-import { ChangeDetectionStrategy, AfterViewInit, Component, ComponentRef, OnChanges, OnDestroy, OnInit, SimpleChanges, ViewContainerRef, Injector, Signal, effect, signal, inject, output, input, untracked, viewChild } from '@angular/core';
-import { toObservable } from '@angular/core/rxjs-interop';
+import { ChangeDetectionStrategy, AfterViewInit, Component, ComponentRef, OnChanges, OnDestroy, OnInit, SimpleChanges, ViewContainerRef, Signal, computed, effect, signal, inject, output, input, untracked, viewChild } from '@angular/core';
 import { RouterModule } from '@angular/router';
-import { combineLatest, Observable, of, Subscription } from 'rxjs';
-import { take, filter, map, timeout } from 'rxjs/operators';
+import { of, Subscription } from 'rxjs';
+import { take, filter, timeout } from 'rxjs/operators';
 
 import {
   EntityCatalogSchemas,
@@ -61,7 +60,6 @@ export class HomePageEndpointCardComponent implements OnInit, OnChanges, OnDestr
   private userFavoriteManager = inject(UserFavoriteManager);
   private sidePanelService = inject(SidePanelService);
   private dialog = inject(TailwindDialogService);
-  private injector = inject(Injector);
 
 
 
@@ -90,10 +88,57 @@ export class HomePageEndpointCardComponent implements OnInit, OnChanges, OnDestr
 
   private _layout = signal<HomePageCardLayout | null>(null);
   public layoutSignal = this._layout.asReadonly();
-  public layout$: Observable<HomePageCardLayout | null>;
 
-  // strict: assigned in ngOnInit before the template subscribes
-  links$!: Observable<LinkMetadata>;
+  // The favorites and shortcuts to list, once the favorites have loaded and
+  // a layout is set. How many fit depends on the layout.
+  readonly links = computed<LinkMetadata | null>(() => {
+    const layout = this.layoutSignal();
+    const allFavs = this.favorites?.();
+    if (!layout || !allFavs) {
+      return null;
+    }
+    // Get the list of shortcuts for the endpoint for the given endpoint ID
+    const shortcutsFn = this.definition?.homeCard?.shortcuts;
+    // strict: guid is populated on every bound endpoint; '' default keeps the lookup well-formed
+    const allShortcuts = shortcutsFn ? shortcutsFn(this.endpoint().guid ?? '') || [] : [];
+    let favs = allFavs;
+    let shortcuts = allShortcuts;
+    const totalShortcuts = allShortcuts.length;
+
+    // Based on the layout, adjust the numbers returned
+    if (layout.y > 1) {
+      // Compact card view
+      if (favs.length > MAX_FAVS_COMPACT) {
+        favs = favs.slice(0, MAX_FAVS_COMPACT);
+      }
+      if (totalShortcuts > MAX_SHORTCUTS) {
+        shortcuts = allShortcuts.slice(0, MAX_SHORTCUTS);
+      }
+      // We only want to display 5 things
+      if (favs.length + totalShortcuts > MAX_LINKS) {
+        let limit = MAX_LINKS - favs.length;
+        if (limit === 1) {
+          limit = 0;
+        }
+        shortcuts = allShortcuts.slice(0, limit);
+      }
+    }
+    return { favs, shortcuts };
+  });
+
+  // Favorites that do not fit in the card
+  readonly hiddenFavorites = computed(() => {
+    const layout = this.layoutSignal();
+    const favs = this.favorites?.();
+    return layout && favs ? favs.length - (layout.y > 1 ? MAX_FAVS_COMPACT : MAX_FAVS_NORMAL) : 0;
+  });
+
+  // Should we show shortcuts on the side or under the main panel? On the side
+  // unless the card is full view with many favorites to also show.
+  readonly showShortcutsOnSide = computed(() => {
+    const layout = this.layoutSignal();
+    return !layout || layout.y > 1 || (this.favorites?.()?.length ?? 0) < CUTOFF_SHOW_SHORTCUTS_ON_LEFT;
+  });
 
   entity: any;
 
@@ -108,7 +153,6 @@ export class HomePageEndpointCardComponent implements OnInit, OnChanges, OnDestr
   // Status = 0 OK, 1 Loading, 2 Error
   private _status = signal<Status>(Status.OK);
   public statusSignal = this._status.asReadonly();
-  public status$: Observable<Status>;
   // Expose the Status enum so the template can name values instead of magic numbers
   public readonly Status = Status;
 
@@ -118,12 +162,19 @@ export class HomePageEndpointCardComponent implements OnInit, OnChanges, OnDestr
 
   private canLoad = false;
 
-  // Should we show shortcuts on the side or udner the manin panel?
-  showShortcutsOnSide = true;
-  hiddenFavorites = 0;
+  // The endpoint type asks for the whole width.
+  private readonly definitionFullView = signal(false);
 
   // Should the Home Card use the whole width, or do we show the links panel as well?
-  fullView = false;
+  // It does when the type asks, or when nothing can be favorited and there
+  // are no shortcuts, so the right-hand panel would be empty.
+  readonly fullView = computed(() => {
+    if (this.definitionFullView()) {
+      return true;
+    }
+    const links = this.links();
+    return !!links && !this.hasFavEntities && links.shortcuts.length === 0;
+  });
 
   // Favorites/Shortcuts placement: strip below the content (linksBelow) or
   // the classic right-hand sidebar. Per-endpoint via homeCard.linksBelow.
@@ -134,8 +185,6 @@ export class HomePageEndpointCardComponent implements OnInit, OnChanges, OnDestr
   hasFavEntities = false;
 
   constructor() {
-    this.layout$ = toObservable(this._layout);
-    this.status$ = toObservable(this._status);
     // An effect: a layout change is also pushed into the created card.
     effect(() => {
       const value = this.layout();
@@ -212,66 +261,13 @@ export class HomePageEndpointCardComponent implements OnInit, OnChanges, OnDestr
     if (this.entity) {
       this.definition = this.entity.definition;
       this.favorite = this.userFavoriteManager.getFavoriteEndpointFromEntity(this.endpoint());
-      this.fullView = this.definition?.homeCard?.fullView ?? false;
+      this.definitionFullView.set(this.definition?.homeCard?.fullView ?? false);
       this.linksBelow = this.definition?.homeCard?.linksBelow ?? false;
       this.link = this.favorite ? this.favorite.getLink() : null;
       // Recompute effective layout now that definition is available
       this.computeEffectiveLayout();
       this.updateLayout();
     }
-
-    // The links wait for the favorites to load, as they did on the stream.
-    const favorites$ = toObservable(this.favorites, { injector: this.injector }).pipe(
-      filter((favs): favs is UserFavorite<IFavoriteMetadata>[] => !!favs)
-    );
-    this.links$ = combineLatest([favorites$, this.layout$]).pipe(
-      filter((pair): pair is [any, HomePageCardLayout] => !!pair[1]),
-      map(([favs, layout]) => {
-        // Get the list of shortcuts for the endpoint for the given endpoint ID
-        const shortcutsFn = this.definition?.homeCard?.shortcuts;
-        // strict: guid is populated on every bound endpoint; '' default keeps the lookup well-formed
-        const allShortcuts = shortcutsFn ? shortcutsFn(this.endpoint().guid ?? '') || [] : [];
-        let shortcuts = allShortcuts;
-        const max = (layout.y > 1) ? MAX_FAVS_COMPACT : MAX_FAVS_NORMAL;
-        const totalShortcuts = allShortcuts.length;
-        this.hiddenFavorites = favs.length - max;
-
-        // Based on the layout, adjust the numbers returned
-        if (layout.y > 1) {
-          // Compact card view
-          this.showShortcutsOnSide = true;
-          if (favs.length > max) {
-            favs = favs.slice(0, max);
-          }
-          if (totalShortcuts > MAX_SHORTCUTS) {
-            shortcuts = allShortcuts.slice(0, MAX_SHORTCUTS);
-          }
-          // We only want to display 5 things
-          if (favs.length + totalShortcuts > MAX_LINKS) {
-            let limit = MAX_LINKS - favs.length;
-            if (limit === 1) {
-              limit = 0;
-            }
-            shortcuts = allShortcuts.slice(0, limit);
-          }
-        } else {
-          // Full card view - move the shortcuts into the main left panel if we have more
-          // than a certain number of favorites to also show
-          if (favs.length >= CUTOFF_SHOW_SHORTCUTS_ON_LEFT) {
-            this.showShortcutsOnSide = false;
-          }
-        }
-
-        // If nothing can be favorited and there are no shotrcuts then hide the right-hand side panel
-        if (!this.hasFavEntities && shortcuts.length === 0) {
-          setTimeout(() => this.fullView = true, 0);
-        }
-        return {
-          favs,
-          shortcuts
-        };
-      })
-    );
 
     // Self-trigger load now that @Input endpoint is bound. This used to be
     // driven by the parent's QueryList walk, which raced with input
