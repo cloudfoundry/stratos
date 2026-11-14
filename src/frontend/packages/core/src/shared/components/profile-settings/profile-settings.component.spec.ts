@@ -2,11 +2,13 @@ import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { provideZonelessChangeDetection, signal } from '@angular/core';
 import { describe, it, expect, beforeEach, vi } from 'vitest';
 import { of } from 'rxjs';
+import { AuthDataService, LocalStorageService } from '@stratosui/store';
 
 import { BaseTestModules, STORE_TEST_PROVIDERS } from '@test-framework/core-test.helper';
 import { DashboardDataService } from '../../../core/dashboard-data.service';
 import { CurrentUserPermissionsService } from '../../../core/permissions/current-user-permissions.service';
 import { UserProfileService } from '../../../core/user-profile.service';
+import { ConfirmationDialogService } from '../confirmation-dialog.service';
 import { ProfileSettingsComponent } from './profile-settings.component';
 
 describe('ProfileSettingsComponent', () => {
@@ -73,5 +75,33 @@ describe('ProfileSettingsComponent', () => {
     TestBed.inject(DashboardDataService).setSessionTimeout(false);
     await fixture.whenStable();
     expect(fixture.nativeElement.querySelector('.user-profile__option-warning')).not.toBeNull();
+  });
+
+  describe('stored preferences', () => {
+    const setSession = (sessionData: object | null) =>
+      (TestBed.inject(AuthDataService) as any)._auth.update((a: object) => ({ ...a, sessionData }));
+
+    // The section shows the size of what is stored once there is a user.
+    it('shows the stored size once the session has a user', async () => {
+      vi.spyOn(LocalStorageService, 'localStorageSize').mockReturnValue(2048);
+      await fixture.whenStable();
+      expect(fixture.nativeElement.textContent).not.toContain('~');
+
+      setSession({ user: { guid: 'u', name: 'n' } });
+      await fixture.whenStable();
+      expect(fixture.nativeElement.textContent).toContain('~');
+    });
+
+    // A reset needs a user to say whose preferences; it asks first.
+    it('asks to reset only when the session has a user', () => {
+      const ask = vi.spyOn(TestBed.inject(ConfirmationDialogService), 'openWithCancel').mockImplementation(() => undefined);
+      component.resetDashboard();
+      expect(ask).not.toHaveBeenCalled();
+
+      setSession({ user: { guid: 'u', name: 'n' } });
+      component.resetDashboard();
+      component.resetListPreferences();
+      expect(ask).toHaveBeenCalledTimes(2);
+    });
   });
 });

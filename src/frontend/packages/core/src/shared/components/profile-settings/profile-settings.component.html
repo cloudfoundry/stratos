@@ -73,7 +73,7 @@
     </div>
   }
 
-  @if (show()[types.STORAGE] && (localStorageSize$ | async); as localStorageSize) {
+  @if (show()[types.STORAGE] && localStorageSize(); as localStorageSize) {
     <div class="user-profile__section user-profile__local-storage"
       >
       <app-card-title class="user-profile__section">Reset Preferences</app-card-title>
