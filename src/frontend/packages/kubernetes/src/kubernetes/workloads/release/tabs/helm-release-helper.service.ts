@@ -1,14 +1,9 @@
-import { Injectable, Injector, Signal, computed, inject } from '@angular/core';
-import { toObservable } from '@angular/core/rxjs-interop';
-import { observeSignal } from '@stratosui/store';
-import { combineLatest, Observable } from 'rxjs';
-import { filter, map } from 'rxjs/operators';
+import { Injectable, Signal, computed, inject } from '@angular/core';
 
 import { ChartAttributes } from '../../../../helm/monocular/shared/models/chart';
 import { ChartMetadata } from '../../../../helm/store/helm.types';
 import { KubeHelmDataService } from '../../../../services/endpoint-data/kube-helm-data.service';
 import { KubePodDataService } from '../../../../services/domain-data/kube-pod-data.service';
-import { KubePod } from '../../../../services/endpoint-data/kube-types';
 import { ContainerStateCollection, KubernetesPod } from '../../../store/kube.types';
 
 import { getHelmReleaseDetailsFromGuid } from '../../store/workloads-entity-factory';
@@ -99,8 +94,6 @@ type InternalHelmUpgrade = {
 })
 export class HelmReleaseHelperService {
 
-  public release$: Observable<HelmRelease>;
-
   // Signal members. The release is undefined until its detail loads; one
   // without an icon gets the placeholder.
   readonly release: Signal<HelmRelease | undefined>;
@@ -119,7 +112,6 @@ export class HelmReleaseHelperService {
   private podData = inject(KubePodDataService);
   private releaseData = inject(HelmReleaseDataService);
   private helmData = inject(KubeHelmDataService);
-  private injector = inject(Injector);
 
   constructor() {
     const helmReleaseGuid = inject(HelmReleaseGuid);
@@ -147,61 +139,12 @@ export class HelmReleaseHelperService {
     });
     this.isFetching = this.releaseData.isFetchingDetail(this.guid);
 
-    // Stream form for readers that combine the release with a request
-    // (hasUpgrade, the upgrade wizard).
-    this.release$ = toObservable(this.release, { injector: this.injector }).pipe(
-      filter((item): item is HelmRelease => !!item),
-    );
-
     this.graph = this.releaseData.graph(this.guid);
     this.resources = this.releaseData.resources(this.guid);
   }
 
   public guidAsUrlFragment(): string {
     return this.guid.replace(':', '/').replace(':', '/');
-  }
-
-  // The fetch*/getCharts streams are built per call (per tab visit, per graph
-  // node click) on the release shell, which is reused across tab switches,
-  // so they use observeSignal: the watch ends with the subscription instead
-  // of piling up until the user leaves the release. The constructor streams
-  // above are built once per shell and keep toObservable.
-  public fetchReleaseGraph(): Observable<HelmReleaseGraph> {
-    // Socket-fed graph signal (written by HelmReleaseSocketService).
-    return observeSignal(this.releaseData.graph(this.guid), this.injector).pipe(
-      filter((graph): graph is HelmReleaseGraph => !!graph)
-    );
-  }
-
-  public fetchReleaseResources(): Observable<HelmReleaseResources> {
-    // Socket-fed resources signal (written by HelmReleaseSocketService).
-    return observeSignal(this.releaseData.resources(this.guid), this.injector).pipe(
-      filter((resources): resources is HelmReleaseResources => !!resources)
-    );
-  }
-
-  public fetchReleaseChartStats(): Observable<HelmReleaseChartData> {
-    const podsSig = this.podData.podsInWorkload(this.endpointGuid, this.namespace, this.releaseTitle);
-    return observeSignal(podsSig, this.injector).pipe(
-      map((pods: KubePod[]) => this.mapPods(pods as any)),
-    );
-  }
-
-  // Check to see if a workload has updates available
-  public getCharts() {
-    void this.helmData.loadCharts();
-    return observeSignal(this.helmData.monocularCharts(), this.injector).pipe(
-      filter((charts: any) => !!charts)
-    );
-  }
-
-  public fetchReleaseHistory(): Observable<HelmReleaseRevision[]> {
-    // Get the history for a Helm release (signal-native; replaces the ngrx
-    // `history` entity-catalog getEntityService).
-    void this.releaseData.loadHistory(this.endpointGuid, this.namespace, this.releaseTitle);
-    return observeSignal(this.releaseData.history(this.guid), this.injector).pipe(
-      filter((revisions): revisions is HelmReleaseRevision[] => !!revisions)
-    );
   }
 
   // Pod and container counts for the release's workload.
@@ -273,13 +216,6 @@ export class HelmReleaseHelperService {
       return state.terminated.exitCode === 0 ? null : false;
     }
     return false;
-  }
-
-  public hasUpgrade(returnLatest = false): Observable<InternalHelmUpgrade | null> {
-    const updates = combineLatest([this.getCharts(), this.release$]);
-    return updates.pipe(
-      map(([charts, release]: [any, any]) => this.findUpgrade(charts, release, returnLatest))
-    );
   }
 
   // Check to see if a workload has updates available. Null while the charts
