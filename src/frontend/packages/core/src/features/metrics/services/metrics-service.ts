@@ -3,7 +3,6 @@ import { toObservable } from '@angular/core/rxjs-interop';
 import {
   EndpointModel,
   EndpointsDataService,
-  getFullEndpointApiUrl,
 } from '@stratosui/store';
 import { Observable } from 'rxjs';
 import { map, shareReplay } from 'rxjs/operators';
@@ -46,7 +45,6 @@ export class MetricsService {
           endpoints.forEach(e => {
             if (e.metadata && e.metadata.metrics && e.metadata.metrics === ep.guid) {
               provider.endpoints.push(e);
-              (e as any).url = getFullEndpointApiUrl(e);
             }
           });
           result.push(provider);
