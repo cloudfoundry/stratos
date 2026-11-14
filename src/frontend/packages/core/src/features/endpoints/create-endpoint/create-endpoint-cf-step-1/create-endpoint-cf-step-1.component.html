@@ -15,8 +15,8 @@
           class="w-full placeholder:!text-transparent focus:outline-none"
           [appUnique]="
             (registerForm.value.createSystemEndpointField
-              ? $safeNavigationMigration((customEndpoints | async)?.names)
-              : $safeNavigationMigration((existingPersonalEndpoints | async)?.names)) ?? []
+              ? customEndpointsSignal()?.names
+              : existingPersonalEndpointsSignal()?.names) ?? []
           "
         />
         @if (registerForm.controls.nameField.errors?.required) {
@@ -51,9 +51,9 @@
         !review() &&
         registerForm.value.urlField &&
         ((registerForm.value.createSystemEndpointField &&
-          (customEndpoints | async)?.urls?.includes(urlKey(registerForm.value.urlField))) ||
+          customEndpointsSignal()?.urls?.includes(urlKey(registerForm.value.urlField))) ||
           (!registerForm.value.createSystemEndpointField &&
-            (existingPersonalEndpoints | async)?.urls?.includes(urlKey(registerForm.value.urlField))))
+            existingPersonalEndpointsSignal()?.urls?.includes(urlKey(registerForm.value.urlField))))
       ) {
         <div class="text-warning text-sm mt-1" role="status">
           An endpoint at this address is already registered. You can register it again.
@@ -89,7 +89,7 @@
           }
         }
       }
-      @if (userEndpointsAndIsAdmin | async) {
+      @if (userEndpointsAndIsAdminSignal()) {
         <app-checkbox
           appInput
           name="createSystemEndpoint"

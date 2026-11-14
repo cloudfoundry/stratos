@@ -356,7 +356,7 @@ describe('CreateEndpointCfStep1Component', () => {
       component = fixture.componentInstance;
       // The scope (system or personal) comes from permissions this test
       // does not set up; the address comparison is the same in each.
-      component.customEndpoints = component.existingEndpoints;
+      component.customEndpointsSignal = component.existingEndpointsSignal;
       await fixture.whenStable();
     }
 

@@ -1,21 +1,38 @@
-import { Observable, combineLatest } from 'rxjs';
-import { filter, map } from 'rxjs/operators';
+import { Observable } from 'rxjs';
+import { filter } from 'rxjs/operators';
 import { toObservable } from '@angular/core/rxjs-interop';
-import { Injector } from '@angular/core';
+import { Injector, Signal, computed } from '@angular/core';
 
-import { EndpointsDataService, endpointUrlKey, getFullEndpointApiUrl, UserProfileInfo } from '@stratosui/store';
+import { EndpointModel, EndpointsDataService, endpointUrlKey, getFullEndpointApiUrl } from '@stratosui/store';
 import { CurrentUserPermissionsService } from '../../../core/permissions/current-user-permissions.service';
 import { StratosCurrentUserPermissions } from '../../../core/permissions/stratos-user-permissions.checker';
+import { SessionSignalService } from '../../../core/signals/session-signal.service';
 import { UserProfileService } from '../../../core/user-profile.service';
 import { SessionService } from '../../../shared/services/session.service';
 
-type EndpointObservable = Observable<{
-  names: string[],
-  /** Address keys (endpointUrlKey): compare a typed address through urlKey. */
-  urls: string[],
-}>;
+/** Endpoint names and address keys (endpointUrlKey: compare a typed address through urlKey). */
+export interface ExistingEndpoints {
+  names: string[];
+  urls: string[];
+}
+type EndpointObservable = Observable<ExistingEndpoints>;
+
+const summarize = (endpoints: EndpointModel[]): ExistingEndpoints => ({
+  names: endpoints.map(ep => ep.name),
+  urls: endpoints.map(ep => endpointUrlKey(getFullEndpointApiUrl(ep))),
+});
 
 export class CreateEndpointHelperComponent {
+
+  // The signals are the source. The Observables are kept for the Git
+  // registration form, which has not moved to the signals yet.
+  existingEndpointsSignal: Signal<ExistingEndpoints>;
+  existingSystemEndpointsSignal: Signal<ExistingEndpoints>;
+  /** Null until the user's profile is known. */
+  existingPersonalEndpointsSignal: Signal<ExistingEndpoints | null>;
+  /** Null until the user's profile is known, as it needs the personal list. */
+  customEndpointsSignal: Signal<ExistingEndpoints | null>;
+  userEndpointsAndIsAdminSignal: Signal<boolean>;
 
   userEndpointsAndIsAdmin: Observable<boolean>;
   customEndpoints: EndpointObservable;
@@ -39,66 +56,42 @@ export class CreateEndpointHelperComponent {
     if (!endpointsData || !injector) {
       throw new Error('CreateEndpointHelperComponent requires EndpointsDataService + Injector — supply them via the subclass super() call.');
     }
-    const currentPage$ = toObservable(endpointsData.endpointsList, { injector });
-    this.existingSystemEndpoints = currentPage$.pipe(
-      map(endpoints => ({
-        names: endpoints.filter(ep => ep.creator.system).map(ep => ep.name),
-        urls: endpoints.filter(ep => ep.creator.system).map(ep => endpointUrlKey(getFullEndpointApiUrl(ep))),
-      }))
-    );
+    const endpoints = endpointsData.endpointsList;
+    this.existingEndpointsSignal = computed(() => summarize(endpoints()));
+    this.existingSystemEndpointsSignal = computed(() => summarize(endpoints().filter(ep => ep.creator.system)));
     // The personal endpoints are matched on the user's name, so they wait for
     // the profile.
     this.userProfileService.loadUserProfile();
-    const userProfile$ = toObservable(this.userProfileService.userProfile, { injector }).pipe(
-      filter((profile): profile is UserProfileInfo => !!profile)
-    );
-    this.existingPersonalEndpoints = combineLatest([
-      currentPage$,
-      userProfile$
-    ]).pipe(
-      map(([endpoints, profile]) => ({
-        names: endpoints.filter(ep => !ep.creator.system && ep.creator.name === profile.userName).map(ep => ep.name),
-        urls: endpoints.filter(ep => !ep.creator.system && ep.creator.name === profile.userName).map(ep => endpointUrlKey(getFullEndpointApiUrl(ep))),
-      }))
-    );
-    this.existingEndpoints = currentPage$.pipe(
-      map(endpoints => ({
-        names: endpoints.map(ep => ep.name),
-        urls: endpoints.map(ep => endpointUrlKey(getFullEndpointApiUrl(ep))),
-      }))
-    );
+    const userProfile = this.userProfileService.userProfile;
+    this.existingPersonalEndpointsSignal = computed(() => {
+      const profile = userProfile();
+      return profile
+        ? summarize(endpoints().filter(ep => !ep.creator.system && ep.creator.name === profile.userName))
+        : null;
+    });
 
-    const isAdmin = toObservable(
-      this.currentUserPermissionsService.can(StratosCurrentUserPermissions.EDIT_ADMIN_ENDPOINT),
-      { injector },
-    );
-    const userEndpointsNotDisabled = this.sessionService.userEndpointsNotDisabled();
+    const isAdmin = this.currentUserPermissionsService.can(StratosCurrentUserPermissions.EDIT_ADMIN_ENDPOINT);
+    const userEndpointsNotDisabled = injector.get(SessionSignalService).userEndpointsNotDisabled;
+    this.userEndpointsAndIsAdminSignal = computed(() => isAdmin() && userEndpointsNotDisabled());
+    this.customEndpointsSignal = computed(() => {
+      const personal = this.existingPersonalEndpointsSignal();
+      if (!personal) {
+        return null;
+      }
+      if (!userEndpointsNotDisabled()) {
+        return this.existingEndpointsSignal();
+      }
+      return isAdmin() ? this.existingSystemEndpointsSignal() : personal;
+    });
 
-    this.userEndpointsAndIsAdmin = combineLatest([
-      isAdmin,
-      userEndpointsNotDisabled
-    ]).pipe(
-      map(([admin, userEndpoints]) => admin && userEndpoints)
+    this.existingEndpoints = toObservable(this.existingEndpointsSignal, { injector });
+    this.existingSystemEndpoints = toObservable(this.existingSystemEndpointsSignal, { injector });
+    this.existingPersonalEndpoints = toObservable(this.existingPersonalEndpointsSignal, { injector }).pipe(
+      filter((personal): personal is ExistingEndpoints => !!personal)
     );
-
-    this.customEndpoints = combineLatest([
-      userEndpointsNotDisabled,
-      isAdmin,
-      this.existingEndpoints,
-      this.existingSystemEndpoints,
-      this.existingPersonalEndpoints
-    ]).pipe(
-      map(([userEndpointsEnabled, admin, endpoints, systemEndpoints, personalEndpoints]) => {
-        if (userEndpointsEnabled){
-          if (admin){
-            return systemEndpoints;
-          }else{
-            return personalEndpoints;
-          }
-        }
-        return endpoints;
-      })
+    this.userEndpointsAndIsAdmin = toObservable(this.userEndpointsAndIsAdminSignal, { injector });
+    this.customEndpoints = toObservable(this.customEndpointsSignal, { injector }).pipe(
+      filter((custom): custom is ExistingEndpoints => !!custom)
     );
-
   }
 }

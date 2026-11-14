@@ -15,7 +15,7 @@ import {
   entityCatalog,
   getFullEndpointApiUrl,
 } from '@stratosui/store';
-import { combineLatest, firstValueFrom, Observable, of } from 'rxjs';
+import { combineLatest, Observable, of } from 'rxjs';
 import { catchError, map, startWith, switchMap } from 'rxjs/operators';
 
 import { getIdFromRoute } from '../../../../core/utils.service';
@@ -444,7 +444,7 @@ export class CreateEndpointCfStep1Component extends CreateEndpointHelperComponen
     if (!result.error) {
       this.registered.set({
         ...data,
-        personal: await this.isPersonal(data.guid),
+        personal: this.isPersonal(data.guid),
         skipSSL: sslAllow,
         caCert: showCA ? (this.registerForm.value.caCertField ?? '') : '',
       });
@@ -477,10 +477,10 @@ export class CreateEndpointCfStep1Component extends CreateEndpointHelperComponen
   }
 
   // Personal = created by a user, not the system.
-  private async isPersonal(guid: string): Promise<boolean> {
+  private isPersonal(guid: string): boolean {
     return isPersonalEndpoint(
       this.endpointsData.endpoints().get(guid),
-      await firstValueFrom(this.userEndpointsAndIsAdmin),
+      this.userEndpointsAndIsAdminSignal(),
       !!this.registerForm.value.createSystemEndpointField,
     );
   }
