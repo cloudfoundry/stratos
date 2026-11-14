@@ -479,6 +479,83 @@ describe('AppDetailDataService', () => {
     httpMock.expectNone(STATS_URL);
   });
 
+  // A poll asks for one kind again. The kinds already loaded keep their
+  // data and are not fetched again: a request built anew starts the
+  // resource over, its value goes undefined, and the tab that shows it
+  // is removed and drawn again (its open parts closed, focus lost).
+  it('refresh("stats") after a full load re-reads only the stats and keeps the loaded data', async () => {
+    const all = svc.refresh('all');
+    await tick();
+    httpMock.expectOne(DETAIL_URL).flush(MOCK_APP_DETAIL);
+    httpMock.expectOne(ENV_URL).flush(MOCK_ENV);
+    await tick();
+    httpMock.expectOne(STATS_URL).flush(MOCK_STATS_RESPONSE);
+    await tick();
+    httpMock.expectOne(`/pp/v1/cf/spaces/cnsi-1/sp-1`).flush(MOCK_SPACE);
+    await tick();
+    httpMock.expectOne(`/pp/v1/cf/org/cnsi-1/org-1`).flush(MOCK_ORG);
+    await tick();
+    httpMock.expectOne(`/pp/v1/cf/org/cnsi-1/org-1/private_domains`).flush(MOCK_DOMAINS_RESPONSE);
+    await all;
+
+    const stats = svc.refresh('stats');
+    await tick();
+    expect(svc.appDetail()).toEqual(MOCK_APP_DETAIL);
+    expect(svc.space()).toEqual(MOCK_SPACE);
+    httpMock.expectNone(DETAIL_URL);
+    httpMock.expectNone(ENV_URL);
+    httpMock.expectNone(`/pp/v1/cf/spaces/cnsi-1/sp-1`);
+    httpMock.expectNone(`/pp/v1/cf/org/cnsi-1/org-1`);
+    httpMock.expectNone(`/pp/v1/cf/org/cnsi-1/org-1/private_domains`);
+    httpMock.expectOne(STATS_URL).flush(MOCK_STATS_RESPONSE);
+    await stats;
+    expect(svc.appDetail()).toEqual(MOCK_APP_DETAIL);
+    expect(svc.envVars()).toEqual(MOCK_ENV);
+    expect(svc.org()).toEqual(MOCK_ORG);
+  });
+
+  async function loadAll(): Promise<void> {
+    const all = svc.refresh('all');
+    await tick();
+    httpMock.expectOne(DETAIL_URL).flush(MOCK_APP_DETAIL);
+    httpMock.expectOne(ENV_URL).flush(MOCK_ENV);
+    await tick();
+    httpMock.expectOne(STATS_URL).flush(MOCK_STATS_RESPONSE);
+    await tick();
+    httpMock.expectOne(`/pp/v1/cf/spaces/cnsi-1/sp-1`).flush(MOCK_SPACE);
+    await tick();
+    httpMock.expectOne(`/pp/v1/cf/org/cnsi-1/org-1`).flush(MOCK_ORG);
+    await tick();
+    httpMock.expectOne(`/pp/v1/cf/org/cnsi-1/org-1/private_domains`).flush(MOCK_DOMAINS_RESPONSE);
+    await all;
+  }
+
+  it('refresh("routes") after a full load asks for the routes and keeps the loaded data', async () => {
+    await loadAll();
+    const routes = svc.refresh('routes');
+    await tick();
+    expect(svc.appDetail()).toEqual(MOCK_APP_DETAIL);
+    httpMock.expectNone(DETAIL_URL);
+    httpMock.expectNone(ENV_URL);
+    httpMock.expectOne(ROUTES_URL).flush(MOCK_ROUTES_RESPONSE);
+    await routes;
+    expect(svc.appDetail()).toEqual(MOCK_APP_DETAIL);
+    expect(svc.space()).toEqual(MOCK_SPACE);
+  });
+
+  it('refresh("app") after a full load keeps the space, which comes from the same space guid', async () => {
+    await loadAll();
+    const app = svc.refresh('app');
+    await tick();
+    httpMock.expectOne(DETAIL_URL).flush({ ...MOCK_APP_DETAIL, sshEnabled: false });
+    await app;
+    await tick();
+    httpMock.expectNone(`/pp/v1/cf/spaces/cnsi-1/sp-1`);
+    expect(svc.appDetail()?.sshEnabled).toBe(false);
+    expect(svc.space()).toEqual(MOCK_SPACE);
+    expect(svc.org()).toEqual(MOCK_ORG);
+  });
+
   // -------------------------------------------------------------------------
   // loading / error signal lifecycle
   // -------------------------------------------------------------------------

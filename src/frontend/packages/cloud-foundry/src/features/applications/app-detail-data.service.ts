@@ -89,8 +89,13 @@ export class AppDetailDataService {
   // but routes and serviceBindings, which wait for their own refresh(kind)).
   private readonly _wanted = signal<ReadonlySet<EntityKind>>(new Set());
   private readonly _urls: Partial<Record<EntityKind, string>> = {};
+  // The URL is a computed string, so a resource sees a new request only when
+  // its URL text changes. A request built anew (a refresh of another kind
+  // replaces _wanted; a reloaded app detail is a new object) starts the
+  // resource over: its value goes undefined and the views on it are drawn again.
   private want(kind: EntityKind, url: () => string | undefined): () => string | undefined {
-    return () => (this._urls[kind] = this._wanted().has(kind) ? url() : undefined);
+    const current = computed(() => (this._wanted().has(kind) ? url() : undefined));
+    return () => (this._urls[kind] = current());
   }
   private appUrl(path = ''): string | undefined {
     const { cnsi, app } = this._ids();
