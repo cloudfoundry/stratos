@@ -847,6 +847,57 @@ func TestBuildCNSIListHidesOnlyTheSameTypeOfSystemEndpoint(t *testing.T) {
 	})
 }
 
+// The list compares addresses the way connect and login do (endpointURLKey):
+// host case and a written-out default port do not make a different address;
+// another port does.
+func TestBuildCNSIListHidesBySameAddressNotSameString(t *testing.T) {
+	t.Parallel()
+
+	Convey("Listing endpoints for an endpoint admin with user endpoints on", t, func() {
+		ctrl := gomock.NewController(t)
+		mockStratosAuth := mock_api.NewMockStratosAuth(ctrl)
+		defer ctrl.Finish()
+
+		pp, db, mock := setupPortalProxyWithAuthService(mockStratosAuth)
+		defer db.Close()
+		pp.GetConfig().UserEndpointsEnabled = config.UserEndpointsConfigEnum.Enabled
+
+		res := httptest.NewRecorder()
+		req := setupMockReq("GET", "", nil)
+		_, ctx := setupEchoContext(res, req)
+
+		user := setupMockUser(mockUserGUID, false, []string{"stratos.endpointadmin"})
+		if errSession := pp.setSessionValues(ctx, user.SessionValues); errSession != nil {
+			t.Error(errors.New("unable to mock/stub user in session object"))
+		}
+		mockStratosAuth.EXPECT().GetUser(gomock.Eq(user.ConnectedUser.GUID)).Return(user.ConnectedUser, nil)
+
+		row := func(name, url, creator string, admin bool) []driver.Value {
+			args := createEndpointRowArgs(name, url, mockAuthEndpoint, mockTokenEndpoint, creator, admin)
+			args[0] = name
+			return args
+		}
+		ownRows := testutils.GetEmptyCNSIRows().
+			AddRow(row("own-cf", "https://API.example.com:443", user.ConnectedUser.GUID, false)...)
+		systemRows := testutils.GetEmptyCNSIRows().
+			AddRow(row("system-cf", "https://api.example.com", "", true)...).
+			AddRow(row("system-cf-other-port", "https://api.example.com:8443", "", true)...)
+
+		mock.ExpectQuery(selectCreatorFromCNSIs).WithArgs(user.ConnectedUser.GUID).WillReturnRows(ownRows)
+		mock.ExpectQuery(selectCreatorFromCNSIs).WithArgs("").WillReturnRows(systemRows)
+
+		list, err := pp.buildCNSIList(ctx)
+		So(err, ShouldBeNil)
+		So(mock.ExpectationsWereMet(), ShouldBeNil)
+
+		names := []string{}
+		for _, endpoint := range list {
+			names = append(names, endpoint.Name)
+		}
+		So(names, ShouldResemble, []string{"own-cf", "system-cf-other-port"})
+	})
+}
+
 // Regression for the migrated endpoint-edit flow: the frontend PUTs the
 // endpoint id only in the URL path (POST /pp/v1/endpoints/:id). Before
 // UpdateEndpointParams gained the param:"id" tag, Bind left params.ID
