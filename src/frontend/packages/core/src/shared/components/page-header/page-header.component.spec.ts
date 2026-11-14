@@ -19,6 +19,7 @@ import { GlobalEventService } from '../../global-events.service';
 import { TailwindSnackBarService } from '../../services/tailwind-snackbar.service';
 import { environment } from '../../../environments/environment';
 import { PageHeaderComponent } from './page-header.component';
+import { ShowPageHeaderComponent } from './show-page-header/show-page-header.component';
 
 describe('PageHeaderComponent', () => {
   let component: PageHeaderComponent;
@@ -61,6 +62,51 @@ describe('PageHeaderComponent', () => {
 
   it('should be created', () => {
     expect(component).toBeTruthy();
+  });
+
+  // The header renders through a portal, in the page that shows it.
+  describe('menus in the shown header', () => {
+    let shown: ComponentFixture<ShowPageHeaderComponent>;
+    const el = (selector: string) => (shown.nativeElement as HTMLElement).querySelector<HTMLElement>(selector);
+
+    beforeEach(async () => {
+      shown = TestBed.createComponent(ShowPageHeaderComponent);
+      await shown.whenStable();
+    });
+
+    it('opens the user menu on click and closes it on Escape', async () => {
+      expect(el('#userMenuPanel')).toBeNull();
+
+      el('#userMenu')!.click();
+      await shown.whenStable();
+      expect(el('#userMenuPanel')).not.toBeNull();
+      expect(el('#userMenu')!.getAttribute('aria-expanded')).toBe('true');
+
+      document.dispatchEvent(new KeyboardEvent('keydown', { key: 'Escape' }));
+      await shown.whenStable();
+      expect(el('#userMenuPanel')).toBeNull();
+      expect(el('#userMenu')!.getAttribute('aria-expanded')).toBe('false');
+    });
+
+    it('opens the token menu on click and closes it on Escape', async () => {
+      el('#tokenMenu')!.click();
+      await shown.whenStable();
+      expect(el('#tokenMenuPanel')).not.toBeNull();
+
+      document.dispatchEvent(new KeyboardEvent('keydown', { key: 'Escape' }));
+      await shown.whenStable();
+      expect(el('#tokenMenuPanel')).toBeNull();
+    });
+
+    it('opens one menu at a time', async () => {
+      el('#userMenu')!.click();
+      await shown.whenStable();
+      el('#tokenMenu')!.click();
+      await shown.whenStable();
+
+      expect(el('#tokenMenuPanel')).not.toBeNull();
+      expect(el('#userMenuPanel')).toBeNull();
+    });
   });
 
   // The avatar shows a Gravatar only while the dashboard allows it.
@@ -283,16 +329,16 @@ describe('PageHeaderComponent', () => {
     });
 
     it('toggleTokenMenu flips isTokenMenuOpen and closes the other menus', () => {
-      component.isHistoryMenuOpen = true;
-      component.isUserMenuOpen = true;
+      component.isHistoryMenuOpen.set(true);
+      component.isUserMenuOpen.set(true);
       component.toggleTokenMenu();
 
-      expect(component.isTokenMenuOpen).toBe(true);
-      expect(component.isHistoryMenuOpen).toBe(false);
-      expect(component.isUserMenuOpen).toBe(false);
+      expect(component.isTokenMenuOpen()).toBe(true);
+      expect(component.isHistoryMenuOpen()).toBe(false);
+      expect(component.isUserMenuOpen()).toBe(false);
 
       component.closeTokenMenu();
-      expect(component.isTokenMenuOpen).toBe(false);
+      expect(component.isTokenMenuOpen()).toBe(false);
     });
 
     it('copyToken copies the auth token value and shows a success snackbar', async () => {

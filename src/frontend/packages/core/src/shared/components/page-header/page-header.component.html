@@ -101,10 +101,10 @@
                   matTooltip="Copy UAA tokens"
                   aria-label="Copy UAA tokens"
                   aria-controls="tokenMenuPanel"
-                  [attr.aria-expanded]="isTokenMenuOpen">
+                  [attr.aria-expanded]="isTokenMenuOpen()">
                   <span aria-hidden="true" class="material-icons">vpn_key</span>
                 </button>
-                @if (isTokenMenuOpen) {
+                @if (isTokenMenuOpen()) {
                   <div id="tokenMenuPanel"
                     class="absolute right-0 top-full mt-2 bg-content-bg rounded-lg shadow-lg border border-content-border z-50">
                     <div class="page-header-token p-4 w-64">
@@ -137,12 +137,12 @@
                   matTooltip="Recent activity"
                   aria-label="Recent activity"
                   aria-controls="historyMenuPanel"
-                  [attr.aria-expanded]="isHistoryMenuOpen"
+                  [attr.aria-expanded]="isHistoryMenuOpen()"
                   (click)="toggleHistoryMenu()">
                   <span aria-hidden="true" class="material-icons">schedule</span>
                 </button>
                 <!-- History dropdown menu -->
-                @if (isHistoryMenuOpen) {
+                @if (isHistoryMenuOpen()) {
                   <div id="historyMenuPanel"
                     class="absolute right-0 top-full mt-2 bg-content-bg rounded-lg shadow-lg border border-content-border z-50">
                     <div class="page-header-history p-4 w-80">
@@ -182,13 +182,13 @@
                   matTooltip="User menu"
                   aria-label="User menu"
                   aria-controls="userMenuPanel"
-                  [attr.aria-expanded]="isUserMenuOpen"
+                  [attr.aria-expanded]="isUserMenuOpen()"
                   (click)="toggleUserMenu()">
                   <app-user-avatar color="header" [allowGravatar]="allowGravatar()" [user]="user()">
                   </app-user-avatar>
                 </button>
                 <!-- User dropdown menu -->
-                @if (isUserMenuOpen) {
+                @if (isUserMenuOpen()) {
                   <div id="userMenuPanel"
                     class="absolute right-0 top-full mt-2 bg-content-bg rounded-lg shadow-lg border border-content-border z-50">
                     <div class="page-header-menu-inner p-4 w-64">
