@@ -1,6 +1,6 @@
 import { CommonModule } from '@angular/common';
 import { HttpClient } from '@angular/common/http';
-import { Component, OnDestroy, OnInit, ChangeDetectionStrategy, inject } from '@angular/core';
+import { Component, OnDestroy, OnInit, ChangeDetectionStrategy, effect, inject, untracked } from '@angular/core';
 import { toObservable } from '@angular/core/rxjs-interop';
 import { ReactiveFormsModule, Validators, FormBuilder, FormControl, FormGroup } from '@angular/forms';
 import { ErrorStateMatcher, ShowOnDirtyErrorStateMatcher } from '@stratosui/core';
@@ -16,7 +16,6 @@ import {
   DeployApplicationState,
   DockerAppDetails,
   OverrideAppDetails,
-  SourceType,
 } from '../../../../store/types/deploy-application.types';
 import {
   ApplicationEnvVarsHelper } from '../../application/application-tabs-base/tabs/build-tab/application-env-vars.service';
@@ -63,9 +62,7 @@ export class DeployApplicationOptionsStepComponent implements OnInit, OnDestroy 
   private appEnvVarsService = inject(ApplicationEnvVarsHelper);
   private activatedRoute = inject(ActivatedRoute);
   private deployData = inject(CfDeployAppDataService);
-  private deployState$ = toObservable(this.deployData.state);
   private deployCfDetails$ = toObservable(this.deployData.cfDetails);
-  private deploySourceType$ = toObservable(this.deployData.sourceType);
 
 
   valid$: Observable<boolean>;
@@ -77,7 +74,7 @@ export class DeployApplicationOptionsStepComponent implements OnInit, OnDestroy 
   stepOpts: any;
 
   public healthCheckTypes = ['http', 'port', 'process'];
-  public sourceType$!: Observable<SourceType | undefined>;
+  readonly sourceType = this.deployData.sourceType;
   public DEPLOY_TYPES_IDS = DEPLOY_TYPES_IDS;
 
   constructor() {
@@ -107,6 +104,21 @@ export class DeployApplicationOptionsStepComponent implements OnInit, OnDestroy 
       ]),
       dockerImage: new FormControl<string | null>(null),
       dockerUsername: new FormControl<string | null>(null)
+    });
+    // Set previously supplied docker values
+    effect(() => {
+      const source = this.deployData.state()?.applicationSource;
+      const docker = source?.dockerDetails;
+      if (!docker?.applicationName) {
+        return;
+      }
+      untracked(() => {
+        if (source.type.id === DEPLOY_TYPES_IDS.DOCKER_IMG) {
+          this.deployOptionsForm.controls.name.setValue(docker.applicationName ?? null);
+          this.deployOptionsForm.controls.dockerImage.setValue(docker.dockerImage ?? null);
+          this.deployOptionsForm.controls.dockerUsername.setValue(docker.dockerUsername ?? null);
+        }
+      });
     });
     this.valid$ = this.deployOptionsForm.valueChanges.pipe(
       map(() => this.deployOptionsForm.valid),
@@ -167,26 +179,6 @@ export class DeployApplicationOptionsStepComponent implements OnInit, OnDestroy 
   }
 
   ngOnInit() {
-    this.sourceType$ = this.deploySourceType$;
-
-    // Set previously supplied docker values
-    this.subs.push(this.deployState$.pipe(
-      filter((deployAppState): deployAppState is DeployApplicationState & {
-        applicationSource: DeployApplicationSource & { dockerDetails: DockerAppDetails };
-      } =>
-        !!deployAppState &&
-        !!deployAppState.applicationSource &&
-        !!deployAppState.applicationSource.dockerDetails &&
-        !!deployAppState.applicationSource.dockerDetails.applicationName),
-    ).subscribe(deployAppState => {
-      const sourceType = deployAppState.applicationSource.type;
-      if (sourceType.id === DEPLOY_TYPES_IDS.DOCKER_IMG) {
-        this.deployOptionsForm.controls.name.setValue(deployAppState.applicationSource.dockerDetails.applicationName ?? null);
-        this.deployOptionsForm.controls.dockerImage.setValue(deployAppState.applicationSource.dockerDetails.dockerImage ?? null);
-        this.deployOptionsForm.controls.dockerUsername.setValue(deployAppState.applicationSource.dockerDetails.dockerUsername ?? null);
-      }
-    }));
-
     const noRouteChanged$ = this.deployOptionsForm.controls.no_route.valueChanges.pipe(startWith(false));
     const randomRouteChanged$ = this.deployOptionsForm.controls.random_route.valueChanges.pipe(startWith(false));
 

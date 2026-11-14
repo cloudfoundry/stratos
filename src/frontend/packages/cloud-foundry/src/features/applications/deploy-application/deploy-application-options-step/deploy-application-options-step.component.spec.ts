@@ -32,7 +32,7 @@ describe('DeployApplicationOptionsStepComponent', () => {
 
     fixture = TestBed.createComponent(DeployApplicationOptionsStepComponent);
     component = fixture.componentInstance;
-    fixture.detectChanges();
+    await fixture.whenStable();
   });
 
   it('should create', () => {
@@ -69,7 +69,6 @@ describe('DeployApplicationOptionsStepComponent', () => {
 
   it('names every text field and drop-down with a visible label', async () => {
     TestBed.inject(CfDeployAppDataService).setSourceType({ id: DEPLOY_TYPES_IDS.GIT_URL, name: 'Git URL' });
-    fixture.detectChanges();
     await fixture.whenStable();
 
     const root: HTMLElement = fixture.nativeElement;
@@ -85,5 +84,17 @@ describe('DeployApplicationOptionsStepComponent', () => {
         expect(label?.textContent?.trim()).toBe(field.placeholder);
       }
     }
+  });
+
+  // A redeploy of a docker app brings its image details back into the form
+  it('fills the docker fields from the deploy state', async () => {
+    const deployData = TestBed.inject(CfDeployAppDataService);
+    deployData.setSourceType({ id: DEPLOY_TYPES_IDS.DOCKER_IMG, name: 'Docker Image' });
+    deployData.saveAppDetails(null, { applicationName: 'my-app', dockerImage: 'repo/img:1', dockerUsername: 'someone' });
+    await fixture.whenStable();
+
+    expect(component.deployOptionsForm.getRawValue()).toEqual(expect.objectContaining({
+      name: 'my-app', dockerImage: 'repo/img:1', dockerUsername: 'someone',
+    }));
   });
 });

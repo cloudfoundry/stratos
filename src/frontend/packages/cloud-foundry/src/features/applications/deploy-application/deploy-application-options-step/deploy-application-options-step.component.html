@@ -1,6 +1,6 @@
 <form [formGroup]="deployOptionsForm" validate class="stepper-form deploy-options">
   <div class="deploy-options__description">Override the manifest using the following options</div>
-  @if ((sourceType$ | async); as sourceType) {
+  @if (sourceType(); as sourceType) {
     <div class="deploy-options__form-sections">
       <div class="deploy-options__form-sections__form-section">
         <!--- Section -->
