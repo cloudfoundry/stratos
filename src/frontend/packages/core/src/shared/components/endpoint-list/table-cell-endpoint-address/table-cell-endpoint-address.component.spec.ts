@@ -37,7 +37,7 @@ describe('TableCellEndpointAddressComponent', () => {
     }).compileComponents();
   });
 
-  beforeEach(() => {
+  beforeEach(async () => {
     fixture = TestBed.createComponent(TableCellEndpointAddressComponent);
     component = fixture.componentInstance;
     seedEndpointsDataService([
@@ -45,7 +45,7 @@ describe('TableCellEndpointAddressComponent', () => {
       { guid: 'ep-2', api_endpoint: { Scheme: 'https', Host: 'two.example.com', Path: '' } },
     ] as EndpointModel[]);
     fixture.componentRef.setInput('row', { guid: 'ep-1' });
-    fixture.detectChanges();
+    await fixture.whenStable();
   });
 
   it('should create', () => {
