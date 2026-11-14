@@ -11,8 +11,6 @@ describe('KubernetesNamespaceService', () => {
   const refresh = vi.fn().mockResolvedValue(undefined);
   const namespaceDataStub = { refresh };
 
-  let svc: KubernetesNamespaceService;
-
   beforeEach(() => {
     vi.clearAllMocks();
     TestBed.resetTestingModule();
@@ -25,7 +23,7 @@ describe('KubernetesNamespaceService', () => {
         KubernetesNamespaceService,
       ],
     });
-    svc = TestBed.inject(KubernetesNamespaceService);
+    TestBed.inject(KubernetesNamespaceService);
   });
 
   it('refreshes the per-endpoint namespace cache', () => {

@@ -19,7 +19,6 @@ import {
 import { ResourceAlert, ResourceAlertLevel } from '../../../../services/analysis-report.types';
 import { KubernetesAnalysisService } from '../../../../services/kubernetes.analysis.service';
 import {
-  HelmReleaseGraph,
   HelmReleaseGraphLink,
   HelmReleaseGraphNode,
   HelmReleaseGraphNodeData,
