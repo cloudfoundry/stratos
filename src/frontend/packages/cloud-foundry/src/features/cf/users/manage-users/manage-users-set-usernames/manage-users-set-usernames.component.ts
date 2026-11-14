@@ -2,8 +2,6 @@ import { HttpClient } from '@angular/common/http';
 import { Component, OnInit, Signal, signal, computed, effect, untracked, ChangeDetectionStrategy, inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
-import { toObservable } from '@angular/core/rxjs-interop';
-import { Observable } from 'rxjs';
 
 import {
   AppInputDirective,
@@ -74,7 +72,6 @@ export class ManageUsersSetUsernamesComponent implements OnInit {
   };
 
   public stateIn = signal<StackedInputActionsState[]>([]);
-  public stateIn$: Observable<StackedInputActionsState[]>;
 
   constructor() {
     const activeRouteCfOrgSpace = this.activeRouteCfOrgSpace;
@@ -82,7 +79,6 @@ export class ManageUsersSetUsernamesComponent implements OnInit {
     const userPerms = inject(CurrentUserPermissionsService);
     const http = inject(HttpClient);
 
-    this.stateIn$ = toObservable(this.stateIn);
     const ffSetPermConfig = new PermissionConfig(CfPermissionTypes.FEATURE_FLAG, CFFeatureFlagTypes.set_roles_by_username);
     const ffRemovePermConfig = new PermissionConfig(CfPermissionTypes.FEATURE_FLAG, CFFeatureFlagTypes.unset_roles_by_username);
     const canSet = userPerms.can(ffSetPermConfig, activeRouteCfOrgSpace.cfGuid);

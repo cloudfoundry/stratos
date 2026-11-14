@@ -9,8 +9,6 @@ import {
 } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
-import { toObservable } from '@angular/core/rxjs-interop';
-import { Observable } from 'rxjs';
 
 import {
   MAT_DIALOG_DATA,
@@ -154,7 +152,6 @@ export class AddUserDialogComponent {
   });
 
   protected stateIn: WritableSignal<StackedInputActionsState[]> = signal<StackedInputActionsState[]>([]);
-  protected stateIn$: Observable<StackedInputActionsState[]> = toObservable(this.stateIn);
 
   // ── Constructor ───────────────────────────────────────────────────────────
 

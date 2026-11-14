@@ -57,7 +57,7 @@
   <!-- Identity input (usernames in associate mode, emails in invite mode) -->
   <div>
     <app-stacked-input-actions
-      [stateIn$]="stateIn$"
+      [stateIn]="stateIn()"
       [stackedActionConfig]="stackedActionConfig()"
       (stateOut)="onIdentities($event)"
     ></app-stacked-input-actions>
