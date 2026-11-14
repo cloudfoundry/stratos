@@ -5,6 +5,7 @@ import { TailwindDialogService } from './shared/services/tailwind-dialog.service
 import { AuthState, observeSignal } from '@stratosui/store';
 
 import { DashboardState } from './core/dashboard-data.service';
+
 import { combineLatest, fromEvent, interval, merge, Subscription } from 'rxjs';
 import { tap, withLatestFrom } from 'rxjs/operators';
 
@@ -26,10 +27,9 @@ export class LoggedInService {
   private dashboardSignals = inject(DashboardSignalService);
   private injector = inject(Injector);
 
-  // Bridge signals → observables once at construction time so the
+  // Bridge the signal → observable once at construction time so the
   // injection context is available for toObservable().
   private auth$ = toObservable(this.authSignals.auth);
-  private dashboardState$ = toObservable(this.dashboardSignals.dashboard);
 
   private userInteractionChecker!: Subscription;
   private lastUserInteraction = Date.now();
@@ -109,15 +109,12 @@ export class LoggedInService {
     const intervalTime = this.checkSessionInterval || 5000;
     this.sessionChecker = interval(intervalTime)
       .pipe(
-        withLatestFrom(
-          this.dashboardState$,
-          this.auth$
-        ),
-        tap(([, dashboardState, authState]) => {
+        withLatestFrom(this.auth$),
+        tap(([, authState]) => {
           if (!authState) {
             return;
           }
-          this._checkSession(dashboardState, authState);
+          this._checkSession(this.dashboardSignals.dashboard(), authState);
         })
       ).subscribe();
   }
