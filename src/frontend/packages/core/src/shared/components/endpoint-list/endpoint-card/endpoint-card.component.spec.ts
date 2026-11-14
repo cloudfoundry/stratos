@@ -7,7 +7,7 @@ import { provideHttpClientTesting } from '@angular/common/http/testing';
 import { describe, it, expect, beforeEach, vi } from 'vitest';
 import { of } from 'rxjs';
 import { EndpointModel, UserFavoriteManager, entityCatalog, EntityCatalogTestModuleManualStore, generateStratosEntities, TEST_CATALOGUE_ENTITIES } from '@stratosui/store';
-import { createBasicStoreModule, STORE_TEST_PROVIDERS } from '@stratosui/store/testing';
+import { createBasicStoreModule, seedEndpointsDataService, STORE_TEST_PROVIDERS } from '@stratosui/store/testing';
 import { CurrentUserPermissionsService } from '@stratosui/core';
 import { SessionSignalService } from '../../../../core/signals/session-signal.service';
 import { StratosCurrentUserPermissions } from '../../../../core/permissions/stratos-user-permissions.checker';
@@ -114,6 +114,23 @@ describe('EndpointCardComponent', () => {
     sessionSignals.userEndpointsEnabled.set(true);
     await card.whenStable();
     expect(text()).toContain('Creator');
+  });
+
+  it('warns while another endpoint shares the address, and stops when it goes', async () => {
+    const warning = () => fixture.nativeElement.querySelector('span[aria-label="Another endpoint is registered at this URL"]');
+    const ep = (guid: string) => ({ guid, cnsi_type: 'metrics', creator: { name: 'a', admin: false, system: true }, api_endpoint: { Scheme: 'https', Host: 'one.example.com', Path: '' } }) as EndpointModel;
+    fixture.componentRef.setInput('row', ep('ep-1'));
+    seedEndpointsDataService([ep('ep-1')]);
+    await fixture.whenStable();
+    expect(warning()).toBeNull();
+
+    seedEndpointsDataService([ep('ep-1'), ep('ep-2')]);
+    await fixture.whenStable();
+    expect(warning()).not.toBeNull();
+
+    seedEndpointsDataService([ep('ep-1')]);
+    await fixture.whenStable();
+    expect(warning()).toBeNull();
   });
 
   // The card navigated on click only: no link, role or tab stop, so keyboard

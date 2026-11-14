@@ -2,7 +2,6 @@ import { CommonModule } from '@angular/common';
 import { ChangeDetectionStrategy, Component, ComponentRef, OnDestroy, OnInit, ViewContainerRef, ChangeDetectorRef, computed, effect, inject, input, untracked, viewChild } from '@angular/core';
 import { CustomTooltipDirective } from '../../custom-tooltip/custom-tooltip.directive';
 import { RouterModule } from '@angular/router';
-import { toObservable } from '@angular/core/rxjs-interop';
 import {
   EndpointModel,
   entityCatalog,
@@ -16,7 +15,6 @@ import {
 
 import { EndpointsSignalService } from '../../../../core/signals/endpoints-signal.service';
 import { Observable, Subscription } from 'rxjs';
-import { map } from 'rxjs/operators';
 
 import { EndpointsService } from '../../../../core/endpoints.service';
 import { safeUnsubscribe } from '../../../../core/utils.service';
@@ -66,7 +64,6 @@ import { DisableRouterLinkDirective } from '../../../../core/disable-router-link
 })
 export class EndpointCardComponent extends CardCell<EndpointModel> implements OnInit, OnDestroy {
   private endpointsSignal = inject(EndpointsSignalService);
-  private endpoints$ = toObservable(this.endpointsSignal.endpoints);
   private endpointListHelper = inject(EndpointListHelper);
   private userFavoriteManager = inject(UserFavoriteManager);
   private currentUserPermissionsService = inject(CurrentUserPermissionsService);
@@ -82,11 +79,9 @@ export class EndpointCardComponent extends CardCell<EndpointModel> implements On
     return row?.cnsi_type ? entityCatalog.getEndpoint(row.cnsi_type, row.sub_type) : undefined;
   });
   public readonly address = computed(() => getFullEndpointApiUrl(this.row()));
-  public readonly isDuplicate$ = computed<Observable<boolean>>(() => {
+  public readonly isDuplicate = computed(() => {
     const address = this.address();
-    return this.endpoints$.pipe(
-      map(entities => Object.values(entities).filter(e => getFullEndpointApiUrl(e) === address).length > 1)
-    );
+    return Object.values(this.endpointsSignal.endpoints()).filter(e => getFullEndpointApiUrl(e) === address).length > 1;
   });
   public readonly endpointLink = computed<string | null>(() => {
     const row = this.row();
