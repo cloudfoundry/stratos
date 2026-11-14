@@ -1,7 +1,6 @@
-import { provideZonelessChangeDetection } from '@angular/core';
+import { provideZonelessChangeDetection, signal } from '@angular/core';
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { describe, it, expect, beforeEach, afterEach, vi } from 'vitest';
-import { BehaviorSubject } from 'rxjs';
 import { EndpointModel, EntityCatalogHelper, EntityCatalogHelpers, StratosCatalogEndpointEntity, entityCatalog } from '@stratosui/store';
 import { BaseTestModules, STORE_TEST_PROVIDERS } from '@test-framework/core-test.helper';
 import { seedEndpointsDataService } from '@stratosui/store/testing';
@@ -12,7 +11,7 @@ import { EndpointRegisterModalComponent } from '../../endpoint-register-modal/en
 // registered; the register dialog is one of the two pages that show them.
 describe('BaseEndpointTileManager tiles', () => {
   let fixture: ComponentFixture<EndpointRegisterModalComponent>;
-  const hubLimit = new BehaviorSubject(1);
+  const hubLimit = signal<number | null>(1);
   let types: StratosCatalogEndpointEntity[];
 
   const endpoint = (guid: string, type: string) => ({ guid, cnsi_type: type, sub_type: '' }) as EndpointModel;
@@ -25,7 +24,7 @@ describe('BaseEndpointTileManager tiles', () => {
       providers: [...STORE_TEST_PROVIDERS, provideZonelessChangeDetection()],
     });
     EntityCatalogHelpers.SetEntityCatalogHelper(TestBed.inject(EntityCatalogHelper));
-    hubLimit.next(1);
+    hubLimit.set(1);
     types = [
       new StratosCatalogEndpointEntity({
         type: 'one-only', label: 'One only', labelPlural: 'One only', logoUrl: '', authTypes: [],
@@ -63,7 +62,19 @@ describe('BaseEndpointTileManager tiles', () => {
   });
 
   it('follows a limit that changes', async () => {
-    hubLimit.next(0);
+    hubLimit.set(0);
+    await fixture.whenStable();
+    expect(labels()).toEqual(['Free', 'One only']);
+  });
+
+  // A limit that waits on the session is null until it is known; showing the
+  // tiles first would flash a type that is about to be taken away.
+  it('shows no tiles until every limit is known', async () => {
+    hubLimit.set(null);
+    await fixture.whenStable();
+    expect(labels()).toEqual([]);
+
+    hubLimit.set(0);
     await fixture.whenStable();
     expect(labels()).toEqual(['Free', 'One only']);
   });

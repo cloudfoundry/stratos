@@ -1,7 +1,4 @@
-import { combineLatest, Observable, of } from 'rxjs';
-import { map, switchMap } from 'rxjs/operators';
-import { toObservable, toSignal } from '@angular/core/rxjs-interop';
-import { computed, Injector, Signal } from '@angular/core';
+import { computed, Injector, Signal, untracked } from '@angular/core';
 import {
   EndpointsDataService,
   IStratosEndpointDefinition,
@@ -112,27 +109,21 @@ export abstract class BaseEndpointTileManager {
     this.injector = injector;
     this.tileManager = new TileConfigManager();
 
-    // A type's limit may be a stream (it can wait on the session), so the
-    // limits are the one RxJS part. A change of types drops the old limit
-    // watchers; no tiles until every limit is known.
-    const limited = toSignal(
-      toObservable(types, { injector }).pipe(
-        switchMap(entities => entities.length
-          ? combineLatest(entities.map(entity => this.getEndpointRegisteredLimit(entity).pipe(
-            map(limit => ({ entity, limit }))
-          )))
-          : of([])
-        )
-      ),
-      { injector, initialValue: [] }
-    );
+    // A type's limit may be a signal that is null until it is known (it can
+    // wait on the session). A change of types drops the old limits.
+    const limited = computed(() => types().map(entity => ({ entity, limit: this.getEndpointRegisteredLimit(entity) })));
     const expanded = computed<ExpandedEndpoint[]>(() => {
       const endpoints = endpointsData.endpointsList();
-      return limited().map(({ entity, limit }) => {
+      const limits = limited().map(({ entity, limit }) => ({ entity, limit: limit() }));
+      // No tiles until every limit is known
+      if (limits.some(({ limit }) => limit === null)) {
+        return [];
+      }
+      return limits.map(({ entity, limit }) => {
         const { type, subType } = entity.getTypeAndSubtype();
         return {
           current: endpoints.filter(em => em.cnsi_type === type && (em.sub_type || null) === subType).length,
-          limit,
+          limit: limit!,
           definition: entity.definition
         };
       });
@@ -164,15 +155,15 @@ export abstract class BaseEndpointTileManager {
       }), { equal: sameTiles });
   }
 
-  private getEndpointRegisteredLimit(endpoint: StratosCatalogEndpointEntity): Observable<number> {
+  private getEndpointRegisteredLimit(endpoint: StratosCatalogEndpointEntity): Signal<number | null> {
     const registeredLimit = endpoint.definition.registeredLimit;
     if (!registeredLimit) {
-      return of(Number.MAX_SAFE_INTEGER);
+      return computed(() => Number.MAX_SAFE_INTEGER);
     }
-    // registeredLimit is typed as a factory function; it returns either a
-    // raw number or an Observable<number>, both handled below.
-    const res = registeredLimit(this.injector!);
-    return typeof res === 'number' ? of(res) : res;
+    // registeredLimit is a factory function; it returns a number or a signal
+    // of one. Calling it is not a read of anything the tiles depend on.
+    const res = untracked(() => registeredLimit(this.injector!));
+    return typeof res === 'number' ? computed(() => res) : res;
   }
 
   private filterByEndpointCount(endpointType: ExpandedEndpoint): boolean {

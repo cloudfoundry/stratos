@@ -1,4 +1,4 @@
-import type { EnvironmentInjector, Injector, Type } from '@angular/core';
+import type { EnvironmentInjector, Injector, Signal, Type } from '@angular/core';
 import type { Store } from '../types/action.types';
 import type { Observable } from 'rxjs';
 
@@ -147,9 +147,11 @@ export interface IStratosEndpointDefinition<T = EntityCatalogSchemas | EntitySch
    */
   readonly linkedToCf?: boolean;
   /**
-   * How many endpoints of this type can be registered, 0 - many
+   * How many endpoints of this type can be registered, 0 - many. A signal
+   * may hold null while the limit is not known yet: the register tiles wait
+   * for it.
    */
-  readonly registeredLimit?: (injector: Injector) => Observable<number> | number;
+  readonly registeredLimit?: (injector: Injector) => Signal<number | null> | number;
   /**
    * Indicates if this endpoint type is in tech preview and should only be shown when tech preview mode is enabled
    */
