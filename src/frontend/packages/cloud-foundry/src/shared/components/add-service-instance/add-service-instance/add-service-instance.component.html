@@ -46,8 +46,8 @@
           </app-step>
         }
         <app-step title="Service Instance" [signalHandle]="supdHandle">
-          <app-specify-user-provided-details [appId]="appId" [showModeSelection]="!!appId" [cfGuid]="(cfGuid$ | async) ?? ''"
-            [spaceGuid]="(spaceGuid$ | async) ?? ''" [serviceInstanceId]="serviceInstanceId" #supd>
+          <app-specify-user-provided-details [appId]="appId" [showModeSelection]="!!appId" [cfGuid]="cfGuid() ?? ''"
+            [spaceGuid]="spaceGuid() ?? ''" [serviceInstanceId]="serviceInstanceId" #supd>
           </app-specify-user-provided-details>
         </app-step>
       }

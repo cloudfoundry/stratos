@@ -230,20 +230,18 @@ describe('AddServiceInstanceComponent', () => {
   });
 
   // The first step saves the picked CF, org and space, then waits for the
-  // space's apps to finish loading (appsLoading$ never completes).
+  // space's apps to finish loading (the apps feed never completes).
   describe('onNext of the Cloud Foundry step', () => {
     it('fails without a selected endpoint', async () => {
       expect(await component.onNext()).toEqual({ success: false });
     });
 
-    it('succeeds once the apps have loaded', async () => {
+    it('waits for the picked space\'s apps before it succeeds', async () => {
+      const http = TestBed.inject(HttpTestingController);
       const spaces = component.cfOrgSpaceService;
       spaces.cf.select.set('cf-1');
       spaces.org.select.set('org-1');
       spaces.space.select.set('space-1');
-      const loading = (component as unknown as { _appsLoading: WritableSignal<boolean> })._appsLoading;
-      loading.set(true);
-      await fixture.whenStable();
 
       let done = false;
       const pending = component.onNext().then(result => {
@@ -251,10 +249,25 @@ describe('AddServiceInstanceComponent', () => {
         return result;
       });
       await new Promise(resolve => setTimeout(resolve, 20));
+      const request = http.expectOne('/pp/v1/cf/apps/cf-1?space_guids=space-1&per_page=500&page=1');
       expect(done).toBe(false);
 
-      loading.set(false);
-      await fixture.whenStable();
+      request.flush({ resources: [] });
+      expect(await pending).toEqual({ success: true });
+    });
+
+    it('does not wait when a failed fetch has ended', async () => {
+      vi.spyOn(console, 'error').mockImplementation(() => undefined);
+      const http = TestBed.inject(HttpTestingController);
+      const spaces = component.cfOrgSpaceService;
+      spaces.cf.select.set('cf-1');
+      spaces.org.select.set('org-1');
+      spaces.space.select.set('space-1');
+
+      const pending = component.onNext();
+      await new Promise(resolve => setTimeout(resolve, 20));
+      http.expectOne('/pp/v1/cf/apps/cf-1?space_guids=space-1&per_page=500&page=1')
+        .flush('boom', { status: 500, statusText: 'Server Error' });
       expect(await pending).toEqual({ success: true });
     });
   });
