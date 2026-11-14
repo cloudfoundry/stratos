@@ -1,6 +1,4 @@
 import { Injectable, OnDestroy, Signal, WritableSignal, computed, effect, inject, signal, untracked } from '@angular/core';
-import { toObservable } from '@angular/core/rxjs-interop';
-import { Observable } from 'rxjs';
 
 import { naturalCompare } from '@stratosui/core';
 import {
@@ -20,17 +18,8 @@ import { CfOrgSpaceDebug, createCfOrgSpaceDebug } from './cf-org-space-debug';
 export interface CfOrgSpaceItem<T = any> {
   list: Signal<T[]>;
   loading: Signal<boolean>;
-  /**
-   * Source-of-truth WritableSignal augmented with `next`/`asObservable`
-   * compat for consumers that still bind it as an rxjs Subject (e.g. the
-   * signal-list multi-filter `select` slot). Consumers should prefer
-   * `select.set(v)` and `select()`; the augmentation methods are only
-   * there so legacy bindings keep working.
-   */
-  select: WritableSignal<string | null> & {
-    next: (v: string | null) => void;
-    asObservable: () => Observable<string | null>;
-  };
+  /** Source-of-truth selection: read with `select()`, write with `select.set(v)`. */
+  select: WritableSignal<string | null>;
 }
 
 /**
@@ -46,9 +35,7 @@ export interface CfOrgSpaceItem<T = any> {
  * - Cascade (cf change clears org+space, org change clears space) and
  *   singleton auto-pick are `effect()` reactions to the selection
  *   signals. No rxjs operators in the control flow.
- * - `cf/org/space.select` is a WritableSignal augmented with `.next` /
- *   `.asObservable` so consumers that still bind it as an rxjs Subject
- *   keep working; that augmentation is the only intentional rxjs surface.
+ * - `cf/org/space.select` is the selection WritableSignal itself.
  * - The connected-CF-endpoint list comes from `EndpointsDataService`
  *   signals — no ngrx store dependency.
  *
@@ -131,25 +118,23 @@ export class CfOrgSpaceDataService implements OnDestroy {
   constructor() {
     this.debug.log('service:construct');
 
-    // Build the signal-native picker triples. `list` / `loading` are
-    // signals; `select` is a WritableSignal augmented with `.next` /
-    // `.asObservable` so consumers that still bind it as an rxjs Subject
-    // keep working.
+    // Build the signal-native picker triples: `list` / `loading` are
+    // signals and `select` is the selection WritableSignal.
     const cfLoading = computed(() => this.connectedCfList().length === 0);
     this.cf = {
       list: this.connectedCfList,
       loading: cfLoading,
-      select: this.augmentSelect(this._cfSelected, 'cf'),
+      select: this._cfSelected,
     };
     this.org = {
       list: this.orgList as Signal<IOrganization[]>,
       loading: this._orgFetching.asReadonly(),
-      select: this.augmentSelect(this._orgSelected, 'org'),
+      select: this._orgSelected,
     };
     this.space = {
       list: this.spaceList as Signal<ISpace[]>,
       loading: this._spaceFetching.asReadonly(),
-      select: this.augmentSelect(this._spaceSelected, 'space'),
+      select: this._spaceSelected,
     };
     this.isLoading = computed(() =>
       this.connectedCfList().length === 0 || this._orgFetching() || this._spaceFetching()
@@ -240,35 +225,6 @@ export class CfOrgSpaceDataService implements OnDestroy {
         untracked(() => this._spaceSelected.set(spaces[0].guid));
       }
     });
-  }
-
-  /**
-   * Augments a `WritableSignal<string | null>` with the `.next` and
-   * `.asObservable` methods that the core list framework's
-   * `IListMultiFilterConfig.select` slot still requires. Consumers read
-   * via `select()` and write via `select.set(v)`; the augmentation is
-   * only there so the framework binding keeps working. Retires when the
-   * list framework multi-filter API migrates to Signal — see
-   * `project_ilistmultifilterconfig_signal_debt`.
-   */
-  private augmentSelect(
-    sig: WritableSignal<string | null>,
-    kind: 'cf' | 'org' | 'space',
-  ): WritableSignal<string | null> & {
-    next: (v: string | null) => void;
-    asObservable: () => Observable<string | null>;
-  } {
-    const obs = toObservable(sig);
-    const augmented = sig as WritableSignal<string | null> & {
-      next: (v: string | null) => void;
-      asObservable: () => Observable<string | null>;
-    };
-    augmented.next = (v: string | null) => {
-      sig.set(v);
-      this.debug.log(`${kind}:select-change`, { to: v });
-    };
-    augmented.asObservable = () => obs;
-    return augmented;
   }
 
   /**
