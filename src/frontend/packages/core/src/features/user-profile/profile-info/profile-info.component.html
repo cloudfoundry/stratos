@@ -17,7 +17,7 @@
   }
   @if (userProfile(); as profile) {
     <app-user-profile-banner [user]="profile"
-      [allowGravatar]="(allowGravatar$ | async) ?? false">
+      [allowGravatar]="allowGravatar()">
     </app-user-profile-banner>
   }
   @if (userProfile(); as profile) {

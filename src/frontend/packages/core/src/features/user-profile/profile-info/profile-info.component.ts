@@ -1,8 +1,6 @@
 import { ChangeDetectionStrategy, Component, computed, inject } from '@angular/core';
-import { toObservable } from '@angular/core/rxjs-interop';
 import { CommonModule } from '@angular/common';
 import { RouterModule } from '@angular/router';
-import { Observable } from 'rxjs';
 
 import { CurrentUserPermissionsService } from '../../../core/permissions/current-user-permissions.service';
 import { StratosCurrentUserPermissions } from '../../../core/permissions/stratos-user-permissions.checker';
@@ -48,11 +46,9 @@ export class ProfileInfoComponent {
     const profile = this.userProfile();
     return profile ? this.userProfileService.getPrimaryEmailAddress(profile) : null;
   });
-  allowGravatar$: Observable<boolean>;
+  readonly allowGravatar = this.dashboardSignals.gravatarEnabled;
 
   constructor() {
     this.userProfileService.loadUserProfile();
-    this.allowGravatar$ = toObservable(this.dashboardSignals.gravatarEnabled);
-
   }
 }

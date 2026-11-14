@@ -4,10 +4,13 @@ import { provideZonelessChangeDetection, signal } from '@angular/core';
 import { describe, it, expect, beforeEach, afterEach, beforeAll, afterAll, vi } from 'vitest';
 import { NoopAnimationsModule } from '@angular/platform-browser/animations';
 import { RouterTestingModule } from '@angular/router/testing';
+import { By } from '@angular/platform-browser';
 import { of } from 'rxjs';
 
 import { STORE_TEST_PROVIDERS, createBasicStoreModule, AppTestModule, CoreTestingModule } from '@test-framework';
 import { CoreModule } from '../../../core/core.module';
+import { DashboardDataService } from '../../../core/dashboard-data.service';
+import { UserProfileBannerComponent } from '../../../shared/components/user-profile-banner/user-profile-banner.component';
 import { CurrentUserPermissionsService } from '../../../core/permissions/current-user-permissions.service';
 import { UserProfileService } from '../../../core/user-profile.service';
 import { SharedModule } from '../../../shared/shared.module';
@@ -75,10 +78,10 @@ describe('ProfileInfoComponent', () => {
     TestBed.compileComponents();
   });
 
-  beforeEach(() => {
+  beforeEach(async () => {
     fixture = TestBed.createComponent(ProfileInfoComponent);
     component = fixture.componentInstance;
-    fixture.detectChanges();
+    await fixture.whenStable();
   });
 
   it('should create', () => {
@@ -102,5 +105,17 @@ describe('ProfileInfoComponent', () => {
     expect(page.canEdit()).toBe(false);
     canEdit.set(true);
     expect(page.canEdit()).toBe(true);
+  });
+
+  // The banner shows the user's Gravatar only while the dashboard allows it.
+  it('hands the banner the gravatar setting as it changes', async () => {
+    const banner = () => fixture.debugElement.query(By.directive(UserProfileBannerComponent)).componentInstance as UserProfileBannerComponent;
+    TestBed.inject(DashboardDataService).setGravatarEnabled(false);
+    await fixture.whenStable();
+    expect(banner().allowGravatar()).toBe(false);
+
+    TestBed.inject(DashboardDataService).setGravatarEnabled(true);
+    await fixture.whenStable();
+    expect(banner().allowGravatar()).toBe(true);
   });
 });
