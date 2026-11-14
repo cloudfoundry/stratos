@@ -12,10 +12,10 @@ import {
   EndpointModel } from '@stratosui/store';
 import { EndpointStatusState } from './signals/endpoint-status-signal.service';
 import { combineLatest as observableCombineLatest, Observable, of } from 'rxjs';
-import { catchError, filter, map, take, withLatestFrom } from 'rxjs/operators';
+import { catchError, filter, map, take } from 'rxjs/operators';
 
 import { endpointHasMetrics } from '../features/endpoints/endpoint-helpers';
-import { SessionService } from '../shared/services/session.service';
+import { SessionSignalService } from './signals/session-signal.service';
 import { EndpointHealthChecks } from './endpoints-health-checks';
 import { AuthSignalService } from './signals/auth-signal.service';
 import { EndpointStatusSignalService } from './signals/endpoint-status-signal.service';
@@ -30,7 +30,6 @@ export class EndpointsService {
   private endpointsSignals = inject(EndpointsSignalService);
   private userService = inject(UserService);
   private endpointHealthChecks = inject(EndpointHealthChecks);
-  private sessionService = inject(SessionService);
   private appRef = inject(ApplicationRef);
 
   // Signal reads of the endpoint projections.
@@ -223,7 +222,7 @@ export const endpointsGuard: CanActivateFn = (
   const router = inject(Router);
   const endpointsService = inject(EndpointsService);
   const userService = inject(UserService);
-  const sessionService = inject(SessionService);
+  const sessionSignals = inject(SessionSignalService);
   const authSignals = inject(AuthSignalService);
   const endpointStatusSignals = inject(EndpointStatusSignalService);
 
@@ -238,9 +237,7 @@ export const endpointsGuard: CanActivateFn = (
       // Only proceed when logged in and endpoints are done loading
       return !!state && state.loggedIn && !endpointState.loading;
     }),
-    withLatestFrom(sessionService.userEndpointsEnabled()),
-    map(([state, userEndpointsEnabled]: [[any, EndpointStatusState], boolean]) => {
-      const [authState] = state;
+    map(([authState]: [any, EndpointStatusState]) => {
       const haveRegistered = endpointsService.haveRegistered();
       const haveConnected = endpointsService.haveConnected();
       const isAdmin = userService.isAdmin();
@@ -252,7 +249,7 @@ export const endpointsGuard: CanActivateFn = (
         let redirect: string | undefined;
         if (!disablePersistenceFeatures) {
           if (!haveRegistered) {
-            redirect = isAdmin || (userEndpointsEnabled && isEndpointAdmin) ? '/endpoints' : '/noendpoints';
+            redirect = isAdmin || (sessionSignals.userEndpointsEnabled() && isEndpointAdmin) ? '/endpoints' : '/noendpoints';
           } else if (!haveConnected) {
             redirect = '/endpoints';
           }
