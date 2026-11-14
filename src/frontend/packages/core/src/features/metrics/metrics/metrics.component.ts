@@ -1,9 +1,7 @@
 import { CommonModule } from '@angular/common';
-import { ChangeDetectionStrategy, Component, inject } from '@angular/core';
+import { ChangeDetectionStrategy, Component, computed, inject } from '@angular/core';
 import { ActivatedRoute } from '@angular/router';
 import { MetricsAPITargets } from '@stratosui/store';
-import { Observable } from 'rxjs';
-import { take, filter, map } from 'rxjs/operators';
 
 import { getIdFromRoute } from '../../../core/utils.service';
 import { CardStatusComponent } from '../../../shared/components/cards/card-status/card-status.component';
@@ -44,52 +42,32 @@ export class MetricsComponent {
   private activatedRoute = inject(ActivatedRoute);
   private metricsService = inject(MetricsService);
 
+  private readonly metricsGuid = getIdFromRoute(this.activatedRoute, 'metricsId');
+
   // find() may not match the routed guid, so the provider can be absent; the template guards with @if/?.
-  public metricsEndpoint$: Observable<MetricsEndpointProvider | undefined>;
-  public metricsInfo$: Observable<MetricsEndpointInfo[]>;
-  public breadcrumbs$: Observable<IHeaderBreadcrumb[]>;
-  public jobDetails$: Observable<PrometheusJobs>;
+  // Raw endpoint data for this metrics endpoint
+  public readonly metricsEndpoint = computed<MetricsEndpointProvider | undefined>(
+    () => this.metricsService.metricsEndpoints().find(item => item.provider.guid === this.metricsGuid));
+
+  // Processed endpoint data
+  public readonly metricsInfo = computed<MetricsEndpointInfo[]>(() => {
+    const ep = this.metricsEndpoint();
+    return ep ? mapMetricsData(ep) : [];
+  });
 
   // Was there an error retrieving data from the Prometheus server?
-  public error = false;
+  public readonly error = computed(() => !!(this.metricsEndpoint()?.provider.metadata?.metrics_stratos as any)?.error);
 
-  constructor() {
+  public readonly breadcrumbs: IHeaderBreadcrumb[] = [{ breadcrumbs: [{ value: 'Endpoints', routerLink: `/endpoints` }] }];
 
-    const metricsGuid = getIdFromRoute(this.activatedRoute, 'metricsId');
-
-    // Raw endpoint data for this metrics endpoint
-    this.metricsEndpoint$ = this.metricsService.metricsEndpoints$.pipe(
-      map((ep) => ep.find((item) => item.provider.guid === metricsGuid)),
-    );
-
-    // Processed endpoint data
-    this.metricsInfo$ = this.metricsEndpoint$.pipe(map((ep) => {
-      if (!ep) {
-        return [];
+  // Job details obtained from the Prometheus server
+  public readonly jobDetails = computed<PrometheusJobs | null>(() => {
+    const targets = this.metricsEndpoint()?.provider?.metadata?.metrics_targets;
+    return targets ? (targets as MetricsAPITargets).activeTargets.reduce((mapped: PrometheusJobs, t) => {
+      if (t.labels && t.labels.job) {
+        mapped[t.labels.job] = t as any;
       }
-      if (ep.provider && ep.provider.metadata && ep.provider.metadata && ep.provider.metadata.metrics_stratos
-        && (ep.provider.metadata.metrics_stratos as any).error) {
-        this.error = true;
-      }
-      return mapMetricsData(ep);
-    }));
-
-    // Breadcrumbs
-    this.breadcrumbs$ = this.metricsEndpoint$.pipe(
-      map(() => ([{ breadcrumbs: [{ value: 'Endpoints', routerLink: `/endpoints` }] }])),
-      take(1)
-    );
-
-    // Job details obtained from the Prometheus server
-    this.jobDetails$ = this.metricsEndpoint$.pipe(
-      map(mi => mi?.provider?.metadata?.metrics_targets),
-      filter((targets): targets is MetricsAPITargets => !!targets),
-      map((targetsData: MetricsAPITargets) => targetsData.activeTargets.reduce((mapped: PrometheusJobs, t) => {
-        if (t.labels && t.labels.job) {
-          mapped[t.labels.job] = t as any;
-        }
-        return mapped;
-      }, {} as PrometheusJobs))
-    );
-  }
+      return mapped;
+    }, {} as PrometheusJobs) : null;
+  });
 }

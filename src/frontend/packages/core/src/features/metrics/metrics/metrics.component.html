@@ -1,6 +1,6 @@
-<app-page-header [breadcrumbs]="breadcrumbs$ | async"><h1>{{ (metricsEndpoint$ | async)?.provider?.name }}</h1></app-page-header>
+<app-page-header [breadcrumbs]="breadcrumbs"><h1>{{ metricsEndpoint()?.provider?.name }}</h1></app-page-header>
 
-@if ((metricsEndpoint$ | async); as ep) {
+@if (metricsEndpoint(); as ep) {
   <div class="p-6">
     <div class="card mb-6">
       <div class="card-body">
@@ -11,7 +11,7 @@
             <h2 class="text-sm mb-2">
               <a target="metrics" href="{{ ep.provider.token_endpoint }}" class="text-brand-600 hover:text-brand-700 underline">{{ ep.provider.token_endpoint }}</a>
             </h2>
-            @if (error) {
+            @if (error()) {
               <div class="text-content-muted">
                 <p>This metrics endpoint does not provide a <app-product-name></app-product-name> metadata file</p>
               </div>
@@ -20,7 +20,7 @@
         </div>
       </div>
     </div>
-    @if (metricsInfo$ | async; as infos) {
+    @if (metricsInfo(); as infos) {
       <div>
         @if (infos.length === 0) {
           <div class="text-center py-8 text-content-muted">
@@ -49,7 +49,7 @@
                           <app-metadata-item icon="history" label="Prometheus Environment">
                           {{ info.metadata.metrics_environment || 'N/A' }}</app-metadata-item>
                         </div>
-                        @if (info.metadata.metrics_job && (jobDetails$ | async); as jobDetails) {
+                        @if (info.metadata.metrics_job && jobDetails(); as jobDetails) {
                           <div class="space-y-3"
                             >
                             @if (jobDetails[info.metadata.metrics_job]) {

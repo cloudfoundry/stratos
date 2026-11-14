@@ -1,4 +1,4 @@
-import { Injectable, inject } from '@angular/core';
+import { Injectable, Signal, computed, inject } from '@angular/core';
 import { toObservable } from '@angular/core/rxjs-interop';
 import {
   EndpointModel,
@@ -32,27 +32,16 @@ export class MetricsService {
     this.setupObservables();
   }
 
+  readonly metricsEndpoints: Signal<MetricsEndpointProvider[]> = computed(() => {
+    const endpoints = this.endpointsData.endpointsList();
+    return endpoints.filter(e => e.cnsi_type === 'metrics').map(provider => ({
+      provider,
+      endpoints: endpoints.filter(e => !!e.metadata?.metrics && e.metadata.metrics === provider.guid),
+    }));
+  });
+
   private setupObservables() {
-    this.metricsEndpoints$ = this.endpoints$.pipe(
-      map((endpoints: EndpointModel[]) => {
-        const result: MetricsEndpointProvider[] = [];
-        const metrics = endpoints.filter(e => e.cnsi_type === 'metrics');
-        metrics.forEach(ep => {
-          const provider: MetricsEndpointProvider = {
-            provider: ep,
-            endpoints: [],
-          };
-          endpoints.forEach(e => {
-            if (e.metadata && e.metadata.metrics && e.metadata.metrics === ep.guid) {
-              provider.endpoints.push(e);
-            }
-          });
-          result.push(provider);
-        });
-        return result;
-      }),
-      shareReplay({ bufferSize: 1, refCount: true }),
-    );
+    this.metricsEndpoints$ = toObservable(this.metricsEndpoints);
 
     this.haveNoMetricsEndpoints$ = this.endpoints$.pipe(
       map((endpoints: EndpointModel[]) => {
