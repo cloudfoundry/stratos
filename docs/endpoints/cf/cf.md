@@ -84,3 +84,23 @@ certificates the console already trusts plus the endpoint's CA, and lists
 each host as trusted or not, with the reason. The result is not saved. The
 check does not go through `HTTPS_PROXY`; behind a proxy it reports the hosts
 as unreachable.
+
+## Application labels
+
+Stratos shows each application's Cloud Foundry
+[labels](https://docs.cloudfoundry.org/adminguide/metadata.html) as
+`key=value` in a **Labels** column on the application lists (the
+Applications page, and the Applications tabs of a Cloud Foundry and of a
+space), and under **Labels** on the application's Summary. To find
+applications by label, choose **Labels** as the filter field and type part of
+a label, such as `team=platform`.
+
+![Applications filtered by label](../../images/screenshots/app-labels-filter.png)
+
+To change them, open the application's Summary and click Edit. Under
+**Labels**, type a label as `key=value` and press Enter; a value may be
+empty. Remove a label with the cross on its pill. A label Cloud Foundry would
+refuse (a key with bad characters, or the reserved `cloudfoundry.org`
+prefix) is reported as you add it. Saving changes only the labels you added
+or removed; the application's other labels and its annotations stay as they
+are.
