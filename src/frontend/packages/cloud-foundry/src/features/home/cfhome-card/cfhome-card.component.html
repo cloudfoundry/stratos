@@ -35,7 +35,7 @@
           @if (showDeployAppTiles()) {
             <div>
               <div class="cf-home-card__no-apps-deploy">Get started by deploying an Application from ...</div>
-              <app-tile-selector [options]="(tileSelectorConfig$ | async) ?? []" [compactTiles]="true"
+              <app-tile-selector [options]="tileSelectorConfig()" [compactTiles]="true"
               (selection)="selectedTile = $event"></app-tile-selector>
             </div>
           }

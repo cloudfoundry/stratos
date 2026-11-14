@@ -1,4 +1,3 @@
-import { AsyncPipe } from '@angular/common';
 import { Component, CUSTOM_ELEMENTS_SCHEMA } from '@angular/core';
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { provideZonelessChangeDetection, signal } from '@angular/core';
@@ -7,7 +6,7 @@ import { provideHttpClient } from '@angular/common/http';
 import { provideHttpClientTesting } from '@angular/common/http/testing';
 import { NoopAnimationsModule } from '@angular/platform-browser/animations';
 import { describe, it, expect, beforeEach, afterEach, vi } from 'vitest';
-import { defer, of, Subject } from 'rxjs';
+import { of, Subject } from 'rxjs';
 
 import { EntityCatalogTestModule, TEST_CATALOGUE_ENTITIES, generateStratosEntities, EntityCatalogHelper, EntityCatalogHelpers, EndpointsDataService } from '@stratosui/store';
 import { createEmptyStoreModule, STORE_TEST_PROVIDERS } from '@stratosui/store/testing';
@@ -206,12 +205,14 @@ describe('DeployApplicationComponent', () => {
 })
 class StubWizardPartComponent {
   validate = new Subject<boolean>();
+  sourceTypeGithub = () => undefined;
+  sourceTypeNeedsUpload = () => undefined;
   valid$ = new Subject<boolean>();
   onEnter() { }
 }
 
 describe('DeployApplicationComponent title', () => {
-  const githubEndpoints = signal<unknown[] | undefined>(undefined);
+  const githubEndpoints = signal<unknown[]>([]);
 
   const render = async (queryParams: Record<string, string>, beforeCreate?: () => void) => {
     TestBed.configureTestingModule({
@@ -232,17 +233,14 @@ describe('DeployApplicationComponent title', () => {
       schemas: [CUSTOM_ELEMENTS_SCHEMA],
     });
     // Only the heading is under test: render the real template without the wizard steps
-    TestBed.overrideComponent(DeployApplicationComponent, { set: { imports: [AsyncPipe, StubWizardPartComponent] } });
+    TestBed.overrideComponent(DeployApplicationComponent, { set: { imports: [StubWizardPartComponent] } });
     EntityCatalogHelpers.SetEntityCatalogHelper(TestBed.inject(EntityCatalogHelper));
     beforeCreate?.();
-    // Counts how often the title's source is subscribed to
+    // Counts how often the title's source is looked up
     const lookUp = ApplicationDeploySourceTypes.prototype.getAutoSelectedType;
     vi.spyOn(ApplicationDeploySourceTypes.prototype, 'getAutoSelectedType').mockImplementation(function (this: ApplicationDeploySourceTypes, route) {
-      const source = lookUp.call(this, route);
-      return defer(() => {
-        subscriptions++;
-        return source;
-      });
+      subscriptions++;
+      return lookUp.call(this, route);
     });
     const fixture = TestBed.createComponent(DeployApplicationComponent);
     await fixture.whenStable();
@@ -254,31 +252,30 @@ describe('DeployApplicationComponent title', () => {
     (fixture.nativeElement.querySelector('h1')?.textContent ?? '').trim();
 
   beforeEach(() => {
-    githubEndpoints.set(undefined);
+    githubEndpoints.set([]);
     subscriptions = 0;
   });
 
   afterEach(() => vi.restoreAllMocks());
 
-  it('shows the source type picked in the link once the endpoints load', async () => {
+  it('shows the source type picked in the link', async () => {
     const fixture = await render({ 'auto-select-deploy': 'github' });
-    githubEndpoints.set([]);
-    await fixture.whenStable();
     await fixture.whenStable();
     expect(heading(fixture)).toBe('Deploy from GitHub');
   });
 
   it('looks the source type up once however often the view is checked', async () => {
     const fixture = await render({ 'auto-select-deploy': 'github' });
-    githubEndpoints.set([]);
     await fixture.whenStable();
+    const lookedUp = subscriptions;
     for (let i = 0; i < 3; i++) {
       fixture.componentRef.changeDetectorRef.markForCheck();
       await fixture.whenStable();
     }
     expect(heading(fixture)).toBe('Deploy from GitHub');
-    // One look-up for the title, however often the view is checked
-    expect(subscriptions).toBeLessThanOrEqual(1);
+    // The title's look-up is a computed: repeated checks do not repeat it
+    expect(lookedUp).toBeGreaterThan(0);
+    expect(subscriptions).toBe(lookedUp);
   });
 
   it('titles a redeploy', async () => {

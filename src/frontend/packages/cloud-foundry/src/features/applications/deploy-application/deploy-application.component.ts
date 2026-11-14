@@ -12,11 +12,9 @@ import {
   viewChild,
   afterRenderEffect,
 } from '@angular/core';
-import { toSignal } from '@angular/core/rxjs-interop';
 import { ErrorStateMatcher, ShowOnDirtyErrorStateMatcher } from '@stratosui/core';
 import { ActivatedRoute, Router } from '@angular/router';
-import { Observable, Subscription } from 'rxjs';
-import { AsyncPipe } from '@angular/common';
+import { Subscription } from 'rxjs';
 
 import { SourceType } from '../../../store/types/deploy-application.types';
 import { CfDeployAppDataService } from '../../../services/domain-data/cf-deploy-app-data.service';
@@ -43,7 +41,6 @@ import { DeployApplicationStep3Component } from './deploy-application-step3/depl
   standalone: true,
   changeDetection: ChangeDetectionStrategy.OnPush,
   imports: [
-    AsyncPipe,
     PageHeaderComponent,
     SteppersComponent,
     StepComponent,
@@ -72,9 +69,7 @@ export class DeployApplicationComponent implements OnInit {
   readonly skipConfig = computed(() => this.deployData.applicationSource()?.type?.id === 'giturl');
   isRedeploy: boolean;
   // undefined when the wizard is opened without an auto-select query param
-  // (getAutoSelectedType returns of(undefined)); the title guards for it.
-  selectedSourceType$: Observable<SourceType | undefined>;
-  // The source type is looked up once; the title follows it.
+  // (getAutoSelectedType returns undefined); the title guards for it.
   private readonly selectedSourceType: Signal<SourceType | undefined>;
 
   // Reactive deploy button text — switches to "Redeploy" when the
@@ -333,8 +328,7 @@ export class DeployApplicationComponent implements OnInit {
     this.appGuid = this.activatedRoute.snapshot.queryParams.appGuid;
     this.isRedeploy = !!this.appGuid;
 
-    this.selectedSourceType$ = appDeploySourceTypes.getAutoSelectedType(activatedRoute);
-    this.selectedSourceType = toSignal(this.selectedSourceType$);
+    this.selectedSourceType = computed(() => appDeploySourceTypes.getAutoSelectedType(activatedRoute));
 
     if (this.isRedeploy) {
       this.deployButtonText = 'Redeploy';

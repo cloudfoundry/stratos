@@ -1,5 +1,5 @@
-import { AsyncPipe, CommonModule } from '@angular/common';
-import { Component, ChangeDetectionStrategy, computed, inject, Injector, input, OnDestroy, signal } from '@angular/core';
+import { CommonModule } from '@angular/common';
+import { Component, ChangeDetectionStrategy, computed, inject, Injector, input, OnDestroy, Signal, signal } from '@angular/core';
 import { Router } from '@angular/router';
 import { Observable, of } from 'rxjs';
 import { filter, map, take } from 'rxjs/operators';
@@ -40,7 +40,6 @@ import { TileSelectorComponent } from '@stratosui/core';
   changeDetection: ChangeDetectionStrategy.OnPush,
   imports: [
     CommonModule,
-    AsyncPipe,
     TileGridComponent,
     TileGroupComponent,
     TileComponent,
@@ -90,22 +89,20 @@ export class CFHomeCardComponent implements HomePageEndpointCard, OnDestroy {
     const eds = this.endpointDataService();
     return !!eds && eds.lastFetched() !== null && eds.appCount() === 0;
   });
-  public tileSelectorConfig$: Observable<ITileConfig<IAppTileData>[]>;
+  public tileSelectorConfig: Signal<ITileConfig<IAppTileData>[]>;
 
   constructor() {
     const appDeploySourceTypes = inject(ApplicationDeploySourceTypes);
-    this.tileSelectorConfig$ = appDeploySourceTypes.types$.pipe(
-      map(types => types.map(type =>
-        // strict: every SourceType emitted by types$ defines a graphic (the
-        // base types and the SCM-derived entries all set one); the field is
-        // only optional on the shared SourceType interface.
-        new ITileConfig<IAppTileData>(type.name, type.graphic!, {
-          type: 'deploy',
-          subType: type.id,
-          ...(type.endpointGuid ? { endpointGuid: type.endpointGuid } : {}),
-        })
-      ))
-    );
+    this.tileSelectorConfig = computed(() => appDeploySourceTypes.types().map(type =>
+      // strict: every SourceType in types defines a graphic (the
+      // base types and the SCM-derived entries all set one); the field is
+      // only optional on the shared SourceType interface.
+      new ITileConfig<IAppTileData>(type.name, type.graphic!, {
+        type: 'deploy',
+        subType: type.id,
+        ...(type.endpointGuid ? { endpointGuid: type.endpointGuid } : {}),
+      })
+    ));
   }
 
   // The selector's (selection) output is typed against the base ITileConfig

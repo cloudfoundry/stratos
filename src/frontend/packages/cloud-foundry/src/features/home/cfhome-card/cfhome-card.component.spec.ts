@@ -1,7 +1,6 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { Component, Input, provideZonelessChangeDetection, CUSTOM_ELEMENTS_SCHEMA, signal } from '@angular/core';
 import { describe, it, expect, beforeEach, vi } from 'vitest';
-import { of } from 'rxjs';
 
 import { ApplicationDeploySourceTypes } from '../../applications/deploy-application/deploy-application-steps.types';
 import { EndpointDataRegistry } from '../../../services/endpoint-data/endpoint-data.registry';
@@ -15,7 +14,7 @@ describe('CFHomeCardComponent', () => {
 
   // Mock services
   const mockAppDeploySourceTypes = {
-    types$: of([])
+    types: signal([])
   };
 
   const mockEndpointDataService = {
@@ -133,7 +132,7 @@ describe('CFHomeCardComponent follows the endpoint data (#6021)', () => {
     await fixture.whenStable();
   });
 
-  const mockTypes = { types$: of([]) };
+  const mockTypes = { types: signal([]) };
   const shown = () => Array.from(fixture.nativeElement.querySelectorAll('.stub-app'))
     .map((el: any) => el.textContent);
   const noApps = () => fixture.nativeElement.querySelector('.cf-home-card__no-apps');

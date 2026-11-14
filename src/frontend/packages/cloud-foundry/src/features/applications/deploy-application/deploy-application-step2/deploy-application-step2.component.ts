@@ -1,6 +1,6 @@
 import { CommonModule } from '@angular/common';
 import { HttpClient } from '@angular/common/http';
-import { AfterContentInit, Component, Injector, OnDestroy, OnInit, ChangeDetectionStrategy, effect, inject, signal, input, untracked, viewChild } from '@angular/core';
+import { AfterContentInit, Component, Injector, OnDestroy, OnInit, ChangeDetectionStrategy, computed, effect, inject, signal, input, untracked, viewChild } from '@angular/core';
 import { toObservable } from '@angular/core/rxjs-interop';
 import { AbstractControl, FormsModule, NgForm } from '@angular/forms';
 import { ActivatedRoute } from '@angular/router';
@@ -97,15 +97,26 @@ export class DeployApplicationStep2Component
   // display details, so Next does not wait on or depend on the lookup.
   private redeployCommitSha?: string;
   public DEPLOY_TYPES_IDS = DEPLOY_TYPES_IDS;
-  sourceType$!: Observable<SourceType>;
   INITIAL_SOURCE_TYPE = 0; // Fall back to GitHub, for cases where there's no type in store (refresh) or url (removed & nav)
+  // The type picked in the link, else the one saved in the deploy state, else the default
+  readonly selectedSourceType = computed<SourceType | undefined>(() =>
+    this.appDeploySourceTypes.getAutoSelectedType(this.route) ||
+    this.deployData.sourceType() ||
+    this.appDeploySourceTypes.types()[this.INITIAL_SOURCE_TYPE]
+  );
   validate!: Observable<boolean>;
 
   stepperText$!: Observable<string | null | undefined>;
 
-  // Observables for source types
-  sourceTypeGithub$!: Observable<boolean>;
-  sourceTypeNeedsUpload$!: Observable<boolean>;
+  // Undefined until the source type is known
+  readonly sourceTypeGithub = computed(() => {
+    const type = this.selectedSourceType();
+    return type?.id ? type.group === 'gitscm' : undefined;
+  });
+  readonly sourceTypeNeedsUpload = computed(() => {
+    const type = this.selectedSourceType();
+    return type?.id ? type.id === DEPLOY_TYPES_IDS.FOLDER || type.id === DEPLOY_TYPES_IDS.FILE : undefined;
+  });
   // tslint:disable-next-line:ban-types
   canDeployType$!: Observable<boolean>;
   isLoading$!: Observable<boolean>;
@@ -272,27 +283,12 @@ export class DeployApplicationStep2Component
   }
 
   ngOnInit() {
-    this.sourceType$ = combineLatest([
-      this.appDeploySourceTypes.getAutoSelectedType(this.route),
-      this.sourceType$$,
-      this.appDeploySourceTypes.types$.pipe(take(1), map(st => st[this.INITIAL_SOURCE_TYPE]))
-    ]).pipe(
-      map(([sourceFromParam, sourceFromStore, sourceDefault]) => sourceFromParam || sourceFromStore || sourceDefault),
-      filter(sourceType => !!sourceType),
+    // The source type as a stream, for the chains below that switch to HTTP
+    const sourceType$ = toObservable(this.selectedSourceType, { injector: this.injector }).pipe(
+      filter((sourceType): sourceType is SourceType => !!sourceType)
     );
 
-    this.sourceTypeGithub$ = this.sourceType$.pipe(
-      filter(type => type && !!type.id),
-      map(type => type.group === 'gitscm')
-    );
-
-    this.sourceTypeNeedsUpload$ = this.sourceType$.pipe(
-      filter(type => type && !!type.id),
-      map(type => type.id === DEPLOY_TYPES_IDS.FOLDER || type.id === DEPLOY_TYPES_IDS.FILE)
-    );
-
-
-    const setInitialSourceType$ = this.sourceType$.pipe(
+    const setInitialSourceType$ = sourceType$.pipe(
       take(1),
       tap(sourceType => {
         this.setSourceType(sourceType);
@@ -308,7 +304,7 @@ export class DeployApplicationStep2Component
 
     this.canDeployType$ = combineLatest([
       cfGuid$,
-      this.sourceType$
+      sourceType$
     ]).pipe(
       filter(([cfGuid, sourceType]) => !!cfGuid && !!sourceType),
       switchMap(([cfGuid, sourceType]) => this.appDeploySourceTypes.canDeployType(cfGuid, sourceType.id)),
@@ -317,7 +313,7 @@ export class DeployApplicationStep2Component
 
     this.stepperText$ = this.canDeployType$.pipe(
       switchMap(canDeployType => canDeployType ?
-        this.isRedeploy() ? of('Review source details') : this.sourceType$.pipe(map(st => st.helpText)) :
+        this.isRedeploy() ? of('Review source details') : sourceType$.pipe(map(st => st.helpText)) :
         of(null)
       )
     );
@@ -415,8 +411,8 @@ export class DeployApplicationStep2Component
 
     const setSourceTypeModel$ = this.sourceType$$.pipe(
       filter(p => !!p),
-      withLatestFrom(this.appDeploySourceTypes.types$),
-      tap(([p, sourceTypes]) => {
+      tap(p => {
+        const sourceTypes = this.appDeploySourceTypes.types();
         const matched = sourceTypes.find(s => s.id === p.id && (p.endpointGuid ? s.endpointGuid === p.endpointGuid : true));
         if (!matched) { return; }
         this.sourceType = matched;

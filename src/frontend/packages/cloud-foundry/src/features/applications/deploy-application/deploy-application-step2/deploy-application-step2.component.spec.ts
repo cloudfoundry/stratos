@@ -1,5 +1,5 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
-import { provideZonelessChangeDetection } from '@angular/core';
+import { provideZonelessChangeDetection, signal } from '@angular/core';
 import { provideHttpClient } from '@angular/common/http';
 import { HttpTestingController, provideHttpClientTesting } from '@angular/common/http/testing';
 import { ActivatedRoute } from '@angular/router';
@@ -421,7 +421,7 @@ describe('DeployApplicationStep2Component', () => {
     let commit$: Subject<any>;
 
     beforeEach(async () => {
-      TestBed.inject(ApplicationDeploySourceTypes).types$ = of([githubType]);
+      (TestBed.inject(ApplicationDeploySourceTypes) as any).types = signal([githubType]);
       const gitData = TestBed.inject(GitDataService);
       vi.spyOn(gitData, 'getBranches').mockReturnValue(of([branch]));
       vi.spyOn(gitData, 'getRepository')

@@ -1,9 +1,8 @@
 import { HttpClient } from '@angular/common/http';
-import { Injectable, Injector, inject } from '@angular/core';
-import { toObservable } from '@angular/core/rxjs-interop';
+import { Injectable, Signal, computed, inject } from '@angular/core';
 import { ActivatedRoute } from '@angular/router';
 import { from, Observable, of } from 'rxjs';
-import { filter, map, shareReplay } from 'rxjs/operators';
+import { map } from 'rxjs/operators';
 
 import { PermissionConfig, CurrentUserPermissionsService } from '@stratosui/core';
 import { GitSCM, GitSCMService, GIT_ENDPOINT_SUB_TYPES, GIT_ENDPOINT_TYPE } from '@stratosui/git';
@@ -31,7 +30,6 @@ export class ApplicationDeploySourceTypes {
   private perms = inject(CurrentUserPermissionsService);
   private scmService = inject(GitSCMService);
   private endpointsData = inject(EndpointsDataService);
-  private injector = inject(Injector);
   private http = inject(HttpClient);
 
 
@@ -88,7 +86,8 @@ export class ApplicationDeploySourceTypes {
       graphic: { matIcon: 'folder' }
     },
   ];
-  public types$: Observable<SourceType[]>;
+  /** The base types plus a type per registered git endpoint. */
+  public types: Signal<SourceType[]>;
 
 
   constructor() {
@@ -100,74 +99,69 @@ export class ApplicationDeploySourceTypes {
       [DEPLOY_TYPES_IDS.GITLAB]: this.scmService.getSCM('gitlab', '')
     };
 
-    // W36-B Wave 3: source endpoints from EndpointsDataService signal
-    // bridge instead of legacy ngrx PaginationService.
-    this.types$ = toObservable(this.endpointsData.endpointsList, { injector: this.injector }).pipe(
-      filter(e => !!e),
-      map(endpoints => {
-        const newTypes: SourceType[] = [];
+    this.types = computed(() => {
+      const endpoints = this.endpointsData.endpointsList();
+      const newTypes: SourceType[] = [];
 
-        // Add all the base types... also update git types if the user has provided credentials for it
-        this.baseTypes.forEach(t => {
-          const scm = scms[t.id];
-          if (scm) {
-            // Find the endpoint that's associated with this git type
-            const eType = GIT_ENDPOINT_TYPE;
-            const eSubType: GIT_ENDPOINT_SUB_TYPES = scm.getType() === DEPLOY_TYPES_IDS.GITHUB ?
-              GIT_ENDPOINT_SUB_TYPES.GITHUB :
-              GIT_ENDPOINT_SUB_TYPES.GITLAB;
-            for (const e of endpoints) {
-              const url = getFullEndpointApiUrl(e);
-              if (
-                e.cnsi_type === eType &&
-                e.sub_type === eSubType &&
-                url === scm.getPublicApi() // Must match the endpoint associated with github.com/gitlab.com types (not enterprise)
-              ) {
-                newTypes.push({
-                  ...t,
-                  endpointGuid: e.guid
-                });
-                return;
-              }
+      // Add all the base types... also update git types if the user has provided credentials for it
+      this.baseTypes.forEach(t => {
+        const scm = scms[t.id];
+        if (scm) {
+          // Find the endpoint that's associated with this git type
+          const eType = GIT_ENDPOINT_TYPE;
+          const eSubType: GIT_ENDPOINT_SUB_TYPES = scm.getType() === DEPLOY_TYPES_IDS.GITHUB ?
+            GIT_ENDPOINT_SUB_TYPES.GITHUB :
+            GIT_ENDPOINT_SUB_TYPES.GITLAB;
+          for (const e of endpoints) {
+            const url = getFullEndpointApiUrl(e);
+            if (
+              e.cnsi_type === eType &&
+              e.sub_type === eSubType &&
+              url === scm.getPublicApi() // Must match the endpoint associated with github.com/gitlab.com types (not enterprise)
+            ) {
+              newTypes.push({
+                ...t,
+                endpointGuid: e.guid
+              });
+              return;
             }
           }
-          newTypes.push(t);
-        });
+        }
+        newTypes.push(t);
+      });
 
-        // Add all enterprise github/gitlab types
-        endpoints.forEach(e => {
-          if (e.cnsi_type !== GIT_ENDPOINT_TYPE) {
-            return;
-          }
-          const deployId: DEPLOY_TYPES_IDS = e.sub_type === GIT_ENDPOINT_SUB_TYPES.GITHUB ?
-            DEPLOY_TYPES_IDS.GITHUB :
-            DEPLOY_TYPES_IDS.GITLAB;
-          const scm = scms[deployId];
-          const url = getFullEndpointApiUrl(e);
-          // If this isn't the public api one... it must be enterprise
-          if (url !== scm.getPublicApi()) {
-            const index = newTypes.findIndex(nt => nt.id === deployId);
-            newTypes.splice(index + 1, 0, {
-              ...this.baseTypes[index], // Use similar settings to the original one but with more info
-              name: e.name,
-              endpointGuid: e.guid
-            });
-          }
-        });
+      // Add all enterprise github/gitlab types
+      endpoints.forEach(e => {
+        if (e.cnsi_type !== GIT_ENDPOINT_TYPE) {
+          return;
+        }
+        const deployId: DEPLOY_TYPES_IDS = e.sub_type === GIT_ENDPOINT_SUB_TYPES.GITHUB ?
+          DEPLOY_TYPES_IDS.GITHUB :
+          DEPLOY_TYPES_IDS.GITLAB;
+        const scm = scms[deployId];
+        const url = getFullEndpointApiUrl(e);
+        // If this isn't the public api one... it must be enterprise
+        if (url !== scm.getPublicApi()) {
+          const index = newTypes.findIndex(nt => nt.id === deployId);
+          newTypes.splice(index + 1, 0, {
+            ...this.baseTypes[index], // Use similar settings to the original one but with more info
+            name: e.name,
+            endpointGuid: e.guid
+          });
+        }
+      });
 
-        return newTypes;
-      }),
-      shareReplay({ bufferSize: 1, refCount: true })
-    );
+      return newTypes;
+    });
   }
 
-  getAutoSelectedType(activatedRoute: ActivatedRoute): Observable<SourceType | undefined> {
+  getAutoSelectedType(activatedRoute: ActivatedRoute): SourceType | undefined {
     const typeId = activatedRoute.snapshot.queryParams[AUTO_SELECT_DEPLOY_TYPE_URL_PARAM];
     if (!typeId) {
-      return of(undefined);
+      return undefined;
     }
     const endpointGuid = activatedRoute.snapshot.queryParams[AUTO_SELECT_DEPLOY_TYPE_ENDPOINT_PARAM];
-    return this.types$.pipe(map(types => types.find(source => source.id === typeId && source.endpointGuid === endpointGuid)));
+    return this.types().find(source => source.id === typeId && source.endpointGuid === endpointGuid);
   }
 
   canDeployType(cfId: string, sourceId: string): Observable<boolean> {
