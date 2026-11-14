@@ -1,13 +1,10 @@
 import { CommonModule } from '@angular/common';
 import { ChangeDetectionStrategy, Component, OnDestroy, OnInit, computed, effect, inject, signal, untracked } from '@angular/core';
-import { toObservable } from '@angular/core/rxjs-interop';
 import { CustomTooltipDirective } from '../../../shared/components/custom-tooltip/custom-tooltip.directive';
 import { Router, RouterModule } from '@angular/router';
 import {
   EndpointsDataService,
 } from '@stratosui/store';
-import { Subscription } from 'rxjs';
-import { take, filter } from 'rxjs/operators';
 
 import { CustomizationService, CustomizationsMetadata } from '../../../core/customizations.types';
 import { EndpointsService } from '../../../core/endpoints.service';
@@ -20,7 +17,6 @@ import {
   StratosActionType } from '../../../core/extension/extension-service';
 import { CurrentUserPermissionsService } from '../../../core/permissions/current-user-permissions.service';
 import { StratosCurrentUserPermissions } from '../../../core/permissions/stratos-user-permissions.checker';
-import { safeUnsubscribe } from '../../../core/utils.service';
 import { PageHeaderComponent } from '../../../shared/components/page-header/page-header.component';
 import { EndpointsMissingComponent } from '../../../shared/components/endpoints-missing/endpoints-missing.component';
 import { ListSubNavComponent } from '../../../shared/components/list-sub-nav/list-sub-nav.component';
@@ -59,8 +55,6 @@ export class EndpointsPageComponent implements OnDestroy, OnInit {
   private dashboardSignals = inject(DashboardSignalService);
   private endpointStatusSignals = inject(EndpointStatusSignalService);
   private currentUserPermissionsService = inject(CurrentUserPermissionsService);
-  // Bridge dashboard signal → observable in injection context (field init).
-  private dashboardState$ = toObservable(this.dashboardSignals.dashboard);
 
   // Signal-backed permission flag. The directive-based approach (*appUserPermission
   // + async pipe) was sensitive to CD timing under zoneless Angular 21 — the
@@ -137,8 +131,6 @@ export class EndpointsPageComponent implements OnDestroy, OnInit {
     });
   }
 
-  subs: Subscription[] = [];
-
   public extensionActions: StratosActionMetadata[] = getActionsFromExtensions(StratosActionType.Endpoints);
 
   private startEndpointHealthCheckPulse() {
@@ -191,21 +183,10 @@ export class EndpointsPageComponent implements OnDestroy, OnInit {
       console.error('Error checking endpoints:', error);
     }
 
-    // Subscribe to dashboard state to enable polling if configured
-    // Defensive: Add error handling and ensure subscription cleanup
-    this.subs.push(
-      this.dashboardState$.pipe(
-        filter(dashboard => !!dashboard),
-        take(1)
-      ).subscribe({
-        next: (dashboard) => {
-          if (dashboard.pollingEnabled) {
-            this.startEndpointHealthCheckPulse();
-          }
-        },
-        error: (err) => console.error('Error subscribing to dashboard state:', err)
-      })
-    );
+    // Poll the endpoints' health when the dashboard preference says so.
+    if (this.dashboardSignals.pollingEnabled()) {
+      this.startEndpointHealthCheckPulse();
+    }
   }
 
 
@@ -215,12 +196,6 @@ export class EndpointsPageComponent implements OnDestroy, OnInit {
       this.stopEndpointHealthCheckPulse();
     } catch (error) {
       console.error('Error stopping health check pulse:', error);
-    }
-
-    try {
-      safeUnsubscribe(...this.subs);
-    } catch (error) {
-      console.error('Error unsubscribing:', error);
     }
 
     try {

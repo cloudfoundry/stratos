@@ -11,6 +11,7 @@ import { AuthDataService, EndpointsDataService, EntityCatalogHelper, EntityCatal
 import { createBasicStoreModule, STORE_TEST_PROVIDERS } from '@stratosui/store/testing';
 import { CoreTestingModule } from "@test-framework/core-test.modules";
 import { CoreModule } from '../../../core/core.module';
+import { DashboardDataService } from '../../../core/dashboard-data.service';
 import { StratosCurrentUserPermissions } from '../../../core/permissions/stratos-user-permissions.checker';
 import { CurrentUserPermissionsService } from '../../../core/permissions/current-user-permissions.service';
 import { SharedModule } from '../../../shared/shared.module';
@@ -265,6 +266,35 @@ describe('EndpointsPageComponent', () => {
   // the server dropped a connection the page still said Connected, so every
   // tick fetched /pp/v1/cf/info and got 403 "no token for endpoint" (76 times
   // in 38 minutes on the lab).
+  // The dashboard setting "polling" decides whether the page keeps checking
+  // the endpoints while it is open.
+  describe('health check polling', () => {
+    const ticks = async (pollingEnabled: boolean) => {
+      vi.useFakeTimers({ toFake: ['setInterval', 'clearInterval'] });
+      try {
+        TestBed.inject(DashboardDataService).setPollingEnabled(pollingEnabled);
+        vi.spyOn(TestBed.inject(EndpointsDataService), 'getAll').mockResolvedValue([]);
+        const page = TestBed.createComponent(EndpointsPageComponent);
+        await page.whenStable();
+        mockEndpointsService.checkAllEndpoints.mockClear();
+        await vi.advanceTimersByTimeAsync(30000);
+        page.destroy();
+        return mockEndpointsService.checkAllEndpoints.mock.calls.length;
+      } finally {
+        mockEndpointsService.checkAllEndpoints.mockReset();
+        vi.useRealTimers();
+      }
+    };
+
+    it('checks the endpoints every 30 seconds when polling is on', async () => {
+      expect(await ticks(true)).toBe(1);
+    });
+
+    it('does not check them when polling is off', async () => {
+      expect(await ticks(false)).toBe(0);
+    });
+  });
+
   it('re-reads the endpoint list before each health check tick', async () => {
     vi.useFakeTimers();
     try {
