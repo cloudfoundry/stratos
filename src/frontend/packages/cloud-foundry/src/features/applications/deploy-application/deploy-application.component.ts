@@ -1,7 +1,8 @@
 import {
   ChangeDetectionStrategy,
   Component,
-  OnDestroy,
+  Injector,
+  effect,
   OnInit,
   Signal,
   computed,
@@ -11,11 +12,10 @@ import {
   viewChild,
   afterRenderEffect,
 } from '@angular/core';
-import { toObservable, toSignal } from '@angular/core/rxjs-interop';
+import { toSignal } from '@angular/core/rxjs-interop';
 import { ErrorStateMatcher, ShowOnDirtyErrorStateMatcher } from '@stratosui/core';
 import { ActivatedRoute, Router } from '@angular/router';
-import { Observable, Subscription, of as observableOf } from 'rxjs';
-import { filter, map, tap } from 'rxjs/operators';
+import { Observable, Subscription } from 'rxjs';
 import { AsyncPipe } from '@angular/common';
 
 import { SourceType } from '../../../store/types/deploy-application.types';
@@ -55,22 +55,21 @@ import { DeployApplicationStep3Component } from './deploy-application-step3/depl
     DeployApplicationStep3Component
 ]
 })
-export class DeployApplicationComponent implements OnInit, OnDestroy {
+export class DeployApplicationComponent implements OnInit {
   private router = inject(Router);
   cfOrgSpaceService = inject(CfOrgSpaceDataService);
   private appsConfig = inject(CfAppsSignalConfigService);
   private activatedRoute = inject(ActivatedRoute);
   private deployData = inject(CfDeployAppDataService);
-  private cfDetails$ = toObservable(this.deployData.cfDetails);
-
+  private injector = inject(Injector);
 
   appGuid: string;
   // Where Cancel returns to — the CF-scoped wall when launched from one
   // (?returnUrl, set by new-application-base-step), else the global wall.
   readonly returnUrl: string = this.activatedRoute.snapshot.queryParams[RETURN_URL_PARAM] || '/applications';
-  initCfOrgSpaceService: Subscription[] = [];
   deployButtonText = 'Deploy';
-  skipConfig$: Observable<boolean> = observableOf(false);
+  // A public git URL has no project to browse, so its commit step is skipped
+  readonly skipConfig = computed(() => this.deployData.applicationSource()?.type?.id === 'giturl');
   isRedeploy: boolean;
   // undefined when the wizard is opened without an auto-select query param
   // (getAutoSelectedType returns of(undefined)); the title guards for it.
@@ -337,18 +336,10 @@ export class DeployApplicationComponent implements OnInit, OnDestroy {
     this.selectedSourceType$ = appDeploySourceTypes.getAutoSelectedType(activatedRoute);
     this.selectedSourceType = toSignal(this.selectedSourceType$);
 
-    this.skipConfig$ = toObservable(this.deployData.applicationSource).pipe(
-      map(appSource => appSource?.type?.id === 'giturl'),
-    );
-
     if (this.isRedeploy) {
       this.deployButtonText = 'Redeploy';
       this.deployButtonTextSignal.set('Redeploy');
     }
-  }
-
-  ngOnDestroy(): void {
-    this.initCfOrgSpaceService.forEach(p => p.unsubscribe());
   }
 
   ngOnInit(): void {
@@ -359,21 +350,19 @@ export class DeployApplicationComponent implements OnInit, OnDestroy {
     }
 
     if (this.appGuid) {
-      this.initCfOrgSpaceService.push(this.cfDetails$.pipe(
-        filter(p => !!p),
-        tap(p => {
-          this.cfOrgSpaceService.cf.select.set(p.cloudFoundry);
-          this.cfOrgSpaceService.org.select.set(p.org);
-          this.cfOrgSpaceService.space.select.set(p.space);
-        })
-      ).subscribe());
-      // In case user has specified the query param manually
-      this.initCfOrgSpaceService.push(this.cfDetails$.pipe(
-        filter(p => !p),
-        tap(_p => {
-          this.router.navigate(['applications', 'deploy']);
-        })
-      ).subscribe());
+      effect(() => {
+        const details = this.deployData.cfDetails();
+        untracked(() => {
+          if (details) {
+            this.cfOrgSpaceService.cf.select.set(details.cloudFoundry);
+            this.cfOrgSpaceService.org.select.set(details.org);
+            this.cfOrgSpaceService.space.select.set(details.space);
+          } else {
+            // In case user has specified the query param manually
+            this.router.navigate(['applications', 'deploy']);
+          }
+        });
+      }, { injector: this.injector });
     } else {
       // Auto-select endpoint/org/space from the apps wall's current filter
       // (root-scoped CfAppsSignalConfigService keeps them in signals — read
