@@ -1,6 +1,7 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { provideZonelessChangeDetection } from '@angular/core';
 import { describe, it, expect, beforeEach, afterEach, beforeAll, afterAll, vi } from 'vitest';
+import { By } from '@angular/platform-browser';
 import { BehaviorSubject } from 'rxjs';
 
 import { BaseTestModulesNoShared, STORE_TEST_PROVIDERS } from "@test-framework/core-test.helper";
@@ -93,5 +94,23 @@ describe('StackedInputActionsComponent', () => {
     await fixture.whenStable();
 
     expect(emitted.at(-1)?.values).toEqual({ 0: 'a@example.com', 1: 'b@example.com' });
+  });
+
+  // Each row is fed by a watcher on its own state. A row that is removed
+  // takes its watcher with it; the watchers used to live on until the whole
+  // form was destroyed, one more for every row added and removed.
+  it('ends a removed row\'s state feed with the row', async () => {
+    addButton().click();
+    await fixture.whenStable();
+    const rows = fixture.debugElement.queryAll(By.directive(StackedInputActionComponent));
+    const second = rows[1].componentInstance as StackedInputActionComponent;
+    const ended = vi.fn();
+    second.stateIn$().subscribe({ complete: ended });
+    expect(ended).not.toHaveBeenCalled();
+
+    component.removeComponent(second);
+    await fixture.whenStable();
+
+    expect(ended).toHaveBeenCalledTimes(1);
   });
 });

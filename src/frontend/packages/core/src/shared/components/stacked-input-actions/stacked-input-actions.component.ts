@@ -1,4 +1,4 @@
-import { ChangeDetectionStrategy, ChangeDetectorRef, Component, ComponentRef, Injector, OnDestroy, OnInit, ViewContainerRef, signal, Signal, inject, input, output, viewChild } from '@angular/core';
+import { ChangeDetectionStrategy, ChangeDetectorRef, Component, ComponentRef, OnDestroy, OnInit, ViewContainerRef, signal, Signal, inject, input, output, viewChild } from '@angular/core';
 import { Observable, Unsubscribable } from 'rxjs';
 import { toObservable } from '@angular/core/rxjs-interop';
 
@@ -34,7 +34,6 @@ export interface StackedInputActionsUpdate { values: { [key: string]: string }; 
 })
 export class StackedInputActionsComponent implements OnInit, OnDestroy {
   private cd = inject(ChangeDetectorRef);
-  private injector = inject(Injector);
 
 
   // Every host binds it: the rows report their results through it.
@@ -86,9 +85,10 @@ export class StackedInputActionsComponent implements OnInit, OnDestroy {
       }
     }));
 
-    // Track how we push state into the component using signals
+    // Track how we push state into the component using signals; the feed
+    // lives and dies with the row, not with the whole form.
     const stateInSignal = signal<StackedInputActionsState | null>(null);
-    componentRef.setInput('stateIn$', toObservable(stateInSignal, { injector: this.injector }));
+    componentRef.setInput('stateIn$', toObservable(stateInSignal, { injector: componentRef.injector }));
 
     // Track them all together in one pot
     this.components[stackedAction.key()] = {
