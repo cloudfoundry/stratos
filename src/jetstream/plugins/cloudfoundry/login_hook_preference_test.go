@@ -122,3 +122,10 @@ func TestLoginHookKeepsALiveConnection(t *testing.T) {
 	connected := runLoginHook(t, &preferenceProxy{live: map[string]bool{consolePick.GUID: true}})
 	require.Empty(t, connected)
 }
+
+// The user chose norm-lab and then disconnected it: the console pick, never
+// attempted for them, must not be connected in its place.
+func TestLoginHookRespectsDisconnectOfTheChosenEndpoint(t *testing.T) {
+	connected := runLoginHook(t, &preferenceProxy{disconnected: map[string]bool{normLab.GUID: true}})
+	require.Empty(t, connected)
+}
