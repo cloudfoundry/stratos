@@ -90,4 +90,42 @@ describe('CopyToClipboardComponent', () => {
     expect(live().textContent?.trim()).toBe('Copy failed');
   });
 
+  // The result shows on the button, not in its place (WCAG 2.4.3): a
+  // focused button that is taken out of the page drops focus to the body.
+  describe('keeps focus on the button', () => {
+    const pressWith = async (writeText: () => Promise<void>) => {
+      Object.defineProperty(window.navigator, 'clipboard', {
+        configurable: true,
+        value: { writeText },
+      });
+      document.body.appendChild(fixture.nativeElement);
+      const button: HTMLButtonElement = fixture.nativeElement.querySelector('button');
+      button.focus();
+      button.click();
+      await Promise.resolve();
+      await fixture.whenStable();
+      return button;
+    };
+
+    afterEach(() => fixture.nativeElement.remove());
+
+    it('after a copy that works', async () => {
+      const button = await pressWith(vi.fn().mockResolvedValue(undefined));
+
+      expect(component.didUserPressCopy()).toBe('yes and succeeded');
+      expect(button.isConnected).toBe(true);
+      expect(document.activeElement).toBe(button);
+      expect(button.textContent).toContain('check_circle');
+    });
+
+    it('after a copy that fails', async () => {
+      const button = await pressWith(vi.fn().mockRejectedValue(new Error('denied')));
+
+      expect(component.didUserPressCopy()).toBe('yes but failed');
+      expect(button.isConnected).toBe(true);
+      expect(document.activeElement).toBe(button);
+      expect(button.textContent).toContain('error');
+    });
+  });
+
 });
