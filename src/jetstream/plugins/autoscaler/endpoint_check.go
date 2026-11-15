@@ -12,8 +12,8 @@ import (
 // cfDomain is the domain an autoscaler or CF API URL sits on: the host
 // without its first label, port and path ignored. It follows the
 // autoscaler CLI plugin's getDomain (api/endpoint.go), which only accepts
-// an autoscaler on the Cloud Foundry's own domain. A host with no dot has
-// no domain ("").
+// an autoscaler on the Cloud Foundry's own domain. Host names compare in lower case. A host with
+// no dot has no domain ("").
 func cfDomain(raw string) string {
 	if raw == "" {
 		return ""
@@ -25,7 +25,7 @@ func cfDomain(raw string) string {
 	if err != nil {
 		return ""
 	}
-	parts := strings.SplitN(u.Hostname(), ".", 2)
+	parts := strings.SplitN(strings.ToLower(u.Hostname()), ".", 2)
 	if len(parts) < 2 {
 		return ""
 	}
