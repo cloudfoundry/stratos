@@ -3,6 +3,7 @@ import { HttpClient } from '@angular/common/http';
 import { firstValueFrom } from 'rxjs';
 import { StratosTheme, defaultTheme, darkTheme } from './theme.config';
 import { CompanyConfig } from './company-config.interface';
+import { deriveDarkHex, luminance } from './derive-dark';
 import { BUILD_INFO } from '../core/src/environments/build-info';
 
 export type ThemeMode = 'light' | 'dark' | 'system';
@@ -73,18 +74,6 @@ const defaultCompanyConfig: CompanyConfig = {
 // #rrggbb, which leaves the stylesheet default in place.
 const TEXT_LIGHT = '#ffffff';
 const TEXT_DARK = '#0f172a';
-function luminance(hex: string): number | null {
-  const m = /^#([0-9a-f]{3}|[0-9a-f]{6})$/i.exec(hex.trim());
-  if (!m) {
-    return null;
-  }
-  const h = m[1].length === 3 ? m[1].replace(/./g, c => c + c) : m[1];
-  const [r, g, b] = [0, 2, 4].map(i => {
-    const v = parseInt(h.slice(i, i + 2), 16) / 255;
-    return v <= 0.04045 ? v / 12.92 : ((v + 0.055) / 1.055) ** 2.4;
-  });
-  return 0.2126 * r + 0.7152 * g + 0.0722 * b;
-}
 export function textOn(color: string): string | null {
   const bg = luminance(color);
   if (bg === null) {
@@ -486,6 +475,24 @@ export class StratosBrandingService {
 
     this._theme.set(theme);
     this.applyTheme(theme);
+    this.applyDarkBrandColors(isDark);
+  }
+
+  // In dark mode the .dark-theme block of main.scss redeclares the brand
+  // colors on body, which beats the inline values on the root. A color the
+  // operator configured gets its derived dark value inline on body instead;
+  // light mode, and any color not configured, leave body bare. --color-on-primary
+  // is not touched: primary has no on-color handling here today.
+  private applyDarkBrandColors(isDark: boolean) {
+    const configured = isDark ? this.configuredColors('theme') : {};
+    for (const key of ['primary', 'secondary', 'accent', 'success', 'warning', 'danger', 'info']) {
+      const dark = configured[key] ? deriveDarkHex(configured[key]) : null;
+      if (dark) {
+        document.body.style.setProperty(`--color-${key}`, dark);
+      } else {
+        document.body.style.removeProperty(`--color-${key}`);
+      }
+    }
   }
 
   // The colors of one config section that the operator set: those that differ
