@@ -1,5 +1,6 @@
 import { HttpClient } from '@angular/common/http';
 import { firstValueFrom } from 'rxjs';
+import { partialFailureError } from '@stratosui/store';
 import { CnsiEntitySource } from './cnsi-entity-source';
 import type { StApp } from '../endpoint-data/stratos-types';
 import { EndpointDataService } from '../endpoint-data/endpoint-data.service';
@@ -24,7 +25,8 @@ interface PatchAppError {
   affected: string[];
 }
 
-type PatchAppResponse = Partial<StApp> & { _meta?: { errors?: PatchAppError[] } };
+/** The `_meta` of a patchApp answer: what failed, if anything. */
+export type PatchAppResponse = Partial<StApp> & { _meta?: { errors?: PatchAppError[] } };
 
 export class CnsiAppsSource extends CnsiEntitySource<StApp> {
   protected readonly entityName = 'apps';
@@ -93,7 +95,7 @@ export class CnsiAppsSource extends CnsiEntitySource<StApp> {
     this.eds?.applyCascade('app.update');
     const errors = _meta?.errors ?? [];
     if (errors.length) {
-      throw new Error(errors.map(e => e.detail || e.title).join('; '));
+      throw partialFailureError(errors);
     }
   }
 
