@@ -39,9 +39,12 @@ func sameDomain(a, b string) bool {
 	return d != "" && d == cfDomain(b)
 }
 
-// checkAutoscaler checks a URL the way the autoscaler CLI does: GET /health
-// must return 200. GET /v1/info (15.3.1 and later) adds the build; older
-// autoscalers lack it, which is not an error.
+// checkAutoscaler checks that a URL is an autoscaler: GET /health must
+// return 200, as the autoscaler CLI checks, and the answer must come from
+// an autoscaler: /health's {"alive": …} or a /v1/info with a name or build.
+// A status check alone passes any web app that answers every path with
+// 200 and its HTML page, the console included. GET /v1/info (15.3.1 and
+// later) adds the build; older autoscalers lack it, which is not an error.
 func checkAutoscaler(client http.Client, baseURL string) (string, error) {
 	base := strings.TrimRight(baseURL, "/")
 
@@ -49,25 +52,28 @@ func checkAutoscaler(client http.Client, baseURL string) (string, error) {
 	if err != nil {
 		return "", fmt.Errorf("could not reach %s: %w", base, err)
 	}
-	_, _ = io.Copy(io.Discard, res.Body)
+	var health struct {
+		Alive *json.RawMessage `json:"alive"`
+	}
+	healthErr := json.NewDecoder(io.LimitReader(res.Body, 64<<10)).Decode(&health)
 	_ = res.Body.Close()
 	if res.StatusCode != http.StatusOK {
 		return "", fmt.Errorf("%s/health returned %d", base, res.StatusCode)
 	}
+	alive := healthErr == nil && health.Alive != nil
 
-	res, err = client.Get(base + "/v1/info")
-	if err != nil {
-		return "", nil
-	}
-	defer func() { _ = res.Body.Close() }()
-	if res.StatusCode != http.StatusOK {
-		return "", nil
-	}
 	var info struct {
+		Name  string `json:"name"`
 		Build string `json:"build"`
 	}
-	if err := json.NewDecoder(res.Body).Decode(&info); err != nil {
-		return "", nil
+	if res, err = client.Get(base + "/v1/info"); err == nil {
+		if res.StatusCode == http.StatusOK {
+			_ = json.NewDecoder(io.LimitReader(res.Body, 64<<10)).Decode(&info)
+		}
+		_ = res.Body.Close()
+	}
+	if !alive && info.Name == "" && info.Build == "" {
+		return "", fmt.Errorf("%s/health did not answer as an autoscaler", base)
 	}
 	return info.Build, nil
 }

@@ -84,6 +84,36 @@ func TestCheckAutoscaler(t *testing.T) {
 		}
 	})
 
+	// A web app that answers every path with 200 and its HTML page (the
+	// console itself does) is not an autoscaler.
+	t.Run("a web app answering every path with 200 is not an autoscaler", func(t *testing.T) {
+		s := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+			w.Header().Set("Content-Type", "text/html")
+			_, _ = w.Write([]byte("<!doctype html><html><body>app</body></html>"))
+		}))
+		defer s.Close()
+		_, err := checkAutoscaler(*s.Client(), s.URL)
+		if err == nil || !strings.Contains(err.Error(), "/health did not answer as an autoscaler") {
+			t.Fatalf("got %v, want an error containing \"/health did not answer as an autoscaler\"", err)
+		}
+	})
+
+	t.Run("a /health body without alive passes when /v1/info names it", func(t *testing.T) {
+		s := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+			switch r.URL.Path {
+			case "/health":
+				_, _ = w.Write([]byte(`OK`))
+			case "/v1/info":
+				_, _ = w.Write([]byte(`{"name":"Autoscaler","build":"16.2.1"}`))
+			}
+		}))
+		defer s.Close()
+		build, err := checkAutoscaler(*s.Client(), s.URL)
+		if err != nil || build != "16.2.1" {
+			t.Fatalf("got (%q, %v), want (\"16.2.1\", nil)", build, err)
+		}
+	})
+
 	t.Run("unreachable", func(t *testing.T) {
 		s := serve(200, 200, "")
 		url := s.URL
