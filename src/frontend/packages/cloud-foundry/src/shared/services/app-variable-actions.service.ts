@@ -1,6 +1,7 @@
 import { HttpClient } from '@angular/common/http';
 import { Injectable, computed, inject, signal } from '@angular/core';
 import { firstValueFrom } from 'rxjs';
+import { PartialFailure, partialFailureError } from '@stratosui/store';
 
 import { ApplicationService } from '../../features/applications/application.service';
 
@@ -104,12 +105,17 @@ export class AppVariableActionsService {
     }
   }
 
-  /** Send the PATCH with the environment delta. The handler returns 200
-   *  with `{guid, _meta?}`; partial success is surfaced via _meta but we
-   *  leave inspection to the consumer (the snackbar wrapper). */
+  /** Send the PATCH with the environment delta. The handler answers 200
+   *  even when CF rejected the change and lists the reasons in
+   *  `_meta.errors`; those reject the call, as CnsiAppsSource.update does. */
   private async patch(env: Record<string, string | null>): Promise<void> {
     const { cfGuid, appGuid } = this.applicationService;
     const url = `/pp/v1/cf/apps/${cfGuid}/${appGuid}`;
-    await firstValueFrom(this.http.patch(url, { environment_json: env }));
+    const answer = await firstValueFrom(this.http.patch<{ _meta?: { errors?: PartialFailure[] } } | null>(
+      url, { environment_json: env }));
+    const errors = answer?._meta?.errors ?? [];
+    if (errors.length) {
+      throw partialFailureError(errors);
+    }
   }
 }
