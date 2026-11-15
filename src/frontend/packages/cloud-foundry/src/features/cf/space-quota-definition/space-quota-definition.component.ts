@@ -25,6 +25,7 @@ import {
 } from './apply-quota-to-spaces-dialog/apply-quota-to-spaces-dialog.component';
 import { CfEndpointsDataService } from '../../../services/domain-data/cf-endpoints-data.service';
 import { CfCurrentUserPermissions } from '../../../user-permissions/cf-user-permissions-checkers';
+import { CfCliMenuComponent } from '../../../shared/components/cli-menu/cf-cli-menu.component';
 import { ActiveRouteCfOrgSpace } from '../cf-page.types';
 import { getActiveRouteCfOrgSpaceProvider } from '../cf.helpers';
 import { QuotaDefinitionBaseComponent } from '../quota-definition-base/quota-definition-base.component';
@@ -45,6 +46,7 @@ export const QUOTA_SPACE_GUID = 'space';
     CustomTooltipDirective,
     PageHeaderComponent,
     PageSubNavComponent,
+    CfCliMenuComponent,
     LoadingPageComponent,
     BooleanIndicatorComponent,
     TileGridComponent,

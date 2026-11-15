@@ -21,6 +21,7 @@ import { QuotaDataService } from '../../../services/endpoint-data/quota-data.ser
 import { StOrgDetail, StOrgQuota, StSpace } from '../../../services/endpoint-data/stratos-types';
 import { CfEndpointsDataService } from '../../../services/domain-data/cf-endpoints-data.service';
 import { CfCurrentUserPermissions } from '../../../user-permissions/cf-user-permissions-checkers';
+import { CfCliMenuComponent } from '../../../shared/components/cli-menu/cf-cli-menu.component';
 import { ActiveRouteCfOrgSpace } from '../cf-page.types';
 import { getActiveRouteCfOrgSpaceProvider } from '../cf.helpers';
 import { QuotaDefinitionBaseComponent } from '../quota-definition-base/quota-definition-base.component';
@@ -45,6 +46,7 @@ export const QUOTA_ORG_GUID = 'org';
     CustomTooltipDirective,
     PageHeaderComponent,
     PageSubNavComponent,
+    CfCliMenuComponent,
     BooleanIndicatorComponent,
     LoadingPageComponent,
     CardNumberMetricComponent,
