@@ -597,6 +597,25 @@ describe('AppDetailDataService', () => {
     expect(svc.errors().app).toBeNull();
   });
 
+  it('keeps the loaded env vars through a reload after a failed poll and a second failure', async () => {
+    await loadAll();
+    expect(svc.envVars()).toEqual(MOCK_ENV); // a view reads it, which keeps the value alive
+    const failed = svc.refresh('envVars');
+    await tick();
+    httpMock.expectOne(ENV_URL).flush('err', { status: 500, statusText: 'Server Error' });
+    await failed;
+    expect(svc.envVars()).toEqual(MOCK_ENV);
+
+    const again = svc.refresh('envVars');
+    await tick();
+    // The reload that follows an error is loading: the kept value must stay.
+    expect(svc.envVars()).toEqual(MOCK_ENV);
+    httpMock.expectOne(ENV_URL).flush('err', { status: 500, statusText: 'Server Error' });
+    await again;
+    expect(svc.errors().envVars).not.toBeNull();
+    expect(svc.envVars()).toEqual(MOCK_ENV);
+  });
+
   // -------------------------------------------------------------------------
   // Stats — stopped-app 400 treated as benign
   // -------------------------------------------------------------------------
