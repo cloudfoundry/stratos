@@ -109,6 +109,7 @@ export function extractHttpErrorPieces(err: unknown): ErrorPiece[] {
       const page = htmlToPieces(body);
       if (page.length) return page;
     }
+    if (err.status === 0) return textPiece('Could not reach the server.');
     return textPiece(err.statusText && err.statusText !== 'OK'
       ? `HTTP ${err.status} ${err.statusText}`
       : `HTTP ${err.status}`);
