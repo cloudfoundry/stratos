@@ -92,6 +92,45 @@ describe('CliMenuComponent (#6126)', () => {
     expect(el().querySelector('[role="menu"]')).toBeNull();
   });
 
+  // Before the page has loaded the name, the command shows a placeholder and
+  // must not be copied as if it were real.
+  it('does not copy a command whose names have not loaded', async () => {
+    await render('variables');
+    fixture.componentRef.setInput('context', { ...context, appName: undefined });
+    await fixture.whenStable();
+    await open();
+    const item = items()[0];
+    expect(item.getAttribute('aria-disabled')).toBe('true');
+    expect(item.hasAttribute('disabled')).toBe(false);
+    item.focus();
+    item.click();
+    await fixture.whenStable();
+    expect(writeText).not.toHaveBeenCalled();
+    expect(snackBar.show).not.toHaveBeenCalled();
+    expect(el().querySelector('[role="menu"]')).not.toBeNull();
+    expect(document.activeElement).toBe(item);
+
+    fixture.componentRef.setInput('context', context);
+    await fixture.whenStable();
+    expect(items()[0].getAttribute('aria-disabled')).toBeNull();
+    items()[0].click();
+    await fixture.whenStable();
+    expect(writeText).toHaveBeenCalledWith('cf env "my app"');
+  });
+
+  it('keeps a command that needs no name available while names load', async () => {
+    fixture = TestBed.createComponent(CliMenuComponent);
+    fixture.componentRef.setInput('commands', [{ name: 'List', msg: 'To list the orgs:', syntax: () => 'cf orgs' }]);
+    fixture.componentRef.setInput('context', { ...context, orgName: undefined });
+    fixture.componentRef.setInput('allLink', ['/x']);
+    await fixture.whenStable();
+    await open();
+    expect(items()[0].getAttribute('aria-disabled')).toBeNull();
+    items()[0].click();
+    await fixture.whenStable();
+    expect(writeText).toHaveBeenCalledWith('cf orgs');
+  });
+
   // The chosen item leaves the page with the menu; focus must not fall to the body.
   it('returns focus to the menu button after a command is chosen', async () => {
     await render('variables');

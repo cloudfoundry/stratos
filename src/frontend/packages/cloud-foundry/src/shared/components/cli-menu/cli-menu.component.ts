@@ -1,9 +1,9 @@
-import { ChangeDetectionStrategy, Component, ElementRef, HostListener, inject, input, signal, viewChild } from '@angular/core';
+import { ChangeDetectionStrategy, Component, ElementRef, HostListener, computed, inject, input, signal, viewChild } from '@angular/core';
 import { RouterLink } from '@angular/router';
 
 import { CustomTooltipDirective, TailwindSnackBarService } from '@stratosui/core';
 
-import { CliCommand, CliCommandNames } from '../cli-info/cli-commands';
+import { CliCommand, CliCommandNames, commandReady } from '../cli-info/cli-commands';
 
 // The CF CLI menu of a tab: the cf commands that match the tab, each copied
 // to the clipboard when chosen, and CF CLI All, which opens the level's
@@ -23,6 +23,10 @@ export class CliMenuComponent {
   readonly context = input.required<CliCommandNames>();
   readonly allLink = input.required<string | any[]>();
 
+  // Each command with whether the names it fills in have loaded.
+  readonly rows = computed(() =>
+    this.commands().map(command => ({ command, ready: commandReady(command, this.context()) })));
+
   readonly open = signal(false);
   private readonly trigger = viewChild.required<ElementRef<HTMLButtonElement>>('trigger');
 
@@ -40,6 +44,11 @@ export class CliMenuComponent {
   }
 
   async copy(command: CliCommand): Promise<void> {
+    // Not ready: the syntax still holds a placeholder for a name. The item
+    // stays focused and the menu open.
+    if (!commandReady(command, this.context())) {
+      return;
+    }
     const syntax = command.syntax(this.context());
     this.close(true);
     try {
