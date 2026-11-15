@@ -9,7 +9,8 @@ import { ThemeToggleComponent } from './theme-toggle.component';
 // text the button shows, so a speech user can say what they see.
 describe('ThemeToggleComponent', () => {
   async function setup(mode: ThemeMode, dark: boolean) {
-    const branding = { themeMode: signal(mode), isDarkMode: signal(dark), toggleTheme: () => {}, setThemeMode: () => {} };
+    const isDarkMode = signal(dark);
+    const branding = { themeMode: signal(mode), isDarkMode, toggleTheme: () => isDarkMode.update((d) => !d), setThemeMode: () => {} };
     TestBed.configureTestingModule({
       imports: [ThemeToggleComponent],
       providers: [provideZonelessChangeDetection(), { provide: StratosBrandingService, useValue: branding }],
@@ -18,7 +19,8 @@ describe('ThemeToggleComponent', () => {
     await fixture.whenStable();
     const button = fixture.nativeElement.querySelector('button') as HTMLButtonElement;
     const shown = (fixture.nativeElement.querySelector('.theme-label') as HTMLElement).textContent!.trim();
-    return { button, shown };
+    const status = fixture.nativeElement.querySelector('[role="status"]') as HTMLElement;
+    return { fixture, button, shown, status };
   }
 
   for (const [mode, dark, shown, next] of [
@@ -39,5 +41,21 @@ describe('ThemeToggleComponent', () => {
   it('says the state in the name, not with aria-pressed', async () => {
     const { button } = await setup('dark', true);
     expect(button.hasAttribute('aria-pressed')).toBe(false);
+  });
+
+  // The toggle is in every page header, so it is drawn on each page
+  // change. A status region that already holds the mode put "Dark mode
+  // activated" in the page each time (WCAG 4.1.3: a message with no
+  // change behind it). It speaks only after a press.
+  it('says nothing when it is drawn', async () => {
+    const { status } = await setup('dark', true);
+    expect(status.textContent!.trim()).toBe('');
+  });
+
+  it('says the new mode after a press', async () => {
+    const { fixture, button, status } = await setup('dark', true);
+    button.click();
+    await fixture.whenStable();
+    expect(status.textContent!.trim()).toBe('Light mode activated');
   });
 });
