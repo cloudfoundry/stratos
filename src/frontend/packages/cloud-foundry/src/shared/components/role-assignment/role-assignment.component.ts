@@ -517,10 +517,17 @@ export class RoleAssignmentComponent implements OnInit, OnDestroy {
     }
 
     // Check all space roles across loaded spaces (computeChecked reads baseline + selection)
-    const spaces = spacesByOrg[orgGuid] ?? [];
-    for (const space of spaces) {
+    // Space scope lists one space, but the user's roles in the org's other
+    // spaces still hold the org User role in place, so scan the baseline too.
+    const spaceGuids = new Set<string>((spacesByOrg[orgGuid] ?? []).map(space => space.guid));
+    for (const userGuid of Object.keys(baseline)) {
+      for (const spaceGuid of Object.keys(baseline[userGuid]?.[orgGuid]?.spaces ?? {})) {
+        spaceGuids.add(spaceGuid);
+      }
+    }
+    for (const spaceGuid of spaceGuids) {
       for (const def of this.spaceRoleDefs) {
-        const checked = computeChecked(def.name, users, baseline, sel, orgGuid, space.guid);
+        const checked = computeChecked(def.name, users, baseline, sel, orgGuid, spaceGuid);
         if (checked !== false) {
           return true;
         }
