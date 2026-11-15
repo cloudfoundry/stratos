@@ -5,6 +5,12 @@ import { Router } from '@angular/router';
 import { IPageSideNavTab } from './features/dashboard/page-side-nav/page-side-nav.component';
 import { IHeaderBreadcrumbLink } from './shared/components/page-header/page-header.types';
 
+export interface SubNavEntry {
+  portal: Portal<any>;
+  fallback: boolean;
+  breadcrumbs?: IHeaderBreadcrumbLink[];
+}
+
 @Injectable({
   providedIn: 'root'
 })
@@ -20,11 +26,18 @@ export class TabNavService {
   private _tabHeader = signal<string | undefined>(undefined);
   public readonly tabHeader: Signal<string | undefined> = this._tabHeader.asReadonly();
 
-  private _tabSubNav = signal<Portal<any> | undefined>(undefined);
-  public readonly tabSubNav: Signal<Portal<any> | undefined> = this._tabSubNav.asReadonly();
+  // Every live sub-nav, in the order it registered. The row shows the last
+  // one that is not a fallback; a fallback (a tabbed page's shared row) shows
+  // only when no tab brought its own, whatever order they initialised in.
+  private _subNavs = signal<SubNavEntry[]>([]);
+  private shownSubNav = computed(() => {
+    const all = this._subNavs();
+    return [...all].reverse().find(e => !e.fallback) ?? all[all.length - 1];
+  });
 
-  private _tabSubNavBreadcrumbs = signal<IHeaderBreadcrumbLink[] | undefined>(undefined);
-  public readonly tabSubNavBreadcrumbs: Signal<IHeaderBreadcrumbLink[] | undefined> = this._tabSubNavBreadcrumbs.asReadonly();
+  public readonly tabSubNav: Signal<Portal<any> | undefined> = computed(() => this.shownSubNav()?.portal);
+  public readonly tabSubNavBreadcrumbs: Signal<IHeaderBreadcrumbLink[] | undefined> =
+    computed(() => this.shownSubNav()?.breadcrumbs);
 
   private _pageHeader = signal<Portal<any> | undefined>(undefined);
   public readonly pageHeader: Signal<Portal<any> | undefined> = this._pageHeader.asReadonly();
@@ -46,12 +59,22 @@ export class TabNavService {
     this._tabHeader.set(header);
   }
 
-  public setSubNav(portal: Portal<any>) {
-    this._tabSubNav.set(portal);
+  /** Register a sub-nav for the row. Returns the entry, to update or remove. */
+  public addSubNav(portal: Portal<any>, fallback = false, breadcrumbs?: IHeaderBreadcrumbLink[]): SubNavEntry {
+    const entry: SubNavEntry = { portal, fallback, breadcrumbs };
+    this._subNavs.update(all => [...all, entry]);
+    return entry;
   }
 
-  public setSubNavBreadcrumbs(breadcrumbs: IHeaderBreadcrumbLink[] | undefined) {
-    this._tabSubNavBreadcrumbs.set(breadcrumbs);
+  /** Replace an entry's breadcrumbs. Returns the entry to hold from now on. */
+  public setSubNavBreadcrumbs(entry: SubNavEntry, breadcrumbs: IHeaderBreadcrumbLink[] | undefined): SubNavEntry {
+    const next = { ...entry, breadcrumbs };
+    this._subNavs.update(all => all.map(e => e === entry ? next : e));
+    return next;
+  }
+
+  public removeSubNav(entry: SubNavEntry) {
+    this._subNavs.update(all => all.filter(e => e !== entry));
   }
 
   public setPageHeader(portal: Portal<any>) {
@@ -66,8 +89,7 @@ export class TabNavService {
   }
 
   public clearSubNav() {
-    this._tabSubNav.set(undefined);
-    this._tabSubNavBreadcrumbs.set(undefined);
+    this._subNavs.set([]);
   }
 
   private getCurrentTabHeader = (tabs: IPageSideNavTab[] | undefined) => {

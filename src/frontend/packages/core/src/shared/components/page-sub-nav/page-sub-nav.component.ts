@@ -2,7 +2,7 @@ import { TemplatePortal } from '@angular/cdk/portal';
 
 import { AfterViewInit, Component, OnDestroy, TemplateRef, ViewContainerRef, effect, inject, input, ChangeDetectionStrategy, viewChild } from '@angular/core';
 
-import { TabNavService } from '../../../tab-nav.service';
+import { SubNavEntry, TabNavService } from '../../../tab-nav.service';
 import { IHeaderBreadcrumbLink } from '../page-header/page-header.types';
 
 @Component({
@@ -21,42 +21,34 @@ export class PageSubNavComponent implements AfterViewInit, OnDestroy {
 
   readonly subNavTmpl = viewChild.required<TemplateRef<any>>('subNavTmpl');
 
-  // Who had the row before this sub-nav, to hand it back in ngOnDestroy: a
-  // tabbed page can hold a sub-nav for every tab while a tab that brings its
-  // own shows that one instead. Read here, before the breadcrumbs effect
-  // below publishes this sub-nav's own.
-  private previousPortal = this.tabNavService.tabSubNav();
-  private previousBreadcrumbs = this.tabNavService.tabSubNavBreadcrumbs();
+  /**
+   * A tabbed page's shared row. It shows only when no tab brought its own
+   * sub-nav, whichever of them initialised first.
+   */
+  readonly fallback = input(false);
+
   // Set in ngAfterViewInit, read in ngOnDestroy.
-  private myPortal?: TemplatePortal;
+  private entry?: SubNavEntry;
 
   constructor() {
     // Publish the breadcrumbs to the dashboard. Most sub-navs bind none and
     // publish nothing.
     effect(() => {
       const crumbs = this.breadcrumbs();
-      if (crumbs !== undefined) {
-        this.tabNavService.setSubNavBreadcrumbs(crumbs);
+      if (crumbs !== undefined && this.entry) {
+        this.entry = this.tabNavService.setSubNavBreadcrumbs(this.entry, crumbs);
       }
     });
   }
 
   ngAfterViewInit() {
-    this.myPortal = new TemplatePortal(this.subNavTmpl(), this.viewContainerRef, {});
-    this.tabNavService.setSubNav(this.myPortal);
+    this.entry = this.tabNavService.addSubNav(
+      new TemplatePortal(this.subNavTmpl(), this.viewContainerRef, {}), this.fallback(), this.breadcrumbs());
   }
 
   ngOnDestroy() {
-    // Only act if the row is still ours; a later sub-nav that took it over
-    // and is still alive keeps it.
-    if (this.tabNavService.tabSubNav() !== this.myPortal) {
-      return;
-    }
-    if (this.previousPortal) {
-      this.tabNavService.setSubNav(this.previousPortal);
-      this.tabNavService.setSubNavBreadcrumbs(this.previousBreadcrumbs);
-    } else {
-      this.tabNavService.clearSubNav();
+    if (this.entry) {
+      this.tabNavService.removeSubNav(this.entry);
     }
   }
 }
