@@ -2,7 +2,7 @@ import { Component, provideZonelessChangeDetection } from '@angular/core';
 import { TestBed } from '@angular/core/testing';
 import { Router, TitleStrategy, provideRouter } from '@angular/router';
 import { of } from 'rxjs';
-import { describe, it, expect, beforeEach } from 'vitest';
+import { describe, it, expect, beforeEach, afterEach, vi } from 'vitest';
 
 import { StratosBrandingService } from '../../theme/stratos-branding.service';
 import { EndpointsDataService } from '@stratosui/store';
@@ -42,7 +42,10 @@ describe('BrandedTitleStrategy', () => {
         { provide: TitleStrategy, useClass: BrandedTitleStrategy },
         {
           provide: EndpointsDataService,
-          useValue: { waitFor: (guid: string) => guid === 'cf-1' ? Promise.resolve({ name: 'norm-lab' }) : Promise.reject(new Error('not found')) },
+          useValue: {
+            waitFor: (guid: string) => guid === 'cf-1' ? Promise.resolve({ name: 'norm-lab' })
+              : guid === 'slow' ? new Promise(() => { /* the API never answers */ }) : Promise.reject(new Error('not found')),
+          },
         },
       ],
     });
@@ -100,5 +103,18 @@ describe('BrandedTitleStrategy', () => {
     await router.navigateByUrl('/cf/missing');
     TestBed.tick();
     expect(document.title).toBe(`Cloud Foundry - ${brand}`);
+  });
+
+  it('keeps the section title when the endpoint lookup is slow, so navigation is not held', async () => {
+    vi.useFakeTimers();
+    try {
+      const navigation = TestBed.inject(Router).navigateByUrl('/cf/slow');
+      await vi.advanceTimersByTimeAsync(2000);
+      await navigation;
+      TestBed.tick();
+      expect(document.title).toBe(`Cloud Foundry - ${brand}`);
+    } finally {
+      vi.useRealTimers();
+    }
   });
 });

@@ -1,7 +1,7 @@
 import { HttpClient } from '@angular/common/http';
 import { inject } from '@angular/core';
 import { ActivatedRouteSnapshot, ResolveFn } from '@angular/router';
-import { endpointTitle, paramTitle, parentTitle } from '@stratosui/core';
+import { endpointTitle, paramTitle, titleOrParent } from '@stratosui/core';
 import { firstValueFrom } from 'rxjs';
 
 import { EndpointDataRegistry } from './services/endpoint-data/endpoint-data.registry';
@@ -11,7 +11,7 @@ import { SpaceDataRegistry } from './services/endpoint-data/space-data.registry'
 // Route `title` resolvers for the Cloud Foundry entity pages (SC 2.4.2): the
 // document title carries the entity's name. Names come from what the app has
 // already loaded where a shared cache exists; otherwise one GET of the
-// entity. A failed lookup keeps the section's title.
+// entity. A failed or slow (2 s) lookup keeps the section's title.
 
 const param = (route: ActivatedRouteSnapshot, name: string) => route.paramMap.get(name) ?? '';
 
@@ -20,7 +20,7 @@ function nameOrParent(route: ActivatedRouteSnapshot, url: string, cached?: strin
     return Promise.resolve(cached);
   }
   const http = inject(HttpClient);
-  return firstValueFrom(http.get<{ name: string }>(url)).then(r => r.name, () => parentTitle(route));
+  return titleOrParent(route, firstValueFrom(http.get<{ name: string }>(url)).then(r => r.name));
 }
 
 const prefixed = (prefix: string | undefined, name: string) => (prefix ? `${prefix} - ${name}` : name);
@@ -39,15 +39,13 @@ export const appTitle: ResolveFn<string> = route => {
 /** `organizations/:orgId` — through the org data service the page shares. */
 export const orgTitle: ResolveFn<string> = route => {
   const org = inject(OrgDataRegistry).acquire(param(route, 'endpointId'), param(route, 'orgId'));
-  return firstValueFrom(org.load(), { defaultValue: undefined })
-    .then(() => org.org()?.name ?? parentTitle(route), () => parentTitle(route));
+  return titleOrParent(route, firstValueFrom(org.load(), { defaultValue: undefined }).then(() => org.org()?.name));
 };
 
 /** `organizations/:orgId/spaces/:spaceId` — through the space data service the page shares. */
 export const spaceTitle: ResolveFn<string> = route => {
   const space = inject(SpaceDataRegistry).acquire(param(route, 'endpointId'), param(route, 'spaceId'));
-  return firstValueFrom(space.load(), { defaultValue: undefined })
-    .then(() => space.space()?.name ?? parentTitle(route), () => parentTitle(route));
+  return titleOrParent(route, firstValueFrom(space.load(), { defaultValue: undefined }).then(() => space.space()?.name));
 };
 
 /** `:type/:endpointId/:serviceInstanceId[/action]` — "Action - instance name". */

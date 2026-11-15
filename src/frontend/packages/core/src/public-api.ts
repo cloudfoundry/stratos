@@ -286,4 +286,4 @@ export { MetricsRangeSelectorComponent } from './shared/components/metrics-range
 export { MetricsLineChartConfig, MetricsChartTypes, IMetricsConfig, IMetricsChartConfig } from './shared/components/metrics-chart/metrics-chart.types';
 export { ChartDataTypes, getMetricsChartConfigBuilder, MetricsChartHelpers } from './shared/components/metrics-chart/metrics.component.helpers';
 
-export { BrandedTitleStrategy, endpointTitle, paramTitle, parentTitle, tabTitle } from './title-strategy';
+export { BrandedTitleStrategy, endpointTitle, paramTitle, parentTitle, tabTitle, titleOrParent } from './title-strategy';
