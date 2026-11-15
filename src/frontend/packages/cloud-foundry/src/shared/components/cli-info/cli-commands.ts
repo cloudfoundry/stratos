@@ -25,6 +25,20 @@ export function commandsForTab(list: CliTabCommands[], tab: string | null): CliC
   return list.find(section => section.tab === tab)?.commands ?? [];
 }
 
+// True when every name the command fills in has loaded. The command is run
+// against a context that notes which names it reads; a name still empty
+// shows as a placeholder, and the command is not ready to copy.
+export function commandReady(command: CliCommand, names: CliCommandNames): boolean {
+  const read: (keyof CliCommandNames)[] = [];
+  command.syntax(new Proxy(names, {
+    get: (target, key) => {
+      read.push(key as keyof CliCommandNames);
+      return target[key as keyof CliCommandNames];
+    },
+  }));
+  return read.every(key => !!names[key]);
+}
+
 // Names are quoted so a name with a space in it stays one argument, in double
 // quotes as they are shown. A name with a character a shell still expands
 // inside double quotes (" $ ` \ !) is single-quoted instead, with each ' as
