@@ -1,7 +1,7 @@
 import { TestBed } from '@angular/core/testing';
 import { HttpErrorResponse } from '@angular/common/http';
 import { provideRouter, Router } from '@angular/router';
-import { provideZonelessChangeDetection, signal } from '@angular/core';
+import { EnvironmentInjector, createEnvironmentInjector, provideZonelessChangeDetection, signal } from '@angular/core';
 import { describe, it, expect, beforeEach, vi } from 'vitest';
 import { BehaviorSubject } from 'rxjs';
 
@@ -245,6 +245,31 @@ describe('AppApplicationActionsService', () => {
     expect(svc.verb()).toBe('RESTARTING');
     appsStub._resolveAll();
     await tick(8);
+  });
+
+  it('stops the settling poll when the page is left, even though its refreshes never settle', async () => {
+    vi.useFakeTimers();
+    try {
+      const data = TestBed.inject(AppDetailDataService) as unknown as { refresh: ReturnType<typeof vi.fn> };
+      data.refresh.mockImplementation(() => new Promise<void>(() => { /* a destroyed view never settles */ }));
+      // Component-scoped in the app: its own injector, destroyed with the page.
+      const page = createEnvironmentInjector([AppApplicationActionsService, AppLifecycleStateService],
+        TestBed.inject(EnvironmentInjector));
+      void page.get(AppApplicationActionsService).restart();
+      await tick();
+      appsStub._resolveAll();
+      await tick(8);
+      data.refresh.mockClear();
+      vi.advanceTimersByTime(5000);
+      expect(data.refresh).toHaveBeenCalled(); // the poll is running
+
+      page.destroy();
+      data.refresh.mockClear();
+      vi.advanceTimersByTime(10000);
+      expect(data.refresh).not.toHaveBeenCalled();
+    } finally {
+      vi.useRealTimers();
+    }
   });
 
   // -------------------------------------------------------------------------
