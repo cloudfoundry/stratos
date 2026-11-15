@@ -20,7 +20,7 @@ import { EndpointPermissionsService } from '../../endpoint-permissions.service';
 import { EndpointsSignalConfigService } from '../../endpoints-page/endpoints-signal-config.service';
 import { CreateEndpointCfStep1Component } from './create-endpoint-cf-step-1.component';
 
-const BROKERS_URL = (cf: string) => `/pp/v1/cf/service_brokers/${cf}?return=base`;
+const BROKERS_URL = (cf: string, page = 1) => `/pp/v1/cf/service_brokers/${cf}?return=base&per_page=100&page=${page}`;
 
 function cf(guid: string, host: string): EndpointModel {
   return {
@@ -141,6 +141,24 @@ describe('CreateEndpointCfStep1Component: a type linked to a Cloud Foundry', () 
 
     expect(options('linked-broker')).toEqual(['Not registered in Cloud Foundry yet', 'mysql', 'autoscaler']);
     expect(select('linked-broker')!.value).toBe('b1');
+  });
+
+  it('offers every broker, not only the first page', async () => {
+    await open(cf('lab', 'api.sys.x.com'));
+    await typeUrl('https://autoscaler.sys.x.com');
+    http.expectOne(BROKERS_URL('lab')).flush({
+      resources: [{ guid: 'b1', name: 'mysql', url: 'https://mysql-broker.sys.x.com' }],
+      pagination: { totalResults: 2, totalPages: 2 },
+    });
+    await fixture.whenStable();
+    http.expectOne(BROKERS_URL('lab', 2)).flush({
+      resources: [{ guid: 'b2', name: 'autoscaler', url: 'https://autoscalerservicebroker.sys.x.com' }],
+      pagination: { totalResults: 2, totalPages: 2 },
+    });
+    await fixture.whenStable();
+
+    expect(options('linked-broker')).toEqual(['Not registered in Cloud Foundry yet', 'mysql', 'autoscaler']);
+    expect(select('linked-broker')!.value).toBe('b2');
   });
 
   it('offers only "not registered yet" when the brokers cannot be read', async () => {
