@@ -67,6 +67,31 @@ func TestGetAdminCNSIRecordByEndpointPrefersTheConsoleClient(t *testing.T) {
 	require.NoError(t, mock.ExpectationsWereMet())
 }
 
+// With no endpoint named for auto-registration, the pick followed the order
+// the database returned, which is not set: the same endpoints could give a
+// different pick after an edit moved a row.
+func TestGetAdminCNSIRecordByEndpointIsStableWithoutTheAutoRegName(t *testing.T) {
+	req := setupMockReq("GET", "", nil)
+	_, _, _, pp, db, mock := setupHTTPTest(req)
+	defer db.Close()
+	pp.Config.CFClient = "console-client"
+
+	a := testutils.GetTestCNSIRecord()
+	a.GUID, a.Name, a.ClientId = "guid-b", "alpha", "console-client"
+	b := testutils.GetTestCNSIRecord()
+	b.GUID, b.Name, b.ClientId = "guid-a", "beta", "console-client"
+	c := testutils.GetTestCNSIRecord()
+	c.GUID, c.Name, c.ClientId = "guid-c", "alpha", "console-client"
+
+	for _, order := range [][]*api.CNSIRecord{{a, b, c}, {c, b, a}, {b, c, a}} {
+		mock.ExpectQuery(selectFromCNSIs).WillReturnRows(testutils.GetCNSIRows(order...))
+		rec, err := pp.GetAdminCNSIRecordByEndpoint(a.APIEndpoint.String(), "cf")
+		require.NoError(t, err)
+		require.Equal(t, "guid-b", rec.GUID, "the first by name, then GUID")
+	}
+	require.NoError(t, mock.ExpectationsWereMet())
+}
+
 // Linking the console's token into an endpoint on another client gave it a
 // token that UAA refuses to refresh for that client ("Authentication
 // expired"), and the refused refresh was recorded on the console's own token.
