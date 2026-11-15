@@ -87,6 +87,12 @@ describe('extractHttpErrorPieces', () => {
   });
 });
 
+describe('extractHttpErrorPieces (no response)', () => {
+  it('says so when the server could not be reached', () => {
+    expect(extractHttpErrorMessage(httpError(null, 0, 'Unknown Error'))).toBe('Could not reach the server.');
+  });
+});
+
 describe('leadPieces', () => {
   it('puts the caller\'s lead-in before the message', () => {
     expect(leadPieces('Delete failed', httpError(nginx502)))
