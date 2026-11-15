@@ -149,6 +149,32 @@ export function leadPieces(lead: string, err: unknown): ErrorPiece[] {
     : [{ text: `${lead}: `, style: 'text' }, first, ...rest];
 }
 
+/** One failed sub-call of a request that answered 200: its detail or title. */
+export interface PartialFailure {
+  detail?: string;
+  title?: string;
+}
+
+/**
+ * The Error to throw when a request answered 200 but listed failures in its
+ * body (patchApp's `_meta.errors`): each failure's words as pieces, an HTML
+ * page read, joined by '; '. Its message is their text, `pieces` keeps them.
+ */
+export function partialFailureError(failures: PartialFailure[]): Error & { pieces: ErrorPiece[] } {
+  const pieces: ErrorPiece[] = [];
+  failures.forEach((failure, i) => {
+    for (const piece of [...(i ? textPiece('; ') : []), ...messagePieces(failure.detail || failure.title || '')]) {
+      const last = pieces[pieces.length - 1];
+      if (last?.style === piece.style) {
+        pieces[pieces.length - 1] = { text: last.text + piece.text, style: piece.style };
+      } else {
+        pieces.push(piece);
+      }
+    }
+  });
+  return Object.assign(new Error(piecesToText(pieces)), { pieces });
+}
+
 /**
  * leadPieces as an Error, for a step's submit() to throw: its message is
  * their text, `pieces` keeps them for the stepper, `cause` is `err`.

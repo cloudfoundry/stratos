@@ -94,9 +94,11 @@ export {
   isHttpErrorResponse,
   leadError,
   leadPieces,
+  partialFailureError,
   proxyAPIVersion,
   stripMarkup,
 } from './jetstream';
+export type { PartialFailure } from './jetstream';
 export type { ErrorPiece, ErrorPieceStyle } from './upstream-error-text';
 export { htmlToPieces, piecesToText } from './upstream-error-text';
 export type { RoutingEvent } from './types/routing.type';

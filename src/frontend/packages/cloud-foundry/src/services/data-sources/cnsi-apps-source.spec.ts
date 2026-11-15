@@ -70,6 +70,18 @@ describe('CnsiAppsSource', () => {
     expect((src.items()[0] as any).name).toBe('old');
   });
 
+  it('update(guid, patch) reads an HTML page in a failure as text', async () => {
+    const page = '<html><head><title>502 Bad Gateway</title></head><body><center><h1>502 Bad Gateway</h1></center></body></html>';
+    const http = {
+      get: vi.fn(() => of({ resources: [{ guid: 'a' }], pagination: { totalResults: 1, totalPages: 1, next: null, previous: null, first: { href: '' }, last: { href: '' } } })),
+      patch: vi.fn(() => of({ guid: 'a', _meta: { errors: [{ code: 'X', title: 'CF-Bad', detail: page, affected: [] }] } })),
+    } as unknown as HttpClient;
+    const src = new CnsiAppsSource('cnsi-1', http);
+    await src.load();
+    const err = await src.update('a', { name: 'n' }).catch(e => e as Error);
+    expect((err as Error).message).toBe('502 Bad Gateway');
+  });
+
   it('action(guid, verb) issues POST to /actions/{verb} and patches state', async () => {
     const initial = {
       resources: [{ guid: 'a', name: 'app', state: 'STOPPED' }] as unknown as StApp[],
