@@ -10,6 +10,14 @@ function paramsEqual(a: Params, b: Params): boolean {
   return ak.length === bk.length && ak.every((k) => a[k] === b[k]);
 }
 
+// The whole URL a router state stands for: the path of every outlet (with
+// matrix params), the query and the fragment.
+function stateUrl(s: ActivatedRouteSnapshot): string {
+  const tree = (n: ActivatedRouteSnapshot): string =>
+    `${n.outlet}:${n.url.map((u) => u.toString()).join('/')}(${n.children.map(tree).join(',')})`;
+  return tree(s.root) + JSON.stringify(s.root.queryParams) + (s.root.fragment ?? '');
+}
+
 @Injectable()
 export class CustomReuseStrategy extends RouteReuseStrategy {
   shouldDetach(_route: ActivatedRouteSnapshot): boolean { return false; }
@@ -25,6 +33,10 @@ export class CustomReuseStrategy extends RouteReuseStrategy {
     // AppComponent, and not reusing it rebuilt the whole tree, dashboard
     // shell included, on the first in-app navigation after every load.
     const isRoot = curr.routeConfig === null && future.routeConfig === null;
+    // A link to the URL already shown still navigates (the app sets
+    // onSameUrlNavigation: 'reload'). Keep the page then: rebuilding it
+    // takes the focused link out of the page and focus falls to the body.
+    const isSameUrl = stateUrl(curr) === stateUrl(future);
 
     let reuse: boolean;
     if (curr.data.reuseRoute === true) {
@@ -49,6 +61,6 @@ export class CustomReuseStrategy extends RouteReuseStrategy {
         (future.component ?? null) === (future.data.reuseRoute ?? null) &&
         paramsEqual(curr.params, future.params);
     }
-    return isDashboard || isRoot || reuse;
+    return isDashboard || isRoot || isSameUrl || reuse;
   }
 }

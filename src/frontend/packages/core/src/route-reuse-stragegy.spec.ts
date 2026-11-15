@@ -1,5 +1,8 @@
+import { Component, provideZonelessChangeDetection } from '@angular/core';
+import { TestBed } from '@angular/core/testing';
 import { describe, it, expect, vi } from 'vitest';
-import { ActivatedRouteSnapshot } from '@angular/router';
+import { ActivatedRouteSnapshot, provideRouter, RouteReuseStrategy, withRouterConfig } from '@angular/router';
+import { RouterTestingHarness } from '@angular/router/testing';
 
 // The strategy imports DashboardBaseComponent purely for identity
 // comparison. Stub it so the spec doesn't pull the whole app template
@@ -13,15 +16,22 @@ import { CustomReuseStrategy } from './route-reuse-stragegy';
 // Stand-in for a detail shell keyed by route params (like ApplicationBaseComponent).
 class FakeShell {}
 
+// Each snapshot stands for its own URL unless one is given: the cases
+// below are moves between pages (tabs, resources), not a link to the page
+// already shown.
+let nextUrl = 0;
 function snap(opts: {
-  component?: unknown; data?: Record<string, unknown>; params?: Record<string, string>; root?: boolean;
+  component?: unknown; data?: Record<string, unknown>; params?: Record<string, string>; root?: boolean; url?: string;
 }): ActivatedRouteSnapshot {
+  const path = opts.url ?? `page-${nextUrl++}`;
+  const root = { outlet: 'primary', url: [{ toString: () => path }], children: [], queryParams: {}, fragment: null };
   return {
     component: opts.component ?? null,
     data: opts.data ?? {},
     params: opts.params ?? {},
     // Angular gives every node a route config except the root.
     routeConfig: opts.root ? null : {},
+    root,
   } as unknown as ActivatedRouteSnapshot;
 }
 
@@ -78,5 +88,44 @@ describe('CustomReuseStrategy', () => {
     const curr = snap({ component: null, data: {}, params: { endpointId: 'cf1' } });
     const future = snap({ component: null, data: {}, params: { endpointId: 'cf2' } });
     expect(strat.shouldReuseRoute(future, curr)).toBe(false);
+  });
+
+  it('reuses an unmarked component route when the URL is the one already shown', () => {
+    const curr = snap({ component: FakeShell, data: {}, params: { id: 'app1' }, url: 'summary' });
+    const future = snap({ component: FakeShell, data: {}, params: { id: 'app1' }, url: 'summary' });
+    expect(strat.shouldReuseRoute(future, curr)).toBe(true);
+  });
+});
+
+// A link to the page already shown (a self-link) runs a navigation, as the
+// app sets onSameUrlNavigation: 'reload'. Rebuilding the page then took the
+// focused link out of it, and focus fell to the page body (WCAG 2.4.3).
+describe('CustomReuseStrategy with the router', () => {
+  @Component({ template: 'page' })
+  class PageComponent {}
+
+  async function harness() {
+    TestBed.configureTestingModule({
+      providers: [
+        provideZonelessChangeDetection(),
+        provideRouter([{ path: 'a', component: PageComponent }], withRouterConfig({ onSameUrlNavigation: 'reload' })),
+        { provide: RouteReuseStrategy, useClass: CustomReuseStrategy },
+      ],
+    });
+    return RouterTestingHarness.create();
+  }
+
+  it('keeps the page for a link to the URL already shown', async () => {
+    const h = await harness();
+    const first = await h.navigateByUrl('/a', PageComponent);
+    const again = await h.navigateByUrl('/a', PageComponent);
+    expect(again).toBe(first);
+  });
+
+  it('still builds the page again when the URL changes', async () => {
+    const h = await harness();
+    const first = await h.navigateByUrl('/a', PageComponent);
+    const other = await h.navigateByUrl('/a?tab=2', PageComponent);
+    expect(other).not.toBe(first);
   });
 });
