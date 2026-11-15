@@ -16,6 +16,7 @@
   [users]="rolesDataUsers()"
   [baseline]="baseline()"
   [loading]="loadingRoles()"
+  [removeMode]="!!isRemove()"
   [lockedOrg]="lockedOrg()"
   [lockedSpaceGuid]="activeRouteCfOrgSpace.spaceGuid || undefined"
   (changeSet)="onChangeSet($event)"

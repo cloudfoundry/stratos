@@ -3,6 +3,7 @@ import { provideHttpClientTesting } from '@angular/common/http/testing';
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { provideZonelessChangeDetection, importProvidersFrom, signal } from '@angular/core';
 import { provideNoopAnimations } from '@angular/platform-browser/animations';
+import { By } from '@angular/platform-browser';
 import { provideRouter } from '@angular/router';
 import { ActivatedRoute } from '@angular/router';
 import { describe, it, expect, beforeEach, vi } from 'vitest';
@@ -22,6 +23,7 @@ import { TabNavService } from '@stratosui/core';
 import { ActiveRouteCfOrgSpace } from '../../../cf-page.types';
 import { CfUsersRolesDataService } from '../../../../../services/domain-data/cf-users-roles-data.service';
 import { CfRolesService } from '../cf-roles.service';
+import { RoleAssignmentComponent } from '../../../../../shared/components/role-assignment/role-assignment.component';
 import { UsersRolesModifyComponent } from './manage-users-modify.component';
 import { StUser } from '../../../../../services/endpoint-data/stratos-types';
 import { CfRoleChange } from '../../../../../store/types/users-roles.types';
@@ -160,6 +162,18 @@ describe('UsersRolesModifyComponent', () => {
 
     // Users come from rolesData.users (a signal)
     expect(component.rolesDataUsers()).toHaveLength(2);
+  });
+
+  it('tells the widget when the wizard removes roles', async () => {
+    const rolesData = TestBed.inject(CfUsersRolesDataService);
+    const widget = () => fixture.debugElement.query(By.directive(RoleAssignmentComponent)).componentInstance as RoleAssignmentComponent;
+    await fixture.whenStable();
+    expect(widget().removeMode()).toBe(false);
+
+    rolesData.setIsRemove(true);
+    await fixture.whenStable();
+
+    expect(widget().removeMode()).toBe(true);
   });
 
   it('pushes the widget changeSet into rolesData.setChanges', () => {

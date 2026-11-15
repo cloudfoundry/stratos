@@ -490,6 +490,17 @@ describe('RoleAssignmentComponent', () => {
       return { fixture, component, last };
     }
 
+    it('remove mode: ticking a space role does not imply the org User role', async () => {
+      const { fixture, component, last } = await widget({ removeMode: true });
+
+      component.onToggleSpaceRole(o1, s1, SpaceUserRoleNames.DEVELOPER, true);
+      await fixture.whenStable();
+
+      expect(last()).toEqual([`+${SpaceUserRoleNames.DEVELOPER}@s1`]);
+      expect(component.checkedForOrg('o1', OrgUserRoleNames.USER)).toBe(false);
+      expect(component.isOrgUserDisabled('o1')).toBe(false);
+    });
+
     it('unticking the only space role drops the org User role it implied', async () => {
       const { fixture, component, last } = await widget();
 

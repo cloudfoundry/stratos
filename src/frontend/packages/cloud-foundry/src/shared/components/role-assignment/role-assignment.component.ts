@@ -88,6 +88,13 @@ export class RoleAssignmentComponent implements OnInit, OnDestroy {
   /** Set when the wizard opens at space scope: only this space is listed. */
   readonly lockedSpaceGuid = input<string>();
 
+  /**
+   * True when the ticked roles are to be removed (the remove wizard). A ticked
+   * space role then does not imply the org User role, and a role ticked for
+   * removal does not hold the org User cell fixed.
+   */
+  readonly removeMode = input(false);
+
   readonly changeSet = output<CfRoleChange[]>();
 
   // --- Role definitions ---
@@ -487,13 +494,14 @@ export class RoleAssignmentComponent implements OnInit, OnDestroy {
     const spacesByOrg = this.spacesByOrg();
     const users = this.users();
     const baseline = this.baseline();
+    const removeMode = this.removeMode();
     const result: Record<string, boolean> = {};
 
     for (const orgGuid of Object.keys(sel).concat(Object.keys(spacesByOrg))) {
       if (orgGuid in result) {
         continue;
       }
-      result[orgGuid] = this._computeOrgUserDisabled(orgGuid, sel, spacesByOrg, users, baseline);
+      result[orgGuid] = this._computeOrgUserDisabled(orgGuid, sel, spacesByOrg, users, baseline, removeMode);
     }
     return result;
   });
@@ -504,14 +512,19 @@ export class RoleAssignmentComponent implements OnInit, OnDestroy {
     spacesByOrg: Record<string, SpaceEntry[]>,
     users: StUser[],
     baseline: CfUserRolesSelected,
+    removeMode: boolean,
   ): boolean {
     const selOrg = sel[orgGuid];
+    // Removing roles: a role ticked now is one being taken away, so only the
+    // roles the users already hold keep the org User role in place.
+    const held = (role: OrgUserRoleNames | SpaceUserRoleNames, spaceGuid?: string) =>
+      !removeMode || computeChecked(role, users, baseline, {}, orgGuid, spaceGuid) !== false;
 
     // Check org roles other than USER
     const otherOrgRoles = [OrgUserRoleNames.MANAGER, OrgUserRoleNames.BILLING_MANAGERS, OrgUserRoleNames.AUDITOR];
     for (const role of otherOrgRoles) {
       const checked = computeChecked(role, users, baseline, sel, orgGuid);
-      if (checked !== false) {
+      if (checked !== false && held(role)) {
         return true;
       }
     }
@@ -528,14 +541,14 @@ export class RoleAssignmentComponent implements OnInit, OnDestroy {
     for (const spaceGuid of spaceGuids) {
       for (const def of this.spaceRoleDefs) {
         const checked = computeChecked(def.name, users, baseline, sel, orgGuid, spaceGuid);
-        if (checked !== false) {
+        if (checked !== false && held(def.name, spaceGuid)) {
           return true;
         }
       }
     }
 
     // Check selection's explicit space-role overrides for spaces not yet loaded
-    if (selOrg?.spaces) {
+    if (selOrg?.spaces && !removeMode) {
       for (const [, spaceEntry] of Object.entries(selOrg.spaces)) {
         for (const [, val] of Object.entries(spaceEntry.roles)) {
           if (val === true) {
@@ -683,14 +696,14 @@ export class RoleAssignmentComponent implements OnInit, OnDestroy {
         },
       };
       let orgRoles = sel[orgGuid].orgRoles;
-      if (value) {
+      if (value && !this.removeMode()) {
         // Cloud Foundry gives a space role only to a member of the org, so
         // a space role brings the org User role with it.
         if (orgRoles[OrgUserRoleNames.USER] !== true) {
           this.impliedOrgUser.add(orgGuid);
         }
         orgRoles = { ...orgRoles, [OrgUserRoleNames.USER]: true };
-      } else if (this.impliedOrgUser.has(orgGuid) && !hasTickedSpaceRole(spaces)) {
+      } else if (!value && this.impliedOrgUser.has(orgGuid) && !hasTickedSpaceRole(spaces)) {
         // The last space role is gone, and the user never asked for org User.
         const { [OrgUserRoleNames.USER]: _implied, ...rest } = orgRoles;
         orgRoles = rest;
