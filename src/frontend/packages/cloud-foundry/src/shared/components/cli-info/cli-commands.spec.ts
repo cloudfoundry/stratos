@@ -32,6 +32,17 @@ describe('CLI command lists (#6126)', () => {
     ]);
   });
 
+  it('quotes a name a shell would otherwise expand so the copied command pastes as one argument', () => {
+    const ctx = (appName: string) => ({ ...context, appName });
+    const app = (appName: string) => syntaxes(APPLICATION_CLI_COMMANDS, 'variables', ctx(appName))[0];
+    expect(app('my app')).toBe('cf env "my app"');
+    expect(app('a$HOME')).toBe("cf env 'a$HOME'");
+    expect(app('a`id`b')).toBe("cf env 'a`id`b'");
+    expect(app('say "hi"')).toBe("cf env 'say \"hi\"'");
+    expect(app("it's $x")).toBe("cf env 'it'\\''s $x'");
+    expect(app('back\\slash')).toBe("cf env 'back\\slash'");
+  });
+
   it('falls back to the placeholders when a name is not known yet', () => {
     const noNames = { ...context, appName: undefined, orgName: '', spaceName: '' };
     expect(syntaxes(APPLICATION_CLI_COMMANDS, 'summary', noNames)[0]).toBe('cf app "[app name]"');
