@@ -32,6 +32,7 @@ func TestSameDomain(t *testing.T) {
 		{"https://api." + lab, "https://autoscaler." + lab + ":443/", true},
 		{"https://api." + lab, "https://autoscaler.sys.adepttech.ca", false},
 		{"https://localhost", "https://localhost", false},
+		{"https://API.Sys.Example.com", "https://autoscaler.sys.example.com", true},
 	}
 	for _, c := range cases {
 		if got := sameDomain(c.a, c.b); got != c.want {
