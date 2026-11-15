@@ -93,6 +93,20 @@ describe('extractHttpErrorPieces (no response)', () => {
   });
 });
 
+describe('extractHttpErrorPieces (plain detail)', () => {
+  it('keeps angle-bracket text in a plain CF error detail', () => {
+    expect(extractHttpErrorMessage(httpError({ errors: [{ detail: 'Space <nil> not found', title: 'T' }] })))
+      .toBe('Space <nil> not found');
+  });
+});
+
+describe('extractHttpErrorPieces (inline tags in a plain detail)', () => {
+  it('drops inline HTML tags but keeps other angle-bracket text', () => {
+    expect(extractHttpErrorMessage(httpError({ errors: [{ detail: 'unbind <b>failed</b> for <nil>', title: 'T' }] })))
+      .toBe('unbind failed for <nil>');
+  });
+});
+
 describe('leadPieces', () => {
   it('puts the caller\'s lead-in before the message', () => {
     expect(leadPieces('Delete failed', httpError(nginx502)))

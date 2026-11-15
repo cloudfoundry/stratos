@@ -61,6 +61,14 @@ export const stripMarkup = (text: string): string => piecesToText(htmlToPieces(t
 
 const textPiece = (text: string): ErrorPiece[] => [{ text, style: 'text' }];
 
+// A plain-text detail that quotes a few HTML tags (`<b>name</b>`): only those
+// tags go, so text in angle brackets that is not HTML (Go's `<nil>`) stays.
+const detailPieces = (detail: string): ErrorPiece[] => {
+  const tags = /<\/?(?:a|abbr|b|big|br|code|em|font|i|kbd|p|s|small|span|strong|sub|sup|tt|u)(?:\s[^<>]*)?\/?>/gi;
+  const text = detail.replace(tags, ' ').replace(/\s+/g, ' ').trim();
+  return text ? textPiece(text) : [];
+};
+
 // A message that may quote an HTML page after a lead-in, such as capi's
 // `resource not found (status 404): <html>...`: the page is read, the
 // lead-in kept, and the text itself is used when the page has no words.
@@ -92,7 +100,8 @@ export function extractHttpErrorPieces(err: unknown): ErrorPiece[] {
       const errors = (body as { errors?: Array<{ detail?: unknown; title?: string; message?: string }> }).errors;
       const first = errors?.[0];
       if (first) {
-        const detail = typeof first.detail === 'string' ? htmlToPieces(first.detail) : [];
+        const detail = typeof first.detail !== 'string' ? []
+          : looksLikeHtml(first.detail) ? htmlToPieces(first.detail) : detailPieces(first.detail);
         if (detail.length) return detail;
         if (first.title) return textPiece(first.title);
         if (first.message) return textPiece(first.message);
