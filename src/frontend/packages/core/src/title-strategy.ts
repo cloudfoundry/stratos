@@ -58,6 +58,26 @@ export function parentTitle(route: ActivatedRouteSnapshot): string {
   return parent?.title ?? '';
 }
 
+/** How long a title lookup may take before the page keeps its section's title. */
+export const TITLE_LOOKUP_MS = 2000;
+
+/**
+ * A lookup's name as the title, or the nearest ancestor title when it fails, is empty, or takes
+ * longer than TITLE_LOOKUP_MS. The Router waits for title resolvers, so an unbounded lookup holds
+ * the navigation itself when an API is slow.
+ */
+export function titleOrParent(
+  route: ActivatedRouteSnapshot, lookup: Promise<string | null | undefined>, ms = TITLE_LOOKUP_MS
+): Promise<string> {
+  return new Promise(resolve => {
+    const timer = setTimeout(() => resolve(parentTitle(route)), ms);
+    lookup.then(name => name || parentTitle(route), () => parentTitle(route)).then(title => {
+      clearTimeout(timer);
+      resolve(title);
+    });
+  });
+}
+
 /** Title from a route parameter ("worker-1"), optionally formatted. */
 export function paramTitle(param: string, format: (value: string) => string = v => v): ResolveFn<string> {
   return (route: ActivatedRouteSnapshot) => format(route.paramMap.get(param) ?? '');
@@ -70,6 +90,6 @@ export function paramTitle(param: string, format: (value: string) => string = v 
 export function endpointTitle(param = 'endpointId'): ResolveFn<string> {
   return (route: ActivatedRouteSnapshot) => {
     const endpoints = inject(EndpointsDataService);
-    return endpoints.waitFor(route.paramMap.get(param) ?? '').then(e => e.name, () => parentTitle(route));
+    return titleOrParent(route, endpoints.waitFor(route.paramMap.get(param) ?? '').then(e => e.name));
   };
 }

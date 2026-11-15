@@ -3,8 +3,8 @@ import { HttpTestingController, provideHttpClientTesting } from '@angular/common
 import { provideZonelessChangeDetection, signal } from '@angular/core';
 import { TestBed } from '@angular/core/testing';
 import { ActivatedRouteSnapshot, ResolveFn, RouterStateSnapshot, convertToParamMap } from '@angular/router';
-import { of } from 'rxjs';
-import { afterEach, beforeEach, describe, expect, it } from 'vitest';
+import { NEVER, of } from 'rxjs';
+import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 
 import { appTitle, orgQuotaTitle, orgTitle, serviceInstanceTitle } from './route-titles';
 import { EndpointDataRegistry } from './services/endpoint-data/endpoint-data.registry';
@@ -25,7 +25,7 @@ function resolve(fn: ResolveFn<string>, route: ActivatedRouteSnapshot): Promise<
 describe('cloud-foundry route titles', () => {
   let httpMock: HttpTestingController;
   const lists = { apps: signal([{ guid: 'app-1', name: 'my-app' }]), recentApps: signal([]), serviceInstances: signal([]) };
-  const org = { load: () => of(undefined), org: signal({ name: 'my-org' }) };
+  const org = { load: (): any => of(undefined), org: signal({ name: 'my-org' }) };
 
   beforeEach(() => {
     TestBed.configureTestingModule({
@@ -40,7 +40,7 @@ describe('cloud-foundry route titles', () => {
     httpMock = TestBed.inject(HttpTestingController);
   });
 
-  afterEach(() => httpMock.verify());
+  afterEach(() => { vi.useRealTimers(); httpMock.verify(); });
 
   it('names an application from the endpoint lists cache without a request', async () => {
     await expect(resolve(appTitle, routeWith({ endpointId: 'cf-1', id: 'app-1' }))).resolves.toBe('my-app');
@@ -73,5 +73,26 @@ describe('cloud-foundry route titles', () => {
 
   it('names an organization through its shared data service', async () => {
     await expect(resolve(orgTitle, routeWith({ endpointId: 'cf-1', orgId: 'o-1' }))).resolves.toBe('my-org');
+  });
+
+  it('keeps the section title when the fetch is slow, so navigation is not held', async () => {
+    vi.useFakeTimers();
+    const title = resolve(orgQuotaTitle, routeWith({ endpointId: 'cf-1', quotaId: 'slow' }));
+    httpMock.expectOne('/pp/v1/cf/organization_quotas/cf-1/slow'); // never answered
+    await vi.advanceTimersByTimeAsync(2000);
+    await expect(title).resolves.toBe('Applications');
+  });
+
+  it('keeps the section title when the organization load is slow', async () => {
+    vi.useFakeTimers();
+    const load = org.load;
+    org.load = () => NEVER;
+    try {
+      const title = resolve(orgTitle, routeWith({ endpointId: 'cf-1', orgId: 'o-1' }));
+      await vi.advanceTimersByTimeAsync(2000);
+      await expect(title).resolves.toBe('Applications');
+    } finally {
+      org.load = load;
+    }
   });
 });
