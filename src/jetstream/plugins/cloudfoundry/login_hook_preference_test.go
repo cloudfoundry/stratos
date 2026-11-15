@@ -4,7 +4,9 @@ import (
 	"errors"
 	"net/http"
 	"net/http/httptest"
+	"net/url"
 	"testing"
+	"time"
 
 	"github.com/cloudfoundry/stratos/src/jetstream/api"
 	"github.com/labstack/echo/v5"
@@ -18,6 +20,7 @@ type preferenceProxy struct {
 	config       api.PortalConfig
 	userEndpoint *api.CNSIRecord // the user's live connection, if any
 	disconnected map[string]bool // endpoints the user disconnected
+	live         map[string]bool // endpoints the user holds a live token for
 	connected    []string        // endpoints the hook connected
 }
 
@@ -43,7 +46,20 @@ func (m *preferenceProxy) GetUserConnectedAdminCNSIRecordByEndpoint(_, _, _ stri
 	return *m.userEndpoint, nil
 }
 
+func (m *preferenceProxy) ListEndpoints() ([]*api.CNSIRecord, error) {
+	out := []*api.CNSIRecord{}
+	for _, r := range []api.CNSIRecord{consolePick, normLab} {
+		rec := r
+		rec.APIEndpoint, _ = url.Parse("https://api.cf.example.com")
+		out = append(out, &rec)
+	}
+	return out, nil
+}
+
 func (m *preferenceProxy) GetCNSITokenRecordWithDisconnected(guid, _ string) (api.TokenRecord, bool) {
+	if m.live[guid] {
+		return api.TokenRecord{AuthToken: "t", TokenExpiry: time.Now().Add(time.Hour).Unix()}, true
+	}
 	if m.disconnected[guid] {
 		return api.TokenRecord{Disconnected: true}, true
 	}
@@ -98,4 +114,11 @@ func TestLoginHookWithSSOKeepsToTheConsoleClient(t *testing.T) {
 	proxy = &preferenceProxy{userEndpoint: &normLab}
 	proxy.config.SSOLogin = true
 	require.Equal(t, []string{normLab.GUID}, runLoginHook(t, proxy))
+}
+
+// A connection the user made with other credentials is theirs: a password
+// login must not replace the live token with the login credentials.
+func TestLoginHookKeepsALiveConnection(t *testing.T) {
+	connected := runLoginHook(t, &preferenceProxy{live: map[string]bool{consolePick.GUID: true}})
+	require.Empty(t, connected)
 }
