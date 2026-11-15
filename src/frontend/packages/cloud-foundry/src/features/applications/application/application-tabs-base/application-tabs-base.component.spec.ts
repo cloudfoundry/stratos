@@ -29,10 +29,13 @@ describe('ApplicationTabsBaseComponent', () => {
   const space = signal<any>(undefined);
   const loading = signal<any>({ app: false, envVars: false, stats: false });
   const canViewEnvVars = signal(true);
+  const stratosProject = signal<any>(null);
+  const getSCM = vi.fn();
 
   beforeEach(async () => {
     app.set(undefined); org.set(undefined); space.set(undefined);
     canViewEnvVars.set(true);
+    stratosProject.set(null);
     loading.set({ app: false, envVars: false, stats: false });
     // Create mock - we'll override specific observables to prevent immediate completion
     applicationServiceMock = new ApplicationServiceMock();
@@ -51,11 +54,13 @@ describe('ApplicationTabsBaseComponent', () => {
     };
 
     const mockGitSCMService = {
-      getSCM: vi.fn().mockReturnValue({
-        getLabel: () => 'Git',
-        getIcon: () => ({ fontName: 'stratos-icons', iconName: 'git' })
-      })
+      getSCM
     };
+    getSCM.mockReset();
+    getSCM.mockReturnValue({
+      getLabel: () => 'Git',
+      getIcon: () => ({ fontName: 'stratos-icons', iconName: 'git' })
+    });
 
     const mockUserFavoriteManager = {
       getFavorite: vi.fn().mockReturnValue(null)
@@ -134,7 +139,7 @@ describe('ApplicationTabsBaseComponent', () => {
         // doesn't need to thread the full HTTP-backed service.
         { provide: AppDetailDataService, useValue: {
           ...makeAppDetailDataServiceStub(), refresh: () => Promise.resolve(), updating: signal(false),
-          app, org, space, loading,
+          app, org, space, loading, stratosProject,
         } },
         provideRouter([]),
         provideZonelessChangeDetection(),
@@ -179,6 +184,32 @@ describe('ApplicationTabsBaseComponent', () => {
     const spaceCrumbs = crumbs.find(c => c.key === 'space')!.breadcrumbs;
     expect(spaceCrumbs.map(c => c.value)).toEqual(['Mock CF', 'my-org', 'my-space']);
     expect(spaceCrumbs[2].routerLink).toBe('/cloud-foundry/mockCfGuid/organizations/org-1/spaces/space-1/apps');
+  });
+
+  it('adds the Git tab once for a github deploy source, without re-running the effect', async () => {
+    // Bound the damage if the effect re-triggers itself: the unfixed code loops without end.
+    getSCM.mockImplementation(() => {
+      if (getSCM.mock.calls.length > 20) { throw new Error('tab effect re-ran without end'); }
+      return { getLabel: () => 'GitHub', getIcon: () => ({ fontName: 'stratos-icons', iconName: 'github' }) };
+    });
+    stratosProject.set({ deploySource: { type: 'github', endpointGuid: 'e1' } });
+    fixture.detectChanges();
+    await fixture.whenStable();
+    expect(component.tabLinks().filter(t => t.link === 'gitscm').length).toBe(1);
+    expect(getSCM.mock.calls.length).toBeLessThanOrEqual(2);
+  });
+
+  it('relabels the Git tab when the deploy source changes', async () => {
+    stratosProject.set({ deploySource: { type: 'github', endpointGuid: 'e1' } });
+    fixture.detectChanges();
+    await fixture.whenStable();
+    getSCM.mockReturnValue({ getLabel: () => 'GitLab', getIcon: () => ({ fontName: 'stratos-icons', iconName: 'gitlab' }) });
+    stratosProject.set({ deploySource: { type: 'gitscm', scm: 'gitlab', endpointGuid: 'e2' } });
+    fixture.detectChanges();
+    await fixture.whenStable();
+    const tab = component.tabLinks().find(t => t.link === 'gitscm')!;
+    expect([tab.label, tab.icon]).toEqual(['GitLab', 'gitlab']);
+    expect(component.tabLinks().filter(t => t.link === 'gitscm').length).toBe(1);
   });
 
   // GUARD: an app-detail error bounce must stay CF-scoped when the app was
