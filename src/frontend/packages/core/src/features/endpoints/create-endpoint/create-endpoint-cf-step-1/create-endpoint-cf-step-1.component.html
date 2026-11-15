@@ -79,12 +79,17 @@
           @if (linkedCf()) {
             <div class="flex flex-col gap-1 mt-2">
               <label for="linked-broker" class="text-sm font-medium text-content-text">Service broker</label>
-              <select id="linked-broker" class="input" (change)="linkedBroker.set($any($event.target).value)">
+              <select id="linked-broker" class="input" [attr.aria-describedby]="linkedBroker() ? null : 'linked-broker-hint'" (change)="linkedBroker.set($any($event.target).value)">
                 <option value="" [selected]="!linkedBroker()">Not registered in Cloud Foundry yet</option>
                 @for (broker of brokers(); track broker.guid) {
                   <option [value]="broker.guid" [selected]="broker.guid === linkedBroker()">{{ broker.name }}</option>
                 }
               </select>
+              @if (!linkedBroker()) {
+                <p id="linked-broker-hint" class="text-sm text-content-muted">
+                  Apps will not use this autoscaler until it is registered in Cloud Foundry with a service broker and this endpoint is linked to that broker.
+                </p>
+              }
             </div>
           }
         }

@@ -195,4 +195,22 @@ describe('CreateEndpointCfStep1Component: a type linked to a Cloud Foundry', () 
     expect(opts.brokerGuid).toBeUndefined();
     expect(opts.brokerName).toBeUndefined();
   });
+
+  it('warns that apps will not use an autoscaler that is not registered yet, and not for a real broker', async () => {
+    await open(cf('lab', 'api.sys.x.com'));
+    await typeUrl('https://autoscaler.sys.x.com');
+    await brokers('lab', [{ guid: 'b1', name: 'autoscaler', url: 'https://autoscalerservicebroker.sys.x.com' }]);
+    const hint = () => (fixture.nativeElement as HTMLElement).querySelector('#linked-broker-hint');
+
+    expect(select('linked-broker')!.value).toBe('b1');
+    expect(hint()).toBeNull();
+    expect(select('linked-broker')!.getAttribute('aria-describedby')).toBeNull();
+
+    select('linked-broker')!.value = '';
+    select('linked-broker')!.dispatchEvent(new Event('change'));
+    await fixture.whenStable();
+
+    expect(hint()!.textContent).toContain('Apps will not use this autoscaler');
+    expect(select('linked-broker')!.getAttribute('aria-describedby')).toBe('linked-broker-hint');
+  });
 });
