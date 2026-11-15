@@ -1,4 +1,4 @@
-import { Component, EffectRef, Injector, OnDestroy, OnInit, ChangeDetectionStrategy, computed, effect, inject, runInInjectionContext, signal } from '@angular/core';
+import { Component, EffectRef, Injector, OnDestroy, OnInit, ChangeDetectionStrategy, computed, effect, inject, runInInjectionContext, signal, untracked } from '@angular/core';
 import { Router, RouterModule } from '@angular/router';
 import { GitSCMService, GitSCMType } from '@stratosui/git';
 
@@ -152,16 +152,18 @@ export class ApplicationTabsBaseComponent implements OnInit, OnDestroy {
         const gitscm = stratProject.deploySource.scm || stratProject.deploySource.type;
         const scm = scmService.getSCM(gitscm as GitSCMType, stratProject.deploySource.endpointGuid);
         const iconInfo = scm.getIcon();
-        // Add tab or update existing tab
-        const tab = this.tabLinks().find(t => t.link === 'gitscm');
-        if (!tab) {
-          this.tabLinks.update(tabs => [...tabs, { link: 'gitscm', label: scm.getLabel(), iconFont: iconInfo.fontName, icon: iconInfo.iconName }]);
-        } else {
-          tab.label = scm.getLabel();
-          tab.iconFont = iconInfo.fontName;
-          tab.icon = iconInfo.iconName;
-        }
-        this.tabLinks.update(tabs => [...tabs]);
+        const gitTab = { link: 'gitscm', label: scm.getLabel(), iconFont: iconInfo.fontName, icon: iconInfo.iconName };
+        // Read untracked: this effect writes tabLinks, so tracking it would re-run the effect on its own write.
+        untracked(() => this.tabLinks.update(tabs => {
+          const existing = tabs.find(t => t.link === 'gitscm');
+          if (!existing) {
+            return [...tabs, gitTab];
+          }
+          if (existing.label === gitTab.label && existing.iconFont === gitTab.iconFont && existing.icon === gitTab.icon) {
+            return tabs;
+          }
+          return tabs.map(t => t === existing ? { ...t, ...gitTab } : t);
+        }));
       }
     });
   }
