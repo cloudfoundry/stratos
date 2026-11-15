@@ -583,6 +583,21 @@ describe('AppDetailDataService', () => {
     expect(svc.appDetail()).toBeUndefined();
   });
 
+  it('refresh() after a write re-reads when a poll is already in flight', async () => {
+    const poll = svc.refresh('app'); // no value yet, so the raw status is 'loading'
+    await tick();
+    const pollReq = httpMock.expectOne(DETAIL_URL); // a poll that started before the write
+
+    const afterWrite = svc.refresh('app');
+    await tick();
+    pollReq.flush(MOCK_APP_DETAIL); // pre-write response
+    await tick();
+    // The refresh that follows the write must send its own request.
+    httpMock.expectOne(DETAIL_URL).flush({ ...MOCK_APP_DETAIL, sshEnabled: false });
+    await Promise.all([poll, afterWrite]);
+    expect(svc.appDetail()).toEqual({ ...MOCK_APP_DETAIL, sshEnabled: false });
+  });
+
   it('clears a previous error on successful re-fetch', async () => {
     const p1 = svc.refresh('app');
     await tick();
