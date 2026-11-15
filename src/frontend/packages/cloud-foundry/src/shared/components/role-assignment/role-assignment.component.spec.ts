@@ -468,6 +468,44 @@ describe('RoleAssignmentComponent', () => {
     expect(component.checkedForOrg('o1', OrgUserRoleNames.USER)).toBe(false);
   });
 
+  describe('org User handling', () => {
+    const s1 = { guid: 's1', name: 'Space One' };
+
+    it('space scope: a role held in another space of the org still disables org User', async () => {
+      await setup({
+        ...defaultCfg,
+        spacesByOrg: { o1: [s1, { guid: 's2', name: 'Space Two' }], o2: [] },
+      });
+      const fixture = TestBed.createComponent(RoleAssignmentComponent);
+      fixture.componentRef.setInput('cfGuid', cfGuid);
+      fixture.componentRef.setInput('users', [makeUser('u1')]);
+      fixture.componentRef.setInput('lockedOrg', { guid: 'o1', name: 'Org One' });
+      fixture.componentRef.setInput('lockedSpaceGuid', 's2');
+      fixture.componentRef.setInput('baseline', {
+        u1: {
+          o1: {
+            name: 'Org One',
+            orgGuid: 'o1',
+            permissions: { managers: false, billing_managers: false, auditors: false, users: true },
+            spaces: {
+              s1: {
+                name: 'Space One',
+                orgGuid: 'o1',
+                orgName: 'Org One',
+                spaceGuid: 's1',
+                permissions: { managers: false, developers: true, auditors: false, supporters: false },
+              },
+            },
+          },
+        },
+      });
+      await fixture.whenStable();
+
+      expect(fixture.componentInstance.filteredSpacesFor('o1').map(s => s.guid)).toEqual(['s2']);
+      expect(fixture.componentInstance.isOrgUserDisabled('o1')).toBe(true);
+    });
+  });
+
   it('roleCountForOrg returns 1 for a single checked role', async () => {
     await setup();
     const user = makeUser('u1');
