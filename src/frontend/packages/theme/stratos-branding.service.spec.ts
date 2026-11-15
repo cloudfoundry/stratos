@@ -6,6 +6,7 @@ import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import { BUILD_INFO } from '../core/src/environments/build-info';
 import { CompanyConfig } from './company-config.interface';
 import { StratosBrandingService } from './stratos-branding.service';
+import { luminance } from './derive-dark';
 import { darkTheme } from './theme.config';
 
 describe('StratosBrandingService', () => {
@@ -164,6 +165,45 @@ describe('StratosBrandingService', () => {
       expect(cssVar('--color-primary')).toBe('#ff00ff');
       expect(cssVar('--nav-bg')).toBe(darkTheme.navigation.background);
       expect(cssVar('--header-bg')).toBe(darkTheme.layout.headerBackground);
+    });
+
+    describe('dark values derived from the configured colors', () => {
+      const DARK_SURFACE = '#0f172a'; // --app-bg of .dark-theme
+      const bodyVar = (name: string) => document.body.style.getPropertyValue(name);
+      const contrast = (a: string, b: string) => {
+        const [hi, lo] = [luminance(a)!, luminance(b)!].sort((x, y) => y - x);
+        return (hi + 0.05) / (lo + 0.05);
+      };
+
+      afterEach(() => document.body.style.removeProperty('--color-primary'));
+
+      it('shows a configured primary readably in dark mode, and drops it in light mode', async () => {
+        http.expectOne('/assets/company-config.json').flush({ theme: { primary: '#7c3aed' } });
+        await settle();
+        service.activateUserPreferences();
+
+        service.setThemeMode('dark');
+        const derived = bodyVar('--color-primary');
+        expect(derived).toMatch(/^#[0-9a-f]{6}$/);
+        expect(derived).not.toBe('#7c3aed');
+        expect(contrast(derived, DARK_SURFACE)).toBeGreaterThanOrEqual(4.5);
+        expect(cssVar('--color-primary')).toBe('#7c3aed');
+
+        service.setThemeMode('light');
+        expect(bodyVar('--color-primary')).toBe('');
+        expect(cssVar('--color-primary')).toBe('#7c3aed');
+      });
+
+      it('sets nothing on the body for a color the operator did not configure', async () => {
+        http.expectOne('/assets/company-config.json').flush({ theme: { primary: '#7c3aed' } });
+        await settle();
+        service.activateUserPreferences();
+
+        service.setThemeMode('dark');
+
+        expect(bodyVar('--color-secondary')).toBe('');
+        expect(bodyVar('--color-danger')).toBe('');
+      });
     });
 
     it('does not log a mode change to the console unless debug.logThemeChanges is set', async () => {
