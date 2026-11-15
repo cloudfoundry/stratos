@@ -219,6 +219,10 @@ func (p *portalProxy) unregisterCluster(c *echo.Context) error {
 	return p.doUnregisterCluster(cnsiGUID)
 }
 
+func (p *portalProxy) UnregisterEndpoint(guid string) error {
+	return p.doUnregisterCluster(guid)
+}
+
 func (p *portalProxy) doUnregisterCluster(cnsiGUID string) error {
 	slog.Debug("doUnregisterCluster", "endpoint", cnsiGUID)
 

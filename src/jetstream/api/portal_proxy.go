@@ -47,6 +47,8 @@ type PortalProxy interface {
 	ListEndpointsByUser(userGUID string) ([]*ConnectedEndpoint, error)
 	ListEndpoints() ([]*CNSIRecord, error)
 	UpdateEndpointMetadata(guid string, metadata string) error
+	// UnregisterEndpoint removes an endpoint with its tokens and favorites.
+	UnregisterEndpoint(guid string) error
 
 	// UAA Token
 	GetUAATokenRecord(userGUID string) (TokenRecord, error)

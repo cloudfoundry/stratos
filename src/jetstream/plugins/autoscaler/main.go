@@ -3,6 +3,7 @@ package autoscaler
 import (
 	"context"
 	"errors"
+	"log/slog"
 
 	"github.com/cloudfoundry/stratos/src/jetstream/api"
 	"github.com/labstack/echo/v5"
@@ -56,6 +57,30 @@ func (a *Autoscaler) AddSessionGroupRoutes(echoGroup *echo.Group) {
 	echoGroup.DELETE("/autoscaler/apps/:appId/policy", a.detachAutoscalerPolicy)
 	echoGroup.GET("/autoscaler/apps/:appId/metric/:metricType", a.getAutoscalerMetric)
 	echoGroup.GET("/autoscaler/apps/:appId/event", a.getAutoscalerEvent)
+}
+
+// OnEndpointNotification unregisters the autoscalers registered for a Cloud
+// Foundry when that Cloud Foundry is unregistered: they serve nothing else.
+func (a *Autoscaler) OnEndpointNotification(action api.EndpointAction, endpoint *api.CNSIRecord) {
+	if action != api.EndpointUnregisterAction || endpoint.CNSIType != "cf" {
+		return
+	}
+	endpoints, err := a.portalProxy.ListEndpoints()
+	if err != nil {
+		slog.Warn("could not list the autoscalers of the unregistered Cloud Foundry", "endpoint", endpoint.GUID, "error", err)
+		return
+	}
+	for _, rec := range endpoints {
+		if rec.CNSIType != EndpointType {
+			continue
+		}
+		if link, ok := parseLink(rec.Metadata); !ok || link.CFGUID != endpoint.GUID {
+			continue
+		}
+		if err := a.portalProxy.UnregisterEndpoint(rec.GUID); err != nil {
+			slog.Warn("could not unregister the autoscaler of the unregistered Cloud Foundry", "autoscaler", rec.GUID, "endpoint", endpoint.GUID, "error", err)
+		}
+	}
 }
 
 // Init performs plugin initialization
