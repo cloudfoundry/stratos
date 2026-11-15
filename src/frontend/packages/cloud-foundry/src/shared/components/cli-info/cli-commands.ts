@@ -25,11 +25,15 @@ export function commandsForTab(list: CliTabCommands[], tab: string | null): CliC
   return list.find(section => section.tab === tab)?.commands ?? [];
 }
 
-// Names are quoted so a name with a space in it stays one argument. The
-// placeholders stand in until the page knows the name.
-const app = (c: CliCommandNames) => `"${c.appName || '[app name]'}"`;
-const org = (c: CliCommandNames) => `"${c.orgName || '[organization name]'}"`;
-const space = (c: CliCommandNames) => `"${c.spaceName || '[space name]'}"`;
+// Names are quoted so a name with a space in it stays one argument, in double
+// quotes as they are shown. A name with a character a shell still expands
+// inside double quotes (" $ ` \ !) is single-quoted instead, with each ' as
+// '\''. The placeholders stand in until the page knows the name.
+const quote = (name: string) =>
+  /["$`\\!]/.test(name) ? `'${name.replace(/'/g, `'\\''`)}'` : `"${name}"`;
+const app = (c: CliCommandNames) => quote(c.appName || '[app name]');
+const org = (c: CliCommandNames) => quote(c.orgName || '[organization name]');
+const space = (c: CliCommandNames) => quote(c.spaceName || '[space name]');
 
 export const APPLICATION_CLI_COMMANDS: CliTabCommands[] = [
   {
