@@ -645,8 +645,14 @@ export class RoleAssignmentComponent implements OnInit, OnDestroy {
     });
   }
 
+  /** Orgs whose org User role was ticked for the user by a space role, not by the user. */
+  private readonly impliedOrgUser = new Set<string>();
+
   onToggleOrgRole(org: APIResource<IOrganization>, role: OrgUserRoleNames, value: boolean): void {
     const orgGuid = org.metadata.guid;
+    if (role === OrgUserRoleNames.USER) {
+      this.impliedOrgUser.delete(orgGuid);
+    }
     this.ensureOrgInSelection(org);
     this.selection.update(sel => ({
       ...sel,
@@ -666,30 +672,38 @@ export class RoleAssignmentComponent implements OnInit, OnDestroy {
     this.ensureOrgInSelection(org);
     this.selection.update(sel => {
       const existingSpaces = sel[orgGuid].spaces;
-      return {
-        ...sel,
-        [orgGuid]: {
-          ...sel[orgGuid],
-          // Cloud Foundry gives a space role only to a member of the org, so
-          // a space role brings the org User role with it.
-          orgRoles: value
-            ? { ...sel[orgGuid].orgRoles, [OrgUserRoleNames.USER]: true }
-            : sel[orgGuid].orgRoles,
-          spaces: {
-            ...existingSpaces,
-            [space.guid]: {
-              spaceName: space.name,
-              roles: {
-                ...(existingSpaces[space.guid]?.roles ?? {}),
-                [role]: value,
-              },
-            },
+      const spaces = {
+        ...existingSpaces,
+        [space.guid]: {
+          spaceName: space.name,
+          roles: {
+            ...(existingSpaces[space.guid]?.roles ?? {}),
+            [role]: value,
           },
         },
       };
+      let orgRoles = sel[orgGuid].orgRoles;
+      if (value) {
+        // Cloud Foundry gives a space role only to a member of the org, so
+        // a space role brings the org User role with it.
+        if (orgRoles[OrgUserRoleNames.USER] !== true) {
+          this.impliedOrgUser.add(orgGuid);
+        }
+        orgRoles = { ...orgRoles, [OrgUserRoleNames.USER]: true };
+      } else if (this.impliedOrgUser.has(orgGuid) && !hasTickedSpaceRole(spaces)) {
+        // The last space role is gone, and the user never asked for org User.
+        const { [OrgUserRoleNames.USER]: _implied, ...rest } = orgRoles;
+        orgRoles = rest;
+        this.impliedOrgUser.delete(orgGuid);
+      }
+      return { ...sel, [orgGuid]: { ...sel[orgGuid], orgRoles, spaces } };
     });
     this.changeSet.emit(diffToChanges(this.users(), this.baseline(), this.selection()));
   }
+}
+
+function hasTickedSpaceRole(spaces: RoleSelection[string]['spaces']): boolean {
+  return Object.values(spaces).some(entry => Object.values(entry.roles).some(val => val === true));
 }
 
 function readChecks(checks: Record<string, Signal<boolean>>): Record<string, boolean> {
