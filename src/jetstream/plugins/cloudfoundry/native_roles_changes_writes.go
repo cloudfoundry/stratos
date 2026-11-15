@@ -173,32 +173,29 @@ func removesOrgUser(changes []nativeRoleChange) bool {
 }
 
 // orderRoleChanges returns indices into changes in execution order. The
-// org-user (membership) role must be created before other roles and removed
-// after them, mirroring the legacy executeUsersRolesChange$ ordering — CF
+// org-user (membership) role adds run before other roles and its removes
+// run after them, each by its own direction, mirroring the legacy
+// executeUsersRolesChange$ ordering. CF
 // rejects a space role for a non-member, and removing membership first would
 // orphan the remaining space roles.
 func orderRoleChanges(changes []nativeRoleChange) []int {
-	orgUser := make([]int, 0, len(changes))
+	orgUserAdds := make([]int, 0, len(changes))
+	orgUserRemoves := make([]int, 0, len(changes))
 	other := make([]int, 0, len(changes))
 	for i, ch := range changes {
-		if isOrgUserChange(ch) {
-			orgUser = append(orgUser, i)
-		} else {
+		switch {
+		case !isOrgUserChange(ch):
 			other = append(other, i)
+		case ch.Add:
+			orgUserAdds = append(orgUserAdds, i)
+		default:
+			orgUserRemoves = append(orgUserRemoves, i)
 		}
 	}
-	if len(orgUser) == 0 {
-		return other
-	}
 	order := make([]int, 0, len(changes))
-	if changes[orgUser[0]].Add {
-		order = append(order, orgUser...)
-		order = append(order, other...)
-	} else {
-		order = append(order, other...)
-		order = append(order, orgUser...)
-	}
-	return order
+	order = append(order, orgUserAdds...)
+	order = append(order, other...)
+	return append(order, orgUserRemoves...)
 }
 
 // roleCreateRequestFor builds a V3 RoleCreateRequest from a change. Space

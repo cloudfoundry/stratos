@@ -358,6 +358,11 @@ func TestOrderRoleChanges(t *testing.T) {
 		got := orderRoleChanges([]nativeRoleChange{orgUserRemove, space})
 		assert.Equal(t, []int{1, 0}, got)
 	})
+	t.Run("mixed org-user add and remove in one batch", func(t *testing.T) {
+		orgUserAddOther := nativeRoleChange{UserGUID: "u", OrgGUID: "o2", Type: orgUserRoleType, Add: true}
+		got := orderRoleChanges([]nativeRoleChange{orgUserRemove, space, orgUserAddOther})
+		assert.Equal(t, []int{2, 1, 0}, got)
+	})
 	t.Run("no org-user change keeps input order", func(t *testing.T) {
 		got := orderRoleChanges([]nativeRoleChange{space, space})
 		assert.Equal(t, []int{0, 1}, got)
