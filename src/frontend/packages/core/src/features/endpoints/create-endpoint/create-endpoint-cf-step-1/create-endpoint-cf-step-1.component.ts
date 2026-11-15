@@ -15,8 +15,8 @@ import {
   entityCatalog,
   getFullEndpointApiUrl,
 } from '@stratosui/store';
-import { combineLatest, Observable, of } from 'rxjs';
-import { catchError, map, startWith, switchMap } from 'rxjs/operators';
+import { combineLatest, EMPTY, Observable, of } from 'rxjs';
+import { catchError, expand, map, reduce, startWith, switchMap } from 'rxjs/operators';
 
 import { getIdFromRoute } from '../../../../core/utils.service';
 import { StepOnNextResult } from '../../../../shared/components/stepper/step/step.component';
@@ -187,11 +187,19 @@ export class CreateEndpointCfStep1Component extends CreateEndpointHelperComponen
   // only "not registered yet".
   readonly brokers = toSignal(toObservable(this.linkedCf).pipe(
     switchMap(guid => !guid ? of([] as BrokerChoice[]) :
-      this.http.get<{ resources?: BrokerChoice[] }>(`/pp/v1/cf/service_brokers/${guid}?return=base`).pipe(
-        map(res => res.resources ?? []),
+      this.brokerPage(guid, 1).pipe(
+        expand(res => res.page < res.totalPages ? this.brokerPage(guid, res.page + 1) : EMPTY),
+        reduce((all, res) => all.concat(res.resources), [] as BrokerChoice[]),
         catchError(() => of([] as BrokerChoice[])),
       )),
   ), { initialValue: [] as BrokerChoice[] });
+  // One page of the Cloud Foundry's brokers, 100 at a time like the other lists.
+  private brokerPage(guid: string, page: number) {
+    return this.http.get<{ resources?: BrokerChoice[]; pagination?: { totalPages?: number } }>(
+      `/pp/v1/cf/service_brokers/${guid}?return=base&per_page=100&page=${page}`).pipe(
+      map(res => ({ resources: res.resources ?? [], page, totalPages: res.pagination?.totalPages ?? 1 })),
+    );
+  }
   // The broker named after the address (autoscaler → autoscalerservicebroker,
   // the upstream and Genesis kit naming) is picked when listed.
   readonly linkedBroker = linkedSignal<{ list: BrokerChoice[]; url: string }, string>({
