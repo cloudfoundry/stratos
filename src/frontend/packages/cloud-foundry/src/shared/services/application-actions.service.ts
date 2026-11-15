@@ -1,4 +1,4 @@
-import { Injectable, computed, inject, signal, Signal } from '@angular/core';
+import { DestroyRef, Injectable, computed, inject, signal, Signal } from '@angular/core';
 import { Router } from '@angular/router';
 
 import { ConfirmationDialogConfig, ConfirmationDialogService, TailwindSnackBarService } from '@stratosui/core';
@@ -355,6 +355,13 @@ export class AppApplicationActionsService {
   // are stable; a full refresh('all') fired loading signals on every
   // kind and caused visible UI flicker across summary/info/cf cards.
   private settlingTimer: ReturnType<typeof setInterval> | null = null;
+  // Provided per page: leaving the page must end the poll.
+  private readonly stopSettlingOnDestroy = inject(DestroyRef).onDestroy(() => {
+    if (this.settlingTimer) {
+      clearInterval(this.settlingTimer);
+      this.settlingTimer = null;
+    }
+  });
   private startSettlingPoll(): void {
     if (this.settlingTimer) {
       clearInterval(this.settlingTimer);
