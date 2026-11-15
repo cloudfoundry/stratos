@@ -88,4 +88,41 @@ describe('PageSubNavComponent', () => {
     inner.destroy();
     expect(tabNav.tabSubNavBreadcrumbs()).toBeUndefined();
   });
+
+  // The tab shells hold a fallback row; a tab's own sub-nav beats it in
+  // whichever order the two initialise.
+  describe('fallback row', () => {
+    async function make(fallback: boolean) {
+      const f = TestBed.createComponent(PageSubNavComponent);
+      f.componentRef.setInput('fallback', fallback);
+      await f.whenStable();
+      return f;
+    }
+
+    it('loses to a tab sub-nav that initialised first', async () => {
+      fixture.destroy();
+      const tabNav = TestBed.inject(TabNavService);
+      const tab = await make(false);
+      const tabPortal = tabNav.tabSubNav();
+      await make(true);
+      expect(tabNav.tabSubNav()).toBe(tabPortal);
+      tab.destroy();
+    });
+
+    it('shows again when the tab sub-nav goes away, and loses to the next one', async () => {
+      fixture.destroy();
+      const tabNav = TestBed.inject(TabNavService);
+      const shell = await make(true);
+      const shellPortal = tabNav.tabSubNav();
+      const tab = await make(false);
+      expect(tabNav.tabSubNav()).not.toBe(shellPortal);
+      tab.destroy();
+      expect(tabNav.tabSubNav()).toBe(shellPortal);
+      const again = await make(false);
+      expect(tabNav.tabSubNav()).not.toBe(shellPortal);
+      again.destroy();
+      shell.destroy();
+      expect(tabNav.tabSubNav()).toBeUndefined();
+    });
+  });
 });
