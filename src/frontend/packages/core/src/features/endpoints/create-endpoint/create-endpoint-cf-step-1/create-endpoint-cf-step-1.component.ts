@@ -169,6 +169,14 @@ export class CreateEndpointCfStep1Component extends CreateEndpointHelperComponen
   private readonly urlValue = signal('');
   readonly linkedToCf = computed(() => !!this.endpoint()?.definition?.linkedToCf && !this.review());
   readonly urlDomain = computed(() => cfDomain(this.urlValue()));
+  // The host as typed, and the domains the registered Cloud Foundry endpoints sit on.
+  readonly urlHostName = computed(() => urlHost(this.urlValue().trim()));
+  readonly cfDomains = computed(() => [...new Set(
+    [...this.endpointsData.endpoints().values()]
+      .filter(e => e.cnsi_type === 'cf')
+      .map(e => cfDomain(getFullEndpointApiUrl(e)))
+      .filter(domain => !!domain),
+  )].sort());
   readonly linkedCfs = computed(() => {
     const domain = this.urlDomain();
     if (!this.linkedToCf() || !domain) {

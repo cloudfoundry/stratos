@@ -62,7 +62,11 @@
       @if (linkedToCf() && urlDomain()) {
         @if (linkedCfs().length === 0) {
           <p class="text-warning text-sm mt-1" role="status">
-            Register the Cloud Foundry this autoscaler serves first: no registered Cloud Foundry is on {{ urlDomain() }}
+            No registered Cloud Foundry shares a domain with {{ urlHostName() }}. Register the Cloud Foundry this
+            autoscaler serves first.
+            @if (cfDomains().length) {
+              Registered Cloud Foundry domains: {{ cfDomains().join(', ') }}.
+            }
           </p>
         } @else {
           <div class="flex flex-col gap-1 mt-2">

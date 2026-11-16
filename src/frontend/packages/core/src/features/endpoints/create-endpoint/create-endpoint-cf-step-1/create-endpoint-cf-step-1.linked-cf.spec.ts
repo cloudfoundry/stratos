@@ -127,8 +127,30 @@ describe('CreateEndpointCfStep1Component: a type linked to a Cloud Foundry', () 
 
     expect(select('linked-cf')).toBeNull();
     expect(text()).toContain(
-      'Register the Cloud Foundry this autoscaler serves first: no registered Cloud Foundry is on sys.x.com');
+      'No registered Cloud Foundry shares a domain with autoscaler.sys.x.com. ' +
+      'Register the Cloud Foundry this autoscaler serves first. ' +
+      'Registered Cloud Foundry domains: sys.y.com.');
     expect(await valid()).toBe(false);
+  });
+
+  it('names the address typed, not a domain cut from it, and lists each registered domain once', async () => {
+    await open(cf('a', 'api.sys.z.com'), cf('b', 'api.sys.y.com'), cf('c', 'cf.sys.y.com:8443'));
+    await typeUrl('https://example.com');
+
+    expect(text()).toContain(
+      'No registered Cloud Foundry shares a domain with example.com. ' +
+      'Register the Cloud Foundry this autoscaler serves first. ' +
+      'Registered Cloud Foundry domains: sys.y.com, sys.z.com.');
+  });
+
+  it('leaves out the list of domains when no Cloud Foundry is registered', async () => {
+    await open();
+    await typeUrl('https://example.com');
+
+    expect(text()).toContain(
+      'No registered Cloud Foundry shares a domain with example.com. ' +
+      'Register the Cloud Foundry this autoscaler serves first.');
+    expect(text()).not.toContain('Registered Cloud Foundry domains');
   });
 
   it('picks the broker named after the address, and offers none', async () => {
