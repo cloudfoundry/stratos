@@ -3,7 +3,7 @@ import { TestBed } from '@angular/core/testing';
 import { Router } from '@angular/router';
 import { describe, it, expect, beforeEach, vi } from 'vitest';
 import { of } from 'rxjs';
-import { CurrentUserRolesDataService, StratosCatalogEndpointEntity, entityCatalog, type EndpointModel } from '@stratosui/store';
+import { CurrentUserRolesDataService, EndpointsDataService, StratosCatalogEndpointEntity, entityCatalog, type EndpointModel } from '@stratosui/store';
 
 import { SessionSignalService } from '../../core/signals/session-signal.service';
 import { ConfirmationDialogService } from '../../shared/components/confirmation-dialog.service';
@@ -112,6 +112,34 @@ describe('EndpointRowActionsService', () => {
     it('says "for you" on a personal endpoint', () => {
       void invoke(ep('connected', 'guid-1', { creator: { name: 'me', admin: false, system: false } }));
       expect(confirm.mock.calls[0][0].message).toContain('removes the endpoint for you');
+    });
+
+    describe('with autoscalers registered for the Cloud Foundry', () => {
+      const autoscaler = (guid: string, name: string, cf: string) =>
+        ep('connected', guid, { name, cnsi_type: 'autoscaler', endpoint_metadata: { cf_guid: cf } });
+      const known = (...rows: EndpointModel[]) =>
+        (TestBed.inject(EndpointsDataService) as any)._endpoints.set(new Map(rows.map(r => [r.guid, r])));
+      const BASE = 'This removes the endpoint for all users and ends every connection to it. You can register it again later.';
+
+      it('names them, by name, in the question', () => {
+        known(autoscaler('as-2', 'zeta', 'guid-1'), autoscaler('as-1', 'alpha', 'guid-1'),
+          autoscaler('as-3', 'other', 'guid-9'));
+        void invoke(ep('connected'));
+        expect(confirm.mock.calls[0][0].message).toBe(
+          `${BASE} This also unregisters the autoscalers registered for it: alpha, zeta.`);
+      });
+
+      it('leaves the question as it was when none is linked', () => {
+        known(autoscaler('as-3', 'other', 'guid-9'));
+        void invoke(ep('connected'));
+        expect(confirm.mock.calls[0][0].message).toBe(BASE);
+      });
+
+      it('adds nothing for an endpoint that is not a Cloud Foundry', () => {
+        known(autoscaler('as-1', 'alpha', 'guid-1'));
+        void invoke(ep('connected', 'guid-1', { cnsi_type: 'metrics' }));
+        expect(confirm.mock.calls[0][0].message).toBe(BASE);
+      });
     });
 
     it('unregisters and says so once confirmed', async () => {
