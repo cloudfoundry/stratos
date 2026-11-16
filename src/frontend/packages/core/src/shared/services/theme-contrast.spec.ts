@@ -1,5 +1,5 @@
 import { describe, it, expect } from 'vitest';
-import { defaultTheme } from '@stratosui/theme';
+import { darkTheme, defaultTheme } from '@stratosui/theme';
 import { luminance } from '../../../../theme/derive-dark';
 import companyConfig from '../../../../theme/company-config.json';
 
@@ -28,6 +28,23 @@ describe('default light theme contrast', () => {
   it('ships company-config.json with the default theme colors', () => {
     for (const [key, value] of Object.entries(companyConfig.theme)) {
       expect(value, key).toBe(defaultTheme.colors[key as keyof typeof defaultTheme.colors]);
+    }
+  });
+});
+
+// Dark mode: the dark surface is #1e293b, and list rows sit on #223046.
+describe('default dark theme contrast', () => {
+  it('muted text reaches 7:1 on the dark surfaces', () => {
+    for (const bg of ['#1e293b', '#223046']) {
+      expect(ratio(darkTheme.layout.textMuted, bg), bg).toBeGreaterThanOrEqual(7);
+    }
+  });
+
+  it('the blue of links and buttons reaches 7:1 on the dark surfaces', () => {
+    for (const key of ['primary', 'info'] as const) {
+      for (const bg of ['#1e293b', '#223046']) {
+        expect(ratio(darkTheme.colors[key], bg), `${key} on ${bg}`).toBeGreaterThanOrEqual(7);
+      }
     }
   });
 });

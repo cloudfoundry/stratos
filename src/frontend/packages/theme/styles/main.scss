@@ -170,16 +170,16 @@
   --shadow-xl: 0 20px 25px -5px rgba(0, 0, 0, 0.1);
 }
 
-/* Dark Theme - WCAG AA Compliant */
+/* Dark Theme - text colors reach 7:1 (WCAG 1.4.6) */
 .dark-theme {
   /* Brand colors - adjusted for dark theme with higher contrast */
-  --color-primary: oklch(71.374% 0.1434 254.62);
-  --color-secondary: oklch(75.351% 0.139 232.66);
-  --color-accent: oklch(75.351% 0.139 232.66);
+  --color-primary: oklch(80.907% 0.0956 251.81);
+  --color-secondary: oklch(82.759% 0.1013 230.32);
+  --color-accent: oklch(82.759% 0.1013 230.32);
   --color-success: oklch(80.035% 0.1821 151.71);
   --color-warning: oklch(83.686% 0.1644 84.43);
   --color-danger: oklch(71.063% 0.1661 22.22);
-  --color-info: oklch(71.374% 0.1434 254.62);
+  --color-info: oklch(80.907% 0.0956 251.81);
   --color-on-primary: oklch(20.768% 0.0398 265.75);
 
   /* Navigation colors - dark theme */
@@ -195,7 +195,7 @@
   --app-bg: oklch(20.768% 0.0398 265.75);
   --body-bg: oklch(12.88% 0.0406 264.7);
   --app-text: oklch(96.826% 0.0069 247.9);
-  --text-muted: oklch(71.067% 0.0351 256.79);
+  --text-muted: oklch(86.898% 0.0198 252.89);
   --header-bg: oklch(27.95% 0.0368 260.03);
   --header-text: oklch(96.826% 0.0069 247.9);
   --header-border: oklch(37.17% 0.0392 257.29);
@@ -203,7 +203,7 @@
   --content-secondary: oklch(20.768% 0.0398 265.75);
   --content-border: oklch(37.17% 0.0392 257.29);
   --content-text: oklch(96.826% 0.0069 247.9);
-  --content-muted: oklch(71.067% 0.0351 256.79);
+  --content-muted: oklch(86.898% 0.0198 252.89);
 
   /* Login page - dark theme */
   --login-bg: oklch(20.768% 0.0398 265.75);
