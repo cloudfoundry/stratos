@@ -43,6 +43,16 @@ describe('ListSubNavComponent — original behaviour', () => {
     expect(title.textContent).toContain('12');
   });
 
+  // The page title (h1) sits in the page header, outside main. The list's
+  // title is the heading of the main area, so a screen reader user can jump
+  // to the list by heading (WCAG 2.4.6).
+  it('renders the title as a heading', async () => {
+    fixture.componentRef.setInput('title', 'Total Routes');
+    fixture.componentRef.setInput('count', signal(12).asReadonly());
+    await fixture.whenStable();
+    expect(html().querySelector('[data-test="list-sub-nav-title"]')!.tagName).toBe('H2');
+  });
+
   it('uses plural label form even when count is 0 or 1', async () => {
     fixture.componentRef.setInput('title', 'Total Endpoints');
     const c = signal(0);

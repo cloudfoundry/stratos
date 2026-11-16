@@ -93,7 +93,7 @@ const VARIANT_CLASSES: Record<NonNullable<ListSubNavAction['variant']>, string> 
   template: `
     <div data-test="list-sub-nav"
          [class]="rowClasses">
-      <div class="text-base font-semibold text-content-text whitespace-nowrap" data-test="list-sub-nav-title">
+      <h2 class="text-base font-semibold text-content-text whitespace-nowrap" data-test="list-sub-nav-title">
         {{ title() }}: <span class="text-content-muted font-medium inline-flex items-center">
           @if (isCountPending()) {
             <app-busy variant="dots" size="1em" data-test="count-pending"></app-busy>
@@ -101,7 +101,7 @@ const VARIANT_CLASSES: Record<NonNullable<ListSubNavAction['variant']>, string> 
             {{ count()() }}
           }
         </span>
-      </div>
+      </h2>
       @if (isAdding()?.()) {
         <!-- Inline add-form slot. When the consumer flips its isAdding signal
              true, the right side of the row swaps the add button for the
