@@ -1,5 +1,5 @@
 <app-page-header [breadcrumbs]="breadcrumbs">
-  {{ title() }}
+  <h1>{{ title() }}</h1>
   @if (actions().length || canShare()) {
     <div class="page-header-right flex gap-2">
       @if (canShare()) {
