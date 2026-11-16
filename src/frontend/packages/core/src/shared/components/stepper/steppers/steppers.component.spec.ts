@@ -63,6 +63,25 @@ describe('SteppersComponent', () => {
     expect(component).toBeTruthy();
   });
 
+  // The page title (h1) sits in the page header, outside main, so a form
+  // page had no heading in its main area (WCAG 2.4.6). The current step's
+  // title is a heading there; the step bar already shows it, so the
+  // heading is for screen readers only.
+  it('gives the current step a heading', async () => {
+    const alpha = makeStep('Alpha').instance;
+    const bravo = makeStep('Bravo').instance;
+    (component as any).allSteps = [alpha, bravo];
+    (component as any).filterSteps();
+    await fixture.whenStable();
+    const heading = () => (fixture.nativeElement as HTMLElement).querySelector('h2');
+    expect(heading()?.textContent?.trim()).toBe('Alpha');
+    expect(heading()?.classList.contains('sr-only')).toBe(true);
+
+    component.currentIndex.set(1);
+    await fixture.whenStable();
+    expect(heading()?.textContent?.trim()).toBe('Bravo');
+  });
+
   // Regression: dev.56 shipped a template change that swapped @if-wrapped
   // steps for [hidden] bindings so the stepper's one-shot @ContentChildren
   // capture sees all steps at ngAfterContentInit. That exposed a second

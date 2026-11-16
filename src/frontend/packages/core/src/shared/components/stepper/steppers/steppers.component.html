@@ -82,8 +82,12 @@
             }
           </div>
         }
-        <!-- Step content -->
+        <!-- Step content. The page title sits in the page header, outside
+             main: this heading names the step for screen readers. -->
         <div class="steppers-contents mb-8">
+          @if (visibleSteps()[currentIndex()].title(); as stepTitle) {
+            <h2 class="sr-only">{{ stepTitle }}</h2>
+          }
           <span *ngTemplateOutlet="visibleSteps()[currentIndex()].content()"></span>
         </div>
         <!-- Navigation buttons -->
