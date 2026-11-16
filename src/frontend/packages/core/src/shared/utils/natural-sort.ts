@@ -171,3 +171,18 @@ export function naturalCompare(
   }
   return 0;
 }
+
+/**
+ * Comparator for endpoint names. Builds the collection-aware context once
+ * from `names` (pass every name in the list being sorted) so `dup2`,
+ * `dup 3` and `dup4` sequence by their number, then returns a
+ * naturalCompare over two names. Direction is baked into the result.
+ * Callers that sort by other keys first can use it as the tiebreak.
+ */
+export function endpointNameCompare(
+  names: readonly string[],
+  direction: 'asc' | 'desc' = 'asc',
+): (a: string, b: string) => number {
+  const ctx = detectSortContext(names);
+  return (a, b) => naturalCompare(a, b, false, direction, ctx);
+}

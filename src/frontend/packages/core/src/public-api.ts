@@ -14,6 +14,7 @@ export {
   naturalCollator,
   naturalCompare,
   detectSortContext,
+  endpointNameCompare,
   NO_SEPARATOR_PATTERN_THRESHOLD,
 } from './shared/utils/natural-sort';
 export type { NaturalSortContext } from './shared/utils/natural-sort';

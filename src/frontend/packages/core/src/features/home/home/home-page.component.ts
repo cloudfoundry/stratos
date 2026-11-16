@@ -9,7 +9,7 @@ import {
 
 import { EndpointsService } from '../../../core/endpoints.service';
 import { HomeShowMode, HomeSortDirection } from '../../../core/dashboard-preferences.service';
-import { naturalCompare } from '../../../shared/utils/natural-sort';
+import { endpointNameCompare } from '../../../shared/utils/natural-sort';
 import { SessionService } from '../../../core/session.service';
 import { DashboardPreferencesService } from '../../../core/dashboard-preferences.service';
 import { PageHeaderComponent } from '../../../shared/components/page-header/page-header.component';
@@ -285,7 +285,9 @@ export class HomePageComponent implements OnInit {
       });
     }
 
-    const dir = this.sortDirection();
+    // One context from every registered endpoint (not the subset shown), so
+    // the separator-strip decision is identical in every mode and group.
+    const nameCompare = endpointNameCompare(this.allEndpoints().map(ep => ep.name ?? ''), this.sortDirection());
     const byPriority = (a: EndpointModel, b: EndpointModel) => {
       // strict: cnsi_type is populated on every endpoint; '' default keeps the lookup well-formed
       const pa = entityCatalog.getEndpoint(a.cnsi_type ?? '', a.sub_type)?.definition?.renderPriority ?? 1000;
@@ -293,7 +295,7 @@ export class HomePageComponent implements OnInit {
       // Same type (priority tie): natural name order, so cf1 < cf2 < cf10
       // instead of the /pp/v1/info payload's arbitrary map order. Direction
       // flips the name comparison only, never the group/type ordering.
-      return pa - pb || naturalCompare(a.name, b.name, false, dir);
+      return pa - pb || nameCompare(a.name, b.name);
     };
 
     return [
