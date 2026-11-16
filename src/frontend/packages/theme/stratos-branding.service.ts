@@ -362,7 +362,7 @@ export class StratosBrandingService {
     root.style.setProperty('--app-bg', theme.layout.background);
     root.style.setProperty('--body-bg', theme.layout.bodyBackground || theme.layout.background);
     root.style.setProperty('--app-text', theme.layout.text);
-    root.style.setProperty('--text-muted', theme.layout.textMuted || '#64748b');
+    root.style.setProperty('--text-muted', theme.layout.textMuted || '#475569');
     root.style.setProperty('--header-bg', theme.layout.headerBackground);
     root.style.setProperty('--header-text', theme.layout.headerText);
     root.style.setProperty('--header-border', theme.layout.headerBorder || '#e2e8f0');
@@ -370,7 +370,7 @@ export class StratosBrandingService {
     root.style.setProperty('--content-secondary', theme.layout.contentSecondary || '#f8fafc');
     root.style.setProperty('--content-border', theme.layout.contentBorder || '#e2e8f0');
     root.style.setProperty('--content-text', theme.layout.text);
-    root.style.setProperty('--content-muted', theme.layout.textMuted || '#64748b');
+    root.style.setProperty('--content-muted', theme.layout.textMuted || '#475569');
 
     // Apply branding variables
     root.style.setProperty('--logo-bg', theme.branding.logo);
