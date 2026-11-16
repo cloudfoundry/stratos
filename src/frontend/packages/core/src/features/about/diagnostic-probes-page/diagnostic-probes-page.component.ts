@@ -3,6 +3,7 @@ import { CommonModule } from '@angular/common';
 import { HttpClient } from '@angular/common/http';
 import { firstValueFrom } from 'rxjs';
 import { EndpointModel, EndpointsDataService, extractHttpErrorMessage } from '@stratosui/store';
+import { endpointNameCompare } from '../../../shared/utils/natural-sort';
 import { AppBusyComponent } from '../../../shared/components/busy-indicator/busy-indicator.component';
 
 // Result DTO from GET /pp/v1/cf/diag/urilimit/:cnsiGuid (#5579).
@@ -39,7 +40,12 @@ export class DiagnosticProbesPageComponent {
   private readonly http = inject(HttpClient);
   private readonly endpoints = inject(EndpointsDataService);
 
-  readonly cfEndpoints: Signal<EndpointModel[]> = this.endpoints.endpointsByType('cf');
+  private readonly cfEndpointsRaw: Signal<EndpointModel[]> = this.endpoints.endpointsByType('cf');
+  readonly cfEndpoints: Signal<EndpointModel[]> = computed(() => {
+    const list = this.cfEndpointsRaw();
+    const compare = endpointNameCompare(list.map(ep => ep.name));
+    return [...list].sort((a, b) => compare(a.name, b.name));
+  });
   private readonly states: WritableSignal<Map<string, ProbeState>> = signal(new Map());
 
   readonly hasEndpoints = computed(() => this.cfEndpoints().length > 0);
