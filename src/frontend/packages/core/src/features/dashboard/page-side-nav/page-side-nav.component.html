@@ -32,7 +32,7 @@
             @if (!tab.icon) {
               <app-custom-icon class="page-side-nav__icon" aria-hidden="true"></app-custom-icon>
             }
-            <span>{{ tab?.label }}</span>
+            <span>@if (header()) {<span class="sr-only">{{ header() }} </span>}{{ tab?.label }}</span>
           </a>
         </li>
       }
