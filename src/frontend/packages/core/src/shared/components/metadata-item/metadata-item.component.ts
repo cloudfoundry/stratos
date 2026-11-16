@@ -3,6 +3,7 @@ import { CommonModule } from '@angular/common';
 import { CustomTooltipDirective } from '../custom-tooltip/custom-tooltip.directive';
 
 import { CustomIconComponent } from '../custom-material/custom-material.component';
+import { AbbrTextComponent } from '../abbr-text/abbr-text.component';
 
 @Component({
   selector: 'app-metadata-item',
@@ -13,6 +14,7 @@ import { CustomIconComponent } from '../custom-material/custom-material.componen
     CommonModule,
     CustomIconComponent,
     CustomTooltipDirective,
+    AbbrTextComponent,
   ],
   changeDetection: ChangeDetectionStrategy.OnPush
 })

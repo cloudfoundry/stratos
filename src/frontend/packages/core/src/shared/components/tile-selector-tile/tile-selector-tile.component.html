@@ -14,7 +14,7 @@
         }
       </div>
       <div class="tile-selector__content">
-        <h3>{{ tile().label }}</h3>
+        <h3><app-abbr-text [text]="tile().label" /></h3>
       </div>
       @if (tile() && tile().description) {
         <div class="tile-selector__description">{{ tile().description }}</div>
