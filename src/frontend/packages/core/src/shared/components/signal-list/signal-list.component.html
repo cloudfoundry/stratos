@@ -578,9 +578,9 @@
                     <div class="flex flex-col items-end leading-tight text-right min-w-0">
                       @for (seg of visibleCompoundSegments(col, row); track $index) {
                         @if (seg.link) {
-                          <a [routerLink]="seg.link" (click)="$event.stopPropagation()" class="text-accent hover:underline truncate max-w-full" [attr.title]="seg.text">{{ seg.text }}</a>
+                          <a [routerLink]="seg.link" (click)="$event.stopPropagation()" class="text-accent hover:underline truncate max-w-full" [attr.title]="seg.text">@if (seg.label) {<span class="sr-only">{{ seg.label }} </span>}{{ seg.text }}</a>
                         } @else {
-                          <span class="truncate max-w-full" [attr.title]="seg.text">{{ seg.text }}</span>
+                          <span class="truncate max-w-full" [attr.title]="seg.text">@if (seg.label) {<span class="sr-only">{{ seg.label }} </span>}{{ seg.text }}</span>
                         }
                       }
                       @if (hiddenCompoundCount(col, row) > 0) {
@@ -785,9 +785,9 @@
                     <div class="flex flex-col leading-tight">
                       @for (seg of visibleCompoundSegments(col, row); track $index) {
                         @if (seg.link) {
-                          <a [routerLink]="seg.link" (click)="$event.stopPropagation()" class="text-accent hover:underline truncate" [attr.title]="seg.text">{{ seg.text }}</a>
+                          <a [routerLink]="seg.link" (click)="$event.stopPropagation()" class="text-accent hover:underline truncate" [attr.title]="seg.text">@if (seg.label) {<span class="sr-only">{{ seg.label }} </span>}{{ seg.text }}</a>
                         } @else {
-                          <span class="truncate" [attr.title]="seg.text">{{ seg.text }}</span>
+                          <span class="truncate" [attr.title]="seg.text">@if (seg.label) {<span class="sr-only">{{ seg.label }} </span>}{{ seg.text }}</span>
                         }
                       }
                       @if (hiddenCompoundCount(col, row) > 0) {

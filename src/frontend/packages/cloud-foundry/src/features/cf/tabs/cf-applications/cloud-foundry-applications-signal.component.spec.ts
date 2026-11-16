@@ -102,8 +102,16 @@ describe('CloudFoundryApplicationsSignalComponent.compoundOrgSpace', () => {
 
   it('renders unresolved segments as plain text (no dead links)', () => {
     const segs = Cmp.compoundOrgSpace(app({ orgGuid: 'org-x', spaceGuid: 'space-x' }), EMPTY, EMPTY);
-    expect(segs[0]).toEqual({ text: '—', link: undefined });
-    expect(segs[1]).toEqual({ text: '—', link: undefined });
+    expect(segs[0]).toEqual({ text: '—', link: undefined, label: 'Organization' });
+    expect(segs[1]).toEqual({ text: '—', link: undefined, label: 'Space' });
+  });
+
+  // An org and a space can have the same name ("e2e"); the label is read
+  // before each by screen readers, so the two links are told apart.
+  it('labels the org and space segments', () => {
+    const segs = Cmp.compoundOrgSpace(
+      app({ orgGuid: 'org-1', spaceGuid: 'space-1', orgName: 'e2e', spaceName: 'e2e' }), EMPTY, EMPTY);
+    expect(segs.map(s => s.label)).toEqual(['Organization', 'Space']);
   });
 
   it('does not link the space when the org guid is unknown', () => {

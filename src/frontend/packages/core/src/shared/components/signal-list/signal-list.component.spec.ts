@@ -125,6 +125,30 @@ describe('SignalListComponent', () => {
     expect(menu.querySelector('[data-test="rename-row"]')).not.toBeNull();
   });
 
+  // Two links in one cell can have the same text: an app's org and space
+  // are both "e2e". A label read before each by screen readers only tells
+  // them apart (WCAG 2.4.4); the visible text stays at the end of the name.
+  it('reads a compound segment label before its text, for screen readers only', async () => {
+    const fixture = TestBed.createComponent(Host);
+    fixture.componentInstance.config = {
+      ...fixture.componentInstance.config,
+      columns: [
+        { header: 'Name', render: r => r.name },
+        {
+          header: 'Org/Space', kind: 'compound', render: () => '',
+          compound: () => [
+            { text: 'e2e', link: ['/org'], label: 'Organization' },
+            { text: 'e2e', link: ['/space'], label: 'Space' },
+          ],
+        },
+      ],
+    };
+    await fixture.whenStable();
+    const links = [...fixture.nativeElement.querySelector('tbody tr').querySelectorAll('td a')].filter((a: HTMLElement) => a.textContent?.includes('e2e'));
+    expect(links.map((a: HTMLElement) => a.textContent?.replace(/\s+/g, ' ').trim())).toEqual(['Organization e2e', 'Space e2e']);
+    expect(links[0].querySelector('.sr-only')?.textContent?.trim()).toBe('Organization');
+  });
+
   describe('row-action menu and the Escape key', () => {
     async function withActions() {
       const fixture = TestBed.createComponent(Host);
