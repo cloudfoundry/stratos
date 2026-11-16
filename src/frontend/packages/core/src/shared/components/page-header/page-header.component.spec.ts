@@ -175,6 +175,18 @@ describe('PageHeaderComponent', () => {
     view.destroy();
   });
 
+  // The page header holds the site's own controls (menu, favorites, help,
+  // user menu), as a banner does: it is the page's header landmark, so a
+  // screen reader user can jump to it (WCAG 1.3.6).
+  it('draws the header as a header landmark', () => {
+    const view = component.pageHeaderTmpl().createEmbeddedView({});
+    const host = document.createElement('div');
+    view.detectChanges();
+    view.rootNodes.forEach((node: Node) => host.appendChild(node));
+    expect(host.querySelector('.page-header')?.tagName).toBe('HEADER');
+    view.destroy();
+  });
+
   it('has no breadcrumbs element while none are bound', () => {
     expect(component.breadcrumbDefinitions()).toBeNull();
   });
