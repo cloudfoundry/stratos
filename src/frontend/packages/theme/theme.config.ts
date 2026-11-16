@@ -114,13 +114,13 @@ export const defaultTheme: StratosTheme = {
 // Dark theme
 export const darkTheme: StratosTheme = {
   colors: {
-    primary: '#60a5fa',
+    primary: '#93c5fd',
     secondary: '#06b6d4',
     accent: '#f59e0b',
     success: '#10b981',
     warning: '#f59e0b',
     danger: '#ef4444',
-    info: '#60a5fa',
+    info: '#93c5fd',
   },
   navigation: {
     background: '#1e293b',
@@ -135,7 +135,7 @@ export const darkTheme: StratosTheme = {
     background: '#0f172a',
     bodyBackground: '#0f172a',
     text: '#f1f5f9',
-    textMuted: '#94a3b8',
+    textMuted: '#cbd5e1',
     headerBackground: '#1e293b',
     headerText: '#f1f5f9',
     headerBorder: '#334155',
