@@ -1,4 +1,4 @@
-import { Component, HostListener, Signal, WritableSignal, ChangeDetectionStrategy, ElementRef, TemplateRef, signal, DestroyRef, inject, AfterViewInit, Injector, input, contentChild, contentChildren, viewChild } from '@angular/core';
+import { Component, HostListener, Signal, computed, WritableSignal, ChangeDetectionStrategy, ElementRef, TemplateRef, signal, DestroyRef, inject, AfterViewInit, Injector, input, contentChild, contentChildren, viewChild } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { RouterModule } from '@angular/router';
 import { EndpointsDataService } from '@stratosui/store';
@@ -1584,6 +1584,32 @@ export class SignalListComponent<T> implements AfterViewInit {
     });
     config.pageIndex.set(0);
   }
+
+  // The filter state as one value, to see when the person changes it.
+  private readonly filterKey = computed(() => {
+    const config = this.config();
+    return JSON.stringify([
+      (config.filterDropdowns ?? []).map(dd => dd.selected()),
+      (config.filterMultis ?? []).map(fm => fm.selected()),
+      (config.filterRanges ?? []).map(fr => fr.selected()),
+      config.nameFilter?.() ?? '',
+    ]);
+  });
+  private firstFilterKey?: string;
+  private filterChanged = false;
+
+  // Said by the list's status line (WCAG 4.1.3): empty until the person
+  // changes a filter, then the number of results, once they have loaded.
+  // NOTE: the two plain fields are set inside the computed; they only latch.
+  protected readonly resultStatus = computed(() => {
+    const key = this.filterKey();
+    this.firstFilterKey ??= key;
+    if (key !== this.firstFilterKey) this.filterChanged = true;
+    const config = this.config();
+    if (!this.filterChanged || config.isAnyLoading()) return '';
+    const n = config.totalFilteredResults();
+    return `${n} ${n === 1 ? 'result' : 'results'}`;
+  });
 
   hasActiveFilter(): boolean {
     for (const dd of this.config().filterDropdowns ?? []) {
