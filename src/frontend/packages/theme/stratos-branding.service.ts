@@ -391,7 +391,7 @@ export class StratosBrandingService {
     root.style.setProperty('--table-row-hover', isDark ? '#334155' : '#f9fafb');
     root.style.setProperty('--table-border', isDark ? '#334155' : '#e5e7eb');
     root.style.setProperty('--input-bg', isDark ? '#1e293b' : '#ffffff');
-    root.style.setProperty('--input-border', isDark ? '#475569' : '#d1d5db');
+    root.style.setProperty('--input-border', isDark ? '#94a3b8' : '#64748b');
     root.style.setProperty('--input-text', isDark ? '#f1f5f9' : '#1e293b');
     root.style.setProperty('--input-placeholder', isDark ? '#94a3b8' : '#64748b');
     root.style.setProperty('--input-disabled-bg', isDark ? '#0f172a' : '#f3f4f6');

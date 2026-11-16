@@ -125,6 +125,19 @@ describe('SignalListComponent', () => {
     expect(menu.querySelector('[data-test="rename-row"]')).not.toBeNull();
   });
 
+  // A field's edge shows where to type: it takes the field border token,
+  // drawn at 3:1 or more (WCAG 1.4.11), not the faint card border.
+  it('draws the toolbar fields with the field border', async () => {
+    const fixture = TestBed.createComponent(Host);
+    await fixture.whenStable();
+    const fields = [...fixture.nativeElement.querySelectorAll('input[type=text], select')] as HTMLElement[];
+    expect(fields.length).toBeGreaterThan(0);
+    for (const f of fields) {
+      expect(f.className, f.outerHTML.slice(0, 80)).toContain('border-input-border');
+      expect(f.className).not.toContain('border-content-border');
+    }
+  });
+
   // Two links in one cell can have the same text: an app's org and space
   // are both "e2e". A label read before each by screen readers only tells
   // them apart (WCAG 2.4.4); the visible text stays at the end of the name.
