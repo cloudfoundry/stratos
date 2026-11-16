@@ -126,6 +126,21 @@ describe('BuildTabComponent', () => {
       expect(component).toBeTruthy();
     });
 
+    // A card was read part by part, with no name for the whole: a screen
+    // reader user did not hear where "Application Info" began or ended. Each
+    // card with a heading is a group named by its heading.
+    it('names each card with a heading as a group', () => {
+      const cards = Array.from(fixture.nativeElement.querySelectorAll('.card')) as HTMLElement[];
+      const titled = cards.filter(c => c.querySelector(':scope > .card-header h3'));
+      expect(titled.length).toBeGreaterThan(0);
+      for (const card of titled) {
+        const h3 = card.querySelector(':scope > .card-header h3') as HTMLElement;
+        expect(card.getAttribute('role'), h3.textContent!).toBe('group');
+        expect(h3.id, h3.textContent!).not.toBe('');
+        expect(card.getAttribute('aria-labelledby')).toBe(h3.id);
+      }
+    });
+
     it('renders the instances accordion', () => {
       expect(fixture.nativeElement.querySelector('app-instances-accordion')).toBeTruthy();
     });
