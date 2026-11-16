@@ -33,6 +33,7 @@ import { ConfirmationDialogService } from '../../../../shared/components/confirm
 import { EndpointCertificatesComponent } from '../../certificates/endpoint-certificates.component';
 import { EndpointPermissionsService } from '../../endpoint-permissions.service';
 import { confirmAndUnregister, isPersonalEndpoint } from '../../unregister-endpoint/unregister-endpoint';
+import { endpointNameCompare } from '../../../../shared/utils/natural-sort';
 
 // What the step knows about the endpoint it registered or is reviewing.
 interface RegisteredEndpoint {
@@ -173,9 +174,10 @@ export class CreateEndpointCfStep1Component extends CreateEndpointHelperComponen
     if (!this.linkedToCf() || !domain) {
       return [];
     }
-    return [...this.endpointsData.endpoints().values()]
-      .filter(e => e.cnsi_type === 'cf' && cfDomain(getFullEndpointApiUrl(e)) === domain)
-      .sort((a, b) => a.name.localeCompare(b.name));
+    const cfs = [...this.endpointsData.endpoints().values()]
+      .filter(e => e.cnsi_type === 'cf' && cfDomain(getFullEndpointApiUrl(e)) === domain);
+    const compare = endpointNameCompare(cfs.map(e => e.name));
+    return cfs.sort((a, b) => compare(a.name, b.name));
   });
   // The only Cloud Foundry on the domain is picked; a choice stays while listed.
   readonly linkedCf = linkedSignal<EndpointModel[], string>({

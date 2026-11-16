@@ -1,4 +1,4 @@
-import { naturalCompare, type SignalListDropdownOption } from '@stratosui/core';
+import { endpointNameCompare, type SignalListDropdownOption } from '@stratosui/core';
 import type { EndpointModel } from '@stratosui/store';
 
 /**
@@ -21,6 +21,7 @@ export function endpointDropdownOptions(
     label: ep.name ?? ep.guid ?? '',
     value: ep.guid ?? null,
   }));
-  named.sort((a, b) => naturalCompare(a.label, b.label));
+  const compare = endpointNameCompare(named.map(o => o.label));
+  named.sort((a, b) => compare(a.label, b.label));
   return [{ label: 'All', value: null }, ...named];
 }

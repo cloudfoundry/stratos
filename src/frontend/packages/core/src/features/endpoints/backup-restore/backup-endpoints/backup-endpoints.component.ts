@@ -9,7 +9,7 @@ import { take, defaultIfEmpty, map } from 'rxjs/operators';
 import { toSignal } from '@angular/core/rxjs-interop';
 
 import { safeUnsubscribe } from '../../../../core/utils.service';
-import { naturalCompare } from '../../../../shared/utils/natural-sort';
+import { endpointNameCompare } from '../../../../shared/utils/natural-sort';
 import { ConfirmationDialogConfig } from '../../../../shared/components/confirmation-dialog.config';
 import { ConfirmationDialogService } from '../../../../shared/components/confirmation-dialog.service';
 import {
@@ -83,7 +83,11 @@ export class BackupEndpointsComponent implements OnDestroy {
   private readonly endpoints: Signal<EndpointModel[]> = computed(() => {
     this.refreshTick();
     const list = this.endpointsData.endpointsList();
-    return list ? [...list].sort((a, b) => naturalCompare(a.name, b.name)) : [];
+    if (!list) {
+      return [];
+    }
+    const compare = endpointNameCompare(list.map(ep => ep.name));
+    return [...list].sort((a, b) => compare(a.name, b.name));
   });
   private readonly loading: Signal<boolean> = this.endpointsData.loading;
 

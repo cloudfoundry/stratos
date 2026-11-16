@@ -1,6 +1,6 @@
 import { Injectable, OnDestroy, Signal, WritableSignal, computed, effect, inject, signal, untracked } from '@angular/core';
 
-import { naturalCompare } from '@stratosui/core';
+import { endpointNameCompare, naturalCompare } from '@stratosui/core';
 import {
   EndpointModel,
   EndpointsDataService,
@@ -76,11 +76,12 @@ export class CfOrgSpaceDataService implements OnDestroy {
   // than `connectedEndpointsOfTypesSelector`. Sorting is done in a
   // `computed` over the service Map; the legacy rxjs `filter`+`map`
   // pipeline is no longer needed.
-  private connectedCfList: Signal<EndpointModel[]> = computed(() =>
-    Array.from(this.endpointsService.endpoints().values())
-      .filter(e => e.cnsi_type === CF_ENDPOINT_TYPE && e.connectionStatus === 'connected')
-      .sort((a, b) => naturalCompare(a.name, b.name))
-  );
+  private connectedCfList: Signal<EndpointModel[]> = computed(() => {
+    const cfs = Array.from(this.endpointsService.endpoints().values())
+      .filter(e => e.cnsi_type === CF_ENDPOINT_TYPE && e.connectionStatus === 'connected');
+    const compare = endpointNameCompare(cfs.map(e => e.name));
+    return cfs.sort((a, b) => compare(a.name, b.name));
+  });
 
   // === Public derived signals ===
   /** Orgs for the currently-selected cnsi. Reads from EndpointDataService
