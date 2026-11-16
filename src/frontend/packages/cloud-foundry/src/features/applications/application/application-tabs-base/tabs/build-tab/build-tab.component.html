@@ -36,9 +36,9 @@
       }
       <app-tile-group class="tile-group-2-cols">
         <app-tile>
-          <div class="card">
+          <div class="card" role="group" aria-labelledby="build-tab-app-info">
             <div class="card-header">
-              <h3 class="text-lg font-semibold">Application Info</h3>
+              <h3 id="build-tab-app-info" class="text-lg font-semibold">Application Info</h3>
             </div>
             <div class="card-body">
               <div class="flex flex-row">
@@ -87,9 +87,9 @@
           </div>
         </app-tile>
         <app-tile size="1of3">
-          <div class="card">
+          <div class="card" role="group" aria-labelledby="build-tab-cf">
             <div class="card-header">
-              <h3 class="text-lg font-semibold">Cloud Foundry</h3>
+              <h3 id="build-tab-cf" class="text-lg font-semibold">Cloud Foundry</h3>
             </div>
             <div class="card-body">
               <app-metadata-item icon="title" label="Name">
@@ -141,9 +141,9 @@
       <!-- Misc -->
       <app-tile-group class="tile-group-2-cols">
         <app-tile>
-          <div class="card">
+          <div class="card" role="group" aria-labelledby="build-tab-build-info">
             <div class="card-header">
-              <h3 class="text-lg font-semibold">Build Info</h3>
+              <h3 id="build-tab-build-info" class="text-lg font-semibold">Build Info</h3>
             </div>
             <div class="card-body">
               <app-metadata-item icon="build" label="Buildpack">
@@ -160,9 +160,9 @@
         </app-tile>
         @if (deploySource$ | async; as deploySource) {
           <app-tile id="app-build-tab-deployment-info">
-            <div class="card">
+            <div class="card" role="group" aria-labelledby="build-tab-deployment">
               <div class="card-header">
-                <h3 class="text-lg font-semibold">Deployment Info</h3>
+                <h3 id="build-tab-deployment" class="text-lg font-semibold">Deployment Info</h3>
               </div>
               <div class="card-body">
                 @switch (deploySource.type) {
@@ -250,9 +250,9 @@
       <!-- Advanced info -->
       <app-tile-group class="tile-group-2-cols">
         <app-tile>
-          <div class="card">
+          <div class="card" role="group" aria-labelledby="build-tab-additional">
             <div class="card-header">
-              <h3 class="text-lg font-semibold">Additional Application Info</h3>
+              <h3 id="build-tab-additional" class="text-lg font-semibold">Additional Application Info</h3>
             </div>
             <div class="card-body">
               <app-metadata-item icon="fingerprint" label="Application GUID" [clipboardValue]="detail.app.guid">
@@ -268,9 +268,9 @@
           </div>
         </app-tile>
         <app-tile>
-          <div class="card">
+          <div class="card" role="group" aria-labelledby="build-tab-health-check">
             <div class="card-header">
-              <h3 class="text-lg font-semibold">Health Check Configuration</h3>
+              <h3 id="build-tab-health-check" class="text-lg font-semibold">Health Check Configuration</h3>
             </div>
             <div class="card-body">
               <app-metadata-item icon="favorite_border" label="Health Check Type">
