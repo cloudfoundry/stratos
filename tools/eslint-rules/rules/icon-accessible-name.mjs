@@ -26,10 +26,15 @@ function hiddenAbove(node) {
 
 const kids = (n) => [...(n.children ?? []), ...(n.branches ?? []), ...(n.cases ?? []), ...(n.empty ? [n.empty] : [])];
 
-// Text a control shows besides its icons: static text or an interpolation.
+// Components that draw a text input as the control's text.
+const TEXT_COMPONENTS = new Set(["app-abbr-text"]);
+
+// Text a control shows besides its icons: static text, an interpolation, or
+// a component that draws text.
 function hasText(n) {
   return kids(n).some((c) => {
     if (c.type === "BoundText") return true;
+    if (TEXT_COMPONENTS.has(c.name)) return true;
     if (typeof c.value === "string" && !c.name) return c.value.trim() !== "";
     if (c.attributes && (isIcon(c) || isHidden(c))) return false;
     return hasText(c);

@@ -24,6 +24,8 @@ ruleTester.run("icon-accessible-name", rule, {
     { code: `<button aria-label="Delete"><span class="material-icons" aria-hidden="true">delete</span></button>` },
     { code: `<button [attr.aria-label]="label"><app-custom-icon>delete</app-custom-icon></button>` },
     { code: `<a routerLink="/x">{{ name }}<app-custom-icon>launch</app-custom-icon></a>` },
+    // app-abbr-text draws its text input (an abbreviation in <abbr>)
+    { code: `<button><app-abbr-text [text]="col.header" /><span class="material-icons" aria-hidden="true">sort</span></button>` },
     // the icon is the control and has a name
     { code: `<span class="material-icons" role="button" tabindex="0" aria-label="Copy">content_copy</span>` },
     // not an icon

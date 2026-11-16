@@ -8,7 +8,7 @@
   <div class="metadata-item__content" [ngClass]="{'metadata-item__content-label-only': metadataValue.childNodes.length === 0}">
     @if (label()) {
       <div [ngClass]="{'metadata-item__label-only': metadataValue.childNodes.length === 0}" class="metadata-item__label">
-        <span>{{ label() }}</span>
+        <span><app-abbr-text [text]="label()" /></span>
         @if (clipboardValue()) {
           <!-- Inline copy glyph: sits next to the label like a textual
                trailing character. nbsp gives breathing room without using

@@ -9,6 +9,7 @@ import { AppAreaLoaderComponent } from '../area-loader/area-loader.component';
 import { CopyToClipboardComponent } from '../copy-to-clipboard/copy-to-clipboard.component';
 import { SignalListCellTemplateDirective } from './signal-list-cell-template.directive';
 import { rangeIsComplete, resolveRelativeDay, SignalListRangeBoundMode, SignalListRangeValue, SignalListRangeValueType } from './range-filter';
+import { AbbrTextComponent } from '../abbr-text/abbr-text.component';
 
 export type SignalListPillColor = 'success' | 'warning' | 'danger' | 'neutral';
 
@@ -512,7 +513,7 @@ export interface SignalListConfig<T> {
 @Component({
   selector: 'app-signal-list',
   standalone: true,
-  imports: [CommonModule, RouterModule, UsageGaugeComponent, AppBusyComponent, AppAreaLoaderComponent, CopyToClipboardComponent],
+  imports: [CommonModule, RouterModule, UsageGaugeComponent, AppBusyComponent, AppAreaLoaderComponent, CopyToClipboardComponent, AbbrTextComponent],
   changeDetection: ChangeDetectionStrategy.OnPush,
   templateUrl: './signal-list.component.html',
   host: { class: 'block h-full min-h-0' },

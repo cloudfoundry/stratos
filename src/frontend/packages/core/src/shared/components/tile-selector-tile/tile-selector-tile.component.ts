@@ -3,13 +3,15 @@ import { ChangeDetectionStrategy, Component, input, output } from '@angular/core
 
 import { ITileConfig, ITileIconConfig, ITileImgConfig } from '../tile/tile-selector.types';
 import { CustomIconComponent } from '../custom-material/custom-material.component';
+import { AbbrTextComponent } from '../abbr-text/abbr-text.component';
 
 @Component({
   selector: 'app-tile-selector-tile',
   standalone: true,
   imports: [
     CommonModule,
-    CustomIconComponent
+    CustomIconComponent,
+    AbbrTextComponent,
   ],
   templateUrl: './tile-selector-tile.component.html',
   styleUrls: ['./tile-selector-tile.component.scss'],
