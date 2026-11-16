@@ -1,5 +1,5 @@
 import {
-  Directive, ElementRef, Renderer2, OnChanges, OnDestroy, HostListener, SecurityContext, inject, numberAttribute, booleanAttribute, input
+  ChangeDetectorRef, Directive, ElementRef, Renderer2, OnChanges, OnDestroy, HostListener, SecurityContext, inject, numberAttribute, booleanAttribute, input
 } from '@angular/core';
 import { DomSanitizer } from '@angular/platform-browser';
 
@@ -16,6 +16,7 @@ let nextId = 0;
 export class CustomTooltipDirective implements OnChanges, OnDestroy {
   private elementRef = inject(ElementRef);
   private renderer = inject(Renderer2);
+  private cdr = inject(ChangeDetectorRef);
   private sanitizer = inject(DomSanitizer);
 
   readonly tooltipText = input<string>('', { alias: "matTooltip" });
@@ -239,6 +240,10 @@ export class CustomTooltipDirective implements OnChanges, OnDestroy {
       this.setDescribedBy(false);
       this.renderer.removeChild(document.body, this.tooltipElement);
       this.tooltipElement = null;
+      // The app is zoneless and the animation renderer leaves a removed
+      // element on the page until change detection runs. A hide from the
+      // document listeners or a timer starts none, so ask for one.
+      this.cdr.markForCheck();
     }
   }
 

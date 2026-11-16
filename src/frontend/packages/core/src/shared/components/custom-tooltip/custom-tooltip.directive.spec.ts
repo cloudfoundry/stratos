@@ -1,7 +1,8 @@
-import { Component, provideZonelessChangeDetection, signal } from '@angular/core';
+import { Component, importProvidersFrom, provideZonelessChangeDetection, signal } from '@angular/core';
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { describe, it, expect, beforeEach, afterEach, vi } from 'vitest';
 import { By } from '@angular/platform-browser';
+import { BrowserAnimationsModule } from '@angular/platform-browser/animations';
 import { CustomTooltipDirective } from './custom-tooltip.directive';
 
 @Component({
@@ -361,5 +362,56 @@ describe('CustomTooltipDirective matTooltipOnlyWhenTruncated', () => {
     directive.onMouseEnter(new MouseEvent('mouseenter'));
     vi.advanceTimersByTime(300);
     expect(document.body.querySelector('.custom-tooltip')?.textContent).toBe('a long endpoint name');
+  });
+});
+
+// The app is zoneless and loads BrowserAnimationsModule. Its renderer holds
+// a removed element in the page until change detection runs, and a listener
+// added with document.addEventListener does not start one: the tooltip
+// stayed on screen after Escape, or after the pointer left. These tests run
+// the same setup and call no detectChanges.
+describe('CustomTooltipDirective with the animation renderer', () => {
+  let fixture: ComponentFixture<KeyboardHostComponent>;
+  let host: HTMLButtonElement;
+
+  const tip = () => document.body.querySelector<HTMLElement>('.custom-tooltip');
+
+  beforeEach(async () => {
+    TestBed.configureTestingModule({
+      providers: [provideZonelessChangeDetection(), importProvidersFrom(BrowserAnimationsModule)],
+      imports: [KeyboardHostComponent],
+    }).compileComponents();
+    fixture = TestBed.createComponent(KeyboardHostComponent);
+    await fixture.whenStable();
+    host = fixture.debugElement.query(By.directive(CustomTooltipDirective)).nativeElement;
+    vi.useFakeTimers();
+  });
+
+  afterEach(() => {
+    vi.clearAllTimers();
+    vi.useRealTimers();
+    document.querySelectorAll('.custom-tooltip').forEach(n => n.remove());
+  });
+
+  it('Escape takes the tooltip off the page at once', async () => {
+    host.dispatchEvent(new MouseEvent('mouseenter'));
+    await vi.advanceTimersByTimeAsync(300);
+    expect(tip()).toBeTruthy();
+
+    document.body.dispatchEvent(new KeyboardEvent('keydown', { key: 'Escape', bubbles: true }));
+    await vi.advanceTimersByTimeAsync(150);
+
+    expect(tip()).toBeNull();
+  });
+
+  it('a pointer move off the host takes the tooltip off the page at once', async () => {
+    host.dispatchEvent(new MouseEvent('mouseenter'));
+    await vi.advanceTimersByTimeAsync(300);
+    expect(tip()).toBeTruthy();
+
+    document.body.dispatchEvent(new MouseEvent('mousemove', { bubbles: true }));
+    await vi.advanceTimersByTimeAsync(150);
+
+    expect(tip()).toBeNull();
   });
 });
