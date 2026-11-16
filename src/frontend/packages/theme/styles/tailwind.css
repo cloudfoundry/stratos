@@ -189,13 +189,13 @@
 
   /* ─── Colors: semantic singletons (static LIGHT value) ─── */
   /* .dark-theme below overrides each at runtime for dark mode. */
-  --color-primary:   oklch(54.615% 0.2152 262.88);
-  --color-secondary: oklch(54.615% 0.2152 262.88);
-  --color-accent:    oklch(54.615% 0.2152 262.88);
+  --color-primary:   oklch(42.445% 0.1809 265.64);
+  --color-secondary: oklch(42.445% 0.1809 265.64);
+  --color-accent:    oklch(42.445% 0.1809 265.64);
   --color-success:   oklch(72.275% 0.192 149.58);
   --color-warning:   oklch(76.859% 0.1647 70.08);
   --color-danger:    oklch(63.683% 0.2078 25.33);
-  --color-info:      oklch(54.615% 0.2152 262.88);
+  --color-info:      oklch(42.445% 0.1809 265.64);
   --color-error:     oklch(63.683% 0.2078 25.33);
   /* Text drawn on --color-primary; dark mode's lighter primary needs dark text. */
   --color-on-primary: oklch(100% 0 none);
