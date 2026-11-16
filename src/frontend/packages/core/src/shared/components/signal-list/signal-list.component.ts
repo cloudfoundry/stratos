@@ -19,6 +19,10 @@ export type SignalListPillColor = 'success' | 'warning' | 'danger' | 'neutral';
 export interface SignalListCompoundSegment {
   readonly text: string;
   readonly link?: readonly (string | number)[];
+  // What the segment is ('Organization', 'Space'), read before the text by
+  // screen readers only. It tells apart two links in one cell that have the
+  // same text, such as an org and a space both named "e2e".
+  readonly label?: string;
 }
 
 // ── Per-row state (RowState) ────────────────────────────────────────────

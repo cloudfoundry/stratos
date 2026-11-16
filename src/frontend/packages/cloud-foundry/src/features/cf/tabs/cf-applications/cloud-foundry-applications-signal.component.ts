@@ -521,8 +521,8 @@ export class CloudFoundryApplicationsSignalComponent implements OnInit {
       ? ['/cloud-foundry', app.cnsiGuid, 'organizations', app.orgGuid, 'spaces', app.spaceGuid]
       : undefined;
     return [
-      { text: orgName, link: orgLink },
-      { text: spaceName, link: spaceLink },
+      { text: orgName, link: orgLink, label: 'Organization' },
+      { text: spaceName, link: spaceLink, label: 'Space' },
     ];
   }
 

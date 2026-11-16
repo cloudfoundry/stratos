@@ -337,9 +337,9 @@ export class ApplicationWallComponent implements OnInit {
         ? ['/cloud-foundry', app.cnsiGuid, 'organizations', app.orgGuid, 'spaces', app.spaceGuid]
         : undefined;
       return [
-        { text: cfName, link: cfLink },
-        { text: orgName, link: orgLink },
-        { text: spaceName, link: spaceLink },
+        { text: cfName, link: cfLink, label: 'Endpoint' },
+        { text: orgName, link: orgLink, label: 'Organization' },
+        { text: spaceName, link: spaceLink, label: 'Space' },
       ];
     };
     const buildConfig = (): SignalListConfig<StApp> => {
