@@ -162,6 +162,22 @@ describe('SignalListComponent', () => {
     expect(links[0].querySelector('.sr-only')?.textContent?.trim()).toBe('Organization');
   });
 
+  // Links stacked in one cell were 17.5 px tall and touching: each line is
+  // now 24 px tall, the WCAG 2.5.8 minimum for a target.
+  it('gives each stacked compound line a 24 px line height', async () => {
+    const fixture = TestBed.createComponent(Host);
+    fixture.componentInstance.config = {
+      ...fixture.componentInstance.config,
+      columns: [
+        { header: 'Name', render: r => r.name },
+        { header: 'Org/Space', kind: 'compound', render: () => '', compound: () => [{ text: 'a', link: ['/a'] }, { text: 'b', link: ['/b'] }] },
+      ],
+    };
+    await fixture.whenStable();
+    const stack = fixture.nativeElement.querySelector('tbody tr td a')!.parentElement as HTMLElement;
+    expect(stack.classList.contains('leading-6')).toBe(true);
+  });
+
   describe('row-action menu and the Escape key', () => {
     async function withActions() {
       const fixture = TestBed.createComponent(Host);
