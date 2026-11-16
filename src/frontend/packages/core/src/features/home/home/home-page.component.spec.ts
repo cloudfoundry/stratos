@@ -169,6 +169,49 @@ describe('HomePageComponent', () => {
       expect(component.endpoints().map(ep => ep.name)).toEqual(['cf10', 'cf2', 'cf1']);
     });
 
+    it('orders dup2, "dup 3", dup4 the same in favorites, all and connected modes', async () => {
+      const mk = (guid: string, name: string, connectionStatus: string): EndpointModel =>
+        ({ ...downCf, guid, name, connectionStatus } as EndpointModel);
+      const eps: Record<string, EndpointModel> = {
+        a: mk('a', 'dup4', 'connected'),
+        b: mk('b', 'dup2', 'connected'),
+        c: mk('c', 'dup 3', 'connected'),
+        z: mk('z', 'zed', 'connected'),
+      };
+      // dup4 and dup 3 are direct favourites; dup2 is a child favourite
+      const groups: IUserFavoritesGroups = {
+        a: { ethereal: false, endpoint: { endpointId: 'a' } as any, entitiesIds: [] },
+        c: { ethereal: false, endpoint: { endpointId: 'c' } as any, entitiesIds: [] },
+        b: { ethereal: true, endpoint: { endpointId: 'b' } as any, entitiesIds: [] },
+      };
+      await configureTestBed(makeStubEndpointsService(false, eps), groups);
+      fixture = TestBed.createComponent(HomePageComponent);
+      component = fixture.componentInstance;
+      const names = () => component.endpoints().map(ep => ep.name);
+      component.setShowMode('favorites');
+      // direct favourites first (dup 3 < dup4), then the child favourite
+      expect(names()).toEqual(['dup 3', 'dup4', 'dup2']);
+      component.setShowMode('all');
+      expect(names()).toEqual(['dup 3', 'dup4', 'dup2', 'zed']);
+      component.setShowMode('connected');
+      expect(names()).toEqual(['dup 3', 'dup4', 'dup2', 'zed']);
+    });
+
+    it('orders ungrouped dup2, "dup 3", dup4 numerically in all and connected modes', async () => {
+      const mk = (guid: string, name: string): EndpointModel =>
+        ({ ...downCf, guid, name, connectionStatus: 'connected' } as EndpointModel);
+      const eps: Record<string, EndpointModel> = {
+        a: mk('a', 'dup4'), b: mk('b', 'dup2'), c: mk('c', 'dup 3'),
+      };
+      await configureTestBed(makeStubEndpointsService(false, eps), {});
+      fixture = TestBed.createComponent(HomePageComponent);
+      component = fixture.componentInstance;
+      for (const mode of ['all', 'connected'] as const) {
+        component.setShowMode(mode);
+        expect(component.endpoints().map(ep => ep.name)).toEqual(['dup2', 'dup 3', 'dup4']);
+      }
+    });
+
     it('connected mode still only shows connected endpoints', async () => {
       await configureTestBed(makeStubEndpointsService(false, { ep1: downCf }), starredGroup(false));
       fixture = TestBed.createComponent(HomePageComponent);
