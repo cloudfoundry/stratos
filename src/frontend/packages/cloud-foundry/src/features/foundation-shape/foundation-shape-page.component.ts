@@ -12,6 +12,7 @@ import {
 import {
   ConfirmationDialogConfig,
   ConfirmationDialogService,
+  endpointNameCompare,
   EndpointsSignalService,
   InfoCardComponent,
 } from '@stratosui/core';
@@ -80,9 +81,11 @@ export class FoundationShapePageComponent implements OnDestroy {
   private readonly confirmation = inject(ConfirmationDialogService);
   readonly measure = inject(ShapeMeasureService);
 
-  readonly cfEndpoints = computed(() =>
-    this.endpointsSignal.connectedEndpoints().filter(ep => ep.cnsi_type === 'cf' && !!ep.guid)
-  );
+  readonly cfEndpoints = computed(() => {
+    const cfs = this.endpointsSignal.connectedEndpoints().filter(ep => ep.cnsi_type === 'cf' && !!ep.guid);
+    const compare = endpointNameCompare(cfs.map(ep => ep.name));
+    return cfs.sort((a, b) => compare(a.name, b.name));
+  });
 
   private readonly acquired = signal<ReadonlyMap<string, EndpointDataService>>(new Map());
 

@@ -145,6 +145,11 @@ describe('FoundationShapePageComponent', () => {
     await fixture.whenStable();
   });
 
+  it('lists the CF endpoints in name order, numbers compared across separators', () => {
+    endpoints.set(['dup4', 'dup 3', 'dup2'].map(name => ({ guid: name, name, cnsi_type: 'cf' }) as EndpointModel));
+    expect(component.cfEndpoints().map(ep => ep.name)).toEqual(['dup2', 'dup 3', 'dup4']);
+  });
+
   it('acquires a data service per connected CF endpoint and skips non-CF', () => {
     expect(registry.acquire).toHaveBeenCalledTimes(1);
     expect(registry.acquire).toHaveBeenCalledWith('cf-1');
