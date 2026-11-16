@@ -2,6 +2,7 @@ import { CommonModule } from '@angular/common';
 import { HttpClient } from '@angular/common/http';
 import { ChangeDetectionStrategy, Component, computed, effect, inject, signal, untracked } from '@angular/core';
 import { EndpointModel } from '@stratosui/store';
+import { endpointNameCompare } from '../../../shared/utils/natural-sort';
 import { forkJoin, Observable, of } from 'rxjs';
 import { catchError, map } from 'rxjs/operators';
 
@@ -69,9 +70,11 @@ export class DiagnosticCountsPageComponent {
   private endpointsSignal = inject(EndpointsSignalService);
 
   /** Connected Cloud Foundry endpoints only. */
-  readonly cfEndpoints = computed(() =>
-    this.endpointsSignal.connectedEndpoints().filter(ep => ep.cnsi_type === 'cf' && !!ep.guid)
-  );
+  readonly cfEndpoints = computed(() => {
+    const cfs = this.endpointsSignal.connectedEndpoints().filter(ep => ep.cnsi_type === 'cf' && !!ep.guid);
+    const compare = endpointNameCompare(cfs.map(ep => ep.name));
+    return [...cfs].sort((a, b) => compare(a.name, b.name));
+  });
 
   readonly heap = signal<HeapInfo>(readHeap());
   private readonly counts = signal<Record<string, EndpointCounts>>({});

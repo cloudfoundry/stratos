@@ -32,6 +32,7 @@ import {
 import { EndpointsService } from '../../../../../core/src/core/endpoints.service';
 import { EndpointModel } from '../../../../../store/src/types/endpoint.types';
 import { safeUnsubscribe } from '../../../../../core/src/core/utils.service';
+import { endpointNameCompare } from '../../../../../core/src/shared/utils/natural-sort';
 import { PageHeaderComponent } from '../../../../../core/src/shared/components/page-header/page-header.component';
 import {
   SignalStepHandle,
@@ -153,7 +154,12 @@ export class CreateReleaseComponent implements OnInit, OnDestroy {
       createNamespace: new FormControl(false, { nonNullable: true }) });
     this.details.controls.createNamespace.disable();
 
-    this.kubeEndpoints = this.endpointsService.connectedEndpointsOfTypes(KUBERNETES_ENDPOINT_TYPE);
+    const connectedKube = this.endpointsService.connectedEndpointsOfTypes(KUBERNETES_ENDPOINT_TYPE);
+    this.kubeEndpoints = computed(() => {
+      const list = connectedKube();
+      const compare = endpointNameCompare(list.map(ep => ep.name));
+      return [...list].sort((a, b) => compare(a.name, b.name));
+    });
 
     // All namespaces across the connected kube endpoints, sourced from the
     // signal data service: refresh each endpoint once, then read the
