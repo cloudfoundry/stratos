@@ -283,6 +283,22 @@ describe('CardAppInstancesComponent', () => {
       expect(appsStub.scaleApp).toHaveBeenCalledWith('cf-1', 'app-1', { instances: 3 });
     });
 
+    // A screen reader user pressed Increase and heard nothing: the new count
+    // is drawn with no live region (WCAG 4.1.3). A status line, there from
+    // the start, says the new desired count once the scale is done.
+    it('says the new desired count once the scale is done', async () => {
+      const { fixture, dataStub } = await setup({ showActions: true, desired: 2 });
+      Object.assign(dataStub, { refresh: vi.fn().mockResolvedValue(undefined) });
+      const status = () => (fixture.nativeElement as HTMLElement).querySelector('[role="status"]');
+      expect(status()).not.toBeNull();
+      expect(status()!.textContent?.trim()).toBe('');
+      fixture.componentInstance.scaleUp();
+      await vi.waitFor(async () => {
+        await fixture.whenStable();
+        expect(status()!.textContent?.trim()).toBe('Desired instances: 3');
+      });
+    });
+
     it('says so when the scale has no known result, rather than nothing', async () => {
       const { fixture, appsStub, snackStub } = await setup({ showActions: true, desired: 2 });
       appsStub.scaleApp.mockResolvedValueOnce('unknown');
