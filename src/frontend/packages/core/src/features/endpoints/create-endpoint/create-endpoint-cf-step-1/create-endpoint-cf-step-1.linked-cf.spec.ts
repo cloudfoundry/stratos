@@ -192,6 +192,41 @@ describe('CreateEndpointCfStep1Component: a type linked to a Cloud Foundry', () 
     expect(await valid()).toBe(true);
   });
 
+  const note = () => (fixture.nativeElement as HTMLElement).querySelector('#linked-broker-note');
+
+  it('says why the list is empty when a connected Cloud Foundry refuses the brokers', async () => {
+    await open({ ...cf('lab', 'api.sys.x.com'), connectionStatus: 'connected' });
+    await typeUrl('https://autoscaler.sys.x.com');
+    expect(note()).toBeNull();
+    await brokers('lab', 'fail');
+
+    expect(note()!.textContent!.trim()).toBe('Only a Cloud Foundry admin can list service brokers.');
+    expect(note()!.getAttribute('role')).toBe('status');
+    expect(select('linked-broker')!.getAttribute('aria-describedby')).toContain('linked-broker-note');
+    expect(options('linked-broker')).toEqual(['Not registered in Cloud Foundry yet']);
+    expect(await valid()).toBe(true);
+  });
+
+  it('asks to connect, and does not ask for brokers, when the Cloud Foundry is disconnected', async () => {
+    await open({ ...cf('lab', 'api.sys.x.com'), name: 'Lab CF', connectionStatus: 'disconnected' });
+    await typeUrl('https://autoscaler.sys.x.com');
+    http.expectNone(r => r.url.startsWith('/pp/v1/cf/service_brokers'));
+
+    expect(note()!.textContent!.trim()).toBe('Connect to Lab CF to choose its service broker. You can link one later.');
+    expect(note()!.getAttribute('role')).toBe('status');
+    expect(select('linked-broker')!.getAttribute('aria-describedby')).toContain('linked-broker-note');
+    expect(options('linked-broker')).toEqual(['Not registered in Cloud Foundry yet']);
+    expect(await valid()).toBe(true);
+  });
+
+  it('shows no note when the brokers are listed', async () => {
+    await open({ ...cf('lab', 'api.sys.x.com'), connectionStatus: 'connected' });
+    await typeUrl('https://autoscaler.sys.x.com');
+    await brokers('lab', [{ guid: 'b1', name: 'autoscaler', url: 'https://autoscalerservicebroker.sys.x.com' }]);
+
+    expect(note()).toBeNull();
+  });
+
   it('registers with the Cloud Foundry and broker chosen', async () => {
     await open(cf('lab', 'api.sys.x.com'));
     await typeUrl('https://autoscaler.sys.x.com');
