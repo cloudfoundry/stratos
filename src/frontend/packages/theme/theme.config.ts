@@ -85,7 +85,7 @@ export const defaultTheme: StratosTheme = {
     background: '#f8fafc',
     bodyBackground: '#f1f5f9',
     text: '#1e293b',
-    textMuted: '#64748b',
+    textMuted: '#475569',
     headerBackground: '#ffffff',
     headerText: '#1e293b',
     headerBorder: '#e2e8f0',
