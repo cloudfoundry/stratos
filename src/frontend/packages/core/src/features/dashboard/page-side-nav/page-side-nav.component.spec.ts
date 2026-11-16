@@ -118,6 +118,18 @@ describe('PageSideNavComponent', () => {
     expect(el.querySelectorAll('a')).toHaveLength(2);
   });
 
+  // A tab can share its text with a side nav link that goes elsewhere: an
+  // app's "Services" tab and the side nav's "Services" (WCAG 2.4.4). The
+  // header is read before each tab, for screen readers only.
+  it('reads the header before each tab label', async () => {
+    fixture.componentRef.setInput('header', 'Application');
+    fixture.componentRef.setInput('tabs', [{ link: 'services', label: 'Services' }]);
+    await fixture.whenStable();
+    const link = (fixture.nativeElement as HTMLElement).querySelector('a')!;
+    expect(link.textContent!.replace(/\s+/g, ' ').trim()).toBe('Application Services');
+    expect(link.querySelector('.sr-only')?.textContent?.trim()).toBe('Application');
+  });
+
   it('draws no list item for a hidden tab', async () => {
     fixture.componentRef.setInput('tabs', [
       { link: 'summary', label: 'Summary' },
