@@ -7,6 +7,7 @@ import {
   computed,
   inject,
   input,
+  signal,
   viewChild
 } from '@angular/core';
 import { FormsModule } from '@angular/forms';
@@ -107,6 +108,9 @@ export class CardAppInstancesComponent implements OnDestroy {
    */
   readonly isUpdating = computed(() => this.dataService.loading().app);
 
+  /** Said by the card's status line once a scale is done (WCAG 4.1.3). */
+  readonly scaleStatus = signal('');
+
   /** Edit-permission gate, built once the org and space are known; false until then. */
   private readonly editCheck = computed(() => {
     const org = this.dataService.org();
@@ -192,6 +196,9 @@ export class CardAppInstancesComponent implements OnDestroy {
           this.dataService.refresh('app'),
           this.dataService.refresh('stats'),
         ]);
+        if (!how) {
+          this.scaleStatus.set(`Desired instances: ${value}`);
+        }
       } catch (err: unknown) {
         this.snackBarRef = this.snackBar.error(leadPieces('Failed to update instance count', err));
       }
