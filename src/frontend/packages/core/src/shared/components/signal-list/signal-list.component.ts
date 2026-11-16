@@ -991,8 +991,8 @@ export class SignalListComponent<T> implements AfterViewInit {
     this.onDocumentClickForMultiPopup(ev);
   }
 
-  // Escape closes the open menu and puts focus back on the kebab that
-  // opened it, as the button advertises (aria-haspopup="menu"). It is
+  // Escape closes the open actions popup and puts focus back on the kebab
+  // that opened it, as a show/hide button's popup does. It is
   // handled on the host while focus is inside the list (on the kebab or an
   // item in the menu) and stopped there: dialogs and the side panel close on
   // any Escape that reaches the document, and one press should only close
