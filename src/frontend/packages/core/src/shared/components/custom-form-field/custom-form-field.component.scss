@@ -78,6 +78,15 @@
   }
 }
 
+/* Focus: a 2 px outline round the whole field, not only the line under it,
+   so the change has the area WCAG 2.4.13 asks for. The outline appearance
+   already draws a 2 px focus border. */
+.focused:not(.appearance-outline) .form-field-flex {
+  outline: 2px solid var(--input-focus-border);
+  outline-offset: 2px;
+  border-radius: 0.25rem;
+}
+
 /* Outline Appearance */
 .appearance-outline {
   .form-field-flex {
