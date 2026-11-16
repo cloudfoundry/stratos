@@ -547,6 +547,22 @@ describe('CreateEndpointCfStep1Component', () => {
       expect(text()).toContain('Remove this endpoint for you. Connections to it end.');
     });
 
+    it('names the autoscalers registered for the Cloud Foundry when asking to unregister it', async () => {
+      const autoscaler = (guid: string, name: string, cf: string) =>
+        ({ ...endpoint({ guid, name, cnsi_type: 'autoscaler' }), endpoint_metadata: { cf_guid: cf } });
+      (TestBed.inject(EndpointsDataService) as any)._endpoints.set(new Map([
+        autoscaler('as-2', 'zeta', 'ep-guid'), autoscaler('as-1', 'alpha', 'ep-guid'), autoscaler('as-3', 'other', 'x'),
+      ].map(e => [e.guid, e])));
+      const ask = vi.spyOn(TestBed.inject(ConfirmationDialogService), 'openWithCancel')
+        .mockImplementation((_c, _ok, cancel) => cancel());
+      await review(endpoint());
+
+      await component.unregister();
+
+      expect(ask.mock.calls[0][0].message).toContain(
+        'You can register it again later. This also unregisters the autoscalers registered for it: alpha, zeta.');
+    });
+
     it('reopens unlocked after Unregister in the Register flow', async () => {
       component.registerForm.controls.nameField.setValue('my-cf');
       component.registerForm.controls.urlField.setValue('api.example.com');

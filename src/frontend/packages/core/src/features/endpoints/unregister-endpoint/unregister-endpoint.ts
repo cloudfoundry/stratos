@@ -1,3 +1,5 @@
+import { EndpointModel } from '@stratosui/store';
+
 import { ConfirmationDialogConfig } from '../../../shared/components/confirmation-dialog.config';
 import { ConfirmationDialogService } from '../../../shared/components/confirmation-dialog.service';
 import { TailwindSnackBarService } from '../../../shared/services/tailwind-snackbar.service';
@@ -9,6 +11,20 @@ export interface UnregisterTarget {
   type: string;
   // True for an endpoint only its creator can see.
   personal: boolean;
+  // Names of the autoscalers registered for it, which go with it (a Cloud Foundry only).
+  autoscalers?: string[];
+}
+
+/**
+ * The names of the autoscalers registered for a Cloud Foundry: each records
+ * the Cloud Foundry it serves in its endpoint metadata (cf_guid), and
+ * jetstream unregisters them with it.
+ */
+export function linkedAutoscalerNames(cfGuid: string, endpoints: Iterable<EndpointModel>): string[] {
+  return [...endpoints]
+    .filter(e => e.cnsi_type === 'autoscaler' && e.endpoint_metadata?.cf_guid === cfGuid)
+    .map(e => e.name)
+    .sort((a, b) => a.localeCompare(b));
 }
 
 /**
@@ -42,7 +58,10 @@ export async function confirmAndUnregister(
   const config = new ConfirmationDialogConfig(
     `Unregister ${ep.name}?`,
     `This removes the endpoint for ${ep.personal ? 'you' : 'all users'} and ends every connection to it. ` +
-      'You can register it again later.',
+      'You can register it again later.' +
+      (ep.autoscalers?.length
+        ? ` This also unregisters the autoscalers registered for it: ${ep.autoscalers.join(', ')}.`
+        : ''),
     'Unregister',
     true,
     undefined,

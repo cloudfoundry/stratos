@@ -14,7 +14,7 @@ import { TailwindSnackBarService } from '../../shared/services/tailwind-snackbar
 import { CONNECT_ENDPOINT_DIALOG_OPTIONS, ConnectEndpointDialogComponent } from './connect-endpoint-dialog/connect-endpoint-dialog.component';
 import { EndpointPermissionsService } from './endpoint-permissions.service';
 import { EndpointsSignalConfigService } from './endpoints-page/endpoints-signal-config.service';
-import { confirmAndUnregister, isPersonalEndpoint } from './unregister-endpoint/unregister-endpoint';
+import { confirmAndUnregister, isPersonalEndpoint, linkedAutoscalerNames } from './unregister-endpoint/unregister-endpoint';
 
 /**
  * True when an endpoint's stored token is expired or effectively dead —
@@ -198,6 +198,7 @@ export class EndpointRowActionsService {
       name: ep.name,
       type: cnsi_type,
       personal: isPersonalEndpoint(ep, false, false),
+      autoscalers: cnsi_type === 'cf' ? linkedAutoscalerNames(guid, this.endpointsData.endpoints().values()) : [],
     });
     if (gone) {
       this.snackBar.show(`Unregistered ${ep.name}`);

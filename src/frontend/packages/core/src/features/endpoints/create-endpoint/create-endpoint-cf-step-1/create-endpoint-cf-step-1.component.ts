@@ -32,7 +32,7 @@ import { ProductNameComponent } from '../../../../shared/components/product-name
 import { ConfirmationDialogService } from '../../../../shared/components/confirmation-dialog.service';
 import { EndpointCertificatesComponent } from '../../certificates/endpoint-certificates.component';
 import { EndpointPermissionsService } from '../../endpoint-permissions.service';
-import { confirmAndUnregister, isPersonalEndpoint } from '../../unregister-endpoint/unregister-endpoint';
+import { confirmAndUnregister, isPersonalEndpoint, linkedAutoscalerNames } from '../../unregister-endpoint/unregister-endpoint';
 import { endpointNameCompare } from '../../../../shared/utils/natural-sort';
 
 // What the step knows about the endpoint it registered or is reviewing.
@@ -415,7 +415,10 @@ export class CreateEndpointCfStep1Component extends CreateEndpointHelperComponen
     if (!reg) {
       return;
     }
-    const gone = await confirmAndUnregister(this.confirmDialog, this.endpointsSignalConfig, this.snackBarService, reg);
+    const gone = await confirmAndUnregister(this.confirmDialog, this.endpointsSignalConfig, this.snackBarService, {
+      ...reg,
+      autoscalers: reg.type === 'cf' ? linkedAutoscalerNames(reg.guid, this.endpointsData.endpoints().values()) : [],
+    });
     if (!gone) {
       return;
     }
