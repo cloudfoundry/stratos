@@ -752,12 +752,14 @@ export class AddServiceInstanceComponent implements OnInit, OnDestroy {
       this.csiGuidsService.serviceGuid = serviceId;
       this.cSIHelperService = this.cSIHelperServiceFactory.create(endpointId, serviceId);
       void this.cSIHelperService.load();
-      if (this.modeService.spaceScopedDetails.isSpaceScoped) {
-        this.csiState.setCFDetails(
-          endpointId,
-          this.modeService.spaceScopedDetails.orgGuid,
-          this.modeService.spaceScopedDetails.spaceGuid,
-        );
+      const scoped = this.modeService.spaceScopedDetails;
+      if (scoped.isSpaceScoped) {
+        // The link names the space but not always its org, and the plan
+        // step waits for both, so take the org from the space.
+        if (scoped.spaceGuid && !scoped.orgGuid) {
+          scoped.orgGuid = (await this.awaitSpaceLoad(endpointId, scoped.spaceGuid)).orgGuid;
+        }
+        this.csiState.setCFDetails(endpointId, scoped.orgGuid, scoped.spaceGuid);
       } else {
         this.csiState.setCFDetails(endpointId);
       }
