@@ -453,7 +453,7 @@ router-outlet + * {
   .btn-info {
     @apply shadow-sm;
     /* Info shares the primary blue by default, so it takes the text color
-       made for it: white on the light-mode blue (5.2:1), dark on the lighter
+       made for it: white on the light-mode blue (8.7:1), dark on the lighter
        dark-mode blue, where white was 2.5:1 (now 7.0:1). */
     color: var(--color-on-primary);
     background-color: var(--color-info);
