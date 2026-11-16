@@ -10,6 +10,7 @@ import { createBasicStoreModule, STORE_TEST_PROVIDERS, CoreTestingModule } from 
 
 import { AppComponent } from './app.component';
 import { CurrentUserPermissionsService } from './core/permissions/current-user-permissions.service';
+import { StratosBrandingService } from '../../theme/stratos-branding.service';
 import { LoggedInService } from './logged-in.service';
 import { SharedModule } from './shared/shared.module';
 
@@ -55,5 +56,16 @@ describe('AppComponent', () => {
     (TestBed.inject(AuthDataService) as any)._auth.update((a: object) => ({ ...a, sessionData: { user: { name: 'tester' } } }));
     await fixture.whenStable();
     expect(userId()?.textContent).toBe('tester');
+  });
+  // The brand colors of dark mode sit inline on body. A dark-theme class on an
+  // element inside the app would redeclare the default colors there, and
+  // everything below it would show those instead of the brand colors.
+  it('keeps the dark-theme class on body, not inside the app', async () => {
+    const fixture = TestBed.createComponent<AppComponent>(AppComponent);
+    TestBed.inject(StratosBrandingService).setThemeMode('dark');
+    await fixture.whenStable();
+    expect(document.body.classList.contains('dark-theme')).toBe(true);
+    expect(fixture.nativeElement.querySelector('.dark-theme')).toBeNull();
+    expect(fixture.nativeElement.classList.contains('dark-theme')).toBe(false);
   });
 });
