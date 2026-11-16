@@ -216,3 +216,23 @@ describe('endpointNameCompare', () => {
     expect([...plain].sort(endpointNameCompare(plain))).toEqual(['cf1', 'cf2', 'cf10']);
   });
 });
+
+describe('stripSeparators keeps separate numbers apart', () => {
+  const names = ['app-10-1', 'app-2-1', 'app-1-11', 'app-1-2'];
+  const ctx = detectSortContext(names);
+
+  it('flags the collection for stripping', () => {
+    expect(ctx.stripSeparators).toBe(true);
+  });
+
+  it('orders by each number in turn, ascending, whatever the input order', () => {
+    const asc = ['app-1-2', 'app-1-11', 'app-2-1', 'app-10-1'];
+    expect([...names].sort(endpointNameCompare(names))).toEqual(asc);
+    expect([...names].reverse().sort(endpointNameCompare(names))).toEqual(asc);
+  });
+
+  it('reverses the whole order descending', () => {
+    const desc = ['app-10-1', 'app-2-1', 'app-1-11', 'app-1-2'];
+    expect([...names].sort(endpointNameCompare(names, 'desc'))).toEqual(desc);
+  });
+});
