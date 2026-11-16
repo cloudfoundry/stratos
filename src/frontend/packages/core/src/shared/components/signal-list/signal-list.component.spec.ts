@@ -125,6 +125,34 @@ describe('SignalListComponent', () => {
     expect(menu.querySelector('[data-test="rename-row"]')).not.toBeNull();
   });
 
+  // Typing in the name filter or picking a filter changed the list with
+  // nothing said (WCAG 4.1.3). A status line, empty until the person
+  // changes a filter, then says how many results the list holds.
+  it('says the result count once the person changes a filter', async () => {
+    const fixture = TestBed.createComponent(Host);
+    const nameFilter = signal('');
+    const total = signal(2);
+    fixture.componentInstance.config = {
+      ...fixture.componentInstance.config,
+      nameFilter,
+      totalFilteredResults: total.asReadonly(),
+    };
+    await fixture.whenStable();
+    const status = () => (fixture.nativeElement as HTMLElement).querySelector('[data-test="result-status"]');
+    expect(status()?.getAttribute('role')).toBe('status');
+    expect(status()!.textContent!.trim()).toBe('');
+
+    nameFilter.set('node');
+    total.set(1);
+    await fixture.whenStable();
+    expect(status()!.textContent!.trim()).toBe('1 result');
+
+    nameFilter.set('');
+    total.set(2);
+    await fixture.whenStable();
+    expect(status()!.textContent!.trim()).toBe('2 results');
+  });
+
   // A field's edge shows where to type: it takes the field border token,
   // drawn at 3:1 or more (WCAG 1.4.11), not the faint card border.
   it('draws the toolbar fields with the field border', async () => {
