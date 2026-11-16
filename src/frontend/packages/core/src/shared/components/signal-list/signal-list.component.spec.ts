@@ -142,6 +142,20 @@ describe('SignalListComponent', () => {
     const escape = (target: EventTarget) =>
       target.dispatchEvent(new KeyboardEvent('keydown', { key: 'Escape', bubbles: true }));
 
+    // The popup is a plain group of buttons, Tab moves through it and it
+    // has no arrow keys, so it is not a menu: aria-haspopup="menu" told a
+    // screen reader to expect one (WCAG 4.1.2). The button shows and hides
+    // the group, and says whether it is open.
+    it('presents the actions button as a show/hide button, not a menu button', async () => {
+      const fixture = await withActions();
+      const kebab = fixture.nativeElement.querySelector('[data-test="row-actions"]') as HTMLButtonElement;
+      expect(kebab.hasAttribute('aria-haspopup')).toBe(false);
+      expect(kebab.getAttribute('aria-expanded')).toBe('false');
+      kebab.click();
+      await fixture.whenStable();
+      expect(kebab.getAttribute('aria-expanded')).toBe('true');
+    });
+
     // The checklist popup listens for the same document click; a second
     // listener for one host event was dropped, so only Escape closed the menu.
     it('closes the open menu on a click outside it', async () => {

@@ -502,7 +502,6 @@
                             (click)="toggleRowActions(row, $event)"
                             title="Actions"
                             aria-label="Row actions"
-                            aria-haspopup="menu"
                             [attr.aria-expanded]="openActionsRowKey() === config().getRowKey(row)"
                             class="inline-flex items-center justify-center p-0.5 text-content-muted hover:text-accent">
                             <span aria-hidden="true" class="material-icons text-xl leading-none">more_vert</span>
@@ -722,7 +721,6 @@
                           (click)="toggleRowActions(row, $event)"
                           title="Actions"
                           aria-label="Row actions"
-                          aria-haspopup="menu"
                           [attr.aria-expanded]="openActionsRowKey() === config().getRowKey(row)"
                           class="inline-flex items-center justify-center p-0.5 text-content-muted hover:text-accent">
                           <span aria-hidden="true" class="material-icons text-xl leading-none">more_vert</span>
