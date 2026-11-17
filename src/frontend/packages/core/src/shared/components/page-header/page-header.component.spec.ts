@@ -7,7 +7,7 @@ import { ActivatedRoute } from '@angular/router';
 import { RouterTestingModule } from '@angular/router/testing';
 import { CommonModule } from '@angular/common';
 
-import { RecentlyVisitedDataService } from '@stratosui/store';
+import { RecentlyVisitedDataService, UserProfileDataService, UserProfileInfo } from '@stratosui/store';
 import { CoreTestingModule } from '@test-framework';
 import { DashboardDataService } from '../../../core/dashboard-data.service';
 import { EndpointsService } from '../../../core/endpoints.service';
@@ -459,6 +459,24 @@ describe('PageHeaderComponent', () => {
       expect(button().getAttribute('aria-expanded')).toBe('false');
       expect(button().getAttribute('aria-controls')).toBe('userMenuPanel');
       expect(panel()).toBeNull();
+    });
+
+    // The avatar shows the initials as text, so a speech input user may say
+    // them: the name starts with them (WCAG 2.5.3).
+    const loadProfile = (profile: Partial<UserProfileInfo>) => {
+      TestBed.inject(UserProfileDataService).fetch('u1');
+      TestBed.inject(HttpTestingController).expectOne(r => r.url.endsWith('/users/u1')).flush({ id: 'u1', userName: 'nabram', ...profile });
+      view.detectChanges();
+    };
+
+    it('starts its name with the initials the avatar shows', () => {
+      loadProfile({ name: { givenName: 'Norman', familyName: 'Abramovitz' } } as Partial<UserProfileInfo>);
+      expect(button().getAttribute('aria-label')).toBe('NA, user menu');
+    });
+
+    it('keeps "User menu" when the avatar shows no initials', () => {
+      loadProfile({});
+      expect(button().getAttribute('aria-label')).toBe('User menu');
     });
 
     it('reports the panel open once toggled', () => {

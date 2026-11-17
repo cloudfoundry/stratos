@@ -180,7 +180,7 @@
                 <button id="userMenu"
                   class="page-header-menu-button page-header-usermenu p-2 hover:bg-white/10 rounded-md transition-colors"
                   matTooltip="User menu"
-                  aria-label="User menu"
+                  [attr.aria-label]="userMenuLabel()"
                   aria-controls="userMenuPanel"
                   [attr.aria-expanded]="isUserMenuOpen()"
                   (click)="toggleUserMenu()">
