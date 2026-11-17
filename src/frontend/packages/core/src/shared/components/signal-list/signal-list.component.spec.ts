@@ -2602,6 +2602,27 @@ describe('SignalListComponent control names', () => {
     expect(Array.from(root.querySelectorAll('[data-test="row-radio"]')).map(name)).toEqual(['Pick one', 'Pick two']);
   });
 
+  // A screen reader says which column sorts the table, and which way: the
+  // sorted header has aria-sort, and only that one (WCAG 1.3.1).
+  it('marks the sorted column header with aria-sort', async () => {
+    const fixture = TestBed.createComponent(Host);
+    const sort = signal<{ field: string; direction: 'asc' | 'desc' }>({ field: 'name', direction: 'asc' });
+    fixture.componentInstance.config = {
+      ...fixture.componentInstance.config,
+      columns: [
+        { key: 'name', header: 'Name', sortField: 'name', render: r => r.name },
+        { key: 'size', header: 'Size', sortField: r => r.name, render: r => r.name },
+      ],
+      sort,
+    };
+    await fixture.whenStable();
+    const ths = () => Array.from((fixture.nativeElement as HTMLElement).querySelectorAll('thead th')).map(th => th.getAttribute('aria-sort'));
+    expect(ths()).toEqual(['ascending', null]);
+    ((fixture.nativeElement as HTMLElement).querySelector('thead th button') as HTMLButtonElement).click();
+    await fixture.whenStable();
+    expect(ths()).toEqual(['descending', null]);
+  });
+
   it('names the sort and items-per-page drop-downs after their captions', async () => {
     const fixture = TestBed.createComponent(Host);
     fixture.componentInstance.config = {

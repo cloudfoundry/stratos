@@ -801,6 +801,13 @@ export class SignalListComponent<T> implements AfterViewInit {
     return this.config().sort!().direction;
   }
 
+  // aria-sort goes on the sorted header only, as in the WAI-ARIA sortable
+  // table pattern; the other headers leave it out rather than say "none".
+  ariaSortFor(col: SignalListColumn<T>): 'ascending' | 'descending' | null {
+    const direction = this.isSortable(col) ? this.sortDirectionFor(col) : null;
+    return direction === 'asc' ? 'ascending' : direction === 'desc' ? 'descending' : null;
+  }
+
   onHeaderSort(col: SignalListColumn<T>): void {
     const config = this.config();
     if (!this.isSortable(col) || !config.sort) return;
