@@ -656,7 +656,7 @@
             }
             @for (col of config().columns; track col.key) {
               @if (col.kind !== 'favorite' && col.kind !== 'actions') {
-                <th class="text-left px-3 py-2 font-semibold text-sm text-content-text whitespace-nowrap">
+                <th class="text-left px-3 py-2 font-semibold text-sm text-content-text whitespace-nowrap" [attr.aria-sort]="ariaSortFor(col)">
                   @if (col.kind === 'checkbox' && col.checkbox?.selectAll) {
                     <input
                       data-test="select-all"
