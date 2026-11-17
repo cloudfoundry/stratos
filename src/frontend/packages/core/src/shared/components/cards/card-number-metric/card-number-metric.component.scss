@@ -11,6 +11,15 @@
     &:focus-visible {
       outline-offset: -2px;
     }
+    // The card inside is positioned and has a background, so it paints over
+    // an outline drawn inside the link: draw the outline on the card.
+    &:focus-visible:has(.card) {
+      outline: none;
+    }
+    &:focus-visible .card {
+      outline: 2px solid var(--focus-ring, var(--color-primary));
+      outline-offset: -2px;
+    }
   }
   &__container {
     align-items: center;
