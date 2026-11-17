@@ -43,16 +43,13 @@
   }
   // The link carries the ellipsis, so its box is as wide as the name that
   // shows and its focus outline stays inside the name box.
+  // The theme's link color, which reaches 7:1 in light and dark mode.
   &__name a {
-    color: rgb(37 99 235); // blue-600
+    color: var(--color-primary);
     display: block;
     overflow: hidden;
     text-overflow: ellipsis;
     white-space: nowrap;
-
-    :host-context(.dark) & {
-      color: rgb(96 165 250); // blue-400
-    }
   }
   // The date's color is the theme's muted text color, set in the template.
   &__updated {
