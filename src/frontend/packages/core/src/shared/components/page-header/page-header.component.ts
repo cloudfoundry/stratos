@@ -33,7 +33,7 @@ import { EntityFavoriteStarComponent } from '../../../core/entity-favorite-star/
 import { CustomTooltipDirective } from '../custom-tooltip/custom-tooltip.directive';
 import { ExtensionButtonsComponent } from '../extension-buttons/extension-buttons.component';
 import { RecentEntitiesComponent } from '../recent-entities/recent-entities.component';
-import { UserAvatarComponent } from '../user-avatar/user-avatar.component';
+import { UserAvatarComponent, avatarInitials } from '../user-avatar/user-avatar.component';
 import { PageHeaderEventsComponent } from './page-header-events/page-header-events.component';
 import { ThemeToggleComponent } from '../theme-toggle/theme-toggle.component';
 import { BreadcrumbsComponent } from '../breadcrumbs/breadcrumbs.component';
@@ -193,6 +193,12 @@ export class PageHeaderComponent implements OnDestroy, AfterViewInit {
     return name ? name : profile.userName;
   });
   public readonly allowGravatar = this.dashboardSignals.gravatarEnabled;
+  // The avatar's initials are text on the button, so the name starts with
+  // them: a speech input user can say what they see (WCAG 2.5.3).
+  public readonly userMenuLabel = computed(() => {
+    const initials = avatarInitials(this.user(), this.allowGravatar());
+    return initials ? `${initials}, user menu` : 'User menu';
+  });
   public canLogout: Signal<boolean>;
   public authToken$!: Observable<string>;
   public refreshToken$!: Observable<string>;

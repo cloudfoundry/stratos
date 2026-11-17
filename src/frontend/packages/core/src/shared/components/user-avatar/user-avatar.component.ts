@@ -32,11 +32,17 @@ export class UserAvatarComponent {
     return `//gravatar.com/avatar/${hash}?s=64`;
   });
 
-  readonly initials = computed(() => {
-    const name = this.user()?.name;
-    if (!name || this.gravatar()) {
-      return null;
-    }
-    return (name.givenName ? name.givenName.charAt(0) : '') + (name.familyName ? name.familyName.charAt(0) : '');
-  });
+  readonly initials = computed(() => avatarInitials(this.user(), this.allowGravatar()));
+}
+
+/**
+ * The initials the avatar shows, or null when it shows the Gravatar (allowed
+ * and the user has an email) or the user has no name.
+ */
+export function avatarInitials(user: UserProfileInfo | null | undefined, allowGravatar: boolean | null | undefined): string | null {
+  const name = user?.name;
+  if (!name || (allowGravatar && user?.emails?.[0]?.value)) {
+    return null;
+  }
+  return (name.givenName ? name.givenName.charAt(0) : '') + (name.familyName ? name.familyName.charAt(0) : '') || null;
 }
