@@ -42,7 +42,11 @@ FRAG_DIR="${FRAG_DIR:-${ROOT_DIR}/changelog.d}"
 # looking for WCAG changes finds them in one place; an Accessibility
 # subcategory written under any other section is assembled there too,
 # and WCAG criteria are its subcategories.
-SECTION_ORDER='Breaking Changes|Features|BugFixes|Accessibility|Maintainability|Chores|Security Updates'
+#
+# Contributors close the notes: the people outside the maintainers whose
+# code or reports the release carries, credited by @handle in the PR that
+# lands their work.
+SECTION_ORDER='Breaking Changes|Features|BugFixes|Accessibility|Maintainability|Chores|Security Updates|Contributors'
 
 fragments() {
   find "${FRAG_DIR}" -maxdepth 1 -name '[0-9]*.md' 2>/dev/null | LC_ALL=C sort
@@ -429,6 +433,7 @@ cmd_assemble() {
         # display name, Maintainability publishes as Maintenance (Chores
         # included); the rest already read as titles.
         label = (s == "BugFixes") ? "Bug Fixes" : (s == "Maintainability") ? "Maintenance" : s
+        if (s == "Contributors") body = "Thanks to everyone whose code and reports shaped this release:\n\n" body
         printf "## %s\n\n%s", label, body
         out = 1
       }

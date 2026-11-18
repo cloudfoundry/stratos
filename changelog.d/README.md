@@ -55,6 +55,17 @@ Valid sections, in the order they appear in the published notes:
 | `[Maintainability]` | Keeping the codebase current: retiring an unmaintained or archived dependency, consolidating forked or vendored code, clearing scanner findings |
 | `[Chores]` | Routine dependency bumps, CI/build changes, docs |
 | `[Security Updates]` | CVE fixes (table of release/version/CVE links) |
+| `[Contributors]` | Credit for people outside the maintainers whose code or report the PR carries |
+
+Credit belongs in the PR that lands the work: name the person by GitHub
+handle and say what they gave, with the issue or PR number. The section
+closes the notes under a thank-you line, and the handle notifies them when
+the release is published:
+
+```markdown
+[Contributors]
+- @rkoster — application labels: display, filter and edit them (#6102).
+```
 
 A section appears in the published notes only when at least one fragment
 contributes to it. Unknown section headers fail assembly loudly.
