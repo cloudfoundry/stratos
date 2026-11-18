@@ -163,10 +163,14 @@ callable standalone for the exceptional regen case (fix an asset after
 Notes accumulate continuously as per-PR fragment files in `changelog.d/`
 — each PR adds its own `NNNN-<slug>.md` (`./build/release-notes.sh new`)
 with entries under `[Breaking Changes]` / `[Features]` / `[BugFixes]` /
-`[Chores]` / `[Security Updates]` headers. `make stamp tag` assembles
-them (sections in that order, populated sections only) into the tag
-body, `make publish` reuses the tag body as the GitHub release notes,
-and `make sweep` clears the directory for the next cycle. See
+`[Accessibility]` / `[Maintainability]` / `[Chores]` /
+`[Security Updates]` headers. `make stamp tag` assembles them (sections
+in that order, populated sections only) into the tag body.
+Maintainability and Chores publish as one Maintenance section, whose
+dependency tables are merged into one table of version chains, and an
+Accessibility subcategory under any section lands in Accessibility.
+`make publish` reuses the tag body as the GitHub release notes, and
+`make sweep` clears the directory for the next cycle. See
 [changelog.d/README.md](https://github.com/cloudfoundry/stratos/blob/develop/changelog.d/README.md) for authoring details
 and `./build/release-notes.sh assemble` for a preview.
 
