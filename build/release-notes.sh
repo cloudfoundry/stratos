@@ -35,7 +35,8 @@ FRAG_DIR="${FRAG_DIR:-${ROOT_DIR}/changelog.d}"
 # dependency, consolidating forked code, clearing a scanner finding) and
 # Chores (routine bumps, CI, build, docs) stay separate tags for authors
 # but publish as one Maintenance section: readers found the split hard to
-# follow.
+# follow. Its Package/From/To tables merge into one table of version
+# chains, so a package bumped twice in a release reads 1.0 → 1.1 → 1.2.
 #
 # Accessibility follows the fixes as a section of its own, so a reader
 # looking for WCAG changes finds them in one place; an Accessibility
@@ -286,7 +287,7 @@ cmd_assemble() {
       nknown = split(known, knownList, "|")
       for (i = 1; i <= nknown; i++) isKnown[knownList[i]] = 1
     }
-    FNR == 1 { key = ""; delete pending }
+    FNR == 1 { key = ""; intable = 0; delete pending }
     # [Section] or [Section: Subcategory]. The subcategory is free-form;
     # bullets sharing one are grouped under a ### heading in the section.
     /^\[[^]]+\][[:space:]]*$/ {
@@ -312,7 +313,7 @@ cmd_assemble() {
           printf "NOTE: %s: new subcategory [%s: %s]; if it will be used again, add it to the list in changelog.d/README.md\n", FILENAME, s, sc > "/dev/stderr"
         }
       }
-      key = s SUBSEP sc
+      key = s SUBSEP sc; cur = s; intable = 0
       delete pending
       next
     }
@@ -322,12 +323,64 @@ cmd_assemble() {
         printf "ERROR: %s: content before any [Section] header\n", FILENAME > "/dev/stderr"
         err = 1; exit 1
       }
+      # Dependency tables in the maintenance section are collected rather
+      # than copied. The bullet introducing one loses its colon: the generic
+      # "Dependency updates:" is dropped (the merged table brings its own),
+      # any other keeps its words, which say why, as a sentence.
+      if (cur == "Maintainability" && $0 ~ /^\|[[:space:]]*Package[[:space:]]*\|[[:space:]]*From[[:space:]]*\|[[:space:]]*To[[:space:]]*\|[[:space:]]*$/) {
+        if (last[key] ~ /:[[:space:]]*$/) {
+          if (substr(buf[key], bstart[key] + 1) ~ /^- Dependency updates:[[:space:]]*\n$/) buf[key] = substr(buf[key], 1, bstart[key])
+          else sub(/:[[:space:]]*\n$/, ".\n", buf[key])
+        }
+        last[key] = ""; intable = 1; delete pending[key]
+        next
+      }
+      if (intable) {
+        if ($0 ~ /^\|/) {
+          if ($0 ~ /^\|[-|: ]+\|[[:space:]]*$/) next
+          split($0, f, "|")
+          for (i = 2; i <= 4; i++) gsub(/^[[:space:]]+|[[:space:]]+$/, "", f[i])
+          dep(f[2], f[3], f[4])
+          next
+        }
+        intable = 0
+        # The blank line that closed the table goes with it, so the list
+        # it sat in stays one list.
+        if ($0 ~ /^[[:space:]]*$/) next
+      }
       # Blank lines buffer lazily so they only land between content lines
       # of the same group in the same fragment (e.g. before a table),
       # never at group boundaries or between merged fragments.
       if ($0 ~ /^[[:space:]]*$/) { pending[key] = pending[key] "\n"; next }
+      if ($0 ~ /^- /) bstart[key] = length(buf[key] pending[key])
       buf[key] = buf[key] pending[key] $0 "\n"
+      last[key] = $0
       delete pending[key]
+    }
+    # One chain per package, in landing order. A step that does not start
+    # where the previous one ended (a downgrade, a skipped table) opens a
+    # new run after a semicolon instead of implying a path never taken.
+    function dep(pkg, from, to) {
+      if (pkg == "") return
+      if (!(pkg in chain)) { deps[++ndeps] = pkg; chain[pkg] = from " → " to }
+      else if (from == tip[pkg]) chain[pkg] = chain[pkg] " → " to
+      else chain[pkg] = chain[pkg] "; " from " → " to
+      tip[pkg] = to
+    }
+    # Pads by characters, not bytes: the arrow is three bytes in UTF-8, and
+    # the table must also line up in the plain-text tag body.
+    function width(s) { gsub(/→/, "-", s); return length(s) }
+    function pad(s, w,   n) { n = width(s); while (n++ < w) s = s " "; return s }
+    function rule(w,   r) { r = ""; while (length(r) < w + 2) r = r "-"; return r }
+    function deptable(   i, wp, wv, t) {
+      wp = length("Package"); wv = length("Versions")
+      for (i = 1; i <= ndeps; i++) {
+        if (width(deps[i]) > wp) wp = width(deps[i])
+        if (width(chain[deps[i]]) > wv) wv = width(chain[deps[i]])
+      }
+      t = "- Dependency updates:\n\n| " pad("Package", wp) " | " pad("Versions", wv) " |\n|" rule(wp) "|" rule(wv) "|\n"
+      for (i = 1; i <= ndeps; i++) t = t "| " pad(deps[i], wp) " | " pad(chain[deps[i]], wv) " |\n"
+      return t
     }
     function trimmed(b) {
       sub(/^\n+/, "", b)
@@ -341,6 +394,7 @@ cmd_assemble() {
         # Plain bullets first, then listed subcategories in list order,
         # then unlisted ones in the order they landed.
         body = trimmed(buf[s, ""])
+        if (s == "Maintainability" && ndeps) body = body deptable()
         for (k = 1; k <= nknown; k++) {
           b = trimmed(buf[s, knownList[k]])
           if (b != "") body = body (body != "" ? "\n" : "") "### " knownList[k] "\n\n" b
