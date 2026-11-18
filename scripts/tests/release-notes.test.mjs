@@ -157,3 +157,20 @@ test('code blocks, tables and paragraph breaks inside a bullet are kept', () => 
   assert.equal(status, 0)
   assert.equal(out, '## Features\n\n- Run:\n\n  ```bash\n  make one\n    two\n  ```\n\n  | A | B |\n  |---|---|\n  | 1 | 2 |\n\n  Second paragraph.\n')
 })
+
+test('contributors close the notes, after Security Updates, with a thank-you line', () => {
+  const { out, status } = assemble({
+    '0001-a.md': '[Contributors]\n- @someone — the frobnicator (#1).\n\n[Features]\n- F1.\n',
+    '0002-b.md': '[Security Updates]\n- S1.\n\n[Contributors]\n- @other — a report (#2).\n',
+  })
+  assert.equal(status, 0)
+  assert.equal(out, [
+    '## Features', '', '- F1.', '',
+    '## Security Updates', '', '- S1.', '',
+    '## Contributors', '',
+    'Thanks to everyone whose code and reports shaped this release:', '',
+    '- @someone — the frobnicator (#1).',
+    '- @other — a report (#2).',
+    '',
+  ].join('\n'))
+})
