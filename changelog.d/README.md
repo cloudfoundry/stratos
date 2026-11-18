@@ -51,12 +51,23 @@ Valid sections, in the order they appear in the published notes:
 | `[Breaking Changes]` | Anything an operator must act on before upgrading |
 | `[Features]` | New functionality |
 | `[BugFixes]` | Fixes |
+| `[Accessibility]` | Accessibility and WCAG changes, fixes and features alike |
 | `[Maintainability]` | Keeping the codebase current: retiring an unmaintained or archived dependency, consolidating forked or vendored code, clearing scanner findings |
 | `[Chores]` | Routine dependency bumps, CI/build changes, docs |
 | `[Security Updates]` | CVE fixes (table of release/version/CVE links) |
 
 A section appears in the published notes only when at least one fragment
 contributes to it. Unknown section headers fail assembly loudly.
+
+**Accessibility** collects every accessibility entry. A header such as
+`[BugFixes: Accessibility]` or `[Features: Accessibility]` lands there
+too. Name the WCAG success criterion as the subcategory, so the changes
+group by criterion:
+
+```markdown
+[Accessibility: 1.4.3 Contrast (Minimum)]
+- Placeholder text in form fields now meets 4.5:1.
+```
 
 ### Subcategories
 
