@@ -2,12 +2,11 @@ import { DatePipe } from '@angular/common';
 import {
   ChangeDetectionStrategy,
   Component,
-  EventEmitter,
-  Output,
   Signal,
   computed,
   effect,
   inject,
+  output
 } from '@angular/core';
 import { ActivatedRoute } from '@angular/router';
 
@@ -42,7 +41,7 @@ export class DetachAppsComponent {
   private serviceCatalog = inject(ServiceCatalogDataService);
   private selectionStore = inject<ListSelectionStore<StServiceCredentialBinding>>(ListSelectionStore);
 
-  @Output() selectedApps = new EventEmitter<StServiceCredentialBinding[]>();
+  readonly selectedApps = output<StServiceCredentialBinding[]>();
 
   private bindingsSource: SignalSource<StServiceCredentialBinding[]>;
   selection: BoundListSelectionState<StServiceCredentialBinding>;

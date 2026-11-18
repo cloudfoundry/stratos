@@ -1,6 +1,5 @@
 import { CommonModule } from '@angular/common';
 import { Component, ChangeDetectionStrategy, Signal, WritableSignal, inject, signal } from '@angular/core';
-import { toSignal } from '@angular/core/rxjs-interop';
 import { Router, RouterModule } from '@angular/router';
 
 import {
@@ -20,7 +19,7 @@ import { CfOrgQuotasSignalConfigService } from '../../../../shared/signal-list-c
 import { CfCurrentUserPermissions } from '../../../../user-permissions/cf-user-permissions-checkers';
 import { CloudFoundryEndpointService } from '../../services/cloud-foundry-endpoint.service';
 import type { StOrgQuota } from '../../../../services/endpoint-data/stratos-types';
-import { extractHttpErrorMessage } from '../../../../services/extract-error-message';
+import { leadPieces } from '@stratosui/store';
 
 // Signal-native CF Org Quotas tab. Read-only list of org-level quota
 // definitions on the foundation. Replaces the legacy ListConfig +
@@ -69,18 +68,9 @@ export class CloudFoundryQuotasComponent {
     const router = inject(Router);
     const cfGuid = this.cfEndpointService.cfGuid;
 
-    this.canAddQuota = toSignal(
-      currentUserPermissionsService.can(CfCurrentUserPermissions.QUOTA_CREATE, cfGuid),
-      { initialValue: false },
-    );
-    this.canEditQuota = toSignal(
-      currentUserPermissionsService.can(CfCurrentUserPermissions.QUOTA_EDIT, cfGuid),
-      { initialValue: false },
-    );
-    this.canDeleteQuota = toSignal(
-      currentUserPermissionsService.can(CfCurrentUserPermissions.QUOTA_DELETE, cfGuid),
-      { initialValue: false },
-    );
+    this.canAddQuota = currentUserPermissionsService.can(CfCurrentUserPermissions.QUOTA_CREATE, cfGuid);
+    this.canEditQuota = currentUserPermissionsService.can(CfCurrentUserPermissions.QUOTA_EDIT, cfGuid);
+    this.canDeleteQuota = currentUserPermissionsService.can(CfCurrentUserPermissions.QUOTA_DELETE, cfGuid);
 
     this.quotasConfig.initialize(cfGuid);
     void this.quotasConfig.loadAll();
@@ -104,7 +94,8 @@ export class CloudFoundryQuotasComponent {
       columns: [
         {
           header: 'Name', key: 'name', sortField: 'name',
-          kind: 'text',
+          kind: 'link',
+          link: (q: StOrgQuota) => ['/cloud-foundry', cfGuid, 'quota-definitions', q.guid],
           render: (q: StOrgQuota) => q.name,
           widthHint: '14rem',
         },
@@ -212,7 +203,7 @@ export class CloudFoundryQuotasComponent {
             try {
               await this.quotasConfig.deleteQuota(q.cnsiGuid, q.guid);
             } catch (err: unknown) {
-              this.snackBar.error(`Delete failed: ${extractHttpErrorMessage(err)}`);
+              this.snackBar.error(leadPieces('Delete failed', err));
             }
           });
         },

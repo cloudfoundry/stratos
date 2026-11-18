@@ -1,8 +1,8 @@
-import { AsyncPipe } from '@angular/common';
-import { Component, Input, inject, ChangeDetectionStrategy } from '@angular/core';
+import { Component, inject, ChangeDetectionStrategy, input, signal } from '@angular/core';
+import { toObservable, toSignal } from '@angular/core/rxjs-interop';
 import { marked } from 'marked';
 import { Observable, of as observableOf } from 'rxjs';
-import { catchError, map } from 'rxjs/operators';
+import { catchError, filter, map, switchMap, tap } from 'rxjs/operators';
 
 import { ChartVersion } from '../../shared/models/chart-version';
 import { ChartsService } from '../../shared/services/charts.service';
@@ -15,43 +15,41 @@ import { LoaderComponent } from '../../loader/loader.component';
   changeDetection: ChangeDetectionStrategy.OnPush,
   standalone: true,
   imports: [
-    AsyncPipe,
     LoaderComponent
   ]
 })
 export class ChartDetailsReadmeComponent {
 
-  @Input() set currentVersion(currentVersion: ChartVersion) {
-    if (currentVersion) {
-      this.readmeContent$ = this.getReadme(currentVersion);
-    }
-  }
+  readonly currentVersion = input<ChartVersion>();
 
-  public loading = false;
-  public readmeContent$!: Observable<string>;
+  // Nothing renders until the readme arrives, so show the spinner from the start
+  public loading = signal(true);
   private renderer = new marked.Renderer();
-  private loadingDelay: ReturnType<typeof setTimeout>;
   private chartsService = inject(ChartsService);
+
+  public readmeContent = toSignal(toObservable(this.currentVersion).pipe(
+    filter((currentVersion): currentVersion is ChartVersion => !!currentVersion),
+    tap(() => this.loading.set(true)),
+    switchMap(currentVersion => this.getReadme(currentVersion)),
+  ));
 
   constructor() {
     this.renderer.link = ({ href, title, text }) => `<a target="_blank" title="${title}" href="${href}">${text}</a>`;
     this.renderer.code = ({ text, lang: _lang, escaped: _escaped }: { text: string; lang?: string; escaped?: boolean }) => `<code>${text}</code>`;
-    this.loadingDelay = setTimeout(() => this.loading = true, 100);
   }
 
   // TODO: See #150 - This should not require loading the specific version and then the readme
   private getReadme(currentVersion: ChartVersion): Observable<string> {
     return this.chartsService.getChartReadme(currentVersion).pipe(
       map(resp => {
-        clearTimeout(this.loadingDelay);
-        this.loading = false;
+        this.loading.set(false);
         const result = marked(resp, {
           renderer: this.renderer
         });
         return typeof result === 'string' ? result : '';
       }),
       catchError((error) => {
-        this.loading = false;
+        this.loading.set(false);
         if (error.status === 404) {
           return observableOf('<h1>No Readme available for this chart</h1>');
         } else {

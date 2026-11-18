@@ -1,5 +1,5 @@
 <div class="select-users__selected-users">
   Selected Users:
-  <app-enumerate [collection]="selectedUsers$" [labelPath]="'username'"></app-enumerate>
+  <app-enumerate [collection]="selectedUsers()" [labelPath]="'username'"></app-enumerate>
 </div>
 <app-signal-list [config]="listConfig()"></app-signal-list>

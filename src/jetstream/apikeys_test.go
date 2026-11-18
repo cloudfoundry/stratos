@@ -7,6 +7,7 @@ import (
 	"log/slog"
 	"net/http"
 	"testing"
+	"time"
 
 	"github.com/cloudfoundry/stratos/src/jetstream/api"
 	"github.com/cloudfoundry/stratos/src/jetstream/api/config"
@@ -113,7 +114,7 @@ func Test_addAPIKey(t *testing.T) {
 
 					mockAPIRepo.
 						EXPECT().
-						AddAPIKey(gomock.Eq(userID), gomock.Eq(comment)).
+						AddAPIKey(gomock.Eq(userID), gomock.Eq(comment), gomock.Nil()).
 						Return(&retval, nil)
 
 					err := pp.addAPIKey(ctx)
@@ -149,6 +150,90 @@ func Test_addAPIKey(t *testing.T) {
 		Convey("when API keys are enabled", func() {
 			pp.Config.APIKeysEnabled = config.APIKeysConfigEnum.AllUsers
 
+			Convey("when the expiry is in the past", func() {
+				ctx, _ := makeNewRequestWithParams("POST", map[string]string{
+					"comment":    "Test API key",
+					"expires_at": time.Now().Add(-24 * time.Hour).UTC().Format(time.RFC3339),
+				})
+				ctx.Set("user_id", userID)
+
+				err := pp.addAPIKey(ctx)
+
+				Convey("should return a 400 error", func() {
+					So(err, ShouldResemble, echo.NewHTTPError(http.StatusBadRequest, "Expiry must be in the future"))
+				})
+			})
+
+			Convey("when the expiry is after 2038-01-19T03:14:07Z", func() {
+				ctx, _ := makeNewRequestWithParams("POST", map[string]string{"comment": "Test API key", "expires_at": "2038-01-19T03:14:08Z"})
+				ctx.Set("user_id", userID)
+
+				err := pp.addAPIKey(ctx)
+
+				Convey("should return a 400 error", func() {
+					So(err, ShouldResemble, echo.NewHTTPError(http.StatusBadRequest, "Expiry must be before 19 January 2038"))
+				})
+			})
+
+			Convey("when the expiry carries a UTC offset", func() {
+				comment := "Test API key"
+				local := time.Now().Add(48 * time.Hour).In(time.FixedZone("", 2*3600)).Truncate(time.Second)
+				expiry := local.UTC()
+
+				mockAPIRepo.
+					EXPECT().
+					AddAPIKey(gomock.Eq(userID), gomock.Eq(comment), gomock.Any()).
+					DoAndReturn(func(_, _ string, got *time.Time) (*api.APIKey, error) {
+						if got.Location() != time.UTC || !got.Equal(expiry) {
+							t.Errorf("AddAPIKey got %v, want UTC instant %v", got, expiry)
+						}
+						return &api.APIKey{UserGUID: userID, Comment: comment, ExpiresAt: got}, nil
+					})
+
+				ctx, _ := makeNewRequestWithParams("POST", map[string]string{"comment": comment, "expires_at": local.Format(time.RFC3339)})
+				ctx.Set("user_id", userID)
+
+				Convey("the repository receives the UTC instant", func() {
+					So(pp.addAPIKey(ctx), ShouldBeNil)
+				})
+			})
+
+			Convey("when the expiry is not a time", func() {
+				ctx, _ := makeNewRequestWithParams("POST", map[string]string{"comment": "Test API key", "expires_at": "soon"})
+				ctx.Set("user_id", userID)
+
+				err := pp.addAPIKey(ctx)
+
+				Convey("should return a 400 error", func() {
+					So(err, ShouldResemble, echo.NewHTTPError(http.StatusBadRequest, "Expiry must be an RFC 3339 time"))
+				})
+			})
+
+			Convey("when the expiry is in the future", func() {
+				comment := "Test API key"
+				expiry := time.Now().Add(24 * time.Hour).UTC().Truncate(time.Second)
+				retval := api.APIKey{UserGUID: userID, Comment: comment, ExpiresAt: &expiry}
+
+				mockAPIRepo.
+					EXPECT().
+					AddAPIKey(gomock.Eq(userID), gomock.Eq(comment), gomock.Eq(&expiry)).
+					Return(&retval, nil)
+
+				ctx, rec := makeNewRequestWithParams("POST", map[string]string{
+					"comment":    comment,
+					"expires_at": expiry.Format(time.RFC3339),
+				})
+				ctx.Set("user_id", userID)
+
+				err := pp.addAPIKey(ctx)
+
+				Convey("the key is created with that expiry", func() {
+					So(err, ShouldBeNil)
+					So(rec.Code, ShouldEqual, 200)
+					So(rec.Body.String(), ShouldContainSubstring, `"expires_at":"`+expiry.Format(time.RFC3339))
+				})
+			})
+
 			Convey("when comment is not specified", func() {
 				ctx, _ := makeNewRequest()
 				ctx.Set("user_id", userID)
@@ -165,7 +250,7 @@ func Test_addAPIKey(t *testing.T) {
 
 				mockAPIRepo.
 					EXPECT().
-					AddAPIKey(gomock.Eq(userID), gomock.Eq(comment)).
+					AddAPIKey(gomock.Eq(userID), gomock.Eq(comment), gomock.Nil()).
 					Return(nil, errors.New("Something went wrong"))
 
 				ctx, _ := makeNewRequestWithParams("POST", map[string]string{"comment": comment})
@@ -184,7 +269,7 @@ func Test_addAPIKey(t *testing.T) {
 
 				mockAPIRepo.
 					EXPECT().
-					AddAPIKey(gomock.Eq(userID), gomock.Eq(comment)).
+					AddAPIKey(gomock.Eq(userID), gomock.Eq(comment), gomock.Nil()).
 					Return(&retval, nil)
 
 				ctx, rec := makeNewRequestWithParams("POST", map[string]string{"comment": comment})

@@ -5,7 +5,6 @@ import { of } from 'rxjs';
 import { IFavoriteMetadata, UserFavorite, UserFavoritesDataService } from '@stratosui/store';
 import { BaseTestModulesNoShared, STORE_TEST_PROVIDERS } from "@test-framework/core-test.helper";
 import { ConfirmationDialogService } from '../../../../shared/components/confirmation-dialog.service';
-import { SessionService } from '../../../../shared/services/session.service';
 import { FreshEntityNameService } from '../../../../core/signals/fresh-entity-name.service';
 import { FavoritesMetaCardComponent } from './favorites-meta-card.component';
 
@@ -33,7 +32,6 @@ describe('FavoritesMetaCardComponent', () => {
       providers: [
         ...(STORE_TEST_PROVIDERS || []),
         ConfirmationDialogService,
-        SessionService,
         { provide: FreshEntityNameService, useValue: { freshNameFor: () => freshName, fetchNameFor: () => of(fetchedName) } },
         provideZonelessChangeDetection(),
       ],
@@ -47,31 +45,31 @@ describe('FavoritesMetaCardComponent', () => {
     component = fixture.componentInstance;
   });
 
-  it('should create', () => {
-    fixture.detectChanges();
+  it('should create', async () => {
+    await fixture.whenStable();
     expect(component).toBeTruthy();
   });
 
-  it('shows the stored name when no fresh name is available', () => {
+  it('shows the stored name when no fresh name is available', async () => {
     freshName = null;
-    component.favoriteEntity = makeFavoriteStub('stored name');
-    fixture.detectChanges();
+    fixture.componentRef.setInput('favoriteEntity', makeFavoriteStub('stored name'));
+    await fixture.whenStable();
     expect(component.displayName()).toBe('stored name');
   });
 
-  it('shows the fresh name when one is available', () => {
+  it('shows the fresh name when one is available', async () => {
     freshName = 'fresh name';
-    component.favoriteEntity = makeFavoriteStub('stored name');
-    fixture.detectChanges();
+    fixture.componentRef.setInput('favoriteEntity', makeFavoriteStub('stored name'));
+    await fixture.whenStable();
     expect(component.displayName()).toBe('fresh name');
   });
 
-  it('persists the corrected name once when fresh diverges from stored', () => {
+  it('persists the corrected name once when fresh diverges from stored', async () => {
     const favData = TestBed.inject(UserFavoritesDataService);
     const spy = vi.spyOn(favData, 'updateMetadata').mockImplementation(() => undefined);
     freshName = 'renamed app';
-    component.favoriteEntity = makeFavoriteStub('old app');
-    fixture.detectChanges();
+    fixture.componentRef.setInput('favoriteEntity', makeFavoriteStub('old app'));
+    await fixture.whenStable();
     expect(spy).toHaveBeenCalledTimes(1);
     const persisted = spy.mock.calls[0][0];
     expect(persisted.metadata).toBeDefined();
@@ -79,12 +77,12 @@ describe('FavoritesMetaCardComponent', () => {
     expect(persisted.metadata!.name).toBe('renamed app');
   });
 
-  it('does not persist when fresh equals stored', () => {
+  it('does not persist when fresh equals stored', async () => {
     const favData = TestBed.inject(UserFavoritesDataService);
     const spy = vi.spyOn(favData, 'updateMetadata').mockImplementation(() => undefined);
     freshName = 'same name';
-    component.favoriteEntity = makeFavoriteStub('same name');
-    fixture.detectChanges();
+    fixture.componentRef.setInput('favoriteEntity', makeFavoriteStub('same name'));
+    await fixture.whenStable();
     expect(spy).not.toHaveBeenCalled();
   });
 
@@ -100,29 +98,28 @@ describe('FavoritesMetaCardComponent', () => {
     } as unknown as UserFavorite<IFavoriteMetadata>;
   }
 
-  it('does not throw and falls back to entity id when metadata is null', () => {
+  it('does not throw and falls back to entity id when metadata is null', async () => {
     freshName = null;
-    expect(() => {
-      component.favoriteEntity = makeFavoriteStubNoMetadata();
-      fixture.detectChanges();
-    }).not.toThrow();
+    fixture.componentRef.setInput('favoriteEntity', makeFavoriteStubNoMetadata());
+    // A throw while rendering rejects here and fails the test.
+    await fixture.whenStable();
     expect(component.displayName()).toBe('app1');
   });
 
-  it('still shows the fresh name when metadata is null', () => {
+  it('still shows the fresh name when metadata is null', async () => {
     freshName = 'fresh name';
-    component.favoriteEntity = makeFavoriteStubNoMetadata();
-    fixture.detectChanges();
+    fixture.componentRef.setInput('favoriteEntity', makeFavoriteStubNoMetadata());
+    await fixture.whenStable();
     expect(component.displayName()).toBe('fresh name');
   });
 
-  it('fetches the name on demand and backfills metadata when nothing else resolves', () => {
+  it('fetches the name on demand and backfills metadata when nothing else resolves', async () => {
     const favData = TestBed.inject(UserFavoritesDataService);
     const spy = vi.spyOn(favData, 'updateMetadata').mockImplementation(() => undefined);
     freshName = null;            // not in any loaded signal (home counts-only)
     fetchedName = 'opensource';  // single-resource fetch resolves the real name
-    component.favoriteEntity = makeFavoriteStubNoMetadata();
-    fixture.detectChanges();
+    fixture.componentRef.setInput('favoriteEntity', makeFavoriteStubNoMetadata());
+    await fixture.whenStable();
     // Renders the fetched name (not the entity-id fallback)...
     expect(component.displayName()).toBe('opensource');
     // ...and heals the null-metadata favorite for good.
@@ -133,7 +130,7 @@ describe('FavoritesMetaCardComponent', () => {
     expect(persisted.metadata!.name).toBe('opensource');
   });
 
-  it('does not persist (and does not throw) when the favorite is malformed', () => {
+  it('does not persist (and does not throw) when the favorite is malformed', async () => {
     const favData = TestBed.inject(UserFavoritesDataService);
     const spy = vi.spyOn(favData, 'updateMetadata').mockImplementation(() => undefined);
     freshName = 'renamed app';
@@ -142,7 +139,9 @@ describe('FavoritesMetaCardComponent', () => {
       guid: 'x', endpointId: 'ep1', endpointType: 'cf', entityId: 'x', metadata: { name: 'old' },
       getPrettyTypeName: () => 'App', getIcon: () => ({} as any), getLink: () => '/x',
     } as unknown as UserFavorite<IFavoriteMetadata>;
-    expect(() => { component.favoriteEntity = malformed; fixture.detectChanges(); }).not.toThrow();
+    fixture.componentRef.setInput('favoriteEntity', malformed);
+    // A throw while rendering rejects here and fails the test.
+    await fixture.whenStable();
     expect(spy).not.toHaveBeenCalled();
   });
 });

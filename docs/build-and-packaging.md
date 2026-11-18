@@ -75,7 +75,9 @@ by default rather than sweeping it with everything else untracked.
 | `make check lint` | Lint checks (ESLint + `go fmt` + `go vet` + `golangci-lint` on both Go modules). Requires `golangci-lint` installed. Note: `go fmt` may modify files. |
 | `make check gate` | Full pre-push quality gate — mirrors what CI runs on each PR (ESLint + Vitest frontend tests + Go unit tests). Run this before every push. |
 | `make check tests` | Unit tests only |
-| `make check coverage` | Frontend unit tests with coverage (Vitest). No Go coverage. |
+| `make check coverage` | Unit tests with coverage, frontend (Vitest) and backend (Go) |
+| `make check frontend coverage` | Frontend coverage only; report in `coverage/frontend/` |
+| `make check backend coverage` | Backend coverage only: one Go profile per module in `coverage/backend/`, per-module and total statement coverage printed |
 | `make check e2e` | Playwright E2E core tests |
 
 ESLint and Vitest need no separate install — both are plain `devDependencies`
@@ -86,7 +88,8 @@ here that's external to the JS toolchain and needs its own install step (see
 Run `make check gate` before any push — it mirrors what CI runs on each PR.
 `make check e2e` requires a running Stratos instance (local or deployed);
 point it at a specific deployment via the `E2E_BASE_URL` environment
-variable (defaults to the local dev server at `https://localhost:5540`).
+variable (defaults to the local e2e server at `https://localhost:5540`, or
+`E2E_FRONTEND_PORT` when set).
 
 `make test e2e`/`make check e2e` also need Playwright's browser binaries —
 `bun install` pulls in the `@playwright/test` package but does **not**
@@ -350,9 +353,28 @@ it without the raw formatting codes:
 | `make dev website` | Docusaurus dev server with hot reload — reads `docs/` directly (`path: '../docs'` in `website/docusaurus.config.js`), no separate conversion step |
 | `make build website` | Build the HTML site into `website/build/` |
 | `make build booklets` | Render curated `docs/` subsets to standalone PDF/epub via Quarto — see `docs/booklets/README.md` for how a booklet's chapter list ("spine") is defined |
+| `make deploy website pages` | Force-push `HEAD` to your fork's `pages-preview` branch; the Deploy Website workflow builds it and publishes `https://<you>.github.io/stratos/` |
+| `make deploy website cf` | `cf push` the built site (`website/manifest.yml`, a static app) to the current `cf target` |
+| `make build deploy website cf` | Build the site, then push it |
 
 Booklets need the `quarto` tool (see `developer-environment.md`); the
 website only needs `bun` (already required).
+
+The upstream site publishes from `develop` on its own
+(`.github/workflows/website-deploy.yml`); `deploy website pages` is for
+previewing on a fork. Before the first preview, enable Pages on the fork
+and allow the preview branch to deploy:
+
+```bash
+gh api -X POST repos/<you>/stratos/pages -f build_type=workflow
+gh api -X POST repos/<you>/stratos/environments/github-pages/deployment-branch-policies -f name=pages-preview
+```
+
+The second command needs the `github-pages` environment, which the first
+deploy creates. The preview pushes to the `origin` remote; set
+`PAGES_REMOTE` in `site.mk` if your fork is another remote. See
+[website/README.md](https://github.com/cloudfoundry/stratos/blob/develop/website/README.md#deployment)
+for details.
 
 Booklet source (`docs/booklets/`) lives inside `docs/` but is excluded from
 the published site (`exclude` in `docusaurus.config.js`) — CI renders
@@ -408,8 +430,8 @@ that brought it into the tree. It reads `bun.lock` and npm
 `package-lock.json`, and takes `<rev>:<path>` to read a version from git:
 
 ```bash
-node scripts/lockdiff.mjs origin/develop:bun.lock bun.lock
-node scripts/lockdiff.mjs origin/develop:src/frontend/packages/devkit/package-lock.json \
+bun scripts/lockdiff.mjs origin/develop:bun.lock bun.lock
+bun scripts/lockdiff.mjs origin/develop:src/frontend/packages/devkit/package-lock.json \
   src/frontend/packages/devkit/package-lock.json --detail
 ```
 
@@ -454,35 +476,36 @@ dev → alpha → beta → rc → prerelease → release
 
 | Command | Example input | Result |
 |---------|--------------|--------|
-| `make bump patch` | `v4.9.3-dev.38` | `v4.9.4` |
-| `make bump minor` | `v4.9.3-dev.38` | `v4.10.0` |
-| `make bump major` | `v4.9.3-dev.38` | `v5.0.0` |
+| `make bump patch` | `4.9.3-dev.38` | `4.9.4` |
+| `make bump minor` | `4.9.3-dev.38` | `4.10.0` |
+| `make bump major` | `4.9.3-dev.38` | `5.0.0` |
 
 **Prerelease bumps** (operate on the current semver core — create `.1` if the
 stage is new, otherwise increment the counter):
 
 | Command | Example input | Result |
 |---------|--------------|--------|
-| `make bump dev` | `v4.9.3` | `v4.9.3-dev.1` |
-| `make bump dev` | `v4.9.3-dev.38` | `v4.9.3-dev.39` |
-| `make bump alpha` | `v4.9.3-dev.38` | `v4.9.3-alpha.1` |
-| `make bump beta` | `v4.9.3-alpha.2` | `v4.9.3-beta.1` |
-| `make bump rc` | `v4.9.3-beta.1` | `v4.9.3-rc.1` |
-| `make bump rc` | `v4.9.3-rc.1` | `v4.9.3-rc.2` |
-| `make bump prerelease` | `v4.9.3-rc.2` | `v4.9.3-prerelease.1` |
+| `make bump dev` | `4.9.3` | `4.9.3-dev.1` |
+| `make bump dev` | `4.9.3-dev.38` | `4.9.3-dev.39` |
+| `make bump alpha` | `4.9.3-dev.38` | `4.9.3-alpha.1` |
+| `make bump beta` | `4.9.3-alpha.2` | `4.9.3-beta.1` |
+| `make bump rc` | `4.9.3-beta.1` | `4.9.3-rc.1` |
+| `make bump rc` | `4.9.3-rc.1` | `4.9.3-rc.2` |
+| `make bump prerelease` | `4.9.3-rc.2` | `4.9.3-prerelease.1` |
+| `make bump set TO=5.0.0-rc.1` | any | `5.0.0-rc.1` |
 
 To strip the prerelease suffix and finalize a release, use `FINAL=strip` on
 the release verb — see [Finalizing a release](#finalizing-a-release) below.
 
 **Automatic build metadata.** Every `make bump` appends
 `+build.YYYYMMDD.SHORT-SHA` per SemVer 2.0.0, e.g.
-`v4.9.3-dev.42+build.20260410.79d3982a`. Build metadata is ignored by version
+`4.9.3-dev.42+build.20260410.79d3982a`. Build metadata is ignored by version
 precedence rules but provides traceability from binary to source.
 
-**Explicit set.** For an arbitrary version string, call the script directly:
+**Explicit set.** For an arbitrary version string, pass it in `TO`:
 
 ```bash
-./build/version-bump.sh set v5.0.0-rc.1
+make bump set TO=5.0.0-rc.1
 ```
 
 **Preview a bump** without writing files: use `DRYRUN=yes` (see
@@ -505,6 +528,7 @@ the command shape.
 |----------|-------------|
 | `DRYRUN=yes` | Preview actions without executing. Wired to `bump` (prints the new version without writing `package.json`) and to `check e2e` / `test e2e` (passes `--list` to Playwright, listing tests without running them). |
 | `FINAL=strip` | Strip prerelease suffix from the version (persisted to `package.json`), then re-invoke Make with the remaining goals. Useful as a one-shot finalize-then-package on the release verb. |
+| `TO=...` | The version `make bump set` writes, e.g. `TO=4.9.4-dev.1`. Separate from `VERSION` so a chained `make bump set build` still stamps the `+build` metadata. |
 | `VERSION=...` | Override the version from `package.json` for this invocation only (not persisted). |
 | `PLATFORM=os/arch` | Override backend build platform. Syntax is Go's own `GOOS`/`GOARCH` values, lowercase, slash-separated — not a Stratos-specific format. `os`: `linux`, `darwin`, `windows`. `arch`: `amd64`, `arm64`. Those are the six combinations this project builds/tests (see Supported Platforms in `developer-environment.md`); Go itself supports more `GOOS`/`GOARCH` pairs than that if you need one we don't list. |
 

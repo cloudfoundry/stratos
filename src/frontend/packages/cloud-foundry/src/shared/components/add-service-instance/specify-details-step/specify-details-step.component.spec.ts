@@ -1,20 +1,51 @@
+import { readFileSync } from 'fs';
+import { join } from 'path';
 import { ComponentFixture, TestBed } from '@angular/core/testing';
-import { importProvidersFrom, provideZonelessChangeDetection } from '@angular/core';
-import { provideHttpClient } from '@angular/common/http';
+import { importProvidersFrom, provideZonelessChangeDetection, signal } from '@angular/core';
+import { HttpErrorResponse, provideHttpClient } from '@angular/common/http';
 import { HttpTestingController, provideHttpClientTesting } from '@angular/common/http/testing';
 import { provideRouter } from '@angular/router';
-import { firstValueFrom, of } from 'rxjs';
+import { of } from 'rxjs';
 import { describe, it, expect, beforeEach, vi } from 'vitest';
 
 import { STORE_TEST_PROVIDERS } from '@stratosui/store/testing';
-import { generateCfBaseTestModulesNoShared } from '@test-framework/cf';
+import {
+  answerServiceWrite,
+  generateCfBaseTestModulesNoShared,
+  RESOLVE_PATHS,
+  ResolvePath,
+  serviceWriteContract,
+  ServiceWriteContract,
+} from '@test-framework/cf';
 import { StServiceInstance } from '../../../../services/endpoint-data/stratos-types';
 import { SchemaFormComponent } from '../../schema-form/schema-form.component';
 import { CreateServiceInstanceHelperServiceFactory } from '../create-service-instance-helper-service-factory.service';
 import { CsiGuidsService } from '../csi-guids.service';
 import { CreateServiceFormMode, CsiModeService } from '../csi-mode.service';
 import { CsiStateService } from '../csi-state.service';
+import { TrackedJobsService } from '../../../../services/async-jobs/tracked-jobs.service';
+import { setJobTrackingLimit } from '../../../../services/async-jobs/write-with-job';
+import type { StServicePlan } from '../../../../services/endpoint-data/stratos-types';
 import { SpecifyDetailsStepComponent } from './specify-details-step.component';
+import { EndpointDataRegistry } from '../../../../services/endpoint-data/endpoint-data.registry';
+
+// onNext waits for the wizard state on a microtask before it sends anything,
+// so a spec that answers the request right after calling it lets that settle
+const settle = async () => {
+  for (let i = 0; i < 5; i++) {
+    await Promise.resolve();
+  }
+};
+
+// nginx's own 502 page.
+const nginx502 = (): string =>
+  readFileSync(join(import.meta.dirname, '../../../../../../store/src/testdata/upstream-errors/nginx-502.body'), 'utf8');
+
+// Makes the helper the step reads answer with these service instances
+const stubInstances = (instances: Array<Partial<StServiceInstance>>) => {
+  vi.spyOn(TestBed.inject(CreateServiceInstanceHelperServiceFactory), 'create')
+    .mockReturnValue({ serviceInstances: () => signal(instances) } as never);
+};
 
 describe('SpecifyDetailsStepComponent', () => {
   let component: SpecifyDetailsStepComponent;
@@ -44,10 +75,10 @@ describe('SpecifyDetailsStepComponent', () => {
       .compileComponents();
   });
 
-  beforeEach(() => {
+  beforeEach(async () => {
     fixture = TestBed.createComponent(SpecifyDetailsStepComponent);
     component = fixture.componentInstance;
-    fixture.detectChanges();
+    await fixture.whenStable();
   });
 
   it('should create', () => {
@@ -65,7 +96,6 @@ describe('SpecifyDetailsStepComponent', () => {
     expect(component.cSIHelperService).toBeUndefined();
     expect(() => component.onEnter({ guid: 'plan-1', cnsiGuid: 'cf-1', name: 'small' } as any)).not.toThrow();
     expect(component.cSIHelperService).toBeDefined();
-    expect(component.allServiceInstances$).toBeDefined();
   });
 
   // Regression: the wizard's plan list is summary-tier (no `schemas`), so
@@ -118,14 +148,15 @@ describe('SpecifyDetailsStepComponent', () => {
       { guid: 'si-1', name: 'instance-one' },
       { guid: 'si-2', name: 'instance-two' },
     ] as StServiceInstance[];
-    component.serviceInstances$ = of(instances);
-    component.bindableServiceInstances$ = of(instances);
-    component.hasInstances$ = of(true);
+    stubInstances(instances);
+    const csiState = TestBed.inject(CsiStateService);
+    csiState.setCFDetails('cf-1', 'org-1', 'sp-1');
+    csiState.setServiceGuid('svc-1');
+    csiState.setServicePlan('plan-1');
     component.formMode.set(CreateServiceFormMode.BindServiceInstance);
     // setInput (not a plain field write) so the OnPush view is marked dirty,
     // same as the parent-template binding in the real wizard.
     fixture.componentRef.setInput('showModeSelection', true);
-    fixture.detectChanges();
     await fixture.whenStable();
 
     const texts = Array.from(
@@ -150,13 +181,48 @@ describe('SpecifyDetailsStepComponent', () => {
     httpMock.expectNone(r => r.url.startsWith('/pp/v1/cf/service_plans/'));
     expect(component.schemaFormConfig()?.schema).toEqual(schema);
   });
+
+  // app-form-field shows a field's <app-error> text as its error line.
+  describe('name errors', () => {
+    function nameInput(): HTMLInputElement {
+      return (fixture.nativeElement as HTMLElement).querySelector<HTMLInputElement>('input[placeholder="Name"]')!;
+    }
+
+    async function typeName(value: string) {
+      const input = nameInput();
+      input.value = value;
+      input.dispatchEvent(new Event('input', { bubbles: true }));
+      await fixture.whenStable();
+    }
+
+    /** What app-form-field shows for the name, through aria-errormessage. */
+    function nameError(): string | undefined {
+      const id = nameInput().getAttribute('aria-errormessage');
+      return id ? (fixture.nativeElement as HTMLElement).querySelector(`#${id}`)?.textContent?.trim() : undefined;
+    }
+
+    it('says a taken name already exists', async () => {
+      stubInstances([{ guid: 'si-1', name: 'my-db', space: { guid: 'sp-1' } }]);
+      const csiState = TestBed.inject(CsiStateService);
+      csiState.setCFDetails('cf-1', 'org-1', 'sp-1');
+      csiState.setServiceGuid('svc-1');
+      component.onEnter({ guid: 'plan-1', cnsiGuid: 'cf-1', name: 'small' } as any);
+      await typeName('my-db');
+
+      expect(nameError()).toBe('A service instance with this name already exists. Please enter a different one.');
+    });
+
+    it('says a long name exceeds 50 characters', async () => {
+      await typeName('x'.repeat(51));
+
+      expect(nameError()).toBe('A service instance name cannot exceed 50 characters.');
+    });
+  });
 });
 
-// Stage 5 of the services-domain signal+V3 slice: managed service instance
-// create/update goes through HttpClient + writeWithJob against
-// /pp/v1/cf/service_instances. The previous ngrx pipeline (entity-catalog
-// actions + selectCfRequestInfo polling + LongRunningCfOperationsService)
-// is gone — writeWithJob's fast-path-then-handoff IS the long-running path.
+// Managed service instance create/update goes through HttpClient +
+// writeWithJob against /pp/v1/cf/service_instances; writeWithJob's
+// fast-path-then-handoff is the long-running path.
 //
 // `extractCreatedSiGuid` parses the new SI guid out of writeWithJob's
 // terminal result so the bind-after-create flow can chain into
@@ -164,10 +230,22 @@ describe('SpecifyDetailsStepComponent', () => {
 // fast-path and polled-handoff to the same bare-result shape, so the
 // helper only has to inspect one level.
 describe('SpecifyDetailsStepComponent.onNext (v3 + writeWithJob)', () => {
-  function setup(opts: {
+  // whenStable, advancing the clock when a test has faked it: zoneless
+  // change detection is scheduled on timers.
+  async function stable(fixture: ComponentFixture<unknown>): Promise<void> {
+    const done = fixture.whenStable();
+    if (vi.isFakeTimers()) {
+      await vi.advanceTimersByTimeAsync(20);
+    }
+    await done;
+  }
+
+  async function setup(opts: {
     isEditMode?: boolean;
     bindAppGuid?: string;
+    tags?: string[];
     csiBindParams?: object;
+    instances?: Array<Partial<StServiceInstance>>;
   } = {}) {
     const csiState = {
       cfGuid: 'cnsi-1',
@@ -178,7 +256,11 @@ describe('SpecifyDetailsStepComponent.onNext (v3 + writeWithJob)', () => {
       serviceInstanceGuid: opts.isEditMode ? 'si-existing' : undefined,
       bindAppGuid: opts.bindAppGuid,
       bindAppParams: opts.csiBindParams,
-      name: 'my-instance',
+      // As in the real wizard: create never writes the name into wizard
+      // state, and edit seeds it with the instance's name before the user
+      // renames it in the form. Messages must name what the form sent.
+      name: opts.isEditMode ? 'my-old-instance' : '',
+      tags: opts.tags,
       spaceScoped: false,
     };
 
@@ -220,23 +302,98 @@ describe('SpecifyDetailsStepComponent.onNext (v3 + writeWithJob)', () => {
       ],
     });
 
+    // The endpoint's cached data; a write marks its services stale.
+    const endpointData = { applyCascade: vi.fn() };
+    const registryStub = vi.spyOn(TestBed.inject(EndpointDataRegistry), 'peek')
+      .mockReturnValue(endpointData as unknown as ReturnType<EndpointDataRegistry['peek']>);
+
+    if (opts.instances) {
+      stubInstances(opts.instances);
+    }
     const fixture = TestBed.createComponent(SpecifyDetailsStepComponent);
     const component = fixture.componentInstance;
     component.createNewInstanceForm.controls.name.setValue('my-instance');
-    fixture.detectChanges();
+    await stable(fixture);
     return {
       fixture,
       component,
       modeServiceStub,
       csiStateStub,
+      endpointData,
+      registryStub,
       httpMock: TestBed.inject(HttpTestingController),
     };
   }
 
+  // Cached services lists (the recent-instances card, the offering's count,
+  // the next list's first paint) must not keep the old rows once CF has the
+  // instance, finished or not (#6002).
+  describe('marks the cached services stale', () => {
+    const drain = (httpMock: HttpTestingController) =>
+      httpMock.match(() => true).forEach(r => r.flush({}, { status: 200, statusText: 'OK' }));
+
+    it('after a create', async () => {
+      const { component, httpMock, endpointData, registryStub } = await setup();
+      const done = component.onNext();
+      await settle();
+      httpMock.expectOne('/pp/v1/cf/service_instances/cnsi-1').flush(
+        { state: 'COMPLETE', result: { links: { service_instances: 'https://cf/v3/service_instances/si-new' } } },
+        { status: 200, statusText: 'OK' },
+      );
+      await done;
+      expect(registryStub).toHaveBeenCalledWith('cnsi-1');
+      expect(endpointData.applyCascade).toHaveBeenCalledWith('serviceInstance.create');
+      drain(httpMock);
+    });
+
+    it('after an update', async () => {
+      const { component, httpMock, endpointData } = await setup({ isEditMode: true });
+      const done = component.onNext();
+      await settle();
+      httpMock.expectOne('/pp/v1/cf/service_instances/cnsi-1/si-existing').flush(
+        { state: 'COMPLETE', result: {} }, { status: 200, statusText: 'OK' },
+      );
+      await done;
+      expect(endpointData.applyCascade).toHaveBeenCalledWith('serviceInstance.update');
+      drain(httpMock);
+    });
+
+    it('as soon as CF accepts a slow create, before it ends', async () => {
+      const { fixture, component, httpMock, endpointData } = await setup();
+      const done = component.onNext();
+      await settle();
+      httpMock.expectOne('/pp/v1/cf/service_instances/cnsi-1').flush(
+        { id: 'job-3', state: 'PROCESSING', startedAt: '2026-10-20T00:00:00Z' },
+        { status: 202, statusText: 'Accepted' },
+      );
+      await Promise.resolve();
+      const poll = httpMock.expectOne('/pp/v1/stratos/jobs/job-3');
+      poll.flush({ id: 'job-3', state: 'PROCESSING', startedAt: '2026-10-20T00:00:00Z' }, { status: 200, statusText: 'OK' });
+      await vi.waitFor(() => expect(endpointData.applyCascade).toHaveBeenCalledWith('serviceInstance.create'));
+      fixture.destroy();
+      void done;
+      drain(httpMock);
+    });
+
+    it('after a create that failed inside the fast-path window', async () => {
+      const { component, httpMock, endpointData } = await setup();
+      const done = component.onNext();
+      await settle();
+      httpMock.expectOne('/pp/v1/cf/service_instances/cnsi-1').flush(
+        { errors: [{ code: 'CF-UnableToPerform', detail: 'the broker said no' }] },
+        { status: 502, statusText: 'Bad Gateway' },
+      );
+      await done;
+      expect(endpointData.applyCascade).toHaveBeenCalledWith('serviceInstance.create');
+      drain(httpMock);
+    });
+  });
+
   it('POSTs the v3 managed body and returns success+redirect on create without bind', async () => {
-    const { component, httpMock } = setup();
-    const result$ = component.onNext();
-    const finalResult = firstValueFrom(result$);
+    const { component, httpMock } = await setup();
+    const snackBarOpen = vi.spyOn((component as any).snackBar, 'open');
+    const finalResult = component.onNext();
+    await settle();
 
     const req = httpMock.expectOne('/pp/v1/cf/service_instances/cnsi-1');
     expect(req.request.method).toBe('POST');
@@ -255,22 +412,72 @@ describe('SpecifyDetailsStepComponent.onNext (v3 + writeWithJob)', () => {
         result: {
           jobGuid: 'job-1',
           operation: 'service_instance.create',
-          links: { service_instance: 'https://cf/v3/service_instances/si-new' },
+          links: { service_instances: 'https://cf/v3/service_instances/si-new' },
         },
       },
       { status: 200, statusText: 'OK' },
     );
 
     await expect(finalResult).resolves.toEqual({ success: true, redirect: true });
+    expect(snackBarOpen).toHaveBeenCalledWith('Service instance "my-instance" created.', 'Dismiss', { duration: 4000 });
     // Drain unrelated background loaders the cf test module fires on bootstrap;
     // they are not under test in this stage.
     httpMock.match(() => true).forEach(r => r.flush({}, { status: 200, statusText: 'OK' }));
   });
 
+  it('binds an existing instance and names it, without claiming it was created', async () => {
+    const { component, modeServiceStub, httpMock } = await setup({ bindAppGuid: 'app-1', instances: [ { guid: 'si-1', name: 'instance-one' }, { guid: 'si-2', name: 'instance-two' }, ] });
+    const snackBarOpen = vi.spyOn((component as any).snackBar, 'open');
+    component.bindExistingInstance = true;
+    component.selectExistingInstanceForm.controls.serviceInstance.setValue('si-2');
+
+    await expect(component.onNext()).resolves.toEqual({ success: true, redirect: true });
+    expect(modeServiceStub.createApplicationServiceBinding).toHaveBeenCalledWith('si-2', 'cnsi-1', 'app-1', undefined);
+    expect(snackBarOpen).toHaveBeenCalledWith('Service instance "instance-two" bound to the application.', 'Dismiss', { duration: 4000 });
+    httpMock.expectNone('/pp/v1/cf/service_instances/cnsi-1');
+    httpMock.match(() => true).forEach(r => r.flush({}, { status: 200, statusText: 'OK' }));
+  });
+
+  it('does not say a deferred bind is done', async () => {
+    const { component, modeServiceStub, httpMock } = await setup({ bindAppGuid: 'app-1', instances: [{ guid: 'si-2', name: 'instance-two' }] });
+    modeServiceStub.createApplicationServiceBinding.mockReturnValue(of({ success: true, deferred: true }));
+    const snackBarOpen = vi.spyOn((component as any).snackBar, 'open');
+    component.bindExistingInstance = true;
+    component.selectExistingInstanceForm.controls.serviceInstance.setValue('si-2');
+
+    await expect(component.onNext()).resolves.toEqual({ success: true, redirect: true });
+    expect(snackBarOpen).toHaveBeenCalledWith(
+      'Service instance "instance-two" is still provisioning. It will be bound to the application automatically when ready.',
+      'Dismiss', { duration: 4000 });
+    httpMock.match(() => true).forEach(r => r.flush({}, { status: 200, statusText: 'OK' }));
+  });
+
+  it('says a deferred bind after a create is not done yet', async () => {
+    const { component, modeServiceStub, httpMock } = await setup({ bindAppGuid: 'app-1' });
+    modeServiceStub.createApplicationServiceBinding.mockReturnValue(of({ success: true, deferred: true }));
+    const snackBarOpen = vi.spyOn((component as any).snackBar, 'open');
+    const finalResult = component.onNext();
+    await settle();
+    httpMock.expectOne('/pp/v1/cf/service_instances/cnsi-1').flush(
+      {
+        state: 'COMPLETE',
+        result: { jobGuid: 'job-1', operation: 'service_instance.create', links: { service_instances: 'https://cf/v3/service_instances/si-new' } },
+      },
+      { status: 200, statusText: 'OK' },
+    );
+
+    await expect(finalResult).resolves.toEqual({ success: true, redirect: true });
+    expect(snackBarOpen).toHaveBeenCalledWith(
+      'Service instance "my-instance" created. It is still provisioning, so it will be bound to the application automatically when ready.',
+      'Dismiss', { duration: 4000 });
+    httpMock.match(() => true).forEach(r => r.flush({}, { status: 200, statusText: 'OK' }));
+  });
+
   it('chains into bind when bindAppGuid is set and a SI guid is extractable', async () => {
-    const { component, modeServiceStub, csiStateStub, httpMock } = setup({ bindAppGuid: 'app-1' });
-    const result$ = component.onNext();
-    const finalResult = firstValueFrom(result$);
+    const { component, modeServiceStub, csiStateStub, httpMock } = await setup({ bindAppGuid: 'app-1' });
+    const snackBarOpen = vi.spyOn((component as any).snackBar, 'open');
+    const finalResult = component.onNext();
+    await settle();
 
     const post = httpMock.expectOne('/pp/v1/cf/service_instances/cnsi-1');
     post.flush(
@@ -279,13 +486,14 @@ describe('SpecifyDetailsStepComponent.onNext (v3 + writeWithJob)', () => {
         result: {
           jobGuid: 'job-1',
           operation: 'service_instance.create',
-          links: { service_instance: 'https://cf/v3/service_instances/si-new' },
+          links: { service_instances: 'https://cf/v3/service_instances/si-new' },
         },
       },
       { status: 200, statusText: 'OK' },
     );
 
     await expect(finalResult).resolves.toEqual({ success: true, redirect: true });
+    expect(snackBarOpen).toHaveBeenCalledWith('Service instance "my-instance" created and bound.', 'Dismiss', { duration: 4000 });
     expect(csiStateStub.setServiceInstanceGuid).toHaveBeenCalledWith('si-new');
     expect(modeServiceStub.createApplicationServiceBinding).toHaveBeenCalledWith(
       'si-new', 'cnsi-1', 'app-1', undefined,
@@ -295,12 +503,12 @@ describe('SpecifyDetailsStepComponent.onNext (v3 + writeWithJob)', () => {
     httpMock.match(() => true).forEach(r => r.flush({}, { status: 200, statusText: 'OK' }));
   });
 
-  it('skips auto-bind on slow-async create when no SI link is available (UNKNOWN/missing-link path)', async () => {
-    const { component, modeServiceStub, httpMock } = setup({ bindAppGuid: 'app-1' });
-    const result$ = component.onNext();
-    const finalResult = firstValueFrom(result$);
+  it('reports a create that ended with an unknown result, and that the bind was not attempted', async () => {
+    const { component, modeServiceStub, httpMock } = await setup({ bindAppGuid: 'app-1' });
+    const finalResult = component.onNext();
+    await settle();
 
-    // 202 handoff with a job that 404s on poll → writeWithJob resolves UNKNOWN.
+    // 202 handoff with a job the backend no longer knows → UNKNOWN.
     const post = httpMock.expectOne('/pp/v1/cf/service_instances/cnsi-1');
     post.flush(
       { id: 'job-2', state: 'PROCESSING', startedAt: '2026-05-09T00:00:00Z' },
@@ -311,19 +519,107 @@ describe('SpecifyDetailsStepComponent.onNext (v3 + writeWithJob)', () => {
     const poll = httpMock.expectOne('/pp/v1/stratos/jobs/job-2');
     poll.flush({ errors: [{ message: 'unknown job' }] }, { status: 404, statusText: 'Not Found' });
 
-    // SI eventually settles in CF; bind is left to the user via the services
-    // wall — same UX as SERVICES_WALL_MODE. No bind call here.
-    await expect(finalResult).resolves.toEqual({ success: true, redirect: true });
+    await expect(finalResult).resolves.toEqual({
+      success: false,
+      message: 'Create service instance "my-instance": the operation ended, but its result could not be determined. '
+        + 'The Services list shows the current state. It was not bound to the application.',
+    });
     expect(modeServiceStub.createApplicationServiceBinding).not.toHaveBeenCalled();
     // Drain unrelated background loaders the cf test module fires on bootstrap;
     // they are not under test in this stage.
     httpMock.match(() => true).forEach(r => r.flush({}, { status: 200, statusText: 'OK' }));
   });
 
+  it('reports an update that ended with an unknown result, never as updated', async () => {
+    const { component, httpMock } = await setup({ isEditMode: true });
+    const finalResult = component.onNext();
+    await settle();
+
+    httpMock.expectOne('/pp/v1/cf/service_instances/cnsi-1/si-existing').flush(null, { status: 202, statusText: 'Accepted' });
+
+    await expect(finalResult).resolves.toEqual({
+      success: false,
+      message: 'Update service instance "my-instance": the operation ended, but its result could not be determined. '
+        + 'The Services list shows the current state.',
+    });
+    httpMock.match(() => true).forEach(r => r.flush({}, { status: 200, statusText: 'OK' }));
+  });
+
+  it('reports a bind that ended with an unknown result after a create', async () => {
+    const { component, modeServiceStub, httpMock } = await setup({ bindAppGuid: 'app-1' });
+    modeServiceStub.createApplicationServiceBinding.mockReturnValue(of({ success: false, unknown: 'ended' }));
+    const finalResult = component.onNext();
+    await settle();
+
+    httpMock.expectOne('/pp/v1/cf/service_instances/cnsi-1').flush(
+      {
+        state: 'COMPLETE',
+        result: { jobGuid: 'job-1', operation: 'service_instance.create', links: { service_instances: 'https://cf/v3/service_instances/si-new' } },
+      },
+      { status: 200, statusText: 'OK' },
+    );
+
+    await expect(finalResult).resolves.toEqual({
+      success: false,
+      message: 'Service instance "my-instance" was created. Binding it to the application: the operation ended, '
+        + 'but its result could not be determined. The application\'s Services tab shows the current state.',
+    });
+    httpMock.match(() => true).forEach(r => r.flush({}, { status: 200, statusText: 'OK' }));
+  });
+
+  it('names the instance and says it was created when the bind after a create fails', async () => {
+    const { component, modeServiceStub, httpMock } = await setup({ bindAppGuid: 'app-1' });
+    modeServiceStub.createApplicationServiceBinding.mockReturnValue(of({ success: false, message: 'bind said no' }));
+    const finalResult = component.onNext();
+    await settle();
+
+    httpMock.expectOne('/pp/v1/cf/service_instances/cnsi-1').flush(
+      {
+        state: 'COMPLETE',
+        result: { jobGuid: 'job-1', operation: 'service_instance.create', links: { service_instances: 'https://cf/v3/service_instances/si-new' } },
+      },
+      { status: 200, statusText: 'OK' },
+    );
+
+    const message = 'Service instance "my-instance" was created, but binding it to the application failed: bind said no';
+    await expect(finalResult).resolves.toEqual({ success: false, message, messagePieces: [{ text: message, style: 'text' }] });
+    httpMock.match(() => true).forEach(r => r.flush({}, { status: 200, statusText: 'OK' }));
+  });
+
+  it('names the instance when binding an existing one fails', async () => {
+    const { component, modeServiceStub, httpMock } = await setup({ bindAppGuid: 'app-1', instances: [{ guid: 'si-2', name: 'instance-two' }] });
+    modeServiceStub.createApplicationServiceBinding.mockReturnValue(of({ success: false, message: 'bind said no' }));
+    component.bindExistingInstance = true;
+    component.selectExistingInstanceForm.controls.serviceInstance.setValue('si-2');
+
+    const message = 'Failed to bind service instance "instance-two" to the application: bind said no';
+    await expect(component.onNext()).resolves.toEqual({ success: false, message, messagePieces: [{ text: message, style: 'text' }] });
+    httpMock.match(() => true).forEach(r => r.flush({}, { status: 200, statusText: 'OK' }));
+  });
+
+  it('keeps an error page\'s heading when binding an existing instance fails', async () => {
+    const { component, modeServiceStub, httpMock } = await setup({ bindAppGuid: 'app-1', instances: [{ guid: 'si-2', name: 'instance-two' }] });
+    const error = new HttpErrorResponse({ error: nginx502(), status: 502, statusText: 'Bad Gateway' });
+    modeServiceStub.createApplicationServiceBinding.mockReturnValue(of({ success: false, message: '502 Bad Gateway\nnginx/1.28.0', error }));
+    component.bindExistingInstance = true;
+    component.selectExistingInstanceForm.controls.serviceInstance.setValue('si-2');
+
+    const out = await component.onNext();
+
+    expect(out.message).toBe('Failed to bind service instance "instance-two" to the application: 502 Bad Gateway\nnginx/1.28.0');
+    expect(out.messagePieces).toEqual([
+      { text: 'Failed to bind service instance "instance-two" to the application: ', style: 'text' },
+      { text: '502 Bad Gateway', style: 'heading' },
+      { text: '\nnginx/1.28.0', style: 'text' },
+    ]);
+    httpMock.match(() => true).forEach(r => r.flush({}, { status: 200, statusText: 'OK' }));
+  });
+
   it('PATCHes the v3 endpoint and returns success+redirect on update', async () => {
-    const { component, httpMock } = setup({ isEditMode: true });
-    const result$ = component.onNext();
-    const finalResult = firstValueFrom(result$);
+    const { component, httpMock } = await setup({ isEditMode: true });
+    const snackBarOpen = vi.spyOn((component as any).snackBar, 'open');
+    const finalResult = component.onNext();
+    await settle();
 
     const req = httpMock.expectOne('/pp/v1/cf/service_instances/cnsi-1/si-existing');
     expect(req.request.method).toBe('PATCH');
@@ -337,15 +633,420 @@ describe('SpecifyDetailsStepComponent.onNext (v3 + writeWithJob)', () => {
     );
 
     await expect(finalResult).resolves.toEqual({ success: true, redirect: true });
+    expect(snackBarOpen).toHaveBeenCalledWith('Service instance "my-instance" updated.', 'Dismiss', { duration: 4000 });
     // Drain unrelated background loaders the cf test module fires on bootstrap;
     // they are not under test in this stage.
     httpMock.match(() => true).forEach(r => r.flush({}, { status: 200, statusText: 'OK' }));
   });
 
+  describe('a write that outlasts the wait', () => {
+    const failedJob = {
+      id: 'job-slow', kind: 'service_instance.create', state: 'FAILED', startedAt: '2026-10-15T00:00:00Z',
+      errors: [{ code: 'CF-UnableToPerform', message: 'CF-UnableToPerform', detail: 'the broker said no' }],
+    };
+
+    async function startSlowCreate(opts: Parameters<typeof setup>[0] = {}) {
+      vi.useFakeTimers();
+      const ctx = await setup(opts);
+      const tracked = TestBed.inject(TrackedJobsService);
+      vi.spyOn(tracked, 'remember');
+      vi.spyOn(tracked, 'forget');
+      // Each release hold() hands out, so a test can see when the wizard lets go.
+      const releases: ReturnType<typeof vi.fn>[] = [];
+      const realHold = tracked.hold.bind(tracked);
+      vi.spyOn(tracked, 'hold').mockImplementation(id => {
+        const release = vi.fn(realHold(id));
+        releases.push(release);
+        return release;
+      });
+      const open = vi.spyOn((ctx.component as any).snackBar, 'open');
+      const error = vi.spyOn((ctx.component as any).snackBar, 'error');
+      const result = ctx.component.onNext();
+      await settle();
+      ctx.httpMock.expectOne('/pp/v1/cf/service_instances/cnsi-1').flush(
+        { id: 'job-slow', state: 'PROCESSING', startedAt: '2026-10-15T00:00:00Z' },
+        { status: 202, statusText: 'Accepted' },
+      );
+      await vi.advanceTimersByTimeAsync(0);
+      // Answer the background loaders the cf test module starts, so their
+      // 60 s timeouts do not fire while these tests wait minutes.
+      ctx.httpMock.match(r => !r.url.startsWith('/pp/v1/stratos/jobs/'))
+        .forEach(r => r.flush({}, { status: 200, statusText: 'OK' }));
+      return { ...ctx, open, error, result, tracked, releases };
+    }
+
+    function answerPoll(httpMock: HttpTestingController, body: object) {
+      httpMock.expectOne('/pp/v1/stratos/jobs/job-slow').flush(body, { status: 200, statusText: 'OK' });
+    }
+
+    it('asks at 30 s, and with no answer hands off to the Services list, keeps tracking, and reports a later failure', async () => {
+      const { component, httpMock, open, error, result } = await startSlowCreate();
+      try {
+        await vi.advanceTimersByTimeAsync(30_000);
+        expect(component.slowWrite()).toEqual({
+          text: 'Creating service instance "my-instance" is still running after 30 s.', answerIn: 30,
+        });
+        expect(open).not.toHaveBeenCalled();
+        await vi.advanceTimersByTimeAsync(29_000);
+        expect(component.slowWrite()?.answerIn).toBe(1);
+        expect(open).not.toHaveBeenCalled();
+        await vi.advanceTimersByTimeAsync(1_000);
+        await expect(result).resolves.toEqual({ success: true, redirect: true });
+        expect(component.slowWrite()).toBeNull();
+        expect(open).toHaveBeenCalledWith(
+          'Creating service instance "my-instance" carries on in the background. The Services list shows its '
+            + 'progress, and a message will say how it ended.',
+          'Dismiss', { duration: 10000 },
+        );
+
+        answerPoll(httpMock, failedJob);
+        await vi.advanceTimersByTimeAsync(0);
+        expect(error).toHaveBeenCalledWith([{ text: 'Failed to create service instance "my-instance": the broker said no', style: 'text' }]);
+      } finally {
+        vi.useRealTimers();
+      }
+      httpMock.match(() => true).forEach(r => r.flush({}, { status: 200, statusText: 'OK' }));
+    });
+
+    // Snackbars stack: the 10 s hand-off notice must not outlive the
+    // message that says how the write ended.
+    for (const end of ['failure', 'success'] as const) {
+      it(`takes the hand-off notice down before reporting a ${end}`, async () => {
+        const { component, httpMock, open, error, result } = await startSlowCreate();
+        try {
+          await vi.advanceTimersByTimeAsync(30_000);
+          component.continueInBackground();
+          await expect(result).resolves.toEqual({ success: true, redirect: true });
+          const notice = vi.spyOn(open.mock.results[0].value, 'dismiss');
+          answerPoll(httpMock, end === 'failure'
+            ? failedJob
+            : { ...failedJob, state: 'COMPLETE', errors: undefined, result: {} });
+          await vi.advanceTimersByTimeAsync(0);
+          const reported = end === 'failure' ? error.mock.invocationCallOrder : open.mock.invocationCallOrder.slice(1);
+          expect(reported).toHaveLength(1);
+          expect(notice).toHaveBeenCalled();
+          expect(notice.mock.invocationCallOrder[0]).toBeLessThan(reported[0]);
+        } finally {
+          vi.useRealTimers();
+        }
+        httpMock.match(() => true).forEach(r => r.flush({}, { status: 200, statusText: 'OK' }));
+      });
+    }
+
+    it('brings the question into view and focus when it appears', async () => {
+      const scrollIntoView = vi.fn();
+      const original = Element.prototype.scrollIntoView;
+      Element.prototype.scrollIntoView = scrollIntoView;
+      const { fixture, httpMock, result, component } = await startSlowCreate();
+      try {
+        await vi.advanceTimersByTimeAsync(30_000);
+        await stable(fixture);
+        expect(scrollIntoView).toHaveBeenCalledWith({ block: 'nearest', behavior: 'smooth' });
+        expect(scrollIntoView.mock.contexts[0]).toBe(fixture.nativeElement.querySelector('[role=alertdialog]'));
+        // An alert dialog takes focus, so it is read out and answerable from
+        // the keyboard: its first control.
+        expect(document.activeElement).toBe(fixture.nativeElement.querySelector('#slow-write-seconds'));
+        component.continueInBackground();
+        await result;
+      } finally {
+        Element.prototype.scrollIntoView = original;
+        vi.useRealTimers();
+      }
+      httpMock.match(() => true).forEach(r => r.flush({}, { status: 200, statusText: 'OK' }));
+    });
+
+    it('hands off at once when the user chooses to continue in the background', async () => {
+      const { component, httpMock, open, result } = await startSlowCreate();
+      try {
+        await vi.advanceTimersByTimeAsync(30_000);
+        component.continueInBackground();
+        await expect(result).resolves.toEqual({ success: true, redirect: true });
+        expect(open).toHaveBeenCalledWith(
+          'Creating service instance "my-instance" carries on in the background. The Services list shows its '
+            + 'progress, and a message will say how it ended.',
+          'Dismiss', { duration: 10000 },
+        );
+        expect(component.slowWrite()).toBeNull();
+      } finally {
+        vi.useRealTimers();
+      }
+      httpMock.match(() => true).forEach(r => r.flush({}, { status: 200, statusText: 'OK' }));
+    });
+
+    it('keeps waiting for the chosen seconds, then asks again with the time so far', async () => {
+      const { component, httpMock, open, result } = await startSlowCreate();
+      let settled = false;
+      void result.then(() => { settled = true; });
+      try {
+        await vi.advanceTimersByTimeAsync(40_000);
+        component.waitSeconds.set(45);
+        component.keepWaiting();
+        expect(component.slowWrite()).toBeNull();
+        await vi.advanceTimersByTimeAsync(44_000);
+        expect(component.slowWrite()).toBeNull();
+        expect(settled).toBe(false);
+        await vi.advanceTimersByTimeAsync(1_000);
+        expect(component.slowWrite()).toEqual({
+          text: 'Creating service instance "my-instance" is still running after 1 min.', answerIn: 30,
+        });
+        expect(open).not.toHaveBeenCalled();
+        expect(settled).toBe(false);
+      } finally {
+        vi.useRealTimers();
+      }
+      httpMock.match(() => true).forEach(r => r.flush({}, { status: 200, statusText: 'OK' }));
+    });
+
+    it('takes 30 to 600 whole seconds and ignores Keep waiting otherwise', async () => {
+      const { component, httpMock, result } = await startSlowCreate();
+      try {
+        await vi.advanceTimersByTimeAsync(30_000);
+        for (const [value, valid] of [[29, false], [30, true], [600, true], [601, false], [45.5, false], [null, false]] as const) {
+          component.waitSeconds.set(value as number);
+          expect(component.waitSecondsValid()).toBe(valid);
+        }
+        component.waitSeconds.set(601);
+        component.keepWaiting();
+        expect(component.slowWrite()).not.toBeNull();
+        component.continueInBackground();
+        await result;
+      } finally {
+        vi.useRealTimers();
+      }
+      httpMock.match(() => true).forEach(r => r.flush({}, { status: 200, statusText: 'OK' }));
+    });
+
+    it('renders what the user types into the seconds field: the error and a disabled Keep waiting', async () => {
+      const { fixture, httpMock, result, component } = await startSlowCreate();
+      try {
+        // Zoneless change detection is scheduled on the (fake) clock.
+        const stable = async () => { const done = fixture.whenStable(); await vi.advanceTimersByTimeAsync(50); await done; };
+        await vi.advanceTimersByTimeAsync(30_000);
+        await stable();
+        const root: HTMLElement = fixture.nativeElement;
+        const input = root.querySelector<HTMLInputElement>('#slow-write-seconds')!;
+        const keep = () => [...root.querySelectorAll('button')].find(b => b.textContent?.trim() === 'Keep waiting')!;
+        expect(input.value).toBe('60');
+        expect(keep().disabled).toBe(false);
+        input.value = '601';
+        input.dispatchEvent(new Event('input'));
+        await stable();
+        expect(keep().disabled).toBe(true);
+        expect(root.querySelector('#slow-write-range')?.textContent).toContain('Enter 30 to 600 whole seconds.');
+        input.value = '90';
+        input.dispatchEvent(new Event('input'));
+        await stable();
+        expect(keep().disabled).toBe(false);
+        expect(root.querySelector('#slow-write-range')).toBeNull();
+        component.continueInBackground();
+        await result;
+      } finally {
+        vi.useRealTimers();
+      }
+      httpMock.match(() => true).forEach(r => r.flush({}, { status: 200, statusText: 'OK' }));
+    });
+
+    it('closes the prompt and reports the outcome when the write ends while asking', async () => {
+      const { component, httpMock, open, result } = await startSlowCreate();
+      try {
+        await vi.advanceTimersByTimeAsync(30_000);
+        expect(component.slowWrite()).not.toBeNull();
+        answerPoll(httpMock, { ...failedJob, state: 'COMPLETE', errors: undefined, result: {} });
+        await expect(result).resolves.toEqual({ success: true, redirect: true });
+        expect(component.slowWrite()).toBeNull();
+        expect(open).toHaveBeenCalledTimes(1);
+        expect(open).toHaveBeenCalledWith('Service instance "my-instance" created.', 'Dismiss', { duration: 4000 });
+        await vi.advanceTimersByTimeAsync(60_000);
+        expect(open).toHaveBeenCalledTimes(1);
+      } finally {
+        vi.useRealTimers();
+      }
+      httpMock.match(() => true).forEach(r => r.flush({}, { status: 200, statusText: 'OK' }));
+    });
+
+    it('hands off once when the user leaves while being asked', async () => {
+      const { component, fixture, httpMock, open, result } = await startSlowCreate();
+      try {
+        await vi.advanceTimersByTimeAsync(30_000);
+        fixture.destroy();
+        await expect(result).resolves.toEqual({ success: true, redirect: true });
+        expect(component.slowWrite()).toBeNull();
+        await vi.advanceTimersByTimeAsync(60_000);
+        expect(open).toHaveBeenCalledTimes(1);
+      } finally {
+        vi.useRealTimers();
+      }
+      httpMock.match(() => true).forEach(r => r.flush({}, { status: 200, statusText: 'OK' }));
+    });
+
+    const processingJob = { ...failedJob, state: 'PROCESSING', errors: undefined };
+
+    it('remembers a running write so a reload or a new sign-in can report it, and forgets it once it ends', async () => {
+      const { httpMock, result, tracked } = await startSlowCreate();
+      try {
+        answerPoll(httpMock, processingJob);
+        await vi.advanceTimersByTimeAsync(0);
+        expect(tracked.remember).toHaveBeenCalledWith({
+          jobId: 'job-slow',
+          startedAt: Date.now(),
+          running: 'Creating service instance "my-instance"',
+          done: 'Service instance "my-instance" created.',
+          failed: 'Failed to create service instance "my-instance"',
+          unknown: 'Create service instance "my-instance"',
+          where: 'The Services list',
+        });
+        expect(tracked.following.has('job-slow')).toBe(true);
+        await vi.advanceTimersByTimeAsync(500);
+        answerPoll(httpMock, { ...failedJob, state: 'COMPLETE', errors: undefined, result: {} });
+        await expect(result).resolves.toEqual({ success: true, redirect: true });
+        expect(tracked.forget).toHaveBeenCalledWith('job-slow');
+        expect(tracked.following.has('job-slow')).toBe(false);
+      } finally {
+        vi.useRealTimers();
+      }
+      httpMock.match(() => true).forEach(r => r.flush({}, { status: 200, statusText: 'OK' }));
+    });
+
+    it('holds the write against other tabs from before it is remembered until after it is forgotten', async () => {
+      const { httpMock, result, tracked, releases } = await startSlowCreate();
+      try {
+        answerPoll(httpMock, processingJob);
+        await vi.advanceTimersByTimeAsync(0);
+        expect(tracked.hold).toHaveBeenCalledOnce();
+        expect(tracked.hold).toHaveBeenCalledWith('job-slow');
+        expect(vi.mocked(tracked.hold).mock.invocationCallOrder[0])
+          .toBeLessThan(vi.mocked(tracked.remember).mock.invocationCallOrder[0]);
+        expect(releases[0]).not.toHaveBeenCalled();
+        await vi.advanceTimersByTimeAsync(500);
+        answerPoll(httpMock, { ...failedJob, state: 'COMPLETE', errors: undefined, result: {} });
+        await expect(result).resolves.toEqual({ success: true, redirect: true });
+        expect(releases[0]).toHaveBeenCalledOnce();
+        expect(vi.mocked(tracked.forget).mock.invocationCallOrder[0])
+          .toBeLessThan(releases[0].mock.invocationCallOrder[0]);
+      } finally {
+        vi.useRealTimers();
+      }
+      httpMock.match(() => true).forEach(r => r.flush({}, { status: 200, statusText: 'OK' }));
+    });
+
+    it('says a resumed create was not bound when the wizard was to bind it', async () => {
+      const { httpMock, tracked } = await startSlowCreate({ bindAppGuid: 'app-1' });
+      try {
+        answerPoll(httpMock, processingJob);
+        await vi.advanceTimersByTimeAsync(0);
+        expect(tracked.remember).toHaveBeenCalledWith(expect.objectContaining({
+          done: 'Service instance "my-instance" created. It was not bound to the application: the wizard that '
+            + 'would bind it closed before the instance was ready.',
+        }));
+      } finally {
+        vi.useRealTimers();
+      }
+      httpMock.match(() => true).forEach(r => r.flush({}, { status: 200, statusText: 'OK' }));
+    });
+
+    it('keeps the record and says so when the session ends while following', async () => {
+      const { httpMock, result, tracked } = await startSlowCreate();
+      try {
+        answerPoll(httpMock, processingJob);
+        await vi.advanceTimersByTimeAsync(500);
+        httpMock.expectOne('/pp/v1/stratos/jobs/job-slow').flush({}, { status: 401, statusText: 'Unauthorized' });
+        await expect(result).resolves.toEqual({
+          success: false,
+          message: 'Signed out while Creating service instance "my-instance" was running (1 s so far). '
+            + 'Its status will show after you sign in.',
+        });
+        expect(tracked.forget).not.toHaveBeenCalled();
+      } finally {
+        vi.useRealTimers();
+      }
+      httpMock.match(() => true).forEach(r => r.flush({}, { status: 200, statusText: 'OK' }));
+    });
+
+    it('stops following at the configured limit, says it is still running in CF, and forgets the write', async () => {
+      setJobTrackingLimit(1);
+      const { component, httpMock, result, error, tracked } = await startSlowCreate();
+      try {
+        answerPoll(httpMock, processingJob);
+        await vi.advanceTimersByTimeAsync(30_000);
+        component.continueInBackground();
+        await expect(result).resolves.toEqual({ success: true, redirect: true });
+        for (let i = 0; i < 20 && !error.mock.calls.length; i++) {
+          httpMock.match('/pp/v1/stratos/jobs/job-slow').forEach(r => r.flush(processingJob));
+          await vi.advanceTimersByTimeAsync(3_000);
+        }
+        expect(error).toHaveBeenCalledWith(
+          'Create service instance "my-instance": still running in Cloud Foundry after 1 min, so Stratos stopped '
+            + 'checking on it. The Services list shows its current state.');
+        expect(tracked.forget).toHaveBeenCalledWith('job-slow');
+      } finally {
+        setJobTrackingLimit(60);
+        vi.useRealTimers();
+      }
+      httpMock.match(() => true).filter(r => !r.cancelled).forEach(r => r.flush({}, { status: 200, statusText: 'OK' }));
+    });
+
+    it('does not hand off a write that ends inside the wait', async () => {
+      const { httpMock, open, result } = await startSlowCreate();
+      try {
+        await vi.advanceTimersByTimeAsync(29_000);
+        answerPoll(httpMock, { ...failedJob, state: 'COMPLETE', errors: undefined, result: {} });
+        await expect(result).resolves.toEqual({ success: true, redirect: true });
+        expect(open).toHaveBeenCalledTimes(1);
+        expect(open).toHaveBeenCalledWith('Service instance "my-instance" created.', 'Dismiss', { duration: 4000 });
+      } finally {
+        vi.useRealTimers();
+      }
+      httpMock.match(() => true).forEach(r => r.flush({}, { status: 200, statusText: 'OK' }));
+    });
+
+    it('hands off as soon as the user leaves the wizard, and only once', async () => {
+      const { fixture, httpMock, open } = await startSlowCreate();
+      try {
+        fixture.destroy();
+        expect(open).toHaveBeenCalledWith(
+          'Creating service instance "my-instance" carries on in the background. The Services list shows its '
+            + 'progress, and a message will say how it ended.',
+          'Dismiss', { duration: 10000 },
+        );
+        await vi.advanceTimersByTimeAsync(90_000);
+        expect(open).toHaveBeenCalledTimes(1);
+      } finally {
+        vi.useRealTimers();
+      }
+      httpMock.match(() => true).forEach(r => r.flush({}, { status: 200, statusText: 'OK' }));
+    });
+
+    it('reports a failure that ends after the user left the wizard', async () => {
+      const { fixture, httpMock, error } = await startSlowCreate();
+      try {
+        fixture.destroy();
+        answerPoll(httpMock, failedJob);
+        await vi.advanceTimersByTimeAsync(0);
+        expect(error).toHaveBeenCalledWith([{ text: 'Failed to create service instance "my-instance": the broker said no', style: 'text' }]);
+      } finally {
+        vi.useRealTimers();
+      }
+      httpMock.match(() => true).forEach(r => r.flush({}, { status: 200, statusText: 'OK' }));
+    });
+  });
+
+  it('renders the instance\'s existing tags when editing, and drops a removed one', async () => {
+    const { fixture, component, httpMock } = await setup({ isEditMode: true, tags: ['db', 'prod'] });
+    component.onEnter({ guid: 'plan-1', cnsiGuid: 'cnsi-1' } as StServicePlan);
+    await fixture.whenStable();
+    const chips = () => [...(fixture.nativeElement as HTMLElement).querySelectorAll('.stepper-form__tags span.rounded-full')]
+      .map(e => e.textContent?.replace('cancel', '').trim());
+    expect(chips()).toEqual(['db', 'prod']);
+    component.removeTag('db');
+    await fixture.whenStable();
+    expect(chips()).toEqual(['prod']);
+    httpMock.match(() => true).forEach(r => r.flush({}, { status: 200, statusText: 'OK' }));
+  });
+
   it('surfaces CF detail message on 4xx create failure', async () => {
-    const { component, httpMock } = setup();
-    const result$ = component.onNext();
-    const finalResult = firstValueFrom(result$);
+    const { component, httpMock } = await setup();
+    const finalResult = component.onNext();
+    await settle();
 
     const req = httpMock.expectOne('/pp/v1/cf/service_instances/cnsi-1');
     req.flush(
@@ -359,5 +1060,99 @@ describe('SpecifyDetailsStepComponent.onNext (v3 + writeWithJob)', () => {
     // Drain unrelated background loaders the cf test module fires on bootstrap;
     // they are not under test in this stage.
     httpMock.match(() => true).forEach(r => r.flush({}, { status: 200, statusText: 'OK' }));
+  });
+
+  // CF quotes the broker's own page in the error detail.
+  it('keeps an error page\'s heading when the create fails', async () => {
+    const { component, httpMock } = await setup();
+    const finalResult = component.onNext();
+    await settle();
+
+    httpMock.expectOne('/pp/v1/cf/service_instances/cnsi-1').flush(
+      { errors: [{ code: 10001, title: 'CF-ServiceBrokerBadResponse', detail: nginx502() }] },
+      { status: 502, statusText: 'Bad Gateway' },
+    );
+
+    const out = await finalResult;
+    expect(out.message).toBe('Failed to create service instance "my-instance": 502 Bad Gateway\nnginx/1.28.0');
+    expect(out.messagePieces).toEqual([
+      { text: 'Failed to create service instance "my-instance": ', style: 'text' },
+      { text: '502 Bad Gateway', style: 'heading' },
+      { text: '\nnginx/1.28.0', style: 'text' },
+    ]);
+    httpMock.match(() => true).forEach(r => r.flush({}, { status: 200, statusText: 'OK' }));
+  });
+
+  // Recorded backend answers (see @test-framework/cf service-write-contract):
+  // a synchronous or asynchronous broker, resolved on the fast or the polled
+  // path, must give the user the same outcome.
+  describe('same outcome for sync and async brokers on both resolve paths', () => {
+    const CREATE_URL = '/pp/v1/cf/service_instances/cnsi-1';
+    const UPDATE_URL = '/pp/v1/cf/service_instances/cnsi-1/si-existing';
+
+    async function runOnNext(opts: Parameters<typeof setup>[0], url: string, contract: ServiceWriteContract, path: ResolvePath) {
+      const ctx = await setup(opts);
+      const finalResult = ctx.component.onNext();
+      await settle();
+      await answerServiceWrite(ctx.httpMock, url, contract, path);
+      const out = await finalResult;
+      // Drain unrelated background loaders the cf test module fires on bootstrap.
+      ctx.httpMock.match(() => true).forEach(r => r.flush({}, { status: 200, statusText: 'OK' }));
+      return { out, ...ctx };
+    }
+
+    // The new instance's guid as CF reported it, found without assuming
+    // which link key carries it.
+    function createdGuid(contract: ServiceWriteContract): string {
+      const m = JSON.stringify(contract.fastPath.body).match(/\/v3\/service_instances\/([0-9a-f-]{36})/);
+      if (!m) {
+        throw new Error('recorded create names no service instance');
+      }
+      return m[1];
+    }
+
+    for (const broker of ['sync', 'async']) {
+      for (const path of RESOLVE_PATHS) {
+        const name = `${broker} broker, ${path} path`;
+
+        it(`creates: ${name}`, async () => {
+          const { out } = await runOnNext({}, CREATE_URL, serviceWriteContract(`${broker}-service-instance-create`), path);
+          expect(out).toEqual({ success: true, redirect: true });
+        });
+
+        it(`creates and binds the selected app: ${name}`, async () => {
+          const contract = serviceWriteContract(`${broker}-service-instance-create`);
+          const { out, csiStateStub, modeServiceStub } = await runOnNext({ bindAppGuid: 'app-1' }, CREATE_URL, contract, path);
+          expect(out).toEqual({ success: true, redirect: true });
+          expect(csiStateStub.setServiceInstanceGuid).toHaveBeenCalledWith(createdGuid(contract));
+          expect(modeServiceStub.createApplicationServiceBinding).toHaveBeenCalledWith(
+            createdGuid(contract), 'cnsi-1', 'app-1', undefined,
+          );
+        });
+
+        it(`updates: ${name}`, async () => {
+          const { out } = await runOnNext({ isEditMode: true }, UPDATE_URL, serviceWriteContract(`${broker}-service-instance-update`), path);
+          expect(out).toEqual({ success: true, redirect: true });
+        });
+      }
+    }
+
+    const failures: [string, string, Parameters<typeof setup>[0]][] = [
+      ['failasync-service-instance-create', CREATE_URL, {}],
+      ['syncfail-service-instance-create', CREATE_URL, {}],
+      ['failasync-service-instance-update', UPDATE_URL, { isEditMode: true }],
+    ];
+    for (const [contractName, url, opts] of failures) {
+      // Both paths show Stratos's lead-in and the broker's own words; the
+      // CF code and title go to the console (#6002).
+      it(`reports the broker failure the same way on both paths: ${contractName}`, async () => {
+        const contract = serviceWriteContract(contractName);
+        const fast = await runOnNext(opts, url, contract, 'fast');
+        const polled = await runOnNext(opts, url, contract, 'polled');
+        expect(fast.out.success).toBe(false);
+        expect(polled.out.success).toBe(false);
+        expect(polled.out.message).toEqual(fast.out.message);
+      });
+    }
   });
 });

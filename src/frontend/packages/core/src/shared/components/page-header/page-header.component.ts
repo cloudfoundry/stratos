@@ -1,24 +1,22 @@
 import { Portal, TemplatePortal } from '@angular/cdk/portal';
 import { CommonModule } from '@angular/common';
 import { HttpClient } from '@angular/common/http';
-import { ChangeDetectionStrategy, ChangeDetectorRef, AfterViewInit, Component, Input, OnDestroy, TemplateRef, ViewChild, ViewContainerRef, computed, inject } from '@angular/core';
+import { ChangeDetectionStrategy, AfterViewInit, Component, HostListener, OnDestroy, TemplateRef, ViewContainerRef, computed, effect, inject, input, linkedSignal, Signal, signal, untracked, viewChild } from '@angular/core';
 import { RouterModule, ActivatedRoute, Router } from '@angular/router';
-import { toObservable, takeUntilDestroyed } from '@angular/core/rxjs-interop';
+import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import {
   InternalEventSeverity,
   IFavoriteMetadata,
   UserFavorite,
   RecentlyVisitedDataService,
-  StratosStatus,
-  UserProfileInfo,
   AuthTokenEnvelope,
 } from '@stratosui/store';
 import { StratosBrandingService } from '../../../../../theme/stratos-branding.service';
 import { DashboardSignalService } from '../../../core/signals/dashboard-signal.service';
 import { DashboardDataService } from '../../../core/dashboard-data.service';
 import { getTime } from 'date-fns';
-import { combineLatest, firstValueFrom, Observable, shareReplay } from 'rxjs';
-import { map, startWith } from 'rxjs/operators';
+import { firstValueFrom, Observable, shareReplay } from 'rxjs';
+import { map } from 'rxjs/operators';
 import { TailwindSnackBarService } from '../../services/tailwind-snackbar.service';
 
 import { StratosActionType } from '../../../core/extension/extension-service';
@@ -27,7 +25,7 @@ import { StratosCurrentUserPermissions } from '../../../core/permissions/stratos
 import { UserProfileService } from '../../../core/user-profile.service';
 import { IPageSideNavTab } from '../../../features/dashboard/page-side-nav/page-side-nav.component';
 import { TabNavService } from '../../../tab-nav.service';
-import { GlobalEventService, IGlobalEvent } from '../../global-events.service';
+import { GlobalEventService } from '../../global-events.service';
 import { EndpointsService } from './../../../core/endpoints.service';
 import { environment } from './../../../environments/environment';
 import { BREADCRUMB_URL_PARAM, IHeaderBreadcrumb, IHeaderBreadcrumbLink } from './page-header.types';
@@ -35,9 +33,10 @@ import { EntityFavoriteStarComponent } from '../../../core/entity-favorite-star/
 import { CustomTooltipDirective } from '../custom-tooltip/custom-tooltip.directive';
 import { ExtensionButtonsComponent } from '../extension-buttons/extension-buttons.component';
 import { RecentEntitiesComponent } from '../recent-entities/recent-entities.component';
-import { UserAvatarComponent } from '../user-avatar/user-avatar.component';
+import { UserAvatarComponent, avatarInitials } from '../user-avatar/user-avatar.component';
 import { PageHeaderEventsComponent } from './page-header-events/page-header-events.component';
 import { ThemeToggleComponent } from '../theme-toggle/theme-toggle.component';
+import { BreadcrumbsComponent } from '../breadcrumbs/breadcrumbs.component';
 
 // Shared between the anchor's target and the popup window.open call, so both
 // modes address the same window and reuse it on repeat clicks.
@@ -46,7 +45,6 @@ const DOCUMENTATION_WINDOW_NAME = 'stratos-docs';
 @Component({
   selector: 'app-page-header',
   templateUrl: './page-header.component.html',
-  styleUrls: ['./page-header.component.scss'],
   standalone: true,
   imports: [
     CommonModule,
@@ -57,7 +55,8 @@ const DOCUMENTATION_WINDOW_NAME = 'stratos-docs';
     RecentEntitiesComponent,
     UserAvatarComponent,
     PageHeaderEventsComponent,
-    ThemeToggleComponent
+    ThemeToggleComponent,
+    BreadcrumbsComponent
   ],
   changeDetection: ChangeDetectionStrategy.OnPush
 })
@@ -70,7 +69,6 @@ export class PageHeaderComponent implements OnDestroy, AfterViewInit {
   private cups = inject(CurrentUserPermissionsService);
   private endpointsService = inject(EndpointsService);
   private currentUserPermissionsService = inject(CurrentUserPermissionsService);
-  private cdr = inject(ChangeDetectorRef);
   private http = inject(HttpClient);
   private snackBarService = inject(TailwindSnackBarService);
   private dashboardSignals = inject(DashboardSignalService);
@@ -115,26 +113,21 @@ export class PageHeaderComponent implements OnDestroy, AfterViewInit {
     window.open(url, DOCUMENTATION_WINDOW_NAME, 'width=1024,height=900');
   }
 
-  public canAPIKeys$: Observable<boolean>;
-  public breadcrumbDefinitions: IHeaderBreadcrumbLink[] | null = null;
-  private breadcrumbKey: string | null;
-  // Last [breadcrumbs] input value, retained so the queryParamMap
-  // subscription can re-resolve the active breadcrumb after a key change.
-  private latestBreadcrumbs: IHeaderBreadcrumb[] | null = null;
+  public canAPIKeys: Signal<boolean>;
+  // Which of the bound breadcrumb sets to show: the URL's ?breadcrumbs= value.
+  private breadcrumbKey = signal<string | null>(null);
   public eventSeverity = InternalEventSeverity;
-  public pFavorite!: UserFavorite<IFavoriteMetadata>;
-  private pTabs!: IPageSideNavTab[];
 
-  public isMobile$: Observable<boolean> = toObservable(this.dashboardSignals.isMobile);
+  readonly isMobile = this.dashboardSignals.isMobile;
 
   public environment = environment;
 
   // Menu state for Tailwind dropdowns
-  public isHistoryMenuOpen = false;
-  public isUserMenuOpen = false;
-  public isTokenMenuOpen = false;
+  public readonly isHistoryMenuOpen = signal(false);
+  public readonly isUserMenuOpen = signal(false);
+  public readonly isTokenMenuOpen = signal(false);
 
-  @ViewChild('pageHeaderTmpl', { static: true }) pageHeaderTmpl!: TemplateRef<any>;
+  readonly pageHeaderTmpl = viewChild.required<TemplateRef<any>>('pageHeaderTmpl');
 
   // Our own portal registered in ngAfterViewInit; used to verify ownership
   // before clearing, and to avoid wiping another component's portal.
@@ -146,94 +139,83 @@ export class PageHeaderComponent implements OnDestroy, AfterViewInit {
   // previous owner instead of leaving the outlet empty).
   private previousPortal: Portal<any> | undefined;
 
-  @Input() hideSideNavButton = false;
+  readonly hideSideNavButton = input(false);
 
-  @Input() hideEndpointErrors = false;
+  readonly hideEndpointErrors = input(false);
 
-  @Input() hideMenu = false;
+  readonly hideMenu = input(false);
 
-  @Input()
-  endpointIds$!: Observable<string[]>;
+  readonly endpointIds = input<string[]>();
 
-  @Input()
-  set tabs(tabs: IPageSideNavTab[]) {
-    if (tabs) {
-      this.pTabs = tabs.map(tab => ({
-        ...tab,
-        link: tab.link === '-' ?
-          TabNavService.TabsNoLinkValue :
-          this.router.createUrlTree([tab.link], { relativeTo: this.route }).toString()
-      }));
-      this.tabNavService.setTabs(this.pTabs);
-    }
-  }
+  // Published to the side navigation by the effects in the constructor.
+  readonly tabs = input<IPageSideNavTab[]>();
 
-  @Input()
-  set tabsHeader(header: string) {
-    if (header) {
-      this.tabNavService.setHeader(header);
-    }
-  }
+  readonly tabsHeader = input<string>();
 
-  @Input() showUnderFlow = false;
+  readonly showUnderFlow = input(false);
 
-  private pShowHistory = true;
-  @Input()
-  get showHistory(): boolean {
-    return !this.logoutOnly && this.pShowHistory;
-  }
-  set showHistory(showHistory: boolean) {
-    this.pShowHistory = showHistory;
-  }
+  readonly showHistory = input(true);
+  // The logout-only menu never offers the history.
+  readonly historyVisible = computed(() => !this.logoutOnly() && this.showHistory());
 
-  public events$: Observable<IGlobalEvent[]>;
-  public unreadEventCount$: Observable<number>;
-  public eventPriorityStatus$: Observable<StratosStatus | undefined>;
+  private readonly eventService = inject(GlobalEventService);
+  public readonly events = this.eventService.events;
+  public readonly unreadEventCount = computed(() => this.events().filter(event => !event.read).length);
 
-  @Input() set favorite(favorite: UserFavorite<IFavoriteMetadata> | null) {
-    if (favorite && (!this.pFavorite || (favorite.guid !== this.pFavorite.guid))) {
-      if (favorite.canFavorite()) {
-        this.pFavorite = favorite;
-        // A recently-visited record genuinely requires an entityId, name and
-        // router link; only record entity favorites that carry all three.
-        if (favorite.entityId && favorite.metadata) {
-          const routerLink = favorite.getLink();
-          this.recents.add({
-            guid: favorite.guid,
-            date: getTime(new Date()),
-            entityType: favorite.entityType,
-            endpointType: favorite.endpointType,
-            entityId: favorite.entityId,
-            name: favorite.metadata.name,
-            routerLink: routerLink ?? undefined,
-            prettyType: favorite.getPrettyTypeName(),
-            endpointId: favorite.endpointId,
-            metadata: { name: favorite.metadata.name },
-          });
-        }
+  readonly favorite = input<UserFavorite<IFavoriteMetadata> | null>();
+  // The favorite the star is shown for: the last one bound that can be
+  // favorited. A later null, or the same entity again, leaves it in place.
+  readonly shownFavorite = linkedSignal<
+    UserFavorite<IFavoriteMetadata> | null | undefined,
+    UserFavorite<IFavoriteMetadata> | undefined
+  >({
+    source: this.favorite,
+    computation: (favorite, previous) => {
+      const shown = previous?.value;
+      if (favorite && (!shown || favorite.guid !== shown.guid) && favorite.canFavorite()) {
+        return favorite;
       }
-    }
-  }
+      return shown;
+    },
+  });
 
-  public username$: Observable<string>;
-  public user$: Observable<UserProfileInfo>;
-  public allowGravatar$: Observable<boolean>;
-  public canLogout$: Observable<boolean>;
+  public readonly user = this.userProfileService.userProfile;
+  public readonly username = computed(() => {
+    const profile = this.user();
+    if (!profile) {
+      return null;
+    }
+    let name = profile.userName;
+    if (profile.name) {
+      name = profile.name.givenName + ' ' + profile.name.familyName;
+      name = name.trim();
+    }
+    return name ? name : profile.userName;
+  });
+  public readonly allowGravatar = this.dashboardSignals.gravatarEnabled;
+  // The avatar's initials are text on the button, so the name starts with
+  // them: a speech input user can say what they see (WCAG 2.5.3).
+  public readonly userMenuLabel = computed(() => {
+    const initials = avatarInitials(this.user(), this.allowGravatar());
+    return initials ? `${initials}, user menu` : 'User menu';
+  });
+  public canLogout: Signal<boolean>;
   public authToken$!: Observable<string>;
   public refreshToken$!: Observable<string>;
   public tokenExpiry$!: Observable<Date | null>;
 
   public actionsKey: StratosActionType | null;
 
-  @Input()
-  set breadcrumbs(breadcrumbs: IHeaderBreadcrumb[] | null) {
-    this.latestBreadcrumbs = breadcrumbs;
-    this.breadcrumbDefinitions = this.getBreadcrumb(breadcrumbs);
-    this.cdr.markForCheck();
-  }
+  readonly breadcrumbs = input<IHeaderBreadcrumb[] | null>();
+  // The breadcrumb set the URL's key selects. null, which renders no
+  // breadcrumbs element at all, only while [breadcrumbs] is not bound.
+  readonly breadcrumbDefinitions = computed<IHeaderBreadcrumbLink[] | null>(() => {
+    const breadcrumbs = this.breadcrumbs();
+    return breadcrumbs === undefined ? null : this.getBreadcrumb(breadcrumbs);
+  });
 
   // Used when non-admin logs in with no-endpoints -> only show logout in the menu
-  @Input() logoutOnly?: boolean;
+  readonly logoutOnly = input<boolean>();
 
   private getBreadcrumb(breadcrumbs: IHeaderBreadcrumb[] | null) {
     if (!breadcrumbs || !breadcrumbs.length) {
@@ -243,11 +225,12 @@ export class PageHeaderComponent implements OnDestroy, AfterViewInit {
   }
 
   private getBreadcrumbFromKey(breadcrumbs: IHeaderBreadcrumb[]) {
-    if (breadcrumbs.length === 1 || !this.breadcrumbKey) {
+    const key = this.breadcrumbKey();
+    if (breadcrumbs.length === 1 || !key) {
       return breadcrumbs[0];
     }
     return breadcrumbs.find(breadcrumb => {
-      return breadcrumb.key === this.breadcrumbKey;
+      return breadcrumb.key === key;
     }) || breadcrumbs[0];
   }
 
@@ -261,17 +244,6 @@ export class PageHeaderComponent implements OnDestroy, AfterViewInit {
 
   constructor() {
     const route = this.route;
-    const eventService = inject(GlobalEventService);
-
-    this.events$ = eventService.events$.pipe(
-      startWith([])
-    );
-    this.unreadEventCount$ = eventService.events$.pipe(
-      map(events => events.filter(event => !event.read)),
-      map(events => events.length)
-    );
-    this.eventPriorityStatus$ = eventService.priorityStratosStatus$;
-
     this.actionsKey = this.route.snapshot.data ? this.route.snapshot.data.extensionsActionsKey : null;
     // Reactive breadcrumb key — re-resolves whenever the URL's
     // ?breadcrumbs= query param changes. Snapshot-only reads broke on
@@ -279,43 +251,69 @@ export class PageHeaderComponent implements OnDestroy, AfterViewInit {
     // arrival when the route resolves before the param lands. Seed
     // synchronously from snapshot so the initial render gets the key,
     // then subscribe reactively when queryParamMap is available.
-    this.breadcrumbKey = route.snapshot?.queryParams?.[BREADCRUMB_URL_PARAM] || null;
+    this.breadcrumbKey.set(route.snapshot?.queryParams?.[BREADCRUMB_URL_PARAM] || null);
     if (route.queryParamMap) {
       route.queryParamMap.pipe(takeUntilDestroyed()).subscribe(qp => {
-        this.breadcrumbKey = qp.get(BREADCRUMB_URL_PARAM) || null;
-        if (this.latestBreadcrumbs) {
-          this.breadcrumbDefinitions = this.getBreadcrumb(this.latestBreadcrumbs);
-          this.cdr.markForCheck();
-        }
+        this.breadcrumbKey.set(qp.get(BREADCRUMB_URL_PARAM) || null);
       });
     }
 
-    this.user$ = this.userProfileService.userProfile$;
+    // Publish the tabs and their header to the side navigation. Resolving the
+    // links stays out of the effect's dependencies: only a new [tabs] value
+    // publishes again.
+    effect(() => {
+      const tabs = this.tabs();
+      if (tabs) {
+        untracked(() => this.tabNavService.setTabs(tabs.map(tab => ({
+          ...tab,
+          link: tab.link === '-' ?
+            TabNavService.TabsNoLinkValue :
+            this.router.createUrlTree([tab.link], { relativeTo: this.route }).toString()
+        }))));
+      }
+    });
+    effect(() => {
+      const header = this.tabsHeader();
+      if (header) {
+        this.tabNavService.setHeader(header);
+      }
+    });
 
-    this.username$ = this.user$.pipe(
-      map(profile => {
-        let name = profile.userName;
-        if (profile.name) {
-          name = profile.name.givenName + ' ' + profile.name.familyName;
-          name = name.trim();
-        }
-        return name ? name : profile.userName;
-      })
-    );
+    // A recently-visited record genuinely requires an entityId, name and
+    // router link; only record entity favorites that carry all three.
+    effect(() => {
+      const favorite = this.shownFavorite();
+      const entityId = favorite?.entityId;
+      const metadata = favorite?.metadata;
+      if (favorite && entityId && metadata) {
+        untracked(() => this.recents.add({
+          guid: favorite.guid,
+          date: getTime(new Date()),
+          entityType: favorite.entityType,
+          endpointType: favorite.endpointType,
+          entityId,
+          name: metadata.name,
+          routerLink: favorite.getLink() ?? undefined,
+          prettyType: favorite.getPrettyTypeName(),
+          endpointId: favorite.endpointId,
+          metadata: { name: metadata.name },
+        }));
+      }
+    });
 
-    this.allowGravatar$ = toObservable(this.dashboardSignals.gravatarEnabled);
+    // The user menu shows the profile: fetch it once the menu is shown.
+    effect(() => {
+      if (!this.hideMenu() && !environment.hideUserMenu) {
+        untracked(() => this.userProfileService.loadUserProfile());
+      }
+    });
 
     // Must be enabled and the user must have permission
-    this.canAPIKeys$ = combineLatest([
-      this.endpointsService.disablePersistenceFeatures$.pipe(startWith(true)),
-      this.cups.can(StratosCurrentUserPermissions.API_KEYS),
-    ]).pipe(
-      map(([disabled, permission]) => !disabled && permission)
-    );
+    const apiKeysPermission = this.cups.can(StratosCurrentUserPermissions.API_KEYS);
+    this.canAPIKeys = computed(() => !this.endpointsService.disablePersistenceFeatures() && apiKeysPermission());
 
-    this.canLogout$ = this.currentUserPermissionsService.can(StratosCurrentUserPermissions.CAN_NOT_LOGOUT).pipe(
-      map(noLogout => !noLogout)
-    );
+    const noLogout = this.currentUserPermissionsService.can(StratosCurrentUserPermissions.CAN_NOT_LOGOUT);
+    this.canLogout = computed(() => !noLogout());
   }
 
   // Fetch fresh token envelope — called every time the token menu opens so
@@ -368,32 +366,32 @@ export class PageHeaderComponent implements OnDestroy, AfterViewInit {
   ngAfterViewInit() {
     // Remember the current portal so we can hand it back in ngOnDestroy.
     this.previousPortal = this.tabNavService.pageHeader();
-    this.myPortal = new TemplatePortal(this.pageHeaderTmpl, this.viewContainerRef, {});
+    this.myPortal = new TemplatePortal(this.pageHeaderTmpl(), this.viewContainerRef, {});
     this.tabNavService.setPageHeader(this.myPortal);
   }
 
   // Tailwind dropdown menu methods
   toggleHistoryMenu() {
-    this.isHistoryMenuOpen = !this.isHistoryMenuOpen;
-    if (this.isHistoryMenuOpen) {
-      this.isUserMenuOpen = false;
-      this.isTokenMenuOpen = false;
+    this.isHistoryMenuOpen.update(open => !open);
+    if (this.isHistoryMenuOpen()) {
+      this.isUserMenuOpen.set(false);
+      this.isTokenMenuOpen.set(false);
     }
   }
 
   toggleUserMenu() {
-    this.isUserMenuOpen = !this.isUserMenuOpen;
-    if (this.isUserMenuOpen) {
-      this.isHistoryMenuOpen = false;
-      this.isTokenMenuOpen = false;
+    this.isUserMenuOpen.update(open => !open);
+    if (this.isUserMenuOpen()) {
+      this.isHistoryMenuOpen.set(false);
+      this.isTokenMenuOpen.set(false);
     }
   }
 
   toggleTokenMenu() {
-    this.isTokenMenuOpen = !this.isTokenMenuOpen;
-    if (this.isTokenMenuOpen) {
-      this.isHistoryMenuOpen = false;
-      this.isUserMenuOpen = false;
+    this.isTokenMenuOpen.update(open => !open);
+    if (this.isTokenMenuOpen()) {
+      this.isHistoryMenuOpen.set(false);
+      this.isUserMenuOpen.set(false);
       this.refreshTokenObservables();
     }
   }
@@ -403,15 +401,39 @@ export class PageHeaderComponent implements OnDestroy, AfterViewInit {
   }
 
   closeUserMenu() {
-    this.isUserMenuOpen = false;
+    this.isUserMenuOpen.set(false);
+  }
+
+  // Escape closes the open panel (user, token or history) and returns focus
+  // to its button, as a disclosure does; a panel otherwise stays until its
+  // button is used.
+  @HostListener('document:keydown.escape')
+  onEscape() {
+    const open = this.isUserMenuOpen() ? 'userMenu'
+      : this.isTokenMenuOpen() ? 'tokenMenu'
+      : this.isHistoryMenuOpen() ? 'historyMenu'
+      : null;
+    if (!open) {
+      return;
+    }
+    this.closeUserMenu();
+    this.closeTokenMenu();
+    this.closeHistoryMenu();
+    // The header renders through a portal, outside this component's view.
+    document.getElementById(open)?.focus();
   }
 
   closeHistoryMenu() {
-    this.isHistoryMenuOpen = false;
+    this.isHistoryMenuOpen.set(false);
   }
 
-  closeTokenMenu() {
-    this.isTokenMenuOpen = false;
+  // returnFocus: the chosen button leaves the page with the panel, so focus
+  // goes back to the menu button, as on Escape.
+  closeTokenMenu(returnFocus = false) {
+    this.isTokenMenuOpen.set(false);
+    if (returnFocus) {
+      document.getElementById('tokenMenu')?.focus();
+    }
   }
 
 }

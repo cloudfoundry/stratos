@@ -43,6 +43,7 @@
 # Variables:
 #   FINAL=strip                 Strip prerelease from version (persisted)
 #   DRYRUN=yes                  Preview actions without executing
+#   TO=X.Y.Z[-pre.N]            Version for `make bump set`
 #   VERSION=X.Y.Z               Override version (project convention: no v,
 #                               matching package.json/semver.org — a v is
 #                               accepted too, it's just baked in as given)
@@ -80,14 +81,14 @@
 # Stratos versions from package.json — the current version, not the
 # core's next-tag default. `make bump` edits package.json at recipe
 # time; the core keeps version resolution lazy so chains stay correct.
-VERSION_CMD := node -p "require('./package.json').version" 2>/dev/null
+VERSION_CMD := bun -p "require('./package.json').version" 2>/dev/null
 
 include version.mk
 
 # Stratos-specific build metadata and stamps — the per-repo config the
 # vendorable core deliberately excludes.
 $(_HIDE)BUILD_NODE_VERSION := $(shell node --version 2>/dev/null || echo "unknown")
-$(_HIDE)BUILD_TS_VERSION   := $(shell npx tsc --version 2>/dev/null | awk '{print $$2}' || echo "unknown")
+$(_HIDE)BUILD_TS_VERSION   := $(shell bun run tsc --version 2>/dev/null | awk '{print $$2}' || echo "unknown")
 $(_HIDE)BUILD_BUN_VERSION  := $(shell bun --version 2>/dev/null || echo "unknown")
 
 # Lazy (=) so the backend binary's baked-in version reflects the post-bump
@@ -377,8 +378,8 @@ frontend backend website booklets cf github aio pages dist repo version e2e acti
 	@:
 
 # No-op targets for bump modifiers (consumed by BUMP_MOD filter).
-.PHONY: major minor patch rc alpha beta prerelease
-major minor patch rc alpha beta prerelease:
+.PHONY: major minor patch rc alpha beta prerelease set
+major minor patch rc alpha beta prerelease set:
 	@:
 
 # ── Load action registry ─────────────────────────────────────
@@ -396,7 +397,7 @@ include $($(_HIDE)ACTIONS).mk
 
 define build.frontend
 	@echo "Building frontend (production)..."
-	bun run build
+	bun scripts/check-build-warnings.mjs
 	@echo "Frontend built: $($(_HIDE)DIST_DIR)/frontend/browser/"
 endef
 $(call register, build, frontend, $(_HIDE)stamp.frontend)
@@ -518,6 +519,7 @@ define dev.backend
 		echo "Building backend for host platform..."; \
 		$(MAKE) build backend PLATFORM=$($(_HIDE)HOST_OS)/$($(_HIDE)HOST_ARCH); \
 	fi
+	@./build/dev-db-info.sh src/jetstream
 	cd src/jetstream && CONSOLE_PROXY_TLS_ADDRESS=:$(BACKEND_PORT) SESSION_STORE_EXPIRY=$(SESSION_STORE_EXPIRY) ALLOWED_ORIGINS=$(ALLOWED_ORIGINS) ../../$($(_HIDE)BIN_DIR)/jetstream
 endef
 $(call register, dev, backend)
@@ -617,12 +619,12 @@ define test.e2e
 	$(_ensure_host_backend)
 	@if [ -n "$(TIER)$(GROUP)" ]; then \
 		echo "Running tiered E2E tests..."; \
-		$(if $(E2E_VIDEO),E2E_VIDEO=$(E2E_VIDEO) )$(if $(E2E_SCREENSHOTS),E2E_SCREENSHOTS=$(E2E_SCREENSHOTS) )node scripts/e2e-run.mjs \
+		$(if $(E2E_VIDEO),E2E_VIDEO=$(E2E_VIDEO) )$(if $(E2E_SCREENSHOTS),E2E_SCREENSHOTS=$(E2E_SCREENSHOTS) )bun scripts/e2e-run.mjs \
 			$(if $(TIER),--tier $(TIER) )$(if $(GROUP),--group $(GROUP) )--browsers $(or $(E2E_BROWSERS),all) \
 			$(if $(PR),--pr $(PR) )$(call _e2e_toggle,dry-run,$(DRYRUN)); \
 	else \
 		echo "Running Playwright E2E tests..."; \
-		$(if $(E2E_VIDEO),E2E_VIDEO=$(E2E_VIDEO) )$(if $(E2E_SCREENSHOTS),E2E_SCREENSHOTS=$(E2E_SCREENSHOTS) )npx playwright test \
+		$(if $(E2E_VIDEO),E2E_VIDEO=$(E2E_VIDEO) )$(if $(E2E_SCREENSHOTS),E2E_SCREENSHOTS=$(E2E_SCREENSHOTS) )bun run playwright test \
 			$(call _e2e_browsers,$(E2E_BROWSERS)) \
 			$(call _e2e_flag,trace,$(E2E_TRACE)) \
 			$(call _e2e_toggle,list,$(DRYRUN)); \
@@ -636,16 +638,18 @@ $(call register, test, e2e)
 # of any test/check recipe; an operator runs it between runs.
 define clean.e2e
 	@echo "Sweeping stratos-e2e-test labeled CF resources..."
-	DRYRUN=$(DRYRUN) node scripts/e2e-clean.mjs
+	DRYRUN=$(DRYRUN) bun scripts/e2e-clean.mjs
 endef
 $(call register, clean, e2e)
 
 # ── Check (quality gates) ────────────────────────────────────
 # make check          — lint + gate (default)
 # make check lint     — ESLint + go vet + golangci-lint
-# make check gate     — lint + unit tests + production build (= bun run gate-check)
+# make check gate     — lint + library and spec type checks + unit tests + production build (= bun run gate-check)
 # make check tests    — unit tests only
-# make check coverage — unit tests with coverage
+# make check coverage — unit tests with coverage, frontend + backend
+# make check frontend coverage — Vitest coverage only (coverage/frontend/)
+# make check backend coverage  — Go coverage only (coverage/backend/)
 # make check e2e      — Playwright E2E core tests
 
 # golangci-lint has to be built by a Go at least as new as jetstream's go.mod
@@ -660,7 +664,7 @@ $(call register, clean, e2e)
 # the right one, so 1.26 and 1.27 developers both end up with a working linter.
 # Bump GOLANGCI_LINT_VERSION when a newer Go needs a newer release to
 # typecheck it (that release's go.mod must allow the target below).
-GOLANGCI_LINT_VERSION ?= v2.13.1
+GOLANGCI_LINT_VERSION ?= v2.14.0
 GOLANGCI_LINT = $(shell go env GOPATH)/bin/golangci-lint
 GOLANGCI_LINT_GO = go$(shell awk '/^go /{print $$2; exit}' src/jetstream/go.mod)
 
@@ -700,7 +704,7 @@ $(call register, check, lint)
 
 
 define check.gate
-	@echo "Running gate checks (lint + unit tests + production build)..."
+	@echo "Running gate checks (lint + library and spec type checks + unit tests + production build)..."
 	$(ensure_golangci_lint)
 	bun run gate-check
 	$(go_check_all)
@@ -718,16 +722,47 @@ define check.tests
 endef
 $(call register, check, tests, $($(_HIDE)BUILD_INFO_TS))
 
-define check.coverage
-	@echo "Running unit tests with coverage..."
+# frontend/backend pick a side of coverage; with neither, both run, as for
+# build and test. They are valid on check only next to coverage, so a bare
+# `make check frontend` still warns rather than running lint + gate.
+$(_HIDE)COV_FRONTEND = $(or $($(_HIDE)WANT_FRONTEND),$(if $($(_HIDE)WANT_BACKEND),,yes))
+$(_HIDE)COV_BACKEND  = $(or $($(_HIDE)WANT_BACKEND),$(if $($(_HIDE)WANT_FRONTEND),,yes))
+ifeq ($($(_HIDE)WANT_COVERAGE),yes)
+$(call allow, check, frontend)
+$(call allow, check, backend)
+endif
+
+define coverage_frontend
+	@echo "Running frontend unit tests with coverage..."
 	bun run test -- --coverage
+endef
+
+# One profile per Go module (they are separate modules, so one go test run
+# cannot span them); the TOTAL line sums statements across all of them.
+define coverage_backend
+	@echo "Running backend unit tests with coverage..."
+	@rm -rf coverage/backend && mkdir -p coverage/backend
+	@for m in $(GO_MODULES); do \
+		p=$(CURDIR)/coverage/backend/$$(echo $$m | tr / _).out; \
+		echo "==> coverage $$m"; \
+		(cd $$m && go test ./... -count=1 -coverprofile=$$p && \
+		  go tool cover -func=$$p | tail -1) || exit 1; \
+	done
+	@cat coverage/backend/*.out | awk '!/^mode:/ { s += $$(2); if ($$(3) > 0) c += $$(2) } \
+		END { printf "TOTAL backend: %.1f%% of %d statements\n", 100 * c / s, s }'
+endef
+
+# The two halves live in their own defines: $(if) splits on commas.
+define check.coverage
+$(if $($(_HIDE)COV_FRONTEND),$(coverage_frontend))
+$(if $($(_HIDE)COV_BACKEND),$(coverage_backend))
 endef
 $(call register, check, coverage, $($(_HIDE)BUILD_INFO_TS))
 
 define check.e2e
 	$(_ensure_host_backend)
 	@echo "Running Playwright E2E core tests..."
-	@$(if $(E2E_VIDEO),E2E_VIDEO=$(E2E_VIDEO) )$(if $(E2E_SCREENSHOTS),E2E_SCREENSHOTS=$(E2E_SCREENSHOTS) )npx playwright test e2e/tests/core/ \
+	@$(if $(E2E_VIDEO),E2E_VIDEO=$(E2E_VIDEO) )$(if $(E2E_SCREENSHOTS),E2E_SCREENSHOTS=$(E2E_SCREENSHOTS) )bun run playwright test e2e/tests/core/ \
 		$(call _e2e_browsers,$(E2E_BROWSERS)) \
 		$(call _e2e_flag,trace,$(E2E_TRACE)) \
 		$(call _e2e_toggle,list,$(DRYRUN))
@@ -1435,20 +1470,28 @@ endif
 # bump uses its own modifier set not shared with other verbs,
 # so it is wired manually rather than via register/declare_verb.
 
-$(_HIDE)BUMP_MOD := $(filter major minor patch dev alpha beta rc prerelease,$(MAKECMDGOALS))
+$(_HIDE)BUMP_MOD := $(filter major minor patch dev alpha beta rc prerelease set,$(MAKECMDGOALS))
 
+# `set` takes its value from TO, not VERSION: VERSION overrides the
+# build's version, so a chained `bump set build` would bake in the bare
+# value without the +build metadata the bump writes to package.json.
 .PHONY: bump
 bump:
 	@set -- $($(_HIDE)BUMP_MOD); \
 	if [ $$# -eq 0 ]; then \
-		echo "Usage: make bump <major|minor|patch|dev|alpha|beta|rc|prerelease>" >&2; \
+		echo "Usage: make bump <major|minor|patch|dev|alpha|beta|rc|prerelease|set TO=X.Y.Z[-pre.N]>" >&2; \
 		exit 1; \
 	elif [ $$# -gt 1 ]; then \
 		echo "Only one bump modifier allowed" >&2; \
 		exit 1; \
 	fi
 	@chmod +x build/version-bump.sh
+ifeq ($($(_HIDE)BUMP_MOD),set)
+	@[ -n "$(TO)" ] || { echo "ERROR: no version to set — set TO=X.Y.Z (e.g. make bump set TO=4.9.4-dev.1)" >&2; exit 1; }
+	@./build/version-bump.sh set $(TO) $(if $(filter yes,$(DRYRUN)),--dry-run)
+else
 	@./build/version-bump.sh bump $($(_HIDE)BUMP_MOD) $(if $(filter yes,$(DRYRUN)),--dry-run)
+endif
 
 # ── Help ──────────────────────────────────────────────────────
 .PHONY: help
@@ -1475,7 +1518,9 @@ help:
 	@echo "  make check lint           Lint checks only"
 	@echo "  make check gate           Lint + unit tests (gate-check)"
 	@echo "  make check tests          Unit tests only"
-	@echo "  make check coverage       Unit tests with coverage"
+	@echo "  make check coverage       Unit tests with coverage (frontend + backend)"
+	@echo "  make check frontend coverage   Frontend coverage only (coverage/frontend/)"
+	@echo "  make check backend coverage    Backend coverage only (coverage/backend/)"
 	@echo "  make check e2e            Playwright E2E core tests"
 	@echo ""
 	@echo "Release:"
@@ -1546,18 +1591,20 @@ help:
 	@echo "                   make dev frontend FRONTEND_PORT=5540 BACKEND_PORT=5543"
 	@echo ""
 	@echo "Version:"
-	@echo "  make bump major           Next major release (v5.0.0)"
-	@echo "  make bump minor           Next minor release (v4.10.0)"
-	@echo "  make bump patch           Next patch release (v4.9.4)"
+	@echo "  make bump major           Next major release (5.0.0)"
+	@echo "  make bump minor           Next minor release (4.10.0)"
+	@echo "  make bump patch           Next patch release (4.9.4)"
 	@echo "  make bump dev             Increment dev prerelease (dev.N)"
 	@echo "  make bump alpha           Set/increment alpha prerelease (alpha.N)"
 	@echo "  make bump beta            Set/increment beta prerelease (beta.N)"
 	@echo "  make bump rc              Set/increment rc prerelease (rc.N)"
 	@echo "  make bump prerelease      Set/increment prerelease (prerelease.N)"
+	@echo "  make bump set TO=X.Y.Z    Set an exact version (e.g. TO=4.9.4-dev.1)"
 	@echo ""
 	@echo "Variables:"
 	@echo "  FINAL=strip               Strip prerelease from version (persisted)"
 	@echo "  DRYRUN=yes                Preview actions without executing"
+	@echo "  TO=X.Y.Z[-pre.N]          Version for make bump set"
 	@echo "  VERSION=X.Y.Z             Override version (convention: no v — see docs)"
 	@echo "  PLATFORM=os/arch          Override target platform"
 	@echo "  TAG=vX.Y.Z                Tag for publish/unpublish/stamp tag/untag"

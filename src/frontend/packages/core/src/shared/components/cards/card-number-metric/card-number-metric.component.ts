@@ -1,8 +1,6 @@
 import { CommonModule } from '@angular/common';
-import { Component, EventEmitter, Input, OnChanges, OnInit, Output, signal, inject, ChangeDetectionStrategy } from '@angular/core';
-import { toObservable } from '@angular/core/rxjs-interop';
+import { Component, OnChanges, OnInit, computed, signal, inject, ChangeDetectionStrategy, input, output } from '@angular/core';
 import { Router } from '@angular/router';
-import { Observable } from 'rxjs';
 
 import { StratosStatus } from '@stratosui/store';
 import { isUnlimited } from '../../../../core/cf-quota.types';
@@ -30,28 +28,35 @@ enum AlertLevel {
 })
 export class CardNumberMetricComponent implements OnInit, OnChanges {
 
-  @Input() icon!: string;
-  @Input() iconFont!: string;
-  @Input() label!: string;
-  @Input() labelSingular!: string;
-  @Input() limit!: string;
-  @Input() units!: string;
-  @Input() value!: string;
-  @Input() showUsage = false;
-  @Input() textOnly = false;
-  @Input() labelAtTop = false;
-  @Input() link?: string | (() => void | string);
-  @Output() showAlerts = new EventEmitter<any>();
-  @Input() mode!: string;
+  readonly icon = input.required<string>();
+  readonly iconFont = input<string>();
+  readonly label = input<string>();
+  readonly labelSingular = input<string>();
+  readonly limit = input<string>();
+  readonly units = input<string>();
+  readonly value = input<string>();
+  readonly showUsage = input(false);
+  readonly textOnly = input(false);
+  readonly labelAtTop = input(false);
+  readonly link = input<string | (() => void | string)>();
+  readonly showAlerts = output<any>();
+  readonly mode = input<string>();
 
-  @Input()
-  set alerts(alerts: any[]) {
-    if (alerts) {
-      this.processAlerts(alerts);
+  readonly alerts = input<any[]>();
+
+  // How many alerts there are at each level; undefined while there is no list.
+  readonly alertInfo = computed(() => {
+    const alerts = this.alerts();
+    if (!alerts) {
+      return undefined;
     }
-  }
-
-  alertInfo: any;
+    const count = (level: AlertLevel) => alerts.filter(alert => alert.level === level).length;
+    return {
+      info: count(AlertLevel.Info),
+      warning: count(AlertLevel.Warning),
+      error: count(AlertLevel.Error)
+    };
+  });
 
   formattedValue!: string;
   formattedLimit?: string;
@@ -61,7 +66,6 @@ export class CardNumberMetricComponent implements OnInit, OnChanges {
 
   private _status = signal<StratosStatus>(StratosStatus.NONE);
   public status = this._status.asReadonly();
-  public status$: Observable<StratosStatus> = toObservable(this._status);
   isUnlimited!: boolean;
 
   ngOnInit() {
@@ -73,10 +77,11 @@ export class CardNumberMetricComponent implements OnInit, OnChanges {
   }
 
   format() {
-    if (this.value === '') {
+    const value = this.value();
+    if (value === undefined || value === '') {
       this.handleNoValue();
     } else {
-      this.handleValue();
+      this.handleValue(value);
     }
   }
 
@@ -85,76 +90,57 @@ export class CardNumberMetricComponent implements OnInit, OnChanges {
     this.formattedLimit = undefined;
   }
 
-  handleValue() {
-    const value = parseInt(this.value, 10);
+  handleValue(rawValue: string) {
+    const value = parseInt(rawValue, 10);
     this.isUnlimited = false;
     if (isUnlimited(value)) {
       this.formattedValue = 'Unlimited';
       this.isUnlimited = true;
     } else {
-      this.formattedValue = this.formatForUnits(this.value);
+      this.formattedValue = this.formatForUnits(rawValue);
     }
 
-    if (!this.limit) {
+    const limitValue = this.limit();
+    if (!limitValue) {
       return;
     }
 
-    const status = determineCardStatus(parseInt(this.value, 10), parseInt(this.limit, 10));
+    const status = determineCardStatus(value, parseInt(limitValue, 10));
     this._status.set(status);
 
-    const limit = parseInt(this.limit, 10);
+    const limit = parseInt(limitValue, 10);
     if (isUnlimited(limit)) {
       this.formattedLimit = '∞';
       this.usage = '';
     } else {
-      this.formattedLimit = this.formatForUnits(this.limit);
-      this.usage = this.showUsage ? (100 * value / limit).toFixed(2) : '';
+      this.formattedLimit = this.formatForUnits(limitValue);
+      this.usage = this.showUsage() ? (100 * value / limit).toFixed(2) : '';
     }
   }
 
   formatForUnits(v: string): string {
-    if (!this.units) {
+    const units = this.units();
+    if (!units) {
       return v;
     }
     const n = parseInt(v, 10);
-    switch (this.units) {
+    switch (units) {
       default:
         return this.utils.mbToHumanSize(n);
     }
   }
 
   goToLink() {
-    if (typeof (this.link) === 'string') {
-      this.router.navigate([this.link]);
+    const link = this.link();
+    if (typeof link === 'string') {
+      this.router.navigate([link]);
     } else {
-      this.link?.();
+      link?.();
     }
   }
 
-  processAlerts(alerts: any[]) {
-    this.alertInfo = {
-      info: 0,
-      warning: 0,
-      error: 0
-    };
-
-    alerts.forEach((alert: any) => {
-      switch (alert.level as AlertLevel) {
-        case AlertLevel.Warning:
-          this.alertInfo.warning++;
-          break;
-        case AlertLevel.Error:
-          this.alertInfo.error++;
-          break;
-        case AlertLevel.Info:
-          this.alertInfo.info++;
-          break;
-      }
-    });
-  }
-
   public alertsClicked() {
-    this.showAlerts.emit(this.alertInfo);
+    this.showAlerts.emit(this.alertInfo());
   }
 
 }

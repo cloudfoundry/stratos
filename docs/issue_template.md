@@ -11,7 +11,7 @@
 * [ ] Cloud Foundry Application (cf push)
 * [ ] Kubernetes, using a helm chart
 * [ ] Docker, single container deploying all components
-* [ ] npm run start
+* [ ] Local dev server (make dev frontend)
 * [ ] Other (please specify below)
 
 ### Backend (Jet Stream) Deployment type

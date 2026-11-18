@@ -30,6 +30,17 @@ export default defineConfig({
   test: {
     exclude: COMMON_EXCLUDE,
     include: [],
+    // Coverage is global in projects mode: Vitest reads this block and
+    // ignores coverage options in the configs the projects extend. The
+    // include makes every source file count, not only those a test loads;
+    // it is matched against each project's root, so `src/` is the package's.
+    coverage: {
+      provider: 'v8',
+      reporter: ['text-summary', 'json', 'html', 'lcov'],
+      reportsDirectory: 'coverage/frontend',
+      include: ['src/**/*.ts'],
+      exclude: ['**/*.spec.ts', '**/*.d.ts', '**/test-setup.ts'],
+    },
     projects: [
       {
         extends: 'src/frontend/packages/core/vitest.config.mts',

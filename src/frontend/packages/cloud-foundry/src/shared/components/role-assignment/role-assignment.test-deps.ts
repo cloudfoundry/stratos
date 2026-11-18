@@ -22,7 +22,7 @@
  *   driver.toggleOrgRole('o1', 'Manager');
  */
 
-import { Provider } from '@angular/core';
+import { Provider, signal } from '@angular/core';
 import { ComponentFixture } from '@angular/core/testing';
 import { By } from '@angular/platform-browser';
 import { of } from 'rxjs';
@@ -65,7 +65,7 @@ export function provideRoleAssignmentTestDeps(cfg: RoleAssignmentTestCfg): Provi
       provide: CurrentUserPermissionsService,
       useValue: {
         can: (perm: unknown, cf: string, org?: string, space?: string) =>
-          of(cfg.permissions ? cfg.permissions(perm, cf, org, space) : true),
+          signal(cfg.permissions ? cfg.permissions(perm, cf, org, space) : true),
       },
     },
   ];

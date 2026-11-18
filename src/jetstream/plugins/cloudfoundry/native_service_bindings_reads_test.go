@@ -24,6 +24,8 @@ type bindingsTestServer struct {
 	*httptest.Server
 	listHits      int
 	lastListQuery string
+	instanceHits  int
+	instanceQuery string
 }
 
 func newBindingsTestServer(t *testing.T) *bindingsTestServer {
@@ -84,6 +86,38 @@ func newBindingsTestServer(t *testing.T) *bindingsTestServer {
 				}
 			}
 			_ = json.NewEncoder(w).Encode(body)
+		case "/v3/service_instances":
+			// Follow-up the handler makes to resolve plan + offering for
+			// the managed instances; v3 rejects ?include= here so the
+			// joins arrive via fields[] in the `included` block.
+			s.instanceHits++
+			s.instanceQuery = r.URL.RawQuery
+			_ = json.NewEncoder(w).Encode(map[string]interface{}{
+				"pagination": map[string]interface{}{"total_results": 1, "total_pages": 1},
+				"resources": []map[string]interface{}{
+					{
+						"guid": "si-1", "name": "primary-db", "type": "managed",
+						"created_at": "2026-04-22T12:00:00Z", "updated_at": "2026-04-22T12:00:00Z",
+						"relationships": map[string]interface{}{
+							"service_plan": map[string]interface{}{"data": map[string]interface{}{"guid": "plan-1"}},
+							"space":        map[string]interface{}{"data": map[string]interface{}{"guid": "space-1"}},
+						},
+					},
+				},
+				"included": map[string]interface{}{
+					"service_plans": []map[string]interface{}{
+						{
+							"guid": "plan-1", "name": "small", "free": true,
+							"relationships": map[string]interface{}{
+								"service_offering": map[string]interface{}{"data": map[string]interface{}{"guid": "off-1"}},
+							},
+						},
+					},
+					"service_offerings": []map[string]interface{}{
+						{"guid": "off-1", "name": "postgres"},
+					},
+				},
+			})
 		default:
 			http.NotFound(w, r)
 		}
@@ -188,6 +222,52 @@ func TestGetAppServiceBindings_Summary(t *testing.T) {
 	b2 := byGUID["binding-2"]
 	assert.Equal(t, "user-cache", b2.ServiceInstance.Name)
 	assert.Equal(t, "user-provided", b2.ServiceInstance.Type)
+}
+
+// TestGetAppServiceBindings_SummaryPlanAndOffering — summary mode fills
+// servicePlan + serviceOffering for managed instances (the app Services
+// tab renders both) and leaves them off user-provided instances, which
+// have no plan. Only managed instance guids are looked up.
+func TestGetAppServiceBindings_SummaryPlanAndOffering(t *testing.T) {
+	srv := newBindingsTestServer(t)
+	defer srv.Close()
+	plugin := newBindingsPlugin(srv.URL)
+
+	rec, err := bindingsInvoke(plugin, "return=summary")
+	require.NoError(t, err)
+	assert.Equal(t, http.StatusOK, rec.Code)
+	assert.Equal(t, 1, srv.instanceHits, "one follow-up instance lookup")
+	assert.Contains(t, srv.instanceQuery, "guids=si-1", "only the managed instance is looked up")
+	assert.NotContains(t, srv.instanceQuery, "si-2")
+
+	var resp StratosPagedResponse[StServiceCredentialBinding]
+	require.NoError(t, json.Unmarshal(rec.Body.Bytes(), &resp))
+	byGUID := map[string]StServiceCredentialBinding{}
+	for _, b := range resp.Resources {
+		byGUID[b.GUID] = b
+	}
+
+	b1 := byGUID["binding-1"]
+	require.NotNil(t, b1.ServicePlan)
+	assert.Equal(t, "plan-1", b1.ServicePlan.GUID)
+	assert.Equal(t, "small", b1.ServicePlan.Name)
+	require.NotNil(t, b1.ServiceOffering)
+	assert.Equal(t, "off-1", b1.ServiceOffering.GUID)
+	assert.Equal(t, "postgres", b1.ServiceOffering.Name)
+
+	b2 := byGUID["binding-2"]
+	assert.Nil(t, b2.ServicePlan)
+	assert.Nil(t, b2.ServiceOffering)
+}
+
+// TestGetAppServiceBindings_BaseSkipsInstanceLookup — base mode makes no
+// follow-up instance call.
+func TestGetAppServiceBindings_BaseSkipsInstanceLookup(t *testing.T) {
+	srv := newBindingsTestServer(t)
+	defer srv.Close()
+	_, err := bindingsInvoke(newBindingsPlugin(srv.URL), "")
+	require.NoError(t, err)
+	assert.Equal(t, 0, srv.instanceHits)
 }
 
 // TestGetAppServiceBindings_SoftFallbackWhenIncludedMissing — when the

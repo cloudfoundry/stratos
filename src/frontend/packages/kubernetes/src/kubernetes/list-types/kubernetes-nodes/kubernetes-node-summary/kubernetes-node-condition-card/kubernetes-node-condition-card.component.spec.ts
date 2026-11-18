@@ -1,8 +1,8 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
-import { provideZonelessChangeDetection } from '@angular/core';
+import { provideZonelessChangeDetection, signal } from '@angular/core';
 import { ActivatedRoute } from '@angular/router';
+import { By } from '@angular/platform-browser';
 import { describe, it, expect, beforeEach } from 'vitest';
-import { of } from 'rxjs';
 
 import { BaseKubeGuid } from '../../../../kubernetes-page.types';
 import { KubernetesBaseTestModules } from '../../../../kubernetes.testing.module';
@@ -57,8 +57,7 @@ describe('KubernetesNodeConditionCardComponent', () => {
   const mockKubernetesNodeService = {
     nodeName: 'test-node',
     kubeGuid: 'test-guid',
-    nodeEntity$: of(mockNode),
-    node$: of({ entity: mockNode, entityRequestInfo: {} } as any)
+    node: signal(mockNode)
   };
 
   beforeEach(async () => {
@@ -101,5 +100,22 @@ describe('KubernetesNodeConditionCardComponent', () => {
 
   it('should create', () => {
     expect(component).toBeTruthy();
+  });
+
+  it('shows only the conditions the node reports', () => {
+    const shown = fixture.debugElement.queryAll(By.directive(KubernetesNodeConditionComponent))
+      .map(d => d.componentInstance as KubernetesNodeConditionComponent)
+      .filter(c => c.hasCondition())
+      .map(c => [c.condition(), c.conditionValue()]);
+    expect(shown).toEqual([['Ready', true]]);
+  });
+
+  it('uses a host-set value for a row that is not a node condition', () => {
+    const row = TestBed.createComponent(KubernetesNodeConditionComponent);
+    row.componentRef.setInput('condition', 'CaaspUpdates');
+    expect(row.componentInstance.hasCondition()).toBe(false);
+    row.componentRef.setInput('overrideCondition', false);
+    expect(row.componentInstance.hasCondition()).toBe(true);
+    expect(row.componentInstance.conditionValue()).toBe(false);
   });
 });

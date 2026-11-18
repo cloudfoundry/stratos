@@ -1,14 +1,13 @@
 <app-duplicate-url-banner
-  [endpoints$]="connectedHelmEndpoints$"
+  [endpoints]="connectedHelmEndpoints()"
   nounPlural="Charts"></app-duplicate-url-banner>
 <div class="flex flex-row max-h-full">
-  @if (!hide) {
-    <div class="flex flex-col max-h-full overflow-auto"
-      [ngClass]="{'mr-0 min-w-0 w-0': collapsed, 'mr-2.5 min-w-[200px] w-auto': !collapsed}">
-      <h3 class="text-base my-1.5">Filter By Repository</h3>
+  @if (!hide()) {
+    <!-- pt-5: room inside the scrolling sidebar for the field's floated label -->
+    <div class="flex flex-col max-h-full overflow-auto pt-5" data-test="repo-sidebar"
+      [ngClass]="{'mr-0 min-w-0 w-0': collapsed(), 'mr-2.5 min-w-[200px] w-auto': !collapsed()}">
       <app-form-field>
-        <input class="w-full placeholder:!text-transparent focus:outline-none" appInput placeholder="Filter by Repository" name="searchReposValue" [(ngModel)]="searchReposValue"
-          (ngModelChange)="searchReposChange($event)">
+        <input class="w-full placeholder:!text-transparent focus:outline-none" appInput placeholder="Filter by Repository" name="searchReposValue" [(ngModel)]="searchReposValue">
       </app-form-field>
       <div class="max-h-full overflow-auto pr-2.5">
         @if (stratosRepos().length) {
@@ -34,22 +33,22 @@
   }
   <div class="flex-1 min-h-0 flex flex-col">
     <div class="flex items-end my-1">
-      <button class="btn btn-ghost mr-2.5" (click)="collapsed = !collapsed">
-        <span class="material-symbols-outlined">filter_list</span>
-        @if (collapsed) {
-          <span class="material-symbols-outlined">chevron_right</span>
+      <button type="button" aria-label="Filters" [attr.aria-expanded]="!collapsed()" class="btn btn-ghost mr-2.5" (click)="collapsed.set(!collapsed())">
+        <span aria-hidden="true" class="material-icons">filter_list</span>
+        @if (collapsed()) {
+          <span aria-hidden="true" class="material-icons">chevron_right</span>
         }
-        @if (!collapsed) {
-          <span class="material-symbols-outlined">chevron_left</span>
+        @if (!collapsed()) {
+          <span aria-hidden="true" class="material-icons">chevron_left</span>
         }
       </button>
       @if (filteredRepo) {
         <div
           class="inline-flex items-center gap-1 px-3 py-1 rounded-full text-sm bg-brand-100 dark:bg-brand-900 text-brand-900 dark:text-brand-100">
           <span>{{filteredRepo}}</span>
-          <button (click)="filterCharts()"
+          <button type="button" aria-label="Clear repository filter" (click)="filterCharts()"
             class="ml-1 hover:bg-brand-200 dark:hover:bg-brand-800 rounded-full p-0.5">
-            <span class="material-symbols-outlined text-base">cancel</span>
+            <span aria-hidden="true" class="material-icons text-base">cancel</span>
           </button>
         </div>
       }
@@ -60,7 +59,7 @@
           <app-chart-item
             [chart]="$any(row)"
             [showDescription]="false"
-            [artifactHubAndHelmRepoTypes$]="artifactHubAndHelmRepoTypes$">
+            [artifactHubAndHelmRepoTypes]="artifactHubAndHelmRepoTypes()">
           </app-chart-item>
         </ng-template>
       </app-signal-list>

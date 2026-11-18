@@ -49,10 +49,10 @@ describe('UnlimitedInputComponent', () => {
       TestBed.compileComponents();
   });
 
-  beforeEach(() => {
+  beforeEach(async () => {
     fixture = TestBed.createComponent(WrapperComponent);
     component = fixture.componentInstance.unlimitedInput;
-    fixture.detectChanges();
+    await fixture.whenStable();
     element = fixture.nativeElement;
   });
 
@@ -61,7 +61,7 @@ describe('UnlimitedInputComponent', () => {
   });
 
   it('should show checkbox', () => {
-    expect(element.querySelector('input[type=checkbox]')).toBeTruthy();
+    expect(element.querySelector('[role=checkbox]')).toBeTruthy();
   });
 
   it('should not display suffix', () => {
@@ -69,63 +69,61 @@ describe('UnlimitedInputComponent', () => {
   });
 
   it('should display custom suffix', () => {
-    component.suffix = 'MB';
-    fixture.detectChanges();
     expect(element.textContent).toContain('MB');
   });
 
-  it('should disable input if checkbox checked', () => {
+  it('should disable input if checkbox checked', async () => {
     const input = element.querySelector<HTMLInputElement>('input[type=number]');
-    const _checkbox = element.querySelector<HTMLInputElement>('input[type=checkbox]');
+    const _checkbox = element.querySelector<HTMLElement>('[role=checkbox]');
     expect(input).toBeTruthy();
     expect(_checkbox).toBeTruthy();
 
     // Toggle the unlimited flag and call onChange
     component.unlimited = true;
     component.onChange();
-    fixture.detectChanges();
+    await fixture.whenStable();
 
     // strict: presence asserted above; the rendered template always has the number input
     expect(input!.disabled).toBeTruthy();
   });
 
-  it('should clear input when checkbox is checked', () => {
+  it('should clear input when checkbox is checked', async () => {
     const input = element.querySelector<HTMLInputElement>('input[type=number]');
-    const _checkbox = element.querySelector<HTMLInputElement>('input[type=checkbox]');
+    const _checkbox = element.querySelector<HTMLElement>('[role=checkbox]');
     expect(input).toBeTruthy();
     expect(_checkbox).toBeTruthy();
     component.formControl.setValue(2);
-    fixture.detectChanges();
+    await fixture.whenStable();
     // strict: presence asserted above; the rendered template always has the number input
     expect(input!.value).toEqual('2');
 
     // Toggle to unlimited (clears the input),
     component.unlimited = true;
     component.onChange();
-    fixture.detectChanges();
+    await fixture.whenStable();
     expect(input!.value).toEqual('');
   });
 
-  it('should preserve the previous value when checking and unchecking', () => {
+  it('should preserve the previous value when checking and unchecking', async () => {
     const input = element.querySelector<HTMLInputElement>('input[type=number]');
-    const _checkbox = element.querySelector<HTMLInputElement>('input[type=checkbox]');
+    const _checkbox = element.querySelector<HTMLElement>('[role=checkbox]');
     expect(input).toBeTruthy();
     expect(_checkbox).toBeTruthy();
     component.formControl.setValue(2);
-    fixture.detectChanges();
+    await fixture.whenStable();
     // strict: presence asserted above; the rendered template always has the number input
     expect(input!.value).toEqual('2');
 
     // Toggle to unlimited (disable input),
     component.unlimited = true;
     component.onChange();
-    fixture.detectChanges();
+    await fixture.whenStable();
     expect(input!.value).toEqual('');
 
     // Toggle back from unlimited (enable input and restore value),
     component.unlimited = false;
     component.onChange();
-    fixture.detectChanges();
+    await fixture.whenStable();
     expect(input!.value).toEqual('2');
   });
 });

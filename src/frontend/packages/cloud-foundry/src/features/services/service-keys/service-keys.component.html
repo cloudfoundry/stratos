@@ -1,5 +1,5 @@
 <app-page-header [breadcrumbs]="breadcrumbs()">
-  {{ title() }}
+  <h1>{{ title() }}</h1>
 </app-page-header>
 
 <!-- L5 sub-nav: count + Add button that swaps in an inline create form
@@ -8,11 +8,11 @@
   [addAction]="addKeyAction" [isAdding]="isAdding">
   <div subNavForm class="flex items-center gap-2">
     <input class="rounded border border-content-border bg-content-bg px-2 py-1 text-sm"
-      type="text" name="keyName" autocomplete="off" placeholder="Key name"
+      type="text" name="keyName" autocomplete="off" placeholder="Key name" aria-label="Key name"
       [value]="newKeyName()" (input)="newKeyName.set($any($event.target).value)"
       (keydown.enter)="createKey()" [disabled]="creating()" />
     <button type="button"
-      class="inline-flex items-center gap-2 rounded bg-primary px-3 py-1.5 text-sm text-white disabled:opacity-50"
+      class="inline-flex items-center gap-2 rounded bg-primary px-3 py-1.5 text-sm text-on-primary disabled:opacity-50"
       [disabled]="creating() || !newKeyName().trim()" (click)="createKey()">
       @if (creating()) {
         <app-busy size="1rem" context="service-keys"></app-busy>

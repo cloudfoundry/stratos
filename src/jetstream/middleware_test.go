@@ -8,7 +8,9 @@ import (
 	"log/slog"
 	"net/http"
 	"net/http/httptest"
+	"strings"
 	"testing"
+	"time"
 
 	"github.com/cloudfoundry/stratos/src/jetstream/api"
 	"github.com/cloudfoundry/stratos/src/jetstream/api/config"
@@ -229,7 +231,7 @@ func Test_apiKeyMiddleware(t *testing.T) {
 
 					mockAPIRepo.
 						EXPECT().
-						UpdateAPIKeyLastUsed(gomock.Eq(apiKey.GUID)).
+						UpdateAPIKeyLastUsed(gomock.Eq(apiKey.GUID), gomock.Eq(false)).
 						Return(nil)
 
 					err := middleware(ctx)
@@ -265,7 +267,7 @@ func Test_apiKeyMiddleware(t *testing.T) {
 
 					mockAPIRepo.
 						EXPECT().
-						UpdateAPIKeyLastUsed(gomock.Eq(apiKey.GUID)).
+						UpdateAPIKeyLastUsed(gomock.Eq(apiKey.GUID), gomock.Eq(false)).
 						Return(errors.New("Something went wrong"))
 
 					err := middleware(ctx)
@@ -354,7 +356,7 @@ func Test_apiKeyMiddleware(t *testing.T) {
 
 			mockAPIRepo.
 				EXPECT().
-				UpdateAPIKeyLastUsed(gomock.Eq(apiKey.GUID)).
+				UpdateAPIKeyLastUsed(gomock.Eq(apiKey.GUID), gomock.Eq(false)).
 				Return(nil)
 
 			mockStratosAuth.
@@ -677,5 +679,81 @@ func TestEndpointUpdateDeleteMiddleware(t *testing.T) {
 				})
 			})
 		})
+	})
+}
+
+func Test_apiKeyExpired(t *testing.T) {
+	now := time.Date(2026, 10, 28, 12, 0, 0, 0, time.UTC)
+	before, after := now.Add(-time.Second), now.Add(time.Hour)
+
+	cases := []struct {
+		name    string
+		expires *time.Time
+		want    bool
+	}{
+		{"never", nil, false},
+		{"future", &after, false},
+		{"exactly now", &now, true},
+		{"past", &before, true},
+	}
+	for _, tc := range cases {
+		if got := apiKeyExpired(&api.APIKey{ExpiresAt: tc.expires}, now); got != tc.want {
+			t.Errorf("%s: apiKeyExpired = %v, want %v", tc.name, got, tc.want)
+		}
+	}
+}
+
+func Test_apiKeyMiddlewareExpiry(t *testing.T) {
+	slog.SetDefault(slog.New(slog.NewTextHandler(io.Discard, nil)))
+
+	secret := "SecretMcSecretface"
+	run := func(t *testing.T, expires *time.Time, wantRefused bool) (called bool, err error) {
+		ctrl := gomock.NewController(t)
+		mockAPIRepo := mock_apikeys.NewMockRepository(ctrl)
+		pp := makeMockServer(mockAPIRepo, mock_api.NewMockStratosAuth(ctrl))
+		defer pp.DatabaseConnectionPool.Close()
+		pp.Config.APIKeysEnabled = config.APIKeysConfigEnum.AllUsers
+
+		apiKey := &api.APIKey{UserGUID: "aaaaaaaa-aaaa-aaaa-aaaa-aaaaaaaaaaaa", GUID: "00000000-0000-0000-0000-000000000000", ExpiresAt: expires}
+		mockAPIRepo.EXPECT().GetAPIKeyBySecret(gomock.Eq(secret)).Return(apiKey, nil)
+		mockAPIRepo.EXPECT().UpdateAPIKeyLastUsed(gomock.Eq(apiKey.GUID), gomock.Eq(wantRefused)).Return(nil)
+
+		ctx, _ := makeNewRequest()
+		ctx.Request().Header.Add("Authentication", "Bearer "+secret)
+		mw := pp.apiKeyMiddleware(func(c *echo.Context) error {
+			called = true
+			return nil
+		})
+		err = mw(ctx)
+		if wantRefused && ctx.Get(APIKeySkipperContextKey) != nil {
+			t.Error("a refused key must not set the skip flag")
+		}
+		return called, err
+	}
+
+	t.Run("expired a second ago is refused", func(t *testing.T) {
+		exp := time.Now().Add(-time.Second)
+		called, err := run(t, &exp, true)
+		var shadow api.ErrHTTPShadow
+		if called || !errors.As(err, &shadow) {
+			t.Fatalf("called=%v err=%v, want a refusal", called, err)
+		}
+		if shadow.HTTPError.Code != http.StatusUnauthorized ||
+			!strings.Contains(shadow.HTTPError.Message, "API key expired on "+exp.UTC().Format(time.RFC3339)) {
+			t.Errorf("unexpected refusal: %v", shadow.HTTPError)
+		}
+	})
+
+	t.Run("expires in an hour is accepted", func(t *testing.T) {
+		exp := time.Now().Add(time.Hour)
+		if called, err := run(t, &exp, false); !called || err != nil {
+			t.Errorf("called=%v err=%v", called, err)
+		}
+	})
+
+	t.Run("no expiry is accepted", func(t *testing.T) {
+		if called, err := run(t, nil, false); !called || err != nil {
+			t.Errorf("called=%v err=%v", called, err)
+		}
 	})
 }

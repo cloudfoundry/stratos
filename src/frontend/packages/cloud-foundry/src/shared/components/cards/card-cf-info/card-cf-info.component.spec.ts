@@ -53,10 +53,10 @@ describe('CardCfInfoComponent', () => {
       EntityCatalogHelpers.SetEntityCatalogHelper(ech);
     });
 
-  beforeEach(() => {
+  beforeEach(async () => {
     fixture = TestBed.createComponent(CardCfInfoComponent);
     component = fixture.componentInstance;
-    fixture.detectChanges();
+    await fixture.whenStable();
   });
 
   afterEach(() => {
@@ -73,5 +73,26 @@ describe('CardCfInfoComponent', () => {
 
   it('should create', () => {
     expect(component).toBeTruthy();
+  });
+
+  // /pp/v1/cf/info returns the fields flat, with no entity envelope.
+  it('shows the description, API version and SSH access from the CF info', async () => {
+    TestBed.inject(HttpTestingController)
+      .expectOne(req => req.url.startsWith('/pp/v1/cf/info/'))
+      .flush({
+        description: 'Lab foundation',
+        build: 'v2.6.0',
+        api_version: '3.180.0',
+        app_ssh_endpoint: 'ssh.example.com:2222',
+        app_ssh_host_key_fingerprint: 'aa:bb:cc',
+        app_ssh_oauth_client: 'ssh-proxy',
+      });
+    await fixture.whenStable();
+
+    const text = (fixture.nativeElement as HTMLElement).textContent ?? '';
+    expect(text).toContain('Lab foundation (v2.6.0)');
+    expect(text).toContain('3.180.0');
+    expect(text).toContain('Available');
+    expect(text).not.toContain('Not available');
   });
 });

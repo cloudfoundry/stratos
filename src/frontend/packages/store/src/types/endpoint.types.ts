@@ -72,7 +72,8 @@ export interface EndpointModel {
   guid?: string;
   name: string;
   skip_ssl_validation?: boolean;
-  caCert?: string,
+  // The stored CA certificate (PEM), as jetstream names it.
+  ca_cert?: string;
   endpoint_metadata?: any;
   token_endpoint?: string;
   client_id?: string;
@@ -95,7 +96,6 @@ export interface EndpointModel {
   token_renewable?: boolean;
   // These are generated client side when we login
   connectionStatus?: endpointConnectionStatus;
-  metricsAvailable: boolean;
   local?: true;
   creator: CreatorInfo;
 }

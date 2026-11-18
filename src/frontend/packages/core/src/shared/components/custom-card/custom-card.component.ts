@@ -1,5 +1,5 @@
 
-import { ChangeDetectionStrategy, Component, Input  } from '@angular/core';
+import { ChangeDetectionStrategy, Component, input } from '@angular/core';
 
 @Component({
   selector: 'mat-card',
@@ -10,7 +10,7 @@ import { ChangeDetectionStrategy, Component, Input  } from '@angular/core';
   changeDetection: ChangeDetectionStrategy.OnPush
 })
 export class CustomCardComponent {
-  @Input() appearance: 'raised' | 'outlined' = 'raised';
+  readonly appearance = input<'raised' | 'outlined'>('raised');
 }
 
 @Component({
@@ -61,7 +61,7 @@ export class CustomCardContentComponent {
   changeDetection: ChangeDetectionStrategy.OnPush
 })
 export class CustomCardActionsComponent {
-  @Input() align: 'start' | 'end' = 'start';
+  readonly align = input<'start' | 'end'>('start');
 }
 
 @Component({

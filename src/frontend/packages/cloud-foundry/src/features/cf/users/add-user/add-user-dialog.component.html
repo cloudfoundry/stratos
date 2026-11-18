@@ -26,38 +26,41 @@
 
   <!-- Origin selector (associate mode only) -->
   @if (mode() === 'associate') {
-    <div class="flex flex-col gap-1">
-      <label for="origin-input" class="text-sm text-content-muted">Identity Provider Origin</label>
-      <!-- Pick from options OR type freely (editable combobox) -->
+    <!-- mt-3: the floating label sits above the field's box -->
+    <app-form-field class="mt-3">
+      <!-- Pick from options when the list is available -->
       @if (originOptions().length > 0) {
-        <select
+        <app-select
           id="origin-input"
-          class="border rounded px-2 py-1 text-sm"
+          placeholder="Identity Provider Origin"
+          [autoSelectSingleOption]="false"
           [ngModel]="origin()"
           (ngModelChange)="origin.set($event)"
         >
           @for (opt of originOptions(); track opt) {
-            <option [value]="opt" [selected]="opt === origin()">{{ opt }}</option>
+            <app-option [value]="opt">{{ opt }}</app-option>
           }
-        </select>
+        </app-select>
       } @else {
         <!-- Degrade to free-text input when no origin options are available -->
         <input
           id="origin-input"
+          appInput
           type="text"
-          class="border rounded px-2 py-1 text-sm"
+          class="w-full placeholder:!text-transparent focus:outline-none"
+          aria-label="Identity Provider Origin"
+          placeholder="Identity Provider Origin"
           [ngModel]="origin()"
           (ngModelChange)="origin.set($event)"
-          placeholder="uaa"
         />
       }
-    </div>
+    </app-form-field>
   }
 
   <!-- Identity input (usernames in associate mode, emails in invite mode) -->
   <div>
     <app-stacked-input-actions
-      [stateIn$]="stateIn$"
+      [stateIn]="stateIn()"
       [stackedActionConfig]="stackedActionConfig()"
       (stateOut)="onIdentities($event)"
     ></app-stacked-input-actions>
@@ -93,7 +96,7 @@
     >Cancel</button>
     <button
       type="button"
-      class="px-4 py-2 text-sm rounded bg-primary text-white disabled:opacity-50"
+      class="px-4 py-2 text-sm rounded bg-primary text-on-primary disabled:opacity-50"
       [disabled]="!canSubmit()"
       (click)="submit()"
       data-test="add-user-submit"

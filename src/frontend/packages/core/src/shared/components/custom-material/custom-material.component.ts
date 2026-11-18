@@ -1,34 +1,41 @@
-import { ChangeDetectionStrategy, Component, Input, Output, EventEmitter, Directive, booleanAttribute  } from '@angular/core';
+import { ChangeDetectionStrategy, Component, Directive, booleanAttribute, input, model } from '@angular/core';
 
 // Custom Icon Component
 @Component({
   selector: 'app-custom-icon',
-  template: `<i [class]="(fontSet || 'material-icons') + ' custom-icon'" [class.inline]="inline" [attr.aria-label]="ariaLabel"><ng-content></ng-content></i>`,
+  template: `<i [class]="(fontSet() || 'material-icons') + ' custom-icon'" [class.inline]="inline()" [attr.role]="ariaLabel() ? 'img' : null" [attr.aria-label]="ariaLabel() || null"><ng-content></ng-content></i>`,
   styleUrls: ['./custom-material.component.scss'],
   standalone: true,
-  changeDetection: ChangeDetectionStrategy.OnPush
+  changeDetection: ChangeDetectionStrategy.OnPush,
+  // The glyph is a ligature ("mode_edit"); unlabelled, it is decoration and
+  // stays out of the name of whatever holds it. A label makes it an image.
+  host: {
+    '[class.custom-icon-inline]': 'inline()',
+    '[attr.aria-hidden]': "ariaLabel() ? null : 'true'",
+  }
 })
 export class CustomIconComponent {
   // Undefined falls back to material-icons so callers can bind optional fonts
-  @Input() fontSet: string | undefined = 'material-icons';
-  @Input() fontIcon = '';
-  @Input() svgIcon = '';
+  readonly fontSet = input<string | undefined>('material-icons');
+  readonly fontIcon = input('');
+  readonly svgIcon = input('');
   // Attribute form (inline / inline="true") coerces like mat-icon did
-  @Input({ transform: booleanAttribute }) inline = false;
-  @Input() ariaLabel = '';
+  readonly inline = input(false, { transform: booleanAttribute });
+  // Empty, null or undefined: no label, so the icon is decoration.
+  readonly ariaLabel = input<string | null | undefined>('');
 }
 
 // Custom Spinner Component
 @Component({
   selector: 'mat-spinner',
-  template: '<div class="custom-spinner" [style.width.px]="diameter" [style.height.px]="diameter"><div class="spinner-circle"></div></div>',
+  template: '<div class="custom-spinner" [style.width.px]="diameter()" [style.height.px]="diameter()"><div class="spinner-circle"></div></div>',
   styleUrls: ['./custom-material.component.scss'],
   standalone: true,
   changeDetection: ChangeDetectionStrategy.OnPush
 })
 export class CustomSpinnerComponent {
-  @Input() diameter = 40;
-  @Input() color: 'primary' | 'accent' | 'warn' = 'primary';
+  readonly diameter = input(40);
+  readonly color = input<'primary' | 'accent' | 'warn'>('primary');
 }
 
 // App Spinner Component removed - use AppSpinnerComponent from progress-spinner package instead
@@ -36,29 +43,29 @@ export class CustomSpinnerComponent {
 // Custom Progress Bar Component
 @Component({
   selector: 'mat-progress-bar',
-  template: '<div class="custom-progress-bar" [class.indeterminate]="mode === \'indeterminate\'"><div class="progress-fill" [style.width.%]="value"></div></div>',
+  template: '<div class="custom-progress-bar" [class.indeterminate]="mode() === \'indeterminate\'"><div class="progress-fill" [style.width.%]="value()"></div></div>',
   styleUrls: ['./custom-material.component.scss'],
   standalone: true,
   changeDetection: ChangeDetectionStrategy.OnPush
 })
 export class CustomProgressBarComponent {
-  @Input() value = 0;
-  @Input() mode: 'determinate' | 'indeterminate' | 'buffer' | 'query' = 'determinate';
-  @Input() color: 'primary' | 'accent' | 'warn' = 'primary';
+  readonly value = input(0);
+  readonly mode = input<'determinate' | 'indeterminate' | 'buffer' | 'query'>('determinate');
+  readonly color = input<'primary' | 'accent' | 'warn'>('primary');
 }
 
 // Custom Progress Bar Component with custom-progress-bar selector
 @Component({
   selector: 'custom-progress-bar',
-  template: '<div class="custom-progress-bar" [class.indeterminate]="mode === \'indeterminate\'"><div class="progress-fill" [style.width.%]="value"></div></div>',
+  template: '<div class="custom-progress-bar" [class.indeterminate]="mode() === \'indeterminate\'"><div class="progress-fill" [style.width.%]="value()"></div></div>',
   styleUrls: ['./custom-material.component.scss'],
   standalone: true,
   changeDetection: ChangeDetectionStrategy.OnPush
 })
 export class CustomProgressBarSelectorComponent {
-  @Input() value = 0;
-  @Input() mode: 'determinate' | 'indeterminate' | 'buffer' | 'query' = 'determinate';
-  @Input() color: 'primary' | 'accent' | 'warn' = 'primary';
+  readonly value = input(0);
+  readonly mode = input<'determinate' | 'indeterminate' | 'buffer' | 'query'>('determinate');
+  readonly color = input<'primary' | 'accent' | 'warn'>('primary');
 }
 
 // Custom Dialog Content Component
@@ -75,13 +82,13 @@ export class CustomDialogContentComponent {
 // Custom Dialog Actions Component
 @Component({
   selector: 'mat-dialog-actions',
-  template: '<div class="custom-dialog-actions" [class.align-end]="align === \'end\'"><ng-content></ng-content></div>',
+  template: '<div class="custom-dialog-actions" [class.align-end]="align() === \'end\'"><ng-content></ng-content></div>',
   styleUrls: ['./custom-material.component.scss'],
   standalone: true,
   changeDetection: ChangeDetectionStrategy.OnPush
 })
 export class CustomDialogActionsComponent {
-  @Input() align: 'start' | 'center' | 'end' = 'start';
+  readonly align = input<'start' | 'center' | 'end'>('start');
 }
 
 // Custom Dialog Title Component
@@ -101,72 +108,61 @@ export class CustomDialogTitleComponent {
   standalone: true
 })
 export class MatDatepickerDirective {
-  @Input() matDatepicker: any;
+  readonly matDatepicker = input<any>();
 }
 
 // Custom Datepicker Component (Basic)
 @Component({
   selector: 'mat-datepicker',
-  template: '<input type="date" class="custom-datepicker" [value]="selected" (change)="onDateChange($event)">',
+  template: '<input type="date" class="custom-datepicker" [value]="selected()" (change)="onDateChange($event)">',
   styleUrls: ['./custom-material.component.scss'],
   standalone: true,
   changeDetection: ChangeDetectionStrategy.OnPush
 })
 export class CustomDatepickerComponent {
-  @Input() selected!: Date;
-  @Output() selectedChange = new EventEmitter<Date>();
+  // A model: picking a date sets it and emits selectedChange.
+  readonly selected = model<Date>();
 
   onDateChange(event: any) {
-    const date = new Date(event.target.value);
-    this.selected = date;
-    this.selectedChange.emit(date);
+    this.selected.set(new Date(event.target.value));
   }
 }
 
 // Custom Datepicker Input Component
 @Component({
   selector: 'mat-datepicker-input',
-  template: '<input class="custom-datepicker-input" [matDatepicker]="matDatepicker" [value]="value" (input)="onInput($event)">',
+  template: '<input class="custom-datepicker-input" [matDatepicker]="matDatepicker()" [value]="value()" (input)="onInput($event)">',
   styleUrls: ['./custom-material.component.scss'],
   standalone: true,
   imports: [MatDatepickerDirective],
   changeDetection: ChangeDetectionStrategy.OnPush
 })
 export class CustomDatepickerInputComponent {
-  @Input() matDatepicker: any;
-  @Output() valueChange = new EventEmitter<Date>();
-  private _value!: Date;
-
-  @Input()
-  get value(): Date {
-    return this._value;
-  }
-  set value(val: Date) {
-    this._value = val;
-  }
+  readonly matDatepicker = input<any>();
+  // A model: typing sets it and emits valueChange.
+  readonly value = model<Date>();
 
   onInput(event: any) {
-    const date = new Date(event.target.value);
-    this.value = date;
-    this.valueChange.emit(date);
+    this.value.set(new Date(event.target.value));
   }
 }
 
 // Custom Datepicker Toggle Component
 @Component({
   selector: 'mat-datepicker-toggle',
-  template: '<button class="custom-datepicker-toggle" (click)="toggle()"><app-custom-icon>calendar_today</app-custom-icon></button>',
+  template: '<button class="custom-datepicker-toggle" type="button" aria-label="Open calendar" (click)="toggle()"><app-custom-icon>calendar_today</app-custom-icon></button>',
   styleUrls: ['./custom-material.component.scss'],
   standalone: true,
   imports: [CustomIconComponent],
   changeDetection: ChangeDetectionStrategy.OnPush
 })
 export class CustomDatepickerToggleComponent {
-  @Input() for: any;
+  readonly for = input<any>();
 
   toggle() {
-    if (this.for && this.for.open) {
-      this.for.open();
+    const picker = this.for();
+    if (picker && picker.open) {
+      picker.open();
     }
   }
 }

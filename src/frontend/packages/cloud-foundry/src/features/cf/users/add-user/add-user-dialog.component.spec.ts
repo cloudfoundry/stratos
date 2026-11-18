@@ -1,5 +1,5 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
-import { provideZonelessChangeDetection, signal } from '@angular/core';
+import { Signal, WritableSignal, provideZonelessChangeDetection, signal } from '@angular/core';
 import { provideHttpClient } from '@angular/common/http';
 import { HttpTestingController, provideHttpClientTesting } from '@angular/common/http/testing';
 import { describe, it, expect, beforeEach, afterEach, vi } from 'vitest';
@@ -12,7 +12,6 @@ import { CfIdentityProvidersService } from '../../../../shared/data-services/cf-
 import { CfUsersRolesDataService } from '../../../../services/domain-data/cf-users-roles-data.service';
 import { UserInviteService } from '../../user-invites/user-invite.service';
 import { CfUsersPagedDataService } from '../../../../shared/data-services/cf-users-paged-data.service';
-import { CnsiUsersSnapshotService } from '../../../../services/endpoint-data/cnsi-users-snapshot.service';
 import { CfRoleChange } from '../../../../store/types/users-roles.types';
 import { OrgUserRoleNames } from '../../../../store/types/cf-user.types';
 import {
@@ -20,6 +19,7 @@ import {
   RoleAssignmentDriver,
 } from '../../../../shared/components/role-assignment/role-assignment.test-deps';
 import * as addModule from '../../../../shared/signal-list-configs/user/cf-users-add';
+import { StUser } from '../../../../services/endpoint-data/stratos-types';
 import { AddUserDialogComponent, AddUserDialogData } from './add-user-dialog.component';
 
 const CF_GUID = 'test-cf-guid';
@@ -30,6 +30,27 @@ const TEST_HARNESS_CFG = {
   spacesByOrg: { 'org-1': [] },
 };
 
+// The protected members these tests drive and read. They are protected
+// because only the template uses them; the tests reach them through this
+// view of the component instance.
+interface AddUserDialogTestView {
+  data: AddUserDialogData;
+  pendingUsers: StUser[];
+  origin: WritableSignal<string>;
+  switchMode(mode: 'associate' | 'invite'): void;
+  originOptions: Signal<string[]>;
+  identities: WritableSignal<string[]>;
+  identitiesValid: WritableSignal<boolean>;
+  roleChanges: Signal<CfRoleChange[]>;
+  submitting: Signal<boolean>;
+  inviteTabVisible: Signal<boolean>;
+  orgLocked: Signal<boolean>;
+  rolesRequired: Signal<boolean>;
+  canSubmit: Signal<boolean>;
+  onRoleChangeSet(changes: CfRoleChange[]): void;
+  submit(): Promise<void>;
+}
+
 interface MakeOpts {
   idpsOrigins?: string[];
   /** Whether the console user is a CF admin on the endpoint (default true). */
@@ -37,7 +58,7 @@ interface MakeOpts {
 }
 
 function make(data: AddUserDialogData, opts: MakeOpts = {}): {
-  cmp: AddUserDialogComponent;
+  cmp: AddUserDialogTestView;
   fixture: ComponentFixture<AddUserDialogComponent>;
   close: ReturnType<typeof vi.fn>;
   listOrigins: ReturnType<typeof vi.fn>;
@@ -58,7 +79,6 @@ function make(data: AddUserDialogData, opts: MakeOpts = {}): {
       { provide: UserInviteService, useValue: {} },
       { provide: TailwindSnackBarService, useValue: { open: vi.fn(), error: vi.fn() } },
       { provide: CfUsersPagedDataService, useValue: {} },
-      { provide: CnsiUsersSnapshotService, useValue: {} },
       { provide: EndpointsDataService, useValue: { endpointById: () => signal({ user: { admin: opts.admin ?? true } }) } },
       // Real RoleAssignmentComponent services (no stub, no overrideComponent).
       ...provideRoleAssignmentTestDeps(TEST_HARNESS_CFG),
@@ -67,7 +87,7 @@ function make(data: AddUserDialogData, opts: MakeOpts = {}): {
 
   const fixture = TestBed.createComponent(AddUserDialogComponent);
   fixture.detectChanges();
-  return { cmp: fixture.componentInstance, fixture, close, listOrigins };
+  return { cmp: fixture.componentInstance as unknown as AddUserDialogTestView, fixture, close, listOrigins };
 }
 
 describe('AddUserDialogComponent', () => {
@@ -104,7 +124,7 @@ describe('AddUserDialogComponent', () => {
       { cfGuid: CF_GUID, orgGuid: 'org-1', orgName: 'Org One', userInviteAllowed: false },
       { admin: false },
     );
-    const c = cmp as any;
+    const c = cmp;
     c.identities.set(['alice']);
     c.identitiesValid.set(true);
     expect(c.rolesRequired()).toBe(true);
@@ -116,7 +136,7 @@ describe('AddUserDialogComponent', () => {
 
   it('lets a CF admin submit without a role', () => {
     const { cmp } = make({ cfGuid: CF_GUID, userInviteAllowed: false }, { admin: true });
-    const c = cmp as any;
+    const c = cmp;
     c.identities.set(['alice']);
     c.identitiesValid.set(true);
     expect(c.rolesRequired()).toBe(false);
@@ -143,6 +163,104 @@ describe('AddUserDialogComponent', () => {
     expect(cmpEmpty.originOptions()).toEqual([]);
   });
 
+  // ── Identity Provider Origin field (same field style as the others) ───────
+
+  describe('origin field', () => {
+    const DATA: AddUserDialogData = { cfGuid: CF_GUID, userInviteAllowed: true };
+
+    it('free text: names the input, floats the label over the prefilled value, and updates origin', async () => {
+      const { cmp, fixture } = make(DATA);
+      await fixture.whenStable();
+      const el = fixture.nativeElement as HTMLElement;
+
+      const input = el.querySelector('input#origin-input') as HTMLInputElement;
+      expect(input).toBeTruthy();
+      expect(input.getAttribute('aria-label')).toBe('Identity Provider Origin');
+      expect(input.value).toBe('uaa');
+
+      // The floating label sits above the value instead of over it.
+      const label = input.closest('app-form-field')!.querySelector('label') as HTMLLabelElement;
+      expect(label.textContent).toContain('Identity Provider Origin');
+      expect(label.className).toContain('-translate-y-');
+
+      // No boxed input any more.
+      expect(input.className).not.toContain('border');
+
+      input.value = 'ldap';
+      input.dispatchEvent(new Event('input'));
+      await fixture.whenStable();
+      expect(cmp.origin()).toBe('ldap');
+    });
+
+    it('options: renders a select named "Identity Provider Origin" and picking one updates origin', async () => {
+      const { cmp, fixture } = make(DATA, { idpsOrigins: ['uaa', 'ldap'] });
+      await fixture.whenStable();
+      const el = fixture.nativeElement as HTMLElement;
+
+      expect(el.querySelector('input#origin-input')).toBeNull();
+      const select = el.querySelector('app-select#origin-input') as HTMLElement;
+      expect(select).toBeTruthy();
+      const trigger = select.querySelector('[role="combobox"]') as HTMLElement;
+      expect(trigger.getAttribute('aria-label')).toBe('Identity Provider Origin');
+      // ngModel hands the value to the select in a microtask; the select
+      // then renders it in a second pass.
+      await fixture.whenStable();
+      expect(trigger.textContent).toContain('uaa');
+
+      const options = Array.from(select.querySelectorAll('.custom-option-content')) as HTMLElement[];
+      expect(options.map(o => o.textContent?.trim())).toEqual(['uaa', 'ldap']);
+      options[1].click();
+      await fixture.whenStable();
+      expect(cmp.origin()).toBe('ldap');
+    });
+
+    it('submit sends the origin chosen in the select', async () => {
+      const spy = vi.spyOn(addModule, 'addUsers').mockResolvedValue({ ok: true, total: 1, failed: 0 });
+      const { cmp, fixture } = make(DATA, { idpsOrigins: ['uaa', 'ldap'] });
+      await fixture.whenStable();
+      const options = Array.from(
+        (fixture.nativeElement as HTMLElement).querySelectorAll('app-select#origin-input .custom-option-content'),
+      ) as HTMLElement[];
+      options[1].click();
+      await fixture.whenStable();
+      cmp.identities.set(['alice']);
+      cmp.identitiesValid.set(true);
+      await cmp.submit();
+      expect(spy.mock.calls[0][1].origin).toBe('ldap');
+      spy.mockRestore();
+    });
+
+    it('submit sends the origin typed in the free-text field', async () => {
+      const spy = vi.spyOn(addModule, 'addUsers').mockResolvedValue({ ok: true, total: 1, failed: 0 });
+      const { cmp, fixture } = make(DATA);
+      await fixture.whenStable();
+      const input = (fixture.nativeElement as HTMLElement).querySelector('input#origin-input') as HTMLInputElement;
+      input.value = 'okta';
+      input.dispatchEvent(new Event('input'));
+      await fixture.whenStable();
+      cmp.identities.set(['alice']);
+      cmp.identitiesValid.set(true);
+      await cmp.submit();
+      expect(spy.mock.calls[0][1].origin).toBe('okta');
+      spy.mockRestore();
+    });
+
+    it('shows the origin field in associate mode only', async () => {
+      const { cmp, fixture } = make(DATA);
+      await fixture.whenStable();
+      const el = fixture.nativeElement as HTMLElement;
+      expect(el.querySelector('#origin-input')).toBeTruthy();
+
+      cmp.switchMode('invite');
+      await fixture.whenStable();
+      expect(el.querySelector('#origin-input')).toBeNull();
+
+      cmp.switchMode('associate');
+      await fixture.whenStable();
+      expect(el.querySelector('#origin-input')).toBeTruthy();
+    });
+  });
+
   // ── Widget integration tests ───────────────────────────────────────────────
 
   it('renders the shared role widget with an empty baseline (orgLocked false at CF level)', () => {
@@ -150,7 +268,7 @@ describe('AddUserDialogComponent', () => {
     // No orgGuid → orgLocked is false
     expect(cmp.orgLocked()).toBe(false);
     // roleChanges starts empty
-    expect((cmp as any).roleChanges()).toEqual([]);
+    expect(cmp.roleChanges()).toEqual([]);
   });
 
   // ── sentinel-user regression guard ────────────────────────────────────────
@@ -159,7 +277,7 @@ describe('AddUserDialogComponent', () => {
 
   it('pendingUsers is a stable array with exactly one sentinel entry', () => {
     const { cmp } = make({ cfGuid: CF_GUID, userInviteAllowed: false });
-    const pending = (cmp as any).pendingUsers as any[];
+    const pending = cmp.pendingUsers;
     expect(pending).toHaveLength(1);
     expect(pending[0].guid).toBeTruthy();
     expect(pending[0].guid).toBe('pending-add-user');
@@ -189,8 +307,8 @@ describe('AddUserDialogComponent', () => {
       add: true,
       role: OrgUserRoleNames.MANAGER,
     };
-    (cmp as any).onRoleChangeSet([change]);
-    expect((cmp as any).roleChanges()).toEqual([change]);
+    cmp.onRoleChangeSet([change]);
+    expect(cmp.roleChanges()).toEqual([change]);
   });
 
   it('submit forwards the widget grants to addUsers via req.changes', async () => {
@@ -198,7 +316,7 @@ describe('AddUserDialogComponent', () => {
     const { cmp, close } = make(
       { cfGuid: CF_GUID, orgGuid: 'org-1', orgName: 'Org One', userInviteAllowed: false },
     );
-    const c = cmp as any;
+    const c = cmp;
 
     // Simulate widget emitting a role change
     const change: CfRoleChange = {
@@ -236,7 +354,7 @@ describe('AddUserDialogComponent', () => {
     const { cmp, close } = make(
       { cfGuid: CF_GUID, orgGuid: 'org-1', orgName: 'Org One', userInviteAllowed: false },
     );
-    const c = cmp as any;
+    const c = cmp;
 
     c.identities.set(['alice', 'bob']);
     c.identitiesValid.set(true);
@@ -272,7 +390,7 @@ describe('AddUserDialogComponent', () => {
       orgName: 'Org One',
       userInviteAllowed: false,
     });
-    const c = cmp as any;
+    const c = cmp;
 
     // Wait for async init (fetchOrgs subscription + permission resolution).
     await fixture.whenStable();
@@ -297,8 +415,9 @@ describe('AddUserDialogComponent', () => {
     expect(spy).toHaveBeenCalledOnce();
     const [, req] = spy.mock.calls[0];
     // req.changes must NOT be empty — this is the regression guard.
-    expect(req.changes.length).toBeGreaterThan(0);
-    expect(req.changes.some((r: CfRoleChange) => r.role === OrgUserRoleNames.MANAGER && r.add === true)).toBe(true);
+    const changes = req.changes ?? [];
+    expect(changes.length).toBeGreaterThan(0);
+    expect(changes.some((r: CfRoleChange) => r.role === OrgUserRoleNames.MANAGER && r.add === true)).toBe(true);
 
     spy.mockRestore();
   });

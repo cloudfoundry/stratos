@@ -38,10 +38,12 @@ describe('AnalysisReportSelectorComponent', () => {
     }).compileComponents();
   });
 
-  beforeEach(() => {
+  beforeEach(async () => {
     fixture = TestBed.createComponent(AnalysisReportSelectorComponent);
     component = fixture.componentInstance;
-    fixture.detectChanges();
+    fixture.componentRef.setInput('endpoint', 'kube-guid');
+    fixture.componentRef.setInput('path', '/pods');
+    await fixture.whenStable();
   });
 
   it('should create', () => {

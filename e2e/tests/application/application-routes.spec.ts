@@ -37,8 +37,10 @@ test.describe('Application Routes', () => {
     test('should create and display mapped route', async ({ withTestApp }) => {
       const { page, testApp, helper } = withTestApp;
 
-      // Create and map a route
-      const routeGuid = await helper.createAndMapRoute(testApp, 'test-route');
+      // Create and map a route. Host must be unique per run/worker — a fixed
+      // name collides (422 "route already exists") across parallel workers
+      // and with leftovers from prior runs in the shared space.
+      const routeGuid = await helper.createAndMapRoute(testApp, `test-route-${Date.now()}`);
       expect(routeGuid).toBeTruthy();
 
       // Navigate to routes tab
@@ -67,20 +69,12 @@ test.describe('Application Routes', () => {
       await appSummary.navigateTo();
       await appSummary.goToRoutesTab();
 
-      // Wait for routes to load
-      await page.waitForTimeout(1500);
-
-      // Verify route is displayed with host
-      const routeText = page.locator('text=' + testHost);
-      await expect(routeText).toBeVisible({ timeout: 10000 });
-
-      // Verify domain is visible (should be part of the route display)
-      const routeRow = page.locator('mat-row, tr').filter({ hasText: testHost });
-      await expect(routeRow).toBeVisible();
-
-      // Get the full route text which should include domain
-      const routeFullText = await routeRow.textContent();
-      expect(routeFullText).toContain(testHost);
+      // The host has its own cell; the launch link carries the full route
+      // URL (host + domain), so the host text appears twice in the row.
+      const routeRow = page.locator('app-routes-tab tr').filter({ hasText: testHost });
+      await expect(routeRow.getByRole('cell', { name: testHost, exact: true })).toBeVisible({ timeout: 10000 });
+      await expect(routeRow.getByRole('link', { name: new RegExp(testHost) }))
+        .toHaveAttribute('href', new RegExp(`^https?://${testHost}\\.[^/]+`));
     });
 
     test('should show route type (http/tcp)', async ({ withTestApp }) => {
@@ -543,18 +537,22 @@ test.describe('Application Routes', () => {
       // Select the route
       await dialog.selectRoute(unmappedHost);
 
-      // Map the route
-      const isMapEnabled = await dialog.isMapEnabled();
-      if (isMapEnabled) {
-        await dialog.clickMap();
+      // Map the route. isMapEnabled() waits out the picker's transient
+      // disabled frames, so it must resolve true — no silent skip.
+      expect(await dialog.isMapEnabled()).toBeTruthy();
+      await dialog.clickMap();
 
-        // Wait for mapping to complete
-        await page.locator('app-add-route-stepper').waitFor({ state: 'hidden', timeout: 60000 }).catch(() => {});
+      // Wait for the stepper to close (map + nav back to the routes tab).
+      await page.locator('app-add-route-stepper').waitFor({ state: 'hidden', timeout: 60000 }).catch(() => {});
 
-        // Dialog should close
-        const isVisible = await dialog.isVisible();
-        expect(isVisible).toBeFalsy();
-      }
+      // Teeth: prove the map actually happened at the CF level, not just that
+      // the stepper closed. The route's destinations must now include this app.
+      // Poll — the CC destination write is async and can land after the stepper
+      // closes and navigates.
+      await expect.poll(
+        async () => (await cfApi.getRouteDestinations(route.guid)).some(d => d.app?.guid === testApp.app.guid),
+        { timeout: 30000 }
+      ).toBeTruthy();
 
       // Cleanup
       await cfApi.unmapRoute(route.guid, testApp.app.guid).catch(() => {});

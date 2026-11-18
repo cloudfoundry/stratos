@@ -1,5 +1,4 @@
 import { inject } from '@angular/core';
-import { toObservable } from '@angular/core/rxjs-interop';
 import { CanActivateFn, RouterStateSnapshot } from '@angular/router';
 import { Observable } from 'rxjs';
 import { filter, map, take } from 'rxjs/operators';
@@ -38,8 +37,9 @@ function snapshotToQueryParams(state: RouterStateSnapshot): { [key: string]: str
 export const authGuard: CanActivateFn = (_route, state): Observable<boolean> => {
   const authSignals = inject(AuthSignalService);
 
-  // Read the auth slice via the signal-native projection.
-  return toObservable(authSignals.auth).pipe(
+  // Read the auth slice via the signal-native projection. auth$ is built
+  // once; calling toObservable() here left a root watcher per guard run.
+  return authSignals.auth$.pipe(
     // Wait for auth state to stabilize before evaluation
     // This prevents redirecting to /login during transient state updates
     filter(authState => !!authState && !authState.verifying),

@@ -16,21 +16,19 @@ Depending on what you are contributing, you will need to develop with the front-
 
 For a quick-start to get Stratos front and back ends built and running locally on a development system, follow the steps below.
 
-You will need to have `go` and `nodejs` installed in your development environment.
+You will need Node.js, Bun, Go, Git and Make; the [Required Runtimes](../developer-environment.md#required-runtimes) table lists the versions.
 
 ```
 git clone https://github.com/cloudfoundry/stratos.git
 cd stratos
-npm install
-npm run build
-npm run build-backend
-cd src/jetstream
-./jetstream
+make install
+make dev backend     # terminal 1: backend on https://localhost:5443
+make dev frontend    # terminal 2: frontend on https://localhost:5440
 ```
 
-This will build both the frontend and backend and run the backend in a mode where it will also serve the static resources for the frontend. 
+Before the first `make dev backend`, create `src/jetstream/config.properties` with an encryption key and a login method; the contributor guide's [First-Time Setup](../contributing_guide.md#first-time-setup) gives the exact lines, including a local `admin` user.
 
-You can open a web browser and navigate to (https://127.0.0.1:5443) and login with username `admin` and password `admin`.
+Then open https://localhost:5440 in a web browser.
 
 > To develop the frontend we recommend reading through the [frontend](./frontend.md) doc. This includes a faster way to run Stratos and see your changes.
 

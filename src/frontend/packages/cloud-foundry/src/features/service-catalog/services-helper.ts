@@ -1,6 +1,6 @@
 import { ActivatedRoute } from '@angular/router';
 import { Observable, of as observableOf } from 'rxjs';
-import { take, combineLatest, filter, map } from 'rxjs/operators';
+import { take, combineLatestWith, filter, map } from 'rxjs/operators';
 
 import { StServicePlan, StServicePlanVisibility } from '../../services/endpoint-data/stratos-types';
 
@@ -154,7 +154,7 @@ export const getServicePlanAccessibility = (
   const safeServiceBroker$ = serviceBroker$.pipe(filter(sb => !!sb));
   const safeServicePlanVisibilities$ = servicePlanVisibilities$.pipe(filter(spv => !!spv));
   return safeServiceBroker$.pipe(
-    combineLatest(safeServicePlanVisibilities$),
+    combineLatestWith(safeServicePlanVisibilities$),
     map(([serviceBroker, allServicePlanVisibilities]) => getSvcAvailability(servicePlan, serviceBroker, allServicePlanVisibilities))
   );
 };

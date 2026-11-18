@@ -1,8 +1,6 @@
 import { provideHttpClientTesting } from '@angular/common/http/testing';
 import {
   provideHttpClient,
-  HttpClient,
-  HttpHandler,
   withXhr,
 } from "@angular/common/http";
 import { NoopAnimationsModule } from "@angular/platform-browser/animations";
@@ -32,8 +30,6 @@ import { CfUserServiceTestProvider } from "./user-service-helper";
 export const cfEndpointServiceProviderDeps = [
   CfOrgSpaceDataService,
   UserInviteService,
-  HttpClient,
-  HttpHandler,
   CloudFoundryEndpointService,
 ];
 export class BaseCfOrgSpaceRouteMock {
@@ -80,8 +76,6 @@ export function generateTestCfEndpointServiceProvider(
     CloudFoundryEndpointService,
     UserInviteService,
     UserInviteConfigureService,
-    HttpClient,
-    HttpHandler,
   ];
 }
 

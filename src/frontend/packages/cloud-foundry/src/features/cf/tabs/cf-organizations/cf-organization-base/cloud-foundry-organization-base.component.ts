@@ -1,9 +1,5 @@
 import { Component, ChangeDetectionStrategy, computed, inject, OnInit, Signal } from '@angular/core';
-import { toObservable } from '@angular/core/rxjs-interop';
 import { RouterModule } from '@angular/router';
-import { CommonModule } from '@angular/common';
-import { Observable } from 'rxjs';
-import { take, map } from 'rxjs/operators';
 import { OrgDataRegistry } from '../../../../../services/endpoint-data/org-data.registry';
 import { OrgDataService } from '../../../../../services/endpoint-data/org-data.service';
 
@@ -18,6 +14,8 @@ import { IPageSideNavTab } from '../../../../../../../core/src/features/dashboar
 import { IHeaderBreadcrumb } from '../../../../../../../core/src/shared/components/page-header/page-header.types';
 import { PageHeaderComponent } from '../../../../../../../core/src/shared/components/page-header/page-header.component';
 import { LoadingPageComponent } from '../../../../../../../core/src/shared/components/loading-page/loading-page.component';
+import { PageSubNavComponent } from '../../../../../../../core/src/shared/components/page-sub-nav/page-sub-nav.component';
+import { CfCliMenuComponent } from '../../../../../shared/components/cli-menu/cf-cli-menu.component';
 import { IFavoriteMetadata, UserFavorite } from '../../../../../../../store/src/types/user-favorites.types';
 import { UserFavoriteManager } from '../../../../../../../store/src/user-favorite-manager';
 import { organizationEntityType } from '../../../../../cf-entity-types';
@@ -51,10 +49,11 @@ import { CloudFoundryOrganizationService } from '../../../services/cloud-foundry
   standalone: true,
   changeDetection: ChangeDetectionStrategy.OnPush,
   imports: [
-    CommonModule,
     RouterModule,
     PageHeaderComponent,
-    LoadingPageComponent
+    PageSubNavComponent,
+    LoadingPageComponent,
+    CfCliMenuComponent,
   ]
 })
 export class CloudFoundryOrganizationBaseComponent implements OnInit {
@@ -63,8 +62,10 @@ export class CloudFoundryOrganizationBaseComponent implements OnInit {
   orgDataService = inject(OrgDataService);
 
   // Drives the loading-page overlay from the signal-native data service,
-  // replacing the old ngrx EntityMonitor (entityId/entitySchema) path.
-  isLoading$ = toObservable(this.orgDataService.isLoading);
+  // replacing the old ngrx EntityMonitor (entityId/entitySchema) path. It
+  // waits for the org only, and is up from the first render (no flash of
+  // empty tiles before load() starts); the spaces list fills in behind it.
+  isLoading = computed(() => !this.orgDataService.orgSettled());
 
 
   tabLinks: IPageSideNavTab[] = [
@@ -103,7 +104,15 @@ export class CloudFoundryOrganizationBaseComponent implements OnInit {
       icon: 'watch_later'
     }
   ];
-  public breadcrumbs$: Observable<IHeaderBreadcrumb[]>;
+  readonly breadcrumbs = computed<IHeaderBreadcrumb[] | null>(() => {
+    const endpoint = this.cfEndpointService.endpoint();
+    return endpoint ? [{
+      breadcrumbs: [{
+        value: endpoint.entity.name,
+        routerLink: `/cloud-foundry/${endpoint.entity.guid}/organizations`
+      }]
+    }] : null;
+  });
 
   // Used to hide tab that is not yet implemented when in production
   public isDevEnvironment = !environment.production;
@@ -129,7 +138,6 @@ export class CloudFoundryOrganizationBaseComponent implements OnInit {
       return userFavoriteManager.getFavoriteFromEntity<IFavoriteMetadata>(
         organizationEntityType, CF_ENDPOINT_TYPE, route.cfGuid, favEntity);
     });
-    this.breadcrumbs$ = this.getBreadcrumbs();
 
     // Add any tabs from extensions
     this.tabLinks = this.tabLinks.concat(getTabsFromExtensions(StratosTabType.CloudFoundryOrg));
@@ -140,21 +148,5 @@ export class CloudFoundryOrganizationBaseComponent implements OnInit {
     // load() calls and short-circuits once warm, so re-entry on tab nav is a
     // no-op.
     this.orgDataService.load().subscribe({ error: () => {} });
-  }
-
-  private getBreadcrumbs() {
-    return this.cfEndpointService.endpoint$.pipe(
-      map(endpoint => ([
-        {
-          breadcrumbs: [
-            {
-              value: endpoint.entity.name,
-              routerLink: `/cloud-foundry/${endpoint.entity.guid}/organizations`
-            }
-          ]
-        }
-      ])),
-      take(1)
-    );
   }
 }

@@ -7,11 +7,12 @@ import {
 } from '@angular/core';
 import { MAT_DIALOG_DATA, TailwindDialogRef } from '@stratosui/core';
 
-import { StratosJobError } from '../../../../services/async-jobs/async-job.types';
 import {
   RevisionsService,
   RevisionRow,
 } from '../../../services/revisions.service';
+import { extractHttpErrorMessage } from '@stratosui/store';
+import { unknownHow, unknownOutcomeMessage } from '../../../../services/async-jobs/unknown-outcome-message';
 
 export interface RollbackDialogData {
   revision: RevisionRow;
@@ -38,6 +39,9 @@ export class RollbackDialogComponent {
 
   inFlight = signal(false);
   errorMessage = signal<string | null>(null);
+  // Set once a rollback ended with an unknown result: whatever closes the
+  // dialog then asks the Revisions tab to re-read.
+  private ended = false;
 
   async confirm(): Promise<void> {
     if (this.inFlight()) {
@@ -55,23 +59,19 @@ export class RollbackDialogComponent {
       if (r.status === 'COMPLETE') {
         this.ref.close({ ok: true, stateChanged: true });
       } else {
-        // UNKNOWN — caller refetches; treat as success close
-        this.ref.close({ ok: true, stateChanged: true });
+        // Result unknown: say so rather than close as if it worked.
+        this.ended = true;
+        this.errorMessage.set(unknownOutcomeMessage(
+          `Roll back to revision #${this.data.revision.version}`, 'The Revisions tab', unknownHow(r)));
       }
     } catch (err: unknown) {
-      if (err instanceof StratosJobError) {
-        this.errorMessage.set(
-          err.job?.errors?.[0]?.message ?? 'Rollback failed',
-        );
-      } else {
-        this.errorMessage.set('Rollback failed');
-      }
+      this.errorMessage.set(extractHttpErrorMessage(err));
     } finally {
       this.inFlight.set(false);
     }
   }
 
   cancel(): void {
-    this.ref.close({ ok: false, stateChanged: false });
+    this.ref.close({ ok: false, stateChanged: this.ended });
   }
 }

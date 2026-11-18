@@ -1,8 +1,15 @@
-<app-page-header tabsHeader="Cell" [breadcrumbs]="breadcrumbs$ | async" [tabs]="tabLinks">
+<app-page-header tabsHeader="Cell" [breadcrumbs]="breadcrumbs()" [tabs]="tabLinks">
   @if (name$ | async; as name) {
     <h1> Cell: {{ name }}</h1>
   }
 </app-page-header>
+@if (cfCellService.error(); as error) {
+  <div data-test="cell-metrics-error" role="alert"
+       class="flex items-center gap-2 px-4 py-2 text-sm bg-[var(--danger-bg)] text-[var(--danger-text)] border-b border-content-border">
+    <span class="material-icons text-base" aria-hidden="true">error_outline</span>
+    <span>{{ error }}</span>
+  </div>
+}
 <app-loading-page [isLoading]="isLoading$" [text]="'Retrieving cell'">
   <router-outlet></router-outlet>
 </app-loading-page>

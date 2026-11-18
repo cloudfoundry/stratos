@@ -36,4 +36,11 @@ describe('ApplicationStateComponent', () => {
   it('should be created', () => {
     expect(component).toBeTruthy();
   });
+
+  // The label beside the icon already says the state; the icon's own name
+  // would be read twice.
+  it('hides the icon from assistive technology beside its label', () => {
+    const icon = fixture.nativeElement.querySelector('app-application-state-icon') as HTMLElement;
+    expect(icon.getAttribute('aria-hidden')).toBe('true');
+  });
 });

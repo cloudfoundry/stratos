@@ -25,15 +25,23 @@ describe('BindAppsStepComponent', () => {
     });
   });
 
-  beforeEach(() => {
+  beforeEach(async () => {
     fixture = TestBed.createComponent(BindAppsStepComponent);
     component = fixture.componentInstance;
-    component.boundAppId = '';
-    component.apps$ = of([]);
-    fixture.detectChanges();
+    fixture.componentRef.setInput('boundAppId', '');
+    fixture.componentRef.setInput('apps$', of([]));
+    await fixture.whenStable();
   });
 
   it('should create', () => {
     expect(component).toBeTruthy();
+  });
+
+  it('shows and names its drop-down "Choose App"', async () => {
+    await fixture.whenStable();
+    const trigger = (fixture.nativeElement as HTMLElement).querySelector('[role="combobox"]');
+    expect(trigger).toBeTruthy();
+    expect(trigger!.getAttribute('aria-label')).toBe('Choose App');
+    expect(trigger!.textContent).toContain('Choose App');
   });
 });

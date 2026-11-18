@@ -1,6 +1,4 @@
-import { Injector, Signal, computed, inject, runInInjectionContext } from '@angular/core';
-import { toObservable } from '@angular/core/rxjs-interop';
-import { Observable } from 'rxjs';
+import { Signal, computed } from '@angular/core';
 
 import { EndpointDataService } from '../../../services/endpoint-data/endpoint-data.service';
 import { EndpointDataRegistry } from '../../../services/endpoint-data/endpoint-data.registry';
@@ -8,10 +6,9 @@ import { StServiceInstance, StServiceOffering, StServicePlan } from '../../../se
 
 /**
  * Per-(cfGuid, serviceGuid) facade that derives signal-driven views over
- * EndpointDataService's per-CNSI services-domain caches. Constructed via
- * CreateServiceInstanceHelperServiceFactory which provides an injection
- * context so the helper can use toObservable() on its derived signals
- * for legacy RxJS-pipe consumers.
+ * EndpointDataService's per-CNSI services-domain caches. Constructed and
+ * cached by CreateServiceInstanceHelperServiceFactory. Readers that
+ * compose with streams bridge the signals in their own injector.
  *
  * Loads happen lazily on construction via loadServicesDetails() —
  * idempotent (warm-cache short-circuit). Filtering by the configured
@@ -24,22 +21,11 @@ import { StServiceInstance, StServiceOffering, StServicePlan } from '../../../se
 export class CreateServiceInstanceHelper {
   marketPlaceMode = false;
 
-  // The factory wraps construction in runInInjectionContext, so inject()
-  // here resolves the surrounding injector for use with later toObservable
-  // calls (e.g. serviceInstances$ which is computed-per-call).
-  private readonly injector = inject(Injector);
-
   private endpointData: EndpointDataService;
 
   readonly serviceOffering: Signal<StServiceOffering | undefined>;
   readonly serviceName: Signal<string | undefined>;
   readonly servicePlans: Signal<StServicePlan[]>;
-
-  // toObservable bridges for legacy RxJS-pipe consumers. Created in the
-  // helper constructor — the factory wraps construction in
-  // runInInjectionContext so these are valid here.
-  readonly servicePlans$: Observable<StServicePlan[]>;
-  readonly serviceName$: Observable<string | undefined>;
 
   constructor(
     public readonly serviceGuid: string,
@@ -65,9 +51,6 @@ export class CreateServiceInstanceHelper {
     this.servicePlans = computed(() =>
       this.endpointData.servicePlans().filter(p => p.serviceOffering?.guid === this.serviceGuid),
     );
-
-    this.servicePlans$ = toObservable(this.servicePlans);
-    this.serviceName$ = toObservable(this.serviceName);
   }
 
   /**
@@ -96,14 +79,5 @@ export class CreateServiceInstanceHelper {
       }
       return list;
     });
-  }
-
-  /**
-   * Observable bridge for serviceInstances() — for legacy RxJS-pipe consumers.
-   * Wraps the toObservable call in the captured injector so callers don't
-   * need to be in an injection context.
-   */
-  serviceInstances$(planGuid?: string | null, spaceGuid?: string | null): Observable<StServiceInstance[]> {
-    return runInInjectionContext(this.injector, () => toObservable(this.serviceInstances(planGuid, spaceGuid)));
   }
 }

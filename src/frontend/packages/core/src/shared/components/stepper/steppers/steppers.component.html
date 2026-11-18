@@ -1,45 +1,45 @@
 <div class="steppers-wrapper">
-  @if (steps && steps.length) {
+  @if (visibleSteps().length) {
     <div class="steppers">
       <div class="steppers-inner">
         <!-- Context summary — surfaces in-progress selections (e.g.
              "Creating service instance in {CF} / {Org} / {Space}") so
              later steps don't lose track of what's being built. -->
-        @if (contextSummary) {
+        @if (contextSummary()) {
           <div class="steppers-context-summary mb-4 px-3 py-2 rounded border border-content-border bg-content-bg-alt text-sm text-content-muted">
-            <ng-container *ngTemplateOutlet="contextSummary"></ng-container>
+            <ng-container *ngTemplateOutlet="contextSummary()"></ng-container>
           </div>
         }
         <!-- Step headers -->
-        @if (steps.length > 1) {
+        @if (visibleSteps().length > 1) {
           <div class="steppers-headers flex flex-wrap sm:flex-nowrap items-center justify-center mb-8 gap-2 overflow-x-auto">
-            @for (step of steps; track $index; let i = $index; let isLast = $last) {
+            @for (step of visibleSteps(); track $index; let i = $index; let isLast = $last) {
               <div
                 class="steppers-header flex items-center shrink-0 min-w-0"
              [ngClass]="{
-               'steppers-header--active': step.active,
-               'steppers-header--busy': step.blocked || step.showBusy
+               'steppers-header--active': step.active(),
+               'steppers-header--busy': step.effectiveBlocked || step.effectiveShowBusy
              }">
-                @if (steps.length !== 1) {
-                  <div class="steppers-header-inner flex items-center min-w-0">
+                @if (visibleSteps().length !== 1) {
+                  <ng-template #headerBody>
                     <!-- Step indicator -->
                     <div class="steppers-header-indicator relative flex items-center justify-center shrink-0">
                       <!-- Loading spinner -->
-                      @if ((step.blocked || step.showBusy)) {
+                      @if ((step.effectiveBlocked || step.effectiveShowBusy)) {
                         <app-busy class="text-primary" size="2rem" context="stepper"></app-busy>
                       } @else {
-                        <app-dot-content [disabled]="step.skip"
+                        <app-dot-content [disabled]="step.effectiveSkip"
                           class="w-8 h-8 rounded-full flex items-center justify-center text-sm font-medium transition-colors steppers-header-indicator-content"
                                  [ngClass]="{
-                                   'steppers-header-indicator-content--active': step.active,
-                                   'steppers-header-indicator-content--complete': step.complete,
-                                   'steppers-header-indicator-content--inactive': !step.active && !step.complete,
-                                   'steppers-header-indicator-content--skip': step.skip
+                                   'steppers-header-indicator-content--active': step.active(),
+                                   'steppers-header-indicator-content--complete': step.complete(),
+                                   'steppers-header-indicator-content--inactive': !step.active() && !step.complete(),
+                                   'steppers-header-indicator-content--skip': step.effectiveSkip
                                  }">
-                          @if (step.complete) {
-                            <span class="material-icons text-sm">{{ this.getIconLigature() }}</span>
+                          @if (step.complete()) {
+                            <span class="material-icons text-sm" role="img" aria-label="Complete">{{ this.getIconLigature() }}</span>
                           }
-                          @if (!step.complete) {
+                          @if (!step.complete()) {
                             <div>{{ i + 1 }}</div>
                           }
                         </app-dot-content>
@@ -49,22 +49,32 @@
                     <!-- Step title -->
                     <span class="steppers-header-text ml-2 sm:ml-3 text-xs sm:text-sm font-medium truncate max-w-[120px] sm:max-w-none"
                   [ngClass]="{
-                    'steppers-header-text--active': step.active,
-                    'steppers-header-text--complete': step.complete,
-                    'steppers-header-text--inactive': !step.active && !step.complete,
-                    'steppers-header-text--skip': step.skip
+                    'steppers-header-text--active': step.active(),
+                    'steppers-header-text--complete': step.complete(),
+                    'steppers-header-text--inactive': !step.active() && !step.complete(),
+                    'steppers-header-text--skip': step.effectiveSkip
                   }">
-                      {{ step.title }}
+                      {{ step.title() }}
                     </span>
-                  </div>
+                  </ng-template>
+                  @if (step.complete() && !visibleSteps()[currentIndex()].effectiveDisablePrevious && !visibleSteps()[currentIndex()].hidePrevious) {
+                    <button type="button" class="steppers-header-inner flex items-center min-w-0 cursor-pointer"
+                      [attr.aria-label]="step.title() + ', completed'" (click)="goTo(i)">
+                      <ng-container *ngTemplateOutlet="headerBody"></ng-container>
+                    </button>
+                  } @else {
+                    <div class="steppers-header-inner flex items-center min-w-0">
+                      <ng-container *ngTemplateOutlet="headerBody"></ng-container>
+                    </div>
+                  }
                 }
                 <!-- Connector line -->
                 @if (!isLast) {
                   <div
                     class="steppers-header-connector w-8 sm:w-12 h-0.5 mx-2 sm:mx-4 shrink-0 hidden sm:block"
                [ngClass]="{
-                 'steppers-header-connector--complete': step.complete,
-                 'steppers-header-connector--incomplete': !step.complete
+                 'steppers-header-connector--complete': step.complete(),
+                 'steppers-header-connector--incomplete': !step.complete()
                }">
                   </div>
                 }
@@ -72,48 +82,63 @@
             }
           </div>
         }
-        <!-- Step content -->
+        <!-- Step content. The page title sits in the page header, outside
+             main: this heading names the step for screen readers. -->
         <div class="steppers-contents mb-8">
-          <span *ngTemplateOutlet="steps[currentIndex()].content"></span>
+          @if (visibleSteps()[currentIndex()].title(); as stepTitle) {
+            <h2 class="sr-only">{{ stepTitle }}</h2>
+          }
+          <span *ngTemplateOutlet="visibleSteps()[currentIndex()].content()"></span>
         </div>
         <!-- Navigation buttons -->
-        <div class="steppers-navigation flex items-center justify-between border-t pt-6">
+        <div class="steppers-navigation flex flex-wrap items-center justify-between border-t pt-6">
+          <!-- In this row: a dialog's body scrolls under it, so a reason placed before it is hidden.
+               On the page before any failure: screen readers miss a live region that arrives with its text. -->
+          <div id="stepper_error" class="w-full" role="alert">
+            @if (stepError(); as error) {
+              <p class="text-sm text-danger-700 dark:text-danger-300 mb-4 break-words"><app-error-text [pieces]="error" /></p>
+            }
+          </div>
           <div class="steppers-navigation-left">
-            @if (steps.length !== 1 || basePreviousRedirect) {
+            @if ((currentIndex() > 0 || !!basePreviousRedirect()) && !visibleSteps()[currentIndex()].hidePrevious) {
               <button id="stepper_previous"
                 class="btn btn-secondary"
-                (click)="setActive(currentIndex() - 1)"
-                [disabled]="!canGoto(currentIndex() - 1) || steps[currentIndex()].disablePrevious">
+                (click)="goPrevious()"
+                [disabled]="!canGoto(currentIndex() - 1) || visibleSteps()[currentIndex()].effectiveDisablePrevious">
                 Previous
               </button>
             }
           </div>
-          <div class="steppers-navigation-right flex items-center space-x-3">
+          <!-- ml-auto: an empty left div fits on the reason's line, leaving this one alone on the next,
+               where justify-between has nothing to spread. -->
+          <div class="steppers-navigation-right ml-auto flex items-center space-x-3">
             <!-- Cancel button -->
-            @if (!steps[currentIndex()].hideCloseButton && cancel) {
+            @if (!visibleSteps()[currentIndex()].effectiveHideCloseButton && (cancel() || cancelAction())) {
               <button id="stepper_cancel"
                 class="btn btn-secondary"
-                [routerLink]="cancelReload ? null : (cancel$ | async)"
-                [queryParams]="cancelReload ? null : (cancelQueryParams$ | async)"
+                [routerLink]="cancelReload() || cancelAction() ? null : cancelLink()"
+                [queryParams]="cancelReload() || cancelAction() ? null : cancelQueryParams()"
                 [disabled]="!canCancel(currentIndex())"
                 (click)="onCancel(currentIndex())">
                 {{ this.getCancelButtonText(currentIndex()) }}
               </button>
             }
             <!-- Next/Submit button -->
-            @if (!steps[currentIndex()].hideNextButton) {
-              <button id="stepper_next"
+            @if (!visibleSteps()[currentIndex()].hideNextButton()) {
+              <button id="stepper_next" #nextButton
                 class="steppers-navigation-right-next btn flex items-center space-x-2"
+                [attr.aria-describedby]="stepError() ? 'stepper_error' : null"
                   [ngClass]="{
-                    'btn-danger': steps[currentIndex()].destructiveStep,
-                    'btn-primary': !steps[currentIndex()].destructiveStep
+                    'btn-danger': visibleSteps()[currentIndex()].effectiveDestructiveStep,
+                    'btn-warning': !visibleSteps()[currentIndex()].effectiveDestructiveStep && visibleSteps()[currentIndex()].effectiveWarningStep,
+                    'btn-primary': !visibleSteps()[currentIndex()].effectiveDestructiveStep && !visibleSteps()[currentIndex()].effectiveWarningStep
                   }"
                 type="submit"
                 (click)="goNext()"
-                [disabled]="steps[currentIndex()].busy || steps[currentIndex()].blocked || !canGoNext(currentIndex())">
+                [disabled]="visibleSteps()[currentIndex()].busy() || visibleSteps()[currentIndex()].effectiveBlocked || !canGoNext(currentIndex())">
                 <!-- Loading spinner -->
-                @if (showNextButtonProgress) {
-                  <app-busy class="text-white" size="1.25rem" context="stepper-next"></app-busy>
+                @if (showNextButtonProgress()) {
+                  <app-busy size="1.25rem" context="stepper-next"></app-busy>
                 } @else {
                   <span>{{ this.getNextButtonText(currentIndex()) }}</span>
                 }

@@ -181,3 +181,24 @@ func TestFastPath_UsesDefaultsWhenZero(t *testing.T) {
 		t.Fatal("RunFastPath with default options deadlocked")
 	}
 }
+
+// The 202 hand-off body carries the id any replica can resolve, so the
+// frontend's poll survives landing on a replica that did not create it.
+func TestFastPath_HandoffCarriesEncodedID(t *testing.T) {
+	tr := newFastPathTracker(t)
+	tl := newCodecTranslator()
+	tl.set("job-1", JobStateProcessing)
+
+	res := RunFastPath(context.Background(), tr, tl, backendRef{JobID: "job-1", User: "user-a"}, FastPathOptions{
+		Kind:         "fake.thing.create",
+		Window:       50 * time.Millisecond,
+		PollInterval: 10 * time.Millisecond,
+	})
+
+	if res.Resolved || res.HandoffJob == nil {
+		t.Fatalf("expected a hand-off, got %+v", res)
+	}
+	if res.HandoffJob.ID != "fake.thing.create.job-1" {
+		t.Errorf("expected the encoded id on the hand-off, got %q", res.HandoffJob.ID)
+	}
+}

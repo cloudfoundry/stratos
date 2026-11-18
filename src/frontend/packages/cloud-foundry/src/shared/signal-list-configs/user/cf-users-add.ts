@@ -6,7 +6,6 @@ import type { CfUsersRolesDataService } from '../../../services/domain-data/cf-u
 import type { UserInviteService, UserInviteSendSpaceRoles } from '../../../features/cf/user-invites/user-invite.service';
 import type { TailwindSnackBarService } from '@stratosui/core';
 import type { CfUsersPagedDataService } from '../../data-services/cf-users-paged-data.service';
-import type { CnsiUsersSnapshotService } from '../../../services/endpoint-data/cnsi-users-snapshot.service';
 
 export interface AddRoleSelection {
   orgRoles: OrgUserRoleNames[];
@@ -48,7 +47,6 @@ export interface AddUsersDeps {
   invite: UserInviteService;
   snackBar: TailwindSnackBarService;
   paged: CfUsersPagedDataService;
-  snapshot: CnsiUsersSnapshotService;
   cfGuid: string;
 }
 
@@ -172,7 +170,7 @@ function reportAndRefresh(
   totalCount: number,
 ): void {
   deps.paged.markStale(deps.cfGuid);
-  deps.snapshot.refreshIfLoaded(deps.cfGuid);
+  deps.paged.refreshIfLoaded(deps.cfGuid);
   reportSnackBar(deps, failedCount, totalCount);
 }
 

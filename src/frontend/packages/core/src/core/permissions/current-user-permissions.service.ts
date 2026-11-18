@@ -1,8 +1,5 @@
-import { EnvironmentInjector, Injectable, inject, runInInjectionContext } from '@angular/core';
-import { toObservable } from '@angular/core/rxjs-interop';
+import { computed, EnvironmentInjector, Injectable, inject, runInInjectionContext, Signal, untracked } from '@angular/core';
 import { EndpointsDataService } from '@stratosui/store';
-import { combineLatest, Observable, of } from 'rxjs';
-import { distinctUntilChanged, map, switchMap } from 'rxjs/operators';
 
 import {
   CurrentUserPermissions,
@@ -14,6 +11,7 @@ import {
   BaseCurrentUserPermissionsChecker,
   ICurrentUserPermissionsChecker,
   IPermissionCheckCombiner,
+  PERMISSION_DENIED,
 } from './current-user-permissions.types';
 import { StratosUserPermissionsChecker } from './stratos-user-permissions.checker';
 
@@ -23,11 +21,8 @@ export const CUSTOM_USER_PERMISSION_CHECKERS = 'custom_user_perm_checkers';
   providedIn: 'root'
 })
 export class CurrentUserPermissionsService {
-  // Capture the injection context so checkers — which call `inject(...)` for
-  // their signal-mirror dependencies — can be constructed lazily on the first
-  // permission check. Eager construction would pull in `Store` at root
-  // injection time, breaking component specs that transitively reference this
-  // service but never invoke a permission check.
+  // The checkers call `inject(...)` for the roles data services; they are
+  // built on the first permission check, in this captured injection context.
   private injector = inject(EnvironmentInjector);
   private endpointsData = inject(EndpointsDataService);
   private _allCheckers: ICurrentUserPermissionsChecker[] | null = null;
@@ -57,57 +52,69 @@ export class CurrentUserPermissionsService {
    * @param orgOrSpaceGuid If this is the only param then it will be used as the id to for all permission checks.
    * @param spaceGuid If this is provided then the orgOrSpaceGuid will be used for org related permission checks and this will be
    *  used for space related permission checks.
+   * @returns A signal: false until the state the check reads has loaded, then
+   *   it follows that state. It holds no subscription, so it lives only as
+   *   long as its reader.
    */
   public can(
     action: CurrentUserPermissions | PermissionConfigType,
     endpointGuid?: string,
     ...args: any[]
-  ): Observable<boolean> {
-    let actionConfig: PermissionConfig[] | PermissionConfig | undefined;
-    if (typeof action === 'string') {
-      const permConfigType = this.getPermissionConfig(action);
-      if (!permConfigType) {
-        return of(false); // Logging handled in getPermissionConfig
+  ): Signal<boolean> {
+    // Untracked: a caller inside a computed must not depend on anything
+    // read while the check is built, only on what the check reads.
+    return untracked(() => {
+      let actionConfig: PermissionConfig[] | PermissionConfig | undefined;
+      if (typeof action === 'string') {
+        const permConfigType = this.getPermissionConfig(action);
+        if (!permConfigType) {
+          return PERMISSION_DENIED; // Logging handled in getPermissionConfig
+        }
+        actionConfig = this.getConfig(permConfigType);
+      } else {
+        actionConfig = this.getConfig(action);
       }
-      actionConfig = this.getConfig(permConfigType);
-    } else {
-      actionConfig = this.getConfig(action);
-    }
-    const obs$ = this.getCanObservable(actionConfig, endpointGuid, ...args);
-    return obs$ ?
-      obs$.pipe(distinctUntilChanged()) :
-      of(false);
+      return this.getCanSignal(actionConfig, endpointGuid, ...args) ?? PERMISSION_DENIED;
+    });
   }
 
-  private getCanObservable(
+  private getCanSignal(
     actionConfig: PermissionConfig[] | PermissionConfig | undefined,
     endpointGuid?: string,
-    ...args: any[]): Observable<boolean> | null {
+    ...args: any[]): Signal<boolean> | null {
     if (Array.isArray(actionConfig)) {
       return this.getComplexPermission(actionConfig, endpointGuid, ...args);
     } else if (actionConfig) {
       return this.getSimplePermission(actionConfig, endpointGuid, ...args);
     } else if (endpointGuid) {
-      // W36-B Wave 3: read endpoint via EndpointsDataService signal
-      // bridge instead of the legacy EntityMonitor.entity$.
-      return toObservable(this.endpointsData.endpointById(endpointGuid), { injector: this.injector }).pipe(
-        // strict: a registered endpoint always carries a cnsi_type; preserve the
-        // original guard (call through when an endpoint resolves, else emit false).
-        switchMap(endpoint => endpoint ?
-          this.getFallbackPermission(endpointGuid, endpoint.cnsi_type!) :
-          of(false)
-        )
-      );
+      return this.getFallbackForEndpoint(endpointGuid);
     }
     return null;
   }
 
-  private getSimplePermission(actionConfig: PermissionConfig, endpointGuid?: string, ...args: any[]): Observable<boolean> {
-    return this.findChecker<Observable<boolean>>(
+  /** The fallback check for the endpoint's type, built once per type seen. */
+  private getFallbackForEndpoint(endpointGuid: string): Signal<boolean> {
+    const endpoint = this.endpointsData.endpointById(endpointGuid);
+    let built: { type: string, check: Signal<boolean> } | null = null;
+    return computed(() => {
+      // strict: a registered endpoint always carries a cnsi_type.
+      const type = endpoint()?.cnsi_type;
+      if (!type) {
+        return false;
+      }
+      if (built?.type !== type) {
+        built = { type, check: untracked(() => this.getFallbackPermission(endpointGuid, type)) };
+      }
+      return built.check();
+    });
+  }
+
+  private getSimplePermission(actionConfig: PermissionConfig, endpointGuid?: string, ...args: any[]): Signal<boolean> {
+    return this.findChecker<Signal<boolean>>(
       (checker: ICurrentUserPermissionsChecker) => checker.getSimpleCheck(actionConfig, endpointGuid, ...args),
       'permissions check',
       actionConfig.type,
-      of(false)
+      PERMISSION_DENIED
     );
   }
 
@@ -126,7 +133,7 @@ export class CurrentUserPermissionsService {
       'complex permissions check',
       'a group',
       [{
-        checks: [of(false)]
+        checks: [PERMISSION_DENIED]
       }]
     );
   }
@@ -155,23 +162,21 @@ export class CurrentUserPermissionsService {
 
   private combineChecks(
     checkCombiners: IPermissionCheckCombiner[],
-  ) {
+  ): Signal<boolean> {
     const reducedChecks = checkCombiners.map(combiner =>
       BaseCurrentUserPermissionsChecker.reduceChecks(combiner.checks, combiner.combineType)
     );
-    return combineLatest(reducedChecks).pipe(
-      map(checks => checks.every(check => check))
-    );
+    // No check groups (empty config): deny rather than grant by default.
+    return computed(() => reducedChecks.length > 0 && reducedChecks.every(check => check()));
   }
 
-  private getFallbackPermission(endpointGuid: string, endpointType: string): Observable<boolean> {
-    return this.findChecker<Observable<boolean>>(
+  private getFallbackPermission(endpointGuid: string, endpointType: string): Signal<boolean> {
+    return this.findChecker<Signal<boolean>>(
       (checker: ICurrentUserPermissionsChecker) => checker.getFallbackCheck(endpointGuid, endpointType),
       'fallback permission',
       'N/A',
-      // No fallback checker found => permission denied (falsy, same as the
-      // previous of(null) under the declared Observable<boolean> contract).
-      of(false)
+      // No fallback checker found => permission denied.
+      PERMISSION_DENIED
     );
   }
 

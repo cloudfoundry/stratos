@@ -1,17 +1,16 @@
 import { BreakpointObserver, Breakpoints } from '@angular/cdk/layout';
 import { Portal, PortalModule } from '@angular/cdk/portal';
-import { ChangeDetectionStrategy, AfterViewInit, ChangeDetectorRef, Component, ElementRef, NgZone, OnDestroy, OnInit, signal, ViewChild, ViewContainerRef, inject } from '@angular/core';
+import { ChangeDetectionStrategy, AfterViewInit, Component, ElementRef, OnDestroy, OnInit, computed, signal, ViewContainerRef, inject, viewChild } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { ActivatedRoute, ActivatedRouteSnapshot, NavigationEnd, Route, Router, RouterModule } from '@angular/router';
-import { toObservable } from '@angular/core/rxjs-interop';
 import {
   entityCatalog,
   UserFavoritesDataService,
 } from '@stratosui/store';
 import { DashboardSignalService } from '../../../core/signals/dashboard-signal.service';
-import { DashboardDataService, DashboardState } from '../../../core/dashboard-data.service';
-import { combineLatest, Observable, of, Subscription } from 'rxjs';
-import { distinctUntilChanged, filter, map, startWith, withLatestFrom } from 'rxjs/operators';
+import { DashboardDataService } from '../../../core/dashboard-data.service';
+import { Observable, of, Subscription } from 'rxjs';
+import { distinctUntilChanged, filter, map, startWith } from 'rxjs/operators';
 
 import { CustomizationService } from '../../../core/customizations.types';
 import { naturalCompare } from '../../../shared/utils/natural-sort';
@@ -25,6 +24,12 @@ import { PageHeaderService } from './../../../core/page-header-service/page-head
 import { SideNavComponent, SideNavItem } from './../side-nav/side-nav.component';
 import { RoutingIndicatorComponent } from '../../../shared/components/routing-indicator/routing-indicator.component';
 import { ShowPageHeaderComponent } from '../../../shared/components/page-header/show-page-header/show-page-header.component';
+
+// simplification: hidden or inert controls count as focusable, which keeps
+// main out of the tab order (as before); filter by visibility if a page
+// with only hidden controls turns up.
+const FOCUSABLE = 'a[href], button:not([disabled]), input:not([disabled]), select:not([disabled]), ' +
+  'textarea:not([disabled]), [tabindex]:not([tabindex="-1"]), [contenteditable]:not([contenteditable="false"])';
 
 @Component({
   selector: 'app-dashboard-base',
@@ -50,40 +55,44 @@ export class DashboardBaseComponent implements OnInit, OnDestroy, AfterViewInit 
   private activatedRoute = inject(ActivatedRoute);
   private endpointsService = inject(EndpointsService);
   tabNavService = inject(TabNavService);
-  private ngZone = inject(NgZone);
   sidePanelService = inject(SidePanelService);
   private cs = inject(CustomizationService);
-  private cd = inject(ChangeDetectorRef);
   private dashboardSignals = inject(DashboardSignalService);
   private dashboardData = inject(DashboardDataService);
   private userFavorites = inject(UserFavoritesDataService);
   private endpointReauthReport = inject(EndpointReauthReportService);
 
   public activeTabLabel$!: Observable<string>;
-  public subNavData$!: Observable<[string, Portal<any>, IPageSideNavTab, IHeaderBreadcrumbLink[]]>;
+  public readonly subNavData = computed<[string | null, Portal<any> | undefined, IPageSideNavTab | null, IHeaderBreadcrumbLink[] | undefined]>(() => {
+    const tabNav = this.tabNavService.currentTabHeader();
+    return [tabNav ? tabNav.label : null, this.tabNavService.tabSubNav(), tabNav, this.tabNavService.tabSubNavBreadcrumbs()];
+  });
   public isMobile$: Observable<boolean> = of(false);
   public sideNavMode$!: Observable<string>;
   public sideNavMode!: string;
-  public mainNavState$: Observable<{ mode: string; opened: boolean; iconMode: boolean, }> = of({ mode: 'side', opened: true, iconMode: false });
+  public readonly mainNavState = computed(() => {
+    const state = this.dashboardSignals.dashboard();
+    return state.isMobile
+      ? { mode: 'over', opened: state.isMobileNavOpen || false, iconMode: false }
+      : { mode: state.sideNavPinned ? 'side' : 'over', opened: true, iconMode: !state.sidenavOpen };
+  });
   public rightNavState$!: Observable<{ opened: boolean, component?: object, props?: object, }>;
-  private dashboardState$: Observable<DashboardState> = of({} as DashboardState);
   public noMargin$: Observable<boolean> = of(false);
-  private closeSub!: Subscription;
   private mobileSub: Subscription;
   private resizeObserver?: ResizeObserver;
   private mutationObserver?: MutationObserver;
-  private drawer: any;
   public iconModeOpen = false;
   public sideNavWidth = 54;
 
   sideNavTabs: SideNavItem[] = this.getNavigationRoutes();
   sideNaveMode = 'side';
 
-  @ViewChild('previewPanelContainer', { read: ViewContainerRef, static: false }) previewPanelContainer!: ViewContainerRef;
+  readonly previewPanelContainer = viewChild.required('previewPanelContainer', { read: ViewContainerRef });
 
-  @ViewChild('content', { static: false }) public content!: ElementRef<HTMLElement>;
+  public readonly content = viewChild<ElementRef<HTMLElement>>('content');
 
   showScrollShadow = signal(false);
+  mainTabStop = signal(false);
 
   // Slide-in side panel mode
   sidePanelMode: SidePanelMode = SidePanelMode.Modal;
@@ -99,59 +108,14 @@ export class DashboardBaseComponent implements OnInit, OnDestroy, AfterViewInit 
       startWith(false),
       distinctUntilChanged()
     );
-    this.dashboardState$ = toObservable(this.dashboardSignals.dashboard);
-    this.mainNavState$ = this.dashboardState$.pipe(
-      map(state => {
-        if (state.isMobile) {
-          return {
-            mode: 'over',
-            opened: state.isMobileNavOpen || false,
-            iconMode: false
-          };
-        } else {
-          return {
-            mode: state.sideNavPinned ? 'side' : 'over',
-            opened: true,
-            iconMode: !state.sidenavOpen
-          };
-        }
-      })
-    );
-
     this.mobileSub = this.isMobile$
       .subscribe(isMobile => isMobile ? this.dashboardData.enableMobileNav() : this.dashboardData.disableMobileNav());
   }
 
-  @ViewChild('sidenav') set sidenav(drawer: any) {
-    this.drawer = drawer;
-    if (!this.closeSub && drawer && drawer.closedStart) {
-      // We need this for mobile to ensure the state is synced when the dashboard is closed by clicking on the backdrop.
-      this.closeSub = drawer.closedStart.pipe(withLatestFrom(this.dashboardState$)).subscribe(([_change, state]: [any, DashboardState]) => {
-        if (state.isMobile) {
-          this.dashboardData.closeSideNav();
-        }
-      });
-    }
-  }
-
-  public redrawSideNav() {
-    // We need to do this to ensure there isn't a space left behind
-    // when going from mobile to desktop
-    if (this.drawer && this.drawer._modeChanged) {
-      this.ngZone.runOutsideAngular(() => {
-        setTimeout(() => this.drawer._modeChanged.next(), 250);
-      });
-    }
-  }
-
-  sideHelpClosed() {
-    this.sidePanelService.hide();
-  }
-
   ngAfterViewInit() {
-    this.sidePanelService.setContainer(this.previewPanelContainer);
+    this.sidePanelService.setContainer(this.previewPanelContainer());
 
-    const el = this.content?.nativeElement;
+    const el = this.content()?.nativeElement;
     if (!el) return;
     this.updateScrollShadow(el);
 
@@ -172,14 +136,6 @@ export class DashboardBaseComponent implements OnInit, OnDestroy, AfterViewInit 
   }
 
   ngOnInit() {
-    this.subNavData$ = combineLatest([
-      this.tabNavService.getCurrentTabHeaderObservable().pipe(
-        startWith(null)
-      ),
-      this.tabNavService.tabSubNav$,
-      this.tabNavService.tabSubNavBreadcrumbs$
-    ]).pipe(map(([tabNav, tabSubNav, tabSubNavBreadcrumb]: [any, any, any]) => [tabNav ? tabNav.label : null, tabSubNav, tabNav, tabSubNavBreadcrumb]));
-
     // Register all health checks for endpoint types that support this
     entityCatalog.getAllEndpointTypes().forEach(epType => {
       if (epType && epType.definition && epType.definition.healthCheck) {
@@ -202,9 +158,6 @@ export class DashboardBaseComponent implements OnInit, OnDestroy, AfterViewInit 
     if (this.mobileSub) {
       this.mobileSub.unsubscribe();
     }
-    if (this.closeSub) {
-      this.closeSub.unsubscribe();
-    }
     this.resizeObserver?.disconnect();
     this.mutationObserver?.disconnect();
     this.sidePanelService.unsetContainer();
@@ -215,15 +168,29 @@ export class DashboardBaseComponent implements OnInit, OnDestroy, AfterViewInit 
     this.updateScrollShadow(el);
   }
 
+  // The skip link focuses the main landmark itself; the default fragment
+  // navigation would go through the router and leave focus on the link.
+  skipToContent(event: Event) {
+    event.preventDefault();
+    this.content()?.nativeElement.focus();
+  }
+
   private updateScrollShadow(el?: HTMLElement) {
     if (!el) {
-      el = this.content?.nativeElement;
+      el = this.content()?.nativeElement;
     }
     if (!el) return;
     const hasMore = el.scrollHeight > el.clientHeight && el.scrollTop + el.clientHeight < el.scrollHeight - 4;
     if (this.showScrollShadow() !== hasMore) {
       this.showScrollShadow.set(hasMore);
-      this.cd.markForCheck();
+    }
+    // WCAG 2.1.1: a page that scrolls with nothing focusable in it can only
+    // be scrolled from the keyboard if main itself takes a tab stop. A page
+    // with controls keeps main out of the tab order: arrow keys scroll it
+    // once focus is inside.
+    const tabStop = el.scrollHeight > el.clientHeight && !el.querySelector(FOCUSABLE);
+    if (this.mainTabStop() !== tabStop) {
+      this.mainTabStop.set(tabStop);
     }
   }
 
@@ -268,9 +235,9 @@ export class DashboardBaseComponent implements OnInit, OnDestroy, AfterViewInit 
           const alwaysShowNavFor = this.cs.get().alwaysShowNavForEndpointTypes;
           const alwaysShow = alwaysShowNavFor ?
             alwaysShowNavFor(item.requiresEndpointType) : (item.requiresEndpointType === 'cf');
-          item.hidden = alwaysShow ? of(false) : this.endpointsService.doesNotHaveConnectedEndpointType(item.requiresEndpointType);
+          item.hidden = alwaysShow ? signal(false) : this.endpointsService.noConnectedEndpointOfType(item.requiresEndpointType);
         } else if (item.requiresPersistence) {
-          item.hidden = this.endpointsService.disablePersistenceFeatures$.pipe(startWith(true));
+          item.hidden = this.endpointsService.disablePersistenceFeatures;
         }
         // Backwards compatibility (text became label)
         if (!item.label && !!item.text) {

@@ -8,10 +8,8 @@ import {
   inject,
   signal,
 } from '@angular/core';
-import { toObservable } from '@angular/core/rxjs-interop';
-import { Observable, of } from 'rxjs';
 
-import { SignalListComponent, SignalListConfig } from '@stratosui/core';
+import { SignalListComponent, SignalListConfig, StepOnNextResult } from '@stratosui/core';
 
 import { CfUsersRolesDataService } from '../../../../../services/domain-data/cf-users-roles-data.service';
 import {
@@ -48,10 +46,6 @@ export class UsersRolesSelectComponent {
   // selectedKeys + users() each tick.
   readonly selectedUsers: Signal<StUser[]> = computed(() => this.selectConfig.resolveSelected());
 
-  // EnumerateComponent takes an Observable<any[]>; bridge the selection
-  // signal back to one for the existing label rendering.
-  readonly selectedUsers$: Observable<StUser[]> = toObservable(this.selectedUsers);
-
   readonly valid$ = signal<boolean>(false);
 
   constructor() {
@@ -64,9 +58,9 @@ export class UsersRolesSelectComponent {
     });
   }
 
-  onNext = () => {
+  async onNext(): Promise<StepOnNextResult> {
     const users = this.selectedUsers();
     this.rolesData.setUsers(this.activeRouteCfOrgSpace.cfGuid, users);
-    return of({ success: true });
-  };
+    return { success: true };
+  }
 }

@@ -1,10 +1,9 @@
 import { CommonModule } from '@angular/common';
-import { ChangeDetectionStrategy, ChangeDetectorRef, Component, OnInit, WritableSignal, computed, inject, signal } from '@angular/core';
+import { ChangeDetectionStrategy, Component, OnInit, WritableSignal, computed, inject, signal } from '@angular/core';
 import { RouterModule } from '@angular/router';
-import { Observable } from 'rxjs';
-import { map, publishReplay, refCount } from 'rxjs/operators';
 
 import { ApplicationService } from '../../../../cloud-foundry/src/features/applications/application.service';
+import { AppDetailDataService } from '../../../../cloud-foundry/src/features/applications/app-detail-data.service';
 import { CustomIconComponent, SignalListComponent, SignalListConfig } from '@stratosui/core';
 import { PageHeaderComponent } from '../../../../core/src/shared/components/page-header/page-header.component';
 import {
@@ -32,11 +31,11 @@ import { AutoscalerConstants } from '../../core/autoscaler-helpers/autoscaler-ut
 })
 export class AutoscalerMetricPageComponent implements OnInit {
   applicationService = inject(ApplicationService);
-  private cdr = inject(ChangeDetectorRef);
+  private detail = inject(AppDetailDataService);
   private chartConfig = inject(AppAutoscalerMetricChartSignalConfigService);
 
   parentUrl: string;
-  applicationName$!: Observable<string | null>;
+  readonly applicationName = computed(() => this.detail.app()?.entity?.name ?? null);
 
   // Re-exposed for template binding so the time-window dropdown can
   // read/write the selected window.
@@ -84,19 +83,15 @@ export class AutoscalerMetricPageComponent implements OnInit {
       onRefresh: () => this.chartConfig.refresh(),
       onClear: () => this.chartConfig.clearFilters(),
       viewMode: this.chartConfig.viewMode,
+      // Each card holds a gauge and a time chart; the 16rem default squeezed them.
+      cardMinWidth: '40rem',
       sort: this.chartConfig.sort,
       hidePagerWhenSingle: true,
     });
   }
 
   ngOnInit() {
-    this.applicationName$ = this.applicationService.app$.pipe(
-      map(({ entity }) => entity ? entity.entity.name : null),
-      publishReplay(1),
-      refCount()
-    );
     void this.chartConfig.loadAll();
-    this.cdr.markForCheck();
   }
 
   onWindowChange(value: string): void {

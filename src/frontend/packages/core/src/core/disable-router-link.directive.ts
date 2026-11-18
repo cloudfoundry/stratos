@@ -1,4 +1,4 @@
-import { Directive, Input, inject } from '@angular/core';
+import { Directive, inject, input } from '@angular/core';
 import { RouterLink, RouterLinkWithHref } from '@angular/router';
 
 @Directive({
@@ -7,7 +7,7 @@ import { RouterLink, RouterLinkWithHref } from '@angular/router';
 })
 export class DisableRouterLinkDirective {
 
-  @Input() appDisableRouterLink: boolean = false;
+  readonly appDisableRouterLink = input<boolean>(false);
 
   constructor() {
     const routerLink = inject(RouterLink, { optional: true });
@@ -26,7 +26,7 @@ export class DisableRouterLinkDirective {
 
     // Replace method
     link.onClick = (...args) => {
-      if (this.appDisableRouterLink) {
+      if (this.appDisableRouterLink()) {
         return routerLinkWithHref ? false : true;
       } else {
         return onClick.apply(link, args);

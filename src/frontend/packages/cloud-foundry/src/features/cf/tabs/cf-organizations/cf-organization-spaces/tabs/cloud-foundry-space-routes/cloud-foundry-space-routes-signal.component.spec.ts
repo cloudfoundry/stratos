@@ -3,7 +3,6 @@ import { importProvidersFrom, provideZonelessChangeDetection, signal } from '@an
 import { provideHttpClient } from '@angular/common/http';
 import { provideHttpClientTesting } from '@angular/common/http/testing';
 import { provideRouter } from '@angular/router';
-import { of } from 'rxjs';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 
 import { ConfirmationDialogService, CurrentUserPermissionsService, TabNavService, TailwindSnackBarService } from '@stratosui/core';
@@ -23,7 +22,12 @@ import type { StRoute } from '../../../../../../../services/endpoint-data/strato
 // progress snackbar.
 function makeSnackBar() {
   const ref = { update: vi.fn(), dismiss: vi.fn(), afterDismissed: vi.fn(), onAction: vi.fn(), dismissWithAction: vi.fn() };
-  return { ref, open: vi.fn(() => ref), show: vi.fn(() => ref), error: vi.fn(() => ref) };
+  return {
+    ref,
+    open: vi.fn<TailwindSnackBarService['open']>(() => ref),
+    show: vi.fn<TailwindSnackBarService['show']>(() => ref),
+    error: vi.fn<TailwindSnackBarService['error']>(() => ref),
+  };
 }
 const flush = async (n = 16) => { for (let i = 0; i < n; i++) { await Promise.resolve(); } };
 
@@ -97,7 +101,7 @@ describe('CloudFoundrySpaceRoutesSignalComponent', () => {
         { provide: CloudFoundryEndpointService, useValue: stubEndpointService },
         { provide: CloudFoundryOrganizationService, useValue: stubOrgService },
         { provide: CloudFoundrySpaceService, useValue: stubSpaceService },
-        { provide: CurrentUserPermissionsService, useValue: { can: () => of(true) } },
+        { provide: CurrentUserPermissionsService, useValue: { can: () => signal(true) } },
         { provide: TailwindSnackBarService, useValue: snackBar },
         // The confirm dialog normally opens a modal and waits for the user;
         // the harness fires the confirm callback immediately so the bulk
@@ -108,7 +112,7 @@ describe('CloudFoundrySpaceRoutesSignalComponent', () => {
 
     fixture = TestBed.createComponent(CloudFoundrySpaceRoutesSignalComponent);
     component = fixture.componentInstance;
-    fixture.detectChanges();
+    await fixture.whenStable();
   });
 
   it('should be created', () => {
@@ -117,6 +121,20 @@ describe('CloudFoundrySpaceRoutesSignalComponent', () => {
 
   it('initializes the routes config for the route-scoped CF + space', () => {
     expect(stubRoutesConfig.initialize).toHaveBeenCalledWith('cnsi-1', 'space-1');
+  });
+
+  // The route URL is truncated in the card title, so it is linked and has a
+  // copy button carrying the full URL; TCP routes are not HTTP and get no link.
+  it('Route column links HTTP routes over https and copies the full URL', () => {
+    const col = component.listConfig()!.columns.find(c => c.key === 'url')!;
+    const http = route();
+    expect(col.render(http)).toBe('https://my-app.example.com');
+    expect(col.externalLink?.(http)).toBe('https://my-app.example.com');
+    expect(col.copyValue?.(http)).toBe('https://my-app.example.com');
+    const tcp = route({ url: 'tcp.example.com', host: '', port: 9000 });
+    expect(col.render(tcp)).toBe('tcp.example.com:9000');
+    expect(col.externalLink?.(tcp)).toBeNull();
+    expect(col.copyValue?.(tcp)).toBe('tcp.example.com:9000');
   });
 
   it('exposes a checkbox selection column and Unmap + Delete bulk actions', () => {
@@ -169,13 +187,13 @@ describe('CloudFoundrySpaceRoutesSignalComponent', () => {
   it('bulk unmap: one failure reports settled outcome via error()', async () => {
     const targets: StRoute[] = [
       route({ cnsiGuid: 'cnsi-1', guid: 'route-1', appGuids: ['app-1'] }),
-      route({ cnsiGuid: 'cnsi-1', guid: 'route-2', appGuids: ['app-2'] }),
+      route({ cnsiGuid: 'cnsi-1', guid: 'route-2', url: 'r2.example.com', appGuids: ['app-2'] }),
     ];
     stubRoutesConfig.view.filteredItems = signal(targets).asReadonly();
     stubRoutesConfig.bulkUnmapRoutes.mockResolvedValue({
       results: [
         { guid: 'route-1', state: 'COMPLETE' },
-        { guid: 'route-2', state: 'FAILED' },
+        { guid: 'route-2', state: 'FAILED', errors: [{ code: 'CF-X', message: 'Route is busy.' }] },
       ],
       succeeded: 1,
       failed: 1,
@@ -190,7 +208,7 @@ describe('CloudFoundrySpaceRoutesSignalComponent', () => {
     await flush();
 
     expect(stubRoutesConfig.bulkUnmapRoutes).toHaveBeenCalledWith('cnsi-1', ['route-1', 'route-2']);
-    expect(snackBar.error).toHaveBeenCalledWith('1 route unmapped, 1 failed');
+    expect(snackBar.error).toHaveBeenCalledWith('1 route unmapped; 1 failed: "r2.example.com" (Route is busy)');
     const allCalls = [...snackBar.open.mock.calls, ...snackBar.show.mock.calls, ...snackBar.error.mock.calls]
       .map(c => c[0]);
     expect(allCalls.join(' ')).not.toContain('requested');

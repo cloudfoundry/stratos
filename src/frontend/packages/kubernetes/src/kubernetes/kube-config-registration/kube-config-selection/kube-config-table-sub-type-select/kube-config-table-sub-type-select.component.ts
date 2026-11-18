@@ -34,11 +34,12 @@ export class KubeConfigTableSubTypeSelectComponent extends TableCellCustom<KubeC
   }
 
   ngOnInit() {
-    this.selected = this.row._subType || '';
+    this.selected = this.row()._subType || '';
   }
 
   valueChanged(value: string): void {
-    this.row._subType = value;
-    this.helper.update(this.row);
+    const row = this.row();
+    row._subType = value;
+    this.helper.update(row);
   }
 }

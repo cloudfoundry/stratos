@@ -158,6 +158,10 @@ export class GitHubSCM extends BaseSCM implements GitSCM {
   }
 
   parseErrorAsString(error: unknown): string {
+    const unreachable = this.unreachableHostMessage(error);
+    if (unreachable) {
+      return unreachable;
+    }
     const message = super.parseErrorAsString(error);
     const errorResponse = error as { status?: number };
     return errorResponse.status === 403 && message.startsWith('API rate limit exceeded for') ?

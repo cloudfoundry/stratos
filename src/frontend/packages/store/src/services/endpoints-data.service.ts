@@ -3,10 +3,11 @@ import { Injectable, Signal, computed, inject, signal } from '@angular/core';
 import { firstValueFrom } from 'rxjs';
 
 import { EndpointType } from '../extension-types';
-import { httpErrorResponseToSafeString } from '../jetstream';
+import { extractHttpErrorMessage, httpErrorResponseToSafeString } from '../jetstream';
 import { ActionState, getDefaultActionState } from '../types/entity-pipeline.types';
 import { computeConnectionStatus, EndpointModel } from '../types/endpoint.types';
 import { SystemInfo } from '../types/system.types';
+import { EndpointLastErrorService } from './endpoint-last-error.service';
 
 /**
  * Wave-1 (W36-B) signal-native endpoints data service.
@@ -85,6 +86,13 @@ export interface EndpointConnectOptions {
   body?: FormData | null;
 }
 
+// Another endpoint at the same address the user is also connected to,
+// named by the backend after a connect.
+export interface AlsoConnectedEndpoint {
+  guid: string;
+  name: string;
+}
+
 export interface EndpointRegisterOptions {
   endpointType: EndpointType;
   endpointSubType?: string | null;
@@ -96,6 +104,11 @@ export interface EndpointRegisterOptions {
   ssoAllowed: boolean;
   createSystemEndpoint: boolean;
   caCert?: string;
+  // A type linked to a Cloud Foundry (linkedToCf): the Cloud Foundry
+  // endpoint and, when known, its service broker.
+  cfGuid?: string;
+  brokerGuid?: string;
+  brokerName?: string;
 }
 
 export interface EndpointUpdateOptions {
@@ -114,6 +127,7 @@ const EMPTY_FETCH_STATE: EndpointFetchingState = { fetching: false };
 @Injectable({ providedIn: 'root' })
 export class EndpointsDataService {
   private http = inject(HttpClient);
+  private lastError = inject(EndpointLastErrorService);
 
   // ---- core state ---------------------------------------------------------
 
@@ -142,7 +156,7 @@ export class EndpointsDataService {
   // Wave 5 will read this. Wave 1 records it but does not act on it.
   private lastGetAllLogin = false;
   private hydrationPromise: Promise<EndpointModel[]> | null = null;
-  private hydrated = false;
+  private readonly _hydrated = signal<boolean>(false);
   private readyResolvers: Array<() => void> = [];
 
   // ---- public signal surface ---------------------------------------------
@@ -155,6 +169,14 @@ export class EndpointsDataService {
 
   readonly loading: Signal<boolean> = this._loading.asReadonly();
   readonly error: Signal<string | null> = this._error.asReadonly();
+
+  /**
+   * True once the first `getAll()` has settled (loaded or failed), and from
+   * then on. Unlike `loading`, a later refresh does not clear it, so a
+   * first-load placeholder keyed on it does not replace endpoints already
+   * shown.
+   */
+  readonly hydrated: Signal<boolean> = this._hydrated.asReadonly();
 
   /** Delta-list of recent disconnects. Consumers read + clear via {@link clearDisconnected}. */
   readonly disconnectedSignal: Signal<EndpointDisconnectEvent[]> = this._disconnected.asReadonly();
@@ -228,7 +250,7 @@ export class EndpointsDataService {
    * never had to coordinate the initial fetch themselves.
    */
   whenReady(): Promise<void> {
-    if (this.hydrated) {
+    if (this._hydrated()) {
       return Promise.resolve();
     }
     if (!this.hydrationPromise) {
@@ -314,14 +336,25 @@ export class EndpointsDataService {
     if (opts.endpointSubType) {
       body.set('sub_type', opts.endpointSubType);
     }
+    if (opts.cfGuid) {
+      body.set('cf_guid', opts.cfGuid);
+    }
+    if (opts.brokerGuid) {
+      body.set('broker_guid', opts.brokerGuid);
+      body.set('broker_name', opts.brokerName || '');
+    }
 
     const stagingGuid = '<New Endpoint>' + opts.name;
     let registeredGuid = '';
     const result = await this.runMutation(stagingGuid, 'POST', ENDPOINTS_URL, body, e => {
+      // A type this server cannot register: the address is not at fault.
+      if (e?.status === 400 && e?.error?.reason === 'unknown_endpoint_type' && e?.error?.error) {
+        return e.error.error;
+      }
       const message = 'There was a problem creating the endpoint. Please ensure the endpoint address is correct and try again. ' +
         httpErrorResponseToSafeString(e);
       if (e?.status === 403) {
-        return `${e?.error?.error}. Please check "Skip SSL validation for the endpoint" if the certificate issuer is trusted`;
+        return `${extractHttpErrorMessage(e)}. Please check "Skip SSL validation for the endpoint" if the certificate issuer is trusted`;
       }
       return message;
     }, async endpoint => {
@@ -338,7 +371,7 @@ export class EndpointsDataService {
     return result;
   }
 
-  async connect(guid: string, opts: EndpointConnectOptions): Promise<ActionState> {
+  async connect(guid: string, opts: EndpointConnectOptions): Promise<ActionState & { alsoConnected?: AlsoConnectedEndpoint[] }> {
     if (opts.authType === 'sso') {
       // Special-case SSO — redirect kicks the browser away; nothing to await.
       const loc = window.location.protocol + '//' + window.location.hostname +
@@ -360,10 +393,19 @@ export class EndpointsDataService {
     }
 
     this.markConnecting(guid, true);
+    let alsoConnected: AlsoConnectedEndpoint[] = [];
     return this.runMutation(guid, 'POST', TOKENS_URL, body, e =>
       httpErrorResponseToSafeString(e) || 'Could not connect, please try again',
-    ).then(async state => {
+    // The tokens response is a LoginRes, not an endpoint.
+    response => {
+      alsoConnected = (response as { also_connected?: AlsoConnectedEndpoint[] } | null)?.also_connected ?? [];
+    }).then(async state => {
       this.markConnecting(guid, false, state);
+      if (state.error) {
+        this.lastError.record(guid, state.message);
+      } else {
+        this.lastError.clear(guid);
+      }
       if (!state.error) {
         // Refresh authoritative state so connectionStatus + user fields land.
         // Await so the emitted ConnectEvent reflects post-refresh user data
@@ -383,7 +425,7 @@ export class EndpointsDataService {
           });
         }
       }
-      return state;
+      return { ...state, alsoConnected };
     });
   }
 
@@ -417,6 +459,7 @@ export class EndpointsDataService {
       'Could not unregister endpoint',
     ).then(state => {
       if (!state.error) {
+        this.lastError.clear(guid);
         const next = new Map(this._endpoints());
         next.delete(guid);
         this._endpoints.set(next);
@@ -473,7 +516,7 @@ export class EndpointsDataService {
   }
 
   private markHydrated(): void {
-    this.hydrated = true;
+    this._hydrated.set(true);
     const resolvers = this.readyResolvers;
     this.readyResolvers = [];
     resolvers.forEach(r => r());

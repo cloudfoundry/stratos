@@ -4,7 +4,6 @@ import { provideHttpClient } from '@angular/common/http';
 import { provideHttpClientTesting } from '@angular/common/http/testing';
 import { provideRouter } from '@angular/router';
 import { describe, it, expect, beforeEach, vi } from 'vitest';
-import { of } from 'rxjs';
 
 import { CurrentUserPermissionsService, TabNavService } from '@stratosui/core';
 import { STORE_TEST_PROVIDERS } from '@stratosui/store/testing';
@@ -84,7 +83,7 @@ describe('CloudFoundrySpaceUsersComponent', () => {
           provide: CloudFoundrySpaceService,
           useValue: { spaceGuid: 'space-1', orgGuid: 'org-1', cfGuid: 'cnsi-1', spaceDataService: { space: signal(null) } },
         },
-        { provide: UserInviteService, useValue: { configured$: of(false) } },
+        { provide: UserInviteService, useValue: { configured: signal(false) } },
       ],
     }).compileComponents();
 
@@ -163,8 +162,8 @@ async function makeSubNavFixture(canReturn: boolean, filteredItems?: StUser[]): 
         provide: CloudFoundrySpaceService,
         useValue: { spaceGuid: 'space-1', orgGuid: 'org-1', cfGuid: 'cnsi-1', spaceDataService: { space: signal(null) } },
       },
-      { provide: CurrentUserPermissionsService, useValue: { can: () => of(canReturn) } },
-      { provide: UserInviteService, useValue: { configured$: of(false) } },
+      { provide: CurrentUserPermissionsService, useValue: { can: () => signal(canReturn) } },
+      { provide: UserInviteService, useValue: { configured: signal(false) } },
     ],
   }).compileComponents();
   const fixture = TestBed.createComponent(CloudFoundrySpaceUsersComponent);

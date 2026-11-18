@@ -1,9 +1,6 @@
-import { AfterViewInit, Component, Input, OnInit, inject, ChangeDetectionStrategy } from '@angular/core';
-import { combineLatest as observableCombineLatest, Observable } from 'rxjs';
-import { delay, map, startWith } from 'rxjs/operators';
+import { Component, OnInit, inject, ChangeDetectionStrategy, input, computed, Signal } from '@angular/core';
 
 import { EndpointsService } from '../../../core/endpoints.service';
-import { CommonModule } from '@angular/common';
 import { NoContentMessageComponent } from '../no-content-message/no-content-message.component';
 
 export interface EndpointMissingMessageParts {
@@ -23,16 +20,16 @@ export interface EndpointMissingMessageParts {
   changeDetection: ChangeDetectionStrategy.OnPush,
   standalone: true,
   imports: [
-    CommonModule,
     NoContentMessageComponent
   ]
 })
-export class EndpointsMissingComponent implements AfterViewInit, OnInit {
+export class EndpointsMissingComponent implements OnInit {
 
-  @Input() showToolbarHint = true;
-  @Input() showDirectToEndpointMessage = true;
+  public endpointsService = inject(EndpointsService);
 
-  noContent$!: Observable<EndpointMissingMessageParts | null>;
+  readonly showToolbarHint = input(true);
+  readonly showDirectToEndpointMessage = input(true);
+
 
   protected noneRegisteredText: EndpointMissingMessageParts = {
     firstLine: 'There are no registered endpoints',
@@ -49,40 +46,27 @@ export class EndpointsMissingComponent implements AfterViewInit, OnInit {
   };
 
   protected showNoConnected = false;
-  protected haveRegistered$: Observable<boolean>;
-  protected haveConnected$: Observable<boolean>;
+  // Subclasses swap these for their own endpoint type's flags.
+  protected haveRegistered: Signal<boolean> = this.endpointsService.haveRegistered;
+  protected haveConnected: Signal<boolean> = this.endpointsService.haveConnected;
 
-  public endpointsService = inject(EndpointsService);
+  readonly noContent = computed((): EndpointMissingMessageParts | null => {
+    const disablePersistenceFeatures = this.endpointsService.disablePersistenceFeatures();
+    if (!this.haveRegistered()) {
+      return this.removeAdvice(this.noneRegisteredText, disablePersistenceFeatures);
+    }
+    if (!this.haveConnected() && this.showNoConnected) {
+      return this.removeAdvice(this.noneConnectedText, disablePersistenceFeatures);
+    }
+    return null;
+  });
 
-  constructor() {
-    this.haveRegistered$ = this.endpointsService.haveRegistered$;
-    this.haveConnected$ = this.endpointsService.haveConnected$;
-  }
   ngOnInit() {
-    if (this.showToolbarHint) {
+    if (this.showToolbarHint()) {
       this.noneRegisteredText.toolbarLink = {
         text: 'Register an endpoint'
       };
     }
-  }
-  ngAfterViewInit() {
-    this.noContent$ = observableCombineLatest([
-      this.haveRegistered$,
-      this.haveConnected$,
-      this.endpointsService.disablePersistenceFeatures$
-    ]).pipe(
-      delay(1),
-      map(([hasRegistered, hasConnected, disablePersistenceFeatures]): EndpointMissingMessageParts | null => {
-        if (!hasRegistered) {
-          return this.removeAdvice(this.noneRegisteredText, disablePersistenceFeatures);
-        }
-        if (!hasConnected && this.showNoConnected) {
-          return this.removeAdvice(this.noneConnectedText, disablePersistenceFeatures);
-        }
-        return null;
-      }),
-      startWith<EndpointMissingMessageParts | null>(null)
-    );
   }
 
   private removeAdvice(messageParts: EndpointMissingMessageParts, disablePersistenceFeatures: boolean) {

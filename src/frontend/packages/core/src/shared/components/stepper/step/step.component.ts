@@ -1,18 +1,15 @@
-import { ChangeDetectionStrategy, Component, EventEmitter, Input, Output, Signal, TemplateRef, ViewChild } from '@angular/core';
-import { from, Observable, of as observableOf } from 'rxjs';
+import { ChangeDetectionStrategy, Component, Signal, TemplateRef, input, signal, viewChild } from '@angular/core';
 
 import { StepperRedirectPayload } from '../stepper.types';
+import { ErrorPiece, extractHttpErrorPieces, piecesToText } from '@stratosui/store';
 
-export interface IStepperStep {
-  validate: Observable<boolean>;
-  valid?: boolean;
-  onNext: StepOnNextFunction;
-  onEnter?: (data?: any) => void;
-}
 
 export interface StepOnNextResult {
   success: boolean;
   message?: string;
+  // `message` as styled pieces (an upstream HTML error page keeps its
+  // heading); the stepper shows these above its buttons when set.
+  messagePieces?: readonly ErrorPiece[];
   // Should we redirect to the store previous state?
   redirect?: boolean;
   redirectPayload?: StepperRedirectPayload;
@@ -20,8 +17,6 @@ export interface StepOnNextResult {
   ignoreSuccess?: boolean;
   data?: any;
 }
-
-export type StepOnNextFunction = (index: number, step: StepComponent) => Observable<StepOnNextResult>;
 
 /**
  * Signal-native step contract — additive shape introduced in FWT-956 and
@@ -37,11 +32,11 @@ export interface SignalStepHandle {
   readonly valid: Signal<boolean>;
   /**
    * Optional submission action invoked when the user clicks Next/Finish.
-   * Resolves on success; rejects with an Error to surface a snackbar via
-   * the existing stepper plumbing. Resolving with `{ ignoreSuccess: true }`
+   * Resolves on success; rejects with an Error for the stepper to show its
+   * message above the buttons. Resolving with `{ ignoreSuccess: true }`
    * preserves the legacy `StepOnNextResult.ignoreSuccess` semantic — the
    * step reports success without auto-advancing or emitting the success
-   * snackbar (used by `manage-users` / `remove-user` two-click apply).
+   * snackbar (used by the `manage-users` two-click apply).
    * When omitted the step auto-succeeds — useful for confirmation screens.
    */
   readonly submit?: () => Promise<void | Partial<StepOnNextResult>>;
@@ -65,10 +60,14 @@ export interface SignalStepHandle {
   readonly onLeave?: (isNext?: boolean) => void | Promise<void>;
   /** UI: marks the step as destructive (red Apply button etc.). */
   readonly destructiveStep?: Signal<boolean>;
+  /** UI: marks a step that changes things but deletes nothing (yellow button). */
+  readonly warningStep?: Signal<boolean>;
   /** UI: enables the Close button (e.g. after applyStarted flips). */
   readonly canClose?: Signal<boolean>;
   /** UI: disables the Previous button. */
   readonly disablePrevious?: Signal<boolean>;
+  /** UI: removes the Previous button, for a step nothing can go back from. */
+  readonly hidePrevious?: Signal<boolean>;
   /** UI: text for the Finish button. */
   readonly finishButtonText?: Signal<string>;
   /** UI: text for the Next button. */
@@ -90,184 +89,115 @@ export interface SignalStepHandle {
 export class StepComponent {
 
   public pOnEnter: (data?: any) => void;
-  active = false;
-  complete = false;
-  error = false;
+  // Set by the stepper, read by its template. Signals, so a write from a
+  // timer or a submit continuation re-renders the stepper by itself.
+  readonly active = signal(false);
+  readonly complete = signal(false);
+  readonly error = signal(false);
+  // Disables Next/Apply while a submit runs, and for a moment on entering a
+  // destructive or warning step.
+  readonly busy = signal(false);
 
-  // busy gates the parent stepper's Next/Apply [disabled] binding, but the
-  // steppers component is OnPush and busy mutations happen outside its CD
-  // scope (the destructive-entry timer below, goNext teardown). Mirror the
-  // validChange pattern so the stepper can markForCheck — a bare property
-  // write is invisible to it (a step's markForCheck walks the declaration
-  // tree, which doesn't include the steppers view). Without this the
-  // destructive confirm step's Apply stayed disabled forever under zoneless.
-  @Output() busyChange = new EventEmitter<boolean>();
-  set busy(v: boolean) {
-    if (this._busy !== v) {
-      this._busy = v;
-      this.busyChange.emit(v);
-    }
-  }
-  get busy(): boolean { return this._busy; }
-  private _busy = false;
+  // Empty when not bound: the single-step base wizards give their step no title.
+  readonly title = input('');
 
-  pHidden = false;
-
-  @Input()
-  title!: string;
-
-  @Output() hiddenChange = new EventEmitter<boolean>();
-
-  @Input()
-  set hidden(hidden: boolean) {
-    this.pHidden = hidden;
-    this.hiddenChange.emit(this.pHidden);
+  // The legacy inputs, bound as [hidden], [valid], ... Each has an
+  // `effective...` getter, which returns the signalHandle's value when the
+  // handle has that field and the input's otherwise. Read the getter, not the
+  // input: a handle overrides it. The inputs, the handle and its fields are
+  // all signals, and the stepper reads the getters in its template and
+  // effects, so it follows a change with no change event.
+  readonly hidden = input(false);
+  get effectiveHidden(): boolean {
+    return this.signalHandle()?.hidden?.() ?? this.hidden();
   }
 
-  // Signal-handle `hidden` overrides legacy storage. Signal reads inside the
-  // getter are tracked by Angular CD so the parent re-evaluates when the
-  // signal changes — no EventEmitter needed for the signal-handle path.
-  get hidden() {
-    return this.signalHandle?.hidden ? this.signalHandle.hidden() : this.pHidden;
+  // With a signalHandle the [valid] input is ignored, whatever the handle has.
+  readonly valid = input(true);
+  get effectiveValid(): boolean {
+    const handle = this.signalHandle();
+    return handle ? handle.valid() : this.valid();
   }
 
-  @Input()
-  set valid(value: boolean) {
-    if (this._valid !== value) {
-      this._valid = value;
-      // Emit event to notify parent stepper of validation change
-      this.validChange.emit(value);
-    }
-  }
-  // When `signalHandle` is set, the stepper reads validity from
-  // `signalHandle.valid()` — the legacy `_valid` storage is ignored.
-  // Signal reads are tracked by Angular's CD so this is reactive without
-  // the manual `validChange` emitter pattern.
-  get valid(): boolean {
-    return this.signalHandle ? this.signalHandle.valid() : this._valid;
-  }
-  private _valid = true;
-
-  @Output() validChange = new EventEmitter<boolean>();
-
-  // Setter-backed inputs that emit change events so the parent stepper
-  // component can re-run change detection. Under OnPush + zoneless change
-  // detection, setting an @Input() on a child component only marks that
-  // child dirty — it does NOT propagate to a grandparent view that reads
-  // the input value via a content-child query (as the stepper does in
-  // its own template via `this.steps[i].canClose` and `disablePrevious`).
-  // Without the emitters the stepper's own template bindings never get
-  // re-evaluated and the Previous/Close buttons stay stuck in the state
-  // they were in at the initial view bind.
-  private _canClose = true;
-  @Input()
-  set canClose(v: boolean) {
-    if (this._canClose !== v) {
-      this._canClose = v;
-      this.canCloseChange.emit(v);
-    }
-  }
-  get canClose(): boolean {
-    return this.signalHandle?.canClose ? this.signalHandle.canClose() : this._canClose;
-  }
-  @Output() canCloseChange = new EventEmitter<boolean>();
-
-  private _hideCloseButton = false;
-  @Input()
-  set hideCloseButton(v: boolean) { this._hideCloseButton = v; }
-  get hideCloseButton(): boolean {
-    return this.signalHandle?.hideCloseButton ? this.signalHandle.hideCloseButton() : this._hideCloseButton;
+  readonly canClose = input(true);
+  get effectiveCanClose(): boolean {
+    return this.signalHandle()?.canClose?.() ?? this.canClose();
   }
 
-  @Input()
-  hideNextButton = false;
-
-  private _nextButtonText = 'Next';
-  @Input()
-  set nextButtonText(v: string) { this._nextButtonText = v; }
-  get nextButtonText(): string {
-    return this.signalHandle?.nextButtonText ? this.signalHandle.nextButtonText() : this._nextButtonText;
+  readonly hideCloseButton = input(false);
+  get effectiveHideCloseButton(): boolean {
+    return this.signalHandle()?.hideCloseButton?.() ?? this.hideCloseButton();
   }
 
-  private _finishButtonText = 'Finish';
-  @Input()
-  set finishButtonText(v: string) { this._finishButtonText = v; }
-  get finishButtonText(): string {
-    return this.signalHandle?.finishButtonText ? this.signalHandle.finishButtonText() : this._finishButtonText;
+  readonly hideNextButton = input(false);
+
+  readonly nextButtonText = input('Next');
+  get effectiveNextButtonText(): string {
+    return this.signalHandle()?.nextButtonText?.() ?? this.nextButtonText();
   }
 
-  private _cancelButtonText = 'Cancel';
-  @Input()
-  set cancelButtonText(v: string) { this._cancelButtonText = v; }
-  get cancelButtonText(): string {
-    return this.signalHandle?.cancelButtonText ? this.signalHandle.cancelButtonText() : this._cancelButtonText;
+  readonly finishButtonText = input('Finish');
+  get effectiveFinishButtonText(): string {
+    return this.signalHandle()?.finishButtonText?.() ?? this.finishButtonText();
   }
 
-  private _disablePrevious = false;
-  @Input()
-  set disablePrevious(v: boolean) {
-    if (this._disablePrevious !== v) {
-      this._disablePrevious = v;
-      this.disablePreviousChange.emit(v);
-    }
-  }
-  get disablePrevious(): boolean {
-    return this.signalHandle?.disablePrevious ? this.signalHandle.disablePrevious() : this._disablePrevious;
-  }
-  @Output() disablePreviousChange = new EventEmitter<boolean>();
-
-  private _blocked = false;
-  @Input()
-  set blocked(v: boolean) { this._blocked = v; }
-  get blocked(): boolean {
-    return this.signalHandle?.blocked ? this.signalHandle.blocked() : this._blocked;
+  readonly cancelButtonText = input('Cancel');
+  get effectiveCancelButtonText(): string {
+    return this.signalHandle()?.cancelButtonText?.() ?? this.cancelButtonText();
   }
 
-  private _destructiveStep = false;
-  @Input()
-  set destructiveStep(v: boolean) { this._destructiveStep = v; }
-  get destructiveStep(): boolean {
-    return this.signalHandle?.destructiveStep ? this.signalHandle.destructiveStep() : this._destructiveStep;
+  readonly disablePrevious = input(false);
+  get effectiveDisablePrevious(): boolean {
+    return this.signalHandle()?.disablePrevious?.() ?? this.disablePrevious();
   }
 
-  @ViewChild(TemplateRef, { static: true })
-  content!: TemplateRef<any>;
-
-  @Input()
-  set skip(v: boolean) {
-    this._skip = v;
+  get hidePrevious(): boolean {
+    return this.signalHandle()?.hidePrevious?.() ?? false;
   }
+
+  readonly blocked = input(false);
+  get effectiveBlocked(): boolean {
+    return this.signalHandle()?.blocked?.() ?? this.blocked();
+  }
+
+  readonly destructiveStep = input(false);
+  get effectiveDestructiveStep(): boolean {
+    return this.signalHandle()?.destructiveStep?.() ?? this.destructiveStep();
+  }
+
+  readonly warningStep = input(false);
+  get effectiveWarningStep(): boolean {
+    return this.signalHandle()?.warningStep?.() ?? this.warningStep();
+  }
+
+  readonly content = viewChild.required(TemplateRef);
+
   // When `signalHandle.skipIf` is set, prefer the signal read so admin-only
   // / conditional steps flip without consumers needing to wire boolean
-  // bindings. Falls back to legacy `_skip` storage for non-signal steps.
-  get skip(): boolean {
-    return this.signalHandle?.skipIf ? this.signalHandle.skipIf() : this._skip;
-  }
-  private _skip = false;
-
-  private _showBusy = false;
-  @Input()
-  set showBusy(v: boolean) { this._showBusy = v; }
-  get showBusy(): boolean {
-    return this.signalHandle?.showBusy ? this.signalHandle.showBusy() : this._showBusy;
+  // bindings. Falls back to the [skip] input for non-signal steps.
+  readonly skip = input(false);
+  get effectiveSkip(): boolean {
+    return this.signalHandle()?.skipIf?.() ?? this.skip();
   }
 
-  @Input()
-  onNext: StepOnNextFunction = () => observableOf({ success: true })
+  readonly showBusy = input(false);
+  get effectiveShowBusy(): boolean {
+    return this.signalHandle()?.showBusy?.() ?? this.showBusy();
+  }
 
-  @Input()
-  onEnter: (data: any) => void = () => { }
+  // The two callbacks are inputs holding a function. Call them through
+  // pOnEnter and invokeLeave, which also honour the signalHandle.
+  readonly onEnter = input<(data: any) => void>(() => { });
 
-  @Input()
-  onLeave: (isNext?: boolean) => void = () => { }
+  readonly onLeave = input<(isNext?: boolean) => void>(() => { });
 
   /**
    * Effective onLeave — signal-handle overrides legacy. Returns void or a
    * Promise; SteppersComponent should await if it cares about ordering.
    */
   invokeLeave(isNext?: boolean): void | Promise<void> {
-    const handleLeave = this.signalHandle?.onLeave;
-    return handleLeave ? handleLeave(isNext) : this.onLeave(isNext);
+    const handleLeave = this.signalHandle()?.onLeave;
+    return handleLeave ? handleLeave(isNext) : this.onLeave()(isNext);
   }
 
   /**
@@ -276,44 +206,30 @@ export class StepComponent {
    * effective validity / skip / submission delegate to this handle. Wider
    * consumer migration to this shape tracked at FWT-957.
    */
-  @Input()
-  signalHandle?: SignalStepHandle;
+  readonly signalHandle = input<SignalStepHandle>();
 
   /**
-   * Dispatch the step's submission. Signal-handle path wraps `submit()` as
-   * an Observable<StepOnNextResult> so SteppersComponent.goNext can consume
-   * both shapes uniformly. When `signalHandle` is set without `submit`, the
-   * step auto-succeeds (confirmation-screen pattern). Legacy path delegates
-   * to the existing `onNext(index, this)` contract.
+   * Runs the step's submission: the signalHandle's `submit`, or an
+   * immediate success for a step without one (a confirmation screen). It
+   * never rejects: a submit that throws or rejects gives
+   * `{ success: false }` with the error's message.
    */
-  invokeNext(index: number): Observable<StepOnNextResult> {
-    const submit = this.signalHandle?.submit;
-    if (submit) {
-      return from(
-        submit().then(
-          (resolved) => {
-            // resolved is `void | Partial<StepOnNextResult>`; void case
-            // (Promise.resolve()) isn't an object so guard before merge.
-            // Without spreading the resolved object the redirect / redirectPayload
-            // flags from routeToServices-style success returns are lost and the
-            // stepper can't navigate the user out of the wizard on completion.
-            const base = { success: true } as StepOnNextResult;
-            if (typeof resolved === 'object' && resolved !== null) {
-              return { ...base, ...resolved } as StepOnNextResult;
-            }
-            return base;
-          },
-          (err: unknown) => ({
-            success: false,
-            message: err instanceof Error ? err.message : String(err),
-          } as StepOnNextResult),
-        ),
-      );
+  async invokeNext(): Promise<StepOnNextResult> {
+    const submit = this.signalHandle()?.submit;
+    if (!submit) {
+      return { success: true };
     }
-    if (this.signalHandle) {
-      return observableOf({ success: true } as StepOnNextResult);
+    try {
+      const resolved = await submit();
+      // A resolved object carries flags such as redirect/redirectPayload,
+      // which take the user out of the wizard on completion.
+      return typeof resolved === 'object' && resolved !== null
+        ? { ...resolved, success: resolved.success ?? true }
+        : { success: true };
+    } catch (err) {
+      const messagePieces = extractHttpErrorPieces(err);
+      return { success: false, message: piecesToText(messagePieces), messagePieces };
     }
-    return this.onNext(index, this);
   }
 
   constructor() {
@@ -322,13 +238,13 @@ export class StepComponent {
       // existing destructive-step busy-flag side-effect — Shape 3 wizards
       // (kube-config import, manage-users confirm) rely on this for the
       // pre-submit visual delay.
-      const handleEnter = this.signalHandle?.onEnter;
-      const enter = handleEnter ?? this.onEnter;
+      const handleEnter = this.signalHandle()?.onEnter;
+      const enter = handleEnter ?? this.onEnter();
       if (enter) {
-        if (this.destructiveStep) {
-          this.busy = true;
+        if (this.effectiveDestructiveStep || this.effectiveWarningStep) {
+          this.busy.set(true);
           setTimeout(() => {
-            this.busy = false;
+            this.busy.set(false);
           }, 1000);
         }
         // Promise return values are fire-and-forget here — SteppersComponent

@@ -1,23 +1,28 @@
 import {
   ChangeDetectionStrategy,
-  ChangeDetectorRef,
   Component,
   computed,
   inject,
+  linkedSignal,
   OnDestroy,
   signal,
-  ViewChild,
+  untracked,
+  viewChild,
+  afterRenderEffect,
 } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { Router } from '@angular/router';
-import { firstValueFrom, Subscription } from 'rxjs';
-import { take } from 'rxjs/operators';
+import { Subscription } from 'rxjs';
 
 import {
   SignalStepHandle,
   StepComponent,
   SteppersComponent,
 } from '@stratosui/core';
+import {
+  ENDPOINT_REGISTER_HANDLE,
+  leaveEndpointRegistration,
+} from '../../../../core/src/features/endpoints/endpoint-register-modal/endpoint-register-handle';
 import { KubeConfigHelper } from './kube-config.helper';
 import { KubeConfigImportComponent } from './kube-config-import/kube-config-import.component';
 import { KubeConfigSelectionComponent } from './kube-config-selection/kube-config-selection.component';
@@ -46,65 +51,61 @@ export class KubeConfigRegistrationComponent implements OnDestroy {
   // FWT-959 Part 2: SignalStepHandle wiring.
   //
   // Both child step components already own most of the state (selection's
-  // valid$ + onEnter, import's onEnter + onNext + applyStarted/busy). The
+  // valid + onEnter, import's onEnter + onNext + applyStarted/busy). The
   // parent assembles per-step handles that delegate into the children via
-  // @ViewChild and bridges the children's RxJS surface into local signals
+  // view queries and bridges the children's RxJS surface into local signals
   // for the reactive bits the handles need. Step children are instantiated
-  // lazily on activation, so the bridges are wired in ViewChild *setters*
-  // (an ngAfterViewInit pass would only ever see the first step's child).
+  // lazily on activation, so the bridges are wired in effects on the
+  // queries (an ngAfterViewInit pass would only ever see the first step's
+  // child).
   private helper = inject(KubeConfigHelper);
   private router = inject(Router);
-  private cdr = inject(ChangeDetectorRef);
 
-  // Cancel target shared between the stepper's cancel attr and the
-  // submit() Router.navigate call so the two stay in sync.
+  // Cancel target of the stepper on the /endpoints/new page.
   readonly cancelUrl = '/endpoints';
+  // Present when hosted by the Register Endpoint dialog, which this form
+  // closes instead of navigating to /endpoints (the page under the dialog).
+  private registerHandle = inject(ENDPOINT_REGISTER_HANDLE, { optional: true });
+  readonly cancelAction = this.registerHandle ? () => this.registerHandle!.close(false) : undefined;
 
-  private selectionValid = signal<boolean>(false);
+  // The selection step's validity. The step exists only while it is the
+  // active one; once it is gone the last answer stays.
+  private readonly selectionValid = linkedSignal<boolean | undefined, boolean>({
+    source: () => this._selector()?.valid(),
+    computation: (valid, previous) => valid ?? previous?.value ?? false,
+  });
   private importerBusy = signal<boolean>(false);
   // Parent-owned mirror of the importer's applyStarted state. The importer
   // is destroyed whenever it is not the active step, so handle computeds
   // (and the selection step's [applyStarted] input) read this signal
   // instead of reaching into the child: a computed whose first evaluation
-  // dereferences an undefined ViewChild captures zero signal dependencies
+  // dereferences an undefined plain field captures zero signal dependencies
   // and never re-evaluates. Lifecycle matches the importer's own flag:
   // reset on review-step entry, set on the first Import click.
   readonly applyStarted = signal<boolean>(false);
 
-  private _selector?: KubeConfigSelectionComponent;
-  private _importer?: KubeConfigImportComponent;
-  private selectorSub?: Subscription;
+  private readonly _selector = viewChild<KubeConfigSelectionComponent>('selector');
+  private readonly _importer = viewChild<KubeConfigImportComponent>('importer');
   private importerSub?: Subscription;
 
-  @ViewChild('selector', { static: false })
-  set selectorRef(v: KubeConfigSelectionComponent | undefined) {
-    this._selector = v;
-    this.selectorSub?.unsubscribe();
-    this.selectorSub = undefined;
-    if (v) {
-      this.selectorSub = v.valid$.subscribe(valid => {
-        this.selectionValid.set(!!valid);
-        this.cdr.markForCheck();
-      });
-    }
-  }
-
-  @ViewChild('importer', { static: false })
-  set importerRef(v: KubeConfigImportComponent | undefined) {
-    this._importer = v;
-    this.importerSub?.unsubscribe();
-    this.importerSub = undefined;
-    if (v) {
-      this.importerSub = v.busy$.subscribe(b => {
-        this.importerBusy.set(!!b);
-        this.cdr.markForCheck();
-      });
-    }
-  }
+  // The bridge runs after render: the step's child creates its stream in
+  // its own init hooks, which run after this component's effects.
+  private readonly importerBridge = afterRenderEffect(() => {
+    const v = this._importer();
+    untracked(() => {
+      this.importerSub?.unsubscribe();
+      this.importerSub = undefined;
+      if (v) {
+        this.importerSub = v.busy$.subscribe(b => {
+          this.importerBusy.set(!!b);
+        });
+      }
+    });
+  });
 
   selectionStepHandle: SignalStepHandle = {
     valid: this.selectionValid.asReadonly(),
-    onEnter: () => this._selector?.onEnter(),
+    onEnter: () => this._selector()?.onEnter(),
     // No submit — the step auto-advances. The cluster list is consumed by
     // the review step's onEnter via the shared KubeConfigHelper instance.
   };
@@ -124,8 +125,7 @@ export class KubeConfigRegistrationComponent implements OnDestroy {
       // via pOnEnter). The importer resets its applyStarted flag in
       // onEnter — mirror that here.
       this.applyStarted.set(false);
-      const clusters = await firstValueFrom(this.helper.clusters$.pipe(take(1)));
-      this._importer?.onEnter(clusters);
+      this._importer()?.onEnter(this.helper.clusters() ?? []);
     },
     submit: async () => {
       // Two-click "Import then Close" semantic. The importer's existing
@@ -133,15 +133,15 @@ export class KubeConfigRegistrationComponent implements OnDestroy {
       // ignoreSuccess, second-click returns redirect). We delegate to it
       // to preserve the side-effects (busy flag, processAction kickoff)
       // and translate its result into the signal-handle Promise contract.
-      const result = await firstValueFrom(this._importer!.onNext(0, null as any));
+      const result = await this._importer()!.onNext();
       if (!result.success) {
         throw new Error(result.message || 'Failed to import kube config');
       }
       if (result.redirect) {
-        // Legacy `redirect: true` (no payload) meant "navigate to the
-        // stepper's cancel URL". cancelUrl is the single source of truth
-        // shared with the <app-steppers [cancel]> binding.
-        await this.router.navigateByUrl(this.cancelUrl);
+        // `redirect: true` (no payload): Close after the import. Each row
+        // already shows what its import did, so this reports no
+        // registration (no success message over failed rows).
+        await leaveEndpointRegistration(this.registerHandle, this.router, false);
         return;
       }
       if (result.ignoreSuccess) {
@@ -152,7 +152,6 @@ export class KubeConfigRegistrationComponent implements OnDestroy {
   };
 
   ngOnDestroy() {
-    this.selectorSub?.unsubscribe();
     this.importerSub?.unsubscribe();
   }
 }

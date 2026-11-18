@@ -1,12 +1,14 @@
 import { provideHttpClient } from '@angular/common/http';
 import { provideHttpClientTesting } from '@angular/common/http/testing';
 import { ComponentFixture, TestBed } from '@angular/core/testing';
-import { provideZonelessChangeDetection, importProvidersFrom } from '@angular/core';
+import { provideZonelessChangeDetection, importProvidersFrom, signal } from '@angular/core';
 import { provideNoopAnimations } from '@angular/platform-browser/animations';
+import { By } from '@angular/platform-browser';
 import { provideRouter } from '@angular/router';
 import { ActivatedRoute } from '@angular/router';
 import { describe, it, expect, beforeEach, vi } from 'vitest';
-import { BehaviorSubject, of } from 'rxjs';
+import { BehaviorSubject, Observable, of } from 'rxjs';
+import { map } from 'rxjs/operators';
 
 import { OrgUserRoleNames } from '../../../../../store/types/cf-user.types';
 import { RoleAssignmentDriver } from '../../../../../shared/components/role-assignment/role-assignment.test-deps';
@@ -21,6 +23,7 @@ import { TabNavService } from '@stratosui/core';
 import { ActiveRouteCfOrgSpace } from '../../../cf-page.types';
 import { CfUsersRolesDataService } from '../../../../../services/domain-data/cf-users-roles-data.service';
 import { CfRolesService } from '../cf-roles.service';
+import { RoleAssignmentComponent } from '../../../../../shared/components/role-assignment/role-assignment.component';
 import { UsersRolesModifyComponent } from './manage-users-modify.component';
 import { StUser } from '../../../../../services/endpoint-data/stratos-types';
 import { CfRoleChange } from '../../../../../store/types/users-roles.types';
@@ -28,25 +31,21 @@ import { CfRoleChange } from '../../../../../store/types/users-roles.types';
 const mockUser1: StUser = {
   guid: 'user-1',
   username: 'alice',
-  admin: false,
-  active: true,
   cnsiGuid: 'cfGuid',
-  orgRoles: {},
-  spaceRoles: {},
+  orgRoles: [],
+  spaceRoles: [],
 };
 const mockUser2: StUser = {
   guid: 'user-2',
   username: 'bob',
-  admin: false,
-  active: true,
   cnsiGuid: 'cfGuid',
-  orgRoles: {},
-  spaceRoles: {},
+  orgRoles: [],
+  spaceRoles: [],
 };
 
 const mockExistingRoles = { 'user-1': { 'org-1': { orgGuid: 'org-1', name: 'Org 1', permissions: {}, spaces: {} } } };
 
-function buildTestBed(activeRoute: Partial<ActiveRouteCfOrgSpace>) {
+function buildTestBed(activeRoute: Partial<ActiveRouteCfOrgSpace>, loading$: Observable<boolean> = new BehaviorSubject<boolean>(false)) {
   const mockOrgEntity = {
     entity: {
       metadata: { guid: 'org-guid', created_at: '', updated_at: '', url: '' },
@@ -56,7 +55,7 @@ function buildTestBed(activeRoute: Partial<ActiveRouteCfOrgSpace>) {
   };
 
   const mockCfRolesService = {
-    loading$: new BehaviorSubject<boolean>(false).asObservable(),
+    loading$: loading$.pipe(map(l => l)),
     existingRoles$: new BehaviorSubject<any>(mockExistingRoles).asObservable(),
     newRoles$: new BehaviorSubject<any>({}).asObservable(),
     fetchOrg: vi.fn().mockReturnValue(of(
@@ -70,7 +69,7 @@ function buildTestBed(activeRoute: Partial<ActiveRouteCfOrgSpace>) {
   };
 
   const mockUserPerms = {
-    can: vi.fn().mockReturnValue(of(true)),
+    can: vi.fn().mockReturnValue(signal(true)),
   };
 
   TestBed.configureTestingModule({
@@ -165,6 +164,18 @@ describe('UsersRolesModifyComponent', () => {
     expect(component.rolesDataUsers()).toHaveLength(2);
   });
 
+  it('tells the widget when the wizard removes roles', async () => {
+    const rolesData = TestBed.inject(CfUsersRolesDataService);
+    const widget = () => fixture.debugElement.query(By.directive(RoleAssignmentComponent)).componentInstance as RoleAssignmentComponent;
+    await fixture.whenStable();
+    expect(widget().removeMode()).toBe(false);
+
+    rolesData.setIsRemove(true);
+    await fixture.whenStable();
+
+    expect(widget().removeMode()).toBe(true);
+  });
+
   it('pushes the widget changeSet into rolesData.setChanges', () => {
     const rolesData = TestBed.inject(CfUsersRolesDataService);
     const change: CfRoleChange = {
@@ -250,5 +261,70 @@ describe('UsersRolesModifyComponent — driver: real widget toggle flows through
     const changes = rolesData.changedRoles();
     expect(changes.length).toBeGreaterThan(0);
     expect(changes.some(c => c.role === OrgUserRoleNames.MANAGER && c.add === true)).toBe(true);
+  });
+});
+
+describe('UsersRolesModifyComponent — existing roles still loading', () => {
+  let component: UsersRolesModifyComponent;
+  let fixture: ComponentFixture<UsersRolesModifyComponent>;
+  let loading: BehaviorSubject<boolean>;
+  let rolesData: CfUsersRolesDataService;
+  let driver: RoleAssignmentDriver;
+
+  beforeEach(async () => {
+    loading = new BehaviorSubject<boolean>(true);
+    buildTestBed({ orgGuid: 'org-guid', spaceGuid: '' }, loading);
+    fixture = TestBed.createComponent(UsersRolesModifyComponent);
+    component = fixture.componentInstance;
+    rolesData = TestBed.inject(CfUsersRolesDataService);
+    rolesData.setUsers('cfGuid', [mockUser1]);
+    await fixture.whenStable();
+    driver = new RoleAssignmentDriver(fixture);
+  });
+
+  it('does not take a role change while roles load, and keeps Next blocked', async () => {
+    driver.toggleOrgRole('org-guid', 'Manager');
+    await fixture.whenStable();
+
+    expect(rolesData.changedRoles()).toEqual([]);
+    expect(component.valid()).toBe(false);
+  });
+
+  it('takes a role change once the roles have loaded', async () => {
+    loading.next(false);
+    await fixture.whenStable();
+
+    driver.toggleOrgRole('org-guid', 'Manager');
+    await fixture.whenStable();
+
+    expect(rolesData.changedRoles().length).toBeGreaterThan(0);
+    expect(component.valid()).toBe(true);
+  });
+});
+
+describe('UsersRolesModifyComponent — Next follows the pending changes', () => {
+  let component: UsersRolesModifyComponent;
+  let fixture: ComponentFixture<UsersRolesModifyComponent>;
+  let driver: RoleAssignmentDriver;
+
+  beforeEach(async () => {
+    buildTestBed({ orgGuid: 'org-guid', spaceGuid: '' });
+    fixture = TestBed.createComponent(UsersRolesModifyComponent);
+    component = fixture.componentInstance;
+    TestBed.inject(CfUsersRolesDataService).setUsers('cfGuid', [mockUser1]);
+    await fixture.whenStable();
+    driver = new RoleAssignmentDriver(fixture);
+  });
+
+  it('keeps Next disabled until a role is changed, and again once it is undone', async () => {
+    expect(component.valid()).toBe(false);
+
+    driver.toggleOrgRole('org-guid', 'Manager');
+    await fixture.whenStable();
+    expect(component.valid()).toBe(true);
+
+    driver.toggleOrgRole('org-guid', 'Manager');
+    await fixture.whenStable();
+    expect(component.valid()).toBe(false);
   });
 });

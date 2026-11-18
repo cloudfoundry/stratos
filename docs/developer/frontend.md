@@ -18,48 +18,46 @@ If you feel comfortable with these and are happy with your dev environment pleas
 ## Set up Dependencies
 
 * Set up a Stratos backend. Both backend and frontend exist in this same repo. Follow the [Backend Development](./introduction.md#build--run-locally) set up guide.
-* Install [NodeJs](https://nodejs.org) (if not already install) (minimum node version 12.13.0)
-* Install [Angular CLI](https://cli.angular.io/) (if not already install) - `npm install -g @angular/cli`
+* Install Node.js and Bun at the versions in [Required Runtimes](../developer-environment.md#required-runtimes). The Angular CLI comes with the project's dependencies; run it as `bunx ng`.
 
 
 ## Run the frontend
 
-1. Run `npm install`
-1. Run `npm start` for a dev server. (the app will automatically reload if you change any of the source files)
-   * If this times out please use `npm run start-high-mem` instead
-   * To change the port from the default 4200, add `-- --port [new port number]`
-   * To stop the automatic reload every time a resource changes add `-- --live-reload false`
-   * To do both the above use `-- --live-reload false --port [new port number]`
-1. Navigate to `https://localhost:4200/`. The credentials to log in will be dependent on the Jetstream the console points at. Please refer
+1. Run `make install`
+1. Run `make dev frontend` for a dev server. The app reloads automatically when you change a source file.
+   * To change the ports, set `FRONTEND_PORT`, and `BACKEND_PORT` if the backend is not on 5443, for example
+     `make dev frontend FRONTEND_PORT=5540 BACKEND_PORT=5543`
+1. Navigate to `https://localhost:5440/`. The credentials to log in will be dependent on the Jetstream the console points at. Please refer
    to the guides used when setting up the backend for more information
 
 ## Build
 
 > The normal dev cycle does not require a direct build.
 
-Run `npm run build` to build the project.
+Run `make build frontend` to build the frontend.
 
-The build artefacts will be stored in the `dist/` directory. This will output a production build of the application.
+The build artefacts will be stored in `dist/frontend/browser/`. This is a production build of the application.
 
 ## Creating angular items via angular cli
 
-To create a new angular component run `ng generate component component-name`. You can use a similar command to create other types of angular
-items `ng generate <directive|pipe|service|class|guard|interface|enum|module> <name>`.
+To create a new angular component run `bunx ng generate component component-name`. You can use a similar command to create other types of angular
+items `bunx ng generate <directive|pipe|service|class|guard|interface|enum> <name>`.
 
 ## Theming
 
-We use the angular material theming mechanism. See [here](https://material.angular.io/guide/theming-your-components) for more information about theming new components added to stratos.
+Stratos does not use Angular Material. Colours and other design tokens are CSS custom properties exposed to templates as Tailwind v4 classes. See
+[Theming Architecture](../theming-architecture.md) and [Tailwind CSS v4 Usage](../tailwind-usage.md) before styling new components.
 
 
 ## Additional Information
 
 ### Extensions
 
-Documentation on extensions can be found [here](../extensions/introduction.md). From a developers perspective extensions are managed by npm packages.
+Documentation on extensions can be found [here](../extensions/introduction.md). From a developer's perspective extensions are packages.
 The default set are in `./src/frontend/packages`, any package added directly here will be automatically included by the build.
 
-At build time the Stratos Devkit (`./src/frontend/packages/devkit`) will ensure all packages are imported correctly and theming, both component and console level, are applied correctly.
-The devkit is automatically built in `postinstall` after `npm install` is ran. To directly build it `npm run dev-setup` can be executed.
+At build time the Stratos Devkit (`./src/frontend/packages/devkit`) ensures all packages are imported correctly.
+The devkit is built automatically by the `postinstall` step of `bun install` (which `make install` runs). To build it directly, run `bun run dev-setup`.
 
 ### Configuration
 

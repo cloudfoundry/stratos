@@ -2,6 +2,7 @@ package kubernetes
 
 import (
 	"fmt"
+	"net/http"
 	"sync"
 
 	// Import the OIDC auth plugin
@@ -10,9 +11,32 @@ import (
 	"github.com/cloudfoundry/stratos/src/jetstream/api"
 )
 
-// KubeProxyError represents error when a proxied request to the Kube API failes
+// KubeProxyError is an endpoint's failure, in the per-endpoint error
+// shape the passthrough proxy uses (jetstream passthrough.go), so the
+// frontend reads it the same way:
+//
+//	{"error": {"statusCode": 500, "status": "..."}, "errorResponse": "..."}
 type KubeProxyError struct {
-	Name string
+	Error         KubeProxyErrorStatus `json:"error"`
+	ErrorResponse string               `json:"errorResponse"`
+}
+
+// KubeProxyErrorStatus is the status part of a KubeProxyError
+type KubeProxyErrorStatus struct {
+	StatusCode int    `json:"statusCode"`
+	Status     string `json:"status"`
+}
+
+// failedKubeProxyResponse reports that an endpoint's request failed:
+// status says what failed, err why.
+func failedKubeProxyResponse(endpointGUID, status string, err error) KubeProxyResponse {
+	return KubeProxyResponse{
+		Endpoint: endpointGUID,
+		Error: &KubeProxyError{
+			Error:         KubeProxyErrorStatus{StatusCode: http.StatusInternalServerError, Status: status},
+			ErrorResponse: err.Error(),
+		},
+	}
 }
 
 // KubeProxyFunc represents a function to proxy to the Kube API

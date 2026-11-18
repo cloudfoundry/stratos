@@ -1,6 +1,6 @@
 import { Component, inject, ChangeDetectionStrategy } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { NavigationCancel, NavigationEnd, NavigationStart, Router } from '@angular/router';
+import { NavigationCancel, NavigationEnd, NavigationError, NavigationSkipped, NavigationStart, Router } from '@angular/router';
 import { interval, Observable, of as observableOf } from 'rxjs';
 import { filter, map, startWith, switchMap, delay, tap } from 'rxjs/operators';
 
@@ -26,10 +26,16 @@ export class RoutingIndicatorComponent {
 
   constructor() {
     this.value$ = this.router.events.pipe(
+      // Every way a navigation can finish must end the bar. A missed one
+      // (e.g. NavigationError from a lazy chunk that 404s after a redeploy)
+      // left it at 95 % with `started` set, so the next NavigationStart was
+      // filtered out too.
       filter(event => {
         return (event instanceof NavigationStart && !this.started) ||
           event instanceof NavigationCancel ||
-          event instanceof NavigationEnd;
+          event instanceof NavigationEnd ||
+          event instanceof NavigationError ||
+          event instanceof NavigationSkipped;
       }),
       switchMap(event => {
         if (event instanceof NavigationStart) {

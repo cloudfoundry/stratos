@@ -4,24 +4,24 @@
   [class.invalid]="isInvalid"
   [class.valid]="isValid"
   [class.disabled]="isDisabled"
-  [class.appearance-standard]="appearance === 'standard'"
-  [class.appearance-fill]="appearance === 'fill'"
-  [class.appearance-outline]="appearance === 'outline'"
-  [class.appearance-legacy]="appearance === 'legacy'"
-  [class.color-primary]="color === 'primary'"
-  [class.color-accent]="color === 'accent'"
-  [class.color-warn]="color === 'warn'"
-  [class.float-label-never]="floatLabel === 'never'"
-  [class.float-label-always]="floatLabel === 'always'"
-  [class.float-label-auto]="floatLabel === 'auto'">
+  [class.appearance-standard]="appearance() === 'standard'"
+  [class.appearance-fill]="appearance() === 'fill'"
+  [class.appearance-outline]="appearance() === 'outline'"
+  [class.appearance-legacy]="appearance() === 'legacy'"
+  [class.color-primary]="color() === 'primary'"
+  [class.color-accent]="color() === 'accent'"
+  [class.color-warn]="color() === 'warn'"
+  [class.float-label-never]="floatLabel() === 'never'"
+  [class.float-label-always]="floatLabel() === 'always'"
+  [class.float-label-auto]="floatLabel() === 'auto'">
 
   <div class="form-field-wrapper relative">
 
     <!-- Main form field flex container -->
     <div class="form-field-flex flex items-baseline box-border relative transition-all duration-200"
-         [class.w-full]="!fitContent"
-         [class.w-max]="fitContent"
-         [class.max-w-full]="fitContent">
+         [class.w-full]="!fitContent()"
+         [class.w-max]="fitContent()"
+         [class.max-w-full]="fitContent()">
 
       <!-- Prefix (optional) -->
       @if (hasPrefix) {
@@ -37,25 +37,25 @@
            shrinks the infix to its content so the trigger fits the
            value (e.g. select showing "run.adepttech.ca"). -->
       <div class="form-field-infix block relative min-w-0"
-           [class.flex-auto]="!fitContent"
-           [class.flex-none]="fitContent"
-           [class.w-max]="fitContent"
+           [class.flex-auto]="!fitContent()"
+           [class.flex-none]="fitContent()"
+           [class.w-max]="fitContent()"
            [style.padding]="'0.25em 0'"
-           [style.min-width.px]="fitContent ? null : 180">
+           [style.min-width.px]="fitContent() ? null : 180">
 
         <!-- Input content -->
         <ng-content select="input, textarea, select, app-select"></ng-content>
 
         <!-- Floating Label — suppressed for app-select; the select renders its own muted placeholder -->
-        @if (placeholder && !selectComponent) {
+        @if (placeholder() && !selectComponent()) {
           <label
             [for]="inputId"
             [class]="labelClasses"
             [attr.aria-hidden]="true">
-            @if (isRequired && !hideRequiredMarker) {
+            @if (isRequired && !hideRequiredMarker()) {
               <span class="text-danger mr-0.5 font-medium" aria-label="required">*</span>
             }
-            {{ placeholder }}
+            {{ placeholder() }}
           </label>
         }
       </div>
@@ -96,7 +96,7 @@
     </div>
 
     <!-- Underline (for standard and legacy appearances) -->
-    @if (appearance === 'standard' || appearance === 'legacy') {
+    @if (appearance() === 'standard' || appearance() === 'legacy') {
       <div class="form-field-underline relative w-full h-px transition-colors duration-200"
            [class]="underlineColorClasses">
       <span class="form-field-ripple absolute bottom-0 left-0 w-full h-0.5
@@ -122,20 +122,23 @@
               d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7 4a1 1 0 11-2 0 1 1 0 012 0zm-1-9a1 1 0 00-1 1v4a1 1 0 102 0V6a1 1 0 00-1-1z"
               clip-rule="evenodd"/>
           </svg>
-          <div class="form-field-error flex-1 text-xs leading-tight"
+          <div class="form-field-error flex-1 text-xs leading-tight [&_.mat-error]:mt-0"
             [id]="inputId + '-error'">
-            {{ errorMessage }}
+            @if (!projectedErrors().length) {
+              {{ errorMessage }}
+            }
+            <ng-content select="app-error"></ng-content>
           </div>
           <ng-content select="mat-error"></ng-content>
         </div>
       }
 
       <!-- Hint Text (only shown when no errors) -->
-      @if (!isInvalid && hintLabel) {
+      @if (!isInvalid && hintLabel()) {
         <div class="form-field-hint-wrapper flex justify-between gap-2 text-content-muted">
           <div class="form-field-hint flex-1 text-xs leading-tight"
             [id]="inputId + '-hint'">
-            {{ hintLabel }}
+            {{ hintLabel() }}
           </div>
           <ng-content select="mat-hint"></ng-content>
         </div>

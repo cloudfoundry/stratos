@@ -28,11 +28,11 @@ describe('AppChipsComponent', () => {
       TestBed.compileComponents();
   });
 
-  beforeEach(() => {
+  beforeEach(async () => {
     fixture = TestBed.createComponent(AppChipsComponent);
     component = fixture.componentInstance;
-    component.chips = chips;
-    fixture.detectChanges();
+    fixture.componentRef.setInput('chips', chips);
+    await fixture.whenStable();
     element = fixture.nativeElement;
   });
 
@@ -45,27 +45,36 @@ describe('AppChipsComponent', () => {
     expect(element.textContent).not.toContain('value5');
   });
 
-  it('should show number of hidden items when compacted', () => {
+  it('should show number of hidden items when compacted', async () => {
     component.toggleLimit(); // show less
     component.toggleLimit(); // +2
-    // Method calls markForCheck(), but we need detectChanges in zoneless mode
-    fixture.detectChanges();
+    await fixture.whenStable();
 
     expect(element.textContent).toContain('+2');
   });
 
-  it('should show "show less" when expanded', () => {
+  it('should show "show less" when expanded', async () => {
     component.toggleLimit();
-    // Method calls markForCheck(), but we need detectChanges in zoneless mode
-    fixture.detectChanges();
+    await fixture.whenStable();
 
     expect(element.textContent).toContain('Show less');
   });
 
-  it('should display custom object property', () => {
-    component.displayProperty = 'custom';
-    // Setter calls markForCheck(), but we need detectChanges in zoneless mode
-    fixture.detectChanges();
+  it('should reveal every chip when expanded and hide them again when collapsed', async () => {
+    component.toggleLimit();
+    await fixture.whenStable();
+    expect(element.textContent).toContain('value4');
+    expect(element.textContent).toContain('value5');
+
+    component.toggleLimit();
+    await fixture.whenStable();
+    expect(element.textContent).not.toContain('value4');
+    expect(element.textContent).toContain('+2');
+  });
+
+  it('should display custom object property', async () => {
+    fixture.componentRef.setInput('displayProperty', 'custom');
+    await fixture.whenStable();
 
     expect(element.textContent).toContain('custom1');
     expect(element.textContent).not.toContain('value1');

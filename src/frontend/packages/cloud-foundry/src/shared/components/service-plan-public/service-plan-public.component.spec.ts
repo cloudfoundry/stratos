@@ -73,56 +73,63 @@ describe('ServicePlanPublicComponent', () => {
     expect(component).toBeTruthy();
   });
 
-  it('renders Yes when the plan is public', () => {
-    component.servicePlan = buildPlan({ visibilityType: 'public' });
-    fixture.detectChanges();
-    fixture.detectChanges();
+  it('renders Yes when the plan is public', async () => {
+    fixture.componentRef.setInput('servicePlan', buildPlan({ visibilityType: 'public' }));
+    await fixture.whenStable();
 
-    expect(component.servicePlan?.visibilityType).toBe('public');
+    expect(component.servicePlan()?.visibilityType).toBe('public');
     expect(element.textContent?.trim()).toContain('Yes');
   });
 
-  it('renders No when the plan is not public', () => {
-    component.servicePlan = buildPlan({ visibilityType: 'admin' });
-    fixture.detectChanges();
-    fixture.detectChanges();
+  it('renders No when the plan is not public', async () => {
+    fixture.componentRef.setInput('servicePlan', buildPlan({ visibilityType: 'admin' }));
+    await fixture.whenStable();
 
     expect(element.textContent?.trim()).toContain('No');
   });
 
-  it('shows "limited visibility" when V3 visibility is organization', () => {
+  it('shows "limited visibility" when V3 visibility is organization', async () => {
     catalogStub.visibilityResponse = { type: 'organization', organizations: [{ guid: 'o-1' }] };
-    component.servicePlan = buildPlan({ visibilityType: 'organization' });
-    fixture.detectChanges();
-    fixture.detectChanges();
+    fixture.componentRef.setInput('servicePlan', buildPlan({ visibilityType: 'organization' }));
+    await fixture.whenStable();
 
     expect(element.textContent).toContain('Service Plan has limited visibility');
   });
 
-  it('shows "limited visibility" when V3 visibility is space', () => {
+  it('shows "limited visibility" when V3 visibility is space', async () => {
     catalogStub.visibilityResponse = { type: 'space', space: { guid: 's-1' } };
-    component.servicePlan = buildPlan({ visibilityType: 'space' });
-    fixture.detectChanges();
-    fixture.detectChanges();
+    fixture.componentRef.setInput('servicePlan', buildPlan({ visibilityType: 'space' }));
+    await fixture.whenStable();
 
     expect(element.textContent).toContain('Service Plan has limited visibility');
   });
 
-  it('shows "no visibility" when V3 visibility is admin-only', () => {
+  it('shows "no visibility" when V3 visibility is admin-only', async () => {
     catalogStub.visibilityResponse = { type: 'admin' };
-    component.servicePlan = buildPlan({ visibilityType: 'admin' });
-    fixture.detectChanges();
-    fixture.detectChanges();
+    fixture.componentRef.setInput('servicePlan', buildPlan({ visibilityType: 'admin' }));
+    await fixture.whenStable();
 
     expect(element.textContent).toContain('Service Plan has no visibility');
   });
 
-  it('falls through to "no visibility" when the visibility lookup errors', () => {
+  it('falls through to "no visibility" when the visibility lookup errors', async () => {
     catalogStub.errorOnVisibility = true;
-    component.servicePlan = buildPlan({ visibilityType: 'admin' });
-    fixture.detectChanges();
-    fixture.detectChanges();
+    fixture.componentRef.setInput('servicePlan', buildPlan({ visibilityType: 'admin' }));
+    await fixture.whenStable();
 
     expect(element.textContent).toContain('Service Plan has no visibility');
+  });
+
+  it('updates the visibility message when the plan arrives after the first render', async () => {
+    // Parents pass the plan once their own fetch lands: the first render
+    // sees no plan, which reads as "no visibility".
+    await fixture.whenStable();
+    expect(element.textContent).toContain('Service Plan has no visibility');
+
+    fixture.componentRef.setInput('servicePlan', buildPlan({ visibilityType: 'public' }));
+    await fixture.whenStable();
+
+    expect(element.textContent).toContain('Yes');
+    expect(element.textContent).not.toContain('Service Plan has no visibility');
   });
 });

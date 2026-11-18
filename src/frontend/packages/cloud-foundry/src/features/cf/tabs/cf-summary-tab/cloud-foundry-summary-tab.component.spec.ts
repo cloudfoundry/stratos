@@ -1,4 +1,4 @@
-import { CUSTOM_ELEMENTS_SCHEMA, signal } from '@angular/core';
+import { CUSTOM_ELEMENTS_SCHEMA, WritableSignal, signal } from '@angular/core';
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { importProvidersFrom, provideZonelessChangeDetection } from '@angular/core';
 import { provideHttpClient } from '@angular/common/http';
@@ -11,6 +11,7 @@ import { TEST_CATALOGUE_ENTITIES, generateStratosEntities, EntityCatalogTestModu
 import { STORE_TEST_PROVIDERS, testSCFEndpointGuid, populateStoreWithTestEndpoint } from '@stratosui/store/testing';
 import { generateCFEntities, generateTestCfEndpointServiceProvider, ActiveRouteCfOrgSpace } from '@test-framework/cf';
 import { CfAppsSignalConfigService } from '../../../../shared/signal-list-configs/app/cf-apps-signal-config.service';
+import { EndpointDataRegistry } from '../../../../services/endpoint-data/endpoint-data.registry';
 import { CloudFoundrySummaryTabComponent } from './cloud-foundry-summary-tab.component';
 
 describe('CloudFoundrySummaryTabComponent', () => {
@@ -73,6 +74,21 @@ describe('CloudFoundrySummaryTabComponent', () => {
 
   it('should create', () => {
     expect(component).toBeTruthy();
+  });
+
+  // The tiles wait for the apps to load once; a later refresh (the polling
+  // indicator) must not swap them back to the loading page.
+  it('shows the loading page until the apps first settle, then never again', () => {
+    const loading = (TestBed.inject(EndpointDataRegistry).acquire(testSCFEndpointGuid) as unknown as {
+      _isLoadingDetails: WritableSignal<boolean>;
+    })._isLoadingDetails;
+
+    loading.set(true);
+    expect(component.detailsLoading()).toBe(true);
+    loading.set(false);
+    expect(component.detailsLoading()).toBe(false);
+    loading.set(true);
+    expect(component.detailsLoading()).toBe(false);
   });
 
   // The Applications tile must stay inside the CF section — it used to call

@@ -27,7 +27,7 @@ describe('TableCellConfirmRoleAddRemComponent', () => {
 
     fixture = TestBed.createComponent(TableCellConfirmRoleAddRemComponent);
     component = fixture.componentInstance;
-    component.row = {
+    fixture.componentRef.setInput('row', {
       username: '',
       userGuid: '',
       orgName: '',
@@ -35,7 +35,7 @@ describe('TableCellConfirmRoleAddRemComponent', () => {
       roleName: '',
       add: false,
       role: OrgUserRoleNames.AUDITOR,
-    };
+    });
     fixture.detectChanges();
   });
 

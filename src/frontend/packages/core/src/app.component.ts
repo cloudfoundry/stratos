@@ -1,8 +1,6 @@
 import { DOCUMENT } from '@angular/common';
 import { AfterContentInit, ChangeDetectionStrategy, Component, HostBinding, OnDestroy, OnInit, computed, inject } from '@angular/core';
-import { toObservable } from '@angular/core/rxjs-interop';
 import { RoutingHistoryService } from '@stratosui/store';
-import { Observable } from 'rxjs';
 import { create } from 'rxjs-spy';
 
 import { StratosBrandingService } from '../../theme/stratos-branding.service';
@@ -34,7 +32,7 @@ export class AppComponent implements OnInit, OnDestroy, AfterContentInit {
 
   @HostBinding('@.disabled')
   public animationsDisabled = false;
-  public userId$: Observable<string | null>;
+  public readonly userId = computed(() => this.authSignals.sessionData()?.user?.name ?? null);
 
   constructor() {
     // Trigger initial session verification BEFORE routing starts
@@ -43,7 +41,6 @@ export class AppComponent implements OnInit, OnDestroy, AfterContentInit {
 
     // We use the username to key the session storage. We could replace this with the users id?
     // Sourced from AuthSignalService rather than a direct store.select.
-    this.userId$ = toObservable(computed(() => this.authSignals.sessionData()?.user?.name ?? null));
     if (!environment.production) {
       if (environment.showObsDebug || environment.disablePolling) {
         const spy = create();

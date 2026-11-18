@@ -1,6 +1,5 @@
 
-import { ChangeDetectionStrategy, Component, DestroyRef, EventEmitter, Input, Output, computed, inject, signal, effect } from '@angular/core';
-import { FormsModule } from '@angular/forms';
+import { ChangeDetectionStrategy, Component, DestroyRef, computed, inject, input, signal, effect, output, untracked } from '@angular/core';
 import {
   MonacoEditorComponent,
   MonacoEditorOptions,
@@ -19,7 +18,7 @@ export interface SchemaFormValidationError {
 
 export class SchemaFormConfig {
   // Optional: the broker may not supply a schema for the plan — the form
-  // then falls back to the raw JSON editor (see the `config` setter).
+  // then falls back to the raw JSON editor (see `applyConfig`).
   schema?: object;
   initialData?: object;
 }
@@ -31,21 +30,27 @@ export class SchemaFormConfig {
   standalone: true,
   changeDetection: ChangeDetectionStrategy.OnPush,
   imports: [
-    FormsModule,
     SchemaWidgetRendererComponent,
     MonacoEditorComponent,
   ],
 })
 export class SchemaFormComponent {
+  private static nextId = 0;
 
   mode!: 'JSON' | 'schema';
   readonly schemaView = signal<'schemaForm' | 'schemaJson'>('schemaForm');
+  // The Form/JSON radios' group name and id prefix: one per instance, since
+  // the create-service-instance wizard has two of these forms (instance and
+  // binding parameters).
+  readonly viewToggleId = `schema-view-${SchemaFormComponent.nextId++}`;
   readonly renderError = signal<string | null>(null);
   private readonly snackBar = inject(TailwindSnackBarService);
   private schema: object | undefined;
 
-  @Input()
-  set config(config: SchemaFormConfig | undefined) {
+  // Applied by applyConfig, from the first effect in the constructor.
+  readonly config = input<SchemaFormConfig>();
+
+  private applyConfig(config: SchemaFormConfig | undefined) {
     // Skip if no config... or schema is the same (avoids losing existing data in form)
     if (!config || (config.schema && config.schema === this.schema)) {
       return;
@@ -63,8 +68,8 @@ export class SchemaFormComponent {
     }
   }
 
-  @Output() dataChange = new EventEmitter<object | null>();
-  @Output() validChange = new EventEmitter<boolean>();
+  readonly dataChange = output<object | null>();
+  readonly validChange = output<boolean>();
 
   readonly data = signal<object | null>(null);
   readonly parseValid = signal<boolean>(true);   // the ONLY submission gate
@@ -83,6 +88,7 @@ export class SchemaFormComponent {
     hideCursorInOverviewRuler: true,
     overviewRulerBorder: false,
     renderLineHighlight: 'none',
+    ariaLabel: 'Parameters (JSON)',
   };
 
   cleanSchema: object | null | undefined;
@@ -143,6 +149,12 @@ export class SchemaFormComponent {
   }
 
   constructor() {
+    // Ahead of the two effects below, so they emit the data and validity the
+    // config leaves behind, not the empty state before it.
+    effect(() => {
+      const config = this.config();
+      untracked(() => this.applyConfig(config));
+    });
     effect(() => this.dataChange.emit(this.data()));
     effect(() => this.validChange.emit(this.parseValid()));
     inject(DestroyRef).onDestroy(() => { this._destroyed = true; });

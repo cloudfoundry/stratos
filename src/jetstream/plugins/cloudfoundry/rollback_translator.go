@@ -45,6 +45,15 @@ func NewRollbackJobTranslator(cf *CloudFoundrySpecification) *RollbackJobTransla
 // Kind returns the stable kind prefix for rollback jobs.
 func (t *RollbackJobTranslator) Kind() string { return RollbackJobKind }
 
+// RefOwner implements stratosjobs.OwnedRefTranslator: the rollback is the
+// session user's whose token drives it.
+func (t *RollbackJobTranslator) RefOwner(ref interface{}) string {
+	if rRef, ok := ref.(*RollbackRef); ok {
+		return rRef.UserGuid
+	}
+	return ""
+}
+
 // CurrentStage implements stratosjobs.StageEmittingTranslator. It maps
 // the last entry in the RollbackRef.Stages slice to a JobStage for the
 // tracker's dedup-appending pipeline.

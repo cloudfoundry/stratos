@@ -1,6 +1,6 @@
 import { execFileSync } from 'child_process';
 
-const BACKEND_PORT = process.env.BACKEND_PORT || '5543';
+import { BACKEND_PORT } from './servers';
 
 /**
  * Playwright global teardown — kill test servers by session ID.
@@ -14,7 +14,7 @@ const BACKEND_PORT = process.env.BACKEND_PORT || '5543';
  */
 async function globalTeardown() {
   if (!/^\d{2,5}$/.test(BACKEND_PORT)) {
-    console.warn(`  Skipping e2e teardown: invalid BACKEND_PORT '${BACKEND_PORT}'.`);
+    console.warn(`  Skipping e2e teardown: invalid E2E_BACKEND_PORT '${BACKEND_PORT}'.`);
     return;
   }
 

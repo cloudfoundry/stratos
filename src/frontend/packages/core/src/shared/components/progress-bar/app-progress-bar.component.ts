@@ -11,11 +11,11 @@ import { ProgressBarComponent } from './progress-bar.component';
   imports: [ProgressBarComponent],
   template: `
     <lib-progress-bar
-      [mode]="mode"
-      [value]="value"
-      [bufferValue]="bufferValue"
-      [color]="color"
-      [customHeight]="customHeight">
+      [mode]="mode()"
+      [value]="value()"
+      [bufferValue]="bufferValue()"
+      [color]="color()"
+      [customHeight]="customHeight()">
     </lib-progress-bar>
   `,
   changeDetection: ChangeDetectionStrategy.OnPush

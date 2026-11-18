@@ -2,36 +2,42 @@ import { CommonModule } from '@angular/common';
 import {
   AfterViewInit,
   ChangeDetectionStrategy,
-  ChangeDetectorRef,
   Component,
   Injector,
   OnDestroy,
-  ViewChild,
   computed,
+  effect,
   inject,
   signal,
+  untracked,
+  viewChild,
 } from '@angular/core';
 import { ReactiveFormsModule, Validators, FormBuilder, FormControl, FormGroup } from '@angular/forms';
 import { ActivatedRoute, Router } from '@angular/router';
 import { gitRepositoryUrlValidator } from '../../../../../core/src/shared/validators';
 import {
   CreateEndpointHelperComponent } from '@stratosui/core';
-import { combineLatest, firstValueFrom, Observable, Subscription } from 'rxjs';
-import { take, map } from 'rxjs/operators';
+import { Observable, Subscription } from 'rxjs';
+import { map } from 'rxjs/operators';
 
 import { EndpointsService } from '../../../../../core/src/core/endpoints.service';
 import { getIdFromRoute } from '../../../../../core/src/core/utils.service';
 import { ConnectEndpointConfig } from '../../../../../core/src/features/endpoints/connect.service';
+import { confirmAndUnregister, isPersonalEndpoint } from '../../../../../core/src/features/endpoints/unregister-endpoint/unregister-endpoint';
 import { CreateEndpointConnectComponent } from '../../../../../core/src/features/endpoints/create-endpoint/create-endpoint-connect/create-endpoint-connect.component';
+import { ConfirmationDialogService } from '../../../../../core/src/shared/components/confirmation-dialog.service';
+import {
+  ENDPOINT_REGISTER_HANDLE,
+  leaveEndpointRegistration,
+} from '../../../../../core/src/features/endpoints/endpoint-register-modal/endpoint-register-handle';
 import { EndpointsSignalConfigService } from '../../../../../core/src/features/endpoints/endpoints-page/endpoints-signal-config.service';
 import { SignalStepHandle, StepComponent } from '../../../../../core/src/shared/components/stepper/step/step.component';
 import { SteppersComponent } from '../../../../../core/src/shared/components/stepper/steppers/steppers.component';
 import { UniqueDirective } from '../../../../../core/src/shared/components/unique.directive';
-import { SessionService } from '../../../../../core/src/shared/services/session.service';
 import { CurrentUserPermissionsService } from '../../../../../core/src/core/permissions/current-user-permissions.service';
 import { UserProfileService } from '../../../../../core/src/core/user-profile.service';
 import { TailwindSnackBarService } from '../../../../../core/src/shared/services/tailwind-snackbar.service';
-import { getFullEndpointApiUrl } from '../../../../../store/src/endpoint-utils';
+import { endpointUrlKey, getFullEndpointApiUrl } from '../../../../../store/src/endpoint-utils';
 import { entityCatalog, EndpointsDataService } from '../../../../../store/src/public-api';
 import { GIT_ENDPOINT_SUB_TYPES, GIT_ENDPOINT_TYPE } from '../../../store/git-entity-factory';
 import { GitSCMService } from '../../scm/scm.service';
@@ -92,9 +98,13 @@ export class GitRegistrationComponent extends CreateEndpointHelperComponent impl
   private snackBarService = inject(TailwindSnackBarService);
   private endpointsService = inject(EndpointsService);
   private router = inject(Router);
-  private cdr = inject(ChangeDetectorRef);
   private endpointsSignalConfig = inject(EndpointsSignalConfigService);
-  sessionService: SessionService;
+  private confirmDialog = inject(ConfirmationDialogService);
+  private endpointsData = inject(EndpointsDataService);
+  // Present when hosted by the Register Endpoint dialog, which this form
+  // closes instead of navigating to /endpoints (the page under the dialog).
+  private registerHandle = inject(ENDPOINT_REGISTER_HANDLE, { optional: true });
+  readonly cancelAction = this.registerHandle ? () => this.registerHandle!.close(false) : undefined;
   currentUserPermissionsService: CurrentUserPermissionsService;
   userProfileService: UserProfileService;
 
@@ -107,16 +117,20 @@ export class GitRegistrationComponent extends CreateEndpointHelperComponent impl
   // subscription before the template binds the form.
   registerForm!: FormGroup<GitRegistrationForm>;
 
+  // Set once init() has built the form. The form is a plain field, so this
+  // is what makes the template render it (init runs after the first render).
+  protected readonly formReady = signal(false);
+
   private sub?: Subscription;
   private validateSub?: Subscription;
 
-  public showEndpointFields = false;
+  public readonly showEndpointFields = signal(false);
 
   // Surfaces a one-line note above the radios when an option was auto-
   // skipped due to existing registration ("github.com is already
   // registered. Defaulted to GitHub Enterprise."). null when nothing
   // was skipped.
-  public autoSelectNote: string | null = null;
+  public readonly autoSelectNote = signal<string | null>(null);
 
   // strict: assigned in init() before any consumer subscribes.
   validate!: Observable<boolean>;
@@ -134,23 +148,21 @@ export class GitRegistrationComponent extends CreateEndpointHelperComponent impl
   // lazily on activation, and the handle computeds below dereference it.
   // A computed whose first evaluation sees an undefined plain field
   // captures zero signal dependencies and never re-evaluates.
-  private _connect = signal<CreateEndpointConnectComponent | undefined>(undefined);
-  @ViewChild('connect', { static: false })
-  set connectRef(v: CreateEndpointConnectComponent | undefined) {
-    this._connect.set(v);
-  }
+  private readonly _connect = viewChild<CreateEndpointConnectComponent>('connect');
   private registerValid = signal<boolean>(false);
 
-  // Tracks the endpoint guid created by step 1's runRegistration. Used by
-  // the connect-step's onLeave(isNext=false) handler to unregister on
-  // Previous — "Prev = start over" UX. Cleared after unregister so the
-  // form can re-register cleanly.
-  private registeredGuid: string | null = null;
+  // The endpoint step 1 registered. Previous never undoes it; step 1 shows it
+  // locked and offers Unregister, which clears this and reopens the form.
+  protected readonly registered = signal<{ data: ConnectEndpointConfig; address: string; personal: boolean } | null>(null);
 
   registerStepHandle: SignalStepHandle = {
-    valid: this.registerValid.asReadonly(),
-    nextButtonText: signal('Register').asReadonly(),
+    valid: computed(() => !!this.registered() || this.registerValid()),
+    nextButtonText: computed(() => this.registered() ? 'Next' : 'Register'),
     submit: async () => {
+      const done = this.registered();
+      if (done) {
+        return { data: done.data };
+      }
       const result = await this.runRegistration();
       if (!result.success) {
         throw new Error(result.message || 'Failed to register endpoint');
@@ -173,36 +185,27 @@ export class GitRegistrationComponent extends CreateEndpointHelperComponent impl
     hideCloseButton: signal(true).asReadonly(),
     finishButtonText: computed(() => {
       const c = this._connect();
-      return c?.doConnectSignal() ? 'Connect' : 'Finish';
+      return c?.doConnectSignal() ? 'Connect' : 'Close';
     }),
     onEnter: (data) => {
       // Registration result routed from registerStepHandle.submit via the
       // stepper's enterData channel. Delivery is deferred past the
-      // activating render, so the ViewChild is set by now.
+      // activating render, so the query has resolved by now.
       if (data) {
         this._connect()?.onEnter(data as any);
       }
     },
-    onLeave: async (isNext) => {
-      if (isNext || !this.registeredGuid) {
-        return;
-      }
-      // Previous from connect step ⇒ "start over": unregister the endpoint
-      // we just created so the user can pick a different type/URL on a
-      // clean step 1.
-      const guid = this.registeredGuid;
-      this.registeredGuid = null;
-      await this.endpointsSignalConfig.unregister(guid, GIT_ENDPOINT_TYPE);
-    },
     submit: async () => {
-      const result = await firstValueFrom(this._connect()!.onNext());
+      const result = await this._connect()!.onNext();
+      // The stepper gives the reason, in view: the dialog's body scrolls
+      // under its button row.
       if (!result.success) {
-        throw new Error(result.message || 'Failed to connect endpoint');
+        return { success: false, message: result.message };
       }
-      // Connect's legacy onNext returns redirect:true on success →
-      // navigate back to /endpoints (the stepper's cancel URL).
+      // Connect's legacy onNext returns redirect:true on success: the
+      // form is done.
       if (result.redirect) {
-        await this.router.navigate(['/endpoints']);
+        await leaveEndpointRegistration(this.registerHandle, this.router, true);
       }
     },
   };
@@ -210,18 +213,15 @@ export class GitRegistrationComponent extends CreateEndpointHelperComponent impl
   constructor() {
     const gitSCMService = inject(GitSCMService);
     const activatedRoute = inject(ActivatedRoute);
-    const sessionService = inject(SessionService);
     const currentUserPermissionsService = inject(CurrentUserPermissionsService);
     const userProfileService = inject(UserProfileService);
 
     super(
-      sessionService,
       currentUserPermissionsService,
       userProfileService,
       inject(EndpointsDataService),
       inject(Injector),
     );
-    this.sessionService = sessionService;
     this.currentUserPermissionsService = currentUserPermissionsService;
     this.userProfileService = userProfileService;
 
@@ -290,25 +290,32 @@ export class GitRegistrationComponent extends CreateEndpointHelperComponent impl
     // endpoints are disabled) get one slot. The original code iterated
     // `endpoints$` unscoped, which contradicted the URL input's scoped
     // `appUnique` validator and the backend's per-scope uniqueness.
-    combineLatest([
-      this.endpointsService.endpoints$,
-      this.existingSystemEndpoints,
-      this.existingPersonalEndpoints,
-      this.userEndpointsAndIsAdmin,
-    ]).pipe(take(1)).subscribe(([eps, systemEps, personalEps, isAdminWithUserEndpoints]) => {
-      Object.values(this.gitTypes[this.epSubType].types).forEach(type => {
-        if (!type.url) {
-          type.exists = false;
-          return;
-        }
-        if (isAdminWithUserEndpoints) {
-          // Admin has two slots: system + personal. Grey only when both filled.
-          type.exists = systemEps.urls.includes(type.url) && personalEps.urls.includes(type.url);
-        } else {
-          type.exists = !!Object.values(eps).find(ep => type.url === getFullEndpointApiUrl(ep));
-        }
+    // Done once, when the user's profile is known: the personal list is null
+    // until then. The form's default choice is made from this snapshot.
+    const checkTaken = effect(() => {
+      const personalEps = this.existingPersonalEndpointsSignal();
+      if (!personalEps) {
+        return;
+      }
+      checkTaken.destroy();
+      untracked(() => {
+        const systemEps = this.existingSystemEndpointsSignal();
+        const isAdminWithUserEndpoints = this.userEndpointsAndIsAdminSignal();
+        const eps = this.endpointsService.endpoints();
+        Object.values(this.gitTypes[this.epSubType].types).forEach(type => {
+          if (!type.url) {
+            type.exists = false;
+            return;
+          }
+          if (isAdminWithUserEndpoints) {
+            // Admin has two slots: system + personal. Grey only when both filled.
+            type.exists = systemEps.urls.includes(endpointUrlKey(type.url)) && personalEps.urls.includes(endpointUrlKey(type.url));
+          } else {
+            type.exists = !!Object.values(eps).find(ep => endpointUrlKey(type.url) === endpointUrlKey(getFullEndpointApiUrl(ep)));
+          }
       });
       this.init();
+      });
     });
   }
 
@@ -328,9 +335,9 @@ export class GitRegistrationComponent extends CreateEndpointHelperComponent impl
       .filter(([, item]) => item.exists && !!item.url)
       .map(([, item]) => item.url);
     const defaulted = defaultSelection ? this.gitTypes[this.epSubType].types[defaultSelection].label : '';
-    this.autoSelectNote = (skippedUrls.length > 0 && defaulted)
+    this.autoSelectNote.set((skippedUrls.length > 0 && defaulted)
       ? `An endpoint at ${skippedUrls.join(', ')} is already registered — defaulted to ${defaulted}.`
-      : null;
+      : null);
 
     this.registerForm = this.fb.group<GitRegistrationForm>({
       selectedType: new FormControl(defaultSelection || '', { nonNullable: true, validators: [] }),
@@ -370,8 +377,9 @@ export class GitRegistrationComponent extends CreateEndpointHelperComponent impl
     this.registerValid.set(!!initialDefn?.url || this.registerForm.valid);
     this.validateSub = this.validate.subscribe(v => {
       this.registerValid.set(!!v);
-      this.cdr.markForCheck();
     });
+
+    this.formReady.set(true);
 
     // Ensure the form validity is updates once the dust settles
     setTimeout(() => this.registerForm.updateValueAndValidity(), 0);
@@ -386,7 +394,7 @@ export class GitRegistrationComponent extends CreateEndpointHelperComponent impl
   private updateType(value?: string) {
     const typ = value ?? this.registerForm.value.selectedType ?? '';
     const defn = this.gitTypes[this.epSubType].types[typ];
-    this.showEndpointFields = !defn.url;
+    this.showEndpointFields.set(!defn.url);
 
     const entityDefn = entityCatalog.getEndpoint(GIT_ENDPOINT_TYPE, this.epSubType);
     this.urlValidation = entityDefn?.definition?.urlValidationRegexString;
@@ -431,8 +439,15 @@ export class GitRegistrationComponent extends CreateEndpointHelperComponent impl
       ssoAllowed: false
     };
     if (!result.error) {
-      this.registeredGuid = data.guid;
-      this.snackBarService.show(`Successfully registered '${name}'`);
+      this.registered.set({ data, address: url, personal: isPersonalEndpoint(
+        this.endpointsData.endpoints().get(data.guid),
+        this.userEndpointsAndIsAdminSignal(),
+        createSystemEndpoint,
+      ),
+    });
+      this.registerForm.disable();
+      // 7 s: it shows while the dialog moves to its Connect step.
+      this.snackBarService.show(`Successfully registered '${name}'`, undefined, 7000);
     }
     const success = !result.error;
     return {
@@ -441,6 +456,25 @@ export class GitRegistrationComponent extends CreateEndpointHelperComponent impl
       message: success ? '' : result.message,
       data
     };
+  }
+
+  /** Unregister from the step; the form reopens unlocked and filled in. */
+  async unregister(): Promise<void> {
+    const reg = this.registered();
+    if (!reg) {
+      return;
+    }
+    const gone = await confirmAndUnregister(this.confirmDialog, this.endpointsSignalConfig, this.snackBarService, {
+      guid: reg.data.guid,
+      name: reg.data.name,
+      type: GIT_ENDPOINT_TYPE,
+      personal: reg.personal,
+    });
+    if (!gone) {
+      return;
+    }
+    this.registered.set(null);
+    this.registerForm.enable();
   }
 
   private updateUrlWithSuffix(url: string, defn: GithubType): string {

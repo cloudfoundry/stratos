@@ -107,7 +107,7 @@ export class KubernetesSetupModule {
     const signalRegistry = inject(KubernetesSignalConfigRegistry);
     const parentModule = inject(KubernetesSetupModule, { optional: true, skipSelf: true });
     // Force eager construction of the signal-native registry hook so
-    // EndpointsService.endpoints$ is subscribed (and the initial-state
+    // its effect over EndpointsService.endpoints runs (and the initial-state
     // diff is computed) before the user navigates into any kubernetes
     // page. Replaces the wave-2 ngrx-Actions bridge.
     inject(KubeEndpointRegistryHook);

@@ -62,7 +62,7 @@ export class ChartsService {
     }
 
     if (this.cacheCharts[repo] && this.cacheCharts[repo].length > 0) {
-      return Observable.create((observer: { next: (value: Chart[]) => void }) => {
+      return new Observable<Chart[]>(observer => {
         observer.next(this.cacheCharts[repo]);
       });
     } else {
@@ -239,7 +239,7 @@ export class ChartsService {
     if (url) {
       return this.updateStratosUrl(chart, `${this.hostname}${url}`);
     } else {
-      return '/core/assets/custom/placeholder.png';
+      return '/kubernetes/assets/custom/placeholder.png';
     }
   }
 
@@ -268,7 +268,7 @@ export class ChartsService {
     const errMsg = (error.message) ? error.message :
       error.status ? `${error.status} - ${error.statusText}` : 'Server error';
     console.error(errMsg);
-    return throwError(errMsg);
+    return throwError(() => errMsg);
   }
 
 }

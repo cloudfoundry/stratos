@@ -1,43 +1,43 @@
 <div class="custom-slide-toggle-wrapper">
   <div class="custom-slide-toggle"
-    [class.disabled]="disabled"
-    [class.checked]="checked"
-    [class.invalid]="invalid"
-    [attr.aria-invalid]="invalid || null"
-    [attr.aria-describedby]="invalid && errorMessage ? 'error-' + (id || name) : null">
+    [class.disabled]="disabled()"
+    [class.checked]="checked()"
+    [class.invalid]="invalid()"
+    [attr.aria-invalid]="invalid() || null"
+    [attr.aria-describedby]="invalid() && errorMessage() ? 'error-' + (id() || name()) : null">
 
     <label class="slide-toggle-label"
-      [attr.for]="id"
-      [class.label-before]="labelPosition === 'before'"
-      [class.label-after]="labelPosition === 'after'">
+      [attr.for]="id()"
+      [class.label-before]="labelPosition() === 'before'"
+      [class.label-after]="labelPosition() === 'after'">
 
-      @if (labelPosition === 'before') {
+      @if (labelPosition() === 'before') {
         <span class="slide-toggle-content">
           <ng-content></ng-content>
         </span>
       }
 
-      <div class="slide-toggle-bar" role="switch" tabindex="0"
-        [attr.aria-checked]="checked"
-        (click)="toggle()"
-        (keydown.enter)="toggle()"
-        (keydown.space)="toggle(); $event.preventDefault()">
+      <!-- The input is the switch: one focusable control, named by the label
+           around it. Space toggles it natively; Enter is kept for parity. -->
+      <div class="slide-toggle-bar">
         <input
           type="checkbox"
+          role="switch"
           class="slide-toggle-input"
-          [checked]="checked"
-          [disabled]="disabled"
-          [name]="name"
-          [id]="id"
-          [required]="required"
+          [checked]="checked()"
+          [disabled]="disabled()"
+          [attr.name]="name() ?? null"
+          [attr.id]="id() ?? null"
+          [required]="required()"
           (change)="toggle()"
+          (keydown.enter)="toggle()"
           />
         <div class="slide-toggle-thumb-container">
           <div class="slide-toggle-thumb"></div>
         </div>
       </div>
 
-      @if (labelPosition === 'after') {
+      @if (labelPosition() === 'after') {
         <span class="slide-toggle-content">
           <ng-content></ng-content>
         </span>
@@ -45,10 +45,10 @@
     </label>
   </div>
 
-  @if (invalid && errorMessage) {
+  @if (invalid() && errorMessage()) {
     <div class="slide-toggle-error">
-      <div [id]="'error-' + (id || name)" role="alert" aria-live="polite">
-        {{ errorMessage }}
+      <div [id]="'error-' + (id() || name())" role="alert" aria-live="polite">
+        {{ errorMessage() }}
       </div>
     </div>
   }

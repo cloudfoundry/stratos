@@ -1,6 +1,5 @@
 import { DatePipe } from '@angular/common';
-import { Component, ChangeDetectionStrategy, WritableSignal, computed, inject, signal } from '@angular/core';
-import { toObservable } from '@angular/core/rxjs-interop';
+import { Component, ChangeDetectionStrategy, Signal, WritableSignal, computed, effect, inject, signal, untracked } from '@angular/core';
 import {
   GitCommit,
   GithubCommitAuthorComponent,
@@ -8,8 +7,6 @@ import {
   GitSCMService,
   GitSCMType,
 } from '@stratosui/git';
-import { Observable } from 'rxjs';
-import { filter, map, take } from 'rxjs/operators';
 
 import {
   SignalListColumn,
@@ -51,14 +48,11 @@ export class CommitListWrapperComponent {
   // pinned; the deploy sends an empty SHA and CF deploys whatever HEAD points
   // at. Off (default) preserves the pick-a-commit behaviour.
   public readonly useLatestHead: WritableSignal<boolean> = signal(false);
-  readonly useLatestHead$: Observable<boolean> = toObservable(this.useLatestHead);
 
   // The chosen commit (or null) — derived from the radio selection signal.
-  // deploy-application-step2-1 subscribes to this to drive step validity and
-  // seed the deploy payload.
-  readonly selectedCommit$: Observable<GitCommit | null> = toObservable(
-    computed(() => this.signalConfig.selectedCommit() ?? null)
-  );
+  // deploy-application-step2-1 reads this to drive step validity and seed
+  // the deploy payload.
+  readonly selectedCommit: Signal<GitCommit | null> = computed(() => this.signalConfig.selectedCommit() ?? null);
 
   // Toggle handler for the deploy-latest-HEAD checkbox. Clears the radio
   // selection while on (so a stale pin isn't carried) and restores the
@@ -75,29 +69,31 @@ export class CommitListWrapperComponent {
   constructor() {
     // Resolve the git source (project + branch) from the deploy wizard's
     // application-source signal, mirroring the legacy deploy list-config.
-    toObservable(this.deployData.applicationSource).pipe(
-      map(appSource => (appSource?.type?.id === 'github' || appSource?.type?.id === 'gitlab') ? {
-        scm: appSource.type.id as GitSCMType,
-        accessToken: appSource.gitDetails?.accessToken,
-        projectName: appSource.gitDetails?.projectName,
-        sha: appSource.gitDetails?.branch?.name,
-        endpointGuid: appSource.gitDetails?.endpointGuid,
-      } : null),
-      filter((fetchDetails): fetchDetails is NonNullable<typeof fetchDetails> & { projectName: string; sha: string } =>
-        !!fetchDetails && !!fetchDetails.projectName && !!fetchDetails.sha),
-      take(1),
-    ).subscribe(fetchDetails => {
-      // strict: deploy-application-step2 always writes endpointGuid (real guid
-      // or '') alongside projectName when saving a github/gitlab gitDetails, so
-      // a source that has passed the projectName/sha guard above carries a
-      // string endpointGuid; the `?.` in the map only widens it to undefined.
-      const scm = this.scmService.getSCM(fetchDetails.scm, fetchDetails.endpointGuid!, fetchDetails.accessToken);
-      this.branchName.set(fetchDetails.sha);
-      this.signalConfig.initialize(scm, fetchDetails.projectName, fetchDetails.sha);
-      this.listConfig.set(this.buildListConfig());
-      // Auto-select the first (newest) commit once the list loads so the step
-      // starts valid, matching the legacy picker.
-      void this.signalConfig.loadAll().then(() => this.signalConfig.selectFirst());
+    // Once, as soon as the source names a project and branch.
+    const resolveSource = effect(() => {
+      const appSource = this.deployData.applicationSource();
+      if (appSource?.type?.id !== 'github' && appSource?.type?.id !== 'gitlab') {
+        return;
+      }
+      const projectName = appSource.gitDetails?.projectName;
+      const sha = appSource.gitDetails?.branch?.name;
+      if (!projectName || !sha) {
+        return;
+      }
+      resolveSource.destroy();
+      // deploy-application-step2 always writes endpointGuid (real guid or '')
+      // alongside projectName when saving a github/gitlab gitDetails.
+      untracked(() => {
+        const scm = this.scmService.getSCM(
+          appSource.type.id as GitSCMType, appSource.gitDetails?.endpointGuid ?? '', appSource.gitDetails?.accessToken,
+        );
+        this.branchName.set(sha);
+        this.signalConfig.initialize(scm, projectName, sha);
+        this.listConfig.set(this.buildListConfig());
+        // Auto-select the first (newest) commit once the list loads so the step
+        // starts valid, matching the legacy picker.
+        void this.signalConfig.loadAll().then(() => this.signalConfig.selectFirst());
+      });
     });
   }
 

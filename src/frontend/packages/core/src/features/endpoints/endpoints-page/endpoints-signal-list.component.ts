@@ -1,12 +1,12 @@
 import { CommonModule } from '@angular/common';
-import { ChangeDetectionStrategy, Component, Input, Signal, WritableSignal, inject, signal } from '@angular/core';
-import { toSignal } from '@angular/core/rxjs-interop';
-import { map } from 'rxjs/operators';
+import { ChangeDetectionStrategy, Component, Signal, WritableSignal, inject, signal, input, computed } from '@angular/core';
 
 import {
+  EndpointLastErrorService,
   EndpointModel,
   EndpointsDataService,
   MenuItem,
+  describeLastConnectError,
   UserFavorite,
   UserFavoriteManager,
   entityCatalog,
@@ -25,9 +25,16 @@ import {
   SignalListRowAction,
 } from '../../../shared/components/signal-list/signal-list.component';
 import { SignalListCellTemplateDirective } from '../../../shared/components/signal-list/signal-list-cell-template.directive';
+import { DuplicateUrlBannerComponent } from '../../../shared/components/duplicate-url-banner/duplicate-url-banner.component';
 import { EndpointCardComponent } from '../../../shared/components/endpoint-list/endpoint-card/endpoint-card.component';
 import { EndpointListHelper } from '../../../shared/components/endpoint-list/endpoint-list.helpers';
+import {
+  NO_SYNC_STATUS,
+  endpointSyncStatusColor,
+  endpointSyncStatusLabel,
+} from '../../../shared/components/endpoint-list/endpoint-sync-status';
 import { TableCellEndpointAddressComponent } from '../../../shared/components/endpoint-list/table-cell-endpoint-address/table-cell-endpoint-address.component';
+import { TableCellEndpointNameComponent } from '../../../shared/components/endpoint-list/table-cell-endpoint-name/table-cell-endpoint-name.component';
 import { EndpointAuthStateService } from '../../../shared/services/endpoint-auth-state.service';
 import { EndpointRowActionsService, isEndpointExpired } from '../endpoint-row-actions.service';
 import { EndpointsSignalConfigService } from './endpoints-signal-config.service';
@@ -50,8 +57,10 @@ import { EndpointsSignalConfigService } from './endpoints-signal-config.service'
     ListSubNavComponent,
     SignalListComponent,
     SignalListCellTemplateDirective,
+    DuplicateUrlBannerComponent,
     EndpointCardComponent,
     TableCellEndpointAddressComponent,
+    TableCellEndpointNameComponent,
   ],
 })
 export class EndpointsSignalListComponent {
@@ -60,6 +69,11 @@ export class EndpointsSignalListComponent {
   private rowActions = inject(EndpointRowActionsService);
   private authState = inject(EndpointAuthStateService);
   private endpointsData = inject(EndpointsDataService);
+  private lastError = inject(EndpointLastErrorService);
+
+  // Every registered endpoint, connected or not: two registrations at one
+  // URL are worth pointing out before anyone connects to them.
+  readonly registeredEndpoints = this.endpointsData.endpointsList;
 
   /**
    * Primary "Register Endpoint" action surfaced on the L5 sub-nav row above
@@ -68,7 +82,7 @@ export class EndpointsSignalListComponent {
    * the modal). Optional so consumers without registration capability can
    * mount the list with count-only.
    */
-  @Input() addAction?: ListSubNavAddAction;
+  readonly addAction = input<ListSubNavAddAction>();
 
   /** Reactive count for the L5 sub-nav row. Wired in the constructor —
    *  `endpointsConfig.view` is built by initialize() and isn't available
@@ -87,28 +101,24 @@ export class EndpointsSignalListComponent {
   // the endpoint was explicitly starred. We only care about that group-level
   // record here — the entitiesIds list is for child favorites the app wall /
   // orgs / etc. lists already track separately.
-  private readonly favoriteEndpointRowKeys: Signal<ReadonlySet<string>> = toSignal(
-    this.userFavoriteManager.getAllFavorites().pipe(
-      map(([groups]) => {
-        const out = new Set<string>();
-        if (!groups) return out;
-        for (const epFavGuid in groups) {
-          const g = groups[epFavGuid];
-          if (!g || g.ethereal) continue;
-          const ep = g.endpoint;
-          // Endpoint favorites have entityId omitted on the way in (see
-          // `toggleEndpointFavorite`), so we synthesize the row key from
-          // endpointId twice to match the table's getRowKey shape
-          // (`${ep.guid}:${ep.guid}`).
-          if (ep && ep.entityType === 'endpoint' && ep.endpointId) {
-            out.add(`${ep.endpointId}:${ep.endpointId}`);
-          }
-        }
-        return out;
-      }),
-    ),
-    { initialValue: new Set<string>() },
-  );
+  private readonly favoriteEndpointRowKeys: Signal<ReadonlySet<string>> = computed(() => {
+    const out = new Set<string>();
+    const groups = this.userFavoriteManager.allFavorites()?.[0];
+    if (!groups) return out;
+    for (const epFavGuid in groups) {
+      const g = groups[epFavGuid];
+      if (!g || g.ethereal) continue;
+      const ep = g.endpoint;
+      // Endpoint favorites have entityId omitted on the way in (see
+      // `toggleEndpointFavorite`), so we synthesize the row key from
+      // endpointId twice to match the table's getRowKey shape
+      // (`${ep.guid}:${ep.guid}`).
+      if (ep && ep.entityType === 'endpoint' && ep.endpointId) {
+        out.add(`${ep.endpointId}:${ep.endpointId}`);
+      }
+    }
+    return out;
+  });
 
   public listConfig: WritableSignal<SignalListConfig<EndpointModel> | undefined> = signal(undefined);
 
@@ -139,7 +149,15 @@ export class EndpointsSignalListComponent {
 
     const userLabel = (ep: EndpointModel): string => ep.user?.name ?? '';
 
+    // A type that needs no login is never connected or disconnected; like
+    // the endpoint card, show its sync status instead.
+    const needsNoLogin = (ep: EndpointModel): boolean =>
+      !!entityCatalog.getEndpoint(ep.cnsi_type ?? '', ep.sub_type)?.definition?.unConnectable;
+
     const statusLabel = (ep: EndpointModel): string => {
+      if (needsNoLogin(ep)) {
+        return endpointSyncStatusLabel(ep) ?? NO_SYNC_STATUS;
+      }
       // 'connecting' is a transient overlay held while a connect/reconnect is in
       // flight (EndpointsDataService.isConnecting); it outranks the settled
       // states because an active operation is what the user most wants to see.
@@ -161,7 +179,18 @@ export class EndpointsSignalListComponent {
       return s.charAt(0).toUpperCase() + s.slice(1);
     };
 
+    // A failed connect stores no token, so the endpoint reads Disconnected;
+    // hovering the status says why the last connect failed.
+    const statusTooltip = (ep: EndpointModel): string => {
+      const label = statusLabel(ep);
+      const lastError = label === 'Disconnected' || label === 'Expired' ? this.lastError.lastError(ep.guid ?? '') : null;
+      return lastError ? describeLastConnectError(lastError) : label;
+    };
+
     const statusColor = (ep: EndpointModel): SignalListPillColor => {
+      if (needsNoLogin(ep)) {
+        return endpointSyncStatusColor(ep);
+      }
       if (this.endpointsData.isConnecting(ep.guid ?? '') || this.endpointsData.isDisconnecting(ep.guid ?? '')) {
         return 'warning';
       }
@@ -192,7 +221,11 @@ export class EndpointsSignalListComponent {
         },
         {
           header: 'Name', key: 'name', sortField: 'name',
-          kind: 'text',
+          // Cell projected via <ng-template appSignalListCell="name">: the
+          // name links to the endpoint like the card title does, and the
+          // shared-connection icon marks an administrator-shared token.
+          kind: 'template',
+          templateName: 'name',
           render: (ep: EndpointModel) => ep.name ?? '',
           widthHint: '16rem',
         },
@@ -224,6 +257,7 @@ export class EndpointsSignalListComponent {
           kind: 'dot',
           pillColor: statusColor,
           render: statusLabel,
+          tooltip: statusTooltip,
           widthHint: '8rem',
         },
         {

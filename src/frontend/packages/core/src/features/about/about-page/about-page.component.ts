@@ -1,11 +1,7 @@
 import { CommonModule } from '@angular/common';
-import { ChangeDetectionStrategy, Component, ComponentRef, OnDestroy, OnInit, VERSION, ViewChild, ViewContainerRef, inject } from '@angular/core';
-import { toObservable } from '@angular/core/rxjs-interop';
+import { ChangeDetectionStrategy, Component, ComponentRef, OnDestroy, OnInit, VERSION, ViewContainerRef, computed, inject, viewChild } from '@angular/core';
 import { Meta } from '@angular/platform-browser';
 import { RouterModule } from '@angular/router';
-import { SessionData } from '@stratosui/store';
-import { Observable } from 'rxjs';
-import { filter, map } from 'rxjs/operators';
 
 import { CustomizationService, CustomizationsMetadata } from '../../../core/customizations.types';
 import { AuthSignalService } from '../../../core/signals/auth-signal.service';
@@ -30,9 +26,9 @@ export class AboutPageComponent implements OnInit, OnDestroy {
   private meta = inject(Meta);
 
 
-  sessionData$!: Observable<SessionData>;
-  versionNumber$!: Observable<string>;
-  userIsAdmin$!: Observable<boolean>;
+  readonly sessionData = this.auth.sessionData;
+  readonly versionNumber = computed(() => (this.sessionData()?.version?.proxy_version ?? '').split('-')[0]);
+  readonly userIsAdmin = computed(() => !!this.sessionData()?.user?.admin);
   buildInfo = BUILD_INFO;
   angularVersion = VERSION.full;
 
@@ -43,8 +39,8 @@ export class AboutPageComponent implements OnInit, OnDestroy {
   gitCommitLink?: string;
   gitBranchLink?: string;
 
-  @ViewChild('aboutInfoContainer', { read: ViewContainerRef, static: true }) aboutInfoContainer!: ViewContainerRef;
-  @ViewChild('supportInfoContainer', { read: ViewContainerRef, static: true }) supportInfoContainer!: ViewContainerRef;
+  readonly aboutInfoContainer = viewChild.required('aboutInfoContainer', { read: ViewContainerRef });
+  readonly supportInfoContainer = viewChild.required('supportInfoContainer', { read: ViewContainerRef });
 
   aboutInfoComponentRef!: ComponentRef<any>;
   componentRef!: ComponentRef<any>;
@@ -55,26 +51,9 @@ export class AboutPageComponent implements OnInit, OnDestroy {
     const cs = inject(CustomizationService);
 
     this.customizations = cs.get();
-
-    // toObservable() requires an injection context — bridge the signal here
-    // (constructor is in DI context) rather than in ngOnInit (which is not).
-    this.sessionData$ = toObservable(this.auth.sessionData).pipe(
-      filter((sessionData): sessionData is SessionData => !!sessionData)
-    );
   }
 
   ngOnInit() {
-    this.userIsAdmin$ = this.sessionData$.pipe(
-      map(session => !!(session.user && session.user.admin))
-    );
-
-    this.versionNumber$ = this.sessionData$.pipe(
-      map((sessionData: SessionData) => {
-        const versionNumber = sessionData.version?.proxy_version ?? '';
-        return versionNumber.split('-')[0];
-      })
-    );
-
     this.initVcsLinks();
     this.addAboutInfoComponent();
     this.addSupportInfo();
@@ -132,16 +111,16 @@ export class AboutPageComponent implements OnInit, OnDestroy {
   }
 
   addAboutInfoComponent() {
-    this.aboutInfoContainer.clear();
+    this.aboutInfoContainer().clear();
     if (this.customizations.aboutInfoComponent) {
-      this.aboutInfoComponentRef = this.aboutInfoContainer.createComponent(this.customizations.aboutInfoComponent);
+      this.aboutInfoComponentRef = this.aboutInfoContainer().createComponent(this.customizations.aboutInfoComponent);
     }
   }
 
   addSupportInfo() {
-    this.supportInfoContainer.clear();
+    this.supportInfoContainer().clear();
     if (this.customizations.supportInfoComponent) {
-      this.componentRef = this.supportInfoContainer.createComponent(this.customizations.supportInfoComponent);
+      this.componentRef = this.supportInfoContainer().createComponent(this.customizations.supportInfoComponent);
     }
   }
 }

@@ -157,6 +157,9 @@
         "ui": {
           "type": "object",
           "properties": {
+            "jobTrackingLimitMins": {
+              "type": ["integer", "null"]
+            },
             "listAllowLoadMaxed": {
               "type": "boolean"
             },

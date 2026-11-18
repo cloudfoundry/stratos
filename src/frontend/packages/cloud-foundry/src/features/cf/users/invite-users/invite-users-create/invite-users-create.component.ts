@@ -1,9 +1,8 @@
 import { CommonModule } from '@angular/common';
-import { Component, computed, Input, OnDestroy, OnInit, Signal, signal, ChangeDetectionStrategy, inject } from '@angular/core';
+import { Component, computed, OnInit, Signal, signal, ChangeDetectionStrategy, inject, input } from '@angular/core';
 import { FormsModule } from '@angular/forms';
-import { toObservable } from '@angular/core/rxjs-interop';
 import { Router } from '@angular/router';
-import { firstValueFrom, Observable } from 'rxjs';
+import { firstValueFrom } from 'rxjs';
 import { map } from 'rxjs/operators';
 
 import {
@@ -12,7 +11,7 @@ import {
   StackedInputActionsComponent,
   StackedInputActionsState,
   StackedInputActionsUpdate,
-  StepOnNextFunction,
+  StepOnNextResult,
 } from '@stratosui/core';
 import { CfUsersPagedDataService } from '../../../../../shared/data-services/cf-users-paged-data.service';
 import { OrgDataRegistry } from '../../../../../services/endpoint-data/org-data.registry';
@@ -36,7 +35,7 @@ import { UserInviteSendSpaceRoles, UserInviteService } from '../../../user-invit
     StackedInputActionsComponent
   ]
 })
-export class InviteUsersCreateComponent implements OnInit, OnDestroy {
+export class InviteUsersCreateComponent implements OnInit {
   private usersData = inject(CfUsersPagedDataService);
   private activeRouteCfOrgSpace = inject(ActiveRouteCfOrgSpace);
   private userInviteService = inject(UserInviteService);
@@ -46,10 +45,10 @@ export class InviteUsersCreateComponent implements OnInit, OnDestroy {
 
 
   public stepValid = signal<boolean>(false);
-  public valid$: Observable<boolean>;
 
   /** FWT-957: post-success navigation target supplied by parent. */
-  @Input() redirectUrl!: string;
+  // The one host stepper binds where to go on success.
+  readonly redirectUrl = input.required<string>();
 
   /**
    * FWT-957: signal-native step handle. Reuses the existing onNext side
@@ -65,11 +64,10 @@ export class InviteUsersCreateComponent implements OnInit, OnDestroy {
       if (res.error) {
         throw new Error(res.errorMessage || 'Failed to invite users');
       }
-      await this.router.navigateByUrl(this.redirectUrl);
+      await this.router.navigateByUrl(this.redirectUrl());
     },
   };
   public stateIn = signal<StackedInputActionsState[]>([]);
-  public stateIn$: Observable<StackedInputActionsState[]>;
   public orgName!: Signal<string>;
   public spaceName!: Signal<string>;
   private orgData?: OrgDataService;
@@ -81,8 +79,6 @@ export class InviteUsersCreateComponent implements OnInit, OnDestroy {
   private users!: StackedInputActionsUpdate;
 
   constructor() {
-    this.valid$ = toObservable(this.stepValid);
-    this.stateIn$ = toObservable(this.stateIn);
     this.spaceRoles.push(
       {
         label: UserRoleLabels.space.short[SpaceUserRoleNames.AUDITOR],
@@ -125,25 +121,10 @@ export class InviteUsersCreateComponent implements OnInit, OnDestroy {
     }
   }
 
-  ngOnDestroy() {
-    if (this.orgData) {
-      this.orgRegistry.release(
-        this.activeRouteCfOrgSpace.cfGuid,
-        this.activeRouteCfOrgSpace.orgGuid,
-      );
-    }
-    if (this.spaceData) {
-      this.spaceRegistry.release(
-        this.activeRouteCfOrgSpace.cfGuid,
-        this.activeRouteCfOrgSpace.spaceGuid,
-      );
-    }
-  }
-
   /**
    * FWT-957 helper: runs the invite request and applies per-user state
    * updates / madeChanges side effects. Returns the invite response so
-   * both the legacy onNext map and the new SignalStepHandle.submit path
+   * both onNext and the SignalStepHandle.submit path
    * can branch on res.error uniformly.
    */
   private runInvite() {
@@ -210,12 +191,13 @@ export class InviteUsersCreateComponent implements OnInit, OnDestroy {
       );
   }
 
-  onNext: StepOnNextFunction = () => this.runInvite().pipe(
-    map(res => ({
+  async onNext(): Promise<StepOnNextResult> {
+    const res = await firstValueFrom(this.runInvite());
+    return {
       success: !res.error,
       message: res.errorMessage,
       redirect: !res.error
-    })),
-  );
+    };
+  }
 
 }

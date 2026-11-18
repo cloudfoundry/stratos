@@ -30,6 +30,7 @@ export class BackupCheckboxCellComponent extends TableCellCustom<EndpointModel, 
   }
 
   disabled(): boolean {
-    return !this.service.canBackupEndpoint(this.row, this.config.type);
+    // The host always binds [config]; it is optional only on the base class.
+    return !this.service.canBackupEndpoint(this.row(), this.config()!.type);
   }
 }

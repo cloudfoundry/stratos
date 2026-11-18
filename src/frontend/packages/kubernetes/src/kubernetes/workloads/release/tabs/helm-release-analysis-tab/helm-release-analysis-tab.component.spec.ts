@@ -1,5 +1,6 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { provideZonelessChangeDetection } from '@angular/core';
+import { By } from '@angular/platform-browser';
 import { describe, it, expect, beforeEach, afterEach, beforeAll, afterAll, vi } from 'vitest';
 
 import { TabNavService } from '../../../../../../../core/src/tab-nav.service';
@@ -46,5 +47,14 @@ describe('HelmReleaseAnalysisTabComponent', () => {
 
   it('should create', () => {
     expect(component).toBeTruthy();
+  });
+
+  it('hands the chosen report to the viewer', async () => {
+    const viewer = fixture.debugElement.query(By.directive(AnalysisReportViewerComponent)).componentInstance as AnalysisReportViewerComponent;
+    expect(viewer.report()).toBeNull();
+    const report = { id: 'r1', name: 'popeye run', type: 'popeye' } as any;
+    component.report.set(report);
+    await fixture.whenStable();
+    expect(viewer.report()).toBe(report);
   });
 });

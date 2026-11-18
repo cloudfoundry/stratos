@@ -1,11 +1,9 @@
 import { CommonModule } from '@angular/common';
 import { HttpClient } from '@angular/common/http';
 import {
-  Component, ChangeDetectionStrategy, OnInit, Signal, WritableSignal, computed, inject, signal, Injector, effect,
+  Component, ChangeDetectionStrategy, DestroyRef, OnInit, Signal, WritableSignal, computed, inject, signal, Injector, effect,
 } from '@angular/core';
-import { toSignal } from '@angular/core/rxjs-interop';
 import { Router, RouterModule } from '@angular/router';
-import { map } from 'rxjs/operators';
 
 import {
   ConfirmationDialogConfig,
@@ -25,15 +23,18 @@ import {
 import {
   UserFavorite,
   UserFavoriteManager,
+  leadPieces,
 } from '@stratosui/store';
 
 import { applicationEntityType } from '../../../../../../../cf-entity-types';
 import { BulkResult, CfAppsSignalConfigService } from '../../../../../../../shared/signal-list-configs/app/cf-apps-signal-config.service';
+import { appLabelsColumn, appLabelsFilterText } from '../../../../../../../shared/signal-list-configs/app/app-labels';
 import { CfCurrentUserPermissions } from '../../../../../../../user-permissions/cf-user-permissions-checkers';
 import { CloudFoundryEndpointService } from '../../../../../services/cloud-foundry-endpoint.service';
 import { CloudFoundrySpaceService } from '../../../../../services/cloud-foundry-space.service';
 import { runBulkWithProgress } from '../../../../../../../services/async-jobs/bulk-progress';
 import type { StApp } from '../../../../../../../services/endpoint-data/stratos-types';
+import { unknownHowOf, unknownOutcomeMessage } from '../../../../../../../services/async-jobs/unknown-outcome-message';
 
 // Signal-native space-apps tab. Scoped to one space under one CF
 // endpoint (cfGuid + spaceGuid supplied by the route-level services).
@@ -69,19 +70,16 @@ export class CloudFoundrySpaceAppsSignalComponent implements OnInit {
   private router = inject(Router);
   private permissionsService = inject(CurrentUserPermissionsService);
   private readonly injector = inject(Injector);
+  private readonly destroyRef = inject(DestroyRef);
 
   /** Total app count in this space for the L5 sub-nav. */
   public totalApplications!: Signal<number>;
   /** Reactive permission flag for the Create Application button — scoped
-   *  to this space (APPLICATION_CREATE checks SPACE_DEVELOPER role). Built
-   *  in the constructor (injection context) so toSignal() resolves. */
-  public readonly canCreateApplication: Signal<boolean> = toSignal(
-    this.permissionsService.can(
-      CfCurrentUserPermissions.APPLICATION_CREATE,
-      this.cfEndpointService.cfGuid,
-      this.cfSpaceService.spaceGuid,
-    ),
-    { initialValue: false },
+   *  to this space (APPLICATION_CREATE checks SPACE_DEVELOPER role). */
+  public readonly canCreateApplication: Signal<boolean> = this.permissionsService.can(
+    CfCurrentUserPermissions.APPLICATION_CREATE,
+    this.cfEndpointService.cfGuid,
+    this.cfSpaceService.spaceGuid,
   );
   /** L5 primary action — navigates to the deploy stepper with the CNSI
    *  pre-selected via the `:endpointId` route param. Org/space pre-fill
@@ -97,25 +95,8 @@ export class CloudFoundrySpaceAppsSignalComponent implements OnInit {
   // Row keys (${cnsiGuid}:${appGuid}) for apps the user has favorited.
   // Mirrors the application-wall pattern so favorites carry across the
   // two views identically.
-  private readonly favoriteAppRowKeys: Signal<ReadonlySet<string>> = toSignal(
-    this.userFavoriteManager.getAllFavorites().pipe(
-      map(([groups, entities]) => {
-        const out = new Set<string>();
-        if (!groups || !entities) return out;
-        for (const epFavGuid in groups) {
-          const g = groups[epFavGuid];
-          if (!g?.entitiesIds) continue;
-          for (const favId of g.entitiesIds) {
-            const fav = entities[favId];
-            if (fav && fav.entityType === applicationEntityType && fav.endpointType === 'cf') {
-              out.add(`${fav.endpointId}:${fav.entityId}`);
-            }
-          }
-        }
-        return out;
-      }),
-    ),
-    { initialValue: new Set<string>() },
+  private readonly favoriteAppRowKeys: Signal<ReadonlySet<string>> = computed(() =>
+    this.userFavoriteManager.entityFavoriteKeys('cf', [applicationEntityType]),
   );
 
   // Selected row keys for bulk operations — key is `${cnsiGuid}:${guid}`,
@@ -240,6 +221,7 @@ export class CloudFoundrySpaceAppsSignalComponent implements OnInit {
             widthHint: '7rem',
           },
           ...(withStack ? [stackColumn] : []),
+          appLabelsColumn,
           {
             header: 'Created', key: 'createdAt', sortField: 'createdAt',
             render: (app: StApp) => CloudFoundrySpaceAppsSignalComponent.formatDate(app.createdAt),
@@ -281,8 +263,8 @@ export class CloudFoundrySpaceAppsSignalComponent implements OnInit {
         // once this CF has 2+ installed stacks, and picking any of them
         // swaps in the corresponding checklist popup.
         filterColumns: withStack
-          ? ['name', 'state', 'stackName', 'lastRefreshedAt']
-          : ['name', 'state', 'lastRefreshedAt'],
+          ? ['name', 'state', 'stackName', 'labels', 'lastRefreshedAt']
+          : ['name', 'state', 'labels', 'lastRefreshedAt'],
         // Status is unconditional (no visibility gate); Stack's entry is
         // only wired while its column is actually in filterColumns —
         // otherwise a filterField left over at 'stackName' from a
@@ -318,6 +300,7 @@ export class CloudFoundrySpaceAppsSignalComponent implements OnInit {
     // registered function instead of a second state→label mapping.
     this.appsConfig.registerFilterExtractor('name', (app: StApp) => app.name ?? '');
     this.appsConfig.registerFilterExtractor('state', stateLabel);
+    this.appsConfig.registerFilterExtractor('labels', appLabelsFilterText);
 
     // Default per-space tab presentation: card view at 6 per page. The
     // service's writable signals carry user toggles within a session; we
@@ -330,7 +313,7 @@ export class CloudFoundrySpaceAppsSignalComponent implements OnInit {
     // Drive the Instances column's running / desired display the same way
     // the wall does — initial fetch + 30s polling + reactive re-fetch on
     // pagedItems change.
-    this.appsConfig.startStatsPolling();
+    this.appsConfig.startStatsPolling(this.destroyRef);
   }
 
   private toggleAppFavorite(app: StApp): void {
@@ -358,28 +341,25 @@ export class CloudFoundrySpaceAppsSignalComponent implements OnInit {
       .filter(a => keys.has(`${a.cnsiGuid}:${a.guid}`));
   }
 
-  // Run a bulk op with live settlement feedback; clears selection when the
-  // POST phase ends (rows are already optimistically handled by the op).
-  private async runBulk(
+  // Run a bulk op with live settlement feedback: each item's outcome,
+  // failures named with their reason.
+  private runBulk(
     verb: string,
-    count: number,
+    targets: readonly { guid: string; name: string }[],
     op: () => Promise<BulkResult>,
   ): Promise<void> {
-    try {
-      await runBulkWithProgress({
-        snackBar: this.snackBar,
-        http: this.http,
-        noun: 'application',
-        verb,
-        progressVerb: 'Deleting',
-        doneVerb: 'deleted',
-        op,
-        refresh: () => this.appsConfig.refresh(),
-        count,
-      });
-    } finally {
-      this.selectedAppKeys.set(new Set());
-    }
+    return runBulkWithProgress({
+      snackBar: this.snackBar,
+      http: this.http,
+      noun: 'application',
+      verb,
+      progressVerb: 'Deleting',
+      doneVerb: 'deleted',
+      op,
+      refresh: () => this.appsConfig.refresh(),
+      count: targets.length,
+      names: new Map(targets.map(t => [t.guid, t.name])),
+    });
   }
 
   // Bulk Delete, rendered in the selection bar above the list when 1+ rows
@@ -402,10 +382,16 @@ export class CloudFoundrySpaceAppsSignalComponent implements OnInit {
           );
           this.confirmDialog.open(confirm, async (result?: { checkboxChecked?: boolean }) => {
             const guids = targets.map(a => a.guid);
-            await this.runBulk('delete', targets.length, () =>
-              result?.checkboxChecked
-                ? this.appsConfig.bulkDeleteAppsWithCleanup(cnsi, guids)
-                : this.appsConfig.bulkDeleteApps(cnsi, guids));
+            // Clear the selection once the POST phase ends: the op has
+            // already handled the rows.
+            try {
+              await this.runBulk('delete', targets, () =>
+                result?.checkboxChecked
+                  ? this.appsConfig.bulkDeleteAppsWithCleanup(cnsi, guids)
+                  : this.appsConfig.bulkDeleteApps(cnsi, guids));
+            } finally {
+              this.selectedAppKeys.set(new Set());
+            }
           });
         },
       },
@@ -417,12 +403,18 @@ export class CloudFoundrySpaceAppsSignalComponent implements OnInit {
   // restart/restage stay on the app detail page until a follow-up
   // migration brings them in here too.
   private buildAppActions = (app: StApp): readonly SignalListRowAction<StApp>[] => {
-    const runAction = async (label: string, op: () => Promise<void>) => {
+    // A delete resolves 'unknown' when it ended with a result nobody can
+    // determine: the row stays and the message says where to look.
+    const runAction = async (label: string, op: () => Promise<unknown>, name?: string) => {
       try {
-        await op();
+        const outcome = await op();
         await this.appsConfig.refresh();
-      } catch (err: any) {
-        this.snackBar.error(`${label} failed: ${err?.message ?? err}`);
+        const how = unknownHowOf(outcome);
+        if (how) {
+          this.snackBar.error(unknownOutcomeMessage(name ? `${label} "${name}"` : label, 'The Applications list', how));
+        }
+      } catch (err: unknown) {
+        this.snackBar.error(leadPieces(`${label} failed`, err));
       }
     };
     return [
@@ -437,10 +429,11 @@ export class CloudFoundrySpaceAppsSignalComponent implements OnInit {
             { label: 'Also delete this application\'s routes and service bindings' },
           );
           this.confirmDialog.open(confirm, async (result?: { checkboxChecked?: boolean }) => {
-            await runAction('Delete', () =>
-              result?.checkboxChecked
-                ? this.appsConfig.bulkDeleteAppsWithCleanup(app.cnsiGuid, [app.guid]).then(() => {})
-                : this.appsConfig.deleteApp(app.cnsiGuid, app.guid));
+            // The cleanup delete goes through the bulk endpoint, so its
+            // result is reported like a multi-select delete's.
+            await (result?.checkboxChecked
+              ? this.runBulk('delete', [app], () => this.appsConfig.bulkDeleteAppsWithCleanup(app.cnsiGuid, [app.guid]))
+              : runAction('Delete', () => this.appsConfig.deleteApp(app.cnsiGuid, app.guid, app.name), app.name));
           });
         },
       },

@@ -1,38 +1,27 @@
 <app-page-header>
   <h1>API Keys</h1>
-  <div class="page-header-right">
-    <button id="stratos-api-key" class="btn btn-icon" type="button" (click)="addApiKey()" matTooltip="Create API Key">
-      <app-custom-icon>add</app-custom-icon>
-    </button>
-  </div>
 </app-page-header>
 
-@if (keyDetails(); as details) {
-  <div class="keys-page__new">
-    <app-card class="keys-page__card">
-      <app-card-header>
-        <app-custom-icon>vpn_key</app-custom-icon>New API Key
-      </app-card-header>
-      <app-card-content>
-        <p>Your API Key has been successfully created. Use the following information to connect to <app-product-name></app-product-name>.</p>
-        <p><i>Please safely record these details, there is no later way to view them</i></p>
-        <ul>
-          <li id="apikey-secret">Secret: {{ details.secret }}</li>
-        </ul>
-        <button (click)="clearKeyDetails()" class="btn btn-danger" type="button">Close</button>
-      </app-card-content>
-    </app-card>
-  </div>
+@if (banners().length) {
+  <ul class="m-0 mb-4 flex list-none flex-col gap-2 p-0">
+    @for (b of banners(); track b.guid) {
+      <li data-testid="key-banner" role="status"
+        class="flex flex-wrap items-center justify-between gap-3 rounded border px-4 py-3"
+        [class]="b.expired
+          ? 'border-danger bg-danger-50 text-danger-900 dark:bg-danger-900/40 dark:text-danger-100'
+          : 'border-warning bg-warning-50 text-content-text dark:bg-warning-900/40'">
+        <span>{{ b.text }}</span>
+        <button class="btn btn-secondary" type="button" (click)="createReplacement(b.comment)">Create replacement</button>
+      </li>
+    }
+  </ul>
 }
+
+<app-list-sub-nav title="Total API Keys" [count]="keyCount" [loading]="loading" [addAction]="createAction"></app-list-sub-nav>
 
 @if (hasKeys() === true) {
   <app-signal-list [config]="listConfig"></app-signal-list>
 }
 @if (hasKeys() === false) {
-  <app-no-content-message icon="vpn_key" [firstLine]="'You have no API keys'"
-  [secondLine]="{
-      text: ''
-    }" [toolbarLink]="{
-      text: 'Create an API key'
-    }" toolbarAlign="stratos-api-key"></app-no-content-message>
+  <app-no-content-message icon="vpn_key" [firstLine]="'You have no API keys'"></app-no-content-message>
 }

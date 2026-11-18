@@ -1,12 +1,15 @@
-import { Component, HostListener, Input, Signal, WritableSignal, ChangeDetectionStrategy, ContentChild, ContentChildren, QueryList, ElementRef, TemplateRef, ViewChild, signal, DestroyRef, inject, AfterViewInit } from '@angular/core';
+import { Component, HostListener, Signal, computed, WritableSignal, ChangeDetectionStrategy, ElementRef, TemplateRef, signal, DestroyRef, inject, AfterViewInit, Injector, input, contentChild, contentChildren, viewChild } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { RouterModule } from '@angular/router';
+import { EndpointsDataService } from '@stratosui/store';
 
 import { UsageGaugeComponent } from '../usage-gauge/usage-gauge.component';
 import { AppBusyComponent } from '../busy-indicator/busy-indicator.component';
 import { AppAreaLoaderComponent } from '../area-loader/area-loader.component';
+import { CopyToClipboardComponent } from '../copy-to-clipboard/copy-to-clipboard.component';
 import { SignalListCellTemplateDirective } from './signal-list-cell-template.directive';
 import { rangeIsComplete, resolveRelativeDay, SignalListRangeBoundMode, SignalListRangeValue, SignalListRangeValueType } from './range-filter';
+import { AbbrTextComponent } from '../abbr-text/abbr-text.component';
 
 export type SignalListPillColor = 'success' | 'warning' | 'danger' | 'neutral';
 
@@ -17,6 +20,10 @@ export type SignalListPillColor = 'success' | 'warning' | 'danger' | 'neutral';
 export interface SignalListCompoundSegment {
   readonly text: string;
   readonly link?: readonly (string | number)[];
+  // What the segment is ('Organization', 'Space'), read before the text by
+  // screen readers only. It tells apart two links in one cell that have the
+  // same text, such as an org and a space both named "e2e".
+  readonly label?: string;
 }
 
 // ── Per-row state (RowState) ────────────────────────────────────────────
@@ -181,10 +188,17 @@ export interface SignalListColumn<T> {
   // cell the signal-list migration dropped. Does not make the row clickable
   // (rowLink only follows `kind: 'link'` + `link`).
   externalLink?: (row: T) => string | null;
+  // Optional, kind-agnostic. Returns the text a copy button beside the cell
+  // (or card title) puts on the clipboard, or null for no button. Used by the
+  // route lists, whose full URL is truncated in the cell.
+  copyValue?: (row: T) => string | null;
   // Optional, kind-agnostic. Overrides the hover `title` (tooltip) for this
   // column's cell/card-title; defaults to the rendered text. Used by the
   // routes card to show a route's full guid on hover while the visible title
-  // shows a short-guid fallback for unnamed routes.
+  // shows a short-guid fallback for unnamed routes. Of the other cells, only
+  // a pill or a dot reads it: the service-instance lists put a failed
+  // operation's reason on the Last Operation pill, the endpoints list a
+  // failed connect's reason on the Status dot.
   tooltip?: (row: T) => string;
   // Optional for kind === 'pill' or 'dot'. Returns a color family. Default: neutral.
   pillColor?: (row: T) => SignalListPillColor;
@@ -411,6 +425,10 @@ export interface SignalListConfig<T> {
   // in-page recovery affordance instead of an empty list until
   // re-navigation (#5577).
   readonly errorMessage?: string;
+  // The failure's reason (e.g. the endpoint's own error text), shown
+  // under errorMessage in the failed-load state. A signal, so the text
+  // follows the latest failure; nothing is shown while it is undefined.
+  readonly errorDetail?: Signal<string | undefined>;
   readonly nameFilter?: WritableSignal<string>;
   // Column keys (see SignalListColumn.key / header fallback) eligible for
   // the text-filter. When 2+ entries are provided AND filterField is
@@ -434,6 +452,9 @@ export interface SignalListConfig<T> {
   // to a success/danger/neutral color so a quick glance over a wall of
   // cards surfaces problems.
   readonly cardAccentColor?: (row: T) => SignalListPillColor;
+  // Optional — minimum card width in card view (CSS length). Default 16rem;
+  // lists of wide cards (charts) set more so one card is not squeezed.
+  readonly cardMinWidth?: string;
   // Optional — when provided, each row is decorated with its state: row
   // coloring (error/warning/info) + an icon/message sub-row. MUST return a
   // STABLE Signal per row (store it on the row / in the consumer — do NOT
@@ -492,13 +513,22 @@ export interface SignalListConfig<T> {
 @Component({
   selector: 'app-signal-list',
   standalone: true,
-  imports: [CommonModule, RouterModule, UsageGaugeComponent, AppBusyComponent, AppAreaLoaderComponent],
+  imports: [CommonModule, RouterModule, UsageGaugeComponent, AppBusyComponent, AppAreaLoaderComponent, CopyToClipboardComponent, AbbrTextComponent],
   changeDetection: ChangeDetectionStrategy.OnPush,
   templateUrl: './signal-list.component.html',
   host: { class: 'block h-full min-h-0' },
 })
 export class SignalListComponent<T> implements AfterViewInit {
-  @Input({ required: true }) config!: SignalListConfig<T>;
+  readonly config = input.required<SignalListConfig<T>>();
+
+  private readonly injector = inject(Injector);
+
+  // The error banner's label for an errorsByCnsi key: the endpoint's name,
+  // or the key itself when no endpoint has that guid. Resolved only while
+  // the banner shows, so lists without errors need no endpoint data.
+  endpointLabel(cnsiGuid: string): string {
+    return this.injector.get(EndpointsDataService).endpoints().get(cnsiGuid)?.name || cnsiGuid;
+  }
 
   // Optional content-projected template for fully-custom card rendering.
   // When supplied AND viewMode is 'card', signal-list delegates the card
@@ -506,16 +536,14 @@ export class SignalListComponent<T> implements AfterViewInit {
   // bypassing the default column-based card layout. Toolbar, pagination,
   // empty/loading states, and overflow handling all stay in signal-list.
   // Used by the helm catalog tab to render <app-chart-item> per row.
-  @ContentChild('cardTemplate', { read: TemplateRef })
-  cardTemplate?: TemplateRef<{ $implicit: T }>;
+  readonly cardTemplate = contentChild<unknown, TemplateRef<{ $implicit: T }>>('cardTemplate', { read: TemplateRef });
 
   // Named cell templates supplied by the host page. Each tagged with
   // `appSignalListCell="<name>"`; columns of `kind: 'template'` reference
   // them by name via SignalListColumn.templateName.
-  @ContentChildren(SignalListCellTemplateDirective)
-  cellTemplates?: QueryList<SignalListCellTemplateDirective<T>>;
+  readonly cellTemplates = contentChildren(SignalListCellTemplateDirective);
 
-  @ViewChild('scrollBody', { static: false }) scrollBody?: ElementRef<HTMLElement>;
+  readonly scrollBody = viewChild<ElementRef<HTMLElement>>('scrollBody');
 
   private readonly host: ElementRef<HTMLElement> = inject(ElementRef);
 
@@ -546,9 +574,26 @@ export class SignalListComponent<T> implements AfterViewInit {
   // wire onRefresh return either void or Promise<void>; either way the
   // refresh state clears once the promise resolves (or synchronously on
   // void return).
+  // A button that is off while it works, or at the end of what it can do,
+  // is aria-disabled, not disabled, and its handler ignores the press:
+  // Chromium takes focus off a focused button that becomes disabled and
+  // puts it on the page body (WCAG 2.4.3). Refresh, Clear, the pager and
+  // the bulk actions all turn off when pressed.
+  refreshBusy(): boolean {
+    return (this.config().isAnyLoading() || this.isRefreshing()) && this.config().totalFilteredResults() > 0;
+  }
+
+  onFirstPage(): boolean {
+    return this.effectivePageIndex() === 0;
+  }
+
+  onLastPage(): boolean {
+    return this.effectivePageIndex() + 1 >= Math.max(1, this.config().totalPages());
+  }
+
   async invokeRefresh(): Promise<void> {
-    const fn = this.config?.onRefresh;
-    if (!fn) return;
+    const fn = this.config()?.onRefresh;
+    if (!fn || this.refreshBusy()) return;
     this.isRefreshing.set(true);
     try {
       await fn();
@@ -566,12 +611,12 @@ export class SignalListComponent<T> implements AfterViewInit {
     destroyRef.onDestroy(() => {
       this.resizeObserver?.disconnect();
       this.mutationObserver?.disconnect();
-      this.scrollBody?.nativeElement.removeEventListener('scroll', this.onScroll);
+      this.scrollBody()?.nativeElement.removeEventListener('scroll', this.onScroll);
     });
   }
 
   ngAfterViewInit(): void {
-    const el = this.scrollBody?.nativeElement;
+    const el = this.scrollBody()?.nativeElement;
     if (!el) return;
     this.measureOverflow();
 
@@ -595,7 +640,7 @@ export class SignalListComponent<T> implements AfterViewInit {
   }
 
   private measureOverflow(): void {
-    const el = this.scrollBody?.nativeElement;
+    const el = this.scrollBody()?.nativeElement;
     if (!el) {
       this.hasOverflow.set(false);
       this.canScrollRight.set(false);
@@ -611,7 +656,7 @@ export class SignalListComponent<T> implements AfterViewInit {
     this.canScrollRight.set(el.scrollLeft + el.clientWidth < el.scrollWidth - 2);
   }
 
-  trackByRow = (_: number, row: T) => this.config.getRowKey(row);
+  trackByRow = (_: number, row: T) => this.config().getRowKey(row);
 
   pillClasses(color: SignalListPillColor): string {
     switch (color) {
@@ -650,12 +695,26 @@ export class SignalListComponent<T> implements AfterViewInit {
   }
 
   cardAccentFor(row: T): SignalListPillColor {
-    return this.config.cardAccentColor ? this.config.cardAccentColor(row) : 'neutral';
+    const config = this.config();
+    return config.cardAccentColor ? config.cardAccentColor(row) : 'neutral';
   }
 
+  cardGridColumns(): string {
+    return `repeat(auto-fill, minmax(${this.config().cardMinWidth ?? '16rem'}, 1fr))`;
+  }
+
+  // What the select lists. A list whose page size is not one of the choices
+  // (API Keys pages by 10 against 5/20/50/80) would show the first choice
+  // while paging by another number, so the current size is always offered,
+  // in order, with All kept last.
   pageSizeOptions(): readonly number[] {
-    const mode = this.config.viewMode ? this.config.viewMode() : 'table';
-    return this.effectivePageSizeOptions(mode);
+    const config = this.config();
+    const mode = config.viewMode ? config.viewMode() : 'table';
+    const opts = this.effectivePageSizeOptions(mode);
+    const size = this.config().pageSize();
+    if (size <= 0 || opts.includes(size)) return opts;
+    const sizes = [...opts.filter(o => o > 0), size].sort((a, b) => a - b);
+    return opts.includes(-1) ? [...sizes, -1] : sizes;
   }
 
   // The option set actually offered in a view mode. Card views carry the
@@ -664,7 +723,7 @@ export class SignalListComponent<T> implements AfterViewInit {
   // snap). setViewMode must validate against THIS set, not the raw config
   // lists, or a remembered "All" gets snapped away on return to card view.
   private effectivePageSizeOptions(mode: SignalListViewMode): readonly number[] {
-    const opts = this.config.pageSizeOptions;
+    const opts = this.config().pageSizeOptions;
     if (!opts) return [5, 20, 50, 80];
     if ('table' in opts && 'card' in opts) {
       const list = mode === 'card' ? opts.card : opts.table;
@@ -681,13 +740,13 @@ export class SignalListComponent<T> implements AfterViewInit {
   // derived from this also snap the stored signal back into range on
   // first interaction.
   effectivePageIndex(): number {
-    return Math.max(0, Math.min(this.config.pageIndex(), this.config.totalPages() - 1));
+    return Math.max(0, Math.min(this.config().pageIndex(), this.config().totalPages() - 1));
   }
 
   rangeText(): string {
-    const total = this.config.totalFilteredResults();
+    const total = this.config().totalFilteredResults();
     if (total === 0) return '0 of 0';
-    const size = this.config.pageSize();
+    const size = this.config().pageSize();
     if (size <= 0) return `1 – ${total} of ${total}`;
     const start = this.effectivePageIndex() * size + 1;
     const end = Math.min(start + size - 1, total);
@@ -702,21 +761,22 @@ export class SignalListComponent<T> implements AfterViewInit {
   onPageSizeChange(value: string): void {
     const n = parseInt(value, 10);
     if (!Number.isFinite(n) || (n <= 0 && n !== -1)) return;
-    this.config.pageSize.set(n);
-    this.config.pageIndex.set(0);
+    this.config().pageSize.set(n);
+    this.config().pageIndex.set(0);
   }
 
   setViewMode(mode: SignalListViewMode): void {
-    this.config.viewMode?.set(mode);
+    const config = this.config();
+    config.viewMode?.set(mode);
     // Snap pageSize to a valid option for the new mode when per-mode
     // options are configured. Otherwise the dropdown would display blank
     // and the "X of Y" range would reflect a size not in the picker.
-    const opts = this.config.pageSizeOptions;
+    const opts = config.pageSizeOptions;
     if (opts && 'table' in opts && 'card' in opts) {
       const next = this.effectivePageSizeOptions(mode);
-      if (next.length && !next.includes(this.config.pageSize())) {
-        this.config.pageSize.set(next[0]);
-        this.config.pageIndex.set(0);
+      if (next.length && !next.includes(config.pageSize())) {
+        config.pageSize.set(next[0]);
+        config.pageIndex.set(0);
       }
     }
   }
@@ -728,30 +788,39 @@ export class SignalListComponent<T> implements AfterViewInit {
   }
 
   isSortable(col: SignalListColumn<T>): boolean {
-    return !!this.config.sort && col.sortField != null;
+    return !!this.config().sort && col.sortField != null;
   }
 
   isSortedBy(col: SignalListColumn<T>): boolean {
-    return !!this.config.sort && this.config.sort()!.field === this.columnKey(col);
+    const config = this.config();
+    return !!config.sort && config.sort()!.field === this.columnKey(col);
   }
 
   sortDirectionFor(col: SignalListColumn<T>): 'asc' | 'desc' | null {
     if (!this.isSortedBy(col)) return null;
-    return this.config.sort!().direction;
+    return this.config().sort!().direction;
+  }
+
+  // aria-sort goes on the sorted header only, as in the WAI-ARIA sortable
+  // table pattern; the other headers leave it out rather than say "none".
+  ariaSortFor(col: SignalListColumn<T>): 'ascending' | 'descending' | null {
+    const direction = this.isSortable(col) ? this.sortDirectionFor(col) : null;
+    return direction === 'asc' ? 'ascending' : direction === 'desc' ? 'descending' : null;
   }
 
   onHeaderSort(col: SignalListColumn<T>): void {
-    if (!this.isSortable(col) || !this.config.sort) return;
+    const config = this.config();
+    if (!this.isSortable(col) || !config.sort) return;
     const key = this.columnKey(col);
-    const current = this.config.sort();
+    const current = config.sort();
     const nextDirection: 'asc' | 'desc' =
       current.field === key && current.direction === 'asc' ? 'desc' : 'asc';
-    this.config.sort.set({ field: key, direction: nextDirection });
-    this.config.pageIndex.set(0);
+    config.sort.set({ field: key, direction: nextDirection });
+    config.pageIndex.set(0);
   }
 
   sortableColumns(): SignalListColumn<T>[] {
-    return this.config.columns.filter(c => c.sortField != null);
+    return this.config().columns.filter(c => c.sortField != null);
   }
 
   // Columns eligible for the text-filter dropdown. Returns columns whose
@@ -759,10 +828,10 @@ export class SignalListComponent<T> implements AfterViewInit {
   // the order the caller specified. Empty iff the caller didn't opt in or
   // listed keys that don't match any configured column.
   filterableColumns(): SignalListColumn<T>[] {
-    const keys = this.config.filterColumns;
+    const keys = this.config().filterColumns;
     if (!keys || keys.length === 0) return [];
     const byKey = new Map<string, SignalListColumn<T>>();
-    for (const col of this.config.columns) byKey.set(this.columnKey(col), col);
+    for (const col of this.config().columns) byKey.set(this.columnKey(col), col);
     const out: SignalListColumn<T>[] = [];
     for (const k of keys) {
       const col = byKey.get(k);
@@ -772,21 +841,21 @@ export class SignalListComponent<T> implements AfterViewInit {
   }
 
   showFilterFieldSelector(): boolean {
-    return !!this.config.filterField && this.filterableColumns().length >= 2;
+    return !!this.config().filterField && this.filterableColumns().length >= 2;
   }
 
   // Returns the first column configured as kind === 'favorite'; the
   // card-body uses this to attach the star to the Name row so the
   // favorite column doesn't render as a label:value detail line.
   favoriteColumn(): SignalListColumn<T> | null {
-    return this.config.columns.find(c => c.kind === 'favorite' && !!c.favorite) ?? null;
+    return this.config().columns.find(c => c.kind === 'favorite' && !!c.favorite) ?? null;
   }
 
   // Returns the first column configured as kind === 'actions'; the
   // card-body uses this to attach the kebab to the Name row so the
   // column doesn't render as a label:value detail line.
   actionsColumn(): SignalListColumn<T> | null {
-    return this.config.columns.find(c => c.kind === 'actions' && !!c.actions) ?? null;
+    return this.config().columns.find(c => c.kind === 'actions' && !!c.actions) ?? null;
   }
 
   // Returns the first non-control column; the card header renders it as the
@@ -794,7 +863,7 @@ export class SignalListComponent<T> implements AfterViewInit {
   // leading selection column first (e.g. routes) still gets a real title
   // instead of a blank one, and its checkbox moves to the header cluster.
   titleColumn(): SignalListColumn<T> | null {
-    return this.config.columns.find(c =>
+    return this.config().columns.find(c =>
       c.kind !== 'checkbox' && c.kind !== 'favorite' &&
       c.kind !== 'actions' && c.kind !== 'radio'
     ) ?? null;
@@ -814,7 +883,7 @@ export class SignalListComponent<T> implements AfterViewInit {
   // bulk-action bar reads its selectedKeys signal to drive count and
   // pass-through to action handlers.
   checkboxColumn(): SignalListColumn<T> | null {
-    return this.config.columns.find(c => c.kind === 'checkbox' && !!c.checkbox) ?? null;
+    return this.config().columns.find(c => c.kind === 'checkbox' && !!c.checkbox) ?? null;
   }
 
   // Number of rows currently selected via the checkbox column. 0 when no
@@ -826,7 +895,7 @@ export class SignalListComponent<T> implements AfterViewInit {
   // True when the bulk-action bar should render: bulkActions is non-empty,
   // a checkbox column exists, and at least one row is selected.
   showBulkBar(): boolean {
-    const acts = this.config.bulkActions;
+    const acts = this.config().bulkActions;
     if (!acts || acts.length === 0) return false;
     return this.selectedCount() > 0;
   }
@@ -834,9 +903,19 @@ export class SignalListComponent<T> implements AfterViewInit {
   // Clears the checkbox column's selection. Used by the "Clear" button in
   // the bulk-action bar and is the recommended path for consumers to call
   // after a bulk action completes (delete-style actions especially).
+  // The bar goes away with the selection; focus in it moves to the first
+  // selection checkbox (Select all when shown) rather than the page body.
   clearBulkSelection(): void {
+    const host = this.host.nativeElement;
+    if (host.querySelector('[data-test="bulk-action-bar"]')?.contains(document.activeElement)) {
+      host.querySelector<HTMLElement>('[data-test="select-all"], [data-test="row-checkbox"], [data-test="card-select-checkbox"]')?.focus();
+    }
     const col = this.checkboxColumn();
     col?.checkbox?.selectedKeys.set(new Set());
+  }
+
+  bulkActionOff(act: SignalListBulkAction<T>): boolean {
+    return !!act.disabled?.() || !!this.config().bulkRunning?.();
   }
 
   // Invokes a bulk action, passing the current selection snapshot. Errors
@@ -845,7 +924,7 @@ export class SignalListComponent<T> implements AfterViewInit {
   // consumer decides whether the action invalidates the selection (delete:
   // yes; mark-favorite: no).
   async invokeBulkAction(act: SignalListBulkAction<T>): Promise<void> {
-    if (act.disabled?.()) return;
+    if (this.bulkActionOff(act)) return;
     const col = this.checkboxColumn();
     const keys = col?.checkbox?.selectedKeys() ?? new Set<string>();
     if (keys.size === 0) return;
@@ -863,7 +942,7 @@ export class SignalListComponent<T> implements AfterViewInit {
   // for this row (lookup still pending, permission denied, etc.) — the
   // template then renders the row as non-clickable.
   rowLink(row: T): readonly (string | number)[] | null {
-    const col = this.config.columns.find(c => c.kind === 'link' && !!c.link);
+    const col = this.config().columns.find(c => c.kind === 'link' && !!c.link);
     return col?.link?.(row) ?? null;
   }
 
@@ -872,7 +951,7 @@ export class SignalListComponent<T> implements AfterViewInit {
   // clickable area carries the same query hint as the name cell's
   // <a [routerLink] [queryParams]>.
   rowLinkQueryParams(row: T): Record<string, string | number> | null {
-    const col = this.config.columns.find(c => c.kind === 'link' && !!c.link);
+    const col = this.config().columns.find(c => c.kind === 'link' && !!c.link);
     return col?.linkQueryParams?.(row) ?? null;
   }
 
@@ -883,7 +962,7 @@ export class SignalListComponent<T> implements AfterViewInit {
 
   toggleRowActions(row: T, ev: Event): void {
     ev.stopPropagation();
-    const key = this.config.getRowKey(row);
+    const key = this.config().getRowKey(row);
     const willOpen = this.openActionsRowKey() !== key;
     this.openActionsRowKey.update(curr => (curr === key ? null : key));
     if (willOpen) {
@@ -901,6 +980,11 @@ export class SignalListComponent<T> implements AfterViewInit {
   invokeAction(act: SignalListRowAction<T>, row: T, ev: Event): void {
     ev.stopPropagation();
     if (act.disabled) return;
+    // Focus goes back to the kebab before the menu closes: a dialog the
+    // action opens returns focus, when it closes, to what had focus when it
+    // opened, and the pressed menu item is gone by then (focus would fall to
+    // the page body).
+    this.host.nativeElement.querySelector<HTMLElement>('[data-test="row-actions"][aria-expanded="true"]')?.focus();
     this.openActionsRowKey.set(null);
     void act.invoke(row);
   }
@@ -909,15 +993,18 @@ export class SignalListComponent<T> implements AfterViewInit {
   // open menu or on a kebab button closes the menu. Per-menu/kebab
   // handlers already stopPropagation so clicks on them never reach
   // here. Cheap enough to run always — no-op when no menu is open.
+  // The only document:click listener: Angular keeps one handler per host
+  // event, so the checklist popup's click-away runs from here too.
   @HostListener('document:click', ['$event'])
-  onDocumentClickForActions(_ev: MouseEvent): void {
+  onDocumentClickForActions(ev: MouseEvent): void {
     if (this.openActionsRowKey() !== null) {
       this.openActionsRowKey.set(null);
     }
+    this.onDocumentClickForMultiPopup(ev);
   }
 
-  // Escape closes the open menu and puts focus back on the kebab that
-  // opened it, as the button advertises (aria-haspopup="menu"). It is
+  // Escape closes the open actions popup and puts focus back on the kebab
+  // that opened it, as a show/hide button's popup does. It is
   // handled on the host while focus is inside the list (on the kebab or an
   // item in the menu) and stopped there: dialogs and the side panel close on
   // any Escape that reaches the document, and one press should only close
@@ -935,7 +1022,7 @@ export class SignalListComponent<T> implements AfterViewInit {
   }
 
   isFavorite(col: SignalListColumn<T>, row: T): boolean {
-    return !!col.favorite && col.favorite.keys().has(this.config.getRowKey(row));
+    return !!col.favorite && col.favorite.keys().has(this.config().getRowKey(row));
   }
 
   onToggleFavorite(col: SignalListColumn<T>, row: T, ev: Event): void {
@@ -946,7 +1033,7 @@ export class SignalListComponent<T> implements AfterViewInit {
   // Radio-select helpers -----------------------------------------------
 
   isRadioSelected(col: SignalListColumn<T>, row: T): boolean {
-    return !!col.radio && col.radio.selectedKey() === this.config.getRowKey(row);
+    return !!col.radio && col.radio.selectedKey() === this.config().getRowKey(row);
   }
 
   isRadioDisabled(col: SignalListColumn<T>, row: T): boolean {
@@ -956,13 +1043,13 @@ export class SignalListComponent<T> implements AfterViewInit {
   onSelectRadio(col: SignalListColumn<T>, row: T, ev: Event): void {
     ev.stopPropagation();
     if (!col.radio || this.isRadioDisabled(col, row)) return;
-    col.radio.selectedKey.set(this.config.getRowKey(row));
+    col.radio.selectedKey.set(this.config().getRowKey(row));
   }
 
   // Checkbox-select helpers --------------------------------------------
 
   isCheckboxSelected(col: SignalListColumn<T>, row: T): boolean {
-    return !!col.checkbox && col.checkbox.selectedKeys().has(this.config.getRowKey(row));
+    return !!col.checkbox && col.checkbox.selectedKeys().has(this.config().getRowKey(row));
   }
 
   isCheckboxDisabled(col: SignalListColumn<T>, row: T): boolean {
@@ -972,7 +1059,7 @@ export class SignalListComponent<T> implements AfterViewInit {
   onToggleCheckbox(col: SignalListColumn<T>, row: T, ev: Event): void {
     ev.stopPropagation();
     if (!col.checkbox || this.isCheckboxDisabled(col, row)) return;
-    const key = this.config.getRowKey(row);
+    const key = this.config().getRowKey(row);
     const next = new Set(col.checkbox.selectedKeys());
     let nowSelected: boolean;
     if (next.has(key)) {
@@ -1020,8 +1107,9 @@ export class SignalListComponent<T> implements AfterViewInit {
   // Cell-template helpers ----------------------------------------------
 
   cellTemplateFor(col: SignalListColumn<T>): TemplateRef<{ $implicit: T; row: T }> | undefined {
-    if (col.kind !== 'template' || !col.templateName || !this.cellTemplates) return undefined;
-    return this.cellTemplates.find(d => d.name === col.templateName)?.template;
+    const cellTemplates = this.cellTemplates();
+    if (col.kind !== 'template' || !col.templateName || !cellTemplates) return undefined;
+    return cellTemplates.find(d => d.name() === col.templateName)?.template;
   }
 
   // Per-row state (RowState) -------------------------------------------
@@ -1034,7 +1122,7 @@ export class SignalListComponent<T> implements AfterViewInit {
   // registers this view's dependency on it — zoneless re-renders the row
   // when the consumer mutates its state signal.
   rowStateOf(row: T): SignalListRowState | null {
-    return this.config.rowState?.(row)?.() ?? null;
+    return this.config().rowState?.(row)?.() ?? null;
   }
 
   // Data rows stay neutral surfaces — severity colors belong to the message
@@ -1109,7 +1197,7 @@ export class SignalListComponent<T> implements AfterViewInit {
 
   // The projected `__rowMessage` template, if the host supplied one.
   rowMessageTemplate(): TemplateRef<{ $implicit: T; row: T }> | undefined {
-    return this.cellTemplates?.find(d => d.name === SignalListComponent.ROW_MESSAGE_TEMPLATE)?.template;
+    return this.cellTemplates()?.find(d => d.name() === SignalListComponent.ROW_MESSAGE_TEMPLATE)?.template;
   }
 
   // Per-segment text classes: bold emphasis + optional tone color.
@@ -1128,7 +1216,7 @@ export class SignalListComponent<T> implements AfterViewInit {
   // favorite/actions columns, which collapse into one leading control cell)
   // plus 1 when that leading control cell is present.
   totalColumnCount(): number {
-    const dataCols = this.config.columns.filter(c => c.kind !== 'favorite' && c.kind !== 'actions').length;
+    const dataCols = this.config().columns.filter(c => c.kind !== 'favorite' && c.kind !== 'actions').length;
     const leading = (this.favoriteColumn() || this.actionsColumn()) ? 1 : 0;
     return dataCols + leading;
   }
@@ -1146,7 +1234,7 @@ export class SignalListComponent<T> implements AfterViewInit {
 
   // Internal — composes the (row, column) key used by expandedCompoundCells.
   private compoundCellKey(col: SignalListColumn<T>, row: T): string {
-    return `${this.config.getRowKey(row)}::${this.columnKey(col)}`;
+    return `${this.config().getRowKey(row)}::${this.columnKey(col)}`;
   }
 
   // True when the compound cell for (row, col) should render every segment
@@ -1207,8 +1295,9 @@ export class SignalListComponent<T> implements AfterViewInit {
   }
 
   onFilterFieldChange(field: string): void {
-    this.config.filterField?.set(field);
-    this.config.pageIndex.set(0);
+    const config = this.config();
+    config.filterField?.set(field);
+    config.pageIndex.set(0);
     this.multiPopupOpen.set(false);
   }
 
@@ -1218,19 +1307,32 @@ export class SignalListComponent<T> implements AfterViewInit {
   // suffices rather than one open-flag per configured field.
   readonly multiPopupOpen = signal(false);
 
+  // Close and Escape: the popup goes away with the focused control in it,
+  // so focus goes back to the button that opened it.
+  closePopup(): void {
+    const wrap = this.host.nativeElement.querySelector('[data-test="multi-filter-wrap"], [data-test="range-filter-wrap"]');
+    const hadFocus = wrap?.contains(document.activeElement);
+    this.multiPopupOpen.set(false);
+    if (hadFocus) {
+      wrap!.querySelector<HTMLElement>('[data-test="multi-filter-toggle"], [data-test="range-filter-toggle"]')?.focus();
+    }
+  }
+
   // The filterMultis entry whose field matches the active filterField(),
   // or undefined when the current field uses the plain text input.
   activeMulti(): SignalListMultiFilter | undefined {
-    const field = this.config.filterField?.();
-    return this.config.filterMultis?.find(m => m.field === field);
+    const config = this.config();
+    const field = config.filterField?.();
+    return config.filterMultis?.find(m => m.field === field);
   }
 
   // The filterRanges entry whose field matches the active filterField().
   // Same single-active-field contract as activeMulti — the two popups
   // can never be live simultaneously, so they share multiPopupOpen.
   activeRange(): SignalListRangeFilter | undefined {
-    const field = this.config.filterField?.();
-    return this.config.filterRanges?.find(r => r.field === field);
+    const config = this.config();
+    const field = config.filterField?.();
+    return config.filterRanges?.find(r => r.field === field);
   }
 
   // Single source of truth for a range filter's bound mode: number-domain
@@ -1304,8 +1406,9 @@ export class SignalListComponent<T> implements AfterViewInit {
   // one deliberate gesture that discards the stored configuration — the
   // implicit collapse rules in updateRange stay date-mode-only.
   clearPopupFilter(f: SignalListMultiFilter | SignalListRangeFilter): void {
+    if (f.selected() === null) return;
     f.selected.set(null);
-    this.config.pageIndex.set(0);
+    this.config().pageIndex.set(0);
   }
 
   // Flips one weekday in the business-day working week. Routed through
@@ -1354,7 +1457,7 @@ export class SignalListComponent<T> implements AfterViewInit {
     // relative range is simply inert; Clear remains the real reset.
     const collapse = touchedBound && allBoundsEmpty && (next.mode ?? 'date') === 'date';
     fr.selected.set(collapse ? null : next);
-    this.config.pageIndex.set(0);
+    this.config().pageIndex.set(0);
   }
 
   // Button label for the checklist popup: "All (n)" when every option is
@@ -1374,8 +1477,8 @@ export class SignalListComponent<T> implements AfterViewInit {
   // Closes the checklist popup on any click outside its wrapper — the
   // same "click away" pattern as the row-actions kebab menu, keyed off
   // the multi-filter-wrap data-test hook so it works uniformly across
-  // every consumer without a template ref.
-  @HostListener('document:click', ['$event'])
+  // every consumer without a template ref. Called from
+  // onDocumentClickForActions, the list's one document:click listener.
   onDocumentClickForMultiPopup(event: Event): void {
     if (!this.multiPopupOpen()) return;
     const target = event.target as HTMLElement | null;
@@ -1406,7 +1509,7 @@ export class SignalListComponent<T> implements AfterViewInit {
     const curr = fm.selected() ?? all;
     const next = curr.includes(name) ? curr.filter(n => n !== name) : [...curr, name];
     fm.selected.set(next.length === all.length ? null : next);
-    this.config.pageIndex.set(0);
+    this.config().pageIndex.set(0);
   }
 
   // Page position saved when the user starts typing a filter, restored
@@ -1421,16 +1524,16 @@ export class SignalListComponent<T> implements AfterViewInit {
   // filtered from page 2 lands back on page 2. The clamp in the data
   // layer covers a restored index that outlived a shrunken data set.
   onNameFilterChange(value: string): void {
-    const previous = this.config.nameFilter!();
+    const previous = this.config().nameFilter!();
     if (previous === '' && value !== '') {
-      this.prefilterPageIndex = this.config.pageIndex();
+      this.prefilterPageIndex = this.config().pageIndex();
     }
-    this.config.nameFilter!.set(value);
+    this.config().nameFilter!.set(value);
     if (value === '') {
-      this.config.pageIndex.set(this.prefilterPageIndex ?? 0);
+      this.config().pageIndex.set(this.prefilterPageIndex ?? 0);
       this.prefilterPageIndex = null;
     } else {
-      this.config.pageIndex.set(0);
+      this.config().pageIndex.set(0);
     }
   }
 
@@ -1439,42 +1542,84 @@ export class SignalListComponent<T> implements AfterViewInit {
   // Falls back to "Filter by Name" for the single-field case.
   filterPlaceholder(): string {
     if (!this.showFilterFieldSelector()) return 'Filter by Name';
-    const key = this.config.filterField!();
-    const col = this.config.columns.find(c => this.columnKey(c) === key);
-    return `Filter by ${col?.header ?? 'Name'}`;
+    return `Filter by ${this.filterFieldHeader()}`;
+  }
+
+  // Header of the column the filter-field selector names.
+  filterFieldHeader(): string {
+    const config = this.config();
+    const key = config.filterField?.();
+    const col = config.columns.find(c => this.columnKey(c) === key);
+    return col?.header ?? 'Name';
+  }
+
+  // Accessible name of a row's checkbox or radio: the column's header (or
+  // "Select" for an unheaded selection column) and the row's title cell.
+  rowSelectLabel(col: SignalListColumn<T>, row: T): string {
+    const title = this.titleColumn()?.render(row) ?? '';
+    return `${col.header || 'Select'} ${title}`.trim();
   }
 
   onSortFieldChange(field: string): void {
-    if (!this.config.sort) return;
-    const current = this.config.sort();
-    this.config.sort.set({ field, direction: current.direction, caseSensitive: current.caseSensitive });
-    this.config.pageIndex.set(0);
+    const config = this.config();
+    if (!config.sort) return;
+    const current = config.sort();
+    config.sort.set({ field, direction: current.direction, caseSensitive: current.caseSensitive });
+    config.pageIndex.set(0);
   }
 
   toggleSortDirection(): void {
-    if (!this.config.sort) return;
-    const current = this.config.sort();
-    this.config.sort.set({
+    const config = this.config();
+    if (!config.sort) return;
+    const current = config.sort();
+    config.sort.set({
       field: current.field,
       direction: current.direction === 'asc' ? 'desc' : 'asc',
       caseSensitive: current.caseSensitive,
     });
-    this.config.pageIndex.set(0);
+    config.pageIndex.set(0);
   }
 
   toggleSortCaseSensitive(): void {
-    if (!this.config.sort) return;
-    const current = this.config.sort();
-    this.config.sort.set({
+    const config = this.config();
+    if (!config.sort) return;
+    const current = config.sort();
+    config.sort.set({
       field: current.field,
       direction: current.direction,
       caseSensitive: !current.caseSensitive,
     });
-    this.config.pageIndex.set(0);
+    config.pageIndex.set(0);
   }
 
+  // The filter state as one value, to see when the person changes it.
+  private readonly filterKey = computed(() => {
+    const config = this.config();
+    return JSON.stringify([
+      (config.filterDropdowns ?? []).map(dd => dd.selected()),
+      (config.filterMultis ?? []).map(fm => fm.selected()),
+      (config.filterRanges ?? []).map(fr => fr.selected()),
+      config.nameFilter?.() ?? '',
+    ]);
+  });
+  private firstFilterKey?: string;
+  private filterChanged = false;
+
+  // Said by the list's status line (WCAG 4.1.3): empty until the person
+  // changes a filter, then the number of results, once they have loaded.
+  // NOTE: the two plain fields are set inside the computed; they only latch.
+  protected readonly resultStatus = computed(() => {
+    const key = this.filterKey();
+    this.firstFilterKey ??= key;
+    if (key !== this.firstFilterKey) this.filterChanged = true;
+    const config = this.config();
+    if (!this.filterChanged || config.isAnyLoading()) return '';
+    const n = config.totalFilteredResults();
+    return `${n} ${n === 1 ? 'result' : 'results'}`;
+  });
+
   hasActiveFilter(): boolean {
-    for (const dd of this.config.filterDropdowns ?? []) {
+    for (const dd of this.config().filterDropdowns ?? []) {
       if (dd.selected() != null) return true;
     }
     // A filterMultis selection of null means "all" (inactive); toggling
@@ -1482,17 +1627,18 @@ export class SignalListComponent<T> implements AfterViewInit {
     // selection — sets a non-null value, so this mirrors the dropdown
     // check above without needing to special-case the checklist's
     // null/[]/partial states individually.
-    for (const fm of this.config.filterMultis ?? []) {
+    for (const fm of this.config().filterMultis ?? []) {
       if (fm.selected() != null) return true;
     }
     // updateRange stores a half-typed range (e.g. op picked, no date yet)
     // as non-null so the popup keeps the user's choice across keystrokes —
     // so `!= null` alone would flag Clear active on an inert filter.
     // rangeIsComplete gates on the bound(s) actually parsing.
-    for (const fr of this.config.filterRanges ?? []) {
+    for (const fr of this.config().filterRanges ?? []) {
       if (rangeIsComplete(fr.selected(), fr.valueType)) return true;
     }
-    if (this.config.nameFilter && this.config.nameFilter().length > 0) return true;
+    const config = this.config();
+    if (config.nameFilter && config.nameFilter().length > 0) return true;
     return false;
   }
 
@@ -1502,7 +1648,7 @@ export class SignalListComponent<T> implements AfterViewInit {
     // attribute, so treat empty string as the null selection.
     dropdown.selected.set(value === '' ? null : value);
     // Reset to first page so filtered results don't land on an empty page.
-    this.config.pageIndex.set(0);
+    this.config().pageIndex.set(0);
   }
 
 }

@@ -189,14 +189,21 @@
 
   /* ─── Colors: semantic singletons (static LIGHT value) ─── */
   /* .dark-theme below overrides each at runtime for dark mode. */
-  --color-primary:   oklch(62.308% 0.188 259.81);
-  --color-secondary: oklch(71.374% 0.1434 254.62);
-  --color-accent:    oklch(71.374% 0.1434 254.62);
+  --color-primary:   oklch(42.445% 0.1809 265.64);
+  --color-secondary: oklch(42.445% 0.1809 265.64);
+  --color-accent:    oklch(42.445% 0.1809 265.64);
   --color-success:   oklch(72.275% 0.192 149.58);
   --color-warning:   oklch(76.859% 0.1647 70.08);
   --color-danger:    oklch(63.683% 0.2078 25.33);
-  --color-info:      oklch(62.308% 0.188 259.81);
+  --color-info:      oklch(42.445% 0.1809 265.64);
   --color-error:     oklch(63.683% 0.2078 25.33);
+  /* Text drawn on --color-primary; dark mode's lighter primary needs dark text. */
+  --color-on-primary: oklch(100% 0 none);
+  /* Text drawn on the status colors. White is 2.2-3.8:1 on the defaults, so
+     these are the dark navy; the branding service picks per brand color. */
+  --color-on-success: oklch(20.768% 0.0398 265.75);
+  --color-on-warning: oklch(20.768% 0.0398 265.75);
+  --color-on-danger:  oklch(20.768% 0.0398 265.75);
 
   /* ─── Color: neutral status ─── */
   /* tentative — gray for "uncertain / initialising" status icons. Not theme-shifted. */

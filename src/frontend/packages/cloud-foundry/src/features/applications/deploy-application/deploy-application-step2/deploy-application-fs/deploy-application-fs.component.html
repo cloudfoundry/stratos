@@ -1,13 +1,13 @@
 <div>
-  @if (!hideTitle) {
-    @if (sourceType === 'file') {
+  @if (!hideTitle()) {
+    @if (sourceType() === 'file') {
       <div class="font-semibold my-6">Deploy from local Application File archive</div>
     }
-    @if (sourceType === 'folder') {
+    @if (sourceType() === 'folder') {
       <div class="font-semibold my-6">Deploy from local Application Folder</div>
     }
   }
-  @if (sourceType === 'file') {
+  @if (sourceType() === 'file') {
     <div>
       <input #localPathSelectFile fileread="localPathFile" type="file" class="h-0 invisible w-0"
         name="localPathSelectFile" id="localPathSelectFile" (change)="onFileChange($event)" /> Choose an
@@ -15,7 +15,7 @@
         file</button>
       </div>
     }
-    @if (sourceType === 'folder') {
+    @if (sourceType() === 'folder') {
       <div>
         <input #localPathSelectFolder webkitdirectory fileread="localPathFile" type="file" class="h-0 invisible w-0"
           name="localPathSelectFolder" id="localPathSelectFolder" (change)="onFileChange($event)" /> Choose an
@@ -42,13 +42,13 @@
               <app-metadata-item icon="folder" label="Folders">{{ source.folders }}</app-metadata-item>
               @if (!!source.manifestFile) {
                 <div class="items-center flex mb-3">
-                  <span class="material-icons">done</span>
+                  <span aria-hidden="true" class="material-icons">done</span>
                   <span>Manifest file detected</span>
                 </div>
               }
               @if (!!source.cfIgnoreFile) {
                 <div class="items-center flex mb-3">
-                  <span class="material-icons">done</span>
+                  <span aria-hidden="true" class="material-icons">done</span>
                   <span>.cfignore file was detected and applied ({{source.excludes.length}} files excluded)</span>
                 </div>
               }

@@ -1,8 +1,15 @@
-<app-list-sub-nav title="Total Endpoints" [count]="totalEndpoints" [addAction]="addAction"></app-list-sub-nav>
+<app-duplicate-url-banner
+  [endpoints]="registeredEndpoints()"
+  message="Endpoints that share a URL are listed separately; each has its own connection.">
+</app-duplicate-url-banner>
+<app-list-sub-nav title="Total Endpoints" [count]="totalEndpoints" [addAction]="addAction()"></app-list-sub-nav>
 @if (listConfig(); as config) {
   <app-signal-list [config]="config" class="flex-1 min-h-0">
     <ng-template #cardTemplate let-row>
       <app-endpoint-card [row]="$any(row)" [actionMenu]="cardMenuFor($any(row))"></app-endpoint-card>
+    </ng-template>
+    <ng-template appSignalListCell="name" let-row>
+      <app-table-cell-endpoint-name [row]="row"></app-table-cell-endpoint-name>
     </ng-template>
     <ng-template appSignalListCell="address" let-row>
       <app-table-cell-endpoint-address [row]="row"></app-table-cell-endpoint-address>

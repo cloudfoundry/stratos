@@ -1,12 +1,9 @@
-import { Type } from '@angular/core';
 import {
   EndpointModel,
   EndpointsDataService,
 } from '@stratosui/store';
 import { Observable, defer, from } from 'rxjs';
 import { map, take } from 'rxjs/operators';
-
-import { EndpointListDetailsComponent } from '../../shared/components/endpoint-list/endpoint-list.helpers';
 
 export function getEndpointUsername(endpoint: EndpointModel) {
   return endpoint && endpoint.user ? endpoint.user.name : '-';
@@ -32,34 +29,18 @@ export interface EndpointIcon {
   font: string;
 }
 
-// Any initial endpointTypes listDetailsComponent should be added here
-export const coreEndpointListDetailsComponents: Type<EndpointListDetailsComponent>[] = [];
-
 /**
- * Wave 2 (W36-B): reads endpoint via {@link EndpointsDataService} signal
- * surface instead of `store.select(endpointEntitiesSelector)`.
+ * True when a metrics endpoint covers the endpoint: the backend names it in
+ * `metadata.metrics` when it builds the endpoint list.
  *
- * Returns `Observable<boolean>` to preserve consumer signatures (rxjs
- * pipelines in `app.effects.ts`). The observable defers until the service
- * has hydrated so callers behave the same as the legacy `take(1)` over a
- * BehaviorSubject-shaped selector.
+ * Returns `Observable<boolean>` to preserve consumer signatures. The
+ * observable defers until the service has hydrated, then takes one value.
  */
 export function endpointHasMetrics(endpointGuid: string, endpointsService: EndpointsDataService): Observable<boolean> {
   return defer(() => from(endpointsService.whenReady())).pipe(
     map(() => {
       const endpoint = endpointsService.endpoints().get(endpointGuid);
       return !!endpoint?.metadata && !!endpoint.metadata.metrics;
-    }),
-    take(1)
-  );
-}
-
-// There are two different methods for checking if an endpoint has metrics. Need to understand use cases
-export function endpointHasMetricsByAvailable(endpointsService: EndpointsDataService, endpointId: string): Observable<boolean> {
-  return defer(() => from(endpointsService.whenReady())).pipe(
-    map(() => {
-      const endpoint = endpointsService.endpoints().get(endpointId);
-      return !!endpoint && !!endpoint.metricsAvailable;
     }),
     take(1)
   );

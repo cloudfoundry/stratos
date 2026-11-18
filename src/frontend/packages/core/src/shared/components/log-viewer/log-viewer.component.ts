@@ -1,5 +1,5 @@
 import { CommonModule } from '@angular/common';
-import { ChangeDetectionStrategy, Component, ElementRef, Input, OnDestroy, OnInit, ViewChild } from '@angular/core';
+import { ChangeDetectionStrategy, Component, ElementRef, OnDestroy, OnInit, effect, input, signal, untracked, viewChild } from '@angular/core';
 import {
   BehaviorSubject,
   combineLatest as observableCombineLatest,
@@ -13,7 +13,7 @@ import {
 import {
   buffer,
   catchError,
-  combineLatest,
+  combineLatestWith,
   distinctUntilChanged,
   filter,
   map,
@@ -54,20 +54,34 @@ interface ConnectionErrorInfo {
 })
 export class LogViewerComponent implements OnInit, OnDestroy {
 
-  @Input() filter?: (a: any) => void;
+  readonly filter = input<(a: any) => void>();
 
-  @Input() status!: Observable<number>;
+  readonly status = input<Observable<number>>();
+
+  // How many times the parent retries before it reports the stream failed
+  readonly maxReconnectAttempts = input(5);
 
   private logStreamSubject = new BehaviorSubject<Observable<any>>(NEVER);
 
-  @Input()
-  set logStream(stream: Observable<any>) {
-    this.logStreamSubject.next(stream || NEVER);
+  readonly logStream = input<Observable<any> | null>();
+
+  constructor() {
+    // A different stream is a new log: what the last one showed goes.
+    // Untracked: subscribing to the new stream runs the caller's code.
+    effect(() => {
+      const next = this.logStream() || NEVER;
+      untracked(() => {
+        if (next !== this.logStreamSubject.value) {
+          this.clear();
+        }
+        this.logStreamSubject.next(next);
+      });
+    });
   }
 
-  @ViewChild('container', { static: true }) container!: ElementRef;
+  readonly container = viewChild.required<ElementRef>('container');
 
-  @ViewChild('content', { static: true }) content!: ElementRef;
+  readonly content = viewChild.required<ElementRef>('content');
 
   private logLinesCount = 0;
   private countAttribute = 'batchLength';
@@ -84,39 +98,39 @@ export class LogViewerComponent implements OnInit, OnDestroy {
 
   // Connection state tracking
   private connectionAttempts = 0;
-  private maxReconnectAttempts = 5;
   private lastConnectionError: ConnectionErrorInfo | null = null;
 
   public maxLogLines = 1000;
   public isHighThroughput$!: Observable<boolean>;
   public isLocked$!: Observable<boolean>;
-  public statusMessage$ = new BehaviorSubject<LogStreamMessage>({ message: '' });
-  public connectionErrorInfo$ = new BehaviorSubject<ConnectionErrorInfo | null>(null);
+  public readonly statusMessage = signal<LogStreamMessage>({ message: '' });
 
   public ngOnInit() {
-    const contentElement = this.content.nativeElement;
-    const containerElement = this.container.nativeElement;
+    const contentElement = this.content().nativeElement;
+    const containerElement = this.container().nativeElement;
 
     const stoppableLogStream$ = observableCombineLatest([
       this.stopped$,
       this.logStreamSubject.asObservable()
     ]).pipe(
+      // Each line keeps its stream, so lines of a replaced stream still
+      // waiting in the buffer are dropped
       switchMap(
-        ([stopped, stream]) => (stopped ? NEVER : stream)
+        ([stopped, stream]) => (stopped ? NEVER : stream.pipe(map(log => ({ stream, log }))))
       ),
       share()
     );
 
-    if (this.status) {
-      this.statusSub = this.status.subscribe({
+    const status = this.status();
+    if (status) {
+      this.statusSub = status.subscribe({
         next: wsStatus => {
           switch (wsStatus) {
             case 0:
               // Connecting
               this.connectionAttempts = 0;
               this.lastConnectionError = null;
-              this.connectionErrorInfo$.next(null);
-              this.statusMessage$.next({
+              this.statusMessage.set({
                 message: 'Connecting to log stream...',
                 isError: false
               });
@@ -125,8 +139,7 @@ export class LogViewerComponent implements OnInit, OnDestroy {
               // Successfully connected
               this.connectionAttempts = 0;
               this.lastConnectionError = null;
-              this.connectionErrorInfo$.next(null);
-              this.statusMessage$.next({ message: '' });
+              this.statusMessage.set({ message: '' });
               console.log('Log stream connected successfully');
               break;
             case -1: {
@@ -138,10 +151,9 @@ export class LogViewerComponent implements OnInit, OnDestroy {
                 severity: 'error',
                 userMessage: errorMsg,
                 timestamp: Date.now(),
-                retryable: this.connectionAttempts < this.maxReconnectAttempts
+                retryable: this.connectionAttempts < this.maxReconnectAttempts()
               };
-              this.connectionErrorInfo$.next(this.lastConnectionError);
-              this.statusMessage$.next({
+              this.statusMessage.set({
                 message: errorMsg,
                 isError: true
               });
@@ -151,8 +163,8 @@ export class LogViewerComponent implements OnInit, OnDestroy {
             case -2: {
               // Retrying connection
               this.connectionAttempts++;
-              const retryMsg = `Connection lost. Retrying (attempt ${this.connectionAttempts}/${this.maxReconnectAttempts})...`;
-              this.statusMessage$.next({
+              const retryMsg = `Connection lost. Retrying (attempt ${this.connectionAttempts}/${this.maxReconnectAttempts()})...`;
+              this.statusMessage.set({
                 message: retryMsg,
                 isError: false
               });
@@ -160,7 +172,7 @@ export class LogViewerComponent implements OnInit, OnDestroy {
               break;
             }
             default:
-              this.statusMessage$.next({ message: '' });
+              this.statusMessage.set({ message: '' });
               break;
           }
         },
@@ -173,8 +185,7 @@ export class LogViewerComponent implements OnInit, OnDestroy {
             timestamp: Date.now(),
             retryable: false
           };
-          this.connectionErrorInfo$.next(this.lastConnectionError);
-          this.statusMessage$.next({
+          this.statusMessage.set({
             message: this.lastConnectionError.userMessage,
             isError: true
           });
@@ -197,7 +208,7 @@ export class LogViewerComponent implements OnInit, OnDestroy {
     // When we resize the window, we need to re-enable auto-scroll - if the height changes
     // we will determine that the user scrolled off the bottom, when in fact this is due to the resize event
     this.resizeSub = observableFromEvent(window, 'resize').pipe(
-      combineLatest(this.isLocked$))
+      combineLatestWith(this.isLocked$))
       .subscribe(([_event, locked]) => {
         if (locked) {
           this.scrollToBottom();
@@ -215,7 +226,7 @@ export class LogViewerComponent implements OnInit, OnDestroy {
       startWith(false));
 
     const buffer$ = observableInterval().pipe(
-      combineLatest(this.isHighThroughput$),
+      combineLatestWith(this.isHighThroughput$),
       throttle(([_t, high]) => {
         return observableInterval(
           high ? this.highThroughputBufferIntervalMS : 0
@@ -226,11 +237,13 @@ export class LogViewerComponent implements OnInit, OnDestroy {
     const addedLogs$ = stoppableLogStream$.pipe(
       buffer(buffer$))
       .pipe(
+        map(lines => lines.filter(line => line.stream === this.logStreamSubject.value).map(line => line.log)),
         filter(log => !!log.length),
         // Apply filter to messages if applicable
         map(logs => logs.map(log => {
           try {
-            return this.filter ? this.filter(log) : log;
+            const filterValue = this.filter();
+            return filterValue ? filterValue(log) : log;
           } catch (filterErr) {
             console.error('Error applying filter to log:', log, filterErr);
             return log; // Fall back to unfiltered log on filter error
@@ -284,8 +297,7 @@ export class LogViewerComponent implements OnInit, OnDestroy {
               timestamp: Date.now(),
               retryable: true
             };
-            this.connectionErrorInfo$.next(errorInfo);
-            this.statusMessage$.next({
+            this.statusMessage.set({
               message: errorInfo.userMessage,
               isError: true
             });
@@ -295,7 +307,7 @@ export class LogViewerComponent implements OnInit, OnDestroy {
         })
       );
 
-    this.listeningSub = observableCombineLatest(this.isLocked$, addedLogs$).pipe(
+    this.listeningSub = observableCombineLatest([this.isLocked$, addedLogs$]).pipe(
       tap(([isLocked, _logs]) => {
         try {
           if (isLocked) {
@@ -320,15 +332,14 @@ export class LogViewerComponent implements OnInit, OnDestroy {
             retryable: false
           };
           this.lastConnectionError = errorInfo;
-          this.connectionErrorInfo$.next(errorInfo);
-          this.statusMessage$.next({
+          this.statusMessage.set({
             message: errorInfo.userMessage,
             isError: true
           });
         },
         complete: () => {
           console.log('Log stream completed');
-          this.statusMessage$.next({
+          this.statusMessage.set({
             message: 'Log stream has been closed',
             isError: false
           });
@@ -349,8 +360,8 @@ export class LogViewerComponent implements OnInit, OnDestroy {
   }
 
   public scrollToBottom() {
-    const contentElement = this.content.nativeElement;
-    const containerElement = this.container.nativeElement;
+    const contentElement = this.content().nativeElement;
+    const containerElement = this.container().nativeElement;
     containerElement.scrollTop = contentElement.clientHeight;
   }
 
@@ -360,12 +371,17 @@ export class LogViewerComponent implements OnInit, OnDestroy {
     }
   }
 
+  private clear() {
+    this.content().nativeElement.textContent = '';
+    this.logLinesCount = 0;
+  }
+
   private binElement() {
-    const toRemove = this.content.nativeElement.firstChild;
+    const toRemove = this.content().nativeElement.firstChild;
     if (!toRemove) {
       return null;
     }
-    const removedEle = this.content.nativeElement.removeChild(toRemove);
+    const removedEle = this.content().nativeElement.removeChild(toRemove);
     this.logLinesCount -= removedEle.getAttribute(this.countAttribute) || 1;
     return removedEle;
   }
@@ -393,7 +409,7 @@ export class LogViewerComponent implements OnInit, OnDestroy {
     }
 
     const baseMsg = 'Unable to connect to log stream.';
-    const actionMsg = this.connectionAttempts >= this.maxReconnectAttempts
+    const actionMsg = this.connectionAttempts >= this.maxReconnectAttempts()
       ? 'Maximum retry attempts reached. Please refresh the page to try again.'
       : 'The application will attempt to reconnect automatically.';
 
@@ -413,8 +429,7 @@ export class LogViewerComponent implements OnInit, OnDestroy {
   public resetConnectionState(): void {
     this.connectionAttempts = 0;
     this.lastConnectionError = null;
-    this.connectionErrorInfo$.next(null);
-    this.statusMessage$.next({ message: '' });
+    this.statusMessage.set({ message: '' });
     console.log('Connection state reset - ready for retry');
   }
 

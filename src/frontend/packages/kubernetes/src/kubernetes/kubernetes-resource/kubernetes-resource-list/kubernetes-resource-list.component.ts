@@ -1,6 +1,8 @@
 import { CommonModule } from '@angular/common';
 import {
   Component,
+  Signal,
+  computed,
   effect,
   Injector,
   OnDestroy,
@@ -10,9 +12,7 @@ import {
   signal,
 } from '@angular/core';
 import { ActivatedRoute, Router } from '@angular/router';
-import { toObservable } from '@angular/core/rxjs-interop';
-import { Observable, Subscription } from 'rxjs';
-import { map } from 'rxjs/operators';
+import { Subscription } from 'rxjs';
 
 import { PageSubNavComponent, SignalListComponent, SignalListConfig } from '@stratosui/core';
 import { entityCatalog } from '../../../../../store/src/public-api';
@@ -64,15 +64,12 @@ export class KubernetesResourceListComponent implements OnDestroy {
   public entityCatalogKey: string;
 
   // Only populated in the namespaced (non-workload) branch; the workload
-  // view leaves it unset. Template guards with @if (namespaces$).
-  public namespaces$?: Observable<string[]>;
-
-  // undefined represents the "All namespaces" (cluster-wide) selection.
-  selectedNamespace?: string;
+  // view leaves it unset. Template guards with @if (namespaces).
+  public namespaces?: Signal<string[]>;
 
   public isNamespacedView = true;
   public isWorkloadView = false;
-  public menuOpen = false;
+  public readonly menuOpen = signal(false);
 
   // Signal-native code path: when the entity type is registered with
   // KubernetesSignalConfigRegistry, the shell builds a SignalListConfig
@@ -80,8 +77,9 @@ export class KubernetesResourceListComponent implements OnDestroy {
   // generic-route hits), the constructor redirects to the cluster summary.
   public readonly signalListConfig: WritableSignal<SignalListConfig<unknown> | undefined> = signal(undefined);
   // Drives the signal-config dataSignal projection — namespace dropdown
-  // writes flow into here so factories that consume `selectedNamespace`
+  // writes flow into here so factories that consume the selected namespace
   // re-evaluate (cluster-wide vs namespaced fetch).
+  // undefined represents the "All namespaces" (cluster-wide) selection.
   private readonly _selectedNamespaceSignal: WritableSignal<string | undefined> = signal(undefined);
   public readonly selectedNamespaceSignal = this._selectedNamespaceSignal.asReadonly();
 
@@ -136,8 +134,8 @@ export class KubernetesResourceListComponent implements OnDestroy {
       // Namespaced
       this.kubeId = this.baseKubeGuid.guid;
       void this.namespaceData.refresh({ kubeGuid: this.kubeId });
-      this.namespaces$ = toObservable(this.namespaceData.namespacesForEndpoint(this.kubeId), { injector: this.injector })
-        .pipe(map(ns => ns.map(n => n.metadata.name)));
+      const namespaces = this.namespaceData.namespacesForEndpoint(this.kubeId);
+      this.namespaces = computed(() => namespaces().map(n => n.metadata.name));
 
       // Watch for namespace changes via the signal-native current-namespace
       // service. effect() runs whenever the per-endpoint selection signal
@@ -148,8 +146,7 @@ export class KubernetesResourceListComponent implements OnDestroy {
         if (!ns) {
           return;
         }
-        this.selectedNamespace = ns === '*' ? undefined : ns;
-        this._selectedNamespaceSignal.set(this.selectedNamespace);
+        this._selectedNamespaceSignal.set(ns === '*' ? undefined : ns);
       });
     }
 

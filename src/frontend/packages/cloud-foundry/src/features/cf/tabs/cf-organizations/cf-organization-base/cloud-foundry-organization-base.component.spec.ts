@@ -28,6 +28,8 @@ describe('CloudFoundryOrganizationBaseComponent', () => {
   const mockOrgService = {
     cfGuid: 'cf-guid',
     orgGuid: 'org-guid',
+    // The CF CLI menu reads the organization's name from here.
+    orgDataService: { org: signal({ name: 'test-org' }) },
     org$: of({
       entity: {
         entity: {
@@ -50,7 +52,7 @@ describe('CloudFoundryOrganizationBaseComponent', () => {
 
   const mockEndpointService = {
     cfGuid: 'cf-guid',
-    endpoint$: of({
+    endpoint: signal({
       entity: {
         guid: 'cf-guid',
         name: 'Test CF',
@@ -59,10 +61,10 @@ describe('CloudFoundryOrganizationBaseComponent', () => {
     })
   };
 
+  // An organization page's route names no space.
   const mockActiveRoute = {
     cfGuid: 'cf-guid',
     orgGuid: 'org-guid',
-    spaceGuid: 'space-guid'
   };
 
   // Minimal OrgDataService stand-in: only the methods the base component
@@ -70,7 +72,7 @@ describe('CloudFoundryOrganizationBaseComponent', () => {
   // so the test doesn't need to wire HttpClient against the native handler.
   const mockOrgDataService = {
     org: () => null,
-    isLoading: signal(false),
+    orgSettled: signal(false),
     load: () => of(undefined),
   };
 
@@ -127,5 +129,23 @@ describe('CloudFoundryOrganizationBaseComponent', () => {
 
   it('should create', () => {
     expect(component).toBeTruthy();
+  });
+
+  // The overlay covers the tabs until the org itself is in; the spaces list
+  // (enriched with per-space counts, slow on a large org) fills in behind it.
+  it('shows the loading overlay until the org settles', async () => {
+    const element: HTMLElement = fixture.nativeElement;
+    await fixture.whenStable();
+    expect(element.querySelector('[data-test="loading-page-indicator"]')).toBeTruthy();
+    mockOrgDataService.orgSettled.set(true);
+    await fixture.whenStable();
+    expect(element.querySelector('[data-test="loading-page-indicator"]')).toBeFalsy();
+    mockOrgDataService.orgSettled.set(false);
+  });
+
+  it('links back to the endpoint\'s organizations', () => {
+    expect(component.breadcrumbs()).toEqual([{
+      breadcrumbs: [{ value: 'Test CF', routerLink: '/cloud-foundry/cf-guid/organizations' }]
+    }]);
   });
 });

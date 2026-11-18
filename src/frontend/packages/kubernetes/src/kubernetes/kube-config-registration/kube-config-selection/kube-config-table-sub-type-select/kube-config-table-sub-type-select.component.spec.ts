@@ -32,11 +32,18 @@ describe('KubeConfigTableSubTypeSelectComponent', () => {
   beforeEach(() => {
     fixture = TestBed.createComponent(KubeConfigTableSubTypeSelectComponent);
     component = fixture.componentInstance;
-    component.row = {} as KubeConfigFileCluster;
+    fixture.componentRef.setInput('row', {} as KubeConfigFileCluster);
     fixture.detectChanges();
   });
 
   it('should create', () => {
     expect(component).toBeTruthy();
+  });
+
+  it('names its drop-down "Type"', async () => {
+    await fixture.whenStable();
+    const trigger = (fixture.nativeElement as HTMLElement).querySelector('[role="combobox"]');
+    expect(trigger).toBeTruthy();
+    expect(trigger!.getAttribute('aria-label')).toBe('Type');
   });
 });

@@ -64,13 +64,13 @@ export interface StratosTheme {
 // Light theme (default) — values must match :root in main.scss
 export const defaultTheme: StratosTheme = {
   colors: {
-    primary: '#3b82f6',
-    secondary: '#60a5fa',
-    accent: '#60a5fa',
+    primary: '#1e40af',
+    secondary: '#1e40af',
+    accent: '#1e40af',
     success: '#22c55e',
     warning: '#f59e0b',
     danger: '#ef4444',
-    info: '#3b82f6',
+    info: '#1e40af',
   },
   navigation: {
     background: '#1e293b',
@@ -85,7 +85,7 @@ export const defaultTheme: StratosTheme = {
     background: '#f8fafc',
     bodyBackground: '#f1f5f9',
     text: '#1e293b',
-    textMuted: '#64748b',
+    textMuted: '#475569',
     headerBackground: '#ffffff',
     headerText: '#1e293b',
     headerBorder: '#e2e8f0',
@@ -114,13 +114,13 @@ export const defaultTheme: StratosTheme = {
 // Dark theme
 export const darkTheme: StratosTheme = {
   colors: {
-    primary: '#3b82f6',
+    primary: '#93c5fd',
     secondary: '#06b6d4',
     accent: '#f59e0b',
     success: '#10b981',
     warning: '#f59e0b',
     danger: '#ef4444',
-    info: '#3b82f6',
+    info: '#93c5fd',
   },
   navigation: {
     background: '#1e293b',
@@ -135,7 +135,7 @@ export const darkTheme: StratosTheme = {
     background: '#0f172a',
     bodyBackground: '#0f172a',
     text: '#f1f5f9',
-    textMuted: '#94a3b8',
+    textMuted: '#cbd5e1',
     headerBackground: '#1e293b',
     headerText: '#f1f5f9',
     headerBorder: '#334155',

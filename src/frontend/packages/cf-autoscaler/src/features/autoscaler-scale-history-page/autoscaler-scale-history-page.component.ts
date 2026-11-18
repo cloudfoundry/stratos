@@ -1,10 +1,9 @@
-import { ChangeDetectionStrategy, ChangeDetectorRef, Component, OnInit, WritableSignal, computed, inject, signal } from '@angular/core';
+import { ChangeDetectionStrategy, Component, OnInit, WritableSignal, computed, inject, signal } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { RouterModule } from '@angular/router';
-import { Observable } from 'rxjs';
-import { map, publishReplay, refCount } from 'rxjs/operators';
 
 import { ApplicationService } from '@stratosui/cloud-foundry';
+import { AppDetailDataService } from '../../../../cloud-foundry/src/features/applications/app-detail-data.service';
 import { CustomIconComponent, PageHeaderModule, SignalListComponent, SignalListConfig, SignalListPillColor } from '@stratosui/core';
 
 import {
@@ -27,11 +26,11 @@ import { AppAutoscalerEvent } from '../../store/app-autoscaler.types';
 })
 export class AutoscalerScaleHistoryPageComponent implements OnInit {
   applicationService = inject(ApplicationService);
-  private cdr = inject(ChangeDetectorRef);
+  private detail = inject(AppDetailDataService);
   private eventsConfig = inject(CfAppAutoscalerEventsSignalConfigService);
 
   parentUrl: string;
-  applicationName$!: Observable<string | null>;
+  readonly applicationName = computed(() => this.detail.app()?.entity?.name ?? null);
 
   public listConfig: WritableSignal<SignalListConfig<AppAutoscalerEvent> | undefined> = signal(undefined);
 
@@ -100,13 +99,7 @@ export class AutoscalerScaleHistoryPageComponent implements OnInit {
   }
 
   ngOnInit() {
-    this.applicationName$ = this.applicationService.app$.pipe(
-      map(({ entity }) => entity ? entity.entity.name : null),
-      publishReplay(1),
-      refCount()
-    );
     void this.eventsConfig.loadAll();
-    this.cdr.markForCheck();
   }
 
   // Autoscaler timestamps are nanoseconds since the unix epoch — divide

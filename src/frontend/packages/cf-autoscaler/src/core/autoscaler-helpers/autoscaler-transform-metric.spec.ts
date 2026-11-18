@@ -173,6 +173,7 @@ describe('Autoscaler Transform Metric Helper', () => {
           {
             name: 'throughput',
             value: 14,
+            time: 1557026857,
           }
         ],
         colorTarget: [

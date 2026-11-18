@@ -1,11 +1,12 @@
 import { HttpClient } from '@angular/common/http';
 import { signal, Signal } from '@angular/core';
-import { EMPTY, Observable, of, ReplaySubject } from 'rxjs';
+import { EMPTY, Observable, of } from 'rxjs';
 import { catchError, finalize, map, shareReplay, tap, timeout } from 'rxjs/operators';
 
 import { ICfV2Info } from '../../cf-api.types';
 import { StratosDiagnostics } from '../diagnostics/stratos-diagnostics.service';
 import { StError } from './stratos-types';
+import { extractHttpErrorMessage } from '@stratosui/store';
 
 // V3-native CF info data source. Hits /pp/v1/cf/info/:cnsiGuid (handled by
 // getNativeCFInfo in native_info.go) which projects /v3/info + the root
@@ -25,8 +26,6 @@ export class CfInfoDataService {
   readonly isLoading: Signal<boolean> = this._isLoading.asReadonly();
   readonly errors: Signal<StError[]> = this._errors.asReadonly();
   readonly lastFetched: Signal<Date | null> = this._lastFetched.asReadonly();
-
-  readonly loaded$ = new ReplaySubject<void>(1);
 
   private _inFlightLoad: Observable<void> | null = null;
 
@@ -68,7 +67,6 @@ export class CfInfoDataService {
       finalize(() => {
         this._isLoading.set(false);
         this._lastFetched.set(new Date());
-        this.loaded$.next();
         this._inFlightLoad = null;
       }),
       shareReplay({ bufferSize: 1, refCount: false }),
@@ -80,7 +78,7 @@ export class CfInfoDataService {
     this._errors.update(errors => [...errors, {
       resource,
       severity: 'error' as const,
-      message: err instanceof Error ? err.message : String(err),
+      message: extractHttpErrorMessage(err),
       recoverable: true,
       detail: err,
     }]);

@@ -1,9 +1,10 @@
 import { CommonModule } from '@angular/common';
-import { Component, Input, ChangeDetectionStrategy, booleanAttribute, inject } from '@angular/core';
+import { Component, ChangeDetectionStrategy, booleanAttribute, computed, inject, input, untracked } from '@angular/core';
 import { Router } from '@angular/router';
 
 import {
   CardCell,
+  CustomTooltipDirective,
   EndpointsSignalService,
   MetaCardComponent,
   MetaCardItemComponent,
@@ -13,7 +14,6 @@ import {
   MultilineTitleComponent
 } from '@stratosui/core';
 
-import { CfCurrentUserRolesSignalService } from '../../../../user-permissions/cf-current-user-roles-signal.service';
 import { StServiceOffering } from '../../../../services/endpoint-data/stratos-types';
 import { CfOrgSpaceLabelService } from '../../../services/cf-org-space-label.service';
 import { ServiceIconComponent } from '../../service-icon/service-icon.component';
@@ -35,6 +35,7 @@ import { TableCellServiceTagsComponent } from './table-cell-service-tags/table-c
   changeDetection: ChangeDetectionStrategy.OnPush,
   imports: [
     CommonModule,
+    CustomTooltipDirective,
     MetaCardComponent,
     MetaCardItemComponent,
     MetaCardKeyComponent,
@@ -53,13 +54,25 @@ import { TableCellServiceTagsComponent } from './table-cell-service-tags/table-c
 export class CfServiceCardComponent extends CardCell<StServiceOffering> {
   private endpoints = inject(EndpointsSignalService);
   private router = inject(Router);
-  private cfRoles = inject(CfCurrentUserRolesSignalService);
 
-  offering!: StServiceOffering;
-  cfOrgSpace!: CfOrgSpaceLabelService;
-  // Cached lookup of providerDisplayName from brokerCatalogMetadata. The
+  // The row under the name the template and the methods below use. It can be
+  // absent: select-service binds its selection before one is made.
+  get offering(): StServiceOffering {
+    return this.row();
+  }
+  // One label service per endpoint; built untracked so that it depends on
+  // the row's endpoint alone.
+  private readonly cnsiGuid = computed(() => this.row()?.cnsiGuid);
+  readonly cfOrgSpace = computed(() => {
+    const cnsiGuid = this.cnsiGuid();
+    return untracked(() => new CfOrgSpaceLabelService(this.endpoints, cnsiGuid));
+  });
+  // Lookup of providerDisplayName from brokerCatalogMetadata. The
   // legacy code JSON-parsed entity.extra; the backend now decodes it.
-  providerDisplayName: string | null = null;
+  readonly providerDisplayName = computed<string | null>(() => {
+    const provider = this.row()?.brokerCatalogMetadata?.providerDisplayName;
+    return typeof provider === 'string' ? provider : null;
+  });
   brokerNameConfig: TableCellServiceBrokerComponentConfig = {
     mode: TableCellServiceBrokerComponentMode.NAME
   };
@@ -68,22 +81,7 @@ export class CfServiceCardComponent extends CardCell<StServiceOffering> {
   };
 
   // Attribute form (disableCardClick / disableCardClick="true") coerces to boolean
-  @Input({ transform: booleanAttribute }) disableCardClick = false;
-
-  @Input()
-  set row(row: StServiceOffering) {
-    super.row = row;
-    if (row) {
-      this.offering = row;
-      const meta = row.brokerCatalogMetadata;
-      const provider = meta?.providerDisplayName;
-      this.providerDisplayName = typeof provider === 'string' ? provider : null;
-
-      if (!this.cfOrgSpace) {
-        this.cfOrgSpace = new CfOrgSpaceLabelService(this.endpoints, this.cfRoles, row.cnsiGuid);
-      }
-    }
-  }
+  readonly disableCardClick = input(false, { transform: booleanAttribute });
 
   getDisplayName(): string {
     if (!this.offering) return '';

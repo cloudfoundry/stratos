@@ -39,16 +39,16 @@ describe('RunningInstancesComponent', () => {
     component = fixture.componentInstance;
 
     // Mock the required inputs before detectChanges
-    component.instances = 3;
-    component.cfGuid = 'test-cf-guid';
-    component.appGuid = 'test-app-guid';
+    fixture.componentRef.setInput('instances', 3);
+    fixture.componentRef.setInput('cfGuid', 'test-cf-guid');
+    fixture.componentRef.setInput('appGuid', 'test-app-guid');
 
     // Mock the pagination monitor to avoid the error
     vi.spyOn(component, 'ngOnInit').mockImplementation(() => {
       // Do nothing - just prevent the actual initialization
     });
 
-    fixture.detectChanges();
+    await fixture.whenStable();
   });
 
   it('should create', () => {

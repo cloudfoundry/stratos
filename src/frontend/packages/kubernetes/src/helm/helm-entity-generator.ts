@@ -1,7 +1,6 @@
-import { EnvironmentInjector, Injector, inject, runInInjectionContext } from '@angular/core';
-import { toObservable } from '@angular/core/rxjs-interop';
-import { Observable, of } from 'rxjs';
-import { filter, map } from 'rxjs/operators';
+import { EnvironmentInjector, Injector, Signal, computed, inject, runInInjectionContext } from '@angular/core';
+import { of } from 'rxjs';
+import { map } from 'rxjs/operators';
 
 import { KubeHelmDataService } from '../services/endpoint-data/kube-helm-data.service';
 
@@ -77,17 +76,19 @@ export function generateHelmEntities(): StratosBaseCatalogEntity[] {
         logoUrl: '/kubernetes/assets/custom/helm.svg',
         renderPriority: helmRepoRenderPriority + 1,
         registrationComponent: HelmHubRegistrationComponent,
-        registeredLimit: (injector: Injector): Observable<number> => {
+        registeredLimit: (injector: Injector): Signal<number | null> | number => {
           // session-data reads route through AuthDataService (signal-native
           // facade) resolved off the framework-passed injector.
           const authData = injector?.get(AuthDataService, null);
           if (!authData) {
-            return of(1);
+            return 1;
           }
-          return toObservable(authData.sessionData, { injector }).pipe(
-            filter(sessionData => !!sessionData?.['plugin-config']),
-            map(sessionData => sessionData?.['plugin-config']?.artifactHubDisabled === 'true' ? 0 : 1),
-          );
+          const sessionData = authData.sessionData;
+          // Null until the session's plugin config is known
+          return computed(() => {
+            const pluginConfig = sessionData()?.['plugin-config'];
+            return pluginConfig ? (pluginConfig.artifactHubDisabled === 'true' ? 0 : 1) : null;
+          });
         }
       },
     ] };

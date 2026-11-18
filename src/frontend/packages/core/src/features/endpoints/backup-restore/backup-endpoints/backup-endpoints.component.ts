@@ -1,15 +1,15 @@
 import { CommonModule } from '@angular/common';
-import { ChangeDetectionStrategy, Component, OnDestroy, Injector, Signal, WritableSignal, computed, inject, signal } from '@angular/core';
+import { ChangeDetectionStrategy, Component, OnDestroy, Signal, WritableSignal, computed, effect, inject, signal, untracked } from '@angular/core';
 import { Router } from '@angular/router';
 import { ReactiveFormsModule, Validators, FormControl, FormGroup, ValidatorFn, AbstractControl, ValidationErrors } from '@angular/forms';
 import { format } from 'date-fns';
 import { httpErrorResponseToSafeString, entityCatalog, EndpointModel, EndpointsDataService } from '@stratosui/store';
 import { Observable, Subscription } from 'rxjs';
-import { take, defaultIfEmpty, filter, map } from 'rxjs/operators';
-import { toObservable, toSignal } from '@angular/core/rxjs-interop';
+import { take, defaultIfEmpty, map } from 'rxjs/operators';
+import { toSignal } from '@angular/core/rxjs-interop';
 
 import { safeUnsubscribe } from '../../../../core/utils.service';
-import { naturalCompare } from '../../../../shared/utils/natural-sort';
+import { endpointNameCompare } from '../../../../shared/utils/natural-sort';
 import { ConfirmationDialogConfig } from '../../../../shared/components/confirmation-dialog.config';
 import { ConfirmationDialogService } from '../../../../shared/components/confirmation-dialog.service';
 import {
@@ -59,7 +59,6 @@ export class BackupEndpointsComponent implements OnDestroy {
   service = inject(BackupEndpointsService);
   private confirmDialog = inject(ConfirmationDialogService);
   private endpointsData = inject(EndpointsDataService);
-  private injector = inject(Injector);
   private router = inject(Router);
 
 
@@ -84,12 +83,13 @@ export class BackupEndpointsComponent implements OnDestroy {
   private readonly endpoints: Signal<EndpointModel[]> = computed(() => {
     this.refreshTick();
     const list = this.endpointsData.endpointsList();
-    return list ? [...list].sort((a, b) => naturalCompare(a.name, b.name)) : [];
+    if (!list) {
+      return [];
+    }
+    const compare = endpointNameCompare(list.map(ep => ep.name));
+    return [...list].sort((a, b) => compare(a.name, b.name));
   });
-  private readonly loading: Signal<boolean> = toSignal(
-    toObservable(this.endpointsData.loading, { injector: this.injector }),
-    { initialValue: false },
-  );
+  private readonly loading: Signal<boolean> = this.endpointsData.loading;
 
   private readonly pagedItems: Signal<EndpointModel[]> = computed(() => {
     const size = this.pageSize();
@@ -109,10 +109,6 @@ export class BackupEndpointsComponent implements OnDestroy {
   });
 
   listConfig!: SignalListConfig<EndpointModel>;
-
-  disableSelectAll$!: Observable<boolean>;
-  disableSelectNone$!: Observable<boolean>;
-  selectValid$!: Observable<boolean>;
 
   // Step 2
   passwordValid$!: Observable<boolean>;
@@ -137,16 +133,16 @@ export class BackupEndpointsComponent implements OnDestroy {
   }
 
   setupSelectStep() {
-    // W36-B Wave 3: source endpoints from EndpointsDataService signal
-    // bridge instead of the legacy ngrx PaginationService. The
-    // service's `endpointsList` signal is populated via /pp/v1/info,
-    // same data; loading state comes from `loading()`.
-    const endpoints$ = toObservable(this.endpointsData.endpointsList, { injector: this.injector }).pipe(
-      filter(entities => !!entities),
-      map(endpoints => [...endpoints].sort((a, b) => naturalCompare(a.name, b.name)))
-    );
-
-    endpoints$.pipe(take(1), defaultIfEmpty([] as EndpointModel[])).subscribe(entities => this.service.initialize(entities));
+    // The selections start from the endpoint list as it is once loaded.
+    // Later list updates (health checks) leave the user's choices alone.
+    let initialised = false;
+    effect(() => {
+      if (initialised || !this.endpointsData.hydrated()) {
+        return;
+      }
+      initialised = true;
+      untracked(() => this.service.initialize(this.endpoints()));
+    });
 
     this.listConfig = {
       pagedItems: this.pagedItems,
@@ -162,13 +158,6 @@ export class BackupEndpointsComponent implements OnDestroy {
       getRowKey: (row: EndpointModel) => row.guid!,
       columns: this.buildColumns(),
     };
-
-    this.disableSelectAll$ = toObservable(this.service.allChanged, { injector: this.injector });
-    this.disableSelectNone$ = toObservable(this.service.hasChanges, { injector: this.injector }).pipe(
-      map(hasChanges => !hasChanges)
-    );
-
-    this.selectValid$ = toObservable(this.service.hasChanges, { injector: this.injector });
 
     this.selectStepHandle = {
       valid: this.service.hasChanges,
@@ -251,7 +240,7 @@ export class BackupEndpointsComponent implements OnDestroy {
       const userCancelledDialog = () => {
         // Match legacy behavior: cancel returned `success: false` with no
         // message, leaving the user on the password step. Reject with an
-        // empty message so the stepper snackbar stays quiet.
+        // empty message so the stepper shows no error.
         reject(new Error(''));
       };
 
@@ -274,10 +263,10 @@ export class BackupEndpointsComponent implements OnDestroy {
         reject(new Error(`Failed to create backup` + (errorMessage ? `: ${errorMessage}` : '')));
       };
 
-      const createBackup = () => this.service.createBackup().pipe(take(1), defaultIfEmpty(null)).subscribe(
-        res => res !== null ? backupSuccess(res) : backupFailure('Backup service returned no response'),
-        backupFailure
-      );
+      const createBackup = () => this.service.createBackup().pipe(take(1), defaultIfEmpty(null)).subscribe({
+        next: res => res !== null ? backupSuccess(res) : backupFailure('Backup service returned no response'),
+        error: backupFailure
+      });
 
       if (this.service.hasConnectionDetails()) {
         this.confirmDialog.openWithCancel(confirmation, createBackup, userCancelledDialog);

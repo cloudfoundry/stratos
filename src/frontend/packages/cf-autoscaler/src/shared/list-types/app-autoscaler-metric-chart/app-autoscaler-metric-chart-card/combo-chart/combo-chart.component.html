@@ -2,8 +2,8 @@
   [data]="comboChartData"
   [options]="comboChartOptions"
   [type]="'bar'"
-  [width]="width"
-  [height]="height"
+  [width]="width()"
+  [height]="height()"
   (chartClick)="onChartClick($event.event, $event.active)"
   (chartHover)="onChartHover($event.event, $event.active)">
 </canvas>

@@ -79,12 +79,12 @@
     &-indicator-content {
       &--active {
         background-color: var(--color-primary);
-        color: oklch(100% 0 none);
+        color: var(--color-on-primary);
       }
 
       &--complete {
         background-color: var(--color-success);
-        color: oklch(100% 0 none);
+        color: var(--color-on-success);
       }
 
       &--inactive {

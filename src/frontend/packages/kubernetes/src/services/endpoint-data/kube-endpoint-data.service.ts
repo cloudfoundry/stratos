@@ -1,9 +1,11 @@
 import { HttpClient, HttpErrorResponse, HttpHeaders } from '@angular/common/http';
-import { Signal, signal } from '@angular/core';
-import { firstValueFrom, Observable, of, ReplaySubject } from 'rxjs';
-import { catchError, finalize, map, tap } from 'rxjs/operators';
+import { Signal, computed, signal } from '@angular/core';
+import { defer, firstValueFrom, Observable, of } from 'rxjs';
+import { catchError, finalize, map, shareReplay, tap } from 'rxjs/operators';
 
 import { KubeListResponse, KUBE_LIST_DEFAULT_LIMIT } from './kube-paged-response';
+import { KubeLoadTracker } from './kube-load-tracker';
+import { KubeProxyResponse, kubeProxyResult } from './kube-proxy-response';
 import {
   KubeEndpointData,
   KubeNamespace,
@@ -23,6 +25,9 @@ import {
 //     segment. (Original design doc had `/proxy/${kubeGuid}/...` — the
 //     existing kubernetes effects show the actual contract is header-
 //     based; honoring that contract here.)
+//   - The proxy reports a failed sub-fetch as the endpoint's error
+//     entry in a 200 response (kubeProxyResult throws it), so it is
+//     handled like an HTTP error.
 //   - 403 / 404 / network errors on individual sub-fetches push a
 //     StratosError onto the `_errors` signal AND tag the affected
 //     field name in `_unavailable` so consumers can render "Not
@@ -40,6 +45,7 @@ export class KubeEndpointDataService {
   private readonly _errors = signal<StratosError[]>([]);
   private readonly _unavailable = signal<string[]>([]);
   private readonly _lastFetched = signal<Date | null>(null);
+  private readonly loads = new KubeLoadTracker();
 
   readonly kubeVersion: Signal<string | null> = this._kubeVersion.asReadonly();
   readonly nodeCount: Signal<number> = this._nodeCount.asReadonly();
@@ -49,10 +55,11 @@ export class KubeEndpointDataService {
   readonly errors: Signal<StratosError[]> = this._errors.asReadonly();
   readonly unavailable: Signal<string[]> = this._unavailable.asReadonly();
   readonly lastFetched: Signal<Date | null> = this._lastFetched.asReadonly();
+  // The namespace list is loading (load() or refresh('namespaces')).
+  readonly namespacesLoading: Signal<boolean> = computed(() => this.loads.isLoading('namespaces'));
 
-  // ReplaySubject(1) — late subscribers get the last emission so they
-  // don't hang on a stream that already completed before they wired up.
-  readonly loaded$ = new ReplaySubject<void>(1);
+  // The load in progress. A load() made while one runs joins it.
+  private inFlight?: Observable<void>;
 
   // `clusterName` is just the kubeGuid for now — k8s has no global
   // "cluster name" field on /version, so the human-friendly endpoint
@@ -74,13 +81,8 @@ export class KubeEndpointDataService {
   // namespace list. Each leg is independently catchable so a 403 on
   // /version doesn't kill the namespace fetch.
   load(): Observable<void> {
-    if (this._isLoading()) {
-      // Already loading — return the in-flight loaded$ stream so the
-      // caller resolves on the same completion.
-      return new Observable<void>(sub => {
-        const inner = this.loaded$.subscribe(() => { sub.next(); sub.complete(); });
-        return () => inner.unsubscribe();
-      });
+    if (this.inFlight) {
+      return this.inFlight;
     }
     this._isLoading.set(true);
     this._errors.set([]);
@@ -88,12 +90,12 @@ export class KubeEndpointDataService {
 
     const headers = new HttpHeaders({ 'x-cap-cnsi-list': this.kubeGuid });
 
-    const versionReq = this.http.get<{ [cnsi: string]: KubeVersionInfo }>(
+    const versionReq = this.http.get<KubeProxyResponse<KubeVersionInfo>>(
       '/pp/v1/proxy/version',
       { headers },
     ).pipe(
-      tap(resp => {
-        const info = resp?.[this.kubeGuid];
+      kubeProxyResult<KubeVersionInfo>(this.kubeGuid),
+      tap(info => {
         const v = info?.gitVersion ?? this.composeVersion(info);
         this._kubeVersion.set(v || null);
       }),
@@ -104,12 +106,15 @@ export class KubeEndpointDataService {
       map(() => undefined as void),
     );
 
-    const namespacesReq = this.http.get<{ [cnsi: string]: KubeListResponse<KubeNamespace> }>(
-      `/pp/v1/proxy/api/v1/namespaces?limit=${KUBE_LIST_DEFAULT_LIMIT}`,
-      { headers },
-    ).pipe(
-      tap(resp => {
-        const list = resp?.[this.kubeGuid];
+    const namespacesReq = defer(() => {
+      const loaded = this.loads.start('namespaces');
+      return this.http.get<KubeProxyResponse<KubeListResponse<KubeNamespace>>>(
+        `/pp/v1/proxy/api/v1/namespaces?limit=${KUBE_LIST_DEFAULT_LIMIT}`,
+        { headers },
+      ).pipe(finalize(loaded));
+    }).pipe(
+      kubeProxyResult<KubeListResponse<KubeNamespace>>(this.kubeGuid),
+      tap(list => {
         const items = (list?.items ?? []).map(ns => ({
           ...ns,
           kubeGuid: this.kubeGuid,
@@ -125,12 +130,12 @@ export class KubeEndpointDataService {
       map(() => undefined as void),
     );
 
-    const nodesReq = this.http.get<{ [cnsi: string]: KubeListResponse<unknown> }>(
+    const nodesReq = this.http.get<KubeProxyResponse<KubeListResponse<unknown>>>(
       `/pp/v1/proxy/api/v1/nodes?limit=${KUBE_LIST_DEFAULT_LIMIT}`,
       { headers },
     ).pipe(
-      tap(resp => {
-        const list = resp?.[this.kubeGuid];
+      kubeProxyResult<KubeListResponse<unknown>>(this.kubeGuid),
+      tap(list => {
         this._nodeCount.set(list?.items?.length ?? 0);
       }),
       catchError((err: HttpErrorResponse | unknown) => {
@@ -150,11 +155,11 @@ export class KubeEndpointDataService {
       firstValueFrom(nodesReq),
     ]);
 
-    return new Observable<void>(sub => {
+    const done = new Observable<void>(sub => {
       all.then(() => {
         this._isLoading.set(false);
         this._lastFetched.set(new Date());
-        this.loaded$.next();
+        this.inFlight = undefined;
         sub.next();
         sub.complete();
       }).catch((err) => {
@@ -169,11 +174,13 @@ export class KubeEndpointDataService {
         });
         this._isLoading.set(false);
         this._lastFetched.set(new Date());
-        this.loaded$.next();
+        this.inFlight = undefined;
         sub.next();
         sub.complete();
       });
-    }).pipe(finalize(() => undefined));
+    }).pipe(shareReplay({ bufferSize: 1, refCount: false }));
+    this.inFlight = done;
+    return done;
   }
 
   // refresh() re-runs load() (or a scoped subset). For wave-1 we only
@@ -183,11 +190,10 @@ export class KubeEndpointDataService {
     if (scope === 'version') {
       const headers = new HttpHeaders({ 'x-cap-cnsi-list': this.kubeGuid });
       try {
-        const resp = await firstValueFrom(this.http.get<{ [cnsi: string]: KubeVersionInfo }>(
+        const info = await firstValueFrom(this.http.get<KubeProxyResponse<KubeVersionInfo>>(
           '/pp/v1/proxy/version',
           { headers },
-        ));
-        const info = resp?.[this.kubeGuid];
+        ).pipe(kubeProxyResult<KubeVersionInfo>(this.kubeGuid)));
         this._kubeVersion.set(info?.gitVersion ?? this.composeVersion(info) ?? null);
         this.clearUnavailable('kubeVersion');
       } catch (err) {
@@ -197,12 +203,12 @@ export class KubeEndpointDataService {
     }
     if (scope === 'namespaces') {
       const headers = new HttpHeaders({ 'x-cap-cnsi-list': this.kubeGuid });
+      const loaded = this.loads.start('namespaces');
       try {
-        const resp = await firstValueFrom(this.http.get<{ [cnsi: string]: KubeListResponse<KubeNamespace> }>(
+        const list = await firstValueFrom(this.http.get<KubeProxyResponse<KubeListResponse<KubeNamespace>>>(
           `/pp/v1/proxy/api/v1/namespaces?limit=${KUBE_LIST_DEFAULT_LIMIT}`,
           { headers },
-        ));
-        const list = resp?.[this.kubeGuid];
+        ).pipe(kubeProxyResult<KubeListResponse<KubeNamespace>>(this.kubeGuid)));
         const items = (list?.items ?? []).map(ns => ({
           ...ns,
           kubeGuid: this.kubeGuid,
@@ -212,6 +218,8 @@ export class KubeEndpointDataService {
         this.clearUnavailable('namespaces');
       } catch (err) {
         this.markUnavailable('namespaces', err, 'kube-namespaces');
+      } finally {
+        loaded();
       }
       return;
     }
@@ -219,6 +227,12 @@ export class KubeEndpointDataService {
     // circuit, then re-run.
     this.invalidate();
     await firstValueFrom(this.load());
+  }
+
+  // The node count from a node-list load made elsewhere
+  // (KubeNodeDataService), so the cluster summary matches that list.
+  syncNodeCount(count: number): void {
+    this._nodeCount.set(count);
   }
 
   invalidate(): void {
@@ -243,7 +257,7 @@ export class KubeEndpointDataService {
   }
 
   private addError(err: StratosError): void {
-    this._errors.update(curr => [...curr, err].slice(0, 50));
+    this._errors.update(curr => [...curr, err].slice(-50));
   }
 
   private markUnavailable(field: string, err: unknown, title: string): void {
@@ -254,6 +268,7 @@ export class KubeEndpointDataService {
     this.addError({
       scope: 'envelope',
       code,
+      status,
       title,
       detail: (err as Error)?.message ?? String(err),
       affected: [field],

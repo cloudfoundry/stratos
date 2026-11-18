@@ -1,6 +1,9 @@
+import { readFileSync } from 'fs';
+import { join } from 'path';
+import { HttpErrorResponse } from '@angular/common/http';
 import { describe, it, expect } from 'vitest';
 import {
-  isEqual, buildLegendData, shiftArray,
+  AutoscalerConstants, autoscalerErrorMessage, isEqual, buildLegendData, shiftArray,
 } from './autoscaler-util';
 
 describe('Autoscaler Util Helper', () => {
@@ -70,5 +73,44 @@ describe('Autoscaler Util Helper', () => {
   it('shiftArray', () => {
     expect(shiftArray([0, 2, 3], 1)).toEqual([1, 3, 4]);
     expect(shiftArray([1, 6, 9], -1)).toEqual([0, 5, 8]);
+  });
+  // The built-in metrics of autoscaler 14.x and 15.x, with the threshold
+  // limits it enforces by default.
+  it('knows every built-in metric and its threshold limit', () => {
+    expect(AutoscalerConstants.MetricTypes).toEqual(
+      expect.arrayContaining(['memoryused', 'memoryutil', 'responsetime', 'throughput', 'cpu', 'cpuutil', 'disk', 'diskutil']));
+    expect(AutoscalerConstants.getMetricThresholdMax('cpuutil')).toBe(100);
+    expect(AutoscalerConstants.getMetricThresholdMax('diskutil')).toBe(100);
+    expect(AutoscalerConstants.getMetricThresholdMax('disk')).toBe(2048);
+    expect(AutoscalerConstants.getMetricThresholdMax('memoryused')).toBeUndefined();
+    expect(AutoscalerConstants.getMetricUnit('disk')).toBe('MB');
+  });
+  it('autoscalerErrorMessage', () => {
+    const refusal = new HttpErrorResponse({ status: 403, error: { error: 'The application is not bound to Auto-Scaling service' } });
+    expect(autoscalerErrorMessage(refusal)).toBe('The application is not bound to Auto-Scaling service');
+    // A body that is plain text is the reason, not the request's own message.
+    const other = new HttpErrorResponse({ status: 500, error: 'boom', url: '/x' });
+    expect(autoscalerErrorMessage(other)).toBe('boom');
+  });
+  // The other shapes the autoscaler (14.x and 15.x) answers with.
+  it('autoscalerErrorMessage reads every autoscaler error shape', () => {
+    const coded = new HttpErrorResponse({ status: 404, error: { code: 'Not Found', message: 'Policy Not Found' } });
+    expect(autoscalerErrorMessage(coded)).toBe('Policy Not Found');
+    const decode = new HttpErrorResponse({ status: 400, error: { error_message: 'decode params: query: "order": invalid value' } });
+    expect(autoscalerErrorMessage(decode)).toBe('decode params: query: "order": invalid value');
+    const invalidPolicy = new HttpErrorResponse({
+      status: 400, error: [
+        { context: '(root).scaling_rules.0.breach_duration_secs', description: 'Must be greater than or equal to 60' },
+        { context: '(root)', description: 'instance_min_count is required' },
+      ]
+    });
+    expect(autoscalerErrorMessage(invalidPolicy)).toBe(
+      'scaling_rules.0.breach_duration_secs: Must be greater than or equal to 60; instance_min_count is required');
+  });
+  // A proxy in front of the autoscaler answers with its own HTML page.
+  it('autoscalerErrorMessage reads an error page as its message', () => {
+    const page = readFileSync(join(import.meta.dirname, '../../../../store/src/testdata/upstream-errors/nginx-502.body'), 'utf8');
+    const proxied = new HttpErrorResponse({ status: 502, statusText: 'Bad Gateway', error: page, url: '/x' });
+    expect(autoscalerErrorMessage(proxied)).toBe('502 Bad Gateway\nnginx/1.28.0');
   });
 });

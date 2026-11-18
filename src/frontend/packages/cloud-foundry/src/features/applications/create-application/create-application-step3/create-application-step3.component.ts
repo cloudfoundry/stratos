@@ -1,12 +1,14 @@
-import { Component, OnDestroy, OnInit, inject, ChangeDetectionStrategy } from '@angular/core';
+import { Component, OnDestroy, OnInit, inject, ChangeDetectionStrategy, computed } from '@angular/core';
+import { toObservable } from '@angular/core/rxjs-interop';
 import { CommonModule } from '@angular/common';
-import { HttpClient, HttpErrorResponse } from '@angular/common/http';
+import { HttpClient } from '@angular/common/http';
 import { AbstractControl, ReactiveFormsModule, FormControl, FormGroup, Validators } from '@angular/forms';
 import { ActivatedRoute, Router } from '@angular/router';
-import { from, Observable, of as observableOf, throwError } from 'rxjs';
-import { catchError, filter, map, mergeMap, switchMap } from 'rxjs/operators';
+import { firstValueFrom, from, Observable, of as observableOf, throwError } from 'rxjs';
+import { catchError, filter, map, switchMap } from 'rxjs/operators';
 
-import { AppErrorComponent, AppInputDirective, CustomFormFieldComponent, CustomSelectComponent, CustomOptionComponent, ErrorStateMatcher, ShowOnDirtyErrorStateMatcher, StepOnNextFunction } from '@stratosui/core';
+import { AppErrorComponent, AppInputDirective, CustomFormFieldComponent, CustomSelectComponent, CustomOptionComponent, ErrorStateMatcher, ShowOnDirtyErrorStateMatcher, StepOnNextResult } from '@stratosui/core';
+import { extractHttpErrorMessage } from '@stratosui/store';
 import { CnsiAppsSource } from '../../../../services/data-sources/cnsi-apps-source';
 import { CnsiRoutesSource } from '../../../../services/data-sources/cnsi-routes-source';
 import { EndpointDataRegistry } from '../../../../services/endpoint-data/endpoint-data.registry';
@@ -39,6 +41,12 @@ interface DomainHostForm {
 })
 export class CreateApplicationStep3Component implements OnInit, OnDestroy {
   private createAppState = inject(CreateAppStateService);
+  // The wizard's selection and app name as one value; the domains
+  // pipeline below composes it with an HTTP request.
+  private readonly appState$ = toObservable(computed(() => ({
+    cloudFoundryDetails: this.createAppState.cloudFoundryDetails(),
+    name: this.createAppState.name(),
+  })));
   private router = inject(Router);
   private route = inject(ActivatedRoute);
   private http = inject(HttpClient);
@@ -65,10 +73,10 @@ export class CreateApplicationStep3Component implements OnInit, OnDestroy {
   message: any = null;
 
   newAppData!: { cloudFoundryDetails: NewAppCFDetails; name: string };
-  onNext: StepOnNextFunction = () => {
+  async onNext(): Promise<StepOnNextResult> {
     const { cloudFoundryDetails } = this.newAppData;
     const { cloudFoundry } = cloudFoundryDetails;
-    return this.createApp().pipe(
+    const created$ = this.createApp().pipe(
       switchMap(appGuid => this.createRoute().pipe(
         map(routeGuid => ({ appGuid, routeGuid })),
       )),
@@ -88,12 +96,13 @@ export class CreateApplicationStep3Component implements OnInit, OnDestroy {
         );
         return { success: true };
       }),
-      catchError((err: Error | HttpErrorResponse) => {
-        const message = err instanceof HttpErrorResponse ? this.formatHttpError(err) : err.message;
-        return observableOf({ success: false, message });
-      }),
     );
-  };
+    try {
+      return await firstValueFrom(created$);
+    } catch (err: unknown) {
+      return { success: false, message: extractHttpErrorMessage(err) };
+    }
+  }
 
   validate(): boolean {
     return this.setDomainHost.valid;
@@ -155,26 +164,19 @@ export class CreateApplicationStep3Component implements OnInit, OnDestroy {
   }
 
   // Wraps an HTTP observable so failures bubble out as Error(prefix: detail)
-  // — the stepper surfaces .message in the snackbar.
+  // — the stepper shows .message above its buttons.
   private tagError<T>(prefix: string): (src: Observable<T>) => Observable<T> {
     return src => src.pipe(
-      catchError((err: HttpErrorResponse) => throwError(() => new Error(
-        `${prefix}: ${this.formatHttpError(err)}`,
+      catchError((err: unknown) => throwError(() => new Error(
+        `${prefix}: ${extractHttpErrorMessage(err)}`,
       ))),
     );
   }
 
-  private formatHttpError(err: HttpErrorResponse): string {
-    const body = err.error;
-    if (body && typeof body === 'object' && typeof body.error === 'string') return body.error;
-    if (typeof body === 'string') return body;
-    return err.message || `HTTP ${err.status}`;
-  }
-
   ngOnInit() {
-    this.domains$ = this.createAppState.state$.pipe(
+    this.domains$ = this.appState$.pipe(
       filter(state => !!state.cloudFoundryDetails?.cloudFoundry && !!state.cloudFoundryDetails?.org),
-      mergeMap(state => {
+      switchMap(state => {
         this.hostControl().setValue(state.name.split(' ').join('-').toLowerCase());
         this.hostControl().markAsDirty();
         this.newAppData = state as { cloudFoundryDetails: NewAppCFDetails; name: string };

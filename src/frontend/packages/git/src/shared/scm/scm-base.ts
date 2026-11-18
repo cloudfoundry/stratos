@@ -1,11 +1,10 @@
 import { Observable, of } from 'rxjs';
 import { take, map } from 'rxjs/operators';
-import { toObservable } from '@angular/core/rxjs-interop';
 import { Injector } from '@angular/core';
 
 import { HttpOptions } from '../../../../core/src/core/core.types';
 import { environment } from '../../../../core/src/environments/environment';
-import { EndpointModel } from '../../../../store/src/public-api';
+import { EndpointModel, observeSignal } from '../../../../store/src/public-api';
 import { EndpointsDataService } from '../../../../store/src/services/endpoints-data.service';
 
 
@@ -76,13 +75,32 @@ export abstract class BaseSCM {
     // tolerate misses (e.g. an app deployed from a since-deleted
     // private github endpoint). The signal-native projection updates
     // synchronously, so the take(1) consumer pattern downstream is
-    // unchanged.
+    // unchanged. observeSignal ends the watch when take(1) unsubscribes;
+    // toObservable would keep one running on the root injector per call.
     if (!this.endpointsData || !this.injector) {
       throw new Error('BaseSCM requires EndpointsDataService + Injector — supply them via the subclass constructor.');
     }
-    return toObservable(this.endpointsData.endpointsList, { injector: this.injector }).pipe(
+    return observeSignal(this.endpointsData.endpointsList, this.injector).pipe(
       map(endpoints => endpoints?.find(e => e.guid === endpointGuid))
     );
+  }
+
+  // A request the browser never completed (status 0) to a host other than the
+  // console's own: most often the Content-Security-Policy refusing it, which
+  // the app cannot tell apart from the network being down. Names the host and
+  // the two ways to allow it. Same-origin failures (the backend proxy) return
+  // undefined so the caller keeps its own message.
+  protected unreachableHostMessage(error: unknown): string | undefined {
+    const { status, url } = (error ?? {}) as { status?: number; url?: string | null };
+    if (status !== 0 || !url) {
+      return undefined;
+    }
+    const origin = new URL(url, window.location.href).origin;
+    if (origin === window.location.origin) {
+      return undefined;
+    }
+    return `Could not reach ${origin}. If the console blocks it, ask your administrator to add ${origin} to ` +
+      'CONSOLE_CSP_GIT_HOSTS, or to register it as a Git endpoint.';
   }
 
   protected parseErrorAsString(res: unknown): string {

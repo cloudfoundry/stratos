@@ -2,11 +2,10 @@ import { HTTP_INTERCEPTORS } from '@angular/common/http';
 import { provideHttpClient, withInterceptorsFromDi } from '@angular/common/http';
 import { provideHttpClientTesting } from '@angular/common/http/testing';
 import { ComponentFixture, TestBed } from '@angular/core/testing';
-import { provideZonelessChangeDetection } from '@angular/core';
+import { provideZonelessChangeDetection, signal } from '@angular/core';
 import { provideNoopAnimations } from '@angular/platform-browser/animations';
 import { ActivatedRoute } from '@angular/router';
 import { describe, it, expect, beforeEach, vi } from 'vitest';
-import { EMPTY, of } from 'rxjs';
 
 import { TabNavService } from '@stratosui/core';
 import { TEST_CATALOGUE_ENTITIES, EntityCatalogTestModule, EntityCatalogHelper, EntityCatalogHelpers } from '@stratosui/store';
@@ -20,6 +19,7 @@ import { kubeEntityCatalog } from '../../kubernetes-entity-generator';
 import { BaseKubeGuid } from '../../kubernetes-page.types';
 import { KubernetesEndpointService } from '../../services/kubernetes-endpoint.service';
 import { HelmReleaseHelperService } from '../release/tabs/helm-release-helper.service';
+import { HelmReleaseVersionsSignalConfigService } from './helm-release-versions-signal-config.service';
 import { UpgradeReleaseComponent } from './upgrade-release.component';
 
 
@@ -32,10 +32,9 @@ describe('UpgradeReleaseComponent', () => {
     // Mock HelmReleaseHelperService to prevent constructor subscription errors
     mockHelmReleaseHelper = {
       guid: 'test-endpoint:test-namespace:test-release',
-      hasUpgrade: vi.fn().mockReturnValue(of(null)),
-      // Real release$ filters out null, so it never emits a value until a
-      // release resolves; EMPTY models "no release resolved" without fabricating one.
-      release$: EMPTY,
+      upgrade: vi.fn().mockReturnValue(signal(null)),
+      // undefined: no release has resolved yet
+      release: signal(undefined),
       releaseTitle: 'test-release',
       endpointGuid: 'test-endpoint',
       namespace: 'test-namespace'
@@ -84,16 +83,17 @@ describe('UpgradeReleaseComponent', () => {
       ]
     });
 
+    // The component provides its own HelmReleaseHelperService; swap that one too.
+    TestBed.overrideProvider(HelmReleaseHelperService, { useValue: mockHelmReleaseHelper });
+
     // Initialize EntityCatalogHelper for Angular 20 compatibility
     const helper = TestBed.inject(EntityCatalogHelper);
     EntityCatalogHelpers.SetEntityCatalogHelper(helper);
 
     fixture = TestBed.createComponent(UpgradeReleaseComponent);
     component = fixture.componentInstance;
-    // Note: Not calling detectChanges() because the component's constructor subscribes to
-    // observables that require complex test data setup. The subscription calls take(1) which
-    // throws EmptyError in test environment. For a basic creation test, we just verify the
-    // component can be instantiated.
+    // The template is not rendered: it needs the stepper and list data. These
+    // tests exercise the component class, so they flush effects with TestBed.tick().
   });
 
   it('should create', () => {
@@ -101,9 +101,47 @@ describe('UpgradeReleaseComponent', () => {
   });
 
   // The version-step handle is valid only once a row is selected. With no
-  // upgrade target resolved (hasUpgrade → null here) nothing is loaded or
+  // upgrade target resolved (upgrade → null here) nothing is loaded or
   // auto-selected, so the step starts invalid.
   it('version step starts invalid until a version is selected', () => {
     expect(component.versionStepHandle.valid()).toBe(false);
+  });
+
+  it('sets up the version list once the upgrade target resolves', () => {
+    // Loading the versions is HTTP; this test is about when the list is set up.
+    const loadAll = vi.spyOn(HelmReleaseVersionsSignalConfigService.prototype, 'loadAll').mockResolvedValue(undefined);
+    const chart = signal<any>(null);
+    (mockHelmReleaseHelper.upgrade as any).mockReturnValue(chart);
+    const live = TestBed.createComponent(UpgradeReleaseComponent);
+    TestBed.tick();
+    expect(live.componentInstance.listConfig()).toBeUndefined();
+
+    chart.set({
+      upgrade: { name: 'chart', repo: { name: 'repo' } },
+      release: { chart: { metadata: { version: '1.0.0' } } },
+      monocularEndpointId: 'monocular',
+    });
+    TestBed.tick();
+
+    expect(live.componentInstance.listConfig()).toBeDefined();
+    expect(loadAll).toHaveBeenCalledTimes(1);
+  });
+
+  // The upgrade target can resolve after the user has left the page. The
+  // late value must not set up a version list on the destroyed component.
+  it('ignores an upgrade target that resolves after destroy', () => {
+    const chart = signal<any>(null);
+    (mockHelmReleaseHelper.upgrade as any).mockReturnValue(chart);
+    const late = TestBed.createComponent(UpgradeReleaseComponent);
+    late.destroy();
+
+    chart.set({
+      upgrade: { name: 'chart', repo: { name: 'repo' } },
+      release: { chart: { metadata: { version: '1.0.0' } } },
+      monocularEndpointId: 'monocular',
+    });
+    TestBed.tick();
+
+    expect(late.componentInstance.listConfig()).toBeUndefined();
   });
 });

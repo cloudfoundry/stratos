@@ -1,21 +1,13 @@
 import { CommonModule } from '@angular/common';
-import { Component, Input, OnDestroy, OnInit, Signal, ChangeDetectionStrategy, inject, computed, signal } from '@angular/core';
-import { toObservable, toSignal } from '@angular/core/rxjs-interop';
-import { Observable, of as observableOf, Subscription } from 'rxjs';
-import { take,
-  catchError,
-  delay,
-  distinctUntilChanged,
-  filter,
-  defaultIfEmpty,
-  map,
-  startWith,
-} from 'rxjs/operators';
+import { Component, OnDestroy, OnInit, Signal, ChangeDetectionStrategy, inject, computed, signal, input } from '@angular/core';
+import { toSignal } from '@angular/core/rxjs-interop';
+import { take, defaultIfEmpty, startWith } from 'rxjs/operators';
 
 import {
   TailwindSnackBarService,
   TailwindSnackBarRef,
   EnumerateComponent,
+  StepOnNextResult,
 } from '@stratosui/core';
 import { StUser } from '../../../../../services/endpoint-data/stratos-types';
 import { ActiveRouteCfOrgSpace } from '../../../cf-page.types';
@@ -46,11 +38,15 @@ export class UsersRolesModifyComponent implements OnInit, OnDestroy {
   private snackBar = inject(TailwindSnackBarService);
   private rolesData = inject(CfUsersRolesDataService);
 
-  private picked$ = toObservable(this.rolesData.users);
-  private isRemove$$ = toObservable(this.rolesData.isRemove);
-  private isSetByUsername$$ = toObservable(this.rolesData.isSetByUsername);
+  readonly isRemove = this.rolesData.isRemove;
+  readonly isSetByUsername = this.rolesData.isSetByUsername;
 
-  @Input() setUsernames = false;
+  private readonly pickedUsers = computed<CfUserWithWarning[]>(() => (this.rolesData.users() ?? []).map(this.mapUser.bind(this)));
+  /** Names of the picked users, starred when not all their roles are known. */
+  protected readonly usersNames = computed(() => this.pickedUsers().map(user => user.showWarning ? '*' + user.username : user.username));
+  readonly usersWithWarning = computed(() => this.pickedUsers().filter(user => !!user.showWarning).map(user => user.username));
+
+  readonly setUsernames = input(false);
 
   /** Signal exposing rolesData.users for template + tests. */
   readonly rolesDataUsers: Signal<StUser[]> = this.rolesData.users;
@@ -78,24 +74,18 @@ export class UsersRolesModifyComponent implements OnInit, OnDestroy {
 
   private snackBarRef: TailwindSnackBarRef<any> | null = null;
 
-  usersNames$!: Observable<string[]>;
-  blocked = signal<boolean>(true);
-  blocked$: Observable<boolean> = toObservable(this.blocked).pipe(delay(0));
-  /** valid$ = inverse of blocked$; consumed by manage-users.component to enable Next. */
-  valid$: Observable<boolean> = toObservable(this.blocked).pipe(delay(0), map(b => !b));
-  isSetByUsername$!: Observable<boolean | undefined>;
-  isRemove$!: Observable<boolean | undefined>;
-  usersWithWarning$!: Observable<string[]>;
+  /** True once the widget has reported at least one pending role change. */
+  private readonly hasChanges = signal(false);
 
-  private subs: Subscription[] = [];
+  /**
+   * Next is blocked while the existing roles load (not in set-by-username
+   * mode, which has none to load) and while there is nothing to apply.
+   */
+  readonly blocked = computed(() => (!this.setUsernames() && this.loadingRoles()) || !this.hasChanges());
+  /** Inverse of blocked; the parent reads it to enable Next. */
+  readonly valid = computed(() => !this.blocked());
 
   ngOnInit() {
-    if (this.setUsernames) {
-      this.blocked.set(false);
-    } else {
-      this.subs.push(this.cfRolesService.loading$.subscribe(loading => this.blocked.set(loading)));
-    }
-
     // Resolve org name for lockedOrg at org/space scope
     if (this.activeRouteCfOrgSpace.orgGuid) {
       this.cfRolesService.fetchOrgEntity(this.activeRouteCfOrgSpace.cfGuid, this.activeRouteCfOrgSpace.orgGuid).pipe(
@@ -108,23 +98,6 @@ export class UsersRolesModifyComponent implements OnInit, OnDestroy {
         }
       });
     }
-
-    const users$: Observable<CfUserWithWarning[]> = this.picked$.pipe(
-      filter(users => !!users),
-      distinctUntilChanged(),
-      map(users => users.map(this.mapUser.bind(this)))
-    );
-
-    this.usersNames$ = users$.pipe(
-      map(users => users.map(user => user.showWarning ? '*' + user.username : user.username))
-    );
-
-    this.usersWithWarning$ = users$.pipe(
-      map(users => users.filter(user => !!user.showWarning).map(user => user.username))
-    );
-
-    this.isSetByUsername$ = this.isSetByUsername$$;
-    this.isRemove$ = this.isRemove$$;
   }
 
   private mapUser(user: StUser): CfUserWithWarning {
@@ -141,7 +114,6 @@ export class UsersRolesModifyComponent implements OnInit, OnDestroy {
   }
 
   ngOnDestroy() {
-    this.subs.forEach(s => s.unsubscribe());
     if (this.snackBarRef) {
       this.snackBarRef.dismiss();
       this.snackBarRef = null;
@@ -151,25 +123,22 @@ export class UsersRolesModifyComponent implements OnInit, OnDestroy {
   /** Called by the role-assignment widget on every edit. */
   onChangeSet(changes: CfRoleChange[]): void {
     this.rolesData.setChanges(changes);
-    this.blocked.set(changes.length === 0);
+    this.hasChanges.set(changes.length > 0);
   }
 
   onEnter = () => {
     if (!this.snackBarRef) {
-      this.usersWithWarning$.pipe(take(1)).subscribe((usersWithWarning => {
-        if (usersWithWarning && usersWithWarning.length) {
-          this.snackBarRef = this.snackBar.open(`Not all roles are shown for user/s - ${usersWithWarning.join(', ')}. To avoid this please
-          navigate to a specific organization or space`, 'Dismiss');
-        }
-      }));
+      const usersWithWarning = this.usersWithWarning();
+      if (usersWithWarning.length) {
+        this.snackBarRef = this.snackBar.open(`Not all roles are shown for user/s - ${usersWithWarning.join(', ')}. To avoid this please
+        navigate to a specific organization or space`, 'Dismiss');
+      }
     }
 
     // In order to show the removed roles correctly (as ticks) flip them from remove to add
-    this.isRemove$$.pipe(take(1)).subscribe(isRemove => {
-      if (isRemove) {
-        this.rolesData.flipSetRoles();
-      }
-    });
+    if (this.isRemove()) {
+      this.rolesData.flipSetRoles();
+    }
   };
 
   onLeave = (isNext: boolean) => {
@@ -179,16 +148,10 @@ export class UsersRolesModifyComponent implements OnInit, OnDestroy {
     }
   };
 
-  onNext = () => {
-    return this.isRemove$$.pipe(
-      take(1),
-      map(isRemove => {
-        if (isRemove) {
-          this.rolesData.flipSetRoles();
-        }
-        return { success: true };
-      }),
-      catchError(_err => observableOf({ success: false })),
-    );
-  };
+  async onNext(): Promise<StepOnNextResult> {
+    if (this.isRemove()) {
+      this.rolesData.flipSetRoles();
+    }
+    return { success: true };
+  }
 }

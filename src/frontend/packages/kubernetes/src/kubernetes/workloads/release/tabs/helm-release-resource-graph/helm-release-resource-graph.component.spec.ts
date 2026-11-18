@@ -1,6 +1,7 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { Component, input, output, provideZonelessChangeDetection } from '@angular/core';
-import { describe, it, expect, beforeEach } from 'vitest';
+import { of, Subject } from 'rxjs';
+import { describe, it, expect, beforeEach, vi } from 'vitest';
 import { GraphComponent } from '@swimlane/ngx-graph';
 import { SidePanelService } from '@stratosui/core';
 
@@ -12,6 +13,7 @@ import { AnalysisReportViewerComponent } from '../../../../analysis-report-viewe
 import { HelmReleaseSocketService } from '../../helm-release-tab-base/helm-release-socket-service';
 import { HelmReleaseDataService } from '../../helm-release-data.service';
 import { HelmReleaseGraph } from '../../../workload.types';
+import { AnalysisReport } from '../../../../store/kube.types';
 import { HelmReleaseResourceGraphComponent } from './helm-release-resource-graph.component';
 
 // ngx-graph's real GraphComponent needs a browser layout engine; the tests
@@ -87,5 +89,90 @@ describe('HelmReleaseResourceGraphComponent', () => {
 
     expect(component.nodes().length).toBe(2);
     expect(fixture.nativeElement.querySelector('ngx-graph')).not.toBeNull();
+  });
+
+  // Regression: ngx-graph redraws on every [update$] emission. A later socket
+  // update (a resource changed status) has to reach it, not only the first.
+  it('asks the graph to redraw on every socket update, not just the first', async () => {
+    const guid = (component as unknown as { helper: { guid: string } }).helper.guid;
+    const graphOf = (status: string) => ({
+      endpointId: 'kube', releaseTitle: 'rel',
+      nodes: { a: { id: 'a', label: 'web', data: { kind: 'Deployment', status, metadata: { name: 'web', namespace: 'ns' } } } },
+      links: {},
+    } as unknown as HelmReleaseGraph);
+    let redraws = 0;
+    component.update$.subscribe(() => redraws++);
+    const data = TestBed.inject(HelmReleaseDataService);
+
+    data.setGraph(guid, graphOf('ok'));
+    await fixture.whenStable();
+    const afterFirst = redraws;
+    data.setGraph(guid, graphOf('error'));
+    await fixture.whenStable();
+
+    expect(redraws).toBe(afterFirst + 1);
+  });
+
+  describe('analysis report', () => {
+    const alert = { kind: 'deployment', name: 'web', level: 2, message: 'no limits' };
+    const report = { id: 'r1', alerts: { 'ns/web': [alert] } } as unknown as AnalysisReport;
+    const alertsOf = (id: string) => component.nodes().find(n => n.id === id)?.data.alerts;
+
+    async function showGraph() {
+      const guid = (component as unknown as { helper: { guid: string } }).helper.guid;
+      TestBed.inject(HelmReleaseDataService).setGraph(guid, {
+        endpointId: 'kube', releaseTitle: 'rel',
+        nodes: {
+          a: { id: 'a', label: 'web', data: { kind: 'Deployment', status: 'ok', metadata: { name: 'web', namespace: 'ns' } } },
+          b: { id: 'b', label: 'web-1', data: { kind: 'Pod', status: 'ok', metadata: { name: 'web-1', namespace: 'ns' } } },
+        },
+        links: {},
+      } as unknown as HelmReleaseGraph);
+      await fixture.whenStable();
+    }
+
+    it('marks the nodes the report has alerts for, and clears them again', async () => {
+      await showGraph();
+      expect(alertsOf('a')).toBeNull();
+      vi.spyOn(component.analyzerService, 'getByID').mockReturnValue(of(report));
+
+      component.analysisChanged({ id: 'r1' });
+      await fixture.whenStable();
+      expect(alertsOf('a')).toEqual([alert]);
+      expect(alertsOf('b')).toBeNull();
+
+      component.analysisChanged(null);
+      await fixture.whenStable();
+      expect(alertsOf('a')).toBeNull();
+    });
+
+    it('keeps the report the user picked last when the first answers late', async () => {
+      await showGraph();
+      const first = new Subject<AnalysisReport>();
+      const second = new Subject<AnalysisReport>();
+      const pick = (id: string) => ({ id, alerts: { 'ns/web': [{ ...alert, message: id }] } }) as unknown as AnalysisReport;
+      vi.spyOn(component.analyzerService, 'getByID').mockImplementation(
+        (_ep: string, id: string) => (id === 'r1' ? first : second) as never);
+
+      component.analysisChanged({ id: 'r1' });
+      component.analysisChanged({ id: 'r2' });
+      second.next(pick('r2'));
+      first.next(pick('r1'));
+      await fixture.whenStable();
+
+      expect(alertsOf('a')?.[0].message).toBe('r2');
+    });
+
+    it('passes the current report to the resource preview', async () => {
+      await showGraph();
+      const show = vi.spyOn(TestBed.inject(SidePanelService), 'show').mockImplementation(() => undefined as never);
+      vi.spyOn(component.analyzerService, 'getByID').mockReturnValue(of(report));
+      component.analysisChanged({ id: 'r1' });
+      await fixture.whenStable();
+
+      component.onNodeClick(component.nodes()[0]);
+
+      expect(show).toHaveBeenCalledWith(expect.anything(), expect.objectContaining({ analysis: report }));
+    });
   });
 });

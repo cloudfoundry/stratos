@@ -11,7 +11,7 @@ import { TabNavService } from '../../../../tab-nav.service';
 import { SignalStepHandle, StepComponent } from '../step/step.component';
 import { SteppersComponent } from './steppers.component';
 
-// Reproduces the manage-users / remove-user Shape-3 wizard: two
+// Reproduces the manage-users Shape-3 wizard: two
 // signal-handle steps where the second is a destructive two-click
 // confirm. Pins the full Next → confirm-entry → Apply-enabled lifecycle —
 // the destructive-step busy delay must release the Apply button.
@@ -27,13 +27,16 @@ import { SteppersComponent } from './steppers.component';
 })
 class DestructiveWizardHostComponent {
   applied = signal(false);
+  destructive = signal(true);
+  warning = signal(false);
   selectHandle: SignalStepHandle = {
     valid: signal(true).asReadonly(),
     submit: async () => { /* advance */ },
   };
   confirmHandle: SignalStepHandle = {
     valid: signal(true).asReadonly(),
-    destructiveStep: signal(true).asReadonly(),
+    destructiveStep: this.destructive.asReadonly(),
+    warningStep: this.warning.asReadonly(),
     submit: async () => {
       this.applied.set(true);
       return { ignoreSuccess: true };
@@ -81,5 +84,27 @@ describe('Steppers destructive two-click flow', () => {
     await vi.runAllTimersAsync();
     fixture.detectChanges();
     expect(fixture.componentInstance.applied()).toBe(true);
+  });
+
+  async function confirmButtonClasses(): Promise<DOMTokenList> {
+    nextButton().click();
+    await vi.runAllTimersAsync();
+    fixture.detectChanges();
+    return nextButton().classList;
+  }
+
+  it('shows a destructive confirm step in red', async () => {
+    const classes = await confirmButtonClasses();
+    expect(classes.contains('btn-danger')).toBe(true);
+    expect(classes.contains('btn-warning')).toBe(false);
+  });
+
+  it('shows a warning confirm step in yellow', async () => {
+    fixture.componentInstance.destructive.set(false);
+    fixture.componentInstance.warning.set(true);
+    const classes = await confirmButtonClasses();
+    expect(classes.contains('btn-warning')).toBe(true);
+    expect(classes.contains('btn-danger')).toBe(false);
+    expect(classes.contains('btn-primary')).toBe(false);
   });
 });

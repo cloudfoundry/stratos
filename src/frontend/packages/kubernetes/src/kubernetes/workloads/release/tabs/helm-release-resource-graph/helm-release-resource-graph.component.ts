@@ -1,13 +1,13 @@
 import { CommonModule } from '@angular/common';
-import {Component, OnDestroy, OnInit, signal, WritableSignal, inject, ChangeDetectionStrategy } from '@angular/core';
-import { toObservable } from '@angular/core/rxjs-interop';
+import { Component, signal, WritableSignal, computed, effect, inject, untracked, ChangeDetectionStrategy, Injector } from '@angular/core';
+import { takeUntilDestroyed, toObservable } from '@angular/core/rxjs-interop';
 import { AppProgressBarComponent } from '../../../../../../../core/src/shared/components/progress-bar/app-progress-bar.component';
 import { CustomIconComponent } from '../../../../../../../core/src/shared/components/custom-material/custom-material.component';
 import { CustomTooltipDirective } from '../../../../../../../core/src/shared/components/custom-tooltip/custom-tooltip.directive';
 import { Edge, GraphComponent, LayoutService, NgxGraphZoomOptions } from '@swimlane/ngx-graph';
 import { SidePanelService } from '@stratosui/core';
-import { combineLatest, Observable, Subject, Subscription } from 'rxjs';
-import { take, distinctUntilChanged, filter, map, publishReplay, refCount, startWith } from 'rxjs/operators';
+import { EMPTY, Observable, of, Subject } from 'rxjs';
+import { catchError, take, filter, map, switchMap } from 'rxjs/operators';
 
 import { PageSubNavComponent } from '../../../../../../../core/src/shared/components/page-sub-nav/page-sub-nav.component';
 import { AnalysisReportRunnerComponent } from '../../../../analysis-report-viewer/analysis-report-runner/analysis-report-runner.component';
@@ -19,7 +19,6 @@ import {
 import { ResourceAlert, ResourceAlertLevel } from '../../../../services/analysis-report.types';
 import { KubernetesAnalysisService } from '../../../../services/kubernetes.analysis.service';
 import {
-  HelmReleaseGraph,
   HelmReleaseGraphLink,
   HelmReleaseGraphNode,
   HelmReleaseGraphNodeData,
@@ -84,17 +83,51 @@ interface CustomHelmReleaseGraphNodeData extends HelmReleaseGraphNodeData {
     WorkloadLiveReloadComponent
   ]
 })
-export class HelmReleaseResourceGraphComponent implements OnInit, OnDestroy {
+export class HelmReleaseResourceGraphComponent {
 
   // see: https://swimlane.github.io/ngx-graph/#/#quick-start
 
-  // Signals: the view is OnPush under zoneless change detection, so plain
-  // fields written from the socket subscription never re-rendered the graph.
-  public nodes = signal<CustomHelmReleaseGraphNode[]>([]);
-  public links = signal<Edge[]>([]);
+  // The graph as the release socket last sent it, with the alerts of the
+  // chosen analysis report drawn on its nodes.
+  public nodes = computed<CustomHelmReleaseGraphNode[]>(() => {
+    const graph = this.helper.graph();
+    const report = this.analysisReport();
+    return Object.values(graph?.nodes ?? {}).map((node: HelmReleaseGraphNode) => {
+      const colors = this.getColor(node.data.status);
+      const missing = node.data.status === 'missing';
 
-  private updateSignal: WritableSignal<boolean> = signal<boolean>(false);
-  update$ = toObservable(this.updateSignal);
+      const newNode: CustomHelmReleaseGraphNode = {
+        id: node.id,
+        label: node.label,
+        data: {
+          ...node.data,
+          missing,
+          dash: missing ? 6 : 0,
+          fill: colors.bg,
+          text: colors.fg,
+          icon: getIcon(node.data.kind),
+          alerts: null,
+          alertSummary: {}
+        } };
+
+      // Does this node have any alerts?
+      this.applyAlertToNode(newNode, report);
+      return newNode;
+    });
+  });
+  public links = computed<Edge[]>(() =>
+    Object.values(this.helper.graph()?.links ?? {}).map((link: any): HelmReleaseGraphLink => ({
+      id: link.id,
+      label: link.id,
+      source: link.source,
+      target: link.target
+    })),
+  );
+
+  // An event trigger: every emission makes ngx-graph redraw. A signal would
+  // drop every set after the first, because the value never changes.
+  private readonly update = new Subject<boolean>();
+  update$ = this.update.asObservable();
 
   // ngx-graph zooms-to-fit on every emission; the options object matches
   // the [zoomToFit$] input's Observable<NgxGraphZoomOptions> type.
@@ -105,77 +138,39 @@ export class HelmReleaseResourceGraphComponent implements OnInit, OnDestroy {
 
   public layoutIndex = 0;
 
-  private graph?: Subscription;
-
   public path: string;
 
-  private analysisReportUpdated = new Subject<any>();
-  private analysisReportUpdated$ = this.analysisReportUpdated.pipe(
-    startWith(null),
-    distinctUntilChanged(),
-    publishReplay(1),
-    refCount()
-  );
+  // The analysis report whose alerts are drawn on the nodes; null for none
+  private readonly analysisReport = signal<any>(null);
+  private readonly analysisPick = new Subject<string | null>();
   protected helper = inject(HelmReleaseHelperService);
   public analyzerService = inject(KubernetesAnalysisService);
   private previewPanel = inject(SidePanelService);
+  private injector = inject(Injector);
 
 
 
   constructor() {
+    // Only the report picked last is kept: choosing another one cancels the
+    // request still in flight, so a slow answer cannot replace a newer pick.
+    this.analysisPick.pipe(
+      switchMap(id => id === null ? of(null) : this.analyzerService.getByID(this.helper.endpointGuid, id).pipe(
+        catchError(() => EMPTY)
+      )),
+      takeUntilDestroyed()
+    ).subscribe(results => this.analysisReport.set(results));
 
 
     this.path = `${this.helper.namespace}/${this.helper.releaseTitle}`;
 
-
-  }
-
-  ngOnInit() {
-
-    // Listen for the graph
-    this.graph = combineLatest(
-      this.helper.fetchReleaseGraph(),
-      this.analysisReportUpdated$
-    ).subscribe(([g, report]: [HelmReleaseGraph, any]) => {
-      const newNodes: CustomHelmReleaseGraphNode[] = [];
-      Object.values(g.nodes).forEach((node: HelmReleaseGraphNode) => {
-        const colors = this.getColor(node.data.status);
-        const icon = getIcon(node.data.kind);
-        const missing = node.data.status === 'missing';
-
-        const newNode: CustomHelmReleaseGraphNode = {
-          id: node.id,
-          label: node.label,
-          data: {
-            ...node.data,
-            missing: node.data.status === 'missing',
-            dash: missing ? 6 : 0,
-            fill: colors.bg,
-            text: colors.fg,
-            icon,
-            alerts: null,
-            alertSummary: {}
-          } };
-
-        // Does this node have any alerts?
-        this.applyAlertToNode(newNode, report);
-
-        newNodes.push(newNode);
-      });
-      this.nodes.set(newNodes);
-
-      const newLinks: HelmReleaseGraphLink[] = [];
-      Object.values(g.links).forEach((link: any) => {
-        newLinks.push({
-          id: link.id,
-          label: link.id,
-          source: link.source,
-          target: link.target
-        });
-      });
-      this.links.set(newLinks);
-      this.updateSignal.set(true);
+    // Every new graph, or report drawn on it, asks ngx-graph to redraw.
+    effect(() => {
+      this.nodes();
+      this.links();
+      untracked(() => this.update.next(true));
     });
+
+
   }
 
   private applyAlertToNode(newNode: CustomHelmReleaseGraphNode, report: any) {
@@ -211,26 +206,17 @@ export class HelmReleaseResourceGraphComponent implements OnInit, OnDestroy {
     }
   }
 
-  ngOnDestroy() {
-    if (this.graph) {
-      this.graph.unsubscribe();
-    }
-  }
-
   // Open side panel when node is clicked
   public onNodeClick(node: CustomHelmReleaseGraphNode) {
-    this.analysisReportUpdated$.pipe(take(1)).subscribe((analysis: any) => {
-      this.previewPanel.show(
-        KubernetesResourceViewerComponent,
-        {
-          title: 'Helm Release Resource Preview',
-          resource$: this.getResource(node),
-          analysis,
-          resourceKind: node.data.kind
-        }
-      );
-    });
-
+    this.previewPanel.show(
+      KubernetesResourceViewerComponent,
+      {
+        title: 'Helm Release Resource Preview',
+        resource$: this.getResource(node),
+        analysis: this.analysisReport(),
+        resourceKind: node.data.kind
+      }
+    );
   }
 
   public fitGraph() {
@@ -272,7 +258,7 @@ export class HelmReleaseResourceGraphComponent implements OnInit, OnDestroy {
   }
 
   private getResource(node: CustomHelmReleaseGraphNode): Observable<HelmReleaseResource | undefined> {
-    return this.helper.fetchReleaseResources().pipe(
+    return toObservable(this.helper.resources, { injector: this.injector }).pipe(
       filter((r: any) => !!r),
       map((r: HelmReleaseResources) => Object.values(r.data).find((res: any) =>
         res.metadata.name === node.label && res.kind === node.data.kind
@@ -282,13 +268,7 @@ export class HelmReleaseResourceGraphComponent implements OnInit, OnDestroy {
   }
 
   public analysisChanged(report: any) {
-    if (report === null) {
-      this.analysisReportUpdated.next(null);
-    } else {
-      this.analyzerService.getByID(this.helper.endpointGuid, report.id).subscribe((results: any) => {
-        this.analysisReportUpdated.next(results);
-      });
-    }
+    this.analysisPick.next(report === null ? null : report.id);
   }
 
 }

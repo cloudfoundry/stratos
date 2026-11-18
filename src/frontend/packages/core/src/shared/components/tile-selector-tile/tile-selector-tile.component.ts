@@ -1,15 +1,17 @@
 import { CommonModule } from '@angular/common';
-import { ChangeDetectionStrategy, Component, EventEmitter, Input, Output  } from '@angular/core';
+import { ChangeDetectionStrategy, Component, input, output } from '@angular/core';
 
 import { ITileConfig, ITileIconConfig, ITileImgConfig } from '../tile/tile-selector.types';
 import { CustomIconComponent } from '../custom-material/custom-material.component';
+import { AbbrTextComponent } from '../abbr-text/abbr-text.component';
 
 @Component({
   selector: 'app-tile-selector-tile',
   standalone: true,
   imports: [
     CommonModule,
-    CustomIconComponent
+    CustomIconComponent,
+    AbbrTextComponent,
   ],
   templateUrl: './tile-selector-tile.component.html',
   styleUrls: ['./tile-selector-tile.component.scss'],
@@ -17,15 +19,19 @@ import { CustomIconComponent } from '../custom-material/custom-material.componen
 })
 export class TileSelectorTileComponent {
 
-  @Input() tile!: ITileConfig;
+  readonly tile = input.required<ITileConfig>();
 
-  @Input() active!: boolean;
+  readonly active = input<boolean>();
 
-  @Input() smaller = false;
+  readonly smaller = input(false);
 
-  @Input() compact = false;
+  readonly compact = input(false);
 
-  @Output() tileSelect = new EventEmitter<ITileConfig>();
+  // Size a font icon like the tile's logos (the tile's icon size); without
+  // it the glyph keeps its own 24px. Opted into per page.
+  readonly scaleIcon = input(false);
+
+  readonly tileSelect = output<ITileConfig>();
 
   public onClick(tile: ITileConfig) {
     this.tileSelect.emit(tile);
@@ -33,12 +39,14 @@ export class TileSelectorTileComponent {
 
   // Narrow the icon/image graphic union for the template
   get iconGraphic(): ITileIconConfig | null {
-    const graphic = this.tile ? this.tile.graphic : null;
+    const tile = this.tile();
+    const graphic = tile ? tile.graphic : null;
     return graphic && 'matIcon' in graphic && graphic.matIcon ? graphic : null;
   }
 
   get imageGraphic(): ITileImgConfig | null {
-    const graphic = this.tile ? this.tile.graphic : null;
+    const tile = this.tile();
+    const graphic = tile ? tile.graphic : null;
     return graphic && 'location' in graphic ? graphic : null;
   }
 

@@ -1,4 +1,4 @@
-import { ChangeDetectionStrategy, Component, TemplateRef, ViewChild } from '@angular/core';
+import { ChangeDetectionStrategy, Component, TemplateRef, viewChild } from '@angular/core';
 
 @Component({
   selector: 'app-meta-card-value',
@@ -8,6 +8,5 @@ import { ChangeDetectionStrategy, Component, TemplateRef, ViewChild } from '@ang
   imports: []
 })
 export class MetaCardValueComponent {
-  @ViewChild(TemplateRef, { static: true })
-  content!: TemplateRef<any>;
+  readonly content = viewChild.required(TemplateRef);
 }

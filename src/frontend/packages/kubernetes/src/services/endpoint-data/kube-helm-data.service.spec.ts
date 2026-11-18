@@ -5,6 +5,7 @@ import { TestBed } from '@angular/core/testing';
 import { afterEach, beforeEach, describe, expect, it } from 'vitest';
 
 import { TailwindSnackBarService } from '../../../../core/src/shared/services/tailwind-snackbar.service';
+import { KubeEndpointEviction } from './kube-endpoint-eviction';
 import { KubeHelmDataService } from './kube-helm-data.service';
 import { HelmInstallPayload, HelmUpgradePayload } from './kube-types';
 
@@ -114,6 +115,27 @@ describe('KubeHelmDataService', () => {
     await promise;
   });
 
+  // A Helm handler's own error on the wire (jetstream api/jetstream_error.go).
+  it('install fails with Jetstream\'s reason', async () => {
+    const promise = svc.install({
+      endpoint: 'kube-1',
+      releaseName: 'rel-x',
+      releaseNamespace: 'ns1',
+      values: '{}',
+      chart: { name: 'nginx', repo: 'bitnami', version: '1.0.0' },
+      monocularEndpoint: null,
+      chartUrl: 'http://example/nginx-1.0.0.tgz',
+    });
+    httpMock.expectOne('/pp/v1/helm/install').flush(
+      {
+        error: { statusCode: 400, status: 'Bad Request', message: 'A Release with that name already exists', method: 'POST' },
+        errorResponse: { method: '' },
+      },
+      { status: 400, statusText: 'Bad Request' },
+    );
+    await expect(promise).rejects.toThrow(/^Failed to install helm chart: A Release with that name already exists$/);
+  });
+
   it('upgrade posts to the release URL then refetches', async () => {
     const payload: HelmUpgradePayload = {
       values: '{}',
@@ -179,5 +201,42 @@ describe('KubeHelmDataService', () => {
     await promise;
     expect(svc.releasesLastFetched()()).not.toBeNull();
     expect(svc.chartsLastFetched()()).not.toBeNull();
+  });
+
+  // The releases request spans every endpoint, so an eviction while it is
+  // on the wire must still drop the departed endpoint's share of it.
+  it('drops a departed endpoint\'s releases from a late response', async () => {
+    const promise = svc.loadReleases();
+    const req = httpMock.expectOne(RELEASES_URL);
+
+    TestBed.inject(KubeEndpointEviction).evict('kube-1');
+    req.flush({
+      'kube-1': [{ name: 'rel-a', namespace: 'ns1', info: { status: 'deployed' }, chart: { metadata: {} } }],
+      'kube-2': [{ name: 'rel-b', namespace: 'ns2', info: { status: 'deployed' }, chart: { metadata: {} } }],
+    });
+    await promise;
+
+    expect(svc.allReleases()().map(r => r.guid)).toEqual(['kube-2:ns2:rel-b']);
+  });
+
+  // Jetstream answers per endpoint; a cluster it could not list is that
+  // endpoint's error entry, not "no releases".
+  it('loadReleases records an endpoint\'s error entry with its reason and keeps the others', async () => {
+    const promise = svc.loadReleases();
+    httpMock.expectOne(RELEASES_URL).flush({
+      'kube-1': [{ name: 'rel-a', namespace: 'ns1', info: { status: 'deployed' }, chart: { metadata: { version: '1.0.0' } } }],
+      'kube-2': {
+        error: { statusCode: 500, status: 'Could not list the Helm releases' },
+        errorResponse: 'Kubernetes cluster unreachable',
+      },
+    });
+    await promise;
+
+    expect(svc.allReleases()().map(r => r.endpointId)).toEqual(['kube-1']);
+    expect(svc.releaseErrors()()).toEqual([expect.objectContaining({
+      title: 'helm-releases',
+      detail: 'Could not list the Helm releases: Kubernetes cluster unreachable',
+      affected: ['kube-2'],
+    })]);
   });
 });

@@ -21,14 +21,14 @@
         <div class="text-sm text-content-muted">{{ address(ep) }}</div>
         <div class="flex-1"></div>
         <button type="button" data-test="probe-run"
-                class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded font-semibold text-sm bg-primary text-white hover:bg-primary/90 transition-all duration-150 disabled:opacity-50"
+                class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded font-semibold text-sm bg-primary text-on-primary hover:bg-primary/90 transition-all duration-150 disabled:opacity-50"
                 [disabled]="stateFor(ep.guid).running"
                 (click)="probe(ep.guid)">
           @if (stateFor(ep.guid).running) {
             <app-busy size="1rem"></app-busy>
             Probing…
           } @else {
-            <span class="material-icons text-base leading-none">network_check</span>
+            <span aria-hidden="true" class="material-icons text-base leading-none">network_check</span>
             Probe URI limit
           }
         </button>
@@ -55,7 +55,7 @@
           @switch (verdict(r)) {
             @case ('lower') {
               <div data-test="probe-verdict-lower" class="text-danger">
-                <span class="material-icons text-base leading-none align-text-bottom">warning</span>
+                <span class="material-icons text-base leading-none align-text-bottom" aria-hidden="true">warning</span>
                 Configured budget exceeds what this chain accepts — set
                 <span class="font-mono">STRATOS_CF_GUID_CHUNK={{ r.recommendedChunk }}</span> or lower.
               </div>
@@ -68,7 +68,7 @@
             }
             @case ('ok') {
               <div data-test="probe-verdict-ok" class="text-success">
-                <span class="material-icons text-base leading-none align-text-bottom">check_circle</span>
+                <span class="material-icons text-base leading-none align-text-bottom" aria-hidden="true">check_circle</span>
                 Configured budget fits this chain.
               </div>
             }

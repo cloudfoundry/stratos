@@ -17,18 +17,68 @@ describe('NoContentMessageComponent', () => {
       TestBed.compileComponents();
   });
 
-  beforeEach(() => {
+  beforeEach(async () => {
     fixture = TestBed.createComponent(NoContentMessageComponent);
     component = fixture.componentInstance;
-    component.secondLine = {
+    fixture.componentRef.setInput('secondLine', {
       link: '',
       linkText: '',
       text: '',
-    };
-    fixture.detectChanges();
+    });
+    await fixture.whenStable();
   });
 
   it('should be created', () => {
     expect(component).toBeTruthy();
+  });
+
+  it('puts the toolbar prompt just below the toolbar button', async () => {
+    vi.useFakeTimers();
+    const button = document.createElement('button');
+    button.id = 'toolbar-target';
+    document.body.appendChild(button);
+    vi.spyOn(button, 'getBoundingClientRect').mockReturnValue({ bottom: 60, right: 900 } as DOMRect);
+
+    const f = TestBed.createComponent(NoContentMessageComponent);
+    f.componentRef.setInput('toolbarLink', { text: 'Create an API key' });
+    f.componentRef.setInput('toolbarAlign', 'toolbar-target');
+    // Fake timers hold the change detection scheduler; step them to render.
+    await vi.advanceTimersByTimeAsync(0);
+    const link: HTMLElement = f.nativeElement.querySelector('.app-no-content-container__link');
+    vi.spyOn(link.parentElement!, 'getBoundingClientRect').mockReturnValue({ top: 200, right: 1000 } as DOMRect);
+    vi.advanceTimersByTime(500);
+
+    expect(link.style.top).toBe('-140px');
+    expect(link.style.right).toBe('97px');
+    button.remove();
+    vi.useRealTimers();
+  });
+
+  // The page header draws over anything inside its bar, so the prompt's
+  // arrow starts below the bar, not below the button.
+  it('puts the toolbar prompt below the page header that holds the button', async () => {
+    vi.useFakeTimers();
+    const bar = document.createElement('div');
+    bar.className = 'page-header-outer';
+    const button = document.createElement('button');
+    button.id = 'toolbar-target';
+    bar.appendChild(button);
+    document.body.appendChild(bar);
+    vi.spyOn(button, 'getBoundingClientRect').mockReturnValue({ bottom: 60, right: 900 } as DOMRect);
+    vi.spyOn(bar, 'getBoundingClientRect').mockReturnValue({ bottom: 78, right: 1000 } as DOMRect);
+
+    const f = TestBed.createComponent(NoContentMessageComponent);
+    f.componentRef.setInput('toolbarLink', { text: 'Create an API key' });
+    f.componentRef.setInput('toolbarAlign', 'toolbar-target');
+    // Fake timers hold the change detection scheduler; step them to render.
+    await vi.advanceTimersByTimeAsync(0);
+    const link: HTMLElement = f.nativeElement.querySelector('.app-no-content-container__link');
+    vi.spyOn(link.parentElement!, 'getBoundingClientRect').mockReturnValue({ top: 200, right: 1000 } as DOMRect);
+    vi.advanceTimersByTime(500);
+
+    expect(link.style.top).toBe('-122px');
+    expect(link.style.right).toBe('97px');
+    bar.remove();
+    vi.useRealTimers();
   });
 });

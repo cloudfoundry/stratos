@@ -7,7 +7,9 @@ import {
   Signal,
   WritableSignal,
   computed,
+  effect,
   inject,
+  linkedSignal,
   signal,
 } from '@angular/core';
 import { ActivatedRoute, Router } from '@angular/router';
@@ -33,6 +35,7 @@ import { of } from 'rxjs';
 import { JsonViewerComponent } from '../../../../../core/src/shared/components/json-viewer/json-viewer.component';
 import { serviceCredentialBindingEntityType } from '../../../entity-relations/signal/cf-relation-registrations';
 import { EndpointDataRegistry } from '../../../services/endpoint-data/endpoint-data.registry';
+import { unknownHowOf, unknownOutcomeMessage } from '../../../services/async-jobs/unknown-outcome-message';
 import { EntityDeleteController } from '../../../services/deletes/entity-delete.controller';
 import { runCfDelete } from '../../../services/deletes/run-cf-delete';
 import { ServiceCatalogDataService, SignalSource } from '../../../services/endpoint-data/service-catalog-data.service';
@@ -41,18 +44,21 @@ import {
   MaskedCredentialsComponent,
   toCredentialFields,
 } from '../../../shared/components/masked-credentials/masked-credentials.component';
-import {
-  CfServiceInstancesSignalConfigService,
-} from '../../../shared/signal-list-configs/service-instance/cf-service-instances-signal-config.service';
+import { CfServiceInstancesSignalConfigService, operationRunning } from '../../../shared/signal-list-configs/service-instance/cf-service-instances-signal-config.service';
 import {
   buildServiceInstanceRowActions,
 } from '../../../shared/signal-list-configs/service-instance/service-instance-row-actions';
+import {
+  lastOperationLabel,
+  lastOperationReasonPieces,
+} from '../../../shared/signal-list-configs/service-instance/service-instance-columns';
 import { StServiceCredentialBinding, StServiceInstance } from '../../../services/endpoint-data/stratos-types';
 import {
   ShareServiceInstanceDialogComponent,
   ShareServiceInstanceDialogData,
 } from './share-service-instance-dialog.component';
-import { AppBusyComponent } from '@stratosui/core';
+import { AppBusyComponent, ErrorTextComponent } from '@stratosui/core';
+import { ErrorPiece, leadPieces } from '@stratosui/store';
 
 interface BindingRow {
   guid: string;
@@ -63,8 +69,10 @@ interface InstanceView {
   name: string;
   isManaged: boolean;
   typeLabel: string;
-  status: string;
-  statusDetail: string;
+  // "Update failed"; empty when CF records no operation.
+  lastOperation: string;
+  // The broker's reason, on a failure only.
+  lastOperationReason: readonly ErrorPiece[];
   plan: string;
   offering: string;
   broker: string;
@@ -95,6 +103,8 @@ interface InstanceView {
  * asks, and so a broker that doesn't support parameter retrieval errors only
  * the section, not the page.
  */
+const PROGRESS_POLL_MS = 10000;
+
 @Component({
   selector: 'app-service-instance-summary',
   templateUrl: './service-instance-summary.component.html',
@@ -103,6 +113,7 @@ interface InstanceView {
   imports: [
     AppBusyComponent,
     CommonModule,
+    ErrorTextComponent,
     PageHeaderComponent,
     MetaCardComponent,
     MetaCardTitleComponent,
@@ -128,7 +139,12 @@ export class ServiceInstanceSummaryComponent implements OnDestroy {
 
   private readonly cfGuid: string;
   private readonly siGuid: string;
-  private readonly source: SignalSource<StServiceInstance | null>;
+  // One-shot instance fetch; re-issued when a delete ends with an unknown
+  // result so the page shows whether the instance is still there.
+  private readonly sourceRef: WritableSignal<SignalSource<StServiceInstance | null>>;
+  private get source(): SignalSource<StServiceInstance | null> {
+    return this.sourceRef();
+  }
 
   // One-shot bindings fetch; re-issued after an unbind so the list refreshes
   // (the thin data service doesn't auto-update like the EDS rollups).
@@ -137,6 +153,10 @@ export class ServiceInstanceSummaryComponent implements OnDestroy {
   readonly breadcrumbs: IHeaderBreadcrumb[] = [
     { breadcrumbs: [{ value: 'Services', routerLink: '/services' }] },
   ];
+
+  // The last instance read. A re-read keeps it on screen until the new
+  // answer lands (or fails), so polling never flashes the page empty.
+  private readonly instance: Signal<StServiceInstance | null>;
 
   readonly loading: Signal<boolean>;
   readonly error: Signal<boolean>;
@@ -149,7 +169,7 @@ export class ServiceInstanceSummaryComponent implements OnDestroy {
   constructor() {
     this.cfGuid = this.route.snapshot.params.endpointId;
     this.siGuid = this.route.snapshot.params.serviceInstanceId;
-    this.source = this.serviceCatalog.serviceInstance(this.cfGuid, this.siGuid);
+    this.sourceRef = signal(this.serviceCatalog.serviceInstance(this.cfGuid, this.siGuid));
     this.bindingsSource = signal(this.serviceCatalog.serviceBindingsForInstance(this.cfGuid, this.siGuid));
 
     // Hold a refcount on the endpoint's data service so the delete chokepoint
@@ -157,13 +177,28 @@ export class ServiceInstanceSummaryComponent implements OnDestroy {
     // app pages) after an unbind.
     this.registry.acquire(this.cfGuid);
 
-    this.loading = this.source.isLoading;
-    this.error = computed(() => this.source.error() != null);
+    this.instance = linkedSignal<{ si: StServiceInstance | null; settled: boolean }, StServiceInstance | null>({
+      source: () => ({ si: this.source.value(), settled: !this.source.isLoading() && this.source.error() == null }),
+      computation: (read, previous) => read.settled || !previous?.value ? read.si : previous.value,
+    });
+    this.loading = computed(() => this.source.isLoading() && !this.instance());
+    this.error = computed(() => this.source.error() != null && !this.instance());
     this.view = computed(() => {
-      const si = this.source.value();
+      const si = this.instance();
       return si ? this.toView(si) : null;
     });
     this.title = computed(() => this.view()?.name ?? '');
+
+    // While an operation is in progress, re-read the instance so its status
+    // follows the broker (#6002). Ends with the operation or the page.
+    effect((onCleanup) => {
+      const si = this.instance();
+      if (!si || !operationRunning(si)) return;
+      const timer = setInterval(() => {
+        if (!this.source.isLoading()) this.reread();
+      }, PROGRESS_POLL_MS);
+      onCleanup(() => clearInterval(timer));
+    });
 
     this.bindingsLoading = computed(() => this.bindingsSource().isLoading());
     this.bindings = computed(() =>
@@ -175,18 +210,25 @@ export class ServiceInstanceSummaryComponent implements OnDestroy {
     // Header action bar. Reuse the shared builder (Edit / Service Keys /
     // Delete) so the route conventions and keys gating match the lists.
     // Detach is dropped — the inline per-app Unbind above covers it. Delete
-    // here also navigates back to the wall, since the page's instance is gone.
+    // here also navigates back to the wall, since the page's instance is gone;
+    // after an unknown result the page stays and re-reads the instance.
     this.actions = computed(() => {
-      const si = this.source.value();
+      const si = this.instance();
       if (!si) { return []; }
       return buildServiceInstanceRowActions(si, {
         router: this.router,
         confirmDialog: this.confirmDialog,
         snackBar: this.snackBar,
         deleteServiceInstance: async (cnsiGuid, guid) => {
-          await this.instancesConfig.deleteServiceInstance(cnsiGuid, guid, si.name);
-          void this.router.navigate(['/services']);
+          const outcome = await this.instancesConfig.deleteServiceInstance(cnsiGuid, guid, si.name);
+          if (outcome === 'deleted') {
+            void this.router.navigate(['/services']);
+          } else {
+            this.reread();
+          }
+          return outcome;
         },
+        unknownOutcomeWhere: 'This page',
         // Offering-bindability cache isn't warmed on this page; fail open so
         // Service Keys shows for managed instances (the builder's convention).
         isOfferingBindable: () => undefined,
@@ -246,15 +288,19 @@ export class ServiceInstanceSummaryComponent implements OnDestroy {
     this.registry.release(this.cfGuid);
   }
 
+  private reread(): void {
+    this.sourceRef.set(this.serviceCatalog.serviceInstance(this.cfGuid, this.siGuid));
+  }
+
   // Share is a managed-instance-only affordance — CF rejects sharing a
   // user-provided instance. Gated in the template so the button only shows
   // for managed instances that have loaded.
-  readonly canShare = computed(() => this.source.value()?.type != null
-    && this.source.value()?.type !== 'user-provided');
+  readonly canShare = computed(() => this.instance()?.type != null
+    && this.instance()?.type !== 'user-provided');
 
   /** Invoke a header action (the builder's invokes close over the instance). */
   runAction(action: SignalListRowAction<StServiceInstance>): void {
-    const si = this.source.value();
+    const si = this.instance();
     if (si) { void action.invoke(si); }
   }
 
@@ -263,7 +309,7 @@ export class ServiceInstanceSummaryComponent implements OnDestroy {
   // shared_spaces, body { guids }). The instance's own space is passed so the
   // picker can exclude it. Managed-only — see canShare.
   openShareToSpaces(): void {
-    const si = this.source.value();
+    const si = this.instance();
     if (!si) { return; }
     this.dialog.open<ShareServiceInstanceDialogComponent, ShareServiceInstanceDialogData, boolean>(
       ShareServiceInstanceDialogComponent,
@@ -290,16 +336,21 @@ export class ServiceInstanceSummaryComponent implements OnDestroy {
     );
     this.confirmDialog.open(confirm, async () => {
       try {
-        await runCfDelete(this.deleteController, this.http, {
+        const outcome = await runCfDelete(this.deleteController, this.http, {
           cnsiGuid: this.cfGuid,
           entityKind: serviceCredentialBindingEntityType,
           deleteGuid: row.guid,
           path: `/pp/v1/cf/service_bindings/${this.cfGuid}/${row.guid}`,
         });
-        // Re-issue the one-shot fetch so the unbound app drops out.
+        // Re-issue the one-shot fetch so the unbound app drops out, or so
+        // the list shows whether it did after an unknown result.
         this.bindingsSource.set(this.serviceCatalog.serviceBindingsForInstance(this.cfGuid, this.siGuid));
+        const how = unknownHowOf(outcome);
+        if (how) {
+          this.snackBar.error(unknownOutcomeMessage(`Unbind "${row.appName}"`, 'This page', how));
+        }
       } catch (err: unknown) {
-        this.snackBar.error(`Unbind failed: ${err instanceof Error ? err.message : String(err)}`);
+        this.snackBar.error(leadPieces('Unbind failed', err));
       }
     });
   }
@@ -310,8 +361,8 @@ export class ServiceInstanceSummaryComponent implements OnDestroy {
       name: si.name,
       isManaged,
       typeLabel: isManaged ? 'Managed' : 'User-provided',
-      status: si.lastOperation?.state ?? '',
-      statusDetail: si.lastOperation?.description ?? '',
+      lastOperation: lastOperationLabel(si),
+      lastOperationReason: lastOperationReasonPieces(si),
       plan: si.servicePlan?.name ?? '',
       offering: si.servicePlan?.serviceOffering?.name ?? '',
       broker: si.servicePlan?.serviceOffering?.broker?.name ?? '',

@@ -1,8 +1,6 @@
 import { CommonModule } from '@angular/common';
-import { Component, OnInit, ChangeDetectionStrategy, inject } from '@angular/core';
+import { Component, ChangeDetectionStrategy, Signal, computed, inject } from '@angular/core';
 import { Router } from '@angular/router';
-import { Observable } from 'rxjs';
-import { take, map } from 'rxjs/operators';
 
 import { CardWrapperComponent, CardContentComponent } from '../../../../../../../core/src/shared/components/cards';
 import { ActiveRouteCfOrgSpace } from '../../../cf-page.types';
@@ -25,33 +23,28 @@ interface UserInviteStepperLink {
     CardContentComponent
   ]
 })
-export class CloudFoundryInviteUserLinkComponent implements OnInit {
+export class CloudFoundryInviteUserLinkComponent {
   private userInviteService = inject(UserInviteService);
   private activeRouteCfOrgSpace = inject(ActiveRouteCfOrgSpace);
   private router = inject(Router);
 
 
-  inviteUserDetails$!: Observable<UserInviteStepperLink | null>;
-
-  ngOnInit() {
-    this.inviteUserDetails$ = this.createInviteUserDetails(
-      this.activeRouteCfOrgSpace.cfGuid,
-      this.activeRouteCfOrgSpace.orgGuid,
-      this.activeRouteCfOrgSpace.spaceGuid
-    );
-  }
+  /** The invite link to show; null until it is known that the user can invite. */
+  readonly inviteUserDetails: Signal<UserInviteStepperLink | null> = this.createInviteUserDetails(
+    this.activeRouteCfOrgSpace.cfGuid,
+    this.activeRouteCfOrgSpace.orgGuid,
+    this.activeRouteCfOrgSpace.spaceGuid
+  );
 
   inviteUser(stepperUrl: string) {
     this.router.navigate([stepperUrl]);
   }
 
-  createInviteUserDetails(cfGuid: string, orgGuid: string, spaceGuid: string): Observable<UserInviteStepperLink | null> {
-    return this.userInviteService.canShowInviteUser(cfGuid, orgGuid, spaceGuid).pipe(
-      take(1),
-      map(canInvite => canInvite ? {
-        url: createCfOrgSpaceSteppersUrl(cfGuid, '/users/invite', orgGuid, spaceGuid),
-        text: `You can invite users to this ${spaceGuid ? 'space' : 'organization'} via email.`
-      } : null)
-    );
+  createInviteUserDetails(cfGuid: string, orgGuid: string, spaceGuid: string): Signal<UserInviteStepperLink | null> {
+    const canInvite = this.userInviteService.canShowInviteUser(cfGuid, orgGuid, spaceGuid);
+    return computed(() => canInvite() ? {
+      url: createCfOrgSpaceSteppersUrl(cfGuid, '/users/invite', orgGuid, spaceGuid),
+      text: `You can invite users to this ${spaceGuid ? 'space' : 'organization'} via email.`
+    } : null);
   }
 }

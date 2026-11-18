@@ -1,8 +1,8 @@
 import { CommonModule } from '@angular/common';
-import { Component, ChangeDetectionStrategy, inject } from '@angular/core';
+import { Component, ChangeDetectionStrategy, computed, inject } from '@angular/core';
 import { RouterModule } from '@angular/router';
-import { Observable, of } from 'rxjs';
-import { catchError, map, startWith, take } from 'rxjs/operators';
+import { Observable } from 'rxjs';
+import { map, startWith } from 'rxjs/operators';
 
 import { PageHeaderComponent } from '../../../../../../../../core/src/shared/components/page-header/page-header.component';
 import { LoadingPageComponent } from '../../../../../../../../core/src/shared/components/loading-page/loading-page.component';
@@ -51,46 +51,39 @@ export class CloudFoundryCellBaseComponent {
     },
   ];
 
-  public breadcrumbs$: Observable<IHeaderBreadcrumb[]>;
   public name$: Observable<string>;
   public isLoading$: Observable<boolean>;
-  public cfCellService!: CloudFoundryCellService;
+  public cfCellService = inject(CloudFoundryCellService);
+  private cfEndpointService = inject(CloudFoundryEndpointService);
 
+  readonly breadcrumbs = computed<IHeaderBreadcrumb[] | null>(() => {
+    const endpoint = this.cfEndpointService.endpoint();
+    return endpoint ? [{
+      breadcrumbs: [{
+        value: endpoint.entity.name,
+        routerLink: `/cloud-foundry/${endpoint.entity.guid}/cells`
+      }]
+    }] : null;
+  });
 
   constructor() {
-    const cfEndpointService = inject(CloudFoundryEndpointService);
-    const cfCellService = inject(CloudFoundryCellService);
+    const cfCellService = this.cfCellService;
 
-
+    // cellMetric$ does not error: a failed request emits null and sets
+    // cfCellService.error(), which the template shows above the tabs.
     this.isLoading$ = cfCellService.cellMetric$.pipe(
       map(() => false),
-      catchError(() => of(false)),
       startWith(true)
     );
+    // cellMetric$ emits null when there is no sample or the request
+    // failed; the route's cell ID is the same bosh_job_id, so show that.
     this.name$ = cfCellService.cellMetric$.pipe(
-      // The metric can emit null before the cell metric resolves; a bare
-      // deref threw an unhandled TypeError inside the rxjs map.
-      map(metric => `${metric?.bosh_job_id ?? ''}`)
+      map(metric => metric?.bosh_job_id ?? cfCellService.cellId)
     );
 
-    this.breadcrumbs$ = cfEndpointService.endpoint$.pipe(
-      map(endpoint => ([
-        {
-          breadcrumbs: [
-            {
-              value: endpoint.entity.name,
-              routerLink: `/cloud-foundry/${endpoint.entity.guid}/cells`
-            }
-          ]
-        }
-      ])),
-      take(1)
-    );
-
+    // Admins only; hidden until the endpoint's user is known.
     // strict: AppsLinks tab is statically present in the tabLinks array literal above
-    this.tabLinks.find(link => link.link === CloudFoundryCellBaseComponent.AppsLinks)!.hidden$ =
-      cfEndpointService.currentUser$.pipe(
-        map(user => !user.admin)
-      );
+    this.tabLinks.find(link => link.link === CloudFoundryCellBaseComponent.AppsLinks)!.isHidden =
+      computed(() => !this.cfEndpointService.endpoint()?.entity.user?.admin);
   }
 }

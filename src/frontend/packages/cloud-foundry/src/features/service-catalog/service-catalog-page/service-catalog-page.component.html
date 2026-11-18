@@ -1,16 +1,16 @@
-<app-page-header [endpointIds$]="cfIds$">
+<app-page-header [endpointIds]="cfIds()">
   <h1>Services Marketplace</h1>
 </app-page-header>
 <app-cf-endpoints-missing></app-cf-endpoints-missing>
 
 <!-- Show loading indicator while endpoints resolve -->
-@if ((cloudFoundryService.hasRegisteredCFEndpoints$ | async) === false || (cloudFoundryService.hasConnectedCFEndpoints$ | async) === false) {
+@if (!cloudFoundryService.hasRegisteredCFEndpoints() || !cloudFoundryService.hasConnectedCFEndpoints()) {
   <app-area-loader message="Loading services…"></app-area-loader>
 }
 
-@if ((cloudFoundryService.hasRegisteredCFEndpoints$ | async) && (cloudFoundryService.hasConnectedCFEndpoints$ | async)) {
+@if (cloudFoundryService.hasRegisteredCFEndpoints() && cloudFoundryService.hasConnectedCFEndpoints()) {
   <app-duplicate-url-banner
-    [endpoints$]="cloudFoundryService.connectedCFEndpoints$"
+    [endpoints]="cloudFoundryService.connectedCFEndpoints()"
     nounPlural="Service offerings"></app-duplicate-url-banner>
   @if (listConfig(); as cfg) {
     <app-list-sub-nav title="Total Service Offerings"

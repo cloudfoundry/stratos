@@ -37,10 +37,28 @@ describe('CommitListWrapperComponent', () => {
 
     fixture = TestBed.createComponent(CommitListWrapperComponent);
     component = fixture.componentInstance;
-    fixture.detectChanges();
+    await fixture.whenStable();
   });
 
   it('should create', () => {
     expect(component).toBeTruthy();
+  });
+
+  // The wrapper is built when the step is entered, from the source the
+  // previous step saved; later changes to the source do not move it.
+  it('lists the commits of the branch saved when it appears, once', async () => {
+    const deployData = TestBed.inject(CfDeployAppDataService);
+    const branch = (name: string) => ({ name, guid: name, projectName: 'o/r', scmType: 'github', endpointGuid: '' });
+    deployData.setSourceType({ id: 'github', name: 'GitHub' });
+    expect(component.branchName()).toBe('');
+
+    deployData.saveAppDetails({ projectName: 'o/r', branch: branch('main'), endpointGuid: '' }, null);
+    await fixture.whenStable();
+    expect(component.branchName()).toBe('main');
+    expect(component.listConfig()).toBeDefined();
+
+    deployData.saveAppDetails({ projectName: 'o/r', branch: branch('dev'), endpointGuid: '' }, null);
+    await fixture.whenStable();
+    expect(component.branchName()).toBe('main');
   });
 });

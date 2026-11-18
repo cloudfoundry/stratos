@@ -57,4 +57,28 @@ describe('MarkdownPreviewComponent', () => {
 
     expect(fixture.nativeElement.querySelector('.markdown-preview__content')?.textContent).toContain('Some help text');
   });
+
+  // A help URL with no file behind it is answered by the SPA fallback, so the
+  // panel rendered the console's own index page as the help text.
+  it('says help is unavailable when the server returns an HTML page', async () => {
+    component.setProps({ documentUrl: '/missing.md' });
+    TestBed.inject(HttpTestingController).expectOne('/missing.md').flush(
+      '<!doctype html><html><body>Stratos Javascript is required</body></html>',
+      { headers: { 'Content-Type': 'text/html' } }
+    );
+    await fixture.whenStable();
+
+    const text = fixture.nativeElement.textContent;
+    expect(text).toContain('Help is not available');
+    expect(text).not.toContain('Javascript is required');
+  });
+
+  it('says help is unavailable when the fetch fails', async () => {
+    vi.spyOn(console, 'warn').mockImplementation(() => {});
+    component.setProps({ documentUrl: '/gone.md' });
+    TestBed.inject(HttpTestingController).expectOne('/gone.md').flush('', { status: 404, statusText: 'Not Found' });
+    await fixture.whenStable();
+
+    expect(fixture.nativeElement.textContent).toContain('Help is not available');
+  });
 });

@@ -1,8 +1,7 @@
-import { ChangeDetectionStrategy, ChangeDetectorRef, Component, OnInit, inject } from '@angular/core';
+import { ChangeDetectionStrategy, Component, inject, signal } from '@angular/core';
 import { AbstractControl, FormBuilder, FormControl, FormGroup, ReactiveFormsModule, ValidatorFn, Validators } from '@angular/forms';
 import { CommonModule } from '@angular/common';
 import { addDays, format } from 'date-fns';
-import { BehaviorSubject } from 'rxjs';
 
 import { TailwindErrorStateMatcher, TailwindShowOnDirtyErrorStateMatcher, TileGridComponent, TileGroupComponent, TileComponent, MetadataItemComponent } from '@stratosui/core';
 import { ApplicationService } from '@stratosui/cloud-foundry';
@@ -13,7 +12,7 @@ import {
   recurringSchedulesOverlapping,
   timeIsSameOrAfter,
 } from '../../../core/autoscaler-helpers/autoscaler-validation';
-import { AppAutoscalerInvalidPolicyError, AppAutoscalerPolicyLocal, AppRecurringSchedule } from '../../../store/app-autoscaler.types';
+import { AppAutoscalerInvalidPolicyError, AppRecurringSchedule } from '../../../store/app-autoscaler.types';
 import { EditAutoscalerPolicyDirective } from '../edit-autoscaler-policy-base-step';
 import {
   validateRecurringSpecificMax,
@@ -51,10 +50,9 @@ interface EditRecurringScheduleForm {
     MetadataItemComponent
   ]
 })
-export class EditAutoscalerPolicyStep3Component extends EditAutoscalerPolicyDirective implements OnInit {
+export class EditAutoscalerPolicyStep3Component extends EditAutoscalerPolicyDirective {
   applicationService = inject(ApplicationService);
   private fb = inject(FormBuilder);
-  private cdr = inject(ChangeDetectorRef);
 
 
   policyAlert = PolicyAlert;
@@ -62,14 +60,9 @@ export class EditAutoscalerPolicyStep3Component extends EditAutoscalerPolicyDire
   monthdayOptions = AutoscalerConstants.MonthdayOptions;
   editRecurringScheduleForm: FormGroup<EditRecurringScheduleForm>;
 
-  public declare currentPolicy: AppAutoscalerPolicyLocal;
-  // FWT-959 Part 2: editIndex backed by a BehaviorSubject so the parent
-  // orchestrator can bridge editIndex changes into a signal for its
-  // signal-step handle (valid / disablePrevious). Templates still read
-  // `editIndex` (now via getter), call-sites still write `this.editIndex = N`.
-  readonly editIndex$ = new BehaviorSubject<number>(-1);
-  get editIndex(): number { return this.editIndex$.value; }
-  set editIndex(v: number) { this.editIndex$.next(v); }
+  // Index of the row being edited, -1 when none. The parent reads it to gate
+  // Next and Previous.
+  readonly editIndex = signal(-1);
   protected editEffectiveType = 'always';
   protected editRepeatType = 'week';
   private editMutualValidation = {
@@ -95,8 +88,8 @@ export class EditAutoscalerPolicyStep3Component extends EditAutoscalerPolicyDire
     });
   }
 
-  // strict: autoscalerTransformArrayToMap (run in step1 ngOnInit, sharing one
-  // policy via the service) always sets schedules + recurring_schedule before
+  // strict: autoscalerTransformArrayToMap (run by the service policy, shared by
+  // every step) always sets schedules + recurring_schedule before
   // any step3 interaction, so both are guaranteed present at runtime even though
   // the shared AppAutoscalerPolicy type marks them optional.
   private get recurringSchedules(): AppRecurringSchedule[] {
@@ -110,15 +103,15 @@ export class EditAutoscalerPolicyStep3Component extends EditAutoscalerPolicyDire
   };
 
   removeRecurringSchedule(index: number) {
-    if (this.editIndex === index) {
-      this.editIndex = -1;
+    if (this.editIndex() === index) {
+      this.editIndex.set(-1);
     }
     this.recurringSchedules.splice(index, 1);
   }
 
   editRecurringSchedule(index: number) {
     const editSchedule = this.recurringSchedules[index];
-    this.editIndex = index;
+    this.editIndex.set(index);
     this.editEffectiveType = editSchedule.start_date ? 'custom' : 'always';
     this.editRepeatType = editSchedule.days_of_week ? 'week' : 'month';
     this.editRecurringScheduleForm.setValue({
@@ -143,7 +136,7 @@ export class EditAutoscalerPolicyStep3Component extends EditAutoscalerPolicyDire
     this.editRecurringScheduleForm.controls['instance_max_count'].setValidators([Validators.required,
     validateRecurringSpecificMax(this.editRecurringScheduleForm, this.editMutualValidation)]);
     if (this.editEffectiveType === 'custom') {
-      if (!this.recurringSchedules[this.editIndex].start_date &&
+      if (!this.recurringSchedules[this.editIndex()].start_date &&
         !this.editRecurringScheduleForm.get('start_date')?.value) {
         this.editRecurringScheduleForm.controls['start_date'].setValue(format(addDays(new Date(), 1), AutoscalerConstants.MomentFormateDate));
         this.editRecurringScheduleForm.controls['end_date'].setValue(format(addDays(new Date(), 1), AutoscalerConstants.MomentFormateDate));
@@ -171,7 +164,7 @@ export class EditAutoscalerPolicyStep3Component extends EditAutoscalerPolicyDire
   }
 
   finishRecurringSchedule() {
-    const currentSchedule = this.recurringSchedules[this.editIndex];
+    const currentSchedule = this.recurringSchedules[this.editIndex()];
     const repeatOn = ('days_of_' + this.editRepeatType) as 'days_of_week' | 'days_of_month';
     if (this.editRecurringScheduleForm.get('effective_type')?.value === 'custom') {
       currentSchedule.start_date = this.editRecurringScheduleForm.get('start_date')?.value ?? '';
@@ -193,7 +186,7 @@ export class EditAutoscalerPolicyStep3Component extends EditAutoscalerPolicyDire
     currentSchedule.instance_max_count = this.editRecurringScheduleForm.get('instance_max_count')?.value ?? 0;
     currentSchedule.start_time = this.editRecurringScheduleForm.get('start_time')?.value ?? '';
     currentSchedule.end_time = this.editRecurringScheduleForm.get('end_time')?.value ?? '';
-    this.editIndex = -1;
+    this.editIndex.set(-1);
   }
 
   validateRecurringScheduleGlobal(controlName?: string): ValidatorFn {
@@ -218,7 +211,7 @@ export class EditAutoscalerPolicyStep3Component extends EditAutoscalerPolicyDire
       const minValue = this.editRecurringScheduleForm?.get('instance_min_count')?.value ?? 0;
       const maxValue = this.editRecurringScheduleForm?.get('instance_max_count')?.value ?? Number.MAX_VALUE;
       const invalid = this.editRecurringScheduleForm &&
-        numberWithFractionOrExceedRange(control.value, minValue, maxValue + 1, false);
+        numberWithFractionOrExceedRange(control.value, minValue, maxValue, false);
       return invalid ? { alertInvalidPolicyInitialMaximumRange: { value: control.value } } : null;
     };
   }
@@ -266,7 +259,7 @@ export class EditAutoscalerPolicyStep3Component extends EditAutoscalerPolicyDire
         newSchedule.start_date = this.editRecurringScheduleForm.get('start_date')?.value ?? '';
         newSchedule.end_date = this.editRecurringScheduleForm.get('end_date')?.value ?? '';
       }
-      const invalid = recurringSchedulesOverlapping(newSchedule as AppRecurringSchedule, this.editIndex,
+      const invalid = recurringSchedulesOverlapping(newSchedule as AppRecurringSchedule, this.editIndex(),
         this.recurringSchedules, repeatProperty);
       return invalid ? { alertInvalidPolicyScheduleRecurringConflict: { value: control.value } } : null;
     };

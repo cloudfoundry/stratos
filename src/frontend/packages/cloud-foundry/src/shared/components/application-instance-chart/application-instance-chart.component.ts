@@ -1,4 +1,4 @@
-import { Component, Input, OnInit , ChangeDetectionStrategy } from '@angular/core';
+import { Component, OnInit, ChangeDetectionStrategy, input } from '@angular/core';
 
 import { MetricsChartComponent, MetricsConfig, MetricsLineChartConfig, MetricsChartHelpers, MetricsRangeSelectorComponent } from '@stratosui/core';
 import { MetricQueryConfig, IMetricMatrixResult, IMetricApplication, MetricQueryType, MetricsRequest } from '@stratosui/store';
@@ -17,27 +17,21 @@ const APP_METRICS_BASE_URL = '/pp/v1/metrics';
 })
 export class ApplicationInstanceChartComponent implements OnInit {
 
-  @Input()
-  private appGuid!: string;
+  // The request cannot be built without the app, endpoint and query.
+  protected readonly appGuid = input.required<string>();
 
-  @Input()
-  private endpointGuid!: string;
+  protected readonly endpointGuid = input.required<string>();
 
-  @Input()
-  private yAxisLabel!: string;
+  protected readonly yAxisLabel = input('');
 
   // Prometheus query string
-  @Input()
-  private queryString!: string;
+  protected readonly queryString = input.required<string>();
 
-  @Input()
-  private seriesTranslation!: string;
+  protected readonly seriesTranslation = input<string>();
 
-  @Input()
-  private queryRange = false;
+  protected readonly queryRange = input(false);
 
-  @Input()
-  public title!: string;
+  public readonly title = input<string>();
 
   public instanceChartConfig!: MetricsLineChartConfig;
 
@@ -46,12 +40,12 @@ export class ApplicationInstanceChartComponent implements OnInit {
   constructor() { }
 
   ngOnInit() {
-    this.instanceChartConfig = MetricsChartHelpers.buildChartConfig(this.yAxisLabel);
+    this.instanceChartConfig = MetricsChartHelpers.buildChartConfig(this.yAxisLabel());
     const request: MetricsRequest = {
-      endpointGuid: this.endpointGuid,
-      url: `${APP_METRICS_BASE_URL}/cf/app/${this.appGuid}`,
-      query: new MetricQueryConfig(this.queryString),
-      queryType: this.queryRange ? MetricQueryType.RANGE_QUERY : MetricQueryType.QUERY,
+      endpointGuid: this.endpointGuid(),
+      url: `${APP_METRICS_BASE_URL}/cf/app/${this.appGuid()}`,
+      query: new MetricQueryConfig(this.queryString()),
+      queryType: this.queryRange() ? MetricQueryType.RANGE_QUERY : MetricQueryType.QUERY,
       windowValue: null,
     };
     this.instanceMetricConfig = {
@@ -64,7 +58,7 @@ export class ApplicationInstanceChartComponent implements OnInit {
   }
 
   private mapSeriesItemValue() {
-    switch (this.seriesTranslation) {
+    switch (this.seriesTranslation()) {
       case 'mb':
         return (bytes: number) => (bytes / 1000000).toFixed(2);
       default:

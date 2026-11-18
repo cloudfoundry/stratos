@@ -133,6 +133,7 @@ func TestGetNativeAppsSummary_ReturnsStratosPagedEnvelope(t *testing.T) {
 				"resources": []map[string]interface{}{
 					{
 						"guid": "app-1", "name": "App One", "state": "STARTED",
+						"metadata": map[string]interface{}{"labels": map[string]string{"team": "platform", "empty": ""}},
 						"relationships": map[string]interface{}{
 							"space": map[string]interface{}{"data": map[string]interface{}{"guid": "space-1"}},
 						},
@@ -202,6 +203,7 @@ func TestGetNativeAppsSummary_ReturnsStratosPagedEnvelope(t *testing.T) {
 	require.NoError(t, json.NewDecoder(rec.Body).Decode(&resp))
 	require.Len(t, resp.Resources, 1)
 	assert.Equal(t, "app-1", resp.Resources[0].GUID)
+	assert.Equal(t, map[string]string{"team": "platform", "empty": ""}, resp.Resources[0].Labels)
 	assert.Equal(t, 52, resp.Pagination.TotalResults)
 	assert.Equal(t, 6, resp.Pagination.TotalPages)
 	require.NotNil(t, resp.Pagination.First)

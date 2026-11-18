@@ -97,10 +97,10 @@ describe('DetachServiceInstanceComponent.confirmStepHandle.submit (v3 + writeWit
 
     const fixture = TestBed.createComponent(DetachServiceInstanceComponent);
     const component = fixture.componentInstance;
-    // detectChanges first so the <app-detach-apps> child mounts and runs its
+    // Render first so the <app-detach-apps> child mounts and runs its
     // initial "empty selection" emit; setSelectedBindings then overrides with
     // the test's chosen bindings (mirroring the user's Step 1 selection).
-    fixture.detectChanges();
+    await fixture.whenStable();
     component.setSelectedBindings(bindings);
     return { fixture, component, httpMock: TestBed.inject(HttpTestingController) };
   }
@@ -163,6 +163,49 @@ describe('DetachServiceInstanceComponent.confirmStepHandle.submit (v3 + writeWit
     const failedRow = rows.find(r => r.guid === 'bind-bad');
     expect(failedRow?.status).toBe('error');
     expect(failedRow?.errorMessage).toContain('binding still referenced');
+
+    httpMock.match(() => true).forEach(r => r.flush({}, { status: 200, statusText: 'OK' }));
+  });
+
+  it('shows the broker detail when a delete fails on the fast path', async () => {
+    const { component, httpMock } = await bootstrap([makeBinding('bind-bad', 'app-1')]);
+
+    const submitPromise = component.confirmStepHandle.submit!();
+    httpMock.expectOne(`/pp/v1/cf/service_bindings/${cfGuid}/bind-bad`).flush(
+      {
+        state: 'FAILED',
+        errors: [{ code: 'cf.v3.10009', message: 'CF-UnableToPerform', detail: 'unbind could not be completed: <b>binding still referenced</b>' }],
+      },
+      { status: 502, statusText: 'Bad Gateway' },
+    );
+
+    await submitPromise;
+    const failedRow = component.rows().find(r => r.guid === 'bind-bad');
+    expect(failedRow?.status).toBe('error');
+    expect(failedRow?.errorMessage).toBe('unbind could not be completed: binding still referenced');
+
+    httpMock.match(() => true).forEach(r => r.flush({}, { status: 200, statusText: 'OK' }));
+  });
+
+  it('marks a binding whose unbind ended with an unknown result as unknown, not success', async () => {
+    const { component, httpMock } = await bootstrap([makeBinding('bind-u', 'app-1')]);
+
+    const submitPromise = component.confirmStepHandle.submit!();
+    httpMock.expectOne(`/pp/v1/cf/service_bindings/${cfGuid}/bind-u`).flush(
+      { id: 'job-u', state: 'PROCESSING', startedAt: '2026-05-09T00:00:00Z' },
+      { status: 202, statusText: 'Accepted' },
+    );
+    await Promise.resolve();
+    // The backend no longer knows the job: ended, result unknown.
+    httpMock.expectOne('/pp/v1/stratos/jobs/job-u').flush(null, { status: 404, statusText: 'Not Found' });
+
+    await submitPromise;
+    const row = component.rows().find(r => r.guid === 'bind-u');
+    expect(row?.status).toBe('unknown');
+    expect(row?.errorMessage).toBe(
+      'Unbind "app-1": the operation ended, but its result could not be determined. '
+      + 'The service instance\'s page shows the current state.',
+    );
 
     httpMock.match(() => true).forEach(r => r.flush({}, { status: 200, statusText: 'OK' }));
   });

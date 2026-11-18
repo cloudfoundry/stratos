@@ -1,10 +1,37 @@
 // Custom Icon Styles
+// The host is the icon's box and the glyph fills it, so a size on
+// <app-custom-icon> works, as it did on the mat-icon this replaced. The defaults
+// are in a layer so that a Tailwind utility on the host beats them
+// (docs/tailwind-usage.md). This file also styles other components, hence the
+// element in the :host selector.
+@layer base {
+  :host(app-custom-icon) {
+    display: inline-block;
+    font-size: 24px;
+    line-height: 1;
+    vertical-align: middle;
+  }
+
+  // An inline icon has no size of its own: it follows the text around it.
+  :host(app-custom-icon.custom-icon-inline) {
+    display: inline;
+    font-size: inherit;
+    line-height: inherit;
+    vertical-align: baseline;
+  }
+
+  // In the layer too, so a rule that sizes the glyph itself, such as the theme's
+  // icon size inside a button, still beats it.
+  .custom-icon {
+    font-size: inherit;
+  }
+}
+
 .custom-icon {
-  display: inline-block;
+  display: block;
   font-family: 'Material Icons';
   font-weight: normal;
   font-style: normal;
-  font-size: 24px;
   line-height: 1;
   letter-spacing: normal;
   text-transform: none;
@@ -13,9 +40,9 @@
   direction: ltr;
   -webkit-font-feature-settings: 'liga';
   -webkit-font-smoothing: antialiased;
-  vertical-align: middle;
 
   &.inline {
+    display: inline-block;
     font-size: inherit;
     line-height: inherit;
     vertical-align: baseline;

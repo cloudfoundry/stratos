@@ -12,12 +12,15 @@ export class ApplicationStateIconPipe implements PipeTransform {
         return cssClass;
       case 'icon':
         return icon;
+      case 'label':
+        // The state's name for assistive technology: 'STARTED' -> 'Started', 'ok' -> 'OK'.
+        return value === 'ok' ? 'OK' : value.charAt(0).toUpperCase() + value.slice(1).toLowerCase();
       default:
         return '';
     }
   }
 
-  transform(value: string | null, args?: string): string {
+  transform(value: string | null | undefined, args?: string): string {
     if (!value) {
       return '';
     }
@@ -34,7 +37,9 @@ export class ApplicationStateIconPipe implements PipeTransform {
       case 'ok':
         return this.result(args, value, 'text-success', 'lens');
       case 'tentative':
-        return this.result(args, value, 'text-tentative', 'lens');
+        // Hollow, so it differs from the filled ok circle by shape and not
+        // by color alone (WCAG 1.4.1).
+        return this.result(args, value, 'text-tentative', 'radio_button_unchecked');
       case 'incomplete':
         return this.result(args, value, 'text-tentative', 'broken_image');
       case 'warning':

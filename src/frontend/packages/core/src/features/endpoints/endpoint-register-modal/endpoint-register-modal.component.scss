@@ -145,3 +145,14 @@ button:focus,
     transform: translateY(0);
   }
 }
+
+/* The dialog body scrolls (max-h-[70vh]). A tall step, such as Connect with
+   its endpoint options, put the stepper's Previous/Next row below the fold,
+   under the dialog footer. Keep the row in view at the bottom of the body. */
+:host ::ng-deep .steppers-navigation {
+  position: sticky;
+  bottom: -1.5rem; /* the body's p-6 bottom padding */
+  z-index: 1;
+  padding-bottom: 1.5rem;
+  background: var(--card-bg);
+}

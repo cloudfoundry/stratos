@@ -1,8 +1,6 @@
 import { CommonModule } from '@angular/common';
 import { Component, ChangeDetectionStrategy, Signal, WritableSignal, computed, inject, signal } from '@angular/core';
-import { toSignal } from '@angular/core/rxjs-interop';
 import { Router, RouterModule } from '@angular/router';
-import { combineLatest, map } from 'rxjs';
 
 import {
   ConfirmationDialogService,
@@ -95,21 +93,14 @@ export class CloudFoundryOrganizationUsersComponent {
   readonly countPending: Signal<boolean> = computed(() => !this.usersConfig.hasLoadedOnce());
 
   /** True when the current user holds org or space role-change rights on
-   *  this endpoint. Bridged from Observable → signal via toSignal;
-   *  initialValue: false keeps actions safely disabled until first emission. */
-  private readonly canManageRoles: Signal<boolean> = toSignal(
-    combineLatest([
-      this.perms.can(CfCurrentUserPermissions.ORGANIZATION_CHANGE_ROLES, this.cfEndpointService.cfGuid),
-      this.perms.can(CfCurrentUserPermissions.SPACE_CHANGE_ROLES, this.cfEndpointService.cfGuid),
-    ]).pipe(map(([org, space]) => org || space)),
-    { initialValue: false },
-  );
+   *  this endpoint. False until the roles load, which keeps the actions
+   *  disabled until then. */
+  private readonly canChangeOrgRoles = this.perms.can(CfCurrentUserPermissions.ORGANIZATION_CHANGE_ROLES, this.cfEndpointService.cfGuid);
+  private readonly canChangeSpaceRoles = this.perms.can(CfCurrentUserPermissions.SPACE_CHANGE_ROLES, this.cfEndpointService.cfGuid);
+  private readonly canManageRoles: Signal<boolean> = computed(() => this.canChangeOrgRoles() || this.canChangeSpaceRoles());
 
   /** True when the CF endpoint has the UAA invite feature configured. */
-  private readonly userInviteAllowed: Signal<boolean> = toSignal(
-    this.userInviteService.configured$,
-    { initialValue: false },
-  );
+  private readonly userInviteAllowed: Signal<boolean> = this.userInviteService.configured;
 
   /** The concrete StUser objects for the current selection, resolved from
    *  filteredItems by row key. Used by Remove to pass actual role data to

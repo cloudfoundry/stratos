@@ -14,7 +14,7 @@
                 <span class="signal-detail-breadcrumb truncate">{{ c.label }}</span>
               }
               @if (!$last) {
-                <span class="material-icons text-base opacity-50 shrink-0">chevron_right</span>
+                <span aria-hidden="true" class="material-icons text-base opacity-50 shrink-0">chevron_right</span>
               }
             }
           </div>
@@ -35,7 +35,7 @@
                     [title]="act.tooltip ?? act.label"
                     (click)="invokeHeaderAction(act, $event)">
               @if (act.icon) {
-                <span class="material-icons text-base leading-none">{{ act.icon }}</span>
+                <span aria-hidden="true" class="material-icons text-base leading-none">{{ act.icon }}</span>
               }
               <span>{{ act.label }}</span>
             </button>
@@ -55,7 +55,7 @@
            [attr.data-test]="'signal-detail-tab-' + tab.label"
            class="signal-detail-tab flex items-center gap-1.5 px-4 py-2.5 text-sm border-b-2 border-transparent text-content-muted hover:text-content-text hover:border-content-border transition-colors whitespace-nowrap">
           @if (tab.icon) {
-            <span class="material-icons text-base leading-none">{{ tab.icon }}</span>
+            <span aria-hidden="true" class="material-icons text-base leading-none">{{ tab.icon }}</span>
           }
           <span>{{ tab.label }}</span>
         </a>
@@ -72,7 +72,7 @@
       </div>
     } @else if (hasError()) {
       <div data-test="signal-detail-error"
-           class="m-4 p-3 rounded border border-danger-shade-300 bg-danger-shade-50 dark:bg-danger-shade-900/20 dark:border-danger-shade-700 text-danger-shade-700 dark:text-danger-shade-200 text-sm">
+           class="m-4 p-3 rounded border border-[var(--danger-border)] bg-[var(--danger-bg)] text-[var(--danger-text)] text-sm">
         {{ errorMessage() }}
       </div>
     } @else {

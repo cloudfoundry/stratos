@@ -1,7 +1,5 @@
-import { Injector } from '@angular/core';
-import { toObservable } from '@angular/core/rxjs-interop';
+import { effect, Injector, Signal, untracked } from '@angular/core';
 import {
-  entityCatalog,
   EndpointModel,
   EndpointsDataService,
   EndpointType,
@@ -13,11 +11,12 @@ export interface ConnectAuthParams {
   password?: string;
   token?: string;
 }
-import { combineLatest, defer, from, Observable, of, Subject, Subscription, timer } from 'rxjs';
-import { delay, distinctUntilChanged, filter, map, pairwise, startWith, switchMap, tap } from 'rxjs/operators';
+import { combineLatest, defer, from, Observable, of, ReplaySubject, Subject, Subscription, timer } from 'rxjs';
+import { delay, filter, finalize, map, pairwise, shareReplay, startWith, switchMap, take, tap } from 'rxjs/operators';
 
 import { EndpointsService } from '../../core/endpoints.service';
 import { safeUnsubscribe } from '../../core/utils.service';
+import { TailwindSnackBarService } from '../../shared/services/tailwind-snackbar.service';
 import { rememberUsername } from './remembered-username';
 
 export interface ConnectEndpointConfig {
@@ -40,28 +39,17 @@ export interface ConnectEndpointData {
   bodyContent: string;
 }
 
-// Why is this here instead of somewhere more common? Answer - Because it'd create circulate dependencies due to reliance on entityCatalog
-//
-// endpoint-token-lifecycle (Task 3): left as-is rather than widened to treat
-// 'expired' as connected — this export currently has no importers anywhere
-// in the codebase (verified by repo-wide grep), so there is no dialog flow
-// to break either way. If a caller shows up, re-decide against that flow's
-// actual behaviour rather than defaulting to widen.
-export const isEndpointConnected = (endpoint: EndpointModel): boolean => {
-  if (!endpoint.cnsi_type) {
-    return endpoint.connectionStatus === 'connected';
-  }
-  const epType = entityCatalog.getEndpoint(endpoint.cnsi_type, endpoint.sub_type)?.definition;
-  return endpoint.connectionStatus === 'connected' || !!epType?.unConnectable;
-};
-
 export class ConnectEndpointService {
 
   public connectingError$!: Observable<string | null>;
   private hasConnected = new Subject<boolean>();
+  // Each tokens call that succeeded
+  private connectSucceeded = new Subject<void>();
 
-  // This Observable is used to observe when conenction has completed
+  // Emits when a connect has completed: true when this service has already
+  // told the user (its "Connected to …" offer), so the caller need not.
   public hasConnected$: Observable<boolean> = this.hasConnected.asObservable();
+  private reportedConnect = false;
   public isBusy$!: Observable<boolean>;
 
   private connecting$!: Observable<boolean>;
@@ -70,8 +58,11 @@ export class ConnectEndpointService {
   private update$!: Observable<ActionState>;
 
   private subs: Subscription[] = [];
+  // Ends the signal bridges made by observe(); see there.
+  private bridgeTeardowns: (() => void)[] = [];
 
   private hasAttemptedConnect!: boolean;
+  private inFlight?: Observable<{ success: boolean, errorMessage: string }>;
   private pData!: ConnectEndpointData;
 
   // We need a delay to ensure the BE has finished registering the endpoint.
@@ -112,38 +103,27 @@ export class ConnectEndpointService {
       }
     }));
 
-    this.subs.push(this.connected$.pipe(
-      // Gate on hasAttemptedConnect (like connectingError$): for an
-      // already-connected endpoint (Reconnect flow) the endpoint carries a
-      // user from the moment the dialog opens, and without the gate the
-      // pre-existing connection reads as an instant success - the dialog
-      // self-closes with a "Connected" snackbar before any input.
-      filter(([isConnected]) => isConnected && this.hasAttemptedConnect),
+    // Report a connect only once the tokens call succeeded. An endpoint
+    // being Reconnected is connected throughout, so watching it for a
+    // user read any refresh of the endpoint list during a failed attempt
+    // as success, and the dialog closed with no error shown.
+    this.subs.push(this.connectSucceeded.pipe(
+      switchMap(() => this.connected$.pipe(filter(([isConnected]) => isConnected), take(1))),
       delay(this.connectDelay),
-      tap(() => this.hasConnected.next(true)),
-      distinctUntilChanged(([isConnected], [oldIsConnected]) => isConnected && oldIsConnected),
+      tap(() => this.hasConnected.next(this.reportedConnect)),
     ).subscribe(([, endpoint]) => this.endpointsService.checkEndpoint(endpoint))
     );
   }
 
   private setupObservables() {
-    // W36-B Wave 3: replace ngrx EntityMonitor reads with toObservable()
+    // W36-B Wave 3: replace ngrx EntityMonitor reads with observe()
     // bridges over EndpointsDataService signals. The service already
     // exposes `connectingState(guid)` / `fetchingState(guid)` /
     // `endpointById(guid)` per the Wave 1 surface lock; we just lift
     // them into the Observable shape this rxjs-heavy class expects.
-    const connectingState$ = toObservable(
-      this.endpointsData.connectingState(this.config.guid),
-      { injector: this.injector },
-    );
-    const fetchingState$ = toObservable(
-      this.endpointsData.fetchingState(this.config.guid),
-      { injector: this.injector },
-    );
-    const endpoint$ = toObservable(
-      this.endpointsData.endpointById(this.config.guid),
-      { injector: this.injector },
-    );
+    const connectingState$ = this.observe(this.endpointsData.connectingState(this.config.guid));
+    const fetchingState$ = this.observe(this.endpointsData.fetchingState(this.config.guid));
+    const endpoint$ = this.observe(this.endpointsData.endpointById(this.config.guid));
 
     // update$ is the per-guid connecting lifecycle (replaces legacy
     // `getUpdatingSection(ConnectEndpoint.UpdatingKey)`). Initial
@@ -190,11 +170,29 @@ export class ConnectEndpointService {
     this.setupCombinedObservables();
   }
 
+  // toObservable() with this connect's lifetime. toObservable() ends its
+  // effect only when the injector is destroyed, and the caller's injector
+  // (the page or stepper) outlives each connect, so every connect left
+  // three effects running. Same values and timing: one effect per signal,
+  // created now, latest value replayed to later subscribers.
+  private observe<T>(source: Signal<T>): Observable<T> {
+    const subject = new ReplaySubject<T>(1);
+    const ref = effect(() => {
+      const value = source();
+      untracked(() => subject.next(value));
+    }, { injector: this.injector, manualCleanup: true });
+    this.bridgeTeardowns.push(() => {
+      ref.destroy();
+      subject.complete();
+    });
+    return subject.asObservable();
+  }
+
   private setupCombinedObservables() {
-    this.isBusy$ = combineLatest(
+    this.isBusy$ = combineLatest([
       this.connecting$.pipe(startWith(false)),
       this.fetchingInfo$.pipe(startWith(false))
-    ).pipe(
+    ]).pipe(
       map(([connecting, fetchingInfo]) => connecting || fetchingInfo),
     );
   }
@@ -204,6 +202,40 @@ export class ConnectEndpointService {
   }
 
   public submit(): Observable<{ success: boolean, errorMessage: string }> {
+    // One connect at a time: a submit while one runs (Enter pressed again,
+    // or Enter after the Connect button) shares it instead of starting
+    // another.
+    return defer(() => {
+      if (!this.inFlight) {
+        this.inFlight = this.connect().pipe(
+          take(1),
+          finalize(() => this.inFlight = undefined),
+          shareReplay({ bufferSize: 1, refCount: false }),
+        );
+      }
+      return this.inFlight;
+    });
+  }
+
+  // The user is also connected, at the same address, to endpoints of this
+  // type that the backend paired with this one (a personal endpoint is
+  // involved). Every connection stays unless the user asks; dismissing
+  // keeps them all. The message reports the connect too: one connect, one
+  // message.
+  private offerDisconnect(others: { guid: string, name: string }[]) {
+    const snackBar = this.injector.get(TailwindSnackBarService);
+    const names = others.map(other => `'${other.name}'`).join(', ');
+    snackBar.show(`Connected to '${this.config.name}'. You are also connected to this address through ${names}. ` +
+      'Dismiss to keep all connected.', 'Disconnect others')
+      .onAction().pipe(take(1)).subscribe(() => others.forEach(other =>
+        this.endpointsData.disconnect(other.guid).then(state => {
+          if (state.error) {
+            snackBar.show(`Could not disconnect '${other.name}': ${state.message}`, 'Dismiss');
+          }
+        })));
+  }
+
+  private connect(): Observable<{ success: boolean, errorMessage: string }> {
     this.hasAttemptedConnect = true;
     const { authType, authVal, systemShared } = this.pData;
     // bodyContent is intentionally unused — see body: null comment below.
@@ -245,6 +277,11 @@ export class ConnectEndpointService {
           if (username) {
             rememberUsername(this.config.guid, username);
           }
+          this.reportedConnect = !!actionState.alsoConnected?.length;
+          this.connectSucceeded.next();
+          if (actionState.alsoConnected?.length) {
+            this.offerDisconnect(actionState.alsoConnected);
+          }
         }
         return {
           success: !actionState.error,
@@ -256,5 +293,7 @@ export class ConnectEndpointService {
 
   public destroy() {
     safeUnsubscribe(...this.subs);
+    this.bridgeTeardowns.forEach(teardown => teardown());
+    this.bridgeTeardowns = [];
   }
 }

@@ -1,4 +1,4 @@
-import { ChangeDetectionStrategy, Component, Input, OnInit } from '@angular/core';
+import { ChangeDetectionStrategy, Component, OnInit, input } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { RouterModule } from '@angular/router';
 import { CustomTooltipDirective } from '../custom-tooltip/custom-tooltip.directive';
@@ -27,10 +27,14 @@ export class ExtensionButtonsComponent implements OnInit {
 
   public extensionActions: StratosActionMetadata[] = [];
 
-  @Input() type!: StratosActionType;
+  readonly type = input<StratosActionType>();
 
   ngOnInit() {
-    this.extensionActions = getActionsFromExtensions(this.type).map(value => ({
+    const type = this.type();
+    if (!type) {
+      return;
+    }
+    this.extensionActions = getActionsFromExtensions(type).map(value => ({
       ...value,
       visible$: value.visible$ || of(true)
     }));

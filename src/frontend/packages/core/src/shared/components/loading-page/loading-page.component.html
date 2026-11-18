@@ -1,15 +1,15 @@
 <ng-content></ng-content>
-@if (isLoading | async) {
+@if (loading$() | async) {
   <div
     [@leaveLoaderAnimation]
     class="loading-page loading-page__overlay">
     <div class="loading-page__indicator">
-      @if (alert) {
+      @if (alert()) {
         <div class="loading-page__alert">
-          {{ alert }}
+          {{ alert() }}
         </div>
       }
-      <div class="loading-page__text">{{ text }}</div>
+      <div class="loading-page__text">{{ text() }}</div>
       <div class="flex justify-center" data-test="loading-page-indicator">
         @switch (resolved()) {
           @case ('logo') {

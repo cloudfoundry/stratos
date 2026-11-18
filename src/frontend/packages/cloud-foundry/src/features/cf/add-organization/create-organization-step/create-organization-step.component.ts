@@ -1,17 +1,17 @@
 import { CommonModule } from '@angular/common';
 import { HttpClient } from '@angular/common/http';
-import { Component, Injector, Input, OnDestroy, OnInit, ChangeDetectionStrategy, effect, inject, runInInjectionContext, signal } from '@angular/core';
-import { toObservable } from '@angular/core/rxjs-interop';
+import { Component, Injector, OnDestroy, OnInit, ChangeDetectionStrategy, effect, inject, runInInjectionContext, signal, input } from '@angular/core';
 import { AbstractControl, ReactiveFormsModule, ValidatorFn, Validators, FormBuilder, FormControl, FormGroup } from '@angular/forms';
 import { ActivatedRoute, Router } from '@angular/router';
-import { Observable, Subscription, firstValueFrom } from 'rxjs';
-import { filter, map, tap } from 'rxjs/operators';
+import { Subscription, firstValueFrom } from 'rxjs';
 
 import { AppErrorComponent, AppInputDirective, CustomFormFieldComponent, CustomSelectComponent, CustomOptionComponent, FocusDirective, SignalStepHandle, TailwindSnackBarService } from '@stratosui/core';
 import { CnsiOrgsSource } from '../../../../services/data-sources/cnsi-orgs-source';
 import { EndpointDataRegistry } from '../../../../services/endpoint-data/endpoint-data.registry';
+import { EndpointDataService } from '../../../../services/endpoint-data/endpoint-data.service';
 import { QuotaDataService, SignalSource } from '../../../../services/endpoint-data/quota-data.service';
 import { StOrgQuota } from '../../../../services/endpoint-data/stratos-types';
+import { leadError } from '@stratosui/store';
 
 interface CreateOrganizationForm {
   orgName: FormControl<string>;
@@ -48,7 +48,8 @@ export class CreateOrganizationStepComponent implements OnInit, OnDestroy {
   private formStatusSub?: Subscription;
 
   /** FWT-957: post-success navigation target supplied by parent. */
-  @Input() redirectUrl!: string;
+  // The one host stepper binds where to go on success.
+  readonly redirectUrl = input.required<string>();
 
   signalHandle: SignalStepHandle = {
     valid: this.validSignal.asReadonly(),
@@ -73,16 +74,14 @@ export class CreateOrganizationStepComponent implements OnInit, OnDestroy {
           this.endpointDataRegistry.release(this.cfGuid);
         }
       } catch (err: unknown) {
-        throw new Error(`Failed to create organization: ${err instanceof Error ? err.message : String(err)}`, { cause: err });
+        throw leadError('Failed to create organization', err);
       }
-      await this.router.navigateByUrl(this.redirectUrl);
+      await this.router.navigateByUrl(this.redirectUrl());
     },
   };
 
-  orgSubscription!: Subscription;
   cfGuid: string;
-  allOrgs: string[] = [];
-  orgs$!: Observable<string[]>;
+  private endpointData?: EndpointDataService;
   cfUrl!: string;
   addOrg!: FormGroup<CreateOrganizationForm>;
 
@@ -106,14 +105,9 @@ export class CreateOrganizationStepComponent implements OnInit, OnDestroy {
     );
 
     // V3-native: org-name list comes from the EndpointDataService signal.
-    const endpointData = this.endpointDataRegistry.acquire(this.cfGuid);
+    const endpointData = this.endpointData = this.endpointDataRegistry.acquire(this.cfGuid);
     endpointData.load().subscribe({ error: () => {} });
     endpointData.loadDetails().subscribe({ error: () => {} });
-    this.orgs$ = toObservable(endpointData.orgs, { injector: this.injector }).pipe(
-      filter(orgs => !!orgs && orgs.length > 0),
-      map(orgs => orgs.map(o => o.name)),
-      tap(names => this.allOrgs = names),
-    );
 
     // Quota dropdown source — pre-pick when there's only one option.
     this.quotaSource = this.quotaData.orgQuotas(this.cfGuid);
@@ -125,8 +119,6 @@ export class CreateOrganizationStepComponent implements OnInit, OnDestroy {
         }
       });
     });
-
-    this.orgSubscription = this.orgs$.subscribe();
   }
 
   // Exposed for the template's dropdown.
@@ -137,12 +129,14 @@ export class CreateOrganizationStepComponent implements OnInit, OnDestroy {
       !this.validateNameTaken(formField.value) ? { nameTaken: { value: formField.value } } : null;
   };
 
-  validateNameTaken = (value: string | null = null) => this.allOrgs.length === 0 ? true : this.allOrgs.indexOf(value || this.orgName.value) === -1;
+  validateNameTaken = (value: string | null = null) => {
+    const orgs = this.endpointData?.orgs() ?? [];
+    return orgs.length === 0 ? true : !orgs.some(o => o.name === (value || this.orgName.value));
+  };
 
   validate = () => this.validSignal();
 
   ngOnDestroy() {
-    this.orgSubscription?.unsubscribe();
     this.formStatusSub?.unsubscribe();
     this.endpointDataRegistry.release(this.cfGuid);
   }

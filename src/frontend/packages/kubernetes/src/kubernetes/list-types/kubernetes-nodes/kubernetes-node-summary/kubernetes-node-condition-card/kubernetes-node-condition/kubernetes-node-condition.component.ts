@@ -1,7 +1,5 @@
-import { AsyncPipe, NgStyle } from '@angular/common';
-import {Component, Input, OnInit, inject, ChangeDetectionStrategy } from '@angular/core';
-import { Observable } from 'rxjs';
-import { filter, map } from 'rxjs/operators';
+import { NgStyle } from '@angular/common';
+import { Component, computed, inject, ChangeDetectionStrategy, input } from '@angular/core';
 
 import { BooleanIndicatorComponent, BooleanIndicatorTypeValue } from '@stratosui/core';
 import { KubernetesNodeService } from '../../../../../services/kubernetes-node.service';
@@ -12,31 +10,25 @@ import { ConditionType, ConditionTypeLabels, KubernetesCondition } from '../../.
   templateUrl: './kubernetes-node-condition.component.html',
   changeDetection: ChangeDetectionStrategy.OnPush,
   standalone: true,
-  imports: [AsyncPipe, NgStyle, BooleanIndicatorComponent]
+  imports: [NgStyle, BooleanIndicatorComponent]
 })
-export class KubernetesNodeConditionComponent implements OnInit {
+export class KubernetesNodeConditionComponent {
 
 
-  @Input()
-  condition!: ConditionType | `${ConditionType}`; // strict: required @Input, templates bind literal strings (condition="Ready")
-  // boolean | undefined: an "Unknown" condition status renders as the indicator's unknown state
-  condition$!: Observable<boolean | undefined>; // strict: assigned in ngOnInit before the template reads it
-  hasCondition$!: Observable<boolean>; // strict: assigned in ngOnInit before the template reads it
+  // Every host binds it, as a literal string (condition="Ready").
+  readonly condition = input.required<ConditionType | `${ConditionType}`>();
 
-  @Input()
-  overrideCondition$?: Observable<boolean>;
+  // Set by the host for a row that is not one of the node's conditions
+  // (the CaaSP rows); it replaces the node's own value.
+  readonly overrideCondition = input<boolean>();
 
-  @Input()
-  type: BooleanIndicatorTypeValue = 'yes-no';
+  readonly type = input<BooleanIndicatorTypeValue>('yes-no');
 
-  @Input()
-  inverse = false;
+  readonly inverse = input(false);
 
-  @Input()
-  subtle = false;
+  readonly subtle = input(false);
 
-  @Input()
-  paddingTop = '20px';
+  readonly paddingTop = input('20px');
 
   public titles = ConditionTypeLabels;
 
@@ -53,18 +45,18 @@ export class KubernetesNodeConditionComponent implements OnInit {
   };
   public kubeNodeService = inject(KubernetesNodeService);
 
-  ngOnInit() {
-    this.condition$ = this.overrideCondition$ ? this.overrideCondition$ : this.kubeNodeService.node$.pipe(
-      filter(p => !!p && !!p.entity),
-      map(p => p.entity.status.conditions),
-      map(conditions => conditions.filter(o => o.type === this.condition)),
-      filter(conditions => !!conditions.length),
-      map(conditions => this.shouldBeGreen(conditions[0]))
-    );
-    this.hasCondition$ = this.condition$.pipe(
-      map(() => true)
-    );
-  }
+  // The node's condition of this type; null when the node has none.
+  private readonly nodeCondition = computed(() => {
+    const conditions = (this.kubeNodeService.node()?.status?.conditions ?? [])
+      .filter(o => o.type === this.condition());
+    return conditions.length ? { value: this.shouldBeGreen(conditions[0]) } : null;
+  });
+  readonly hasCondition = computed(() => this.overrideCondition() !== undefined || !!this.nodeCondition());
+  // boolean | undefined: an "Unknown" condition status renders as the indicator's unknown state
+  readonly conditionValue = computed(() => {
+    const override = this.overrideCondition();
+    return override !== undefined ? override : this.nodeCondition()?.value;
+  });
 
   shouldBeGreen(condition: KubernetesCondition): boolean | undefined {
     if (condition.status === 'True') {

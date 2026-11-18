@@ -1,6 +1,7 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
-import { provideZonelessChangeDetection } from '@angular/core';
-import { describe, it, expect, beforeEach } from 'vitest';
+import { provideZonelessChangeDetection, signal } from '@angular/core';
+import { describe, it, expect, beforeEach, vi } from 'vitest';
+import { provideRouter } from '@angular/router';
 
 import { TabNavService } from '@stratosui/core';
 import { STORE_TEST_PROVIDERS } from '@stratosui/store/testing';
@@ -8,6 +9,8 @@ import { ApplicationStateService } from '../../../shared/services/application-st
 import { generateTestApplicationServiceProvider } from '@test-framework/application-service-helper';
 import { ApplicationEnvVarsHelper } from '../application/application-tabs-base/tabs/build-tab/application-env-vars.service';
 import { EditApplicationComponent } from './edit-application.component';
+import { ApplicationService } from '../application.service';
+import { AppDetailDataService } from '../app-detail-data.service';
 
 const appId = '4e4858c4-24ab-4caf-87a8-7703d1da58a0';
 const cfId = '01ccda9d-8f40-4dd0-bc39-08eea68e364f';
@@ -36,5 +39,135 @@ describe('EditApplicationComponent', () => {
   // The component requires EntityCatalogHelper to be initialized, which needs proper entity catalog setup
   it('should be defined', () => {
     expect(EditApplicationComponent).toBeDefined();
+  });
+});
+
+describe('EditApplicationComponent labels', () => {
+  let fixture: ComponentFixture<EditApplicationComponent>;
+  let component: EditApplicationComponent;
+  const update = vi.fn();
+
+  beforeEach(async () => {
+    update.mockReset();
+    update.mockResolvedValue(undefined);
+    TestBed.configureTestingModule({
+      imports: [EditApplicationComponent],
+      providers: [
+        ...STORE_TEST_PROVIDERS,
+        ApplicationStateService,
+        ApplicationEnvVarsHelper,
+        TabNavService,
+        provideRouter([]),
+        { provide: ApplicationService, useValue: { cfGuid: cfId, appGuid: appId } },
+        { provide: AppDetailDataService, useValue: {
+          appDetail: signal({ app: { labels: { team: 'old', keep: 'yes' } } }), update,
+          app: signal({ entity: {
+            name: 'my-app', instances: 1, memory: 256, disk_quota: 1024, enable_ssh: true, space_guid: 'sp-1',
+          } }),
+        } },
+        provideZonelessChangeDetection(),
+      ],
+    });
+    fixture = TestBed.createComponent(EditApplicationComponent);
+    component = fixture.componentInstance;
+    await fixture.whenStable();
+  });
+
+  // app-form-field projects only inputs, errors, hints and [matSuffix]
+  // content; anything else inside it is dropped.
+  it('shows the name check beside the name', () => {
+    expect(fixture.nativeElement.querySelector('app-form-field app-stateful-icon')).not.toBeNull();
+  });
+
+  it('initializes labels and turns Enter into a removable pill', async () => {
+    expect(component.editAppForm.controls.labels.value).toEqual({ team: 'old', keep: 'yes' });
+    const input = fixture.nativeElement.querySelector('#app-label-input') as HTMLInputElement;
+    input.value = 'example.com/team=platform';
+    input.dispatchEvent(new Event('input'));
+    input.dispatchEvent(new KeyboardEvent('keydown', { key: 'Enter', bubbles: true, cancelable: true }));
+    await fixture.whenStable();
+    expect(component.editAppForm.controls.labels.value['example.com/team']).toBe('platform');
+    expect(fixture.nativeElement.textContent).toContain('example.com/team=platform');
+    expect(component.signalHandle.valid()).toBe(true);
+    fixture.nativeElement.querySelector('[aria-label="Remove label team"]').click();
+    expect(component.editAppForm.controls.labels.value.team).toBeUndefined();
+    expect(await component.updateApp()).toMatchObject({ success: true });
+    expect(update).toHaveBeenCalledWith({ labels: { team: null, 'example.com/team': 'platform' } });
+  });
+
+  it('rejects duplicate keys and blocks saving text not yet added as a pill', () => {
+    const control = component.editAppForm.controls.labelInput;
+    control.setValue('team=new');
+    component.addLabel(new Event('keydown', { cancelable: true }));
+    expect(control.hasError('duplicateLabel')).toBe(true);
+    expect(component.editAppForm.invalid).toBe(true);
+    expect(update).not.toHaveBeenCalled();
+    control.setValue('new=value');
+    expect(control.hasError('pendingLabel')).toBe(true);
+  });
+
+  it('clears the duplicate-key error once the colliding label is removed', () => {
+    const control = component.editAppForm.controls.labelInput;
+    control.setValue('team=new');
+    component.addLabel(new Event('keydown', { cancelable: true }));
+    expect(control.hasError('duplicateLabel')).toBe(true);
+    component.removeLabel('team');
+    expect(control.hasError('duplicateLabel')).toBe(false);
+    expect(control.hasError('pendingLabel')).toBe(true);
+  });
+
+  it('says why Cloud Foundry would reject a label before it becomes a pill', async () => {
+    const control = component.editAppForm.controls.labelInput;
+    control.setValue('team@x=platform');
+    component.addLabel(new Event('keydown', { cancelable: true }));
+    await fixture.whenStable();
+    expect(component.editAppForm.controls.labels.value['team@x']).toBeUndefined();
+    expect(fixture.nativeElement.textContent)
+      .toContain('Label key "team@x" may only use letters, digits, "-", "_" and ".".');
+    expect(component.editAppForm.invalid).toBe(true);
+  });
+
+  it('ties the label input to its hint and message for assistive tech', async () => {
+    const input = fixture.nativeElement.querySelector('#app-label-input') as HTMLInputElement;
+    const describedBy = (input.getAttribute('aria-describedby') ?? '').split(' ');
+    expect(describedBy).toEqual(['app-label-hint', 'app-label-message']);
+    expect(fixture.nativeElement.querySelector('#app-label-hint').textContent).toContain('key=value');
+    const message = fixture.nativeElement.querySelector('#app-label-message') as HTMLElement;
+    expect(message.getAttribute('aria-live')).toBe('polite');
+    expect(input.hasAttribute('aria-invalid')).toBe(false);
+
+    const control = component.editAppForm.controls.labelInput;
+    control.setValue('team=new');
+    component.addLabel(new Event('keydown', { cancelable: true }));
+    await fixture.whenStable();
+    expect(input.getAttribute('aria-invalid')).toBe('true');
+    expect(message.textContent).toContain('A label with this key already exists.');
+
+    // Text not yet added blocks Update but is not an error in the input.
+    input.value = 'fresh=value';
+    input.dispatchEvent(new Event('input'));
+    await fixture.whenStable();
+    expect(input.hasAttribute('aria-invalid')).toBe(false);
+    expect(message.textContent).toContain('Press Enter to add this label.');
+  });
+
+  it('styles label pills with theme colours, not raw greys', () => {
+    const pill = fixture.nativeElement.querySelector('[aria-label="Remove label team"]')!.parentElement as HTMLElement;
+    expect(pill.className).not.toMatch(/gray/);
+    expect(pill.className).toContain('bg-content-secondary');
+  });
+
+  it('ignores the Enter that confirms an IME composition', () => {
+    const control = component.editAppForm.controls.labelInput;
+    control.setValue('new=value');
+    component.addLabel(new KeyboardEvent('keydown', { key: 'Enter', isComposing: true, cancelable: true }));
+    expect(component.editAppForm.controls.labels.value['new']).toBeUndefined();
+    expect(control.value).toBe('new=value');
+  });
+
+  it('keeps form open when the labels request fails', async () => {
+    update.mockRejectedValue(new Error('CF rejected the label'));
+    component.removeLabel('team');
+    await expect(component.updateApp()).rejects.toThrow('CF rejected the label');
   });
 });

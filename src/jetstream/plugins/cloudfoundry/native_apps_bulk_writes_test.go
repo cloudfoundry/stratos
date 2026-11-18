@@ -10,6 +10,7 @@ import (
 	"sync"
 	"testing"
 
+	"github.com/cloudfoundry/stratos/src/jetstream/plugins/stratosjobs"
 	"github.com/labstack/echo/v5"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
@@ -157,4 +158,21 @@ func TestBulkDeleteNativeApps_Validation(t *testing.T) {
 		})
 	}
 	assert.Equal(t, 0, capiHits, "validation must reject before any CF call")
+}
+
+// TestBulkItemErrorsFromJob verifies a job that failed inside the
+// fast-path window reports the BulkItemError contract: CF's title as Code
+// and its detail as Message, so the summary gives CF's explanation rather
+// than its error name. A job error without a detail keeps its title.
+func TestBulkItemErrorsFromJob(t *testing.T) {
+	got := bulkItemErrorsFromJob([]stratosjobs.StratosError{
+		{Code: "cf.v3.10008", Message: "CF-UnprocessableEntity",
+			Detail: "An operation for the service binding between app l9d-d and service instance p2-reload is in progress."},
+		{Code: "cf.v3.10001", Message: "CF-ServiceUnavailable"},
+	})
+	assert.Equal(t, []BulkItemError{
+		{Code: "CF-UnprocessableEntity",
+			Message: "An operation for the service binding between app l9d-d and service instance p2-reload is in progress."},
+		{Code: "CF-ServiceUnavailable", Message: "CF-ServiceUnavailable"},
+	}, got)
 }

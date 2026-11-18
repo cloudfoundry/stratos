@@ -1,13 +1,11 @@
 import { CommonModule } from '@angular/common';
-import { AfterContentInit, Component, Input, OnInit, Signal, ViewChild, ChangeDetectionStrategy, computed, inject } from '@angular/core';
-import { toObservable } from '@angular/core/rxjs-interop';
+import { AfterContentInit, Component, OnInit, Signal, ChangeDetectionStrategy, computed, inject, input, untracked, viewChild } from '@angular/core';
 import { FormsModule, NgForm } from '@angular/forms';
 import { ActivatedRoute } from '@angular/router';
-import { asapScheduler, Observable, of } from 'rxjs';
-import { map, observeOn, startWith, switchMap, withLatestFrom } from 'rxjs/operators';
+import { asapScheduler, Observable } from 'rxjs';
+import { map, observeOn, startWith } from 'rxjs/operators';
 
-import { AppErrorComponent, CustomFormFieldComponent, CustomSelectComponent, CustomOptionComponent, FocusDirective, StepOnNextFunction } from '@stratosui/core';
-import { ISpace } from '../../../../cf-api.types';
+import { AppErrorComponent, CustomFormFieldComponent, CustomSelectComponent, CustomOptionComponent, FocusDirective, StepOnNextResult } from '@stratosui/core';
 import { CfCurrentUserRolesDataService } from '../../../../services/cf-current-user-roles-data.service';
 import { CfPermissionStrings } from '../../../../user-permissions/cf-user-permissions-checkers';
 import { CfOrgSpaceDataService } from '../../../data-services/cf-org-space-service.service';
@@ -36,19 +34,27 @@ export class CreateApplicationStep1Component implements OnInit, AfterContentInit
   route = inject(ActivatedRoute);
 
 
-  @Input()
-  isMarketplaceMode!: boolean;
+  readonly isMarketplaceMode = input<boolean>();
 
-  public spaces$!: Observable<ISpace[]>;
-  public hasSpaces$!: Observable<boolean>;
+  // The spaces of the picked org the user can develop in: all of them when
+  // the roles are not known yet.
+  readonly spaces = computed(() => {
+    const spaces = this.cfOrgSpaceService.space.list();
+    const endpointGuid = this.cfOrgSpaceService.cf.select();
+    const orgGuid = this.cfOrgSpaceService.org.select();
+    const developerIn = untracked(() => this.cfCurrentUserRoles.spacesWithRoleInOrg(
+      endpointGuid!, orgGuid!, CfPermissionStrings.SPACE_DEVELOPER,
+    ))();
+    return developerIn === 'all' ? spaces : spaces.filter(space => developerIn.some(guid => guid === space.guid));
+  });
+  readonly hasSpaces = computed(() => this.spaces().length > 0);
   // Signal-native — direct computed over the service's org.list signal.
   // Template reads as `hasOrgs()`.
   public hasOrgs: Signal<boolean> = computed(() => this.cfOrgSpaceService.org.list().length > 0);
 
-  @ViewChild('cfForm', { static: true })
-  cfForm!: NgForm;
+  readonly cfForm = viewChild.required<NgForm>('cfForm');
 
-  @Input() isRedeploy = false;
+  readonly isRedeploy = input(false);
 
   // A deploy scoped to an endpoint arrives with an `endpointGuid` query
   // param (e.g. from a CF's Applications tab). The CF is fixed for the
@@ -59,8 +65,19 @@ export class CreateApplicationStep1Component implements OnInit, AfterContentInit
 
   validate!: Observable<boolean>;
 
-  @Input()
-  stepperText = 'Select a Cloud Foundry instance, organization and space for the app.';
+  readonly stepperText = input('Select a Cloud Foundry instance, organization and space for the app.');
+
+  // The heading shown. A redeploy and the marketplace flow have their own
+  // text, which replaces the bound one.
+  protected readonly heading = computed(() => {
+    if (this.isMarketplaceMode()) {
+      return 'Select an organization and space for the service instance.';
+    }
+    if (this.isRedeploy()) {
+      return 'Review the Cloud Foundry instance, organization and space for the app.';
+    }
+    return this.stepperText();
+  });
 
   /**
    * Cascade clears: selecting "None" on CF should also clear the Org
@@ -79,7 +96,7 @@ export class CreateApplicationStep1Component implements OnInit, AfterContentInit
    * `dirty`). markAsPristine alone does not emit statusChanges.
    */
   private resetControlPristine(name: string) {
-    const control = this.cfForm?.control?.get(name);
+    const control = this.cfForm()?.control?.get(name);
     if (control) {
       control.markAsPristine();
       control.markAsUntouched();
@@ -122,71 +139,29 @@ export class CreateApplicationStep1Component implements OnInit, AfterContentInit
     }
   }
 
-  onNext: StepOnNextFunction = () => {
+  async onNext(): Promise<StepOnNextResult> {
     this.createAppState.setCFDetails({
       cloudFoundry: this.cfOrgSpaceService.cf.select(),
       org: this.cfOrgSpaceService.org.select(),
       space: this.cfOrgSpaceService.space.select()
     });
-    return of({ success: true });
-  };
+    return { success: true };
+  }
 
   ngOnInit() {
     if (this.route.root.snapshot.queryParams.endpointGuid) {
       this.cfOrgSpaceService.cf.select.set(this.route.root.snapshot.queryParams.endpointGuid);
       this.endpointScoped = true;
     }
-    this.spaces$ = this.getSpacesFromPermissions();
-    this.hasSpaces$ = this.spaces$.pipe(
-      map(spaces => !!spaces.length)
-    );
-    if (this.isRedeploy) {
-      this.stepperText = 'Review the Cloud Foundry instance, organization and space for the app.';
-    }
-
-    if (this.isMarketplaceMode) {
-      this.stepperText = 'Select an organization and space for the service instance.';
-    }
   }
 
   ngAfterContentInit() {
     // strict: cfForm is a `static: true` ViewChild, so the NgForm and its
     // statusChanges stream are initialised by the time ngAfterContentInit runs.
-    this.validate = this.cfForm.statusChanges!.pipe(
-      startWith(this.cfForm.valid || this.isRedeploy),
-      map(() => this.cfForm.valid || this.isRedeploy),
+    this.validate = this.cfForm().statusChanges!.pipe(
+      startWith(this.cfForm().valid || this.isRedeploy()),
+      map(() => this.cfForm().valid || this.isRedeploy()),
       observeOn(asapScheduler)
-    );
-  }
-
-  // Signal-bridges captured at field-init time (toObservable requires an
-  // injection context — only ctor / field initializers / explicit
-  // runInInjectionContext satisfy that, not arbitrary methods). The
-  // chain still ends in `store.select(...)` which is ngrx-Observable,
-  // so we keep the rxjs composition here; only the CfOrgSpaceDataService
-  // signal reads are bridged.
-  private orgSelect$ = toObservable(this.cfOrgSpaceService.org.select);
-  private cfSelect$ = toObservable(this.cfOrgSpaceService.cf.select);
-  private spaceList$ = toObservable(this.cfOrgSpaceService.space.list);
-
-  private getSpacesFromPermissions() {
-    return this.orgSelect$.pipe(
-      withLatestFrom(this.cfSelect$),
-      switchMap(([orgGuid, endpointGuid]) => {
-        return this.cfCurrentUserRoles.spacesWithRoleInOrg$(endpointGuid!, orgGuid!, CfPermissionStrings.SPACE_DEVELOPER);
-      }),
-      switchMap((spacesOrAll => {
-        if (spacesOrAll === 'all') {
-          return this.spaceList$;
-        }
-        const spaceIds = spacesOrAll as string[];
-        return this.spaceList$.pipe(
-          map(spaces => {
-            const filteredSpaces = spaces.filter(space => spaceIds.find(spaceGuid => spaceGuid === space.guid));
-            return filteredSpaces;
-          })
-        );
-      }))
     );
   }
 }

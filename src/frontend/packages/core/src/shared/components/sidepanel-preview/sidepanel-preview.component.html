@@ -3,19 +3,19 @@
   <div class="flex bg-[var(--card-header-bg)] border-b border-[var(--content-border)]"
     [ngClass]="sidePanelService.previewMode() ? 'h-[48px] flex-[0_0_48px]' : 'h-14 flex-[0_0_56px]'">
     <h1 class="self-center ml-3 text-[var(--content-text)]"
-      [ngClass]="sidePanelService.previewMode() ? 'text-[16px]' : 'text-xl'">{{ title }}</h1>
-    @if (favorite) {
-      <app-entity-favorite-star [small]="true" class="flex items-center ml-[10px] opacity-60" [favorite]="favorite"></app-entity-favorite-star>
+      [ngClass]="sidePanelService.previewMode() ? 'text-[16px]' : 'text-xl'">{{ title() }}</h1>
+    @if (favorite(); as fav) {
+      <app-entity-favorite-star [small]="true" class="flex items-center ml-[10px] opacity-60" [favorite]="fav"></app-entity-favorite-star>
     }
     <div class="self-center flex-1 mx-[10px] mr-[50px]">
-      @if (header) {
-        <ng-container [cdkPortalOutlet]="header"></ng-container>
+      @if (header()) {
+        <ng-container [cdkPortalOutlet]="header()"></ng-container>
       }
     </div>
     <button class="btn btn-icon absolute right-[5px]"
       [ngClass]="sidePanelService.previewMode() ? 'top-[3px]' : 'top-[7px]'"
-      type="button" (click)="sidePanelService.hide()">
-      <app-custom-icon>close</app-custom-icon>
+      type="button" aria-label="Close" (click)="sidePanelService.hide()">
+      <app-custom-icon aria-hidden="true">close</app-custom-icon>
     </button>
   </div>
   <div class="flex-1 overflow-y-auto custom-scrollbar p-[12px_15px] relative bg-[var(--card-bg)]">

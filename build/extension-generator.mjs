@@ -1,4 +1,4 @@
-#!/usr/bin/env node
+#!/usr/bin/env bun
 /**
  * extension-generator.js
  * Generates _custom-import.module.ts for extension loading

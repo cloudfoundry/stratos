@@ -11,13 +11,14 @@ import (
 	"strconv"
 
 	"github.com/cloudfoundry/stratos/src/jetstream/api"
+	"github.com/cloudfoundry/stratos/src/jetstream/plugins/stratosjobs"
 	"github.com/fivetwenty-io/capi/v3/pkg/capi"
 	"github.com/labstack/echo/v5"
 )
 
 // capiStatusRe matches the "(status NNN)" fragment capi.MapHTTPError embeds in
-// its error messages. capi sentinel errors don't expose the numeric HTTP
-// status via a field, so this is the only way to recover it for display.
+// its non-envelope error messages. It recovers the status from an error
+// whose wrap chain no longer reaches the *capi.StatusError.
 var capiStatusRe = regexp.MustCompile(`\(status (\d{3})\)`)
 
 // gorouterRouteMissingRe matches the body gorouter returns when the platform's
@@ -35,7 +36,7 @@ func isRouterRouteMissing(err error) bool {
 // stratosErrorReasonHeader carries the machine-readable failure classification
 // to the frontend. Present only for the called-out reasons (unreachable,
 // auth_expired); absent for unclassified errors.
-const stratosErrorReasonHeader = "X-Stratos-Error-Reason"
+const stratosErrorReasonHeader = stratosjobs.ErrorReasonHeader
 
 // stratosUpstreamStatusHeader carries the upstream CF/UAA HTTP status (e.g.
 // 503) when recoverable, so the frontend can show the real error code even
@@ -69,11 +70,13 @@ type nativeCFErrorBody struct {
 }
 
 // nativeCFError classifies err, sets the reason header for called-out reasons,
-// and returns a 502 echo error whose body is a '{'-led JSON object the
-// frontend parses to drive the right banner. The cnsiGUID is always included
-// so the endpoint can be named regardless of reason.
+// and returns an echo error whose body is a '{'-led JSON object the frontend
+// parses to drive the right banner. The status comes from nativeCFStatus. The
+// cnsiGUID is always included so the endpoint can be named regardless of
+// reason.
 func nativeCFError(c *echo.Context, cnsiGUID string, err error) error {
 	reason := setNativeCFErrorHeaders(c, err)
+	status := nativeCFStatus(err, reason)
 	body := nativeCFErrorBody{
 		Reason:         string(reason),
 		UpstreamStatus: upstreamStatusOf(err),
@@ -83,15 +86,32 @@ func nativeCFError(c *echo.Context, cnsiGUID string, err error) error {
 	encoded, mErr := json.Marshal(body)
 	if mErr != nil {
 		// Should never happen for these fields; fall back to the plain detail.
-		return echo.NewHTTPError(http.StatusBadGateway, err.Error())
+		return echo.NewHTTPError(status, err.Error())
 	}
-	return echo.NewHTTPError(http.StatusBadGateway, string(encoded))
+	return echo.NewHTTPError(status, string(encoded))
+}
+
+// nativeCFStatus picks the response status for a shaped native CF error.
+// A 4xx the CF API answered means the endpoint is up and rejected this
+// request, so it goes out with CF's status (other 4xx as 400) and the
+// frontend leaves it to the calling component. Everything else answers 502:
+// the called-out endpoint faults (auth_expired, unreachable — which covers
+// a CF 5xx), errors with no CF status, and a 414, which is the platform
+// chain's URI ceiling (#5579) rather than anything wrong with the request.
+func nativeCFStatus(err error, reason cfErrorReason) int {
+	if reason != reasonUnclassified || upstreamStatusOf(err) == http.StatusRequestURITooLong {
+		return http.StatusBadGateway
+	}
+	if status := statusFromCapiError(err); status < http.StatusInternalServerError {
+		return status
+	}
+	return http.StatusBadGateway
 }
 
 // classifyNativeErrors is echo middleware for the native CF routes. When a
 // handler returns a raw (non-*echo.HTTPError) error and the request carries a
 // :cnsiGuid path param, it shapes the error via nativeCFError so the response
-// gets the classification header + '{'-led JSON body. Errors that are already
+// gets the classification header, the mapped status and a '{'-led JSON body. Errors that are already
 // *echo.HTTPError (auth/config failures such as "could not determine user")
 // and requests without a cnsiGuid pass through unchanged, preserving existing
 // status codes and the legacy plain-text body.
@@ -155,9 +175,12 @@ func diagFailKind(parent context.Context, err error) string {
 
 // upstreamStatusOf extracts the upstream HTTP status when the error carries
 // one. The UAA token-refresh path provides it directly via
-// api.ErrHTTPRequest.Status; capi CF-call errors embed it as "(status NNN)" in
-// the message (parsed best-effort). Returns 0 when no status is recoverable,
-// in which case it is omitted from the response body.
+// api.ErrHTTPRequest.Status, and capi CF-call errors via *capi.StatusError,
+// envelope responses included. An error that lost the wrap chain falls
+// back to the "(status NNN)" capi embeds in non-envelope messages (parsed
+// best-effort), then to the capi sentinel when that names exactly one (see
+// exactCapiStatus). Returns 0 when no status is recoverable, in which case
+// it is omitted from the response.
 func upstreamStatusOf(err error) int {
 	if err == nil {
 		return 0
@@ -166,10 +189,35 @@ func upstreamStatusOf(err error) int {
 	if errors.As(err, &httpReq) {
 		return httpReq.Status
 	}
+	var statusErr *capi.StatusError
+	if errors.As(err, &statusErr) {
+		return statusErr.StatusCode
+	}
 	if m := capiStatusRe.FindStringSubmatch(err.Error()); m != nil {
 		if n, convErr := strconv.Atoi(m[1]); convErr == nil {
 			return n
 		}
+	}
+	return exactCapiStatus(err)
+}
+
+// exactCapiStatus maps the capi sentinels that stand for a single HTTP
+// status back to it. capi.ErrBadRequest (any other 4xx) and
+// capi.ErrServerError (any 5xx) cover a range, so they map to 0.
+func exactCapiStatus(err error) int {
+	switch {
+	case errors.Is(err, capi.ErrNotFound):
+		return http.StatusNotFound
+	case errors.Is(err, capi.ErrUnauthorized):
+		return http.StatusUnauthorized
+	case errors.Is(err, capi.ErrForbidden):
+		return http.StatusForbidden
+	case errors.Is(err, capi.ErrConflict):
+		return http.StatusConflict
+	case errors.Is(err, capi.ErrUnprocessable):
+		return http.StatusUnprocessableEntity
+	case errors.Is(err, capi.ErrRateLimited):
+		return http.StatusTooManyRequests
 	}
 	return 0
 }

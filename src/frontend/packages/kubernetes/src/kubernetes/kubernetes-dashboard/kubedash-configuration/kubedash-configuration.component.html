@@ -1,4 +1,4 @@
-<app-page-header [breadcrumbs]="(breadcrumbs$ | async) ?? []">
+<app-page-header [breadcrumbs]="breadcrumbs()">
   <h1>Dashboard Configuration</h1>
 </app-page-header>
 
@@ -28,14 +28,14 @@
             </div>
             @if (isDashboardConfigured()) {
               <button [routerLink]="dashboardLink" class="btn btn-ghost">
-                <span class="material-symbols-outlined">dashboard</span>
+                <span aria-hidden="true" class="material-icons">dashboard</span>
                 <span class="ml-1">View Dashboard</span>
               </button>
             }
           </div>
         }
         <app-card class="mb-5">
-          <app-card-progress-overlay [busy]="dashboardUIBusy$" [label]="dashboardUIMsg"></app-card-progress-overlay>
+          <app-card-progress-overlay [busy]="dashboardUIBusy()" [label]="dashboardUIMsg"></app-card-progress-overlay>
           <div class="card-header">
             <div class="card-title">Kubernetes Dashboard Installation</div>
             <div class="absolute right-5 top-5">
@@ -44,7 +44,7 @@
                 </app-boolean-indicator>
               }
               @if (!status.service) {
-                <span class="material-symbols-outlined">warning</span>
+                <span class="material-icons" role="img" aria-label="Not installed">warning</span>
               }
             </div>
           </div>
@@ -86,7 +86,7 @@
           }
         </app-card>
         <app-card class="mb-5">
-          <app-card-progress-overlay [busy]="serviceAccountBusy$" [label]="serviceAccountMsg"></app-card-progress-overlay>
+          <app-card-progress-overlay [busy]="serviceAccountBusy()" [label]="serviceAccountMsg"></app-card-progress-overlay>
           <div class="card-header">
             <div class="card-title">Service Account</div>
             <div class="absolute right-5 top-5">
@@ -95,7 +95,7 @@
                 </app-boolean-indicator>
               }
               @if (!status.serviceAccount) {
-                <span class="material-symbols-outlined">warning</span>
+                <span class="material-icons" role="img" aria-label="Not installed">warning</span>
               }
             </div>
           </div>
@@ -104,7 +104,7 @@
               @if (isAzure()) {
                 <div>
                   <p class="flex items-center">
-                    <span class="material-symbols-outlined">warning</span>You are using the Azure deployed version of Kubernetes Dashboard.
+                    <span aria-hidden="true" class="material-icons">warning</span>You are using the Azure deployed version of Kubernetes Dashboard.
                   </p>
                   <p>This version uses the Service Account 'kubernetes-dashboard' to access the Dashboard UI. You will need to
                     create a Cluster Role Binding as described
@@ -144,7 +144,7 @@
                     will
                   have full permissions over the cluster.</p>
                   <p class="flex items-center">
-                    <span class="material-symbols-outlined">warning</span>Please make sure you understand the risks involved
+                    <span aria-hidden="true" class="material-icons">warning</span>Please make sure you understand the risks involved
                   </p>
                   <div class="flex justify-end w-full">
                     <button (click)="createServiceAccount()" [disabled]="isBusy()" class="btn btn-primary">Create

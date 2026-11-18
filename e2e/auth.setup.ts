@@ -6,6 +6,7 @@ import { EndpointManagementHelper } from './helpers/endpoint-management.helper';
 import { ConsoleUserType } from './helpers/request.helper';
 import { detectAuthType, browserLogin } from './helpers/auth.helper';
 import { ADMIN_STATE, USER_STATE, CF_GUIDS_FILE } from './auth.constants';
+import { BASE_URL } from './servers';
 
 /**
  * Resolve org/space GUIDs for every configured CF endpoint via the
@@ -104,7 +105,7 @@ async function resolveAndPersistCfGuids(page: Page, cfEndpoints: any[]): Promise
 
 setup('authenticate as admin', async ({ page, baseURL }) => {
   const secrets = SecretsHelper.load();
-  const authType = await detectAuthType(baseURL || 'https://localhost:5540');
+  const authType = await detectAuthType(baseURL || BASE_URL);
 
   // Ensure endpoint is registered and connected before saving state
   const manager = new EndpointManagementHelper(baseURL);
@@ -174,7 +175,7 @@ setup('authenticate as user', async ({ page, baseURL }) => {
     );
   }
 
-  const authType = await detectAuthType(baseURL || 'https://localhost:5540');
+  const authType = await detectAuthType(baseURL || BASE_URL);
   await browserLogin(page, username, password, authType);
   await page.waitForLoadState('networkidle', { timeout: 15000 }).catch(() => {});
 

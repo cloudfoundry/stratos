@@ -22,9 +22,11 @@ type identityProvider struct {
 // It proxies UAA GET /identity-providers?active_only=true using the requesting
 // user's stored CF token, and projects each provider to {originKey,type,name,active}.
 //
-// A UAA 403 is passed through as HTTP 403 so the frontend can degrade to a
-// free-text origin field rather than showing an error.
-// Any other non-200 response from UAA is returned as 502.
+// A user who may not list providers gets a UAA 403. That is answered as HTTP
+// 200 with an empty list, so the browser logs no failed request and the
+// frontend falls back to a free-text origin field, as it does for any empty
+// list. A user with no token for the endpoint gets 403. Any other non-200
+// response from UAA is returned as 502.
 func (cf *CloudFoundrySpecification) getIdentityProviders(ctx *echo.Context) error {
 	cnsiGUID := ctx.Param("cnsiGuid")
 	if cnsiGUID == "" {
@@ -41,8 +43,7 @@ func (cf *CloudFoundrySpecification) getIdentityProviders(ctx *echo.Context) err
 	}
 
 	// Use the requesting user's token so UAA enforces the caller's permissions.
-	// A non-UAA-admin gets a 403, which the frontend uses as the signal to
-	// degrade to free-text origin input.
+	// A user who may not list providers gets a 403 from UAA (handled below).
 	userGUID, err := cf.getUserGUID(ctx)
 	if err != nil {
 		return echo.NewHTTPError(http.StatusUnauthorized, "could not determine user")
@@ -67,9 +68,9 @@ func (cf *CloudFoundrySpecification) getIdentityProviders(ctx *echo.Context) err
 	}
 	defer func() { _ = resp.Body.Close() }()
 
-	// Pass UAA 403 through so the frontend can degrade to free-text origin input.
+	// Not permitted to list: answer an empty list, not an error status.
 	if resp.StatusCode == http.StatusForbidden {
-		return echo.NewHTTPError(http.StatusForbidden, "cannot list identity providers")
+		return ctx.JSON(http.StatusOK, []identityProvider{})
 	}
 	if resp.StatusCode != http.StatusOK {
 		return echo.NewHTTPError(http.StatusBadGateway, fmt.Sprintf("UAA returned %d", resp.StatusCode))

@@ -3,7 +3,6 @@ import {
   CurrentUserRolesDataService,
   PermissionValues,
 } from '@stratosui/store';
-import { Observable, distinctUntilChanged, map, shareReplay } from 'rxjs';
 
 import { APIResource } from '../../../store/src/types/api.types';
 import { CfUserRelationTypes } from '../actions/permissions.actions';
@@ -42,12 +41,8 @@ interface CfRolesEndpoint {
  * (in the store package) and projects the cf-specific subtree —
  * `state.currentUserRoles.endpoints['cf']` — into per-endpoint signals.
  *
- * Mirrors the pattern from the W36-C Wave 1 `AuthDataService`:
- *   - signal-out for new consumers
- *   - parametric `*$` observable getters preserved so the legacy
- *     rxjs-shaped pipelines in {@link CfUserPermissionsChecker} keep
- *     compiling unchanged through the facade in
- *     {@link CfCurrentUserRolesSignalService}
+ * {@link CfUserPermissionsChecker} builds its checks as computeds over
+ * these per-endpoint signals.
  *
  * Per-endpoint reads choose a `Signal<...>` factory (returned per-guid)
  * rather than a `Signal<Map<guid, ...>>` aggregate because the consumer
@@ -164,82 +159,30 @@ export class CfCurrentUserRolesDataService {
     });
   }
 
-  // ---- observable surface (preserved for legacy checker pipelines) -------
-
-  // Memoize per-endpoint observables so N directive instances on a page
-  // (e.g. edit + delete + restart + restage on the app-action-bar; create-
-  // space / edit-space on cf-org-spaces) share one map+distinctUntilChanged
-  // pipe instead of building N redundant ones. The underlying state$ is
-  // already a multicast store observable so the pipe rebuild was the only
-  // duplicated work, but on pages with several gated buttons the count
-  // adds up — visible as a subtle pause when navigating to a fresh CF
-  // page before any of the buttons appear.
-  private readonly _endpointRolesState$ = new Map<string, Observable<ICfRolesState>>();
-
-  cfEndpointRolesState$(endpointGuid: string): Observable<ICfRolesState> {
-    const cached = this._endpointRolesState$.get(endpointGuid);
-    if (cached) {
-      return cached;
-    }
-    const obs$ = this.rolesData.state$.pipe(
-      map(state => {
-        const all = state?.endpoints?.[CF_ENDPOINT_TYPE] as IAllCfRolesState | undefined;
-        return (all ? all[endpointGuid] : null) as ICfRolesState;
-      }),
-      distinctUntilChanged(),
-      shareReplay({ bufferSize: 1, refCount: false }),
-    );
-    this._endpointRolesState$.set(endpointGuid, obs$);
-    return obs$;
-  }
-
-  cfGlobalState$(endpointGuid: string, permission: PermissionValues): Observable<boolean> {
-    return this.rolesData.state$.pipe(
-      map(state => {
-        const all = state?.endpoints?.[CF_ENDPOINT_TYPE] as IAllCfRolesState | undefined;
-        const global = all?.[endpointGuid]?.global as Record<string, any> | undefined;
-        return global ? !!global[permission] : false;
-      }),
-      distinctUntilChanged(),
-    );
-  }
-
-  cfEndpointHasScope$(endpointGuid: string, scope: CfScopeStrings | string): Observable<boolean> {
-    return this.rolesData.state$.pipe(
-      map(state => {
-        const all = state?.endpoints?.[CF_ENDPOINT_TYPE] as IAllCfRolesState | undefined;
-        const scopes = all?.[endpointGuid]?.global?.scopes;
-        return !!scopes?.includes(scope as string);
-      }),
-      distinctUntilChanged(),
-    );
-  }
-
   /**
    * Space guids within an org where the connected user has the given space role,
    * or `'all'` when role state is unknown (no endpoint/org row) — replaces the
    * `getSpacesFromOrgWithRole` selector. `'all'` lets callers fall back to the
    * full space list (the legacy selector's sentinel).
    */
-  spacesWithRoleInOrg$(endpointGuid: string, orgGuid: string, role: string): Observable<string[] | 'all'> {
-    return this.cfEndpointRolesState$(endpointGuid).pipe(
-      map(state => {
-        if (!state) {
-          return 'all' as const;
+  spacesWithRoleInOrg(endpointGuid: string, orgGuid: string, role: string): Signal<string[] | 'all'> {
+    const rolesState = this.cfEndpointRolesState(endpointGuid);
+    return computed(() => {
+      const state = rolesState();
+      if (!state) {
+        return 'all' as const;
+      }
+      const org = state.organizations[orgGuid];
+      if (!org) {
+        return 'all' as const;
+      }
+      return org.spaceGuids.reduce((array: string[], spaceGuid: string) => {
+        const space = state.spaces[spaceGuid];
+        if (space && (space as Record<string, any>)[role]) {
+          array.push(spaceGuid);
         }
-        const org = state.organizations[orgGuid];
-        if (!org) {
-          return 'all' as const;
-        }
-        return org.spaceGuids.reduce((array: string[], spaceGuid: string) => {
-          const space = state.spaces[spaceGuid];
-          if (space && (space as Record<string, any>)[role]) {
-            array.push(spaceGuid);
-          }
-          return array;
-        }, []);
-      }),
-      distinctUntilChanged(),
-    );
+        return array;
+      }, []);
+    });
   }
 }

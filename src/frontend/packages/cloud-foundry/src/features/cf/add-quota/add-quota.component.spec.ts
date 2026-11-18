@@ -9,7 +9,6 @@ import { TabNavService } from '@stratosui/core';
 import { EntityCatalogHelper, EntityCatalogHelpers, EntityCatalogTestModule, TEST_CATALOGUE_ENTITIES, generateStratosEntities } from '@stratosui/store';
 import { STORE_TEST_PROVIDERS } from '@stratosui/store/testing';
 import { generateCFEntities } from '@test-framework/cf';
-import { LongRunningCfOperationsService } from '../../../shared/data-services/long-running-cf-op.service';
 import { ActiveRouteCfOrgSpace } from '../cf-page.types';
 import { AddQuotaComponent } from './add-quota.component';
 
@@ -17,7 +16,7 @@ describe('AddQuotaComponent', () => {
   let component: AddQuotaComponent;
   let fixture: ComponentFixture<AddQuotaComponent>;
 
-  beforeEach(() => {
+  beforeEach(async () => {
     TestBed.configureTestingModule({
       imports: [
         AddQuotaComponent,
@@ -46,7 +45,6 @@ describe('AddQuotaComponent', () => {
           }
         },
         TabNavService,
-        LongRunningCfOperationsService,
       ]
     });
 
@@ -56,7 +54,7 @@ describe('AddQuotaComponent', () => {
 
     fixture = TestBed.createComponent(AddQuotaComponent);
     component = fixture.componentInstance;
-    fixture.detectChanges();
+    await fixture.whenStable();
   });
 
   it('should create', () => {

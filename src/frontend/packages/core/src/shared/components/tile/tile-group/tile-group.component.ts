@@ -1,12 +1,9 @@
-import { ChangeDetectionStrategy, AfterContentInit,
+import { ChangeDetectionStrategy,
   Component,
-  ContentChildren,
   HostBinding,
-  OnDestroy,
-  QueryList,
   ViewEncapsulation,
+  contentChildren,
  } from '@angular/core';
-import { Subscription } from 'rxjs';
 
 import { TileComponent } from '../tile/tile.component';
 
@@ -17,40 +14,21 @@ import { TileComponent } from '../tile/tile.component';
   encapsulation: ViewEncapsulation.None,
   standalone: true,
   imports: [],
-  changeDetection: ChangeDetectionStrategy.OnPush
+  changeDetection: ChangeDetectionStrategy.OnPush,
+  // The column class follows the number of tiles, including tiles added or
+  // removed by an @if in the host.
+  host: {
+    '[class.tile-group-6-cols]': 'tiles().length === 6',
+    '[class.tile-group-5-cols]': 'tiles().length === 5',
+    '[class.tile-group-4-cols]': 'tiles().length === 4',
+    '[class.tile-group-3-cols]': 'tiles().length === 3',
+    '[class.tile-group-2-cols]': 'tiles().length === 2',
+    '[class.tile-group-1-cols]': 'tiles().length === 1',
+  },
 })
-export class TileGroupComponent implements AfterContentInit, OnDestroy {
+export class TileGroupComponent {
 
   @HostBinding('class.tile-group-gutters') public hasGutters = true;
 
-  @HostBinding('class.tile-group-6-cols') public isSixColumn = false;
-  @HostBinding('class.tile-group-5-cols') public isFiveColumn = false;
-  @HostBinding('class.tile-group-4-cols') public isFourColumn = false;
-  @HostBinding('class.tile-group-3-cols') public isThreeColumn = false;
-  @HostBinding('class.tile-group-2-cols') public isTwoColumn = false;
-  @HostBinding('class.tile-group-1-cols') public isOneColumn = false;
-
-  @ContentChildren(TileComponent) tiles!: QueryList<TileComponent>;
-
-  private tilesSub?: Subscription;
-
-  ngAfterContentInit() {
-    this.updateColumns();
-    // Re-evaluate when tiles are added/removed by @if conditionals
-    this.tilesSub = this.tiles.changes.subscribe(() => this.updateColumns());
-  }
-
-  ngOnDestroy() {
-    this.tilesSub?.unsubscribe();
-  }
-
-  private updateColumns() {
-    const count = this.tiles.length;
-    this.isSixColumn = (count === 6);
-    this.isFiveColumn = (count === 5);
-    this.isFourColumn = (count === 4);
-    this.isThreeColumn = (count === 3);
-    this.isTwoColumn = (count === 2);
-    this.isOneColumn = (count === 1);
-  }
+  readonly tiles = contentChildren(TileComponent);
 }

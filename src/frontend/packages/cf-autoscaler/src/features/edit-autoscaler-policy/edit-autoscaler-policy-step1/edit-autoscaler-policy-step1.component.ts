@@ -1,15 +1,15 @@
 import { CommonModule } from '@angular/common';
-import { ChangeDetectionStrategy, ChangeDetectorRef, Component, OnInit, inject } from '@angular/core';
+import { ChangeDetectionStrategy, Component, OnInit, effect, inject, untracked } from '@angular/core';
 import { AbstractControl, FormBuilder, FormControl, FormGroup, ReactiveFormsModule, ValidationErrors, ValidatorFn, Validators } from '@angular/forms';
-import { Observable, of as observableOf } from 'rxjs';
+import { defer, Observable } from 'rxjs';
 import { map, startWith } from 'rxjs/operators';
 import { TailwindErrorStateMatcher, TailwindShowOnDirtyErrorStateMatcher } from '@stratosui/core';
 import { ApplicationService } from '@stratosui/cloud-foundry';
-import { StepOnNextFunction } from '@stratosui/core';
-import { autoscalerTransformArrayToMap } from '../../../core/autoscaler-helpers/autoscaler-transform-policy';
+import { StepOnNextResult } from '@stratosui/core';
 import { PolicyAlert } from '../../../core/autoscaler-helpers/autoscaler-util';
 import { numberWithFractionOrExceedRange } from '../../../core/autoscaler-helpers/autoscaler-validation';
 import { EditAutoscalerPolicyDirective } from '../edit-autoscaler-policy-base-step';
+import { AUTOSCALER_TIMEZONES } from '../../../core/autoscaler-helpers/autoscaler-timezones';
 
 interface EditLimitForm {
   instance_min_count: FormControl<number>;
@@ -33,11 +33,10 @@ interface EditLimitForm {
 export class EditAutoscalerPolicyStep1Component extends EditAutoscalerPolicyDirective implements OnInit {
   applicationService = inject(ApplicationService);
   private fb = inject(FormBuilder);
-  private cdr = inject(ChangeDetectorRef);
 
 
   policyAlert = PolicyAlert;
-  timezoneOptions = Intl.supportedValuesOf('timeZone');
+  timezoneOptions = AUTOSCALER_TIMEZONES;
   editLimitForm: FormGroup<EditLimitForm>;
   // FWT-959 Part 2: observable surface for the parent's signal-step
   // handle. Mirrors editLimitForm.valid; statusChanges fires after every
@@ -53,47 +52,49 @@ export class EditAutoscalerPolicyStep1Component extends EditAutoscalerPolicyDire
       instance_max_count: this.fb.nonNullable.control(0, [Validators.required, this.validateGlobalLimitMax()]),
       timezone: this.fb.nonNullable.control('', [Validators.required])
     });
-    this.valid$ = this.editLimitForm.statusChanges.pipe(
+    // defer: start from the status when subscribed, not when built.
+    // The form follows the shared policy each time it settles or changes.
+    effect(() => {
+      const policy = this.appAutoscalerPolicy();
+      if (!policy) {
+        return;
+      }
+      untracked(() => {
+        this.editLimitForm.controls.timezone.setValue(policy.schedules?.timezone ?? '');
+        this.editLimitForm.controls.instance_min_count.setValue(policy.instance_min_count);
+        this.editLimitForm.controls.instance_max_count.setValue(policy.instance_max_count);
+        // Each count is checked against the other. The minimum was checked
+        // while the maximum was still unset, so check both again now.
+        this.editLimitForm.controls.instance_min_count.updateValueAndValidity();
+        this.editLimitForm.controls.instance_max_count.updateValueAndValidity();
+      });
+    });
+    this.valid$ = defer(() => this.editLimitForm.statusChanges.pipe(
       startWith(this.editLimitForm.status),
       map(status => status === 'VALID'),
-    );
+    ));
   }
 
   ngOnInit() {
     this.service.updateFromStore(this.applicationService.appGuid, this.applicationService.cfGuid);
-    this.appAutoscalerPolicy$ = this.service.getState().pipe(
-      map(policy => {
-        this.currentPolicy = policy;
-        if (!this.currentPolicy.scaling_rules_form) {
-          this.currentPolicy = autoscalerTransformArrayToMap(this.currentPolicy);
-        }
-        this.editLimitForm.controls.timezone.setValue(this.currentPolicy.schedules?.timezone ?? '');
-        this.editLimitForm.controls.instance_min_count.setValue(this.currentPolicy.instance_min_count);
-        this.editLimitForm.controls.instance_max_count.setValue(this.currentPolicy.instance_max_count);
-        this.editLimitForm.controls.instance_min_count.setValidators([Validators.required, this.validateGlobalLimitMin()]);
-        this.editLimitForm.controls.instance_max_count.setValidators([Validators.required, this.validateGlobalLimitMax()]);
-        this.cdr.markForCheck();
-        return this.currentPolicy;
-      })
-    );
   }
 
-  onNext: StepOnNextFunction = () => {
+  override async onNext(): Promise<StepOnNextResult> {
     this.currentPolicy.instance_min_count = Math.floor(this.editLimitForm.get('instance_min_count')?.value ?? 0);
     this.currentPolicy.instance_max_count = Math.floor(this.editLimitForm.get('instance_max_count')?.value ?? 0);
     if (this.currentPolicy.schedules) {
       this.currentPolicy.schedules.timezone = this.editLimitForm.get('timezone')?.value ?? '';
     }
     this.service.setState(this.currentPolicy);
-    return observableOf({ success: true });
-  };
+    return { success: true };
+  }
 
   validateGlobalLimitMin(): ValidatorFn {
     return (control: AbstractControl): ValidationErrors | null => {
       const invalid = this.editLimitForm ?
-        numberWithFractionOrExceedRange(control.value, 1, this.editLimitForm.controls.instance_max_count.value - 1, true) : false;
+        numberWithFractionOrExceedRange(control.value, 1, this.editLimitForm.controls.instance_max_count.value, true) : false;
       const lastValid = this.editLimitValid;
-      this.editLimitValid = this.editLimitForm && control.value < this.editLimitForm.controls.instance_max_count.value;
+      this.editLimitValid = this.editLimitForm && control.value <= this.editLimitForm.controls.instance_max_count.value;
       if (this.editLimitForm && this.editLimitValid !== lastValid) {
         this.editLimitForm.controls.instance_max_count.updateValueAndValidity();
       }
@@ -104,9 +105,9 @@ export class EditAutoscalerPolicyStep1Component extends EditAutoscalerPolicyDire
   validateGlobalLimitMax(): ValidatorFn {
     return (control: AbstractControl): ValidationErrors | null => {
       const invalid = this.editLimitForm ? numberWithFractionOrExceedRange(control.value,
-        this.editLimitForm.controls.instance_min_count.value + 1, Number.MAX_VALUE, true) : false;
+        this.editLimitForm.controls.instance_min_count.value, Number.MAX_VALUE, true) : false;
       const lastValid = this.editLimitValid;
-      this.editLimitValid = this.editLimitForm && this.editLimitForm.controls.instance_min_count.value < control.value;
+      this.editLimitValid = this.editLimitForm && this.editLimitForm.controls.instance_min_count.value <= control.value;
       if (this.editLimitForm && this.editLimitValid !== lastValid) {
         this.editLimitForm.controls.instance_min_count.updateValueAndValidity();
       }

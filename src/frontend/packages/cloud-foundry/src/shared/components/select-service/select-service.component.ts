@@ -3,7 +3,7 @@ import {
   AfterContentInit,
   ChangeDetectionStrategy,
   Component,
-  OnDestroy,
+  DestroyRef,
   Signal,
   computed,
   effect,
@@ -11,11 +11,11 @@ import {
   signal,
 } from '@angular/core';
 import { FormControl, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
-import { toObservable } from '@angular/core/rxjs-interop';
-import { combineLatest, Observable, of as observableOf, Subject } from 'rxjs';
-import { catchError, filter, map, takeUntil } from 'rxjs/operators';
+import { takeUntilDestroyed, toSignal } from '@angular/core/rxjs-interop';
+import { of as observableOf } from 'rxjs';
+import { catchError, map } from 'rxjs/operators';
 
-import { CustomFormFieldComponent, MatLabelComponent, CustomSelectComponent, CustomOptionComponent, StepOnNextResult, naturalCompare } from '@stratosui/core';
+import { CustomFormFieldComponent, CustomSelectComponent, CustomOptionComponent, StepOnNextResult, naturalCompare } from '@stratosui/core';
 import { ServicesWallService } from '../../../features/services/services/services-wall.service';
 import { StServiceOffering } from '../../../services/endpoint-data/stratos-types';
 import { CfServiceCardComponent } from '../cards/cf-service-card/cf-service-card.component';
@@ -43,13 +43,12 @@ interface SelectServiceForm {
     CommonModule,
     ReactiveFormsModule,
     CustomFormFieldComponent,
-    MatLabelComponent,
     CustomSelectComponent,
     CustomOptionComponent,
     CfServiceCardComponent
   ]
 })
-export class SelectServiceComponent implements OnDestroy, AfterContentInit {
+export class SelectServiceComponent implements AfterContentInit {
   private csiGuidService = inject(CsiGuidsService);
   private csiState = inject(CsiStateService);
   private servicesWallService = inject(ServicesWallService);
@@ -66,20 +65,15 @@ export class SelectServiceComponent implements OnDestroy, AfterContentInit {
     const offerings: StServiceOffering[] = source.value() ?? [];
     return [...offerings].sort((a, b) => naturalCompare(a?.name ?? '', b?.name ?? ''));
   });
-  // Bridge the signal to Observable for the template's `services$ |
-  // async` binding (and downstream RxJS composition below).
-  services$: Observable<StServiceOffering[]> = toObservable(this.services);
 
   readonly isFetching: Signal<boolean> = computed(() => !!this.offeringsSource()?.isLoading());
-  isFetching$: Observable<boolean> = toObservable(this.isFetching);
 
   cfGuid!: string;
   stepperForm: FormGroup<SelectServiceForm>;
   validate = signal<boolean>(false);
-  selectedService$: Observable<StServiceOffering>;
+  readonly selectedService: Signal<StServiceOffering | undefined>;
 
-  // Lifecycle management for subscriptions
-  private destroyed$ = new Subject<void>();
+  private readonly destroyRef = inject(DestroyRef);
   public errorMessage: string | null = null;
 
   // Effect to track form validation status - runs in injection context
@@ -135,22 +129,17 @@ export class SelectServiceComponent implements OnDestroy, AfterContentInit {
       service: new FormControl<string>('', { validators: [Validators.required], nonNullable: true }),
     });
 
-    this.selectedService$ = combineLatest([
-      this.services$,
-      this.stepperForm.controls.service.statusChanges
-    ]).pipe(
-      map(([services, _change]) => services.filter(a => a?.guid === this.stepperForm.controls.service.value)[0]),
-      filter(p => !!p),
-      takeUntil(this.destroyed$)
-    );
+    const serviceControl = this.stepperForm.controls.service;
+    const serviceGuid = toSignal(serviceControl.valueChanges, { initialValue: serviceControl.value });
+    this.selectedService = computed(() => this.services().find(a => a?.guid === serviceGuid()));
   }
 
-  onNext = (): Observable<StepOnNextResult> => {
+  async onNext(): Promise<StepOnNextResult> {
     const serviceGuid = this.stepperForm.controls.service.value;
     this.csiState.setServiceGuid(serviceGuid);
     this.csiGuidService.serviceGuid = serviceGuid;
     this.csiGuidService.cfGuid = this.cfGuid;
-    return observableOf({ success: true });
+    return { success: true };
   }
 
   ngAfterContentInit() {
@@ -162,12 +151,7 @@ export class SelectServiceComponent implements OnDestroy, AfterContentInit {
         console.error('Error tracking form validation:', error);
         return observableOf(null);
       }),
-      takeUntil(this.destroyed$)
+      takeUntilDestroyed(this.destroyRef)
     ).subscribe();
-  }
-
-  ngOnDestroy(): void {
-    this.destroyed$.next();
-    this.destroyed$.complete();
   }
 }

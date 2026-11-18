@@ -22,7 +22,6 @@ function makeSystemInfo(): SystemInfo {
           user: { guid: 'u1', name: 'admin', admin: true },
           system_shared_token: false,
           sso_allowed: false,
-          metricsAvailable: false,
           creator: { name: 'admin', admin: true, system: false },
         } as unknown as SystemInfo['endpoints']['cf']['cf-1'],
         'cf-2': {
@@ -32,7 +31,6 @@ function makeSystemInfo(): SystemInfo {
           // No user => disconnected
           system_shared_token: false,
           sso_allowed: false,
-          metricsAvailable: false,
           creator: { name: 'admin', admin: true, system: false },
         } as unknown as SystemInfo['endpoints']['cf']['cf-2'],
       },
@@ -44,7 +42,6 @@ function makeSystemInfo(): SystemInfo {
           user: { guid: 'u1', name: 'admin', admin: true },
           system_shared_token: false,
           sso_allowed: false,
-          metricsAvailable: false,
           creator: { name: 'admin', admin: true, system: false },
         } as unknown as SystemInfo['endpoints']['k8s']['k8s-1'],
       },
@@ -129,11 +126,29 @@ describe('EndpointsDataService', () => {
     await svc.whenReady(); // should not fire another request
   });
 
+  // A refresh must not look like the first load: the endpoints page shows
+  // its loader only until the first fetch settles.
+  it('stays hydrated, keeping the endpoints, while a refresh loads', async () => {
+    expect(svc.hydrated()).toBe(false);
+    const first = svc.getAll();
+    httpMock.expectOne(SYSTEM_INFO_URL).flush(makeSystemInfo());
+    await first;
+    expect(svc.hydrated()).toBe(true);
+
+    const refresh = svc.getAll();
+    expect(svc.loading()).toBe(true);
+    expect(svc.hydrated()).toBe(true);
+    expect(svc.endpoints().size).toBe(3);
+    httpMock.expectOne(SYSTEM_INFO_URL).flush(makeSystemInfo());
+    await refresh;
+  });
+
   it('getAll() failure populates error and still marks hydrated', async () => {
     const p = svc.getAll().catch(() => undefined);
     httpMock.expectOne(SYSTEM_INFO_URL).flush('boom', { status: 500, statusText: 'err' });
     await p;
     expect(svc.error()).not.toBeNull();
+    expect(svc.hydrated()).toBe(true);
     await svc.whenReady(); // hydrated even on failure
   });
 
@@ -190,6 +205,87 @@ describe('EndpointsDataService', () => {
     expect(state.error).toBe(false);
   });
 
+  // The register form prefixed every failure with "Please ensure the endpoint
+  // address is correct". For a type the server cannot register (the
+  // Autoscaler tile) the address is not at fault, so the server's message
+  // stands alone.
+  it('register() shows an unknown-type refusal without the address hint', async () => {
+    const message = 'This Stratos server cannot register endpoints of type "autoscaler" yet';
+    const registerPromise = svc.register({
+      endpointType: 'autoscaler', name: 'as', endpoint: 'https://autoscaler.example.com',
+      skipSslValidation: false, ssoAllowed: false, createSystemEndpoint: true,
+    });
+    httpMock.expectOne('/api/v1/endpoints').flush(
+      { status: 'error', error: message, reason: 'unknown_endpoint_type' },
+      { status: 400, statusText: 'Bad Request' });
+    const state = await registerPromise;
+
+    expect(state.error).toBe(true);
+    expect(state.message).toBe(message);
+  });
+
+  it('register() sends the Cloud Foundry and broker an autoscaler is linked to', async () => {
+    const registerPromise = svc.register({
+      endpointType: 'autoscaler', name: 'as', endpoint: 'https://autoscaler.sys.example.com',
+      skipSslValidation: false, ssoAllowed: false, createSystemEndpoint: true,
+      cfGuid: 'cf-1', brokerGuid: 'b1', brokerName: 'autoscaler',
+    });
+    const req = httpMock.expectOne('/api/v1/endpoints');
+    const body = req.request.body as FormData;
+    expect(body.get('cf_guid')).toBe('cf-1');
+    expect(body.get('broker_guid')).toBe('b1');
+    expect(body.get('broker_name')).toBe('autoscaler');
+    req.flush({ status: 'error', error: 'stop here' }, { status: 400, statusText: 'Bad Request' });
+    await registerPromise;
+  });
+
+  it('register() sends no link fields when none are given', async () => {
+    const registerPromise = svc.register({
+      endpointType: 'cf', name: 'cf', endpoint: 'https://api.sys.example.com',
+      skipSslValidation: false, ssoAllowed: false, createSystemEndpoint: true,
+    });
+    const req = httpMock.expectOne('/api/v1/endpoints');
+    const body = req.request.body as FormData;
+    expect(body.has('cf_guid')).toBe(false);
+    expect(body.has('broker_guid')).toBe(false);
+    expect(body.has('broker_name')).toBe(false);
+    req.flush({ status: 'error', error: 'stop here' }, { status: 400, statusText: 'Bad Request' });
+    await registerPromise;
+  });
+
+  it('register() keeps the address hint for other refusals', async () => {
+    const registerPromise = svc.register({
+      endpointType: 'cf', name: 'cf', endpoint: 'not a url',
+      skipSslValidation: false, ssoAllowed: false, createSystemEndpoint: true,
+    });
+    httpMock.expectOne('/api/v1/endpoints').flush(
+      { status: 'error', error: 'Failed to get API Endpoint' },
+      { status: 400, statusText: 'Bad Request' });
+    const state = await registerPromise;
+
+    expect(state.message).toContain('Please ensure the endpoint address is correct');
+  });
+
+  it('register() gives the certificate hint with the reason of a 403', async () => {
+    const register = () => svc.register({
+      endpointType: 'cf', name: 'cf', endpoint: 'https://api.example.com',
+      skipSslValidation: false, ssoAllowed: false, createSystemEndpoint: true,
+    });
+    const hint = '. Please check "Skip SSL validation for the endpoint" if the certificate issuer is trusted';
+
+    const jetstream = register();
+    httpMock.expectOne('/api/v1/endpoints').flush(
+      { status: 'error', error: 'certificate signed by unknown authority' },
+      { status: 403, statusText: 'Forbidden' });
+    expect((await jetstream).message).toBe(`certificate signed by unknown authority${hint}`);
+
+    const proxyPage = register();
+    httpMock.expectOne('/api/v1/endpoints').flush(
+      '<html><body><center><h1>403 Forbidden</h1></center><hr><center>nginx</center></body></html>',
+      { status: 403, statusText: 'Forbidden' });
+    expect((await proxyPage).message).toBe(`403 Forbidden\nnginx${hint}`);
+  });
+
   it('clearDisconnected resets the delta queue', async () => {
     const p = svc.getAll();
     httpMock.expectOne(SYSTEM_INFO_URL).flush(makeSystemInfo());
@@ -235,6 +331,25 @@ describe('EndpointsDataService', () => {
     // Successful connect emits on the connectedSignal delta queue.
     expect(svc.connectedSignal()).toHaveLength(1);
     expect(svc.connectedSignal()[0]).toMatchObject({ guid: 'cf-2', type: 'cf' });
+  });
+
+  it('connect returns the other connections the backend names', async () => {
+    const p = svc.getAll();
+    httpMock.expectOne(SYSTEM_INFO_URL).flush(makeSystemInfo());
+    await p;
+
+    const cp = svc.connect('cf-2', {
+      endpointType: 'cf',
+      authType: 'creds',
+      authValues: { username: 'u', password: 'p' },
+      systemShared: false,
+    });
+    httpMock.expectOne('/api/v1/tokens').flush({ also_connected: [{ guid: 'cf-1', name: 'CF one' }] });
+    await new Promise(r => setTimeout(r, 0));
+    httpMock.expectOne(SYSTEM_INFO_URL).flush(makeSystemInfo());
+    const state = await cp;
+
+    expect(state.alsoConnected).toEqual([{ guid: 'cf-1', name: 'CF one' }]);
   });
 
   it('clearConnected resets the connect delta queue', async () => {

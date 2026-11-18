@@ -91,21 +91,22 @@ jobs:
       - uses: actions/checkout@34e114876b0b11c390a56381ad16ebd13914f8d5 # v4.3.1
         with:
           persist-credentials: false
-      - uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020 # v4.4.0
+      - uses: oven-sh/setup-bun@f4d14e03ff726c06358e5557344e1da148b56cf7 # v1.2.2
         with:
-          node-version: ${{ env.NODE_VERSION }}
-      - run: node scripts/lint-docs.mjs
+          bun-version: ${{ env.BUN_VERSION }}
+      - run: bun scripts/lint-docs.mjs
 
   # The website previously had no PR coverage on develop: the legacy docs
   # workflow (since removed) only triggered on master, so a website change
   # (e.g. a dependency bump with a stale bun.lock) could merge green
   # without ever being built. Frozen-lockfile install + full build
-  # catches both.
+  # catches both. The site renders docs/, so a docs-only change can break
+  # it too (a broken link fails the build): run on the deploy's paths.
   website-build:
     name: Website Build
     runs-on: ubuntu-latest
     needs: changes
-    if: needs.changes.outputs.website == 'true'
+    if: needs.changes.outputs.website == 'true' || needs.changes.outputs.docs == 'true'
     steps:
       - uses: actions/checkout@34e114876b0b11c390a56381ad16ebd13914f8d5 # v4.3.1
         with:
@@ -167,9 +168,9 @@ jobs:
         with:
           persist-credentials: false
           fetch-depth: 0
-      - uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020 # v4.4.0
+      - uses: oven-sh/setup-bun@f4d14e03ff726c06358e5557344e1da148b56cf7 # v1.2.2
         with:
-          node-version: ${{ env.NODE_VERSION }}
+          bun-version: ${{ env.BUN_VERSION }}
       - name: Report covering specs
         env:
           BASE: ${{ github.base_ref }}
@@ -177,12 +178,12 @@ jobs:
           # the PR from the base ref, so their stranded specs still surface.
           IMPACT_BASE: origin/${{ github.base_ref }}
         run: |
-          # pipefail: a failing git diff must fail the job, not feed node an
+          # pipefail: a failing git diff must fail the job, not feed bun an
           # empty stdin that reads as a green "no frontend changes".
           set -o pipefail
           {
             echo '```'
-            git diff --name-only "origin/${BASE}...HEAD" | node scripts/e2e-impact.mjs
+            git diff --name-only "origin/${BASE}...HEAD" | bun scripts/e2e-impact.mjs
             echo '```'
           } | tee -a "${GITHUB_STEP_SUMMARY}"
 
@@ -216,7 +217,7 @@ jobs:
       - name: Get Bun cache directory
         id: bun-cache-dir
         shell: bash
-        run: echo "dir=$(bun pm cache)" >> ${GITHUB_OUTPUT}
+        run: echo "dir=$(bun pm cache)" >> "${GITHUB_OUTPUT}"
 
       - name: Cache Bun dependencies
         uses: actions/cache@0057852bfaa89a56745cba8c7296529d2fc39830 # v4.3.0
@@ -234,6 +235,23 @@ jobs:
         # and golangci-lint over every backend module. Running `bun run lint`
         # here instead left the Go linters out of CI entirely.
         run: make check lint
+
+      # build-info.ts is generated, never committed, and store and theme
+      # import it: the type check fails without it (TS2307).
+      - name: Generate build info
+        run: make stamp frontend
+
+      - name: Type-check the libraries
+        # The local gate (gate-check) runs this after lint; without it here a
+        # type error only declaration emit sees passes CI. In this job, not a
+        # new one, so it is covered by the existing required check.
+        run: bun run typecheck-libs
+
+      - name: Type-check the specs
+        # Vitest does not type-check and the library configs exclude
+        # *.spec.ts, so nothing else type-checks the specs. Like the
+        # library check, it needs the build info generated above.
+        run: bun run typecheck-specs
 
   test-frontend:
     name: Frontend Tests
@@ -270,7 +288,7 @@ jobs:
         if: needs.changes.outputs.non_stb == 'true'
         id: bun-cache-dir
         shell: bash
-        run: echo "dir=$(bun pm cache)" >> ${GITHUB_OUTPUT}
+        run: echo "dir=$(bun pm cache)" >> "${GITHUB_OUTPUT}"
 
       - name: Cache Bun dependencies
         if: needs.changes.outputs.non_stb == 'true'
@@ -372,7 +390,7 @@ jobs:
       - name: Get Bun cache directory
         id: bun-cache-dir
         shell: bash
-        run: echo "dir=$(bun pm cache)" >> ${GITHUB_OUTPUT}
+        run: echo "dir=$(bun pm cache)" >> "${GITHUB_OUTPUT}"
 
       - name: Cache Bun dependencies
         uses: actions/cache@0057852bfaa89a56745cba8c7296529d2fc39830 # v4.3.0

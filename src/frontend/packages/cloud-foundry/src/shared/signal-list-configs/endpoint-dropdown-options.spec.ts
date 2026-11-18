@@ -33,6 +33,11 @@ describe('endpointDropdownOptions', () => {
     expect(opts.map(o => o.label)).toEqual(['All', 'cf1', 'cf2', 'cf10']);
   });
 
+  it('keeps a spaced numbered name between its neighbours', () => {
+    const opts = endpointDropdownOptions([ep('g1', 'dup4'), ep('g2', 'dup 3'), ep('g3', 'dup2')]);
+    expect(opts.map(o => o.label)).toEqual(['All', 'dup2', 'dup 3', 'dup4']);
+  });
+
   it('carries the guid through as each option value', () => {
     const opts = endpointDropdownOptions([ep('dbe7222c', 'Cloud Foundry'), ep('2b466124', 'duplicate')]);
     expect(opts).toEqual([

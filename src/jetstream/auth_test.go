@@ -1,6 +1,7 @@
 package main
 
 import (
+	"encoding/json"
 	"errors"
 	"fmt"
 	"log/slog"
@@ -22,8 +23,10 @@ import (
 	mock_api "github.com/cloudfoundry/stratos/src/jetstream/api/mock"
 	"github.com/cloudfoundry/stratos/src/jetstream/crypto"
 	"github.com/cloudfoundry/stratos/src/jetstream/datastore"
+	"github.com/cloudfoundry/stratos/src/jetstream/repository/tokens"
 	"github.com/cloudfoundry/stratos/src/jetstream/testutils"
 	. "github.com/smartystreets/goconvey/convey"
+	"github.com/stretchr/testify/require"
 )
 
 const (
@@ -76,6 +79,57 @@ func TestLoginToUAA(t *testing.T) {
 			So(mock.ExpectationsWereMet(), ShouldBeNil)
 		})
 
+	})
+}
+
+// A login hook (such as auto-connecting the auto-registered Cloud Foundry)
+// runs after the session is set. Its failure is logged, not returned: the
+// user is logged in, and a 500 made the page say "Couldn't check
+// credentials" while a refresh showed the home page.
+func TestLoginToUAAWithAFailingLoginHook(t *testing.T) {
+	t.Parallel()
+
+	Convey("UAA login with a failing login hook", t, func() {
+		req := setupMockReq("POST", "", map[string]string{
+			"username": "admin",
+			"password": "changeme",
+		})
+
+		_, _, ctx, pp, db, mock := setupHTTPTest(req)
+		defer db.Close()
+
+		mockUAA := setupMockServer(t,
+			msRoute("/oauth/token"),
+			msMethod("POST"),
+			msStatus(http.StatusOK),
+			msBody(jsonMust(mockUAAResponse)))
+
+		defer mockUAA.Close()
+		pp.Config.ConsoleConfig = new(api.ConsoleConfig)
+		uaaURL, _ := url.Parse(mockUAA.URL)
+		pp.Config.ConsoleConfig.UAAEndpoint = uaaURL
+		pp.Config.ConsoleConfig.SkipSSLValidation = true
+		pp.Config.ConsoleConfig.AuthEndpointType = string(api.Remote)
+		err := pp.InitStratosAuthService(api.AuthEndpointTypes[pp.Config.ConsoleConfig.AuthEndpointType])
+		So(err, ShouldBeNil)
+
+		hookRan := false
+		_ = pp.AddLoginHook(0, func(c *echo.Context) error {
+			hookRan = true
+			return errors.New("could not auto-connect")
+		})
+
+		mock.ExpectQuery(selectAnyFromTokens).
+			WillReturnRows(testutils.ExpectNoRows())
+
+		mock.ExpectExec(insertIntoTokens).
+			WillReturnResult(sqlmock.NewResult(1, 1))
+
+		loginErr := pp.StratosAuthService.Login(ctx)
+
+		So(hookRan, ShouldBeTrue)
+		So(loginErr, ShouldBeNil)
+		So(mock.ExpectationsWereMet(), ShouldBeNil)
 	})
 }
 
@@ -621,13 +675,13 @@ func TestLoginToCNSIWithUserEndpointsEnabled(t *testing.T) {
 		userEndpoint1Args := createEndpointRowArgs("CF Endpoint 2", mockUAA.URL, mockUAA.URL, mockUAA.URL, mockEndpointAdmin1.ConnectedUser.GUID, mockEndpointAdmin1.ConnectedUser.Admin)
 		userEndpoint1Rows := sqlmock.NewRows(datastore.GetColumnNamesForCSNIs()).AddRow(userEndpoint1Args...)
 
-		res = httptest.NewRecorder()
+		resUser1 := httptest.NewRecorder()
 		req = setupMockReq("POST", "", map[string]string{
 			"username":  "admin",
 			"password":  "changeme",
 			"cnsi_guid": fmt.Sprintf("%v", userEndpoint1Args[0]),
 		})
-		_, ctxConnectToUser1 := setupEchoContext(res, req)
+		_, ctxConnectToUser1 := setupEchoContext(resUser1, req)
 
 		// setup everything to mock a connection to a different user endpoint
 		userEndpoint2Args := createEndpointRowArgs("CF Endpoint 3", mockUAA.URL, mockUAA.URL, mockUAA.URL, mockEndpointAdmin2.ConnectedUser.GUID, mockEndpointAdmin2.ConnectedUser.Admin)
@@ -652,7 +706,7 @@ func TestLoginToCNSIWithUserEndpointsEnabled(t *testing.T) {
 
 				mock.ExpectQuery(selectFromCNSIs).WillReturnRows(adminEndpointRows)
 
-				mock.ExpectQuery(selectAnyFromCNSIs).WillReturnRows(adminEndpointRows)
+				mock.ExpectQuery(selectFromCNSIs).WillReturnRows(adminEndpointRows)
 
 				mock.ExpectQuery(selectAnyFromTokens).
 					WithArgs(adminEndpointArgs[0], mockAdmin.ConnectedUser.GUID).
@@ -699,7 +753,7 @@ func TestLoginToCNSIWithUserEndpointsEnabled(t *testing.T) {
 
 				mock.ExpectQuery(selectFromCNSIs).WillReturnRows(userEndpoint1Rows)
 
-				mock.ExpectQuery(selectAnyFromCNSIs).WillReturnRows(userEndpoint1Rows)
+				mock.ExpectQuery(selectFromCNSIs).WillReturnRows(userEndpoint1Rows)
 
 				mock.ExpectQuery(selectAnyFromTokens).
 					WithArgs(userEndpoint1Args[0], mockEndpointAdmin1.ConnectedUser.GUID).
@@ -727,7 +781,7 @@ func TestLoginToCNSIWithUserEndpointsEnabled(t *testing.T) {
 				mock.ExpectQuery(selectFromCNSIs).WillReturnRows(userEndpoint1Rows)
 
 				// args is the api url
-				mock.ExpectQuery(selectAnyFromCNSIs).WithArgs(userEndpoint1Args[3]).WillReturnRows(adminAndUserEndpointRows)
+				mock.ExpectQuery(selectFromCNSIs).WillReturnRows(adminAndUserEndpointRows)
 
 				// connected system endpoint found
 				mock.ExpectQuery(selectAnyFromTokens).
@@ -735,10 +789,45 @@ func TestLoginToCNSIWithUserEndpointsEnabled(t *testing.T) {
 					WillReturnRows(testutils.GetEmptyTokenRows().
 						AddRow("", mockUAAToken, mockUAAToken, time.Now().Add(-time.Hour).Unix(), false, "", "", "", nil, false))
 
-				// remove other connection, since it has the same api url
-				mock.ExpectExec(deleteTokens).
-					WithArgs(adminEndpointArgs[0], mockEndpointAdmin1.ConnectedUser.GUID).
+				mock.ExpectQuery(selectAnyFromTokens).
+					WithArgs(userEndpoint1Args[0], mockEndpointAdmin1.ConnectedUser.GUID).
+					WillReturnRows(testutils.ExpectNoRows())
+
+				mock.ExpectExec(insertIntoTokens).
 					WillReturnResult(sqlmock.NewResult(1, 1))
+
+				// the other connection stays; the user is told about it
+				err := pp.loginToCNSI(ctxConnectToUser1)
+				dberr := mock.ExpectationsWereMet()
+
+				Convey("there should be no error", func() {
+					So(err, ShouldBeNil)
+				})
+
+				Convey("the response should list the system endpoint", func() {
+					var resp api.LoginRes
+					So(json.Unmarshal(resUser1.Body.Bytes(), &resp), ShouldBeNil)
+					So(resp.AlsoConnected, ShouldResemble, []api.EndpointRef{{GUID: fmt.Sprintf("%v", adminEndpointArgs[0]), Name: "CF Endpoint 1"}})
+				})
+
+				Convey("there should be no db error", func() {
+					So(dberr, ShouldBeNil)
+				})
+			})
+			Convey("Connect to own endpoint while the system endpoint at the same url is shared", func() {
+				if errSession := pp.setSessionValues(ctxConnectToUser1, mockEndpointAdmin1.SessionValues); errSession != nil {
+					t.Error(errors.New("unable to mock/stub user in session object"))
+				}
+
+				mock.ExpectQuery(selectFromCNSIs).WillReturnRows(userEndpoint1Rows)
+
+				mock.ExpectQuery(selectFromCNSIs).WillReturnRows(adminAndUserEndpointRows)
+
+				// an admin's connection shared with every user: not the user's to disconnect
+				mock.ExpectQuery(selectAnyFromTokens).
+					WithArgs(adminEndpointArgs[0], mockEndpointAdmin1.ConnectedUser.GUID, mockAdminGUID).
+					WillReturnRows(testutils.GetEmptyTokenRows().
+						AddRow("", mockUAAToken, mockUAAToken, time.Now().Add(-time.Hour).Unix(), false, "", "", tokens.SystemSharedUserGuid, nil, false))
 
 				mock.ExpectQuery(selectAnyFromTokens).
 					WithArgs(userEndpoint1Args[0], mockEndpointAdmin1.ConnectedUser.GUID).
@@ -754,6 +843,12 @@ func TestLoginToCNSIWithUserEndpointsEnabled(t *testing.T) {
 					So(err, ShouldBeNil)
 				})
 
+				Convey("the response should list nothing", func() {
+					var resp api.LoginRes
+					So(json.Unmarshal(resUser1.Body.Bytes(), &resp), ShouldBeNil)
+					So(resp.AlsoConnected, ShouldBeEmpty)
+				})
+
 				Convey("there should be no db error", func() {
 					So(dberr, ShouldBeNil)
 				})
@@ -765,7 +860,7 @@ func TestLoginToCNSIWithUserEndpointsEnabled(t *testing.T) {
 
 				mock.ExpectQuery(selectFromCNSIs).WillReturnRows(adminEndpointRows)
 
-				mock.ExpectQuery(selectAnyFromCNSIs).WillReturnRows(adminEndpointRows)
+				mock.ExpectQuery(selectFromCNSIs).WillReturnRows(adminEndpointRows)
 
 				mock.ExpectQuery(selectAnyFromTokens).
 					WithArgs(adminEndpointArgs[0], mockEndpointAdmin1.ConnectedUser.GUID).
@@ -915,8 +1010,12 @@ func TestSetUAATokenRecord(t *testing.T) {
 
 }
 
+// An endpoint record without an API address cannot be connected to.
 func TestLoginToCNSIWithMissingAPIEndpoint(t *testing.T) {
-	t.Skip("Skipping for now - need to verify whether still needed.")
+	// It fails today: connect does not check the API address, since
+	// registration always stores one. Remove the skip if connect should
+	// refuse such a record.
+	t.Skip("connect does not check for a missing API address")
 	t.Parallel()
 
 	req := setupMockReq("POST", "", map[string]string{
@@ -925,7 +1024,7 @@ func TestLoginToCNSIWithMissingAPIEndpoint(t *testing.T) {
 		"cnsi_guid": mockCNSIGUID,
 	})
 
-	_, _, ctx, pp, db, _ := setupHTTPTest(req)
+	_, _, ctx, pp, db, mock := setupHTTPTest(req)
 	defer db.Close()
 
 	mockUAA := setupMockServer(t,
@@ -933,21 +1032,29 @@ func TestLoginToCNSIWithMissingAPIEndpoint(t *testing.T) {
 		msMethod("POST"),
 		msStatus(http.StatusOK),
 		msBody(jsonMust(mockUAAResponse)))
-
 	defer mockUAA.Close()
 
-	if err := pp.loginToCNSI(ctx); err == nil {
-		t.Error("Login against CNSI should fail if API endpoint not specified")
-	}
+	mock.ExpectQuery(selectAnyFromCNSIs).
+		WithArgs(mockCNSIGUID).
+		WillReturnRows(sqlmock.NewRows(datastore.GetColumnNamesForCSNIs()).
+			AddRow(mockCNSIGUID, "mockCF", "cf", "", mockUAA.URL, mockUAA.URL, mockDopplerEndpoint, true, "", cipherClientSecret, true, "", "", "", ""))
+	mock.ExpectQuery(selectAnyFromTokens).WillReturnRows(testutils.ExpectNoRows())
+	mock.ExpectExec(insertIntoTokens).WillReturnResult(sqlmock.NewResult(1, 1))
 
-	// testTokenKey := mkTokenRecordKey("", mockUserGuid)
-	// if _, ok := pp.CNSITokenMap[testTokenKey]; ok {
-	// 	t.Error("Token should not be saved in CNSI map if API endpoint not specified")
-	// }
+	sessionValues := map[string]interface{}{
+		"user_id": mockUserGUID,
+		"exp":     time.Now().AddDate(0, 0, 1).Unix(),
+	}
+	require.NoError(t, pp.setSessionValues(ctx, sessionValues))
+
+	err := pp.loginToCNSI(ctx)
+
+	require.Error(t, err, "connect must refuse an endpoint with no API address")
 }
 
+// UAA refusing the user's credentials fails the connect, and no token is
+// saved for the endpoint.
 func TestLoginToCNSIWithBadCreds(t *testing.T) {
-	t.Skip("Skipping for now - need to verify whether still needed.")
 	t.Parallel()
 
 	req := setupMockReq("POST", "", map[string]string{
@@ -956,25 +1063,34 @@ func TestLoginToCNSIWithBadCreds(t *testing.T) {
 		"cnsi_guid": mockCNSIGUID,
 	})
 
-	_, _, ctx, pp, db, _ := setupHTTPTest(req)
+	_, _, ctx, pp, db, mock := setupHTTPTest(req)
 	defer db.Close()
 
 	mockUAA := setupMockServer(t,
 		msRoute("/oauth/token"),
 		msMethod("POST"),
-		msStatus(http.StatusOK),
-		msBody(jsonMust(mockUAAResponse)))
-
+		msStatus(http.StatusUnauthorized),
+		msBody(`{"error":"unauthorized","error_description":"Bad credentials"}`))
 	defer mockUAA.Close()
 
-	if err := pp.loginToCNSI(ctx); err != nil {
-		t.Error(err)
-	}
+	mock.ExpectQuery(selectAnyFromCNSIs).
+		WithArgs(mockCNSIGUID).
+		WillReturnRows(sqlmock.NewRows(datastore.GetColumnNamesForCSNIs()).
+			AddRow(mockCNSIGUID, "mockCF", "cf", mockUAA.URL, mockUAA.URL, mockUAA.URL, mockDopplerEndpoint, true, "", cipherClientSecret, true, "", "", "", ""))
 
-	// testTokenKey := mkTokenRecordKey(mockCNSIGuid, mockUserGuid)
-	// if _, ok := pp.CNSITokenMap[testTokenKey]; !ok {
-	// 	t.Errorf("Token was not saved in CNSI map")
-	// }
+	sessionValues := map[string]interface{}{
+		"user_id": mockUserGUID,
+		"exp":     time.Now().AddDate(0, 0, 1).Unix(),
+	}
+	require.NoError(t, pp.setSessionValues(ctx, sessionValues))
+
+	err := pp.loginToCNSI(ctx)
+
+	var httpErr api.ErrHTTPShadow
+	require.ErrorAs(t, err, &httpErr)
+	require.Equal(t, http.StatusUnauthorized, httpErr.HTTPError.Code)
+	require.Contains(t, fmt.Sprint(httpErr.HTTPError.Message), "Bad credentials", "UAA's reason reaches the user")
+	require.NoError(t, mock.ExpectationsWereMet(), "nothing beyond the endpoint lookup: no token is saved")
 }
 
 func TestVerifySession(t *testing.T) {
@@ -1034,7 +1150,7 @@ func TestVerifySession(t *testing.T) {
 
 		var expectedScopes = `"scopes":["openid","scim.read","cloud_controller.admin","uaa.user","cloud_controller.read","password.write","routing.router_groups.read","cloud_controller.write","doppler.firehose","scim.write"]`
 
-		var expectedBody = `{"status":"ok","error":"","data":{"version":{"proxy_version":"dev","database_version":20161117141922,"build_date":"","git_commit":"","git_branch":""},"user":{"guid":"asd-gjfg-bob","name":"admin","admin":false,` + expectedScopes + `},"endpoints":{"cf":{}},"plugins":null,"config":{"enableTechPreview":false,"APIKeysEnabled":"admin_only","homeViewShowFavoritesOnly":false,"hideNavLogout":false,"userEndpointsEnabled":"disabled","endpointCardConcurrency":2,"endpointRequestConcurrency":3}}}`
+		var expectedBody = `{"status":"ok","error":"","data":{"version":{"proxy_version":"dev","database_version":20161117141922,"build_date":"","git_commit":"","git_branch":""},"user":{"guid":"asd-gjfg-bob","name":"admin","admin":false,` + expectedScopes + `},"endpoints":{"cf":{}},"plugins":null,"config":{"enableTechPreview":false,"APIKeysEnabled":"admin_only","homeViewShowFavoritesOnly":false,"hideNavLogout":false,"userEndpointsEnabled":"disabled","endpointCardConcurrency":2,"endpointRequestConcurrency":3,"jobTrackingLimitMins":60}}}`
 
 		Convey("Should contain expected body", func() {
 			So(res, ShouldNotBeNil)

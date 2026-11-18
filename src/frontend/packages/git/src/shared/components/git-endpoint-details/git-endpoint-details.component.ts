@@ -1,11 +1,12 @@
-import { ChangeDetectionStrategy, Component } from '@angular/core';
+import { ChangeDetectionStrategy, Component, computed } from '@angular/core';
 
 
 import {
   EndpointListDetailsComponent,
 } from '../../../../../core/src/shared/components/endpoint-list/endpoint-list.helpers';
-import { EndpointModel } from '../../../../../store/src/types/endpoint.types';
 import { GIT_ENDPOINT_SUB_TYPES } from '../../../store/git-entity-factory';
+
+const UNKNOWN_GIT_USER = '**token**';
 
 
 @Component({
@@ -17,20 +18,24 @@ import { GIT_ENDPOINT_SUB_TYPES } from '../../../store/git-entity-factory';
 })
 export class GitEndpointDetailsComponent extends EndpointListDetailsComponent {
 
-  // strict: populated by the `row` setter, which the endpoint-list detail
-  // host invokes before this view renders.
-  name!: string;
-  avatar?: string;
+  // jetstream stores this placeholder as the user name when it cannot
+  // read the token's user; there is no such GitHub user (or avatar).
+  private readonly knownUser = computed(() => {
+    const user = this.row()?.user;
+    return user && user.name !== UNKNOWN_GIT_USER ? user : undefined;
+  });
 
-  set row(row: EndpointModel) {
-    if (row && row.user) {
-      this.name = row.user.name === '**token**' ? 'Unknown' : row.user.name;
-      if (row.sub_type === GIT_ENDPOINT_SUB_TYPES.GITHUB) {
-        this.avatar = `https://avatars.githubusercontent.com/${row.user.name}`;
-      }
-    } else {
-      this.name = '-';
-      this.avatar = undefined;
+  readonly name = computed(() => {
+    if (!this.row()?.user) {
+      return '-';
     }
-  }
+    return this.knownUser()?.name ?? 'Unknown';
+  });
+
+  readonly avatar = computed(() => {
+    const user = this.knownUser();
+    return user && this.row().sub_type === GIT_ENDPOINT_SUB_TYPES.GITHUB ?
+      `https://avatars.githubusercontent.com/${user.name}` :
+      undefined;
+  });
 }

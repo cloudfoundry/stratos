@@ -1,19 +1,9 @@
-import {
-  Component,
-  OnDestroy,
-  OnInit,
-  signal,
-  ChangeDetectionStrategy,
-  inject,
-  computed,
-  Signal,
-  WritableSignal,
-} from '@angular/core';
+import { ChangeDetectionStrategy, Component, Injector, OnDestroy, OnInit, Signal, WritableSignal, computed, effect, inject, signal, untracked } from '@angular/core';
 import { Validators, FormControl, FormGroup, FormsModule, ReactiveFormsModule } from '@angular/forms';
 import { Router } from '@angular/router';
-import { Subscription } from 'rxjs';
-import { filter, startWith } from 'rxjs/operators';
 import { toSignal } from '@angular/core/rxjs-interop';
+import { Subscription } from 'rxjs';
+import { startWith } from 'rxjs/operators';
 
 import {
   AppErrorComponent,
@@ -29,6 +19,7 @@ import {
   SignalListSort,
   SignalStepHandle,
 } from '@stratosui/core';
+import { leadError } from '@stratosui/store';
 import { StDomain } from '../../../../services/endpoint-data/stratos-types';
 import { ApplicationService } from '../../application.service';
 import { AppDetailDataService } from '../../app-detail-data.service';
@@ -83,7 +74,7 @@ const pathPattern = `^([\\w\\-\\/\\!\\#\\[\\]\\@\\&\\$\\'\\(\\)\\*\\+\\;\\=\\,]*
  * Orphan-on-attach-fail (create succeeds, attach fails): the action
  * service throws an error whose message names the orphan route GUID + URL
  * verbatim; the rejection propagates up through signalHandle.submit to
- * the stepper which surfaces it via the existing snackbar plumbing.
+ * the stepper, which shows it above its buttons.
  */
 @Component({
   selector: 'app-add-routes',
@@ -110,15 +101,11 @@ export class AddRoutesComponent implements OnInit, OnDestroy {
   private actions = inject(AppRouteActionsService);
   private mapRoutesConfig = inject(CfMapRoutesSignalConfigService);
   private router = inject(Router);
+  private injector = inject(Injector);
 
   subscriptions: Subscription[] = [];
-  /**
-   * Domains for the app's org. Sourced from the signal-native facade
-   * (`applicationService.orgDomains$`) so the picker stays in sync with the
-   * data service without dispatching ngrx actions or wiring through the
-   * legacy entity catalog.
-   */
-  readonly domains: Signal<StDomain[]>;
+  /** Domains for the app's org, from the detail data service. */
+  readonly domains: Signal<StDomain[]> = this.dataService.domains;
 
   addTCPRoute: FormGroup<{
     port: FormControl<string>;
@@ -204,10 +191,6 @@ export class AddRoutesComponent implements OnInit, OnDestroy {
     this.appGuid = applicationService.appGuid;
     this.cfGuid = applicationService.cfGuid;
     this.appUrl = `/applications/${this.cfGuid}/${this.appGuid}/routes`;
-
-    // Bridge the org-domains observable into a signal so the template's
-    // @for binds reactively and we keep the OnPush change detection model.
-    this.domains = toSignal(this.applicationService.orgDomains$, { initialValue: [] });
 
     this.domainFormGroup = new FormGroup({
       domain: new FormControl<StDomain | ''>('', {
@@ -400,32 +383,16 @@ export class AddRoutesComponent implements OnInit, OnDestroy {
       }
     }));
 
-    // Capture the app's space GUID for the create-route relationship payload
-    // as soon as the app entity resolves. Signal-native: the domain list
-    // itself flows from `this.domains` (toSignal of orgDomains$) so we no
-    // longer need the cfEntityCatalog space.domains include-fetch.
-    this.subscriptions.push(
-      this.applicationService.waitForAppEntity$.pipe(
-        filter(app => !!app?.entity?.entity?.space_guid),
-      ).subscribe(app => {
-        this.spaceGuid = app.entity.entity.space_guid;
-      }),
-    );
-
-    // Seed the domain dropdown with the first available org domain once the
-    // signal-native facade emits a non-empty list. Stops at the first emission
-    // so a later refresh doesn't clobber a user-picked value.
-    this.subscriptions.push(
-      this.applicationService.orgDomains$.pipe(
-        filter(domains => Array.isArray(domains) && domains.length > 0),
-      ).subscribe(domains => {
-        if (this.selectedDomain()) {
-          return;
-        }
-        this.selectedDomain.set(domains[0]);
-        this.domainFormGroup.patchValue({ domain: domains[0] });
-      }),
-    );
+    // Seed the domain dropdown with the first org domain once the list is
+    // non-empty; a later refresh never clobbers a user-picked value.
+    effect(() => {
+      const domains = this.domains();
+      if (domains.length === 0 || untracked(this.selectedDomain)) {
+        return;
+      }
+      this.selectedDomain.set(domains[0]);
+      this.domainFormGroup.patchValue({ domain: domains[0] });
+    }, { injector: this.injector });
 
     // Subscribe to domain form changes to update selectedDomain so the
     // template's TCP/HTTP branching reacts.
@@ -443,13 +410,16 @@ export class AddRoutesComponent implements OnInit, OnDestroy {
     // resolves, so calling here-and-now is safe even before the app
     // entity has populated.
     void this.mapRoutesConfig.refresh();
-    // Re-drain when appDetail.spaceGuid first lands (covers the cold-load
-    // race where ngOnInit fires before the cnsi+space are bound).
-    this.subscriptions.push(
-      this.applicationService.waitForAppEntity$.pipe(
-        filter(app => !!app?.entity?.entity?.space_guid),
-      ).subscribe(() => { void this.mapRoutesConfig.refresh(); }),
-    );
+    // The app's space GUID for the create-route relationship payload, as
+    // soon as the app entity resolves; re-drain the routes then too (covers
+    // the cold-load race where ngOnInit fires before the cnsi+space are bound).
+    effect(() => {
+      const spaceGuid = this.dataService.app()?.entity?.space_guid;
+      if (spaceGuid) {
+        this.spaceGuid = spaceGuid;
+        void this.mapRoutesConfig.refresh();
+      }
+    }, { injector: this.injector });
   }
 
   /**
@@ -481,7 +451,7 @@ export class AddRoutesComponent implements OnInit, OnDestroy {
    * Submit dispatch. Row-selected wins over the form (validate() ensures
    * the two intents don't both produce valid=true). Resolves on success
    * (signalHandle.submit unwraps), rejects with an Error to surface the
-   * message via stepper snackbar.
+   * message above the stepper's buttons.
    */
   async runSubmit(): Promise<void> {
     if (this.hasSelectedRoute()) {
@@ -539,29 +509,30 @@ export class AddRoutesComponent implements OnInit, OnDestroy {
       // hostCollision and never reach this branch. Other 422 details
       // (invalid host, quota exceeded, etc.) pass through verbatim;
       // orphan-on-attach-fail messages too.
-      throw new Error(this.classifyCreateError(err), { cause: err });
+      throw this.classifyCreateError(err);
     }
     this.dataService.addRoute(created);
     void this.router.navigate(['/applications', this.cfGuid, this.appGuid, 'routes']);
   }
 
   /**
-   * Map a thrown error from createAndAttachRoute into a user-facing
-   * message. CF v3 returns 422 with `errors[].code` for uniqueness
+   * Map a thrown error from createAndAttachRoute into the error the
+   * stepper shows. CF v3 returns 422 with `errors[].code` for uniqueness
    * conflicts (210003/210004/210005); we translate those without leaking
-   * the colliding route's space/org. Any other shape passes the original
-   * message through.
+   * the colliding route's space/org. The action service's own errors
+   * (orphaned route, action in flight) pass through; a failed request
+   * reads as its CF detail or error page, after a lead-in.
    */
-  private classifyCreateError(err: unknown): string {
-    const e = err as { message?: string; status?: number; error?: unknown };
+  private classifyCreateError(err: unknown): Error {
+    const e = err as { status?: number; error?: unknown };
     const status = e?.status ?? 0;
     if (status === 422) {
       const code = this.extractCfErrorCode(e?.error);
       if (code === 210003 || code === 210004 || code === 210005) {
-        return 'Route name is unavailable. Please choose another.';
+        return new Error('Route name is unavailable. Please choose another.', { cause: err });
       }
     }
-    return e?.message ?? 'Failed to add route';
+    return err instanceof Error ? err : leadError('Failed to add route', err);
   }
 
   /**
@@ -596,8 +567,7 @@ export class AddRoutesComponent implements OnInit, OnDestroy {
     try {
       await this.actions.attachRoute(selected.guid);
     } catch (err) {
-      const msg = (err as Error)?.message ?? 'Failed to map route';
-      throw new Error(msg, { cause: err });
+      throw err instanceof Error ? err : leadError('Failed to map route', err);
     }
     // Use the picker's locally-held StRoute (backend returns empty 200 from
     // attach). The picker's drain stamps cnsiGuid via toStRoute server-side.

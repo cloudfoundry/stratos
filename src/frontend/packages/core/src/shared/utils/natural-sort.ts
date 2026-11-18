@@ -38,9 +38,11 @@
  * their separator characters) lives in detectSortContext below. The
  * output is fed into naturalCompare via the `ctx` parameter:
  *
- *   - ctx.stripSeparators === true:  whitespace/_/- are stripped from
- *     each value before tokenizing, collapsing every input to the
- *     alternating xxx-nnn form. Lossy: `Org` and `Org_` compare equal.
+ *   - ctx.stripSeparators === true:  each value is split into digit runs
+ *     and text first, then whitespace/_/- are stripped from the text
+ *     tokens only (a text token left empty is dropped). `Org_5`, `Org 5`
+ *     and `Org5` all become [Org, 5]; `app-2-1` stays [app, 2, 1] — the
+ *     numbers are never merged. Lossy: `Org` and `Org_` compare equal.
  *   - ctx.stripSeparators omitted/false: tokenize as-is — separators
  *     remain part of the surrounding text tokens (legacy behaviour).
  *
@@ -116,20 +118,20 @@ export function detectSortContext(values: readonly string[]): NaturalSortContext
 
 function tokenize(value: string, ctx: NaturalSortContext): Token[] {
   if (!value) return [];
-  const cleaned = ctx.stripSeparators ? value.replace(SEPARATOR_CHAR_CLASS, '') : value;
-  if (!cleaned) return [];
   const tokens: Token[] = [];
+  const push = (text: string) => {
+    const t = ctx.stripSeparators ? text.replace(SEPARATOR_CHAR_CLASS, '') : text;
+    if (t) tokens.push({ text: t });
+  };
   const re = /(\d+)/g;
   let lastIdx = 0;
   let match: RegExpExecArray | null;
-  while ((match = re.exec(cleaned)) !== null) {
-    if (match.index > lastIdx) {
-      tokens.push({ text: cleaned.slice(lastIdx, match.index) });
-    }
+  while ((match = re.exec(value)) !== null) {
+    push(value.slice(lastIdx, match.index));
     tokens.push({ num: Number(match[1]) });
     lastIdx = match.index + match[1].length;
   }
-  if (lastIdx < cleaned.length) tokens.push({ text: cleaned.slice(lastIdx) });
+  push(value.slice(lastIdx));
   return tokens;
 }
 
@@ -170,4 +172,19 @@ export function naturalCompare(
     return (tokA.num !== undefined ? -1 : 1) * sign;
   }
   return 0;
+}
+
+/**
+ * Comparator for endpoint names. Builds the collection-aware context once
+ * from `names` (pass every name in the list being sorted) so `dup2`,
+ * `dup 3` and `dup4` sequence by their number, then returns a
+ * naturalCompare over two names. Direction is baked into the result.
+ * Callers that sort by other keys first can use it as the tiebreak.
+ */
+export function endpointNameCompare(
+  names: readonly string[],
+  direction: 'asc' | 'desc' = 'asc',
+): (a: string, b: string) => number {
+  const ctx = detectSortContext(names);
+  return (a, b) => naturalCompare(a, b, false, direction, ctx);
 }

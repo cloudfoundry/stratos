@@ -1,5 +1,4 @@
 import { Component, inject, ChangeDetectionStrategy } from '@angular/core';
-import { AsyncPipe } from '@angular/common';
 
 import { MetadataItemComponent, CardWrapperComponent, CardHeaderComponent, CardTitleComponent, CardContentComponent } from '@stratosui/core';
 import { KubernetesNodeService } from '../../../../services/kubernetes-node.service';
@@ -11,7 +10,6 @@ import { KubernetesNodeService } from '../../../../services/kubernetes-node.serv
   changeDetection: ChangeDetectionStrategy.OnPush,
   standalone: true,
   imports: [
-    AsyncPipe,
     CardWrapperComponent,
     CardHeaderComponent,
     CardTitleComponent,

@@ -202,7 +202,7 @@ func (p *portalProxy) enrichCSPReport(report cspViolationReport, remoteIP, forwa
 	report.OriginalPolicy = cspNonceValue.ReplaceAllString(report.OriginalPolicy, "'nonce-REDACTED'")
 
 	policySource := "operator"
-	if p.GetConfig().CSPPolicy == policyWithReporting(defaultCSPPolicy) {
+	if config := p.GetConfig(); config.CSPPolicy == policyWithReporting(builtInCSPPolicy(config.CSPGitHosts)) {
 		policySource = "built-in"
 	}
 

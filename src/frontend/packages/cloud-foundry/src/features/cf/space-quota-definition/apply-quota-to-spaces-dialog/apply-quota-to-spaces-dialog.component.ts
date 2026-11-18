@@ -17,9 +17,10 @@ import {
   TailwindSnackBarService,
 } from '@stratosui/core';
 
+import { drainCfPages } from '../../../../services/endpoint-data/drain-pages';
 import { QuotaDataService } from '../../../../services/endpoint-data/quota-data.service';
 import { StSpace } from '../../../../services/endpoint-data/stratos-types';
-import { extractHttpErrorMessage } from '../../../../services/extract-error-message';
+import { extractHttpErrorMessage, leadPieces } from '@stratosui/store';
 
 // ─── Dialog data ────────────────────────────────────────────────────────────
 
@@ -68,12 +69,10 @@ export class ApplyQuotaToSpacesDialogComponent {
   );
 
   constructor() {
-    // Same spaces-in-org endpoint OrgDataService reads. Fetched fresh here so
-    // the dialog is self-contained (no dependency on a warmed org-detail cache).
-    this.http
-      .get<{ resources: StSpace[]; totalResults: number }>(
-        `/pp/v1/cf/org/${this.data.cfGuid}/${this.data.orgGuid}/spaces`,
-      )
+    // Same spaces-in-org endpoint OrgDataService reads, every page. Fetched
+    // fresh here so the dialog is self-contained (no dependency on a warmed
+    // org-detail cache).
+    drainCfPages<StSpace>(this.http, `/pp/v1/cf/org/${this.data.cfGuid}/${this.data.orgGuid}/spaces`)
       .subscribe({
         next: resp => {
           this.spaces.set(resp?.resources ?? []);
@@ -120,7 +119,7 @@ export class ApplyQuotaToSpacesDialogComponent {
       // Do NOT touch signals after close() — the view is destroyed.
       this.dialogRef.close(true);
     } catch (err: unknown) {
-      this.snackBar.error(`Failed to apply quota: ${extractHttpErrorMessage(err)}`);
+      this.snackBar.error(leadPieces('Failed to apply quota', err));
       this.submitting.set(false);
     }
   }

@@ -1,8 +1,5 @@
-import { CommonModule } from '@angular/common';
-import {Component, inject, ChangeDetectionStrategy } from '@angular/core';
+import { Component, computed, inject, ChangeDetectionStrategy } from '@angular/core';
 import { AnsiColors } from '@stratosui/core';
-import { Observable } from 'rxjs';
-import { map } from 'rxjs/operators';
 
 import { NoContentMessageComponent } from '../../../../../../../core/src/shared/components/no-content-message/no-content-message.component';
 
@@ -14,31 +11,16 @@ import { HelmReleaseHelperService } from '../helm-release-helper.service';
   changeDetection: ChangeDetectionStrategy.OnPush,
   standalone: true,
   imports: [
-    CommonModule,
     NoContentMessageComponent
   ]
 })
 export class HelmReleaseNotesTabComponent {
 
-  public notes$: Observable<string>;
+  private colorizer = new AnsiColors();
+  public helmReleaseHelper = inject(HelmReleaseHelperService);
 
-  private colorizer = new AnsiColors();  public helmReleaseHelper = inject(HelmReleaseHelperService);
-
-
-
-  constructor() {
-
-
-    this.notes$ = this.helmReleaseHelper.release$.pipe(
-      map((release: any) => {
-        if (release?.info?.notes) {
-          return this.colorizer.ansiColorsToHtml(release.info.notes);
-        } else {
-          return '';
-        }
-      })
-    );
-
-
-  }
+  readonly notes = computed(() => {
+    const notes = this.helmReleaseHelper.release()?.info?.notes;
+    return notes ? this.colorizer.ansiColorsToHtml(notes) : '';
+  });
 }

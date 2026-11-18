@@ -33,7 +33,7 @@ export class CloudFoundryCellAppsComponent {
       pageIndex: this.appsConfig.pageIndex,
       pageSize: this.appsConfig.pageSize,
       isAnyLoading: computed(() => this.appsConfig.isLoading()),
-      errorsByCnsi: signal(new Map()),
+      errorsByCnsi: this.appsConfig.errorsByCnsi,
       columns: [
         {
           header: 'App Name', key: 'name', sortField: 'name',
@@ -66,6 +66,7 @@ export class CloudFoundryCellAppsComponent {
       ],
       getRowKey: (r: CfCellAppRow) => `${r.appGuid}:${r.instanceIndex}`,
       emptyMessage: 'There are no applications',
+      errorMessage: 'Failed to load the apps on this cell',
       loadingMessage: 'Loading apps…',
       onRefresh: () => this.appsConfig.refresh(),
       sort: this.appsConfig.sort,

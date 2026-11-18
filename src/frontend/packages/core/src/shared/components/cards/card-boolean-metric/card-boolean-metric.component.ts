@@ -1,4 +1,4 @@
-import { Component, Input, OnChanges, OnInit, inject, ChangeDetectionStrategy } from '@angular/core';
+import { Component, OnChanges, OnInit, inject, ChangeDetectionStrategy, input } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { Router } from '@angular/router';
 
@@ -13,12 +13,12 @@ import { Router } from '@angular/router';
 })
 export class CardBooleanMetricComponent implements OnInit, OnChanges {
 
-  @Input() icon!: string;
-  @Input() iconFont!: string;
-  @Input() label!: string;
-  @Input() value!: string;
-  @Input() textOnly = false;
-  @Input() link?: () => void | string;
+  readonly icon = input.required<string>();
+  readonly iconFont = input<string>();
+  readonly label = input<string>();
+  readonly value = input<string>();
+  readonly textOnly = input(false);
+  readonly link = input<() => void | string>();
 
   formattedValue!: string;
 
@@ -33,10 +33,11 @@ export class CardBooleanMetricComponent implements OnInit, OnChanges {
   }
 
   format() {
-    if (this.value === undefined || this.value === '') {
+    const value = this.value();
+    if (value === undefined || value === '') {
       this.handleNoValue();
     } else {
-      this.handleValue();
+      this.handleValue(value);
     }
   }
 
@@ -44,8 +45,8 @@ export class CardBooleanMetricComponent implements OnInit, OnChanges {
     this.formattedValue = '-';
   }
 
-  handleValue() {
-    if (this.value.toString() === 'true') {
+  handleValue(value: string) {
+    if (value.toString() === 'true') {
       this.formattedValue = 'Yes';
     } else {
       this.formattedValue = 'No';
@@ -53,10 +54,11 @@ export class CardBooleanMetricComponent implements OnInit, OnChanges {
   }
 
   goToLink() {
-    if (typeof (this.link) === 'string') {
-      this.router.navigate([this.link]);
+    const link = this.link();
+    if (typeof link === 'string') {
+      this.router.navigate([link]);
     } else {
-      this.link?.();
+      link?.();
     }
   }
 }

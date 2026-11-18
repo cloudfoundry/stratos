@@ -1,4 +1,4 @@
-import { Directive, Input, OnChanges, SimpleChanges } from '@angular/core';
+import { Directive, OnChanges, SimpleChanges, input } from '@angular/core';
 import { AbstractControl, NG_VALIDATORS, Validator } from '@angular/forms';
 
 @Directive({
@@ -11,7 +11,9 @@ export class UniqueDirective implements Validator, OnChanges {
 
   constructor() { }
 
-  @Input() appUnique!: any[];
+  readonly appUnique = input<any[]>();
+  /** Compares the value as this key, for lists held as keys (e.g. endpointUrlKey). */
+  readonly appUniqueKey = input<(value: any) => any>(value => value);
 
   ngOnChanges(changes: SimpleChanges): void {
     // When the appUnique input changes, re-validate the control
@@ -24,7 +26,8 @@ export class UniqueDirective implements Validator, OnChanges {
     // Store reference to control so we can trigger re-validation in ngOnChanges
     this._control = c;
 
-    const found = this.appUnique ? this.appUnique.indexOf(c.value) >= 0 : false;
+    const appUnique = this.appUnique();
+    const found = appUnique ? appUnique.indexOf(this.appUniqueKey()(c.value)) >= 0 : false;
     return found ? {
       appUnique: {
         message: 'Value is not unique'

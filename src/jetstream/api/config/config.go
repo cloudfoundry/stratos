@@ -137,9 +137,13 @@ func setFieldValue(value reflect.Value, field reflect.Value, tags string, envLoo
 	// Allow multiple values, separated by ',' to allow fallbacks
 	tagList := strings.Split(tags, ",")
 	for _, tag := range tagList {
-		val, ok := envLookup(strings.TrimSpace(tag))
+		name := strings.TrimSpace(tag)
+		val, ok := envLookup(name)
 		if ok {
-			return SetStructFieldValue(value, field, val)
+			if err := SetStructFieldValue(value, field, val); err != nil {
+				return fmt.Errorf("%s: %w", name, err)
+			}
+			return nil
 		}
 	}
 

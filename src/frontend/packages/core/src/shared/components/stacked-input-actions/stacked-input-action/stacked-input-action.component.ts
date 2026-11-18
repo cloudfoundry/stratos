@@ -1,14 +1,16 @@
 import { CommonModule } from '@angular/common';
-import { ChangeDetectionStrategy, AfterContentInit,
+import {
+  ChangeDetectionStrategy, AfterContentInit,
   Component,
   ElementRef,
-  EventEmitter,
-  Input,
   OnDestroy,
   OnInit,
-  Output,
-  ViewChild,
- } from '@angular/core';
+  computed,
+  input,
+  signal,
+  output,
+  viewChild
+} from '@angular/core';
 import { ReactiveFormsModule, Validators, FormControl, AbstractControl } from '@angular/forms';
 import { CustomFormFieldComponent, AppErrorComponent, AppInputDirective } from '../../../components/custom-form-field/custom-form-field.component';
 import { CustomTooltipDirective } from '../../custom-tooltip/custom-tooltip.directive';
@@ -71,33 +73,29 @@ export class StackedInputActionComponent implements OnInit, OnDestroy, AfterCont
       uniqueError: 'Email is not unique'
     }
   };
-  @Input() stateIn$!: Observable<StackedInputActionsState | null>;
-  @Input() position!: number;
-  @Input() showRemove!: boolean;
-  @Input() key!: number;
-  private pConfig!: StackedInputActionConfig;
-  @Input()
-  set config(config: StackedInputActionConfig) {
-    this.pConfig = config;
-  }
-  get config(): StackedInputActionConfig {
-    return this.pConfig || StackedInputActionComponent.defaultConfig;
-  }
+  readonly stateIn$ = input.required<Observable<StackedInputActionsState | null>>();
+  readonly position = input<number>(0);
+  readonly showRemove = input(false);
+  readonly key = input<number>(0);
+  readonly config = input<StackedInputActionConfig | undefined>(undefined);
+  readonly resolvedConfig = computed(() => this.config() || StackedInputActionComponent.defaultConfig);
 
-  @Output() stateOut = new EventEmitter<StackedInputActionUpdate>();
-  @Output() remove = new EventEmitter<any>();
+  readonly stateOut = output<StackedInputActionUpdate>();
+  readonly remove = output<void>();
 
-  @ViewChild('inputElement', { static: true }) inputElement!: ElementRef;
+  readonly inputElement = viewChild.required<ElementRef>('inputElement');
 
   public result = StackedInputActionResult;
   public textFormControl = new FormControl<string | null>('', [Validators.required, this.uniqueValidator.bind(this)]);
-  public state: StackedInputActionsState | null = null;
+  // Signal so a SUCCEEDED result after PROCESSING re-renders: the form
+  // control stays disabled across both, so nothing else marks the view.
+  readonly state = signal<StackedInputActionsState | null>(null);
   private subs: Subscription[] = [];
   private otherValues!: string[];
 
   ngOnInit() {
     const validators = [Validators.required, this.uniqueValidator.bind(this)];
-    if (this.config.isEmailInput) {
+    if (this.resolvedConfig().isEmailInput) {
       validators.push(Validators.email);
     }
     this.textFormControl = new FormControl<string | null>('', validators);
@@ -105,15 +103,15 @@ export class StackedInputActionComponent implements OnInit, OnDestroy, AfterCont
     // Emit any changes of form state outwards.
     this.subs.push(this.textFormControl.valueChanges.subscribe((value) => {
       this.stateOut.emit({
-        key: this.key,
+        key: this.key(),
         value: value ?? '',
         // Component is valid if form is ok OR it's already succeeded
-        valid: this.state && this.state.result === StackedInputActionResult.SUCCEEDED || this.textFormControl.valid
+        valid: this.state()?.result === StackedInputActionResult.SUCCEEDED || this.textFormControl.valid
       });
     }));
 
     // Handle change of state from outside
-    this.subs.push(this.stateIn$.subscribe(this.handleStateIn.bind(this)));
+    this.subs.push(this.stateIn$().subscribe(this.handleStateIn.bind(this)));
   }
 
   ngOnDestroy(): void {
@@ -121,7 +119,7 @@ export class StackedInputActionComponent implements OnInit, OnDestroy, AfterCont
   }
 
   ngAfterContentInit() {
-    this.inputElement.nativeElement.focus();
+    this.inputElement().nativeElement.focus();
   }
 
   uniqueValidator(control: AbstractControl) {
@@ -148,18 +146,18 @@ export class StackedInputActionComponent implements OnInit, OnDestroy, AfterCont
 
   private handleStateIn(incState: StackedInputActionsState | null) {
     if (!incState) {
-      this.state = incState;
+      this.state.set(incState);
       this.textFormControl.enable();
       return;
     }
     switch (incState.result) {
       case StackedInputActionResult.PROCESSING:
       case StackedInputActionResult.SUCCEEDED:
-        this.state = incState;
+        this.state.set(incState);
         this.textFormControl.disable();
         break;
       case StackedInputActionResult.FAILED:
-        this.state = incState;
+        this.state.set(incState);
         this.textFormControl.enable();
         break;
       case StackedInputActionResult.OTHER_VALUES_UPDATED: {

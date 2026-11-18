@@ -1,5 +1,4 @@
 import { DestroyRef, EffectRef, Injectable, Injector, Signal, WritableSignal, computed, effect, inject, runInInjectionContext, signal } from '@angular/core';
-import { toSignal } from '@angular/core/rxjs-interop';
 import { HttpClient, HttpParams } from '@angular/common/http';
 import { firstValueFrom } from 'rxjs';
 import type { EndpointModel } from '@stratosui/store';
@@ -12,6 +11,7 @@ import { ViewPipeline, SortSpec } from '../../../services/data-sources/view-pipe
 import { EndpointDataRegistry } from '../../../services/endpoint-data/endpoint-data.registry';
 import type { EndpointDataService } from '../../../services/endpoint-data/endpoint-data.service';
 import { EntityDeleteController } from '../../../services/deletes/entity-delete.controller';
+import type { DeleteOutcome } from '../../../services/deletes/delete-event.types';
 import { runCfDelete } from '../../../services/deletes/run-cf-delete';
 import { serviceInstancesEntityType } from '../../../cf-entity-types';
 import type { StServiceInstance } from '../../../services/endpoint-data/stratos-types';
@@ -43,6 +43,11 @@ import { ListStateStore, naturalCompare } from '@stratosui/core';
 // Delete is the only write surface this config OWNS (deleteServiceInstance).
 // Edit / Detach are per-row navigations to the /services edit|detach routes
 // and Add is an L5 sub-nav action — both wired at the consuming components.
+// Whether an instance's last operation has yet to end: CF reports a queued
+// operation as "initial" before "in progress".
+export const operationRunning = (si: StServiceInstance): boolean =>
+  si.lastOperation?.state === 'initial' || si.lastOperation?.state === 'in progress';
+
 @Injectable({ providedIn: 'root' })
 export class CfServiceInstancesSignalConfigService {
   orchestrator!: MergeOrchestrator<StServiceInstance>;
@@ -131,6 +136,10 @@ export class CfServiceInstancesSignalConfigService {
   // stale-selection clearer that keeps the toolbar display in sync with the
   // filter when an endpoint disconnects mid-session.
   private readonly _hasLoadedOnce: WritableSignal<boolean> = signal(false);
+  // The current scope's rows, swapped by rebuild() so the progress poll
+  // follows a scope change made after it started.
+  private readonly _scopedItems: WritableSignal<Signal<StServiceInstance[]>> = signal(signal([]));
+  private stopProgress?: () => void;
   /** True once the first load has completed for the current scope. Pages
    *  use `!hasLoadedOnce()` to show a pending count in the sub-nav (#5766). */
   readonly hasLoadedOnce: Signal<boolean> = this._hasLoadedOnce.asReadonly();
@@ -166,7 +175,7 @@ export class CfServiceInstancesSignalConfigService {
   constructor() {
     const cfService = inject(CloudFoundryService, { optional: true });
     this.connectedEndpoints = cfService
-      ? toSignal(cfService.connectedCFEndpoints$, { initialValue: [] as EndpointModel[] })
+      ? cfService.connectedCFEndpoints
       : signal<EndpointModel[]>([]).asReadonly();
 
     this.cnsiOptions = computed(() => endpointDropdownOptions(this.connectedEndpoints()));
@@ -409,6 +418,7 @@ export class CfServiceInstancesSignalConfigService {
         return true;
       });
     });
+    this._scopedItems.set(scopedItems);
     this.view = new ViewPipeline<StServiceInstance>(
       scopedItems,
       this.filter,
@@ -466,6 +476,46 @@ export class CfServiceInstancesSignalConfigService {
     await this.orchestrator.refresh();
     this._hasLoadedOnce.set(true);
     this.writeBackToRegistry();
+  }
+
+  // While an operation is in progress on any instance in the page's scope,
+  // re-read the list every intervalMs so its state follows the broker (#6002).
+  // Stops when none is in progress or the host page closes. A broker that
+  // never finishes keeps one read per interval going while the page is open.
+  startProgressPolling(host: DestroyRef, intervalMs: number = 10000): void {
+    this.stopProgress?.();
+    // Callers start polling after an await in ngOnInit; a host that left in
+    // the meantime must not start a poll nobody will stop.
+    if (host.destroyed) {
+      return;
+    }
+    let timer: ReturnType<typeof setInterval> | undefined;
+    let reading = false;
+    const tick = () => {
+      if (reading) return;
+      reading = true;
+      void this.refresh().finally(() => { reading = false; });
+    };
+    const watch = effect(() => {
+      const busy = this._scopedItems()().some(operationRunning);
+      if (busy && !timer) {
+        timer = setInterval(tick, intervalMs);
+      } else if (!busy && timer) {
+        clearInterval(timer);
+        timer = undefined;
+      }
+    }, { injector: this.injector });
+    // stop() only touches its own timer and effect, so a stale host
+    // destroyed after a newer start leaves the newer poll running.
+    const stop = () => {
+      clearInterval(timer);
+      watch.destroy();
+      if (this.stopProgress === stop) {
+        this.stopProgress = undefined;
+      }
+    };
+    this.stopProgress = stop;
+    host.onDestroy(stop);
   }
 
   // Build a per-CNSI source, optionally pre-seeded from the registry's
@@ -542,16 +592,22 @@ export class CfServiceInstancesSignalConfigService {
   // orchestrator's aggregated view so it disappears without a refresh.
   // Routing through the root-singleton controller removes the prior
   // orchestrator-undefined cold-fallback branch (removeRow no-ops when there
-  // is no orchestrator).
-  async deleteServiceInstance(cnsiGuid: string, siGuid: string, siName: string = siGuid): Promise<void> {
-    await runCfDelete(this.deleteController, this.http, {
+  // is no orchestrator). When the delete ends with an unknown result the
+  // row stays and the list is re-read instead, so it shows what CF holds.
+  async deleteServiceInstance(cnsiGuid: string, siGuid: string, siName: string = siGuid): Promise<DeleteOutcome> {
+    const outcome = await runCfDelete(this.deleteController, this.http, {
       cnsiGuid,
       entityKind: serviceInstancesEntityType,
       deleteGuid: siGuid,
       deleteName: siName,
       path: `/pp/v1/cf/service_instances/${cnsiGuid}/${siGuid}`,
     });
-    this.orchestrator?.removeRow(cnsiGuid, siGuid);
+    if (outcome === 'deleted') {
+      this.orchestrator?.removeRow(cnsiGuid, siGuid);
+    } else {
+      try { await this.refresh(); } catch { /* the next refresh shows it */ }
+    }
+    return outcome;
   }
 
   // Read a previously-fetched key count. undefined = not yet loaded or the

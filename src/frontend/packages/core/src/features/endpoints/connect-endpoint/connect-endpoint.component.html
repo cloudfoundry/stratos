@@ -1,4 +1,4 @@
-<form class="flex flex-col gap-4" [formGroup]="endpointForm" (ngSubmit)="formSubmit && connectService.submit()">
+<form class="flex flex-col gap-4" [formGroup]="endpointForm" (ngSubmit)="submitForm()">
   @if (authTypesForEndpoint.length > 1) {
     <app-form-field class="w-full">
       <app-select (selectionChange)="authChanged()" id="authType" name="authType" formControlName="authType"

@@ -4,16 +4,18 @@ import { provideHttpClient } from '@angular/common/http';
 import { provideHttpClientTesting } from '@angular/common/http/testing';
 import { provideRouter } from '@angular/router';
 import { describe, it, expect, beforeEach, vi } from 'vitest';
+import { appLabelsFilterText } from '../../../../../../../shared/signal-list-configs/app/app-labels';
 
 import { ConfirmationDialogService, CurrentUserPermissionsService, TabNavService, TailwindSnackBarService } from '@stratosui/core';
-import { of } from 'rxjs';
 import { STORE_TEST_PROVIDERS } from '@stratosui/store/testing';
+import { CF_FAILURE_DETAIL, cfRequestFailure, snackText } from '@test-framework/cf';
 import { generateCfBaseTestModulesNoShared } from '@test-framework/cloud-foundry-endpoint-service.helper';
 
 import { CloudFoundrySpaceAppsSignalComponent } from './cloud-foundry-space-apps-signal.component';
 import { CfAppsSignalConfigService } from '../../../../../../../shared/signal-list-configs/app/cf-apps-signal-config.service';
 import { CloudFoundryEndpointService } from '../../../../../services/cloud-foundry-endpoint.service';
 import { CloudFoundrySpaceService } from '../../../../../services/cloud-foundry-space.service';
+import type { StApp } from '../../../../../../../services/endpoint-data/stratos-types';
 
 // Mirrors the mock in bulk-progress.spec.ts / cloud-foundry-applications-signal.component.spec.ts:
 // show/open/error recorded separately (runBulkWithProgress calls each for a
@@ -21,9 +23,30 @@ import { CloudFoundrySpaceService } from '../../../../../services/cloud-foundry-
 // progress snackbar.
 function makeSnackBar() {
   const ref = { update: vi.fn(), dismiss: vi.fn(), afterDismissed: vi.fn(), onAction: vi.fn(), dismissWithAction: vi.fn() };
-  return { ref, open: vi.fn(() => ref), show: vi.fn(() => ref), error: vi.fn(() => ref) };
+  return {
+    ref,
+    open: vi.fn<TailwindSnackBarService['open']>(() => ref),
+    show: vi.fn<TailwindSnackBarService['show']>(() => ref),
+    error: vi.fn<TailwindSnackBarService['error']>(() => ref),
+  };
 }
 const flush = async (n = 16) => { for (let i = 0; i < n; i++) { await Promise.resolve(); } };
+
+// A started one-instance app in space-1 on cnsi-1; overrides set the rest.
+function app(overrides: Partial<StApp> = {}): StApp {
+  return {
+    cnsiGuid: 'cnsi-1',
+    guid: 'app-1',
+    name: 'app-1',
+    state: 'STARTED',
+    spaceGuid: 'space-1',
+    instances: 1,
+    routes: [],
+    createdAt: '',
+    updatedAt: '',
+    ...overrides,
+  };
+}
 
 function makeStubAppsConfig() {
   const pageIndex = signal(0);
@@ -32,7 +55,7 @@ function makeStubAppsConfig() {
   const sortSig = signal({ field: 'name' as const, direction: 'asc' as const });
   const view = {
     pagedItems: signal([]).asReadonly(),
-    filteredItems: signal([]).asReadonly(),
+    filteredItems: signal<StApp[]>([]).asReadonly(),
     totalFilteredResults: signal(0).asReadonly(),
     totalPages: signal(1).asReadonly(),
     totalItems: signal(0).asReadonly(),
@@ -51,6 +74,7 @@ function makeStubAppsConfig() {
     refresh: vi.fn().mockResolvedValue(undefined),
     deleteApp: vi.fn().mockResolvedValue(undefined),
     bulkDeleteApps: vi.fn().mockResolvedValue({ results: [], succeeded: 0, failed: 0, pending: 0 }),
+    bulkDeleteAppsWithCleanup: vi.fn().mockResolvedValue({ results: [], succeeded: 0, failed: 0, pending: 0 }),
     startStatsPolling: vi.fn(),
     registerSortExtractor: vi.fn(),
     registerFilterExtractor: vi.fn(),
@@ -99,7 +123,7 @@ describe('CloudFoundrySpaceAppsSignalComponent', () => {
         { provide: CfAppsSignalConfigService, useValue: stubAppsConfig },
         { provide: CloudFoundryEndpointService, useValue: stubEndpointService },
         { provide: CloudFoundrySpaceService, useValue: stubSpaceService },
-        { provide: CurrentUserPermissionsService, useValue: { can: () => of(true) } },
+        { provide: CurrentUserPermissionsService, useValue: { can: () => signal(true) } },
         { provide: TailwindSnackBarService, useValue: snackBar },
         // The confirm dialog normally opens a modal and waits for the user;
         // the harness fires the confirm callback immediately so the bulk
@@ -110,10 +134,9 @@ describe('CloudFoundrySpaceAppsSignalComponent', () => {
 
     fixture = TestBed.createComponent(CloudFoundrySpaceAppsSignalComponent);
     component = fixture.componentInstance;
-    // Angular runs ngOnInit during detectChanges; the component's
-    // initializeForSpace call doesn't await anything, so we can flush
-    // synchronously for assertions.
-    fixture.detectChanges();
+    // Angular runs ngOnInit during the first change detection pass;
+    // whenStable waits for that pass before the assertions run.
+    await fixture.whenStable();
   });
 
   it('should be created', () => {
@@ -132,7 +155,7 @@ describe('CloudFoundrySpaceAppsSignalComponent', () => {
     const cfg = component.listConfig();
     expect(cfg).toBeDefined();
     expect(cfg!.columns.map(c => c.header)).toEqual([
-      '', 'Name', 'Status', 'Instances', 'Memory', 'Disk', 'Created', 'Last Refreshed', '', '',
+      '', 'Name', 'Status', 'Instances', 'Memory', 'Disk', 'Labels', 'Created', 'Last Refreshed', '', '',
     ]);
     // No filter dropdowns — single-CNSI single-space tab.
     expect(cfg!.filterDropdowns).toBeUndefined();
@@ -159,6 +182,14 @@ describe('CloudFoundrySpaceAppsSignalComponent', () => {
       .toBe(CloudFoundrySpaceAppsSignalComponent.formatDate('2026-07-15T12:00:00Z'));
     const withoutRefresh: any = { ...withRefresh, lastRefreshedAt: undefined };
     expect(lastRefreshedCol!.render(withoutRefresh)).toBe('—');
+  });
+
+  it('exposes labels for display and filtering', async () => {
+    await component.ngOnInit();
+    const cfg = component.listConfig()!;
+    expect(cfg.filterColumns).toContain('labels');
+    expect(stubAppsConfig.registerFilterExtractor).toHaveBeenCalledWith('labels', appLabelsFilterText);
+    expect(cfg.columns.find(c => c.key === 'labels')!.render({ labels: { team: 'platform' } } as any)).toBe('team=platform');
   });
 
   it('includes lastRefreshedAt in filterColumns and wires filterRanges to appsConfig.lastRefreshedRange', async () => {
@@ -219,14 +250,24 @@ describe('CloudFoundrySpaceAppsSignalComponent', () => {
     expect(deleteAction!.label).toBe('Delete');
   });
 
+  it('says why a row delete failed in Cloud Foundry\'s words', async () => {
+    stubAppsConfig.deleteApp.mockRejectedValueOnce(cfRequestFailure());
+    await component.ngOnInit();
+    const row = app({ cnsiGuid: 'cnsi-1', guid: 'app-1', name: 'l9-after' });
+    component.listConfig()!.columns.find(c => c.kind === 'actions')!.actions!(row).find(a => a.label === 'Delete')!.invoke(row);
+    await vi.waitFor(() => expect(snackBar.error).toHaveBeenCalled());
+
+    expect(snackText(snackBar.error.mock.calls[0][0])).toBe(`Delete failed: ${CF_FAILURE_DETAIL}`);
+  });
+
   // Bulk delete now reports the settled outcome via runBulkWithProgress
   // (Task 4), not the old "N applications delete requested" fire-and-forget
   // wording — a CF delete accepted async settles for real once its job
   // completes, and the summary should say so.
   it('bulk delete reports settled outcome wording, not "requested"', async () => {
-    const targets: any[] = [
-      { cnsiGuid: 'cnsi-1', guid: 'app-1', name: 'app-1', state: 'STARTED', spaceGuid: 'space-1', instances: 1, createdAt: '', updatedAt: '' },
-      { cnsiGuid: 'cnsi-1', guid: 'app-2', name: 'app-2', state: 'STARTED', spaceGuid: 'space-1', instances: 1, createdAt: '', updatedAt: '' },
+    const targets: StApp[] = [
+      app({ guid: 'app-1', name: 'app-1' }),
+      app({ guid: 'app-2', name: 'app-2' }),
     ];
     stubAppsConfig.view.filteredItems = signal(targets).asReadonly();
     stubAppsConfig.bulkDeleteApps.mockResolvedValue({
@@ -252,6 +293,72 @@ describe('CloudFoundrySpaceAppsSignalComponent', () => {
     const allCalls = [...snackBar.open.mock.calls, ...snackBar.show.mock.calls, ...snackBar.error.mock.calls]
       .map(c => c[0]);
     expect(allCalls.join(' ')).not.toContain('requested');
+  });
+
+  it('bulk delete names a failed application and gives the reason', async () => {
+    vi.spyOn(console, 'warn').mockImplementation(() => {});
+    const targets: StApp[] = [
+      app({ guid: 'app-1', name: 'l9-after' }),
+      app({ guid: 'app-2', name: 'l7-after' }),
+    ];
+    stubAppsConfig.view.filteredItems = signal(targets).asReadonly();
+    stubAppsConfig.bulkDeleteApps.mockResolvedValue({
+      results: [
+        { guid: 'app-1', state: 'COMPLETE' },
+        { guid: 'app-2', state: 'FAILED', errors: [{ code: 'CF-X', message: 'A binding is in progress.' }] },
+      ],
+      succeeded: 1,
+      failed: 1,
+      pending: 0,
+    });
+
+    await component.ngOnInit();
+    const selected = component.listConfig()!.columns.find(c => c.kind === 'checkbox')!.checkbox!.selectedKeys;
+    selected.set(new Set(['cnsi-1:app-1', 'cnsi-1:app-2']));
+    const deleteAction = component.listConfig()!.bulkActions!.find(a => a.label === 'Delete');
+    deleteAction!.run(new Set(['cnsi-1:app-1', 'cnsi-1:app-2']));
+    await flush();
+
+    expect(snackBar.error).toHaveBeenCalledWith('1 application deleted; 1 failed: "l7-after" (A binding is in progress)');
+    expect(selected().size).toBe(0);
+  });
+
+  // The row menu's Delete with "Also delete routes and bindings" goes
+  // through the bulk endpoint for one app; its result must be reported like
+  // a multi-select delete's, and it must leave other rows' selection alone.
+  it('row delete with cleanup names the failure and keeps the selection', async () => {
+    vi.spyOn(console, 'warn').mockImplementation(() => {});
+    const target = app({ guid: 'app-2', name: 'l7-after' });
+    stubAppsConfig.bulkDeleteAppsWithCleanup.mockResolvedValue({
+      results: [{ guid: 'app-2', state: 'FAILED', errors: [{ code: 'CF-X', message: 'A binding is in progress.' }] }],
+      succeeded: 0,
+      failed: 1,
+      pending: 0,
+    });
+    vi.spyOn(TestBed.inject(ConfirmationDialogService), 'open')
+      .mockImplementation(((_cfg: unknown, doFn: (r: { checkboxChecked: boolean }) => void) => doFn({ checkboxChecked: true })) as never);
+
+    await component.ngOnInit();
+    const cfg = component.listConfig()!;
+    const selected = cfg.columns.find(c => c.kind === 'checkbox')!.checkbox!.selectedKeys;
+    selected.set(new Set(['cnsi-1:app-1']));
+    const del = cfg.columns.find(c => c.kind === 'actions')!.actions!(target).find(a => a.label === 'Delete')!;
+    del.invoke(target);
+    await flush();
+
+    expect(stubAppsConfig.bulkDeleteAppsWithCleanup).toHaveBeenCalledWith('cnsi-1', ['app-2']);
+    expect(snackBar.error).toHaveBeenCalledWith('0 applications deleted; 1 failed: "l7-after" (A binding is in progress)');
+    expect([...selected()]).toEqual(['cnsi-1:app-1']);
+  });
+
+  it('scopes stats polling to this tab: passes its own DestroyRef', async () => {
+    stubAppsConfig.startStatsPolling.mockClear();
+    await component.ngOnInit();
+    const host = stubAppsConfig.startStatsPolling.mock.calls[0]?.[0] as { destroyed: boolean } | undefined;
+    expect(host?.destroyed).toBe(false);
+
+    fixture.destroy();
+    expect(host?.destroyed).toBe(true);
   });
 
   it('formatMb returns human-friendly units and ∞ for unlimited', () => {

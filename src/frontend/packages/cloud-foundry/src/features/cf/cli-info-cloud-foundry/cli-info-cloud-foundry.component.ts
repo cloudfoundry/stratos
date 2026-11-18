@@ -1,26 +1,21 @@
-import { CommonModule } from '@angular/common';
-import { Component, OnInit, ChangeDetectionStrategy, Injector, inject } from '@angular/core';
-import { toObservable } from '@angular/core/rxjs-interop';
+import { Component, OnInit, ChangeDetectionStrategy, computed, inject } from '@angular/core';
 import { Router } from '@angular/router';
 
 import { CustomTooltipDirective } from '@stratosui/core';
 import { RoutingHistoryService } from '@stratosui/store';
-import { BehaviorSubject, combineLatest, Observable, of as observableOf } from 'rxjs';
-import { take, map } from 'rxjs/operators';
 
 import { PageHeaderComponent } from '../../../../../core/src/shared/components/page-header/page-header.component';
 import { IHeaderBreadcrumb } from '../../../../../core/src/shared/components/page-header/page-header.types';
 import { getFullEndpointApiUrl } from '../../../../../store/src/endpoint-utils';
-import { EntityInfo } from '../../../../../store/src/types/api.types';
-import { EndpointModel } from '../../../../../store/src/types/endpoint.types';
-import { StOrgDetail, StSpace } from '../../../services/endpoint-data/stratos-types';
-import { CliCommandComponent } from '../../../shared/components/cli-info/cli-command/cli-command.component';
+import {
+  CLOUD_FOUNDRY_CLI_COMMANDS,
+  ORGANIZATION_CLI_COMMANDS,
+  SPACE_CLI_COMMANDS,
+} from '../../../shared/components/cli-info/cli-commands';
 import { CFAppCLIInfoContext, CliInfoComponent } from '../../../shared/components/cli-info/cli-info.component';
-import { CfUserPermissionDirective } from '../../../shared/directives/cf-user-permission/cf-user-permission.directive';
 import {
   CloudFoundryUserProvidedServicesService,
 } from '../../../shared/services/cloud-foundry-user-provided-services.service';
-import { CfCurrentUserPermissions, CfUserPermissionsChecker } from '../../../user-permissions/cf-user-permissions-checkers';
 import { ActiveRouteCfOrgSpace } from '../cf-page.types';
 import { getActiveRouteCfOrgSpaceProvider } from '../cf.helpers';
 import { CloudFoundryEndpointService } from '../services/cloud-foundry-endpoint.service';
@@ -34,12 +29,9 @@ import { CloudFoundrySpaceService } from '../services/cloud-foundry-space.servic
   standalone: true,
   changeDetection: ChangeDetectionStrategy.OnPush,
   imports: [
-    CommonModule,
     CustomTooltipDirective,
     PageHeaderComponent,
     CliInfoComponent,
-    CliCommandComponent,
-    CfUserPermissionDirective
   ],
   providers: [
     getActiveRouteCfOrgSpaceProvider,
@@ -54,134 +46,96 @@ export class CliInfoCloudFoundryComponent implements OnInit {
   private routingHistory = inject(RoutingHistoryService);
   activeRouteCfOrgSpace = inject(ActiveRouteCfOrgSpace);
   private cfEndpointService = inject(CloudFoundryEndpointService);
-  private cfOrgService = inject(CloudFoundryOrganizationService, { optional: true });
-  private cfSpaceService = inject(CloudFoundrySpaceService, { optional: true });
-  private injector = inject(Injector);
+  // Both services request their organization or space when they are built,
+  // so each is asked for only on a route that names one.
+  private cfOrgService = this.activeRouteCfOrgSpace.orgGuid ? inject(CloudFoundryOrganizationService) : null;
+  private cfSpaceService = this.activeRouteCfOrgSpace.spaceGuid ? inject(CloudFoundrySpaceService) : null;
 
+  // The commands of this level: the page serves a Cloud Foundry, an
+  // organization or a space, by what the route names.
+  readonly sections = this.activeRouteCfOrgSpace.spaceGuid ? SPACE_CLI_COMMANDS
+    : this.activeRouteCfOrgSpace.orgGuid ? ORGANIZATION_CLI_COMMANDS
+    : CLOUD_FOUNDRY_CLI_COMMANDS;
 
-  permsOrgEdit = CfCurrentUserPermissions.ORGANIZATION_EDIT;
-  permsSpaceEdit = CfCurrentUserPermissions.SPACE_EDIT;
-
-  orgGuid!: string;
-  spaceGuid!: string;
-
-  cfEndpointEntityService: any;
   public previousUrl!: string;
   public previousQueryParams!: {
     [key: string]: string;
   };
 
-  public context$!: Observable<CFAppCLIInfoContext>;
-  public breadcrumbs$: Observable<IHeaderBreadcrumb[]>;
-  public route$!: Observable<{ url: string, queryParams: any }>;
 
-  public endpointOrgSpace$!: Observable<[
-    EntityInfo<EndpointModel>,
-    StOrgDetail | null,
-    StSpace | null
-  ]>;
-
-  constructor() {
-    const activeRouteCfOrgSpace = this.activeRouteCfOrgSpace;
-
-    this.breadcrumbs$ = new BehaviorSubject<IHeaderBreadcrumb[]>([]);
-    if (activeRouteCfOrgSpace.orgGuid) {
-      this.orgGuid = activeRouteCfOrgSpace.orgGuid;
-      this.spaceGuid = activeRouteCfOrgSpace.spaceGuid || CfUserPermissionsChecker.ALL_SPACES;
+  // The endpoint with the route's organization and space, once each one the
+  // route names has loaded: otherwise a page opened by its address would show
+  // placeholders for names the route has.
+  private readonly endpointOrgSpace = computed(() => {
+    const cf = this.cfEndpointService.endpoint();
+    const org = this.cfOrgService?.orgDataService.org() ?? null;
+    const space = this.cfSpaceService?.spaceDataService.space() ?? null;
+    if (!cf || (this.cfOrgService && !org) || (this.cfSpaceService && !space)) {
+      return null;
     }
-  }
+    return { cf, org, space };
+  });
+
+  readonly context = computed<CFAppCLIInfoContext | null>(() => {
+    const loaded = this.endpointOrgSpace();
+    if (!loaded) return null;
+    const { cf, org, space } = loaded;
+    return {
+      // CFAppCLIInfoContext requires string org/space names; templates render
+      // falsy values as a '[...]' placeholder, so the empty-string "absent"
+      // marker is behaviourally identical to the prior null.
+      orgName: org ? org.name : '',
+      spaceName: space ? space.name : '',
+      apiEndpoint: getFullEndpointApiUrl(cf.entity),
+      username: cf.entity.user ? cf.entity.user.name : '',
+      skipSslValidation: !!cf.entity.skip_ssl_validation,
+      ssoAllowed: !!cf.entity.sso_allowed
+    };
+  });
+
+  readonly breadcrumbs = computed<IHeaderBreadcrumb[] | null>(() => {
+    const loaded = this.endpointOrgSpace();
+    if (!loaded) return null;
+    const { cf, org, space } = loaded;
+    const breadcrumbs = [{
+      value: cf.entity.name,
+      routerLink: `/cloud-foundry/${cf.entity.guid}`
+    }];
+    if (org) {
+      breadcrumbs.push({
+        value: org.name,
+        routerLink: `/cloud-foundry/${cf.entity.guid}/organizations/${org.guid}`
+      });
+      if (space) {
+        breadcrumbs.push({
+          value: space.name,
+          routerLink: `/cloud-foundry/${cf.entity.guid}/organizations/${org.guid}/spaces/${space.guid}`
+        });
+      }
+    }
+    return [{ breadcrumbs }];
+  });
 
   ngOnInit() {
-    this.setupRouteObservable(this.getDefaultBackLink());
-    // Will auto unsubscribe as we are using 'first'
-    this.route$.pipe(take(1)).subscribe(route => {
-      this.previousUrl = route.url;
-      this.previousQueryParams = route.queryParams;
-    });
+    // The page before this one; by ngOnInit the navigation here is recorded.
+    const route = this.routingHistory.previousState();
+    this.previousUrl = route && route.state ? route.state.url : this.getDefaultBackLink();
+    this.previousQueryParams = route && route.state && route.state.queryParams ? route.state.queryParams : {};
 
-    this.setupObservables();
-    this.setupBreadcrumbs();
   }
 
   private getDefaultBackLink(): string {
     const { cfGuid, orgGuid, spaceGuid } = this.activeRouteCfOrgSpace;
     let backLink = `/cloud-foundry/${cfGuid}`;
     if (orgGuid) {
-      backLink = `${backLink}/${orgGuid}`;
+      backLink = `${backLink}/organizations/${orgGuid}`;
       if (spaceGuid) {
-        backLink = `${backLink}/${spaceGuid}`;
+        backLink = `${backLink}/spaces/${spaceGuid}`;
       }
     }
     return backLink;
   }
 
-  private setupRouteObservable(defaultBackLink: string) {
-    this.route$ = this.routingHistory.previousState$.pipe(
-      map(route => {
-        return {
-          url: route && route.state ? route.state.url : defaultBackLink,
-          queryParams: route && route.state && route.state.queryParams ? route.state.queryParams : {}
-        };
-      })
-    );
-  }
-
-  private setupObservables() {
-    const { orgGuid, spaceGuid } = this.activeRouteCfOrgSpace;
-    // V3-native org + space snapshots from the OrgDataService /
-    // SpaceDataService signals.
-    const org$ = orgGuid && this.cfOrgService
-      ? toObservable(this.cfOrgService.orgDataService.org, { injector: this.injector })
-      : observableOf(null);
-    const space$ = spaceGuid && this.cfSpaceService
-      ? toObservable(this.cfSpaceService.spaceDataService.space, { injector: this.injector })
-      : observableOf(null);
-    this.endpointOrgSpace$ = combineLatest(
-      this.cfEndpointService.endpoint$,
-      org$,
-      space$
-    );
-
-    this.context$ = this.endpointOrgSpace$.pipe(
-      map(([cf, org, space]) => {
-        return {
-          // CFAppCLIInfoContext requires string org/space names; templates render
-          // falsy values as a '[...]' placeholder, so the empty-string "absent"
-          // marker is behaviourally identical to the prior null.
-          orgName: org ? org.name : '',
-          spaceName: space ? space.name : '',
-          apiEndpoint: getFullEndpointApiUrl(cf.entity),
-          username: cf.entity.user ? cf.entity.user.name : ''
-        };
-      }),
-      take(1)
-    );
-  }
-
-  private setupBreadcrumbs() {
-    this.breadcrumbs$ = this.endpointOrgSpace$.pipe(
-      map(([cf, org, space]) => {
-        const breadcrumbs = [{
-          value: cf.entity.name,
-          routerLink: `/cloud-foundry/${cf.entity.guid}`
-        }];
-        if (org) {
-          breadcrumbs.push({
-            value: org.name,
-            routerLink: `/cloud-foundry/${cf.entity.guid}/organizations/${org.guid}`
-          });
-          if (space) {
-            breadcrumbs.push({
-              value: space.name,
-              routerLink: `/cloud-foundry/${cf.entity.guid}/organizations/${org.guid}/spaces/${space.guid}`
-            });
-          }
-        }
-        return [{ breadcrumbs }];
-      }),
-      take(1)
-    );
-  }
 
   back() {
     // Direct Angular Router navigation, replacing the ngrx RouterNav dispatch

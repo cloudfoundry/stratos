@@ -12,6 +12,7 @@ export const USER_PROFILE_ROUTES: Routes = [{
     },
     {
       path: 'edit',
+      title: 'Edit User Profile',
       component: EditProfileInfoComponent,
     }
   ]

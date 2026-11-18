@@ -152,3 +152,5 @@ uaa:
 3. User sees the error message `No scopes were granted` when trying to log in to Stratos via SSO
    - User may not have selected any of the application authorities when logging in to Stratos via SSO for the first time
    - Either of the resolutions to 1 and 2 can be made
+4. Connecting an endpoint with SSO stops at the login server with "Invalid redirect ... did not match one of the registered values"
+   - The endpoint's Client ID does not have the Stratos SSO callback registered. Add it as in [Adding the Stratos SSO Callback URI](#adding-the-stratos-sso-callback-uri), or edit the endpoint to use a client that has it.

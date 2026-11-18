@@ -7,8 +7,9 @@ import {
   inject,
   OnDestroy,
   OnInit,
+  Signal,
   signal,
-  ViewChild,
+  viewChild
 } from '@angular/core';
 import { toSignal } from '@angular/core/rxjs-interop';
 import {
@@ -18,7 +19,7 @@ import {
   Validators,
 } from '@angular/forms';
 import { ActivatedRoute, Router } from '@angular/router';
-import { combineLatest, firstValueFrom, from, Observable, of, Subscription } from 'rxjs';
+import { combineLatest, defer, firstValueFrom, from, Observable, of, Subscription } from 'rxjs';
 import {
   catchError,
   distinctUntilChanged,
@@ -31,6 +32,7 @@ import {
 import { EndpointsService } from '../../../../../core/src/core/endpoints.service';
 import { EndpointModel } from '../../../../../store/src/types/endpoint.types';
 import { safeUnsubscribe } from '../../../../../core/src/core/utils.service';
+import { endpointNameCompare } from '../../../../../core/src/shared/utils/natural-sort';
 import { PageHeaderComponent } from '../../../../../core/src/shared/components/page-header/page-header.component';
 import {
   SignalStepHandle,
@@ -77,14 +79,14 @@ export class CreateReleaseComponent implements OnInit, OnDestroy {
   paginationStateSub?: Subscription;
 
   public cancelUrl: string;
-  kubeEndpoints$!: Observable<any>; // strict: assigned in setupDetailsStep() from the constructor
+  kubeEndpoints!: Signal<EndpointModel[]>; // strict: assigned in setupDetailsStep() from the constructor
   validate$!: Observable<boolean>; // strict: assigned in setupDetailsStep() from the constructor
 
   details!: FormGroup<CreateReleaseForm>; // strict: assigned in setupDetailsStep() from the constructor
   namespaces$!: Observable<string[]>; // strict: assigned in setupDetailsStep() from the constructor
 
-  @ViewChild('releaseNameInputField', { static: true }) releaseNameInputField!: ElementRef; // strict: @ViewChild populated by Angular
-  @ViewChild('editor', { static: true }) editor!: ChartValuesEditorComponent; // strict: @ViewChild populated by Angular
+  readonly releaseNameInputField = viewChild.required<ElementRef>('releaseNameInputField'); // strict: @ViewChild populated by Angular
+  readonly editor = viewChild.required<ChartValuesEditorComponent>('editor'); // strict: @ViewChild populated by Angular
 
   private subs: Subscription[] = [];
   private createdNamespace = false;
@@ -152,19 +154,21 @@ export class CreateReleaseComponent implements OnInit, OnDestroy {
       createNamespace: new FormControl(false, { nonNullable: true }) });
     this.details.controls.createNamespace.disable();
 
-    this.kubeEndpoints$ = this.endpointsService.connectedEndpointsOfTypes(KUBERNETES_ENDPOINT_TYPE);
+    const connectedKube = this.endpointsService.connectedEndpointsOfTypes(KUBERNETES_ENDPOINT_TYPE);
+    this.kubeEndpoints = computed(() => {
+      const list = connectedKube();
+      const compare = endpointNameCompare(list.map(ep => ep.name));
+      return [...list].sort((a, b) => compare(a.name, b.name));
+    });
 
     // All namespaces across the connected kube endpoints, sourced from the
     // signal data service: refresh each endpoint once, then read the
     // aggregate signal. Replaces the legacy getPaginationService(null) read.
-    const allNamespaces$ = this.kubeEndpoints$.pipe(
-      take(1),
-      switchMap(async (endpoints: EndpointModel[]) => {
-        const guids = endpoints.map(e => e.guid).filter((g): g is string => !!g);
-        await Promise.all(guids.map((g: string) => this.namespaceData.refresh({ kubeGuid: g })));
-        return this.namespaceData.allNamespacesAcrossEndpoints(guids)();
-      }),
-    );
+    const allNamespaces$ = defer(async () => {
+      const guids = this.kubeEndpoints().map(e => e.guid).filter((g): g is string => !!g);
+      await Promise.all(guids.map((g: string) => this.namespaceData.refresh({ kubeGuid: g })));
+      return this.namespaceData.allNamespacesAcrossEndpoints(guids)();
+    });
     this.namespaces$ = combineLatest([
       allNamespaces$,
       this.details.controls.endpoint.valueChanges.pipe(startWith('')),
@@ -226,12 +230,11 @@ export class CreateReleaseComponent implements OnInit, OnDestroy {
       map(() => this.details.valid)
     );
 
-    // Auto-select first endpoint
-    this.kubeEndpoints$.pipe(take(1)).subscribe(endpoints => {
-      if (endpoints.length === 1) {
-        this.details.controls.endpoint.setValue(endpoints[0].guid);
-      }
-    });
+    // Auto select endpoint if there is only one
+    const endpoints = this.kubeEndpoints();
+    if (endpoints.length === 1) {
+      this.details.controls.endpoint.setValue(endpoints[0].guid ?? '');
+    }
   }
 
   private setupStepHandles() {
@@ -248,7 +251,7 @@ export class CreateReleaseComponent implements OnInit, OnDestroy {
       finishButtonText: signal('Install').asReadonly(),
       onEnter: () => {
         // Resize the editor when the step becomes visible.
-        this.editor.resizeEditor();
+        this.editor().resizeEditor();
       },
       submit: async () => {
         const result = await firstValueFrom(this.submit$());
@@ -271,15 +274,15 @@ export class CreateReleaseComponent implements OnInit, OnDestroy {
   }
 
   ngOnInit() {
-    // Auto select endpoint if there is only one
-    this.kubeEndpoints$.pipe(take(1)).subscribe(ep => {
-      if (ep.length > 1) {
-        this.details.controls.endpoint.setValue(ep[0].guid, { onlySelf: true });
-        setTimeout(() => {
-          this.releaseNameInputField.nativeElement.focus();
-        }, 1);
-      }
-    });
+    // Preselect the first endpoint if there are several (a single endpoint
+    // is auto selected in setupDetailsStep)
+    const ep = this.kubeEndpoints();
+    if (ep.length > 1) {
+      this.details.controls.endpoint.setValue(ep[0].guid ?? '', { onlySelf: true });
+      setTimeout(() => {
+        this.releaseNameInputField().nativeElement.focus();
+      }, 1);
+    }
   }
 
   // The full submit pipeline used by the signal-handle. Returns the legacy
@@ -322,7 +325,7 @@ export class CreateReleaseComponent implements OnInit, OnDestroy {
       endpoint: formValue.endpoint ?? '',
       releaseName: formValue.releaseName || '',
       releaseNamespace: formValue.releaseNamespace || '',
-      values: JSON.stringify(this.editor.getValues()),
+      values: JSON.stringify(this.editor().getValues()),
       chart: {
         name: this.route.snapshot.params.name,
         repo: this.route.snapshot.params.repo,

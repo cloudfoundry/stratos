@@ -1,10 +1,67 @@
 package metrics
 
 import (
+	"errors"
+	"net"
+	"net/http"
+	"net/http/httptest"
+	"net/url"
+	"strings"
 	"testing"
 
+	"github.com/labstack/echo/v5"
 	. "github.com/smartystreets/goconvey/convey"
+	"github.com/stretchr/testify/assert"
+	"github.com/stretchr/testify/require"
+
+	"github.com/cloudfoundry/stratos/src/jetstream/api"
 )
+
+// httpClientProxy satisfies api.PortalProxy for Connect and Info by
+// embedding the interface; only GetHttpClient is implemented.
+type httpClientProxy struct {
+	api.PortalProxy
+}
+
+func (p *httpClientProxy) GetHttpClient(_ bool, _ string) http.Client {
+	return *http.DefaultClient
+}
+
+// unreachableURL returns the URL of a server that has already stopped, so
+// a request to it fails without a response.
+func unreachableURL(t *testing.T) *url.URL {
+	t.Helper()
+	server := httptest.NewServer(http.NotFoundHandler())
+	server.Close()
+	u, err := url.Parse(server.URL)
+	require.NoError(t, err)
+	return u
+}
+
+func newConnectContext() *echo.Context {
+	form := url.Values{"connect_type": {api.AuthConnectTypeNone}}
+	req := httptest.NewRequest(http.MethodPost, "/pp/v1/auth/login/cnsi", strings.NewReader(form.Encode()))
+	req.Header.Set(echo.HeaderContentType, echo.MIMEApplicationForm)
+	return echo.New().NewContext(req, httptest.NewRecorder())
+}
+
+func TestConnectReportsAnUnreachableEndpoint(t *testing.T) {
+	t.Parallel()
+
+	m := &MetricsSpecification{portalProxy: &httpClientProxy{}}
+	cnsi := api.CNSIRecord{APIEndpoint: unreachableURL(t)}
+
+	var err error
+	require.NotPanics(t, func() {
+		_, _, err = m.Connect(newConnectContext(), cnsi, "user-1")
+	})
+	require.Error(t, err)
+	// Unshaped, so the connect handler can report it as unreachable.
+	var shadow api.ErrHTTPShadow
+	assert.False(t, errors.As(err, &shadow), "got a shaped error: %v", err)
+	var netErr net.Error
+	assert.True(t, errors.As(err, &netErr), "expected the request failure, got %T: %v", err, err)
+}
 
 func TestUrlComparision(t *testing.T) {
 	t.Parallel()
@@ -28,4 +85,36 @@ func TestUrlComparision(t *testing.T) {
 
 	})
 
+}
+
+func TestInfoFailsOnAnErrorStatus(t *testing.T) {
+	t.Parallel()
+
+	for _, tc := range []struct {
+		status  int
+		wantErr bool
+	}{
+		{http.StatusOK, false},
+		{http.StatusUnauthorized, false},
+		{http.StatusBadRequest, true},
+		{http.StatusNotFound, true},
+		{http.StatusInternalServerError, true},
+		{http.StatusBadGateway, true},
+	} {
+		server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, _ *http.Request) {
+			w.WriteHeader(tc.status)
+		}))
+		m := &MetricsSpecification{portalProxy: &httpClientProxy{}}
+
+		_, _, err := m.Info(server.URL, false, "")
+		server.Close()
+
+		if tc.wantErr {
+			if assert.Error(t, err, "status %d", tc.status) {
+				assert.Contains(t, err.Error(), http.StatusText(tc.status))
+			}
+		} else {
+			assert.NoError(t, err, "status %d", tc.status)
+		}
+	}
 }

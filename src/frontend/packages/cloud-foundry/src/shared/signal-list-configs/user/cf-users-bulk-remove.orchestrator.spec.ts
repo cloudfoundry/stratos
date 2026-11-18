@@ -1,5 +1,5 @@
 import { describe, it, expect, vi } from 'vitest';
-import { of } from 'rxjs';
+import { signal } from '@angular/core';
 import { bulkRemoveUsers } from './cf-users-bulk-remove';
 import { CfUsersRolesDataService } from '../../../services/domain-data/cf-users-roles-data.service';
 import type { StUser } from '../../../services/endpoint-data/stratos-types';
@@ -26,7 +26,7 @@ function makeDeps(over: any = {}) {
       applyStatus: () => ({}),
       ...over.rolesData,
     },
-    userPerms: { can: vi.fn().mockReturnValue(of(true)), ...over.userPerms },
+    userPerms: { can: vi.fn().mockReturnValue(signal(true)), ...over.userPerms },
     confirmDialog: { open: vi.fn((_cfg: any, doFn: () => void) => doFn()), ...over.confirmDialog },
     snackBar: { error: vi.fn(), open: vi.fn(), ...over.snackBar },
     cfGuid: 'cnsi',
@@ -53,7 +53,7 @@ describe('bulkRemoveUsers', () => {
   });
 
   it('skips confirm and reports when permission filtering removes everything', async () => {
-    const deps = makeDeps({ userPerms: { can: vi.fn().mockReturnValue(of(false)) } });
+    const deps = makeDeps({ userPerms: { can: vi.fn().mockReturnValue(signal(false)) } });
     await bulkRemoveUsers(deps, { users: [u], opts: { scope: 'orgAndSpaces' }, title: 'T', message: 'M' });
     expect(deps.confirmDialog.open).not.toHaveBeenCalled();
     expect(deps.rolesData.executeChanges).not.toHaveBeenCalled();
@@ -71,7 +71,7 @@ describe('bulkRemoveUsers', () => {
   it('includes skipped count in success message when some changes lack permission', async () => {
     // org changes allowed, space changes denied → skipped = 1
     const canFn = vi.fn().mockImplementation((_perm: any, _cf: any, _org: any, spaceGuid?: string) =>
-      of(spaceGuid === undefined), // org-level: true; space-level: false
+      signal(spaceGuid === undefined), // org-level: true; space-level: false
     );
     const deps = makeDeps({ userPerms: { can: canFn } });
     await bulkRemoveUsers(deps, { users: [uWithSpace], opts: { scope: 'orgAndSpaces' }, title: 'T', message: 'M' });

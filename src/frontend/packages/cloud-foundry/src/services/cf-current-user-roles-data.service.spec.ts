@@ -1,7 +1,6 @@
 import { provideZonelessChangeDetection } from '@angular/core';
 import { TestBed } from '@angular/core/testing';
 import { CurrentUserRolesDataService } from '@stratosui/store';
-import { firstValueFrom } from 'rxjs';
 import { beforeEach, describe, expect, it } from 'vitest';
 
 import { CfUserRelationTypes } from '../actions/permissions.actions';
@@ -83,30 +82,39 @@ describe('CfCurrentUserRolesDataService', () => {
     expect(svc.cfEndpointRolesState(ENDPOINT_A)()).toBeNull();
   });
 
-  it('exposes observable variants reflecting writes', async () => {
+  it('global and scope signals follow writes', () => {
     // Global flags derive purely from scopes (legacy getEndpointRoles ignored
     // user.admin) — so isAdmin requires the cloud_controller.admin scope.
+    const isAdmin = svc.cfGlobalState(ENDPOINT_A, 'isAdmin');
+    const hasScope = svc.cfEndpointHasScope(ENDPOINT_A, 'scope.a' as CfScopeStrings);
+    expect(isAdmin()).toBe(false);
     svc.propagateConnectedAdmin(ENDPOINT_A, { scopes: ['cloud_controller.admin', 'scope.a'] });
-    await expect(firstValueFrom(svc.cfGlobalState$(ENDPOINT_A, 'isAdmin'))).resolves.toBe(true);
-    await expect(
-      firstValueFrom(svc.cfEndpointHasScope$(ENDPOINT_A, 'scope.a' as CfScopeStrings)),
-    ).resolves.toBe(true);
-    const rolesState = await firstValueFrom(svc.cfEndpointRolesState$(ENDPOINT_A));
-    expect(rolesState?.global?.isAdmin).toBe(true);
+    expect(isAdmin()).toBe(true);
+    expect(hasScope()).toBe(true);
+    expect(svc.cfEndpointRolesState(ENDPOINT_A)()?.global?.isAdmin).toBe(true);
   });
 
-  it('returns null/false for endpoints that are not present', async () => {
+  it('returns null/false for endpoints that are not present', () => {
     svc.registerEndpoint(ENDPOINT_A);
     expect(svc.cfEndpointRolesState('missing')()).toBeNull();
     expect(svc.cfGlobalState('missing', 'isAdmin')()).toBe(false);
-    await expect(firstValueFrom(svc.cfGlobalState$('missing', 'isAdmin'))).resolves.toBe(false);
+    expect(svc.spacesWithRoleInOrg('missing', 'org-1', 'isDeveloper')()).toBe('all');
   });
 
-  it('memoizes cfEndpointRolesState$ per endpointGuid (same observable instance)', () => {
-    const a1 = svc.cfEndpointRolesState$(ENDPOINT_A);
-    const a2 = svc.cfEndpointRolesState$(ENDPOINT_A);
-    const b1 = svc.cfEndpointRolesState$(ENDPOINT_B);
-    expect(a1).toBe(a2);
-    expect(a1).not.toBe(b1);
+  it('spacesWithRoleInOrg lists the org spaces holding the role and follows writes', () => {
+    const roles = TestBed.inject(CurrentUserRolesDataService);
+    const seed = (devInS2: boolean) => roles.updateEndpointRoles('cf', () => ({
+      [ENDPOINT_A]: {
+        organizations: { 'org-1': { spaceGuids: ['s-1', 's-2'] } },
+        spaces: { 's-1': { isDeveloper: true }, 's-2': { isDeveloper: devInS2 } },
+      },
+    }));
+    seed(false);
+    const spaces = svc.spacesWithRoleInOrg(ENDPOINT_A, 'org-1', 'isDeveloper');
+    expect(spaces()).toEqual(['s-1']);
+    expect(svc.spacesWithRoleInOrg(ENDPOINT_A, 'org-2', 'isDeveloper')()).toBe('all');
+
+    seed(true);
+    expect(spaces()).toEqual(['s-1', 's-2']);
   });
 });

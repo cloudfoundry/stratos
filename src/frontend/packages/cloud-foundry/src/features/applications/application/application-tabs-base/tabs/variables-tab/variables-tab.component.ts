@@ -23,6 +23,7 @@ import {
   TailwindDialogService,
   TailwindSnackBarService,
 } from '@stratosui/core';
+import { leadPieces } from '@stratosui/store';
 
 import { CodeBlockComponent } from '../../../../../../../../core/src/shared/components/code-block/code-block.component';
 import {
@@ -264,34 +265,34 @@ export class VariablesTabComponent implements OnInit {
       maxWidth: '92vw',
       maxHeight: '90vh',
       resizable: true,
-      data: { mode, name: row?.name, value: row?.value, existingNames },
+      // The dialog runs the save and stays open, with what was typed and the
+      // reason, when it fails.
+      data: {
+        mode, name: row?.name, value: row?.value, existingNames,
+        save: (result: VariableEditDialogResult) => this.applyEditorResult(mode, row, result),
+      },
     });
 
     ref.afterClosed().pipe(take(1)).subscribe((result?: VariableEditDialogResult) => {
       if (!result) {
         return; // cancelled
       }
-      void this.applyEditorResult(mode, row, result);
+      void this.variablesConfig.refresh();
     });
   }
 
-  /** Route a dialog result to add / update / rename, then refresh. */
+  /** Route a dialog result to add / update / rename. Throws on failure. */
   private async applyEditorResult(
     mode: 'add' | 'edit',
     row: ListAppEnvVar | undefined,
     result: VariableEditDialogResult,
   ): Promise<void> {
-    try {
-      if (mode === 'add') {
-        await this.actionsService.addVariable(result.name, result.value);
-      } else if (row && result.name !== row.name) {
-        await this.actionsService.renameVariable(row.name, result.name, result.value);
-      } else {
-        await this.actionsService.updateVariable(result.name, result.value);
-      }
-      await this.variablesConfig.refresh();
-    } catch (err: any) {
-      this.snackBar.error(`Save variable failed: ${err?.message ?? err}`);
+    if (mode === 'add') {
+      await this.actionsService.addVariable(result.name, result.value);
+    } else if (row && result.name !== row.name) {
+      await this.actionsService.renameVariable(row.name, result.name, result.value);
+    } else {
+      await this.actionsService.updateVariable(result.name, result.value);
     }
   }
 
@@ -321,8 +322,8 @@ export class VariablesTabComponent implements OnInit {
             try {
               await this.actionsService.deleteVariable(row.name);
               await this.variablesConfig.refresh();
-            } catch (err: any) {
-              this.snackBar.error(`Delete failed: ${err?.message ?? err}`);
+            } catch (err: unknown) {
+              this.snackBar.error(leadPieces('Delete failed', err));
             }
           });
         },

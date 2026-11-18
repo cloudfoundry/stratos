@@ -9,7 +9,6 @@ export * from './cf-api-svc.types';
 
 // Services
 export { ApplicationService } from './features/applications/application.service';
-export { ApplicationMonitorService } from './features/applications/application-monitor.service';
 export { ApplicationStateService, ApplicationStateData } from './shared/services/application-state.service';
 export { ApplicationEnvVarsHelper } from './features/applications/application/application-tabs-base/tabs/build-tab/application-env-vars.service';
 export { CfOrgSpaceDataService, CfOrgSpaceItem } from './shared/data-services/cf-org-space-service.service';
@@ -17,7 +16,7 @@ export { CloudFoundryService } from './shared/data-services/cloud-foundry.servic
 export { CfOrgSpaceLabelService } from './shared/services/cf-org-space-label.service';
 
 // Utility Functions
-export { getGuids } from './features/applications/application/application-base.component';
+export { APP_DETAIL_PROVIDERS, getGuids } from './features/applications/application/application-base.component';
 
 // Service Instance Constants
 export { CSI_CANCEL_URL } from './shared/components/add-service-instance/csi-mode.service';
@@ -31,7 +30,6 @@ export { createOrgQuotaDefinition } from './features/cf/services/cloud-foundry-o
 
 // Permissions
 export { CfCurrentUserPermissions, cfCurrentUserPermissionsService } from './user-permissions/cf-user-permissions-checkers';
-export { CfCurrentUserRolesSignalService } from './user-permissions/cf-current-user-roles-signal.service';
 export { CfCurrentUserRolesDataService } from './services/cf-current-user-roles-data.service';
 
 // Test helpers
@@ -137,3 +135,5 @@ export type {
   DiagnosticsQueryOptions,
   DiagnosticsSnapshotEnvelope,
 } from './services/diagnostics/diagnostics.types';
+
+export { appTitle } from './route-titles';

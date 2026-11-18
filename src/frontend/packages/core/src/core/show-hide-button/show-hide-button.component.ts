@@ -1,4 +1,4 @@
-import { ChangeDetectionStrategy, Component, EventEmitter, Input, Output } from '@angular/core';
+import { ChangeDetectionStrategy, Component, model, output } from '@angular/core';
 
 @Component({
   selector: 'app-show-hide-button',
@@ -9,18 +9,14 @@ import { ChangeDetectionStrategy, Component, EventEmitter, Input, Output } from 
 })
 export class ShowHideButtonComponent {
 
-  private pShow = false;
+  readonly changed = output<boolean>();
 
-  @Output()
-  changed = new EventEmitter<boolean>();
+  // A model: the button itself flips it.
+  readonly show = model(false);
 
-  @Input()
-  get show(): boolean {
-    return this.pShow;
-  }
-  set show(state: boolean) {
-    this.pShow = state;
-    this.changed.emit(this.pShow);
+  toggle() {
+    this.show.update(show => !show);
+    this.changed.emit(this.show());
   }
 
 }

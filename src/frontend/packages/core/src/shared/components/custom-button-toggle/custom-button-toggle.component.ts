@@ -1,4 +1,4 @@
-import { ChangeDetectionStrategy, Component, Input, Output, EventEmitter, forwardRef, ContentChildren, QueryList, AfterContentInit  } from '@angular/core';
+import { ChangeDetectionStrategy, Component, forwardRef, AfterContentInit, effect, input, model, output, untracked, contentChildren } from '@angular/core';
 import { ControlValueAccessor, NG_VALUE_ACCESSOR } from '@angular/forms';
 
 
@@ -9,23 +9,30 @@ export interface MatButtonToggleChange {
 
 @Component({
   selector: 'app-button-toggle',
-  template: '<button class="custom-button-toggle" [class.selected]="checked" [class.disabled]="disabled" (click)="toggle()" [disabled]="disabled"><ng-content></ng-content></button>',
+  template: '<button class="custom-button-toggle" [class.selected]="checked()" [class.disabled]="disabled()" (click)="toggle()" [disabled]="disabled()"><ng-content></ng-content></button>',
   styleUrls: ['./custom-button-toggle.component.scss'],
   standalone: true,
   imports: [],
   changeDetection: ChangeDetectionStrategy.OnPush
 })
 export class CustomButtonToggleComponent {
-  @Input() value: any;
-  @Input() disabled = false;
-  @Input() checked = false;
+  readonly value = input<any>();
+  // Models: a parent can bind them, and the group writes them from code.
+  readonly disabled = model(false);
+  readonly checked = model(false);
 
   // eslint-disable-next-line @angular-eslint/no-output-native -- intentional Material API parity: drop-in for mat-button-toggle which emits (change)
-  @Output() change = new EventEmitter<CustomButtonToggleComponent>();
+  readonly change = output<CustomButtonToggleComponent>();
 
   toggle() {
-    if (this.disabled) return;
+    if (this.disabled()) return;
     this.change.emit(this);
+  }
+
+  // The group sets checked and disabled from code.
+  setState(checked: boolean, disabled: boolean) {
+    this.checked.set(checked);
+    this.disabled.set(disabled);
   }
 }
 
@@ -45,26 +52,38 @@ export class CustomButtonToggleComponent {
   changeDetection: ChangeDetectionStrategy.OnPush
 })
 export class CustomButtonToggleGroupComponent implements ControlValueAccessor, AfterContentInit {
-  @Input() multiple = false;
-  @Input() disabled = false;
-  @Input() vertical = false;
-  @Input() name!: string;
+  readonly multiple = input(false);
+  // A model: a parent binds it and the form disables the group through it.
+  readonly disabled = model(false);
+  readonly vertical = input(false);
+  readonly name = input<string>();
 
-  // Material API parity: mat-button-toggle-group supports a plain [value] input
-  @Input()
-  set value(value: any) {
-    this.writeValue(value);
-  }
-  get value(): any {
-    return this.multiple ? this.selectedValues : this.selectedValues[0];
+  // Material API parity: mat-button-toggle-group supports a plain [value]
+  // input. It is the value a parent binds; the selection the group holds is
+  // in selectedValues.
+  readonly value = input<any>();
+
+  constructor() {
+    // A bound [value] is written through like a form value. With nothing
+    // bound the input is undefined on the first run, which must not clear a
+    // value the form wrote before it.
+    let first = true;
+    effect(() => {
+      const value = this.value();
+      const unbound = first && value === undefined;
+      first = false;
+      if (!unbound) {
+        untracked(() => this.writeValue(value));
+      }
+    });
   }
 
-  @Output() valueChange = new EventEmitter<any>();
+  readonly valueChange = output<any>();
   // eslint-disable-next-line @angular-eslint/no-output-native -- intentional Material API parity: drop-in for mat-button-toggle-group which emits (change)
-  @Output() change = new EventEmitter<MatButtonToggleChange>();
+  readonly change = output<MatButtonToggleChange>();
 
   // strict: @ContentChildren is populated by Angular before ngAfterContentInit
-  @ContentChildren(CustomButtonToggleComponent) toggles!: QueryList<CustomButtonToggleComponent>;
+  readonly toggles = contentChildren(CustomButtonToggleComponent);
 
   selectedValues: any[] = [];
 
@@ -72,7 +91,7 @@ export class CustomButtonToggleGroupComponent implements ControlValueAccessor, A
   private _onTouched = () => {};
 
   ngAfterContentInit() {
-    this.toggles.forEach(toggle => {
+    this.toggles().forEach(toggle => {
       toggle.change.subscribe(selectedToggle => {
         this.selectToggle(selectedToggle);
       });
@@ -82,24 +101,25 @@ export class CustomButtonToggleGroupComponent implements ControlValueAccessor, A
   }
 
   selectToggle(toggle: CustomButtonToggleComponent) {
-    if (toggle.disabled || this.disabled) return;
+    if (toggle.disabled() || this.disabled()) return;
 
     this._onTouched();
 
-    if (this.multiple) {
-      const index = this.selectedValues.indexOf(toggle.value);
+    const multiple = this.multiple();
+    if (multiple) {
+      const index = this.selectedValues.indexOf(toggle.value());
       if (index === -1) {
-        this.selectedValues.push(toggle.value);
+        this.selectedValues.push(toggle.value());
       } else {
         this.selectedValues.splice(index, 1);
       }
     } else {
-      this.selectedValues = [toggle.value];
+      this.selectedValues = [toggle.value()];
     }
 
     this.updateToggles();
 
-    const value = this.multiple ? this.selectedValues : this.selectedValues[0];
+    const value = multiple ? this.selectedValues : this.selectedValues[0];
     this._onChange(value);
 
     this.change.emit({
@@ -111,20 +131,22 @@ export class CustomButtonToggleGroupComponent implements ControlValueAccessor, A
   }
 
   private updateToggles() {
-    if (!this.toggles) {
+    const toggles = this.toggles();
+    if (!toggles) {
       // writeValue can run before content children are resolved
       return;
     }
-    this.toggles.forEach(toggle => {
-      toggle.checked = this.selectedValues.includes(toggle.value);
+    toggles.forEach(toggle => {
+      toggle.setState(this.selectedValues.includes(toggle.value()), toggle.disabled());
     });
   }
 
   // ControlValueAccessor implementation
   writeValue(value: any): void {
-    if (this.multiple && Array.isArray(value)) {
+    const multiple = this.multiple();
+    if (multiple && Array.isArray(value)) {
       this.selectedValues = value;
-    } else if (!this.multiple && value !== undefined) {
+    } else if (!multiple && value !== undefined) {
       this.selectedValues = [value];
     } else {
       this.selectedValues = [];
@@ -141,10 +163,11 @@ export class CustomButtonToggleGroupComponent implements ControlValueAccessor, A
   }
 
   setDisabledState(isDisabled: boolean): void {
-    this.disabled = isDisabled;
-    if (this.toggles) {
-      this.toggles.forEach(toggle => {
-        toggle.disabled = isDisabled;
+    this.disabled.set(isDisabled);
+    const toggles = this.toggles();
+    if (toggles) {
+      toggles.forEach(toggle => {
+        toggle.setState(toggle.checked(), isDisabled);
       });
     }
   }

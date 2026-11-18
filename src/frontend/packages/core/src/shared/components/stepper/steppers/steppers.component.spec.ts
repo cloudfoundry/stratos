@@ -1,23 +1,34 @@
 import { CommonModule } from '@angular/common';
-import { ChangeDetectorRef, Component, Directive, Input, OnChanges, signal } from '@angular/core';
+import { Component, Directive, Input, OnChanges, signal } from '@angular/core';
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { By } from '@angular/platform-browser';
 import { provideZonelessChangeDetection } from '@angular/core';
-import { provideHttpClient } from '@angular/common/http';
+import { HttpErrorResponse, provideHttpClient } from '@angular/common/http';
 import { provideHttpClientTesting } from '@angular/common/http/testing';
 import { describe, it, expect, beforeEach, afterEach, beforeAll, afterAll, vi } from 'vitest';
+
+import { provideRouter, Router } from '@angular/router';
+import { RoutingHistoryService } from '@stratosui/store';
 import { RouterTestingModule } from '@angular/router/testing';
 import { createBasicStoreModule } from "@test-framework/core-test.helper";
 
 import { CoreTestingModule } from "@test-framework/core-test.modules";
 import { CoreModule } from '../../../../core/core.module';
 import { MDAppModule } from '../../../../core/md.module';
-import { SignalStepHandle, StepComponent } from '../step/step.component';
+import { SignalStepHandle, StepComponent, StepOnNextResult } from '../step/step.component';
 import { SteppersComponent } from './steppers.component';
 
 describe('SteppersComponent', () => {
   let component: SteppersComponent;
   let fixture: ComponentFixture<SteppersComponent>;
+
+  // A step outside any template, with its inputs set the way a binding would.
+  const makeStep = (title: string, inputs: Record<string, unknown> = {}) => {
+    const ref = TestBed.createComponent(StepComponent).componentRef;
+    ref.setInput('title', title);
+    Object.entries(inputs).forEach(([name, value]) => ref.setInput(name, value));
+    return ref;
+  };
 
   beforeEach(() => {
     TestBed.configureTestingModule({
@@ -42,40 +53,60 @@ describe('SteppersComponent', () => {
       TestBed.compileComponents();
   });
 
-  beforeEach(() => {
+  beforeEach(async () => {
     fixture = TestBed.createComponent(SteppersComponent);
     component = fixture.componentInstance;
-    fixture.detectChanges();
+    await fixture.whenStable();
   });
 
   it('should be created', () => {
     expect(component).toBeTruthy();
   });
 
+  // The page title (h1) sits in the page header, outside main, so a form
+  // page had no heading in its main area (WCAG 2.4.6). The current step's
+  // title is a heading there; the step bar already shows it, so the
+  // heading is for screen readers only.
+  it('gives the current step a heading', async () => {
+    const alpha = makeStep('Alpha').instance;
+    const bravo = makeStep('Bravo').instance;
+    (component as any).allSteps = [alpha, bravo];
+    (component as any).filterSteps();
+    await fixture.whenStable();
+    const heading = () => (fixture.nativeElement as HTMLElement).querySelector('h2');
+    expect(heading()?.textContent?.trim()).toBe('Alpha');
+    expect(heading()?.classList.contains('sr-only')).toBe(true);
+
+    component.currentIndex.set(1);
+    await fixture.whenStable();
+    expect(heading()?.textContent?.trim()).toBe('Bravo');
+  });
+
   // Regression: dev.56 shipped a template change that swapped @if-wrapped
   // steps for [hidden] bindings so the stepper's one-shot @ContentChildren
   // capture sees all steps at ngAfterContentInit. That exposed a second
-  // zoneless-CD bug: hiddenChange → filterSteps reassigns this.steps but
+  // zoneless-CD bug: a [hidden] change → filterSteps reassigns this.steps but
   // without markForCheck the template kept rendering the step list from
   // the initial filter. Routes step would never appear even after routes
-  // loaded. This test pins the filter path to mark for check.
-  it('re-filters visible steps and marks for check when a step unhides', () => {
-    const stepA = Object.assign(new StepComponent(), { title: 'A' });
-    const stepB = Object.assign(new StepComponent(), { title: 'B' });
-    const stepC = Object.assign(new StepComponent(), { title: 'C' });
-    stepA.hidden = true;
-    stepB.hidden = false;
-    stepC.hidden = false;
+  // loaded. This test pins the step bar to the re-filtered list.
+  it('re-filters visible steps and renders a step that unhides', async () => {
+    const refA = makeStep('Alpha', { hidden: true });
+    const stepA = refA.instance;
+    const stepB = makeStep('Bravo', { hidden: false }).instance;
+    const stepC = makeStep('Charlie', { hidden: false }).instance;
     (component as any).allSteps = [stepA, stepB, stepC];
     (component as any).filterSteps();
+    await fixture.whenStable();
     expect(component.steps).toEqual([stepB, stepC]);
+    const text = () => (fixture.nativeElement as HTMLElement).textContent;
+    expect(text()).toContain('Bravo');
+    expect(text()).not.toContain('Alpha');
 
-    const cdr = (component as any).cdr as ChangeDetectorRef;
-    const markForCheck = vi.spyOn(cdr, 'markForCheck');
-    stepA.hidden = false;
+    refA.setInput('hidden', false);
     (component as any).filterSteps();
+    await fixture.whenStable();
     expect(component.steps).toEqual([stepA, stepB, stepC]);
-    expect(markForCheck).toHaveBeenCalled();
+    expect(text()).toContain('Alpha');
   });
 
   // Regression: step content is instantiated lazily (the ngTemplateOutlet
@@ -85,14 +116,14 @@ describe('SteppersComponent', () => {
   // bind-service wizard's Service Instance step rendered empty. Delivery
   // must happen after the activating render, with the routed enterData.
   it('delivers onEnter after the activating render, not synchronously', async () => {
-    const stepA = Object.assign(new StepComponent(), { title: 'A' });
-    const stepB = Object.assign(new StepComponent(), { title: 'B' });
-    stepA.valid = true;
+    const stepA = makeStep('A', { valid: true }).instance;
     const entered: unknown[] = [];
-    stepB.signalHandle = {
-      valid: (() => true) as any,
-      onEnter: (data?: unknown) => { entered.push(data); },
-    };
+    const stepB = makeStep('B', {
+      signalHandle: {
+        valid: (() => true) as any,
+        onEnter: (data?: unknown) => { entered.push(data); },
+      },
+    }).instance;
     (component as any).allSteps = [stepA, stepB];
     (component as any).filterSteps();
     (component as any).enterData = { plan: 'p1' };
@@ -177,7 +208,6 @@ describe('SteppersComponent — projected step content', () => {
     });
     await TestBed.compileComponents();
     hostFixture = TestBed.createComponent(ProjectionHostComponent);
-    hostFixture.detectChanges();
     await hostFixture.whenStable();
   });
 
@@ -208,5 +238,941 @@ describe('SteppersComponent — projected step content', () => {
 
     await hostFixture.whenStable();
     expect(hostFixture.componentInstance.entered).toEqual(['two']);
+  });
+});
+
+// The first step's onEnter used to be delivered by a 5 ms setInterval that
+// waited for step 0 to unblock. With no Cloud Foundry connected, the CF step
+// of create-app / deploy / add-service-instance stays blocked, so the
+// interval ran for the life of the page. The poll also targeted allSteps[0]
+// even when that step was hidden, so the step actually shown never got its
+// onEnter.
+@Component({
+  standalone: true,
+  imports: [SteppersComponent, StepComponent],
+  template: `
+    <app-steppers>
+      <app-step title="One" [hidden]="firstHidden()" [blocked]="firstLegacyBlocked()" [signalHandle]="firstHandle"></app-step>
+      <app-step title="Two" [hidden]="secondHidden()" [signalHandle]="secondHandle"></app-step>
+    </app-steppers>
+  `,
+})
+class FirstStepHostComponent {
+  entered: string[] = [];
+  firstHidden = signal(false);
+  secondHidden = signal(false);
+  firstBlocked = signal(false);
+  firstLegacyBlocked = signal(false);
+  firstHandle: SignalStepHandle = {
+    valid: signal(true),
+    blocked: this.firstBlocked,
+    onEnter: () => { this.entered.push('one'); },
+  };
+  secondHandle: SignalStepHandle = {
+    valid: signal(true),
+    onEnter: () => { this.entered.push('two'); },
+  };
+}
+
+@Component({
+  standalone: true,
+  imports: [SteppersComponent],
+  template: `<app-steppers></app-steppers>`,
+})
+class EmptyStepperHostComponent { }
+
+describe('SteppersComponent — first step entry', () => {
+  let hostFixture: ComponentFixture<FirstStepHostComponent>;
+  let host: FirstStepHostComponent;
+
+  // Long enough for any first-step poll to have ticked several times.
+  const settle = async () => {
+    await vi.advanceTimersByTimeAsync(50);
+    await hostFixture.whenStable();
+  };
+
+  beforeEach(async () => {
+    // Only intervals are faked: setTimeout and requestAnimationFrame stay
+    // real so the zoneless scheduler and whenStable still settle.
+    vi.useFakeTimers({ toFake: ['setInterval', 'clearInterval'] });
+    TestBed.configureTestingModule({
+      imports: [FirstStepHostComponent, EmptyStepperHostComponent, RouterTestingModule],
+      providers: [
+        provideZonelessChangeDetection(),
+        provideHttpClient(),
+        provideHttpClientTesting(),
+      ],
+    });
+    await TestBed.compileComponents();
+    hostFixture = TestBed.createComponent(FirstStepHostComponent);
+    host = hostFixture.componentInstance;
+  });
+
+  afterEach(() => vi.useRealTimers());
+
+  it('fires the first step onEnter exactly once on create', async () => {
+    await settle();
+    await settle();
+    expect(host.entered).toEqual(['one']);
+    expect(vi.getTimerCount()).toBe(0);
+  });
+
+  it('leaves no interval running while the first step stays blocked', async () => {
+    host.firstBlocked.set(true);
+    await settle();
+    expect(host.entered).toEqual([]);
+    expect(vi.getTimerCount()).toBe(0);
+  });
+
+  it('fires onEnter once when a blocked first step unblocks', async () => {
+    host.firstBlocked.set(true);
+    await settle();
+    expect(host.entered).toEqual([]);
+
+    host.firstBlocked.set(false);
+    await settle();
+    await settle();
+    expect(host.entered).toEqual(['one']);
+  });
+
+  it('fires onEnter once when a legacy [blocked] first step unblocks', async () => {
+    host.firstHandle = { valid: signal(true), onEnter: () => { host.entered.push('one'); } };
+    host.firstLegacyBlocked.set(true);
+    await settle();
+    expect(host.entered).toEqual([]);
+
+    host.firstLegacyBlocked.set(false);
+    await settle();
+    await settle();
+    expect(host.entered).toEqual(['one']);
+  });
+
+  it('enters the first visible step when the first step is hidden', async () => {
+    host.firstHidden.set(true);
+    await settle();
+    expect(host.entered).toEqual(['two']);
+    expect(vi.getTimerCount()).toBe(0);
+  });
+
+  it('fires onEnter once when the first visible step appears later', async () => {
+    host.firstHidden.set(true);
+    host.secondHidden.set(true);
+    await settle();
+    expect(host.entered).toEqual([]);
+    expect(vi.getTimerCount()).toBe(0);
+
+    // e.g. the step list resolves after an async load
+    host.firstHidden.set(false);
+    host.secondHidden.set(false);
+    await settle();
+    await settle();
+    expect(host.entered).toEqual(['one']);
+  });
+
+  it('leaves no interval running for a stepper with no steps', async () => {
+    const emptyFixture = TestBed.createComponent(EmptyStepperHostComponent);
+    await vi.advanceTimersByTimeAsync(50);
+    await emptyFixture.whenStable();
+    expect(vi.getTimerCount()).toBe(0);
+  });
+});
+
+// A step can be hidden through its signal handle instead of the legacy
+// [hidden] input. The stepper must follow the handle's hidden signal as it
+// follows the input, or its step list goes stale.
+@Component({
+  standalone: true,
+  imports: [SteppersComponent, StepComponent],
+  template: `
+    <app-steppers>
+      <app-step title="One" [signalHandle]="firstHandle"></app-step>
+      <app-step title="Two" [signalHandle]="secondHandle"></app-step>
+    </app-steppers>
+  `,
+})
+class SignalHiddenHostComponent {
+  entered: string[] = [];
+  firstHidden = signal(false);
+  secondHidden = signal(false);
+  firstHandle: SignalStepHandle = {
+    valid: signal(true),
+    hidden: this.firstHidden,
+    onEnter: () => { this.entered.push('one'); },
+  };
+  secondHandle: SignalStepHandle = {
+    valid: signal(true),
+    hidden: this.secondHidden,
+    onEnter: () => { this.entered.push('two'); },
+  };
+}
+
+describe('SteppersComponent — signal-handle hidden', () => {
+  let hostFixture: ComponentFixture<SignalHiddenHostComponent>;
+  let host: SignalHiddenHostComponent;
+  const steppers = () => hostFixture.debugElement
+    .query(By.directive(SteppersComponent)).componentInstance as SteppersComponent;
+  const titles = () => steppers().steps.map(step => step.title());
+
+  beforeEach(async () => {
+    TestBed.configureTestingModule({
+      imports: [SignalHiddenHostComponent, RouterTestingModule],
+      providers: [
+        provideZonelessChangeDetection(),
+        provideHttpClient(),
+        provideHttpClientTesting(),
+      ],
+    });
+    await TestBed.compileComponents();
+    hostFixture = TestBed.createComponent(SignalHiddenHostComponent);
+    host = hostFixture.componentInstance;
+  });
+
+  it('re-filters the step list when a handle hidden signal flips', async () => {
+    host.firstHidden.set(true);
+    await hostFixture.whenStable();
+    expect(titles()).toEqual(['Two']);
+
+    host.firstHidden.set(false);
+    await hostFixture.whenStable();
+    expect(titles()).toEqual(['One', 'Two']);
+    expect(hostFixture.nativeElement.textContent).toContain('One');
+
+    host.secondHidden.set(true);
+    await hostFixture.whenStable();
+    expect(titles()).toEqual(['One']);
+  });
+
+  it('enters the first step once it is shown through its handle', async () => {
+    host.firstHidden.set(true);
+    host.secondHidden.set(true);
+    await hostFixture.whenStable();
+    expect(titles()).toEqual([]);
+    expect(host.entered).toEqual([]);
+
+    host.firstHidden.set(false);
+    host.secondHidden.set(false);
+    await hostFixture.whenStable();
+    await hostFixture.whenStable();
+    expect(titles()).toEqual(['One', 'Two']);
+    expect(host.entered).toEqual(['one']);
+  });
+});
+
+// Showing or hiding a step before the current one shifts the visible
+// list. The current index must move with it, so the stepper stays on the
+// step the user is on and that step is the one marked active.
+describe('SteppersComponent — current step across re-filters', () => {
+  let hostFixture: ComponentFixture<FirstStepHostComponent>;
+  let host: FirstStepHostComponent;
+  const steppers = () => hostFixture.debugElement
+    .query(By.directive(SteppersComponent)).componentInstance as SteppersComponent;
+  const current = () => steppers().steps[steppers().currentIndex()];
+
+  beforeEach(async () => {
+    TestBed.configureTestingModule({
+      imports: [FirstStepHostComponent, RouterTestingModule],
+      providers: [
+        provideZonelessChangeDetection(),
+        provideHttpClient(),
+        provideHttpClientTesting(),
+      ],
+    });
+    await TestBed.compileComponents();
+    hostFixture = TestBed.createComponent(FirstStepHostComponent);
+    host = hostFixture.componentInstance;
+  });
+
+  it('stays on the entered step when a hidden step before it is shown', async () => {
+    host.firstHidden.set(true);
+    await hostFixture.whenStable();
+    await hostFixture.whenStable();
+    expect(host.entered).toEqual(['two']);
+    expect(current().title()).toBe('Two');
+
+    host.firstHidden.set(false);
+    await hostFixture.whenStable();
+    expect(steppers().steps.map(step => step.title())).toEqual(['One', 'Two']);
+    expect(current().title()).toBe('Two');
+    expect(current().active()).toBe(true);
+    expect(steppers().steps[0].active()).toBe(false);
+    // Showing a step is not a transition: no extra onEnter.
+    expect(host.entered).toEqual(['two']);
+  });
+
+  it('stays on the current step when a step before it is hidden', async () => {
+    await hostFixture.whenStable();
+    await hostFixture.whenStable();
+    steppers().setActive(1);
+    await hostFixture.whenStable();
+    expect(current().title()).toBe('Two');
+
+    host.firstHidden.set(true);
+    await hostFixture.whenStable();
+    expect(steppers().steps.map(step => step.title())).toEqual(['Two']);
+    expect(current().title()).toBe('Two');
+    expect(current().active()).toBe(true);
+  });
+
+  it('enters the step shown in place of a current step that is hidden', async () => {
+    await hostFixture.whenStable();
+    await hostFixture.whenStable();
+    steppers().setActive(1);
+    await hostFixture.whenStable();
+    expect(host.entered).toEqual(['one', 'two']);
+
+    host.secondHidden.set(true);
+    await hostFixture.whenStable();
+    await hostFixture.whenStable();
+    expect(steppers().steps.map(step => step.title())).toEqual(['One']);
+    expect(current().title()).toBe('One');
+    expect(current().active()).toBe(true);
+    expect(host.entered).toEqual(['one', 'two', 'one']);
+  });
+});
+
+// When every step is hidden at once (here, two handle signals flipping in
+// one tick), the stepper shows nothing and there is no step for the index
+// to follow. It must remember the step the user was on, so that when steps
+// come back the index and the active marker agree again.
+describe('SteppersComponent — all steps hidden, then shown', () => {
+  let hostFixture: ComponentFixture<SignalHiddenHostComponent>;
+  let host: SignalHiddenHostComponent;
+  const steppers = () => hostFixture.debugElement
+    .query(By.directive(SteppersComponent)).componentInstance as SteppersComponent;
+  const current = () => steppers().steps[steppers().currentIndex()];
+  const settle = async () => {
+    await hostFixture.whenStable();
+    await hostFixture.whenStable();
+  };
+
+  beforeEach(async () => {
+    TestBed.configureTestingModule({
+      imports: [SignalHiddenHostComponent, RouterTestingModule],
+      providers: [
+        provideZonelessChangeDetection(),
+        provideHttpClient(),
+        provideHttpClientTesting(),
+      ],
+    });
+    await TestBed.compileComponents();
+    hostFixture = TestBed.createComponent(SignalHiddenHostComponent);
+    host = hostFixture.componentInstance;
+    await settle();
+    // Move to the second step, then hide every step in one re-filter.
+    steppers().setActive(1);
+    await settle();
+    expect(host.entered).toEqual(['one', 'two']);
+    host.firstHidden.set(true);
+    host.secondHidden.set(true);
+    await settle();
+    expect(steppers().steps).toEqual([]);
+  });
+
+  it('returns to the step the user was on when it reappears, without a second onEnter', async () => {
+    host.secondHidden.set(false);
+    await settle();
+    expect(steppers().steps.map(step => step.title())).toEqual(['Two']);
+    expect(current().title()).toBe('Two');
+    expect(current().active()).toBe(true);
+    expect(host.entered).toEqual(['one', 'two']);
+  });
+
+  it('returns to the step the user was on when all steps reappear', async () => {
+    host.firstHidden.set(false);
+    host.secondHidden.set(false);
+    await settle();
+    expect(current().title()).toBe('Two');
+    expect(current().active()).toBe(true);
+    expect(steppers().steps[0].active()).toBe(false);
+    expect(host.entered).toEqual(['one', 'two']);
+  });
+
+  it('enters the first visible step once when the step the user was on stays hidden', async () => {
+    host.firstHidden.set(false);
+    await settle();
+    expect(steppers().steps.map(step => step.title())).toEqual(['One']);
+    expect(current().title()).toBe('One');
+    expect(current().active()).toBe(true);
+    expect(steppers().allSteps[1].active()).toBe(false);
+    expect(host.entered).toEqual(['one', 'two', 'one']);
+  });
+});
+
+// A step whose submit fails with an HTML error page from a proxy: the
+// stepper shows the page's heading and message as styled pieces.
+@Component({
+  standalone: true,
+  imports: [SteppersComponent, StepComponent],
+  template: `
+    <app-steppers>
+      <app-step title="One" [signalHandle]="handle"></app-step>
+      <app-step title="Two"></app-step>
+    </app-steppers>
+  `,
+})
+class FailingStepHostComponent {
+  handle: SignalStepHandle = {
+    valid: signal(true),
+    submit: () => Promise.reject(new HttpErrorResponse({
+      error: '<html><body><h1>504 Gateway Time-out</h1>\nThe server didn\'t respond in time.\n</body></html>\n',
+      status: 504,
+      statusText: 'Gateway Timeout',
+    })),
+  };
+}
+
+// The reason sits above the buttons. A toast, at the bottom of the page,
+// covered a dialog's Cancel and Next.
+describe('SteppersComponent — failed step', () => {
+  const setUp = async () => {
+    TestBed.configureTestingModule({
+      imports: [FailingStepHostComponent, RouterTestingModule],
+      providers: [
+        provideZonelessChangeDetection(),
+        provideHttpClient(),
+        provideHttpClientTesting(),
+      ],
+    });
+    await TestBed.compileComponents();
+    const hostFixture = TestBed.createComponent(FailingStepHostComponent);
+    await hostFixture.whenStable();
+    const steppers = hostFixture.debugElement.query(By.directive(SteppersComponent)).componentInstance as SteppersComponent;
+    const root: HTMLElement = hostFixture.nativeElement;
+    const reason = () => root.querySelector('[role="alert"] p');
+    return { hostFixture, steppers, root, reason };
+  };
+  const failed = (message: string) => Promise.resolve<StepOnNextResult>({ success: false, message, data: {}, redirect: false, ignoreSuccess: false });
+
+  it('shows an HTML error page as its heading and message', async () => {
+    const { hostFixture, steppers, reason } = await setUp();
+    steppers.goNext();
+    await vi.waitFor(() => expect(steppers.stepError()).not.toBeNull());
+    await hostFixture.whenStable();
+
+    expect(reason()!.querySelector('.font-semibold')!.textContent).toBe('504 Gateway Time-out');
+    expect(reason()!.textContent).toContain('The server didn\'t respond in time.');
+  });
+
+  it('shows a plain message above the buttons, not in a toast', async () => {
+    const { hostFixture, steppers, root, reason } = await setUp();
+    steppers.steps[0].invokeNext = () => failed('nope');
+    steppers.goNext();
+    await hostFixture.whenStable();
+
+    expect(reason()!.textContent).toContain('nope');
+    // In the button row: a dialog's body scrolls under that row, which would
+    // hide a reason placed just before it.
+    expect(root.querySelector('.steppers-navigation [role="alert"] p')).toBe(reason());
+    const next = root.querySelector('#stepper_next')!;
+    expect(reason()!.compareDocumentPosition(next) & Node.DOCUMENT_POSITION_FOLLOWING).toBeTruthy();
+    expect(document.querySelector('.snackbar-box:not([inert])')).toBeNull();
+  });
+
+  it('shows what a step threw, and lets the user retry', async () => {
+    const { hostFixture, steppers, reason } = await setUp();
+    steppers.steps[0].invokeNext = () => Promise.reject(new Error('boom'));
+    steppers.goNext();
+    await hostFixture.whenStable();
+
+    expect(reason()!.textContent).toContain('An error occurred: boom');
+    expect(steppers.steps[0].busy()).toBe(false);
+  });
+
+  it('clears the reason before the next try', async () => {
+    const { hostFixture, steppers, reason } = await setUp();
+    const invokeNext = vi.fn(() => failed('nope'));
+    steppers.steps[0].invokeNext = invokeNext;
+    steppers.goNext();
+    await hostFixture.whenStable();
+    expect(reason()).not.toBeNull();
+
+    invokeNext.mockReturnValue(new Promise<StepOnNextResult>(() => { }));
+    steppers.goNext();
+    await hostFixture.whenStable();
+    expect(reason()).toBeNull();
+  });
+
+  it('drops the result of a try that a later try superseded', async () => {
+    const { hostFixture, steppers, reason } = await setUp();
+    let settleFirst!: (r: StepOnNextResult) => void;
+    const first = new Promise<StepOnNextResult>(r => settleFirst = r);
+    const invokeNext = vi.fn(() => first);
+    steppers.steps[0].invokeNext = invokeNext;
+    steppers.goNext();
+    invokeNext.mockReturnValue(failed('second'));
+    steppers.goNext();
+    await vi.waitFor(() => expect(steppers.stepError()).not.toBeNull());
+
+    settleFirst({ success: true });
+    await first;
+    await hostFixture.whenStable();
+    expect(steppers.currentIndex()).toBe(0);
+    expect(reason()!.textContent).toContain('second');
+    expect(steppers.steps[0].busy()).toBe(false);
+  });
+
+  it('drops a result that arrives after the stepper is destroyed', async () => {
+    const { hostFixture, steppers } = await setUp();
+    let settle!: (r: StepOnNextResult) => void;
+    const pending = new Promise<StepOnNextResult>(r => settle = r);
+    steppers.steps[0].invokeNext = () => pending;
+    const setActive = vi.spyOn(steppers, 'setActive');
+    steppers.goNext();
+    hostFixture.destroy();
+
+    settle({ success: true });
+    await pending;
+    await Promise.resolve();
+    expect(setActive).not.toHaveBeenCalled();
+  });
+
+  it('clears the reason on going back from the step', async () => {
+    const { hostFixture, steppers, reason } = await setUp();
+    steppers.steps[0].invokeNext = () => Promise.resolve<StepOnNextResult>({ success: true, message: '', data: {}, redirect: false, ignoreSuccess: false });
+    steppers.goNext();
+    await hostFixture.whenStable();
+    expect(steppers.currentIndex()).toBe(1);
+    steppers.steps[1].invokeNext = () => failed('nope');
+    steppers.goNext();
+    await hostFixture.whenStable();
+    expect(reason()).not.toBeNull();
+
+    steppers.goTo(0);
+    await hostFixture.whenStable();
+    expect(steppers.currentIndex()).toBe(0);
+    expect(reason()).toBeNull();
+  });
+
+  // Screen readers miss a live region that arrives with its text.
+  it('has its alert region on the page before a step fails', async () => {
+    const { hostFixture, steppers, root } = await setUp();
+    const region = root.querySelector('[role="alert"]')!;
+    expect(region.textContent!.trim()).toBe('');
+
+    steppers.steps[0].invokeNext = () => failed('nope');
+    steppers.goNext();
+    await hostFixture.whenStable();
+
+    expect(root.querySelector('[role="alert"]')).toBe(region);
+    expect(region.textContent).toContain('nope');
+  });
+
+  it('describes Next by the reason only while there is one', async () => {
+    const { hostFixture, steppers, root } = await setUp();
+    const next = root.querySelector('#stepper_next')!;
+    const region = root.querySelector('[role="alert"]')!;
+    expect(next.hasAttribute('aria-describedby')).toBe(false);
+
+    const invokeNext = vi.fn(() => failed('nope'));
+    steppers.steps[0].invokeNext = invokeNext;
+    steppers.goNext();
+    await hostFixture.whenStable();
+    expect(region.id).toBeTruthy();
+    expect(next.getAttribute('aria-describedby')).toBe(region.id);
+
+    invokeNext.mockReturnValue(new Promise<StepOnNextResult>(() => { }));
+    steppers.goNext();
+    await hostFixture.whenStable();
+    expect(next.hasAttribute('aria-describedby')).toBe(false);
+  });
+
+  // A browser moves focus to the page when the focused button is disabled.
+  // The test DOM does not, so the blur stands in for it, before the render
+  // that disables the button: it ignores a blur on a disabled one.
+  it('gives focus back to Next when a step fails', async () => {
+    const { hostFixture, steppers, root } = await setUp();
+    const next = root.querySelector<HTMLButtonElement>('#stepper_next')!;
+    let settle!: (r: StepOnNextResult) => void;
+    const result = new Promise<StepOnNextResult>(r => settle = r);
+    steppers.steps[0].invokeNext = () => result;
+    next.focus();
+    steppers.goNext();
+    next.blur();
+    await hostFixture.whenStable();
+    expect(next.disabled).toBe(true);
+    expect(document.activeElement).toBe(document.body);
+
+    settle({ success: false, message: 'nope', data: {}, redirect: false, ignoreSuccess: false });
+    await vi.waitFor(() => expect(steppers.steps[0].busy()).toBe(false));
+    await hostFixture.whenStable();
+
+    expect(next.disabled).toBe(false);
+    expect(document.activeElement).toBe(next);
+  });
+
+  it('leaves focus where the user moved it while the step was busy', async () => {
+    const { hostFixture, steppers, root } = await setUp();
+    const next = root.querySelector<HTMLButtonElement>('#stepper_next')!;
+    const field = document.createElement('input');
+    root.appendChild(field);
+    let settle!: (r: StepOnNextResult) => void;
+    const result = new Promise<StepOnNextResult>(r => settle = r);
+    steppers.steps[0].invokeNext = () => result;
+    next.focus();
+    steppers.goNext();
+    field.focus();
+    await hostFixture.whenStable();
+
+    settle({ success: false, message: 'nope', data: {}, redirect: false, ignoreSuccess: false });
+    await vi.waitFor(() => expect(steppers.steps[0].busy()).toBe(false));
+    await hostFixture.whenStable();
+
+    expect(document.activeElement).toBe(field);
+  });
+});
+
+// Cancel leaves the stepper: the step's leave hook runs (a signal handle's
+// onLeave, as for a legacy onLeave input), and a host that is not a route of
+// its own (the Register Endpoint dialog) can take Cancel itself instead of a
+// router navigation.
+@Component({
+  standalone: true,
+  imports: [SteppersComponent, StepComponent],
+  template: `
+    <app-steppers cancel="/somewhere" [cancelAction]="cancelAction">
+      <app-step title="One" [signalHandle]="handle"></app-step>
+      <app-step title="Two" [signalHandle]="handle"></app-step>
+    </app-steppers>
+  `,
+})
+class CancelHostComponent {
+  left: (boolean | undefined)[] = [];
+  cancelAction?: () => void;
+  handle: SignalStepHandle = {
+    valid: signal(true),
+    onLeave: (isNext) => { this.left.push(isNext); },
+  };
+}
+
+describe('SteppersComponent — Cancel', () => {
+  let hostFixture: ComponentFixture<CancelHostComponent>;
+  let host: CancelHostComponent;
+  const cancelButton = () => hostFixture.nativeElement.querySelector('#stepper_cancel') as HTMLButtonElement;
+
+  beforeEach(async () => {
+    TestBed.configureTestingModule({
+      imports: [CancelHostComponent, RouterTestingModule.withRoutes([{ path: 'somewhere', children: [] }])],
+      providers: [
+        provideZonelessChangeDetection(),
+        provideHttpClient(),
+        provideHttpClientTesting(),
+      ],
+    });
+    await TestBed.compileComponents();
+    hostFixture = TestBed.createComponent(CancelHostComponent);
+    host = hostFixture.componentInstance;
+  });
+
+  it('runs the step\'s leave hook', async () => {
+    await hostFixture.whenStable();
+    cancelButton().click();
+    expect(host.left).toEqual([false]);
+  });
+
+  it('hands Cancel to the host instead of navigating when given a cancel action', async () => {
+    const navigate = vi.spyOn(TestBed.inject(Router), 'navigateByUrl');
+    host.cancelAction = vi.fn();
+    await hostFixture.whenStable();
+    cancelButton().click();
+    await hostFixture.whenStable();
+    expect(host.cancelAction).toHaveBeenCalledTimes(1);
+    expect(host.left).toEqual([false]);
+    expect(navigate).not.toHaveBeenCalled();
+  });
+});
+
+describe('SteppersComponent — Cancel link', () => {
+  const previousState = signal<any>(null);
+
+  beforeEach(() => {
+    previousState.set({ url: '/applications?x=1', state: { url: '/applications', params: {}, queryParams: { x: '1' } } });
+    TestBed.configureTestingModule({
+      providers: [
+        provideZonelessChangeDetection(),
+        provideRouter([]),
+        provideHttpClient(),
+        provideHttpClientTesting(),
+        { provide: RoutingHistoryService, useValue: { previousState } },
+      ],
+    });
+    TestBed.overrideComponent(SteppersComponent, { set: { imports: [], template: '' } });
+  });
+
+  it('goes back to the page before the wizard, which later navigations do not move', () => {
+    const steppers = TestBed.createComponent(SteppersComponent).componentInstance;
+    expect(steppers.cancelLink()).toBe('/applications');
+    expect(steppers.cancelQueryParams()).toEqual({ x: '1' });
+
+    previousState.set({ url: '/home', state: { url: '/home', params: {}, queryParams: {} } });
+    expect(steppers.cancelLink()).toBe('/applications');
+  });
+});
+
+// Going back runs the leave hook of every step passed, so each can undo
+// what it started (e.g. close a socket it opened).
+@Component({
+  standalone: true,
+  imports: [SteppersComponent, StepComponent],
+  template: `
+    <app-steppers>
+      <app-step title="One" [signalHandle]="steps[0]"></app-step>
+      <app-step title="Two" [signalHandle]="steps[1]"></app-step>
+      <app-step title="Three" [signalHandle]="steps[2]"></app-step>
+    </app-steppers>
+  `,
+})
+class GoingBackHostComponent {
+  left: [string, boolean | undefined][] = [];
+  steps: SignalStepHandle[] = ['One', 'Two', 'Three'].map(title => ({
+    valid: signal(true),
+    onLeave: (isNext?: boolean) => { this.left.push([title, isNext]); },
+  }));
+}
+
+describe('SteppersComponent — going back', () => {
+  let hostFixture: ComponentFixture<GoingBackHostComponent>;
+  let host: GoingBackHostComponent;
+  let steppers: SteppersComponent;
+
+  beforeEach(async () => {
+    TestBed.configureTestingModule({
+      imports: [GoingBackHostComponent, RouterTestingModule],
+      providers: [provideZonelessChangeDetection(), provideHttpClient(), provideHttpClientTesting()],
+    });
+    await TestBed.compileComponents();
+    hostFixture = TestBed.createComponent(GoingBackHostComponent);
+    host = hostFixture.componentInstance;
+    await hostFixture.whenStable();
+    steppers = hostFixture.debugElement.query(By.directive(SteppersComponent)).componentInstance as SteppersComponent;
+    steppers.setActive(1);
+    steppers.setActive(2);
+    await hostFixture.whenStable();
+    host.left = [];
+  });
+
+  it('Previous leaves the current step', async () => {
+    (hostFixture.nativeElement.querySelector('#stepper_previous') as HTMLButtonElement).click();
+    await hostFixture.whenStable();
+    expect(steppers.currentIndex()).toBe(1);
+    expect(host.left).toEqual([['Three', false]]);
+  });
+
+  it('going back two steps leaves both, nearest first', async () => {
+    steppers.goTo(0);
+    await hostFixture.whenStable();
+    expect(steppers.currentIndex()).toBe(0);
+    expect(host.left).toEqual([['Three', false], ['Two', false]]);
+  });
+
+  it('going forward leaves only the current step', async () => {
+    steppers.goTo(0);
+    await hostFixture.whenStable();
+    host.left = [];
+    steppers.setActive(1);
+    await hostFixture.whenStable();
+    expect(host.left).toEqual([['One', true]]);
+  });
+});
+
+@Component({
+  standalone: true,
+  imports: [SteppersComponent, StepComponent],
+  template: `
+    <app-steppers [basePreviousRedirect]="redirect" [startIndex]="startIndex" [startData]="startData">
+      <app-step title="One" [signalHandle]="first"></app-step>
+      <app-step title="Two" [signalHandle]="second"></app-step>
+    </app-steppers>
+  `,
+})
+class StartIndexHostComponent {
+  redirect: { path: string } | null = null;
+  startIndex = 0;
+  startData: unknown = undefined;
+  firstEnter = vi.fn();
+  secondEnter = vi.fn();
+  first: SignalStepHandle = { valid: signal(true), onEnter: this.firstEnter };
+  second: SignalStepHandle = { valid: signal(true), onEnter: this.secondEnter };
+}
+
+describe('SteppersComponent — first step and start index', () => {
+  const create = async (setup: (host: StartIndexHostComponent) => void = () => undefined) => {
+    TestBed.configureTestingModule({
+      imports: [StartIndexHostComponent, RouterTestingModule],
+      providers: [provideZonelessChangeDetection(), provideHttpClient(), provideHttpClientTesting()],
+    });
+    await TestBed.compileComponents();
+    const fixture = TestBed.createComponent(StartIndexHostComponent);
+    setup(fixture.componentInstance);
+    await fixture.whenStable();
+    const steppers = fixture.debugElement.query(By.directive(SteppersComponent)).componentInstance as SteppersComponent;
+    const previous = () => fixture.nativeElement.querySelector('#stepper_previous') as HTMLButtonElement | null;
+    return { fixture, host: fixture.componentInstance, steppers, previous };
+  };
+
+  it('renders no Previous on step 1 without a base redirect', async () => {
+    const { previous } = await create();
+    expect(previous()).toBeNull();
+  });
+
+  it('keeps Previous on step 1 when a base redirect is set', async () => {
+    const { previous } = await create(h => { h.redirect = { path: '/x' }; });
+    expect(previous()).not.toBeNull();
+    expect(previous()!.disabled).toBe(false);
+  });
+
+  it('shows Previous on step 2', async () => {
+    const { fixture, steppers, previous } = await create();
+    steppers.setActive(1);
+    await fixture.whenStable();
+    expect(previous()).not.toBeNull();
+  });
+
+  it('starts on startIndex with earlier steps complete', async () => {
+    const { host, steppers } = await create(h => { h.startIndex = 1; h.startData = { n: 7 }; });
+    expect(steppers.currentIndex()).toBe(1);
+    expect(steppers.steps[0].complete()).toBe(true);
+    expect(host.secondEnter).toHaveBeenCalledWith({ n: 7 });
+    expect(host.firstEnter).not.toHaveBeenCalled();
+  });
+
+  it('goes back to a completed step from its header', async () => {
+    const { fixture, steppers } = await create(h => { h.startIndex = 1; });
+    const header = fixture.nativeElement.querySelector('.steppers-headers button') as HTMLButtonElement;
+    expect(header.getAttribute('aria-label')).toBe('One, completed');
+    header.click();
+    await fixture.whenStable();
+    expect(steppers.currentIndex()).toBe(0);
+  });
+});
+
+// A step nothing can go back from: no Previous, and the completed header
+// before it is not a control that does nothing.
+@Component({
+  standalone: true,
+  imports: [SteppersComponent, StepComponent],
+  template: `
+    <app-steppers>
+      <app-step title="One" [signalHandle]="first"></app-step>
+      <app-step title="Two" [signalHandle]="second"></app-step>
+    </app-steppers>
+  `,
+})
+class NoGoingBackHostComponent {
+  first: SignalStepHandle = { valid: signal(true) };
+  disable = signal(false);
+  hide = signal(false);
+  second: SignalStepHandle = { valid: signal(true), disablePrevious: this.disable, hidePrevious: this.hide };
+}
+
+describe('SteppersComponent — a step with no way back', () => {
+  let hostFixture: ComponentFixture<NoGoingBackHostComponent>;
+  let host: NoGoingBackHostComponent;
+
+  beforeEach(async () => {
+    TestBed.configureTestingModule({
+      imports: [NoGoingBackHostComponent, RouterTestingModule],
+      providers: [provideZonelessChangeDetection(), provideHttpClient(), provideHttpClientTesting()],
+    });
+    await TestBed.compileComponents();
+    hostFixture = TestBed.createComponent(NoGoingBackHostComponent);
+    host = hostFixture.componentInstance;
+    await hostFixture.whenStable();
+    const steppers = hostFixture.debugElement.query(By.directive(SteppersComponent)).componentInstance as SteppersComponent;
+    steppers.setActive(1);
+    await hostFixture.whenStable();
+  });
+
+  const q = (sel: string) => (hostFixture.nativeElement as HTMLElement).querySelector(sel);
+
+  it('offers Previous and a header button by default', () => {
+    expect(q('#stepper_previous')).toBeTruthy();
+    expect(q('button.steppers-header-inner')).toBeTruthy();
+  });
+
+  it('hidePrevious removes the Previous button', async () => {
+    host.hide.set(true);
+    await hostFixture.whenStable();
+    expect(q('#stepper_previous')).toBeNull();
+  });
+
+  it('a completed header is not a button while Previous is disabled', async () => {
+    host.disable.set(true);
+    await hostFixture.whenStable();
+    expect(q('button.steppers-header-inner')).toBeNull();
+    expect(q('.steppers-header-text--complete')?.textContent).toContain('One');
+  });
+});
+
+// The legacy step inputs used to announce a change with an event
+// (validChange, canCloseChange, disablePreviousChange) so the stepper
+// re-rendered its buttons. They are signal inputs now, with no event: the
+// buttons must still follow a change made after the first render.
+@Component({
+  standalone: true,
+  imports: [SteppersComponent, StepComponent],
+  template: `
+    <app-steppers cancel="/somewhere" [cancelAction]="cancelAction">
+      <app-step title="One" [valid]="valid()" [canClose]="canClose()" [nextButtonText]="nextText()"></app-step>
+      <app-step title="Two" [disablePrevious]="disablePrevious()"></app-step>
+    </app-steppers>
+  `,
+})
+class LegacyInputsHostComponent {
+  valid = signal(false);
+  canClose = signal(true);
+  nextText = signal('Next');
+  disablePrevious = signal(false);
+  cancelAction = () => { };
+}
+
+describe('SteppersComponent — legacy step inputs', () => {
+  let hostFixture: ComponentFixture<LegacyInputsHostComponent>;
+  let host: LegacyInputsHostComponent;
+  const button = (id: string) => hostFixture.nativeElement.querySelector(`#stepper_${id}`) as HTMLButtonElement;
+
+  beforeEach(async () => {
+    TestBed.configureTestingModule({
+      imports: [LegacyInputsHostComponent, RouterTestingModule],
+      providers: [
+        provideZonelessChangeDetection(),
+        provideHttpClient(),
+        provideHttpClientTesting(),
+      ],
+    });
+    await TestBed.compileComponents();
+    hostFixture = TestBed.createComponent(LegacyInputsHostComponent);
+    host = hostFixture.componentInstance;
+    await hostFixture.whenStable();
+  });
+
+  it('enables Next when [valid] turns true, and shows a new [nextButtonText]', async () => {
+    expect(button('next').disabled).toBe(true);
+    expect(button('next').textContent).toContain('Next');
+
+    host.valid.set(true);
+    host.nextText.set('Continue');
+    await hostFixture.whenStable();
+    expect(button('next').disabled).toBe(false);
+    expect(button('next').textContent).toContain('Continue');
+  });
+
+  it('disables Cancel when [canClose] turns false', async () => {
+    expect(button('cancel').disabled).toBe(false);
+
+    host.canClose.set(false);
+    await hostFixture.whenStable();
+    expect(button('cancel').disabled).toBe(true);
+  });
+
+  it('disables Previous when [disablePrevious] turns true', async () => {
+    host.valid.set(true);
+    await hostFixture.whenStable();
+    button('next').click();
+    await hostFixture.whenStable();
+    expect(button('previous').disabled).toBe(false);
+
+    host.disablePrevious.set(true);
+    await hostFixture.whenStable();
+    expect(button('previous').disabled).toBe(true);
   });
 });

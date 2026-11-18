@@ -6,6 +6,10 @@ import { ActivatedRoute, Router } from '@angular/router';
 import { firstValueFrom } from 'rxjs';
 import { describe, it, expect, beforeEach, vi } from 'vitest';
 
+import { answerServiceWrite, RESOLVE_PATHS, serviceWriteContract } from '@test-framework/cf';
+
+import { TailwindSnackBarService } from '../../../../../core/src/shared/services/tailwind-snackbar.service';
+import { StratosJobError } from '../../../services/async-jobs/async-job.types';
 import { CsiModeService } from './csi-mode.service';
 
 function configure(routeParams: Record<string, string>) {
@@ -205,7 +209,8 @@ describe('CsiModeService', () => {
 
       await expect(finalResult).resolves.toEqual({
         success: false,
-        message: 'cf.service_binding.create: broker rejected the bind',
+        message: 'broker rejected the bind',
+        error: expect.any(StratosJobError),
       });
       httpMock.verify();
     });
@@ -229,7 +234,7 @@ describe('CsiModeService', () => {
       httpMock.verify();
     });
 
-    it('UNKNOWN (404 on poll, HA-degradation) resolves optimistically as success', async () => {
+    it('UNKNOWN (backend no longer knows the job) resolves as an unknown result, not success', async () => {
       const svc = TestBed.inject(CsiModeService);
       const httpMock = TestBed.inject(HttpTestingController);
 
@@ -246,11 +251,75 @@ describe('CsiModeService', () => {
       const poll = httpMock.expectOne('/pp/v1/stratos/jobs/job-3');
       poll.flush({ errors: [{ message: 'unknown job' }] }, { status: 404, statusText: 'Not Found' });
 
-      // writeWithJob returns {status:'UNKNOWN'} which our mapper treats as
-      // success. Caller refetch reveals the truth — better than blocking the
-      // stepper on a write that probably succeeded.
-      await expect(finalResult).resolves.toEqual({ success: true });
+      // The bind ended but nobody can say whether it happened: the caller
+      // must not report it as bound.
+      await expect(finalResult).resolves.toEqual({ success: false, unknown: 'ended' });
       httpMock.verify();
     });
+
+    // A bind that lands while the instance is still being created waits for
+    // it; if the create fails, the broker's reason is the bind's message.
+    // An HTML reason keeps its heading on a line of its own.
+    it('gives a failed create\'s reason without markup', async () => {
+      TestBed.overrideProvider(TailwindSnackBarService, { useValue: { open: vi.fn(), error: vi.fn() } });
+      const svc = TestBed.inject(CsiModeService);
+      const httpMock = TestBed.inject(HttpTestingController);
+
+      const finalResult = firstValueFrom(svc.createApplicationServiceBinding('si-1', 'cnsi-1', 'app-1', {}));
+      httpMock.expectOne('/pp/v1/cf/service_bindings/cnsi-1').flush(
+        { errors: [{ code: 10008, title: 'CF-UnprocessableEntity', detail: 'There is an operation in progress for the service instance' }] },
+        { status: 422, statusText: 'Unprocessable Entity' },
+      );
+      const read = await vi.waitFor(() => httpMock.expectOne('/pp/v1/cf/service_instances/cnsi-1/si-1'));
+      read.flush({ lastOperation: { type: 'create', state: 'failed', description: '<html><body><h1>Quota</h1> exceeded</body></html>' } });
+
+      await expect(finalResult).resolves.toEqual({ success: false, message: 'Quota\nexceeded' });
+      httpMock.verify();
+    });
+
+    // The instance is still being created after the in-line wait: the bind
+    // is retried in the background, so it has not happened yet and must not
+    // come back as a plain success.
+    it('says the bind is deferred, not done, when the instance is still provisioning after the wait', async () => {
+      vi.useFakeTimers();
+      try {
+        TestBed.overrideProvider(TailwindSnackBarService, { useValue: { open: vi.fn(), error: vi.fn() } });
+        const svc = TestBed.inject(CsiModeService);
+        const httpMock = TestBed.inject(HttpTestingController);
+
+        const finalResult = firstValueFrom(svc.createApplicationServiceBinding('si-1', 'cnsi-1', 'app-1', {}));
+        await vi.advanceTimersByTimeAsync(0);
+        httpMock.expectOne('/pp/v1/cf/service_bindings/cnsi-1').flush(
+          { errors: [{ code: 10008, title: 'CF-UnprocessableEntity', detail: 'There is an operation in progress for the service instance' }] },
+          { status: 422, statusText: 'Unprocessable Entity' },
+        );
+        for (let i = 0; i < 8; i++) {
+          await vi.advanceTimersByTimeAsync(3_000);
+          httpMock.match('/pp/v1/cf/service_instances/cnsi-1/si-1')
+            .forEach(r => r.flush({ lastOperation: { type: 'create', state: 'in progress' } }));
+        }
+
+        await expect(finalResult).resolves.toEqual({ success: true, deferred: true });
+      } finally {
+        vi.useRealTimers();
+      }
+    });
+
+    // Recorded backend answers: a sync or async broker, on either resolve
+    // path, binds the same way.
+    for (const broker of ['sync', 'async']) {
+      for (const path of RESOLVE_PATHS) {
+        it(`binds: ${broker} broker, ${path} path`, async () => {
+          const svc = TestBed.inject(CsiModeService);
+          const httpMock = TestBed.inject(HttpTestingController);
+
+          const finalResult = firstValueFrom(svc.createApplicationServiceBinding('si-1', 'cnsi-1', 'app-1', {}));
+          await answerServiceWrite(httpMock, '/pp/v1/cf/service_bindings/cnsi-1', serviceWriteContract(`${broker}-app-binding-create`), path);
+
+          await expect(finalResult).resolves.toEqual({ success: true });
+          httpMock.verify();
+        });
+      }
+    }
   });
 });

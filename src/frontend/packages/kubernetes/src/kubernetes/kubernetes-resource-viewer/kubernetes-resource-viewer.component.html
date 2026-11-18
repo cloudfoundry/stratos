@@ -1,4 +1,4 @@
-<app-sidepanel-preview [header]="headerContent" class="text-sm" title="{{title}}" [favorite]="favorite">
+<app-sidepanel-preview [header]="headerContent()" class="text-sm" [title]="title()" [favorite]="favorite()">
 
   @if (resource$ | async; as resource) {
     <div>
@@ -35,9 +35,9 @@
           }
         </app-metadata-item>
       }
-      @if (alerts) {
+      @if (alerts()) {
         <app-metadata-item class="table" label="Alerts">
-          <app-resource-alert-view [showHeader]="false" [alerts]="alerts"></app-resource-alert-view>
+          <app-resource-alert-view [showHeader]="false" [alerts]="alerts()"></app-resource-alert-view>
         </app-metadata-item>
       }
       <!-- Custom component if there is one -->
@@ -49,8 +49,8 @@
 
 <ng-template #header>
   <div class="flex justify-end">
-    <button class="btn-icon" name="delete" (click)="deleteWarn()" title="Delete">
-      <span class="material-icons">delete</span>
+    <button aria-label="Delete" class="btn-icon" name="delete" (click)="deleteWarn()" title="Delete">
+      <span aria-hidden="true" class="material-icons">delete</span>
     </button>
   </div>
 </ng-template>

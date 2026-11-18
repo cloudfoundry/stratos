@@ -6,6 +6,8 @@ import {
 } from '@angular-devkit/architect';
 import { buildApplication as angularBuildApplication } from '@angular-devkit/build-angular';
 import { json } from '@angular-devkit/core';
+import { execFileSync } from 'child_process';
+import * as path from 'path';
 import { Observable, from, of } from 'rxjs';
 import { switchMap, catchError, map } from 'rxjs/operators';
 import { PrebuildApplicationBuilderSchema } from './schema';
@@ -64,13 +66,41 @@ function delegateToAngularBuilder(
   return from(context.getTargetOptions(target)).pipe(
     switchMap((buildOptions: json.JsonObject) => {
       // Call Angular's buildApplication directly with the loaded options
-      return angularBuildApplication(buildOptions as any, context);
+      return from(angularBuildApplication(buildOptions as any, context)).pipe(
+        map(result => transformIndex(buildOptions, context, result))
+      );
     }),
     catchError(error => {
       context.logger.error(`Failed to run Angular builder: ${error.message}`);
       return of({ success: false, error: error.message });
     })
   );
+}
+
+/**
+ * Inject the title, git metadata and theme loading assets into the built
+ * index.html. The tracked source keeps plain defaults, so every build gets
+ * fresh values and the source never changes.
+ */
+function transformIndex(
+  buildOptions: json.JsonObject,
+  context: BuilderContext,
+  result: BuilderOutput
+): BuilderOutput {
+  if (!result.success) {
+    return result;
+  }
+  const out = buildOptions.outputPath as string | { base: string; browser?: string };
+  const browserDir = typeof out === 'string' ? path.join(out, 'browser') : path.join(out.base, out.browser ?? 'browser');
+  const index = path.join(context.workspaceRoot, browserDir, 'index.html');
+  try {
+    execFileSync('bun', ['build/index-transformer.js', index], { cwd: context.workspaceRoot, stdio: 'inherit' });
+    return result;
+  } catch (error) {
+    const message = error instanceof Error ? error.message : String(error);
+    context.logger.error(`index.html transform failed: ${message}`);
+    return { success: false, error: message };
+  }
 }
 
 export default createBuilder(buildApplication);

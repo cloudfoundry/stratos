@@ -1,10 +1,9 @@
-import { Component, ChangeDetectionStrategy, inject } from '@angular/core';
-import { CommonModule } from '@angular/common';
+import { Component, ChangeDetectionStrategy, computed, inject, linkedSignal } from '@angular/core';
+import { toSignal } from '@angular/core/rxjs-interop';
 import { Router, RouterModule } from '@angular/router';
 
 import { CustomTooltipDirective, TailwindSnackBarService } from '@stratosui/core';
-import { combineLatest, Observable } from 'rxjs';
-import { filter, map, startWith } from 'rxjs/operators';
+import { EMPTY } from 'rxjs';
 
 import { ConfirmationDialogConfig, ConfirmationDialogService } from '@stratosui/core';
 import { CfCurrentUserPermissions } from '../../../../../../../user-permissions/cf-user-permissions-checkers';
@@ -20,10 +19,13 @@ import {
   LoadingPageComponent,
   CardNumberMetricComponent
 } from '@stratosui/core';
+import { leadPieces } from '@stratosui/store';
 import { CardCfRecentAppsComponent } from '../../../../../../../features/home/card-cf-recent-apps/card-cf-recent-apps.component';
 import { CfUserPermissionDirective } from '../../../../../../../shared/directives/cf-user-permission/cf-user-permission.directive';
 import { CardCfSpaceDetailsComponent } from '../../../../../../../shared/components/cards/card-cf-space-details/card-cf-space-details.component';
 import { PollingIndicatorComponent } from '../../../../../../../../../core/src/shared/components/polling-indicator/polling-indicator.component';
+import { unknownHowOf, unknownOutcomeMessage } from '../../../../../../../services/async-jobs/unknown-outcome-message';
+import { CfCliMenuComponent } from '../../../../../../../shared/components/cli-menu/cf-cli-menu.component';
 
 @Component({
   selector: 'app-cloud-foundry-space-summary',
@@ -31,10 +33,10 @@ import { PollingIndicatorComponent } from '../../../../../../../../../core/src/s
   standalone: true,
   changeDetection: ChangeDetectionStrategy.OnPush,
   imports: [
-    CommonModule,
     RouterModule,
     CustomTooltipDirective,
     PageSubNavComponent,
+    CfCliMenuComponent,
     TileGridComponent,
     TileGroupComponent,
     TileComponent,
@@ -55,26 +57,30 @@ export class CloudFoundrySpaceSummaryComponent {
   private router = inject(Router);
   private spacesConfig = inject(CfSpacesSignalConfigService);
 
-  detailsLoading$: Observable<boolean>;
-  name$?: Observable<string>;
+  // The HTTP-backed counts are subscribed here, by the page that shows them,
+  // not in the space service that every space page holds.
+  readonly userProvidedServiceInstancesCount = toSignal(this.cfSpaceService.userProvidedServiceInstancesCount$, { initialValue: null });
+  readonly quota = this.cfSpaceService.quotaDefinition;
+  // Without the full app list yet, ask Cloud Foundry for the space's count;
+  // once the list is here, count the space's apps in it.
+  private readonly fetchedAppCount = toSignal(
+    this.cfEndpointService.hasApps()
+      ? EMPTY
+      : this.cfEndpointService.fetchAppCount(this.cfSpaceService.orgGuid, this.cfSpaceService.spaceGuid),
+    { initialValue: null },
+  );
+  readonly appCount = computed(() =>
+    this.cfEndpointService.hasApps() ? this.cfSpaceService.apps().length : this.fetchedAppCount());
+
+  // The page shows its tiles once the apps have loaded and the user-provided
+  // service count is in; a later poll does not bring the loading page back.
+  private readonly appsSettled = linkedSignal<boolean, boolean>({
+    source: this.cfSpaceService.loadingApps,
+    computation: (loading, previous) => !!previous?.value || !loading,
+  });
+  readonly detailsLoading = computed(() => !this.appsSettled() || this.userProvidedServiceInstancesCount() === null);
   public permsSpaceEdit = CfCurrentUserPermissions.SPACE_EDIT;
   public permsSpaceDelete = CfCurrentUserPermissions.SPACE_DELETE;
-
-  constructor() {
-    const cfEndpointService = this.cfEndpointService;
-    const cfSpaceService = this.cfSpaceService;
-
-    this.detailsLoading$ = combineLatest([
-      // Wait for the apps to have been fetched, this will determine if multiple small cards are shown or now
-      cfEndpointService.appsLoading$.pipe(
-        filter(loading => !loading)
-      ),
-      cfSpaceService.userProvidedServiceInstancesCount$
-    ]).pipe(
-      map(() => false),
-      startWith(true)
-    );
-  }
 
   deleteSpaceWarn = () => {
     const name = this.cfSpaceService.spaceDataService.space()?.name;
@@ -101,11 +107,18 @@ export class CloudFoundrySpaceSummaryComponent {
     const cnsi = this.cfSpaceService.cfGuid;
     const spaceGuid = this.cfSpaceService.spaceGuid;
     try {
-      await this.spacesConfig.deleteSpace(cnsi, spaceGuid);
+      const outcome = await this.spacesConfig.deleteSpace(cnsi, spaceGuid);
+      const how = unknownHowOf(outcome);
+      if (how) {
+        // Ended, result unknown: stay rather than leave as if deleted.
+        const name = this.cfSpaceService.spaceDataService.space()?.name ?? spaceGuid;
+        this.snackBar.error(
+          unknownOutcomeMessage(`Delete space "${name}"`, 'The organization\'s Spaces list', how), 'Close');
+        return;
+      }
       this.redirectToOrgSpaces();
-    } catch (err: any) {
-      const msg = err?.message ?? err;
-      this.snackBar.error(`Failed to delete space: ${msg}`, 'Close');
+    } catch (err: unknown) {
+      this.snackBar.error(leadPieces('Failed to delete space', err), 'Close');
     }
   }
 

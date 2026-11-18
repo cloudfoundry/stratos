@@ -1,4 +1,4 @@
-import { ChangeDetectionStrategy, ChangeDetectorRef, Component, ComponentRef, Input, OnDestroy, Type, ViewChild, ViewContainerRef, inject } from '@angular/core';
+import { ChangeDetectionStrategy, Component, ComponentRef, OnDestroy, Type, ViewContainerRef, effect, input, untracked, viewChild } from '@angular/core';
 
 import { AnalysisReport } from '../store/kube.types';
 import { KubeScoreReportViewerComponent } from './kube-score-report-viewer/kube-score-report-viewer.component';
@@ -16,23 +16,29 @@ selector: 'app-analysis-report-viewer',
   changeDetection: ChangeDetectionStrategy.OnPush
 })
 export class AnalysisReportViewerComponent implements OnDestroy {
-  private cdr = inject(ChangeDetectorRef);
 
 
   // Component reference for the dynamically created auth form
-  @ViewChild('reportViewer', { read: ViewContainerRef, static: true })
-  public container!: ViewContainerRef; // strict: static ViewChild resolved before lifecycle hooks
+  // Optional: createComponent guards for a container that is not there yet.
+  public readonly container = viewChild('reportViewer', { read: ViewContainerRef });
   private reportComponentRef?: ComponentRef<IReportViewer>;
 
   private id!: string;
 
-  @Input()
-  set report(report: AnalysisReport | null) {
-    if (report === null || report.id === this.id) {
-      return;
-    }
-    this.id = report.id;
-    this.updateReport(report);
+  readonly report = input<AnalysisReport | null>();
+
+  constructor() {
+    // Show a viewer for each new report; the same report again keeps its viewer.
+    effect(() => {
+      const report = this.report();
+      if (!report || report.id === this.id) {
+        return;
+      }
+      this.id = report.id;
+      // Untracked: signals the new viewer reads while it is created are not
+      // dependencies of this effect.
+      untracked(() => this.updateReport(report));
+    });
   }
 
   updateReport(report: AnalysisReport): void {
@@ -48,17 +54,17 @@ export class AnalysisReportViewerComponent implements OnDestroy {
 
   // Dynamically create the component for the report type type
   createComponent(component: Type<IReportViewer>, report: AnalysisReport) {
-    if (!component || !this.container) {
+    const container = this.container();
+    if (!component || !container) {
       return;
     }
 
     if (this.reportComponentRef) {
       this.reportComponentRef.destroy();
     }
-    this.reportComponentRef = this.container.createComponent<IReportViewer>(component);
+    this.reportComponentRef = container.createComponent<IReportViewer>(component);
     // this.reportComponentRef.instance.setReport(report);
     this.reportComponentRef.instance.report = report;
-    this.cdr.markForCheck();
   }
 
   ngOnDestroy() {

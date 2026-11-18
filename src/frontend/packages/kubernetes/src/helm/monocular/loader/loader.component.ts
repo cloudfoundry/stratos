@@ -1,4 +1,4 @@
-import { ChangeDetectionStrategy, Component, Input} from '@angular/core';
+import { ChangeDetectionStrategy, Component, input } from '@angular/core';
 import { AppBusyComponent } from '@stratosui/core';
 
 
@@ -11,5 +11,5 @@ import { AppBusyComponent } from '@stratosui/core';
 })
 export class LoaderComponent {
   // Show the loader or the content
-  @Input() public loading = false;
+  public readonly loading = input(false);
 }

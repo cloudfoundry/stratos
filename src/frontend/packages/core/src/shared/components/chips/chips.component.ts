@@ -1,5 +1,5 @@
 import { CommonModule } from '@angular/common';
-import { ChangeDetectionStrategy, ChangeDetectorRef, Component, Input, OnInit, inject } from '@angular/core';
+import { ChangeDetectionStrategy, Component, computed, input, signal } from '@angular/core';
 import { RouterModule } from '@angular/router';
 import { Observable } from 'rxjs';
 
@@ -39,61 +39,31 @@ export class AppChip<T = string> implements IAppChip<T> {
   templateUrl: './chips.component.html',
   changeDetection: ChangeDetectionStrategy.OnPush
 })
-export class AppChipsComponent implements OnInit {
-  private cdr = inject(ChangeDetectorRef);
+export class AppChipsComponent {
+  readonly chips = input<AppChip[]>([]);
 
-  public atLowerLimit = true;
+  readonly stacked = input(false);
 
-  private pChips: AppChip[] = [];
-  @Input()
-  get chips(): AppChip[] {
-    return this.pChips;
-  }
-  set chips(chips: AppChip[]) {
-    this.pChips = chips;
-    this.cdr.markForCheck();
-  }
+  readonly orientation = input<'rtl' | 'ltr'>('ltr');
 
-  @Input()
-  stacked = false;
+  readonly lowerLimit = input(3);
 
-  @Input()
-  orientation: 'rtl' | 'ltr' = 'ltr';
+  readonly displayProperty = input('value');
 
-  @Input()
-  lowerLimit = 3;
+  private readonly expanded = signal(false);
 
-  private pDisplayProperty = 'value';
-  @Input()
-  get displayProperty(): string {
-    return this.pDisplayProperty;
-  }
-  set displayProperty(displayProperty: string) {
-    this.pDisplayProperty = displayProperty;
-    this.cdr.markForCheck();
-  }
+  readonly atLowerLimit = computed(() => !this.expanded());
 
-  public limit!: number;
-
-  ngOnInit() {
-    this.limit = this.lowerLimit;
-  }
+  readonly limit = computed(() => this.expanded() ? this.chips().length : this.lowerLimit());
 
   public toggleLimit() {
-    if (this.limit === this.lowerLimit) {
-      this.limit = this.chips.length;
-      this.atLowerLimit = false;
-    } else {
-      this.limit = this.lowerLimit;
-      this.atLowerLimit = true;
-    }
-    this.cdr.markForCheck();
+    this.expanded.update(expanded => !expanded);
   }
 
   // displayProperty allows callers to render arbitrary chip-shaped objects,
   // so the lookup has to go through a dynamic string key
   public getDisplayValue(chip: AppChip): string {
-    const value: unknown = Reflect.get(chip, this.displayProperty);
+    const value: unknown = Reflect.get(chip, this.displayProperty());
     return value == null ? '' : String(value);
   }
 

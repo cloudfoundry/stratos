@@ -1,8 +1,4 @@
-import { CommonModule } from '@angular/common';
-import {Component, signal, inject, ChangeDetectionStrategy } from '@angular/core';
-import { toObservable } from '@angular/core/rxjs-interop';
-import { combineLatest, Observable } from 'rxjs';
-import { map } from 'rxjs/operators';
+import { Component, computed, signal, inject, ChangeDetectionStrategy } from '@angular/core';
 
 import { PageSubNavComponent } from '../../../../../../../core/src/shared/components/page-sub-nav/page-sub-nav.component';
 import { JsonViewerComponent } from '../../../../../../../core/src/shared/components/json-viewer/json-viewer.component';
@@ -17,7 +13,6 @@ import { HelmReleaseHelperService } from '../helm-release-helper.service';
   changeDetection: ChangeDetectionStrategy.OnPush,
   standalone: true,
   imports: [
-    CommonModule,
     PageSubNavComponent,
     JsonViewerComponent,
     NoContentMessageComponent
@@ -25,38 +20,27 @@ import { HelmReleaseHelperService } from '../helm-release-helper.service';
 })
 export class HelmReleaseValuesTabComponent {
 
-  public values$: Observable<any>;
+  readonly viewType = signal<string>('user');
+  public helmReleaseHelper = inject(HelmReleaseHelperService);
 
-  private viewType = signal<string>('user');
-  public viewType$ = toObservable(this.viewType);  public helmReleaseHelper = inject(HelmReleaseHelperService);
-
-
-
-  constructor() {
-
-
-    this.values$ = combineLatest([
-      this.viewType$,
-      this.helmReleaseHelper.release$
-    ]).pipe(
-      map(([vtype, release]: [string, any]) => {
-        switch (vtype) {
-          case 'user':
-            return release.config || {};
-          case 'combined': {
-            const chart = release.chart.values || {};
-            const user = release.config || {};
-            const target = {};
-            return this.mergeDeep(target, chart, user);
-          }
-          default:
-            return release.chart.values || {};
-        }
-      })
-    );
-
-
-  }
+  // null until the release loads.
+  readonly values = computed(() => {
+    const release: any = this.helmReleaseHelper.release();
+    if (!release) {
+      return null;
+    }
+    switch (this.viewType()) {
+      case 'user':
+        return release.config || {};
+      case 'combined': {
+        const chart = release.chart.values || {};
+        const user = release.config || {};
+        return this.mergeDeep({}, chart, user);
+      }
+      default:
+        return release.chart.values || {};
+    }
+  });
 
   public viewTypeChange(viewType: string) {
     this.viewType.set(viewType);

@@ -1,4 +1,4 @@
-#!/usr/bin/env node
+#!/usr/bin/env bun
 // Tiered e2e runner behind `make test e2e TIER=... GROUP=...` — see
 // TESTING.md "Tiered E2E runs". Selections are additive: tier-computed
 // spec sets (diff-driven, via e2e-impact.mjs) and group directories union
@@ -52,7 +52,7 @@ const groupOf = (spec) => spec.split(path.sep)[2] // e2e/tests/<group>/...
 
 function impactedSpecs() {
   const diff = execFileSync('git', ['diff', '--name-only', `${opt.base}...HEAD`], { encoding: 'utf8' })
-  const r = spawnSync('node', ['scripts/e2e-impact.mjs', '--files'], { input: diff, encoding: 'utf8' })
+  const r = spawnSync('bun', ['scripts/e2e-impact.mjs', '--files'], { input: diff, encoding: 'utf8' })
   if (r.status !== 0) { console.error('e2e-impact.mjs failed:\n' + r.stderr); process.exit(2) }
   return r.stdout.split('\n').map((l) => l.trim()).filter(Boolean)
 }
@@ -116,10 +116,10 @@ let totals = { expected: 0, unexpected: 0, flaky: 0, skipped: 0 }
 let exitCode = 0
 for (const run of runs) {
   const argv = ['playwright', 'test', ...run.args]
-  console.log(`\n>>> ${run.label}\n    npx ${argv.join(' ')}`)
+  console.log(`\n>>> ${run.label}\n    bun run ${argv.join(' ')}`)
   if (opt.dryRun) continue
   rmSync('e2e-reports/results.json', { force: true }) // a crashed run must not inherit the previous run's report
-  const r = spawnSync('npx', argv, { stdio: 'inherit' })
+  const r = spawnSync('bun', ['run', ...argv], { stdio: 'inherit' })
   if (r.status !== 0) exitCode = 1
   try {
     const j = JSON.parse(readFileSync('e2e-reports/results.json', 'utf8'))

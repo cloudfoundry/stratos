@@ -1,4 +1,4 @@
-@if ((sessionData$ | async); as session) {
+@if (sessionData(); as session) {
   <div class="flex flex-col gap-4">
     <!-- Summary bar -->
     <app-card>
@@ -67,7 +67,7 @@
             <div class="grid grid-cols-[1.5rem_auto_1fr] gap-x-2 items-center px-4 py-1 min-h-7">
               <app-custom-icon class="text-base text-content-muted">date_range</app-custom-icon>
               <span class="text-sm text-content-muted whitespace-nowrap">Helm Modified</span>
-              <span class="text-sm font-medium text-right">{{ helmLastModified$ | async | date:'medium' }}</span>
+              <span class="text-sm font-medium text-right">{{ helmLastModified() | date:'medium' }}</span>
             </div>
           }
         </div>
@@ -97,7 +97,7 @@
             <span class="text-sm font-medium text-right">{{ buildInfo.bunVersion }}</span>
           </div>
         </div>
-        @if ((this.userIsAdmin$ | async); as isAdminUser) {
+        @if (userIsAdmin(); as isAdminUser) {
           <div class="border-t border-content-border mx-4 my-3"></div>
           <div class="flex items-center gap-1.5 text-xs font-semibold uppercase tracking-wider text-content-muted px-4 pb-1">
             @if (isAdminUser) {

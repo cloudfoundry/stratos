@@ -80,10 +80,20 @@ export class ApplicationBasePage extends BasePage {
   }
 
   /**
-   * Navigate to Instances tab
+   * The Instances view is no longer a separate tab — the redesign moved it
+   * into a collapsible accordion (app-instances-accordion) on the Summary tab
+   * (BuildTabComponent). Expand it (from the Summary page) and return its
+   * locator so callers can assert against instance content.
    */
-  async goToInstancesTab(): Promise<void> {
-    await this.goToTab('Instances', 'instances');
+  async expandInstancesAccordion(): Promise<Locator> {
+    const accordion = this.page.locator('app-instances-accordion');
+    await accordion.waitFor({ state: 'visible', timeout: 15000 });
+    const header = accordion.locator('button[aria-expanded]').first();
+    if ((await header.getAttribute('aria-expanded')) === 'false') {
+      await header.click();
+      await this.page.waitForTimeout(300); // expand animation
+    }
+    return accordion;
   }
 
   /**

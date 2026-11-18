@@ -1,10 +1,6 @@
 import { Injectable, Signal, computed, inject } from '@angular/core';
-import { toObservable } from '@angular/core/rxjs-interop';
-import { Observable } from 'rxjs';
-import { map } from 'rxjs/operators';
 
 import { EndpointsDataService } from '../../../../store/src/services/endpoints-data.service';
-import { APIResource, EntityInfo } from '../../../../store/src/types/api.types';
 import { EndpointModel, withConnectingOverlay } from '../../../../store/src/types/endpoint.types';
 
 @Injectable({
@@ -17,11 +13,9 @@ export class CloudFoundryService {
   // signal is the authoritative source.
   private endpointsData = inject(EndpointsDataService);
 
-  // Signal form of the CF endpoint set. Callers that need to read a list at a
-  // known point in time — rather than react to it — must use these: the
-  // observables below are driven by toObservable(), which republishes on the
-  // next effect flush, so reading one immediately after
-  // EndpointsDataService.whenReady() still sees the pre-hydration value.
+  // The CF endpoint set as signals: read one at a known point in time, such
+  // as right after EndpointsDataService.whenReady(), or react to it in a
+  // computed or template.
   readonly cfEndpoints: Signal<EndpointModel[]> = computed(() =>
     this.endpointsData.endpointsList().filter(e => e.cnsi_type === 'cf')
   );
@@ -51,23 +45,7 @@ export class CloudFoundryService {
     })
   );
 
-  hasRegisteredCFEndpoints$: Observable<boolean>;
-  hasConnectedCFEndpoints$: Observable<boolean>;
-  connectedCFEndpoints$: Observable<EndpointModel[]>;
-  cFEndpoints$: Observable<EndpointModel[]>;
-  waitForAppEntity$!: Observable<EntityInfo<APIResource>>;
-
-  constructor() {
-    this.cFEndpoints$ = toObservable(this.cfEndpoints);
-    this.connectedCFEndpoints$ = toObservable(this.connectedCFEndpoints);
-
-    this.hasConnectedCFEndpoints$ = this.connectedCFEndpoints$.pipe(
-      map(endpoints => !!endpoints.length)
-    );
-
-    this.hasRegisteredCFEndpoints$ = this.cFEndpoints$.pipe(
-      map(endpoints => !!endpoints.length)
-    );
-  }
+  readonly hasRegisteredCFEndpoints: Signal<boolean> = computed(() => this.cfEndpoints().length > 0);
+  readonly hasConnectedCFEndpoints: Signal<boolean> = computed(() => this.connectedCFEndpoints().length > 0);
 }
 

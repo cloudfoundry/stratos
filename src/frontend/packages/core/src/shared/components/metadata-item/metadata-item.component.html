@@ -1,27 +1,31 @@
 <div class="metadata-item">
-  @if (icon && !tooltip) {
-    <app-custom-icon class="metadata-item__icon" [fontSet]="iconFont" [ngClass]="{'metadata-item__icon_spacer': (icon === '-')}">{{ icon }}</app-custom-icon>
+  @if (icon() && !tooltip()) {
+    <app-custom-icon class="metadata-item__icon" [fontSet]="iconFont()" [ngClass]="{'metadata-item__icon_spacer': (icon() === '-')}">{{ icon() }}</app-custom-icon>
   }
-  @if (icon && tooltip) {
-    <app-custom-icon matTooltip="{{ tooltip }}" [fontSet]="iconFont" class="metadata-item__icon" [ngClass]="{'metadata-item__icon_spacer': (icon === '-')}">{{ icon }}</app-custom-icon>
+  @if (icon() && tooltip()) {
+    <app-custom-icon matTooltip="{{ tooltip() }}" [ariaLabel]="tooltip()" [fontSet]="iconFont()" class="metadata-item__icon" [ngClass]="{'metadata-item__icon_spacer': (icon() === '-')}">{{ icon() }}</app-custom-icon>
   }
   <div class="metadata-item__content" [ngClass]="{'metadata-item__content-label-only': metadataValue.childNodes.length === 0}">
-    @if (label) {
+    @if (label()) {
       <div [ngClass]="{'metadata-item__label-only': metadataValue.childNodes.length === 0}" class="metadata-item__label">
-        <span>{{ label }}</span>
-        @if (clipboardValue) {
+        <span><app-abbr-text [text]="label()" /></span>
+        @if (clipboardValue()) {
           <!-- Inline copy glyph: sits next to the label like a textual
                trailing character. nbsp gives breathing room without using
                flex gap (which would re-introduce a separate baseline). -->
           <span class="metadata-item__copy-spacer">&nbsp;&nbsp;</span>
+          <!-- Says how the copy went: the glyph's change is not spoken.
+               There before the copy, so the change is announced. -->
+          <span class="sr-only" aria-live="polite">{{ copyState() === 'copied' ? 'Copied to clipboard' : copyState() === 'failed' ? 'Copy failed' : '' }}</span>
           <span
             class="material-icons metadata-item__copy"
             role="button"
             tabindex="0"
-            [title]="copied() ? 'Copied' : 'Copy to clipboard'"
+            [title]="copyState() === 'copied' ? 'Copied' : 'Copy to clipboard'"
+            [attr.aria-label]="copyState() === 'copied' ? 'Copied' : 'Copy to clipboard'"
             (click)="copyToClipboard()"
             (keydown.enter)="copyToClipboard()"
-            (keydown.space)="copyToClipboard(); $event.preventDefault()">{{ copied() ? 'check_circle' : 'content_copy' }}</span>
+            (keydown.space)="copyToClipboard(); $event.preventDefault()">{{ copyState() === 'copied' ? 'check_circle' : 'content_copy' }}</span>
         }
       </div>
     }
@@ -29,12 +33,12 @@
       <div #metadataValue>
         <ng-content></ng-content>
       </div>
-      @if (!edit) {
+      @if (!edit()) {
         <div>
           <ng-content select="[view]"></ng-content>
         </div>
       }
-      @if (edit) {
+      @if (edit()) {
         <div>
           <ng-content select="[edit]"></ng-content>
         </div>

@@ -31,13 +31,15 @@ export class KubeConfigTableUserSelectComponent extends TableCellCustom<KubeConf
   }
 
   ngOnInit() {
-    this.selected = this.row._user || '';
-    this.hasUser = this.row._users.length > 0;
+    const row = this.row();
+    this.selected = row._user || '';
+    this.hasUser = row._users.length > 0;
   }
 
   valueChanged(value: string): void {
-    this.row._user = value;
-    this.helper.update(this.row);
+    const row = this.row();
+    row._user = value;
+    this.helper.update(row);
   }
 
 }

@@ -49,6 +49,7 @@ if (typeof (window as any).monaco === 'undefined') {
     dispose: () => { },
     onDidChangeModelContent: (callback: any) => ({ dispose: () => { } }),
     onDidBlurEditorText: (callback: any) => ({ dispose: () => { } }),
+    onDidFocusEditorText: (callback: any) => ({ dispose: () => { } }),
     setModel: (model: any) => { },
     getModel: () => ({}),
   };
@@ -60,7 +61,12 @@ if (typeof (window as any).monaco === 'undefined') {
       createModel: () => ({}),
       setModelLanguage: () => { },
       setTheme: () => { },
+      addKeybindingRules: () => ({ dispose: () => { } }),
+      registerCommand: () => ({ dispose: () => { } }),
+      getEditors: () => [],
     },
+    KeyMod: { CtrlCmd: 2048, Shift: 1024, WinCtrl: 256 },
+    KeyCode: { KeyM: 43 },
     Uri: {
       parse: (uri: string) => ({ toString: () => uri }),
     },

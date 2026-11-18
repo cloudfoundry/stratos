@@ -1,6 +1,7 @@
 import { Injector, NgModule, inject } from '@angular/core';
 
 import { EntityCatalogModule } from '../../store/src/entity-catalog.module';
+import { CfAutoscalerModule } from './cf-autoscaler.module';
 import { setAutoscalerHelperInjector } from './core/autoscaler-helpers/autoscaler-available';
 import { generateASEntities } from './store/autoscaler-entity-generator';
 
@@ -17,6 +18,8 @@ import { generateASEntities } from './store/autoscaler-entity-generator';
 @NgModule({
   imports: [
     EntityCatalogModule.forFeature(generateASEntities),
+    // Loads the tab component, whose decorator registers the Autoscale tab
+    CfAutoscalerModule,
   ],
 })
 export class CfAutoscalerPackageModule {

@@ -1,6 +1,4 @@
-import { AsyncPipe } from '@angular/common';
-import {Component, inject, ChangeDetectionStrategy } from '@angular/core';
-import { Subject } from 'rxjs';
+import { Component, inject, ChangeDetectionStrategy, signal } from '@angular/core';
 
 import { PageSubNavComponent } from '../../../../../core/src/shared/components/page-sub-nav/page-sub-nav.component';
 import { NoContentMessageComponent } from '../../../../../core/src/shared/components/no-content-message/no-content-message.component';
@@ -20,7 +18,6 @@ selector: 'app-kubernetes-namespace-analysis-report-tab',
   changeDetection: ChangeDetectionStrategy.OnPush,
   standalone: true,
   imports: [
-    AsyncPipe,
     PageSubNavComponent,
     AnalysisReportRunnerComponent,
     AnalysisReportSelectorComponent,
@@ -36,7 +33,7 @@ selector: 'app-kubernetes-namespace-analysis-report-tab',
 })
 export class KubernetesNamespaceAnalysisReportComponent {
 
-  public report$ = new Subject<AnalysisReport | null>();
+  public readonly report = signal<AnalysisReport | null>(null);
 
   path: string;
 
@@ -58,7 +55,6 @@ export class KubernetesNamespaceAnalysisReportComponent {
 
     this.endpointID = this.endpointService.kubeGuid;
     this.path = `${this.kubeNamespaceService.namespaceName}`;
-    this.report$.next(null);
 
     this.breadcrumbs = [
       { value: 'Analysis' },
@@ -72,7 +68,7 @@ export class KubernetesNamespaceAnalysisReportComponent {
     if (report?.id !== this.currentReport) {
       this.currentReport = report?.id || null;
       if (report?.id) {
-        this.analyzerService.getByID(this.endpointID, report.id).subscribe((r: AnalysisReport) => this.report$.next(r));
+        this.analyzerService.getByID(this.endpointID, report.id).subscribe((r: AnalysisReport) => this.report.set(r));
       }
     }
   }

@@ -1,4 +1,4 @@
-import { ChangeDetectionStrategy, Component, Input} from '@angular/core';
+import { ChangeDetectionStrategy, Component, input, linkedSignal } from '@angular/core';
 
 interface ResourceAlert {
   namespace?: string;
@@ -21,17 +21,18 @@ changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class ResourceAlertViewComponent {
 
-  alertInfo?: ResourceAlertGroup[];
+  // Either a list of alerts or an object that holds one in `alerts`.
+  readonly alerts = input<any>();
 
-  @Input()
-  set alerts(data: any) {
-    if (data) {
-      const alerts = data.alerts ? data.alerts : data;
-      this.alertInfo = this.normalize(alerts);
-    }
-  }
+  // The alerts grouped by resource. Alerts that go back to empty keep the last groups.
+  readonly alertInfo = linkedSignal<any, ResourceAlertGroup[] | undefined>({
+    source: this.alerts,
+    computation: (data, previous) => data
+      ? this.normalize(data.alerts ? data.alerts : data)
+      : previous?.value,
+  });
 
-  @Input() showHeader = true;
+  readonly showHeader = input(true);
 
   normalize(data: ResourceAlert[]): ResourceAlertGroup[] {
     // Normalize the alerts into groups

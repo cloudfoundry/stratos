@@ -1,7 +1,4 @@
-import { combineLatest, Observable, of } from 'rxjs';
-import { take, filter, map, switchMap } from 'rxjs/operators';
-import { toObservable } from '@angular/core/rxjs-interop';
-import { Injector } from '@angular/core';
+import { computed, Injector, Signal, untracked } from '@angular/core';
 import {
   EndpointsDataService,
   IStratosEndpointDefinition,
@@ -26,13 +23,11 @@ export function isCreateEndpointTile(
 ): tile is ITileConfig<ICreateEndpointTilesData> {
   return !!tile && !!tile.data && typeof tile.data.type === 'string' && typeof tile.data.parentType === 'string';
 }
-type ExpandedEndpoint<T = number> = {
+type ExpandedEndpoint = {
   current: number,
-  limit: T;
+  limit: number;
   definition: IStratosEndpointDefinition;
 };
-
-type ExpandedEndpoints<T = number> = ExpandedEndpoint<T>[];
 
 /**
  * Provides set of endpoint tiles that can power an `app-tile-selector` component
@@ -48,7 +43,7 @@ export abstract class BaseEndpointTileManager {
 
   private tileManager: TileConfigManager;
 
-  public tileSelectorConfig$: Observable<ITileConfig<ICreateEndpointTilesData>[]>;
+  public tileSelectorConfig: Signal<ITileConfig<ICreateEndpointTilesData>[]>;
 
   // strict: write-only selection model — only ever assigned via the
   // selectedTile setter (which navigates) and never read back before that.
@@ -101,89 +96,74 @@ export abstract class BaseEndpointTileManager {
   }
 
   constructor(
-    types$: Observable<StratosCatalogEndpointEntity[]>,
+    types: Signal<StratosCatalogEndpointEntity[]>,
     endpointsData?: EndpointsDataService,
     injector?: Injector,
   ) {
+    // W36-B Wave 3: source endpoints from EndpointsDataService. The Injector
+    // is required to keep the limit streams inside an injection context.
+    if (!endpointsData || !injector) {
+      throw new Error('BaseEndpointTileManager requires EndpointsDataService + Injector — supply them via the subclass super() call.');
+    }
     this.endpointsData = endpointsData;
     this.injector = injector;
     this.tileManager = new TileConfigManager();
-    // Need to filter the endpoint types on the tech preview flag
-    this.tileSelectorConfig$ = types$.pipe(
-      // Add additional metadata to each endpoint type
-      switchMap(endpointTypes => this.expandEndpointTypes(endpointTypes)),
-      take(1),
-      map(expandedEndpointTypes => {
-        // For each endpoint type...
-        return expandedEndpointTypes
-          // .. remove any that are over the types limit
-          .filter(expandedEndpointType => this.filterByEndpointCount(expandedEndpointType))
-          // .. sort
-          .sort((endpointA, endpointB) => this.sortEndpointTiles(endpointA.definition, endpointB.definition))
-          // .. map into tile format
-          .map(expandedEndpointType => {
-            const endpoint = expandedEndpointType.definition;
-            return this.tileManager.getNextTileConfig<ICreateEndpointTilesData>(
-              endpoint.label ?? endpoint.type ?? '',
-              endpoint.logoUrl ? {
-                location: endpoint.logoUrl
-              } : {
-                  matIcon: endpoint.icon ?? '',
-                  matIconFont: endpoint.iconFont
-                },
-              {
-                type: endpoint.type ?? '',
-                parentType: endpoint.parentType ?? '',
-                component: endpoint.registrationComponent }
-            );
-          });
-      }),
-    );
+
+    // A type's limit may be a signal that is null until it is known (it can
+    // wait on the session). A change of types drops the old limits.
+    const limited = computed(() => types().map(entity => ({ entity, limit: this.getEndpointRegisteredLimit(entity) })));
+    const expanded = computed<ExpandedEndpoint[]>(() => {
+      const endpoints = endpointsData.endpointsList();
+      const limits = limited().map(({ entity, limit }) => ({ entity, limit: limit() }));
+      // No tiles until every limit is known
+      if (limits.some(({ limit }) => limit === null)) {
+        return [];
+      }
+      return limits.map(({ entity, limit }) => {
+        const { type, subType } = entity.getTypeAndSubtype();
+        return {
+          current: endpoints.filter(em => em.cnsi_type === type && (em.sub_type || null) === subType).length,
+          limit: limit!,
+          definition: entity.definition
+        };
+      });
+    });
+    // The endpoints list changes often (status checks); the tiles only when
+    // the offered types do, so the selector keeps its tiles otherwise.
+    const sameTiles = (a: ITileConfig<ICreateEndpointTilesData>[], b: ITileConfig<ICreateEndpointTilesData>[]) =>
+      a.length === b.length && a.every((tile, i) => tile.data?.type === b[i].data?.type && tile.data?.parentType === b[i].data?.parentType);
+    this.tileSelectorConfig = computed(() => expanded()
+      // Remove any that are over the types limit
+      .filter(expandedEndpointType => this.filterByEndpointCount(expandedEndpointType))
+      .sort((endpointA, endpointB) => this.sortEndpointTiles(endpointA.definition, endpointB.definition))
+      // Map into tile format
+      .map(expandedEndpointType => {
+        const endpoint = expandedEndpointType.definition;
+        return this.tileManager.getNextTileConfig<ICreateEndpointTilesData>(
+          endpoint.label ?? endpoint.type ?? '',
+          endpoint.logoUrl ? {
+            location: endpoint.logoUrl
+          } : {
+              matIcon: endpoint.icon ?? '',
+              matIconFont: endpoint.iconFont
+            },
+          {
+            type: endpoint.type ?? '',
+            parentType: endpoint.parentType ?? '',
+            component: endpoint.registrationComponent }
+        );
+      }), { equal: sameTiles });
   }
 
-  protected expandEndpointTypes(endpointEntities: StratosCatalogEndpointEntity[]): Observable<ExpandedEndpoints> {
-    // W36-B Wave 3: source endpoints from EndpointsDataService when
-    // available. Subclasses created before this wave were
-    // single-instance per page; the service is providedIn: 'root', so
-    // any caller can access it. The Injector is required to keep
-    // toObservable() inside an injection context.
-    if (!this.endpointsData || !this.injector) {
-      throw new Error('BaseEndpointTileManager requires EndpointsDataService + Injector — supply them via the subclass super() call.');
-    }
-    return toObservable(this.endpointsData.endpointsList, { injector: this.injector }).pipe(
-      filter(endpoints => !!endpoints),
-      map(endpoints => {
-        const endpointsByType: ExpandedEndpoints<Observable<number>> = [];
-        return endpointEntities.reduce((res: ExpandedEndpoints<Observable<number>>, endpointEntity: StratosCatalogEndpointEntity) => {
-          const { type: endpointType, subType: endpointSubType } = endpointEntity.getTypeAndSubtype();
-          res.push({
-            current: endpoints.filter(em => em.cnsi_type === endpointType && em.sub_type === endpointSubType).length,
-            limit: this.getEndpointRegisteredLimit(endpointEntity),
-            definition: endpointEntity.definition
-          });
-          return res;
-        }, endpointsByType);
-      }),
-      switchMap(endpointsByType => combineLatest(Object.values(endpointsByType).map((type: ExpandedEndpoint<Observable<number>>) => type.limit.pipe(
-        map((limit: number) => ({
-          ...type,
-          limit
-        }))
-      )))),
-    );
-  }
-
-  private getEndpointRegisteredLimit(endpoint: StratosCatalogEndpointEntity): Observable<number> {
+  private getEndpointRegisteredLimit(endpoint: StratosCatalogEndpointEntity): Signal<number | null> {
     const registeredLimit = endpoint.definition.registeredLimit;
     if (!registeredLimit) {
-      return of(Number.MAX_SAFE_INTEGER);
+      return computed(() => Number.MAX_SAFE_INTEGER);
     }
-    // `injector` is guaranteed set here: expandEndpointTypes() throws
-    // without it before any tile (and thus any limit) is evaluated.
-    // registeredLimit is typed as a factory function; it returns either a
-    // raw number or an Observable<number>, both handled below.
-    const res = registeredLimit(this.injector!);
-    return typeof res === 'number' ? of(res) : res;
+    // registeredLimit is a factory function; it returns a number or a signal
+    // of one. Calling it is not a read of anything the tiles depend on.
+    const res = untracked(() => registeredLimit(this.injector!));
+    return typeof res === 'number' ? computed(() => res) : res;
   }
 
   private filterByEndpointCount(endpointType: ExpandedEndpoint): boolean {

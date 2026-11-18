@@ -1,16 +1,31 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
-import { Component, NO_ERRORS_SCHEMA, provideZonelessChangeDetection } from '@angular/core';
+import { Component, NO_ERRORS_SCHEMA, input, provideZonelessChangeDetection, signal } from '@angular/core';
 import { NoopAnimationsModule } from '@angular/platform-browser/animations';
 import { RouterTestingModule } from '@angular/router/testing';
 import { provideHttpClient } from '@angular/common/http';
 import { provideHttpClientTesting } from '@angular/common/http/testing';
 import { describe, it, expect, beforeEach, afterEach, vi } from 'vitest';
-import { of } from 'rxjs';
-import { EndpointModel, UserFavoriteManager, UserFavorite, IEndpointFavMetadata } from '@stratosui/store';
+import { EndpointModel, UserFavoriteManager, UserFavorite, IEndpointFavMetadata, entityCatalog } from '@stratosui/store';
 import { createBasicStoreModule, STORE_TEST_PROVIDERS } from '@stratosui/store/testing';
 import { SidePanelService } from '@stratosui/core';
 import { CoreTestingModule } from '@test-framework/core-test.modules';
+import { HomePageCardLayout } from '../../home.types';
 import { HomePageEndpointCardComponent } from './home-page-endpoint-card.component';
+
+// Stands in for an endpoint type's home card.
+@Component({ selector: 'app-mock-card', template: '', standalone: true })
+class MockCardComponent {
+  readonly endpoint = input<any>();
+  readonly layout = input<any>();
+}
+
+const mockEntity = {
+  definition: {
+    homeCard: {
+      component: () => Promise.resolve(MockCardComponent),
+    },
+  },
+};
 
 describe('HomePageEndpointCardComponent', () => {
   let component: HomePageEndpointCardComponent;
@@ -68,13 +83,13 @@ describe('HomePageEndpointCardComponent', () => {
 
     // Mock UserFavoriteManager methods used in ngOnInit
     vi.spyOn(userFavoriteManager, 'endpointHasEntitiesThatCanFavorite').mockReturnValue(false);
-    vi.spyOn(userFavoriteManager, 'getFavoritesForEndpoint').mockReturnValue(of([]));
+    vi.spyOn(userFavoriteManager, 'favoritesForEndpoint').mockReturnValue(signal([]));
     vi.spyOn(userFavoriteManager, 'getFavoriteEndpointFromEntity').mockReturnValue(mockFavorite as any);
 
     // Set required input
-    fixture.componentInstance.endpoint = mockEndpoint;
+    fixture.componentRef.setInput('endpoint', mockEndpoint);
 
-    fixture.detectChanges();
+    await fixture.whenStable();
   });
 
   afterEach(() => {
@@ -106,7 +121,7 @@ describe('HomePageEndpointCardComponent', () => {
   });
 
   it('does not present a connected endpoint as disconnected', () => {
-    component.endpoint = { ...component.endpoint, connectionStatus: 'connected' };
+    fixture.componentRef.setInput('endpoint', { ...component.endpoint(), connectionStatus: 'connected' });
     expect(component.disconnected).toBe(false);
   });
 
@@ -116,47 +131,133 @@ describe('HomePageEndpointCardComponent', () => {
     // again here from token_expiry, so an expired token is represented
     // directly as connectionStatus: 'expired' rather than the old
     // 'connected' + stale-token_expiry combination.
-    component.endpoint = { ...component.endpoint, connectionStatus: 'expired', token_expiry: 1 };
+    fixture.componentRef.setInput('endpoint', { ...component.endpoint(), connectionStatus: 'expired', token_expiry: 1 });
     expect(component.disconnected).toBe(true);
   });
 
   it('ignores a future token expiry', () => {
-    component.endpoint = { ...component.endpoint, connectionStatus: 'connected', token_expiry: Math.floor(Date.now() / 1000) + 3600 };
+    fixture.componentRef.setInput('endpoint', { ...component.endpoint(), connectionStatus: 'connected', token_expiry: Math.floor(Date.now() / 1000) + 3600 });
     expect(component.disconnected).toBe(false);
   });
 
   it('does not create the card twice when the endpoint input rebinds during load', () => {
     const spy = vi.spyOn(component, 'createCard').mockResolvedValue(undefined as any);
-    component.endpoint = { ...component.endpoint, connectionStatus: 'connected' };
+    fixture.componentRef.setInput('endpoint', { ...component.endpoint(), connectionStatus: 'connected' });
     // Simulate: rebind fires while ngAfterViewInit's create is still awaiting
-    component.ngOnChanges({ endpoint: { currentValue: component.endpoint } } as any);
+    component.ngOnChanges({ endpoint: { currentValue: component.endpoint() } } as any);
     component.ngAfterViewInit();
-    component.ngOnChanges({ endpoint: { currentValue: component.endpoint } } as any);
+    component.ngOnChanges({ endpoint: { currentValue: component.endpoint() } } as any);
     expect(spy).toHaveBeenCalledTimes(1);
   });
 
   it('treats an expired access token as alive when jetstream can refresh it', () => {
-    component.endpoint = { ...component.endpoint, connectionStatus: 'connected', token_expiry: 1, token_renewable: true };
+    fixture.componentRef.setInput('endpoint', { ...component.endpoint(), connectionStatus: 'connected', token_expiry: 1, token_renewable: true });
     expect(component.disconnected).toBe(false);
   });
 
   it('should load component from homeCard.component() when endpoint entity provided', async () => {
-    @Component({ selector: 'app-mock-card', template: '', standalone: true })
-    class MockCardComponent {
-      endpoint: any;
-      layout: any;
-    }
-
-    const mockEntity = {
-      definition: {
-        homeCard: {
-          component: () => Promise.resolve(MockCardComponent),
-        },
-      },
-    };
-
     await component.createCard(mockEntity);
     expect(component['ref']).toBeTruthy();
     expect(component['ref'].instance).toBeInstanceOf(MockCardComponent);
+    // The host hands the card its endpoint through the card's input.
+    expect((component['ref'].instance as unknown as MockCardComponent).endpoint()).toBe(component.endpoint());
+  });
+
+  it('hands the card the layout the home page sets, and each later change', async () => {
+    const cardLayout = () => (component['ref'].instance as unknown as MockCardComponent).layout();
+    fixture.componentRef.setInput('layout', new HomePageCardLayout(2, 1));
+    await fixture.whenStable();
+    await component.createCard(mockEntity);
+    expect(cardLayout()).toEqual(new HomePageCardLayout(2, 1));
+
+    fixture.componentRef.setInput('layout', new HomePageCardLayout(3, 2));
+    await fixture.whenStable();
+    expect(cardLayout()).toEqual(new HomePageCardLayout(3, 2));
+    expect(component.layoutSignal()).toEqual(new HomePageCardLayout(3, 2));
+
+    // Null (the persisted layout has not hydrated) keeps the last layout.
+    fixture.componentRef.setInput('layout', null);
+    await fixture.whenStable();
+    expect(cardLayout()).toEqual(new HomePageCardLayout(3, 2));
+  });
+
+  // With nothing to favorite and no shortcuts, the links panel has nothing to
+  // list, and the card uses the whole width. The width was set from a timer
+  // and only showed with the next unrelated repaint.
+  it('drops the links panel once it is known there is nothing to list', async () => {
+    fixture.componentRef.setInput('layout', new HomePageCardLayout(1, 1));
+    await fixture.whenStable();
+    await new Promise(resolve => setTimeout(resolve, 20));
+    await fixture.whenStable();
+    expect(fixture.nativeElement.querySelector('.sidebar-panel')).toBeNull();
+  });
+
+  // The "N more ..." link counts the favorites that do not fit the layout,
+  // and the shortcuts move to the main panel once many favorites show.
+  it('counts the favorites that do not fit, and places the shortcuts by how many show', async () => {
+    const favs = signal<unknown[]>([]);
+    vi.spyOn(userFavoriteManager, 'favoritesForEndpoint').mockReturnValue(favs as never);
+    vi.spyOn(userFavoriteManager, 'endpointHasEntitiesThatCanFavorite').mockReturnValue(true);
+    const card = TestBed.createComponent(HomePageEndpointCardComponent);
+    card.componentRef.setInput('endpoint', { cnsi_type: 'metrics', guid: 'g', name: 'n' } as EndpointModel);
+    card.componentRef.setInput('layout', new HomePageCardLayout(1, 1));
+    await card.whenStable();
+    const c = card.componentInstance;
+    expect(c.hiddenFavorites()).toBe(-15);
+    expect(c.showShortcutsOnSide()).toBe(true);
+
+    favs.set(Array.from({ length: 20 }, (_, i) => ({
+      id: i, getPrettyTypeName: () => 'App', getLink: () => '/x', getIcon: () => 'apps', metadata: { name: `app-${i}` },
+    })));
+    await card.whenStable();
+    expect(c.hiddenFavorites()).toBe(5);
+    expect(c.links()!.favs.length).toBe(20);
+    expect(c.showShortcutsOnSide()).toBe(false);
+
+    card.componentRef.setInput('layout', new HomePageCardLayout(1, 2));
+    await card.whenStable();
+    expect(c.hiddenFavorites()).toBe(15);
+    expect(c.links()!.favs.length).toBe(5);
+    expect(c.showShortcutsOnSide()).toBe(true);
+    card.destroy();
+  });
+
+  // A type with no image file, such as the autoscaler, has only a font icon.
+  it('draws the font icon when the type has no image', async () => {
+    const getEndpoint = vi.spyOn(entityCatalog, 'getEndpoint').mockReturnValue({
+      definition: { label: 'Test type', unConnectable: true, logoUrl: '', icon: 'meter', iconFont: 'stratos-icons' },
+    } as never);
+    const card = TestBed.createComponent(HomePageEndpointCardComponent);
+    card.componentRef.setInput('endpoint', { cnsi_type: 'test-type', guid: 'g', name: 'n' } as EndpointModel);
+    await card.whenStable();
+
+    const icon = card.nativeElement.querySelector('.card-header i.stratos-icons');
+    expect(icon?.textContent?.trim()).toBe('meter');
+    expect(card.nativeElement.querySelector('.card-header img')).toBeNull();
+    // The box keeps the title in line with its neighbours, whose images are 48px.
+    expect(icon.closest('app-custom-icon').classList).toContain('text-[48px]');
+    expect(icon.closest('app-custom-icon').parentElement.classList).toContain('w-12');
+    card.destroy();
+    getEndpoint.mockRestore();
+  });
+
+  // The header opens the endpoint's page: a link, so the keyboard reaches it
+  // (#4168, WCAG 2.1.1), not a div with a routerLink.
+  it('makes the header of a reachable endpoint a link to its page', async () => {
+    const getEndpoint = vi.spyOn(entityCatalog, 'getEndpoint').mockReturnValue({
+      definition: { label: 'Test type', unConnectable: true, logoUrl: '', icon: 'meter', iconFont: 'stratos-icons' },
+    } as never);
+    const getFavorite = vi.spyOn(userFavoriteManager, 'getFavoriteEndpointFromEntity')
+      .mockReturnValue({ getLink: () => '/endpoints/g' } as never);
+    const card = TestBed.createComponent(HomePageEndpointCardComponent);
+    card.componentRef.setInput('endpoint', { cnsi_type: 'test-type', guid: 'g', name: 'Lab CF' } as EndpointModel);
+    await card.whenStable();
+
+    const link = card.nativeElement.querySelector('.card-header a') as HTMLAnchorElement;
+    expect(link?.getAttribute('href')).toBe('/endpoints/g');
+    expect(link.textContent).toContain('Lab CF');
+    card.destroy();
+    getFavorite.mockRestore();
+    getEndpoint.mockRestore();
   });
 });

@@ -50,13 +50,6 @@
     cursor: help;
     display: flex;
   }
-  &__type {
-    $type-height: 20px;
-    font-size: 13px;
-    line-height: $type-height;
-    margin-top: -($type-height - 2px);
-    opacity: 0.6;
-  }
   &__panel {
     display: flex;
     :first-child {
@@ -154,4 +147,11 @@
 
 .sidebar-muted-text {
   color: var(--content-muted);
+}
+
+// Keyboard focus on the header link. A plain outline: the Tailwind ring
+// utilities compute to a transparent box-shadow in this build (#4167).
+.card-header-link:focus-visible {
+  outline: 2px solid var(--color-primary);
+  outline-offset: 2px;
 }

@@ -1,6 +1,4 @@
 import { Injectable, Signal, signal } from '@angular/core';
-import { toObservable } from '@angular/core/rxjs-interop';
-import { Observable } from 'rxjs';
 
 import { IRecentlyVisitedEntity, IRecentlyVisitedState } from '../types/recently-visited.types';
 
@@ -24,8 +22,7 @@ const FLUSH_RECENT_COUNT = 150;
  *  - `pruneToConnected`     ← `PruneRecentsToConnectedAction`    (keep matching)
  *  - `removeForDeletedEntity` ← `RemoveRecentEntityAction`       (drop by guid)
  *
- * Read surface mirrors `recentlyVisitedSelector` (the raw map); `state$`
- * preserves the legacy `store.select(recentlyVisitedSelector)` pipelines.
+ * Read surface mirrors `recentlyVisitedSelector` (the raw map).
  */
 @Injectable({ providedIn: 'root' })
 export class RecentlyVisitedDataService {
@@ -33,9 +30,6 @@ export class RecentlyVisitedDataService {
 
   /** The recents map, keyed by favorite guid. */
   readonly state: Signal<IRecentlyVisitedState> = this._state.asReadonly();
-
-  /** Observable mirror for legacy rxjs consumers (page name-sync, recents list). */
-  readonly state$: Observable<IRecentlyVisitedState> = toObservable(this._state);
 
   /** An entity was 'hit' — update the access date or add it; trims old data. */
   add(recentlyVisited: IRecentlyVisitedEntity): void {

@@ -1,8 +1,6 @@
 import { Component, inject, ChangeDetectionStrategy, OnInit, computed } from '@angular/core';
-import { CommonModule } from '@angular/common';
-import { toSignal } from '@angular/core/rxjs-interop';
 
-import { TailwindDialogService, MetadataItemComponent } from '@stratosui/core';
+import { TailwindDialogService, MetadataItemComponent, UrlPartsPipe } from '@stratosui/core';
 import { AutoscalerInfoDataService } from '@stratosui/cf-autoscaler';
 import { CloudFoundryEndpointService } from '../../../../features/cf/services/cloud-foundry-endpoint.service';
 import {
@@ -11,13 +9,10 @@ import {
 import { UserInviteConfigureService, UserInviteService } from '../../../../features/cf/user-invites/user-invite.service';
 
 /**
- * CF endpoint summary card. The data path under `cfEndpointService.info$`
- * already hits the V3-native `/pp/v1/cf/info/{cnsi}` handler — the wire
- * shape is StratosCFInfo (snake_case for legacy compat) and is sourced
- * from /v3/info + the unversioned API root. This component reads the
- * already-V3 data through signal bridges instead of the legacy observable
- * plumbing, so the Summary card renders directly off the signal graph
- * without the ngrx EntityService middle-layer in the template.
+ * CF endpoint summary card. `cfEndpointService.info` is the
+ * CfInfoDataService signal over the V3-native `/pp/v1/cf/info/{cnsi}`
+ * handler — the wire shape is StratosCFInfo (snake_case, flat, no entity
+ * envelope), sourced from /v3/info + the unversioned API root.
  */
 @Component({
   selector: 'app-card-cf-info',
@@ -25,8 +20,8 @@ import { UserInviteConfigureService, UserInviteService } from '../../../../featu
   changeDetection: ChangeDetectionStrategy.OnPush,
   standalone: true,
   imports: [
-    CommonModule,
     MetadataItemComponent,
+    UrlPartsPipe,
   ],
 })
 export class CardCfInfoComponent implements OnInit {
@@ -36,16 +31,11 @@ export class CardCfInfoComponent implements OnInit {
   private dialog = inject(TailwindDialogService);
   private autoscalerInfoData = inject(AutoscalerInfoDataService);
 
-  // Signal bridges over the existing observables. The data they carry is
-  // already V3-native — `cfEndpointService.info$` is a toObservable() bridge
-  // over CfInfoDataService's signal, which fetches /pp/v1/cf/info/{cnsi}
-  // directly (W-e dropped the ngrx GetCFInfo effect intermediary). These
-  // are template-side signal reads, not a data-path migration.
   readonly endpointInfo = this.cfEndpointService.endpoint;
-  readonly info = toSignal(this.cfEndpointService.info$, { initialValue: null as any });
-  readonly hasSSHAccess = toSignal(this.cfEndpointService.hasSSHAccess$, { initialValue: false });
-  readonly canConfigureInvites = toSignal(this.userInviteService.canConfigure$, { initialValue: false });
-  readonly invitesConfigured = toSignal(this.userInviteService.configured$, { initialValue: false });
+  readonly info = this.cfEndpointService.info;
+  readonly hasSSHAccess = this.cfEndpointService.hasSSHAccess;
+  readonly canConfigureInvites = this.userInviteService.canConfigure;
+  readonly invitesConfigured = this.userInviteService.configured;
 
   // Autoscaler version comes from the cf-autoscaler signal-native data
   // service. Wave-3 (A-effects-cleanup) replaced the legacy
@@ -68,7 +58,7 @@ export class CardCfInfoComponent implements OnInit {
 
   /** Endpoint description, falling back to '-' when absent. */
   readonly description = computed((): string => {
-    const metadata = this.info()?.entity?.entity;
+    const metadata = this.info();
     if (!metadata) return '-';
     if (!metadata.description) return '-';
     return metadata.description + (metadata.build ? ` (${metadata.build})` : '');

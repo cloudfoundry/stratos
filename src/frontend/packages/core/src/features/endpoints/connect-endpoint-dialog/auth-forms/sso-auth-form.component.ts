@@ -1,4 +1,4 @@
-import { ChangeDetectionStrategy, Component, Input  } from '@angular/core';
+import { ChangeDetectionStrategy, Component, input } from '@angular/core';
 import { ReactiveFormsModule,FormGroup } from '@angular/forms';
 import { IAuthForm } from '@stratosui/store';
 
@@ -22,5 +22,5 @@ interface SsoAuthForm {
   changeDetection: ChangeDetectionStrategy.OnPush
 })
 export class SSOAuthFormComponent implements IAuthForm {
-  @Input() formGroup!: FormGroup<SsoAuthForm>;
+  readonly formGroup = input.required<FormGroup<SsoAuthForm>>();
 }

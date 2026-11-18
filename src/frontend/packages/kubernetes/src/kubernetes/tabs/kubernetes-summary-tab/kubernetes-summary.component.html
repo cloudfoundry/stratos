@@ -1,57 +1,63 @@
 <div>
   <app-page-sub-nav>
-    @if (kubeEndpointService.kubeDashboardConfigured$ | async) {
+    @if (dashboardConfigured()) {
       <button [routerLink]="dashboardLink" class="btn btn-primary">
-        <span class="material-icons">dashboard</span>
+        <span aria-hidden="true" class="material-icons">dashboard</span>
         <span class="ml-1">View Dashboard</span>
       </button>
     }
-    @if (kubeEndpointService.kubeTerminalEnabled$ | async) {
+    @if (kubeEndpointService.kubeTerminalEnabled()) {
       <button [routerLink]="kubeTerminalLink" class="btn btn-primary">
-        <span class="material-icons stratos-icons">terminal</span>
+        <span aria-hidden="true" class="material-icons stratos-icons">terminal</span>
         <span class="ml-1">Open Terminal</span>
       </button>
     }
   </app-page-sub-nav>
 
-  <app-loading-page [isLoading]="isLoading$" [text]="'Retrieving Kubernetes details'">
-    @if (endpointDetails$ | async; as details) {
+  <app-loading-page [isLoading]="isLoading()" [text]="'Retrieving Kubernetes details'">
+    @if (endpointDetails(); as details) {
       <app-entity-summary-title [imagePath]="details.imagePath ?? null"
         [title]="details.name" [subTitle]="details.label">
         <app-tile-grid class="max-w-[760px]">
           <app-tile-group class="tile-group-3-cols">
             <app-tile>
               <app-card-number-metric [textOnly]="true" link="/kubernetes/{{kubeEndpointService.baseKube.guid}}/nodes"
-                icon="apps" label="Nodes" labelSingular="Node" value="{{ nodeCount$ | async }}">
+                icon="apps" label="Nodes" labelSingular="Node" value="{{ nodeCount() }}">
               </app-card-number-metric>
             </app-tile>
             <app-tile>
               <app-card-number-metric [textOnly]="true"
                 link="/kubernetes/{{kubeEndpointService.baseKube.guid}}/namespaces" icon="language" label="Namespaces"
-                labelSingular="Node" value="{{ namespaceCount$ | async }}">
+                labelSingular="Namespace" value="{{ namespaceCount() }}">
               </app-card-number-metric>
             </app-tile>
             <app-tile>
-              <app-card-number-metric [textOnly]="true" link="/kubernetes/{{kubeEndpointService.baseKube.guid}}/pods"
-                icon="apps" label="Pods" labelSingular="Pod" value="{{ podCount$ | async }}">
+              <app-card-number-metric [textOnly]="true" link="/kubernetes/{{kubeEndpointService.baseKube.guid}}/resource/pod"
+                icon="apps" label="Pods" labelSingular="Pod" value="{{ podCount() }}">
               </app-card-number-metric>
             </app-tile>
           </app-tile-group>
         </app-tile-grid>
+        @if (failureReason(); as reason) {
+          <div data-test="cluster-load-failure" class="flex items-start gap-1.5 ml-3 mb-2 text-sm text-danger-shade-700">
+            <span aria-hidden="true" class="material-icons text-base leading-5">error_outline</span>
+            <span class="break-words">Failed to load some cluster details: {{ reason }}</span>
+          </div>
+        }
         <div class="flex flex-row ml-3">
           <div class="mr-5">
             <app-metadata-item label="Node version">
-              {{ (kubeNodeVersions$ | async) }}
+              {{ kubeNodeVersions() }}
             </app-metadata-item>
           </div>
-          @if (kubeEndpointService.kubeDashboardEnabled$ | async) {
+          @if (kubeEndpointService.kubeDashboardEnabled()) {
             <div class="mr-5">
               <app-metadata-item label="Kubernetes Dashboard">
                 <div class="flex items-baseline">
-                  @if (kubeEndpointService.kubeDashboardStatus$ | async) {
-                    <div class="mr-2.5">{{ (kubeEndpointService.kubeDashboardLabel$ | async) }}</div>
+                  @if (dashboardStatus()) {
+                    <div class="mr-2.5">{{ dashboardLabel() }}</div>
                   }
-                  @if (kubeEndpointService.kubeDashboardStatus$ | async) {
+                  @if (dashboardStatus()) {
                     <button class="btn btn-primary leading-normal m-0 min-w-0 p-0"
                     (click)="configureDashboard()">Configure</button>
                   }
@@ -61,13 +67,13 @@
           }
         </div>
         <!-- Show CaaSP metadata -->
-        @if (caaspData$ | async; as data) {
+        @if (caaspData(); as data) {
           <div class="flex flex-row ml-3">
             <div class="mr-5">
               <app-metadata-item label="CaaSP Version">
                 <div class="caasp-version">
                   <div>{{ data.version }}</div>@if (data.versionMismatch) {
-                  <span class="material-icons text-warning-shade-600" title="Nodes report multiple versions">warning</span>
+                  <span class="material-icons text-warning-shade-600" title="Nodes report multiple versions" role="img" aria-label="Nodes report multiple versions">warning</span>
                 }
               </div>
             </app-metadata-item>
@@ -87,10 +93,11 @@
           </div>
         </div>
       }
+      @if (!nodesFailed()) {
       <div class="m-2.5">
         <div>
           <div class="inline-block pr-5 pb-5 w-[250px]">
-            @if (podCapacity$ | async; as podCapacity) {
+            @if (!podsFailed() && podCapacity(); as podCapacity) {
               <div class="card">
                 <app-simple-usage-chart chartTitle="Pod Usage" [data]="podCapacity" height="{{chartHeight}}">
                 </app-simple-usage-chart>
@@ -98,7 +105,7 @@
             }
           </div>
           <div class="inline-block pr-5 pb-5 w-[250px]">
-            @if (diskPressure$ | async; as diskPressure) {
+            @if (diskPressure(); as diskPressure) {
               <div class="card">
                 <app-simple-usage-chart [thresholds]="pressureChartThresholds" chartTitle="Nodes With Disk Pressure"
                   [data]="diskPressure" height="{{chartHeight}}">
@@ -107,7 +114,7 @@
             }
           </div>
           <div class="inline-block pr-5 pb-5 w-[250px]">
-            @if (memoryPressure$ | async; as memoryPressure) {
+            @if (memoryPressure(); as memoryPressure) {
               <div class="card">
                 <app-simple-usage-chart [thresholds]="pressureChartThresholds" chartTitle="Nodes With Memory Pressure"
                   [data]="memoryPressure" height="{{chartHeight}}">
@@ -116,7 +123,7 @@
             }
           </div>
           <div class="inline-block pr-5 pb-5 w-[250px]">
-            @if (outOfDisk$ | async; as outOfDisk) {
+            @if (outOfDisk(); as outOfDisk) {
               <div class="card">
                 <app-simple-usage-chart chartTitle="Nodes Out Of Disk" [thresholds]="criticalPressureChartThresholds"
                   [data]="outOfDisk" height="{{chartHeight}}">
@@ -125,7 +132,7 @@
             }
           </div>
           <div class="inline-block pr-5 pb-5 w-[250px]">
-            @if (nodesReady$ | async; as nodesReady) {
+            @if (nodesReady(); as nodesReady) {
               <div class="card">
                 <app-simple-usage-chart [thresholds]="nominalPressureChartThresholds" chartTitle="Nodes Ready"
                   [data]="nodesReady" height="{{chartHeight}}">
@@ -134,7 +141,7 @@
             }
           </div>
           <div class="inline-block pr-5 pb-5 w-[250px]">
-            @if (networkUnavailable$ | async; as networkUnavailable) {
+            @if (networkUnavailable(); as networkUnavailable) {
               @if (networkUnavailable.supported) {
                 <div class="card">
                   <app-simple-usage-chart [thresholds]="criticalPressureChartThresholdsInverted"
@@ -146,6 +153,7 @@
           </div>
         </div>
       </div>
+      }
     </app-entity-summary-title>
   }
 </app-loading-page>

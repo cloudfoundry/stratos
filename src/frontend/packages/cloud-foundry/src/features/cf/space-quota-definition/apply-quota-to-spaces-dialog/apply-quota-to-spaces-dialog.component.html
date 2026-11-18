@@ -3,17 +3,17 @@
     Apply quota to spaces
   </h2>
   @if (data.quotaName) {
-    <div class="text-sm opacity-60 mb-3">
+    <div class="text-sm text-content-muted mb-3">
       Select the spaces that should use the <strong>{{ data.quotaName }}</strong> space quota.
     </div>
   }
 
   @if (loading()) {
-    <div class="opacity-60 py-4">Loading spaces…</div>
+    <div class="text-content-muted py-4">Loading spaces…</div>
   } @else if (loadError()) {
-    <div class="text-red-600 py-4">{{ loadError() }}</div>
+    <div class="text-danger py-4">{{ loadError() }}</div>
   } @else if (spaces().length === 0) {
-    <div class="opacity-60 py-4">There are no spaces in this organization.</div>
+    <div class="text-content-muted py-4">There are no spaces in this organization.</div>
   } @else {
     <div class="max-h-[18rem] overflow-y-auto border rounded my-2">
       @for (space of spaces(); track space.guid) {
@@ -30,7 +30,7 @@
         </label>
       }
     </div>
-    <div class="text-sm opacity-60 mt-1">{{ selectedCount() }} selected</div>
+    <div class="text-sm text-content-muted mt-1">{{ selectedCount() }} selected</div>
   }
 
   <div class="flex justify-end gap-2 mt-4">

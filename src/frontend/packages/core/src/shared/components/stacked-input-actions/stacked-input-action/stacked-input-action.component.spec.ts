@@ -31,14 +31,42 @@ describe('StackedInputActionComponent', () => {
   beforeEach(() => {
     fixture = TestBed.createComponent(StackedInputActionComponent);
     component = fixture.componentInstance;
-    component.stateIn$ = observableOf({
+    fixture.componentRef.setInput('stateIn$', observableOf({
       key: 'string',
       result: StackedInputActionResult.OTHER_VALUES_UPDATED,
-    });
+    }));
     fixture.detectChanges();
   });
 
   it('should create', () => {
     expect(component).toBeTruthy();
+  });
+  // app-form-field shows a field's <app-error> text as its error line.
+  it('says the value is required once it is cleared', async () => {
+    const host: HTMLElement = fixture.nativeElement;
+    const input = host.querySelector<HTMLInputElement>('[data-test="stacked-input"]')!;
+    input.value = 'x';
+    input.dispatchEvent(new Event('input', { bubbles: true }));
+    input.value = '';
+    input.dispatchEvent(new Event('input', { bubbles: true }));
+    await fixture.whenStable();
+
+    const id = input.getAttribute('aria-errormessage');
+    expect(id && host.querySelector(`#${id}`)?.textContent?.trim()).toBe('Email is required');
+  });
+
+  // Remove was a bare icon: the mouse could click it, the keyboard could
+  // not reach it, and a screen reader heard nothing.
+  it('offers Remove as a named button that keyboard users can reach', async () => {
+    fixture.componentRef.setInput('showRemove', true);
+    await fixture.whenStable();
+    const remove = fixture.nativeElement.querySelector('[data-test="stacked-input-remove"]') as HTMLButtonElement;
+    expect(remove.tagName).toBe('BUTTON');
+    expect(remove.getAttribute('aria-label')).toBe('Remove');
+
+    const emitted = vi.fn();
+    component.remove.subscribe(emitted);
+    remove.click();
+    expect(emitted).toHaveBeenCalledTimes(1);
   });
 });

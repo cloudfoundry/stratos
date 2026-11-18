@@ -83,7 +83,16 @@ export interface CFDomain {
 export interface CFServiceInstance {
   guid: string;
   name: string;
-  type: 'managed' | 'user_provided';
+  type: 'managed' | 'user-provided';
+  last_operation?: {
+    type: string;
+    state: 'initial' | 'in progress' | 'succeeded' | 'failed';
+    description?: string;
+  };
+  // User-provided instances only.
+  tags?: string[];
+  syslog_drain_url?: string;
+  route_service_url?: string;
   relationships: {
     space: {
       data: {
@@ -102,6 +111,9 @@ export interface CreateAppParams {
   memory?: number;
   disk?: number;
   environmentVariables?: Record<string, string>;
+  // Override the app lifecycle. Defaults to buildpack (buildpacks/stack).
+  // Pass { type: 'docker', data: {} } to create a Docker-image app.
+  lifecycle?: { type: 'buildpack' | 'docker'; data?: Record<string, unknown> };
 }
 
 export interface CreateOrgParams {
@@ -214,6 +226,18 @@ export class CFApiHelper {
     return this.request.delete(url, this.proxyHeaders);
   }
 
+  /** True if GET url succeeds, false on 404; any other failure throws. */
+  private async exists(url: string): Promise<boolean> {
+    if (!this.cfApiBase) await this.init();
+    try {
+      await this.pget(url);
+      return true;
+    } catch (error) {
+      if (String(error).includes(' failed: 404 ')) return false;
+      throw error;
+    }
+  }
+
   // ============================================================================
   // Application Operations
   // ============================================================================
@@ -233,7 +257,7 @@ export class CFApiHelper {
           }
         }
       },
-      lifecycle: {
+      lifecycle: params.lifecycle ?? {
         type: 'buildpack',
         data: {
           buildpacks: params.buildpacks || [],
@@ -272,6 +296,11 @@ export class CFApiHelper {
   /**
    * Get application by GUID
    */
+  async appExists(appGuid: string): Promise<boolean> {
+    if (!this.cfApiBase) await this.init();
+    return this.exists(`${this.cfApiBase}/apps/${appGuid}`);
+  }
+
   async getApp(appGuid: string): Promise<CFApp> {
     if (!this.cfApiBase) await this.init();
     return await this.pget(`${this.cfApiBase}/apps/${appGuid}`);
@@ -347,6 +376,44 @@ export class CFApiHelper {
   }
 
   /**
+   * Read an app's user-provided environment variables. CF API v3 returns them
+   * under `var` (they are a separate sub-resource, not echoed on app create).
+   */
+  async getAppEnvironment(appGuid: string): Promise<Record<string, string>> {
+    if (!this.cfApiBase) await this.init();
+    const resp = await this.pget(`${this.cfApiBase}/apps/${appGuid}/environment_variables`);
+    return resp?.var ?? {};
+  }
+
+  /**
+   * GUIDs of the routes currently mapped to an app
+   */
+  async getAppRouteGuids(appGuid: string): Promise<string[]> {
+    if (!this.cfApiBase) await this.init();
+    const resp = await this.pget(`${this.cfApiBase}/apps/${appGuid}/routes?per_page=5000`);
+    return (resp?.resources ?? []).map((r: { guid: string }) => r.guid);
+  }
+
+  /**
+   * Read a CF feature flag (e.g. `diego_docker`). Operators toggle these per
+   * foundation, so a spec exercising a flagged feature reads the target's
+   * actual setting rather than assuming it.
+   */
+  async isFeatureFlagEnabled(name: string): Promise<boolean> {
+    if (!this.cfApiBase) await this.init();
+    const resp = await this.pget(`${this.cfApiBase}/feature_flags/${name}`);
+    return resp?.enabled === true;
+  }
+
+  /**
+   * Set a CF feature flag (admin only). Callers restore the previous value.
+   */
+  async setFeatureFlag(name: string, enabled: boolean): Promise<void> {
+    if (!this.cfApiBase) await this.init();
+    await this.ppatch(`${this.cfApiBase}/feature_flags/${name}`, { enabled });
+  }
+
+  /**
    * Wait for app to reach desired state
    */
   async waitForAppState(appGuid: string, desiredState: 'STOPPED' | 'STARTED', timeoutMs: number = 60000): Promise<void> {
@@ -387,6 +454,14 @@ export class CFApiHelper {
     };
 
     return await this.ppost(`${this.cfApiBase}/organizations`, orgData);
+  }
+
+  /**
+   * Get the console name of this CF endpoint (as shown in the UI selects).
+   */
+  async getEndpointName(): Promise<string> {
+    const endpoints = await this.request.get('/api/v1/endpoints');
+    return endpoints.find((ep: any) => ep.guid === this.cfGuid)?.name || '';
   }
 
   /**
@@ -553,15 +628,21 @@ export class CFApiHelper {
   }
 
   /**
+   * Get a route's destinations (the apps it is mapped to).
+   */
+  async getRouteDestinations(routeGuid: string): Promise<Array<{ guid: string; app?: { guid: string } }>> {
+    if (!this.cfApiBase) await this.init();
+    const res = await this.pget(`${this.cfApiBase}/routes/${routeGuid}/destinations`);
+    return res.destinations || [];
+  }
+
+  /**
    * Unmap route from app
    */
   async unmapRoute(routeGuid: string, appGuid: string): Promise<void> {
-    if (!this.cfApiBase) await this.init();
-
     // The destination guid is not the app guid — look up the destination
     // that points at this app.
-    const res = await this.pget(`${this.cfApiBase}/routes/${routeGuid}/destinations`);
-    const dest = (res.destinations || []).find((d: any) => d.app?.guid === appGuid);
+    const dest = (await this.getRouteDestinations(routeGuid)).find(d => d.app?.guid === appGuid);
     if (!dest) return; // already unmapped
     await this.pdelete(`${this.cfApiBase}/routes/${routeGuid}/destinations/${dest.guid}`);
   }
@@ -572,6 +653,11 @@ export class CFApiHelper {
   async deleteRoute(routeGuid: string): Promise<void> {
     if (!this.cfApiBase) await this.init();
     await this.pdelete(`${this.cfApiBase}/routes/${routeGuid}`);
+  }
+
+  async routeExists(routeGuid: string): Promise<boolean> {
+    if (!this.cfApiBase) await this.init();
+    return this.exists(`${this.cfApiBase}/routes/${routeGuid}`);
   }
 
   // ============================================================================
@@ -594,12 +680,18 @@ export class CFApiHelper {
   /**
    * Create a user-provided service instance (no broker needed) and return its guid
    */
-  async createUserProvidedService(spaceGuid: string, name: string): Promise<string> {
+  async createUserProvidedService(spaceGuid: string, name: string, fields: {
+    credentials?: Record<string, unknown>;
+    tags?: string[];
+    syslog_drain_url?: string;
+    route_service_url?: string;
+  } = {}): Promise<string> {
     if (!this.cfApiBase) await this.init();
 
     const response = await this.ppost(`${this.cfApiBase}/service_instances`, {
       type: 'user-provided',
       name,
+      ...fields,
       relationships: {
         space: {
           data: {
@@ -622,6 +714,81 @@ export class CFApiHelper {
   async deleteServiceInstance(serviceInstanceGuid: string): Promise<void> {
     if (!this.cfApiBase) await this.init();
     await this.pdelete(`${this.cfApiBase}/service_instances/${serviceInstanceGuid}`);
+  }
+
+  /** The credentials CF holds for a user-provided instance. */
+  async getUserProvidedCredentials(serviceInstanceGuid: string): Promise<Record<string, unknown>> {
+    if (!this.cfApiBase) await this.init();
+    return this.pget(`${this.cfApiBase}/service_instances/${serviceInstanceGuid}/credentials`);
+  }
+
+  async serviceInstanceExists(serviceInstanceGuid: string): Promise<boolean> {
+    if (!this.cfApiBase) await this.init();
+    return this.exists(`${this.cfApiBase}/service_instances/${serviceInstanceGuid}`);
+  }
+
+  /** Guid of a service offering's plan visible in the space (planName, else the first), or null. */
+  async findServicePlanGuid(offeringName: string, spaceGuid: string, planName?: string): Promise<string | null> {
+    if (!this.cfApiBase) await this.init();
+    const byName = planName ? `&names=${encodeURIComponent(planName)}` : '';
+    const response = await this.pget(
+      `${this.cfApiBase}/service_plans?service_offering_names=${encodeURIComponent(offeringName)}&space_guids=${spaceGuid}${byName}`
+    );
+    return response.resources?.[0]?.guid ?? null;
+  }
+
+  /**
+   * Create a managed (brokered) service instance. CF answers 202 and creates
+   * it as a job: wait with findServiceInstanceByName until its last_operation
+   * succeeds.
+   */
+  async createManagedServiceInstance(spaceGuid: string, name: string, planGuid: string): Promise<void> {
+    if (!this.cfApiBase) await this.init();
+    await this.ppost(`${this.cfApiBase}/service_instances`, {
+      type: 'managed',
+      name,
+      relationships: {
+        space: { data: { guid: spaceGuid } },
+        service_plan: { data: { guid: planGuid } },
+      },
+      metadata: { labels: { 'stratos-e2e-test': 'true' } },
+    });
+  }
+
+  async findServiceOfferingGuid(name: string, spaceGuid: string): Promise<string | null> {
+    if (!this.cfApiBase) await this.init();
+    const response = await this.pget(
+      `${this.cfApiBase}/service_offerings?names=${encodeURIComponent(name)}&space_guids=${spaceGuid}`
+    );
+    return response.resources?.[0]?.guid ?? null;
+  }
+
+  async findServiceInstanceByName(spaceGuid: string, name: string): Promise<CFServiceInstance | null> {
+    if (!this.cfApiBase) await this.init();
+    const response = await this.pget(
+      `${this.cfApiBase}/service_instances?space_guids=${spaceGuid}&names=${encodeURIComponent(name)}`
+    );
+    return response.resources?.[0] ?? null;
+  }
+
+  /**
+   * App bindings of a service instance: guid, bound app guid and the state of
+   * the last operation (a managed bind is a job; 'succeeded' once the broker
+   * has it).
+   */
+  async getAppBindings(serviceInstanceGuid: string): Promise<{ guid: string; appGuid: string; state?: string }[]> {
+    if (!this.cfApiBase) await this.init();
+    const response = await this.pget(
+      `${this.cfApiBase}/service_credential_bindings?type=app&service_instance_guids=${serviceInstanceGuid}`
+    );
+    return (response.resources || []).map((b: any) => ({
+      guid: b.guid, appGuid: b.relationships?.app?.data?.guid, state: b.last_operation?.state,
+    }));
+  }
+
+  async serviceBindingExists(bindingGuid: string): Promise<boolean> {
+    if (!this.cfApiBase) await this.init();
+    return this.exists(`${this.cfApiBase}/service_credential_bindings/${bindingGuid}`);
   }
 
   /**
@@ -653,6 +820,22 @@ export class CFApiHelper {
   /**
    * Unbind service from app
    */
+  /**
+   * The app's autoscaler policy through the Stratos autoscaler proxy, or null
+   * when the app has none (the autoscaler answers 404).
+   */
+  async getAutoscalerPolicy(appGuid: string): Promise<any | null> {
+    try {
+      return await this.request.get(`/pp/v1/autoscaler/apps/${appGuid}/policy`,
+        { ...this.proxyHeaders, 'x-cap-api-host': 'autoscaler' });
+    } catch (e) {
+      if (/ 404 /.test(String(e))) {
+        return null;
+      }
+      throw e;
+    }
+  }
+
   async unbindService(bindingGuid: string): Promise<void> {
     if (!this.cfApiBase) await this.init();
     await this.pdelete(`${this.cfApiBase}/service_credential_bindings/${bindingGuid}`);

@@ -97,6 +97,10 @@ func (s *Store) New(r *http.Request, name string) (*sessions.Session, error) {
 	}
 	if err := s.load(session); err == nil {
 		session.IsNew = false
+	} else {
+		// No live row behind the cookie: drop its id so Save inserts a new
+		// session instead of updating a missing row, which saves nothing.
+		session.ID = ""
 	}
 	return session, nil
 }

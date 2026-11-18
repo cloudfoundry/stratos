@@ -1,5 +1,5 @@
-import { ChangeDetectionStrategy, AfterContentInit, Component, ContentChild, Input, OnDestroy, OnInit, computed, inject, signal } from '@angular/core';
-import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
+import { ChangeDetectionStrategy, AfterContentInit, Component, DestroyRef, OnDestroy, OnInit, computed, inject, signal, input, contentChild } from '@angular/core';
+import { outputToObservable, takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { CommonModule } from '@angular/common';
 import { ChartConfiguration } from 'chart.js';
 import {
@@ -48,16 +48,14 @@ export interface MetricsConfig<T = any> {
 })
 export class MetricsChartComponent implements OnInit, OnDestroy, AfterContentInit {
   private metricsDataService = inject(MetricsDataService);
+  private destroyRef = inject(DestroyRef);
 
-  @Input()
-  public metricsConfig!: MetricsConfig;
-  @Input()
-  public chartConfig?: MetricsLineChartConfig;
-  @Input()
-  public title!: string;
+  // Every host binds it; the chart has nothing to fetch without it.
+  public readonly metricsConfig = input.required<MetricsConfig>();
+  public readonly chartConfig = input<MetricsLineChartConfig>();
+  public readonly title = input<string>();
 
-  @ContentChild(MetricsRangeSelectorComponent, { static: true })
-  public timeRangeSelector?: MetricsRangeSelectorComponent;
+  public readonly timeRangeSelector = contentChild(MetricsRangeSelectorComponent);
 
   public hasMultipleInstances = false;
 
@@ -86,8 +84,9 @@ export class MetricsChartComponent implements OnInit, OnDestroy, AfterContentIni
     if (!metrics) {
       return null;
     }
-    const mapped = this.mapMetricsToChartData(metrics, this.metricsConfig);
-    const filtered = this.metricsConfig.filterSeries ? this.metricsConfig.filterSeries(mapped) : mapped;
+    const mapped = this.mapMetricsToChartData(metrics, this.metricsConfig());
+    const metricsConfig = this.metricsConfig();
+    const filtered = metricsConfig.filterSeries ? metricsConfig.filterSeries(mapped) : mapped;
     if (!filtered.length) {
       return [];
     }
@@ -102,6 +101,8 @@ export class MetricsChartComponent implements OnInit, OnDestroy, AfterContentIni
   });
 
   public isFetching = computed(() => this.observation ? this.observation.fetching() && !this.observation.metrics() : true);
+  // Why the last fetch failed (the chart shows it in place of the data).
+  public error = computed(() => this.observation?.error() ?? null);
   public isRefreshing = computed(() => this.observation ? this.observation.fetching() && !!this.observation.metrics() : false);
 
   public chartJsData: ChartConfiguration['data'] = { labels: [], datasets: [] };
@@ -132,11 +133,12 @@ export class MetricsChartComponent implements OnInit, OnDestroy, AfterContentIni
   };
 
   private sort(metricsArray: ChartSeries[]) {
-    if (this.metricsConfig.sort) {
+    const metricsConfig = this.metricsConfig();
+    if (metricsConfig.sort) {
       const newMetricsArray = [
         ...metricsArray
       ];
-      return newMetricsArray.sort(this.metricsConfig.sort);
+      return newMetricsArray.sort(metricsConfig.sort);
     }
     return metricsArray;
   }
@@ -150,7 +152,7 @@ export class MetricsChartComponent implements OnInit, OnDestroy, AfterContentIni
         start,
         end,
         step,
-        this.metricsConfig,
+        this.metricsConfig(),
       );
     }
     this.convertToChartJsData(result);
@@ -158,14 +160,15 @@ export class MetricsChartComponent implements OnInit, OnDestroy, AfterContentIni
   }
 
   ngOnInit() {
-    this.requestSignal.set(this.metricsConfig.request);
+    this.requestSignal.set(this.metricsConfig().request);
     this.observation = this.metricsDataService.observe(this.requestSignal);
   }
 
   ngAfterContentInit() {
-    if (this.timeRangeSelector) {
-      this.timeRangeSelector.baseRequest = this.metricsConfig.request;
-      this.timeRangeSelector.request.pipe(takeUntilDestroyed()).subscribe((req: MetricsRequest) => {
+    const timeRangeSelector = this.timeRangeSelector();
+    if (timeRangeSelector) {
+      timeRangeSelector.start(this.metricsConfig().request);
+      outputToObservable(timeRangeSelector.request).pipe(takeUntilDestroyed(this.destroyRef)).subscribe((req: MetricsRequest) => {
         this.requestSignal.set(req);
       });
     }
@@ -199,7 +202,8 @@ export class MetricsChartComponent implements OnInit, OnDestroy, AfterContentIni
   }
 
   public getTooltipValue(model: { value: string; }) {
-    return this.metricsConfig.tooltipValueFormatter ? this.metricsConfig.tooltipValueFormatter(model.value) : model.value;
+    const metricsConfig = this.metricsConfig();
+    return metricsConfig.tooltipValueFormatter ? metricsConfig.tooltipValueFormatter(model.value) : model.value;
   }
 
   public getSeriesTooltipModel(model: any) {
@@ -252,12 +256,13 @@ export class MetricsChartComponent implements OnInit, OnDestroy, AfterContentIni
 
     this.chartJsData = { labels, datasets };
 
-    if (this.chartConfig && this.chartOptions?.scales) {
+    const chartConfig = this.chartConfig();
+    if (chartConfig && this.chartOptions?.scales) {
       if (this.chartOptions.scales.x && 'title' in this.chartOptions.scales.x && this.chartOptions.scales.x.title) {
-        this.chartOptions.scales.x.title.text = this.chartConfig.xAxisLabel || '';
+        this.chartOptions.scales.x.title.text = chartConfig.xAxisLabel || '';
       }
       if (this.chartOptions.scales.y && 'title' in this.chartOptions.scales.y && this.chartOptions.scales.y.title) {
-        this.chartOptions.scales.y.title.text = this.chartConfig.yAxisLabel || '';
+        this.chartOptions.scales.y.title.text = chartConfig.yAxisLabel || '';
       }
     }
   }

@@ -1,18 +1,15 @@
 import { CommonModule } from '@angular/common';
-import { ChangeDetectionStrategy, Component, computed, Injector, OnInit, Signal, effect, signal, inject } from '@angular/core';
-import { toSignal } from '@angular/core/rxjs-interop';
+import { ChangeDetectionStrategy, Component, computed, HostListener, Injector, OnInit, Signal, effect, signal, inject } from '@angular/core';
 import { Router } from '@angular/router';
 import {
   IUserFavoritesGroups,
   EndpointModel,
   entityCatalog,
   UserFavoriteManager } from '@stratosui/store';
-import { Observable } from 'rxjs';
-import { take, filter, map, switchMap } from 'rxjs/operators';
 
 import { EndpointsService } from '../../../core/endpoints.service';
 import { HomeShowMode, HomeSortDirection } from '../../../core/dashboard-preferences.service';
-import { naturalCompare } from '../../../shared/utils/natural-sort';
+import { endpointNameCompare } from '../../../shared/utils/natural-sort';
 import { SessionService } from '../../../core/session.service';
 import { DashboardPreferencesService } from '../../../core/dashboard-preferences.service';
 import { PageHeaderComponent } from '../../../shared/components/page-header/page-header.component';
@@ -63,12 +60,10 @@ export class HomePageComponent implements OnInit {
   private registry = inject(EndpointDataRegistry);
   private injector = inject(Injector);
 
-  public allEndpointIds$: Observable<string[]>;
-  public haveRegistered: Signal<boolean> = toSignal(this.endpointsService.haveRegistered$, { initialValue: false });
+  public haveRegistered: Signal<boolean> = this.endpointsService.haveRegistered;
 
-  private connectedEndpointsRaw: Signal<EndpointModel[]> = toSignal(this.endpointsService.connectedEndpoints$, { initialValue: [] as EndpointModel[] });
-  private disablePersistenceFeatures: Signal<boolean | null> = toSignal(this.endpointsService.disablePersistenceFeatures$, { initialValue: null });
-  private allFavorites = toSignal(this.userFavoriteManager.getAllFavorites());
+  private connectedEndpointsRaw: Signal<EndpointModel[]> = this.endpointsService.connectedEndpoints;
+  private allFavorites = this.userFavoriteManager.allFavorites;
 
   private connectedEndpoints: Signal<EndpointModel[]> = computed(() =>
     this.haveRegistered() ? this.connectedEndpointsRaw() : []
@@ -77,10 +72,7 @@ export class HomePageComponent implements OnInit {
   // Every registered endpoint, connection state ignored — source for the
   // starred-only view, where a starred endpoint that is down must still show
   // (as a Disconnected card) instead of silently disappearing (#5588).
-  private allEndpointsRaw: Signal<EndpointModel[]> = toSignal(
-    this.endpointsService.endpoints$.pipe(map(eps => Object.values(eps))),
-    { initialValue: [] as EndpointModel[] }
-  );
+  private allEndpointsRaw: Signal<EndpointModel[]> = computed(() => Object.values(this.endpointsService.endpoints()));
 
   private allEndpoints: Signal<EndpointModel[]> = computed(() =>
     this.haveRegistered() ? this.allEndpointsRaw() : []
@@ -144,22 +136,18 @@ export class HomePageComponent implements OnInit {
   private redirectChecked = false;
   private layoutInitialized = false;
 
-  constructor() {
-    // Wait for endpoints to be loaded before creating the endpoint IDs list
-    // (PageHeaderComponent currently consumes this as an Observable input)
-    this.allEndpointIds$ = this.endpointsService.haveRegistered$.pipe(
-      filter(haveRegistered => haveRegistered),
-      take(1),
-      switchMap(() => this.endpointsService.connectedEndpoints$),
-      map(endpoints => Object.values(endpoints)
-        .map(endpoint => endpoint.guid)
-        .filter((guid): guid is string => !!guid))
-    );
+  // Connected endpoint ids once any endpoint is registered.
+  public readonly allEndpointIds = computed<string[] | undefined>(() =>
+    this.haveRegistered()
+      ? this.connectedEndpointsRaw().map(endpoint => endpoint.guid).filter((guid): guid is string => !!guid)
+      : undefined
+  );
 
+  constructor() {
     // Redirect to /applications when persistence features are disabled
     effect(() => {
-      const off = this.disablePersistenceFeatures();
-      if (off === null || this.redirectChecked) {
+      const off = this.endpointsService.disablePersistenceFeatures();
+      if (this.redirectChecked) {
         return;
       }
       this.redirectChecked = true;
@@ -297,7 +285,9 @@ export class HomePageComponent implements OnInit {
       });
     }
 
-    const dir = this.sortDirection();
+    // One context from every registered endpoint (not the subset shown), so
+    // the separator-strip decision is identical in every mode and group.
+    const nameCompare = endpointNameCompare(this.allEndpoints().map(ep => ep.name ?? ''), this.sortDirection());
     const byPriority = (a: EndpointModel, b: EndpointModel) => {
       // strict: cnsi_type is populated on every endpoint; '' default keeps the lookup well-formed
       const pa = entityCatalog.getEndpoint(a.cnsi_type ?? '', a.sub_type)?.definition?.renderPriority ?? 1000;
@@ -305,7 +295,7 @@ export class HomePageComponent implements OnInit {
       // Same type (priority tie): natural name order, so cf1 < cf2 < cf10
       // instead of the /pp/v1/info payload's arbitrary map order. Direction
       // flips the name comparison only, never the group/type ordering.
-      return pa - pb || naturalCompare(a.name, b.name, false, dir);
+      return pa - pb || nameCompare(a.name, b.name);
     };
 
     return [
@@ -369,4 +359,20 @@ export class HomePageComponent implements OnInit {
   // Layout menu open state. Held here rather than toggled onto the DOM node so
   // the trigger's aria-expanded reflects it.
   public layoutMenuOpen = signal(false);
+
+  onLayoutMenuEscape(event: Event, trigger: HTMLElement): void {
+    if (!this.layoutMenuOpen()) {
+      return;
+    }
+    event.stopPropagation();
+    this.layoutMenuOpen.set(false);
+    trigger.focus();
+  }
+
+  @HostListener('document:click', ['$event'])
+  onDocumentClick(event: MouseEvent): void {
+    if (this.layoutMenuOpen() && !(event.target as HTMLElement).closest('.dropdown')) {
+      this.layoutMenuOpen.set(false);
+    }
+  }
 }

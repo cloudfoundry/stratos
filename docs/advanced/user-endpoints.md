@@ -3,41 +3,79 @@ title: Configuring User Endpoints
 sidebar_label: Configuring User Endpoints
 ---
 
-Stratos provides a way for users to create endpoints without the need to be an administrator.
+Normally only a Stratos administrator registers endpoints, and every user
+sees the same list. User endpoints let trusted users who are not
+administrators register endpoints of their own, such as their own Cloud
+Foundry, Kubernetes cluster or Helm repository, without asking an
+administrator to add each one. An endpoint a user registers this way is
+personal: it is listed only for that user and for administrators.
 
-> Note: Admin endpoint-ID's are generated through a SHA-1 encryption of the URL. Personal endpoints will differ in their ID, by using the URL + user-ID for encryption. This should pose no problem in the usual Stratos workflow, but if you depend on the ID to be based solely on the URL, then use this feature with caution.
+The feature first shipped in Stratos 4.4.1. It is off by default, and the
+setting `USER_ENDPOINTS_ENABLED` turns it on. The setting changes who may
+register, see, connect to, edit and unregister endpoints for **every** user
+of the console, not only the users who will register their own.
+[User Endpoints in Detail](user-endpoints-details.md) lists every rule.
 
-## Set up
+## Who may register their own endpoints
 
-In order to enable User Endpoints support in Stratos:
+Stratos decides who may register endpoints from the token of the
+**UAA that users log in to Stratos with**. A user whose token carries the
+scope `stratos.endpointadmin` is an *endpoint admin* and may register
+personal endpoints. Setting this up is a change to that UAA (a group and a
+client scope), not a setting inside Stratos.
 
-1. The environment variable `USER_ENDPOINTS_ENABLED` or helm chart value `console.userEndpointsEnabled` must be set
-2. The UAA client used by Stratos needs an additional scope `stratos.endpointadmin`
-3. Users need to have the `stratos.endpointadmin` group attached to them
+This has two consequences:
 
-Once all steps have been completed, user within the `stratos.endpointadmin` group are allowed to create personal user endpoints. Endpoints created that way are only visible to their respective user and all admins. Admins will be able to create personal user endpoints after step 1 has been completed.
+- A console without a UAA login cannot have endpoint admins. With a local
+  login (the Helm chart's `console.localAdminPassword`), the only user is
+  the administrator, so the feature adds nothing.
+- The endpoints themselves do not need a UAA. The scope comes from the
+  console's login, so an endpoint admin may register a Kubernetes cluster
+  or a Helm repository as well as a Cloud Foundry.
 
-## Environment variable
+## The three settings
 
-`USER_ENDPOINTS_ENABLED` or helm chart value `console.userEndpointsEnabled` can be set to three different states:
+- `disabled` (the default): only administrators register endpoints, and
+  everyone sees the same list.
+- `enabled`: endpoint admins register personal endpoints. Administrators
+  choose, for each endpoint they register, whether it is a system endpoint
+  (listed for everyone) or a personal one.
+- `admin_only`: for winding the feature down. Users no longer register
+  endpoints and no longer see their personal ones, but administrators still
+  see every endpoint, so they can review and unregister them before the
+  feature is turned off.
 
-1. `disabled` (default) will disable this feature. Neither admins nor users will see user endpoints.
-2. `admin_only` will hide user endpoints from users. Admins can create and see all user endpoints.
-3. `enabled` will allow users within the `stratos.endpointadmin` group and admins to create personal user endpoints. These endpoints will only be visible to them or admins.
+Turning the feature off does not delete personal endpoints. They stay in the
+database, hidden from everyone.
 
-## Adding scopes to the UAA client
+## Several endpoints at one address
 
-To add the scope to a client, modify the following [UAA CLI](https://github.com/cloudfoundry/cf-uaac) command:
+Earlier versions of Stratos refused a second endpoint at an address that was
+already registered, apart from one personal endpoint beside a system one.
+The reason was the endpoint ID: it was derived from the address, so a link
+into the console that carries the ID always led to the same endpoint.
 
-```
-uaac client update CLIENT_NAME --scope "OTHER_SCOPES stratos.endpointadmin"
-```
+Endpoint IDs are now random, and any number of endpoints may share an
+address. This is needed when:
 
-Replace `CLIENT_NAME` with the used client and `OTHER_SCOPES` with the current configured scopes.
+- an operator connects as a user's account to look into that user's problem,
+  without touching the user's own connection;
+- several Cloud Foundry environments differ only by port (a different port is
+  a different address);
+- someone debugging Stratos keeps one connection for each of several admin
+  accounts.
 
-To add the group and add users to it, use:
+Connecting to one endpoint never disconnects another. When a pair at the same
+address includes a personal endpoint, Stratos says so after the connect and
+offers to disconnect the others.
 
-```
-uaac group add stratos.endpointadmin
-uaac member add stratos.endpointadmin USER_NAME
-```
+## When to use it
+
+Use it when trusted users need their own endpoints, the endpoints should stay
+private to them, and you can change the UAA that users log in to Stratos with.
+
+Do not turn it on just for a test on a shared console: while it is on, its
+rules apply to every user.
+
+See [User Endpoints in Detail](user-endpoints-details.md) for the full rules,
+the UAA commands, and how to turn the feature on and off.

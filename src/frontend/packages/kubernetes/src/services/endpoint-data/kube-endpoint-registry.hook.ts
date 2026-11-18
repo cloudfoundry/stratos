@@ -1,21 +1,20 @@
-import { Injectable, OnDestroy, inject } from '@angular/core';
-import { Subscription } from 'rxjs';
+import { Injectable, effect, inject, untracked } from '@angular/core';
 
 import { EndpointModel } from '@stratosui/store';
 
 import { EndpointsService } from '../../../../core/src/core/endpoints.service';
 import { KUBERNETES_ENDPOINT_TYPE } from '../../kubernetes/kubernetes-entity-factory';
 import { KubeEndpointDataRegistry } from './kube-endpoint-data.registry';
+import { KubeEndpointEviction } from './kube-endpoint-eviction';
 
 // Signal/router-native lifecycle hook for the kubernetes endpoint
 // registry. Replaces the wave-2 `KubeEndpointLifecycleService` which
 // listened for `CONNECT_ENDPOINTS_SUCCESS` / `DISCONNECT_ENDPOINTS_SUCCESS`
 // ngrx Actions.
 //
-// Source of truth: `EndpointsService.endpoints$` — the same selector
-// the rest of the app reads. Whatever flips an endpoint's
-// `connectionStatus` (action, effect, or future signal-native writer)
-// shows up here on the next emission.
+// Source of truth: the `EndpointsService.endpoints` signal — the same
+// projection the rest of the app reads. Whatever flips an endpoint's
+// `connectionStatus` shows up here on the next effect run.
 //
 // Per emission we diff against the previously-seen set of *connected
 // kubernetes endpoint GUIDs* and:
@@ -23,9 +22,11 @@ import { KubeEndpointDataRegistry } from './kube-endpoint-data.registry';
 //   * Warm `registry.getService(guid)` for new connects (guids in
 //     current set, not previous) so the first navigation already has
 //     a cached service.
-//   * Evict `registry.unregister(guid)` for departures (guids in
-//     previous set, not current). A departure covers BOTH a status
-//     flip to disconnected AND the endpoint being removed entirely.
+//   * Evict `registry.unregister(guid)` and `eviction.evict(guid)` for
+//     departures (guids in previous set, not current). A departure
+//     covers BOTH a status flip to disconnected AND the endpoint being
+//     removed entirely. The second call clears the root domain caches,
+//     which still hold data fetched with the departed credentials.
 //
 // Diff key: `endpoint.cnsi_type === KUBERNETES_ENDPOINT_TYPE &&
 // endpoint.connectionStatus === 'connected'`. Subscriber sees
@@ -37,11 +38,11 @@ import { KubeEndpointDataRegistry } from './kube-endpoint-data.registry';
 // user navigates into any kubernetes page.
 
 @Injectable({ providedIn: 'root' })
-export class KubeEndpointRegistryHook implements OnDestroy {
+export class KubeEndpointRegistryHook {
   private readonly endpointsService = inject(EndpointsService);
   private readonly registry = inject(KubeEndpointDataRegistry);
+  private readonly eviction = inject(KubeEndpointEviction);
 
-  private readonly subs = new Subscription();
   private lastConnected: Set<string> = new Set();
 
   // Diagnostics counters — surfaced via `window.__stratosKubeDiag.lifecycle`
@@ -52,8 +53,9 @@ export class KubeEndpointRegistryHook implements OnDestroy {
   private _emissions = 0;
 
   constructor() {
-    this.subs.add(
-      this.endpointsService.endpoints$.subscribe(endpoints => {
+    effect(() => {
+      const endpoints = this.endpointsService.endpoints();
+      untracked(() => {
         this._emissions++;
         const current = this.computeConnectedKubeGuids(endpoints);
 
@@ -72,12 +74,13 @@ export class KubeEndpointRegistryHook implements OnDestroy {
           if (!current.has(guid)) {
             this._disconnects++;
             this.registry.unregister(guid);
+            this.eviction.evict(guid);
           }
         });
 
         this.lastConnected = current;
-      })
-    );
+      });
+    });
 
     if (typeof window !== 'undefined') {
       const diag = (window as unknown as { __stratosKubeDiag?: Record<string, unknown> }).__stratosKubeDiag;
@@ -110,9 +113,5 @@ export class KubeEndpointRegistryHook implements OnDestroy {
       }
     }
     return out;
-  }
-
-  ngOnDestroy(): void {
-    this.subs.unsubscribe();
   }
 }

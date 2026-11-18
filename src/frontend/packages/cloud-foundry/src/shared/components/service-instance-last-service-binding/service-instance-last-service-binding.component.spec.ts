@@ -57,64 +57,64 @@ describe('ServiceInstanceLastServiceBindingComponent', () => {
     component = fixture.componentInstance;
   });
 
-  it('creates', () => {
-    component.serviceInstance = makeInstance([]);
-    fixture.detectChanges();
+  it('creates', async () => {
+    fixture.componentRef.setInput('serviceInstance', makeInstance([]));
+    await fixture.whenStable();
     expect(component).toBeTruthy();
   });
 
-  it('renders a dash when the instance has no service bindings', () => {
-    component.serviceInstance = makeInstance([]);
-    fixture.detectChanges();
+  it('renders a dash when the instance has no service bindings', async () => {
+    fixture.componentRef.setInput('serviceInstance', makeInstance([]));
+    await fixture.whenStable();
     const text = (fixture.nativeElement as HTMLElement).textContent ?? '';
     expect(text.trim()).toBe('-');
   });
 
-  it('renders the operation type and timestamp when a binding is present', () => {
-    component.serviceInstance = makeInstance([
+  it('renders the operation type and timestamp when a binding is present', async () => {
+    fixture.componentRef.setInput('serviceInstance', makeInstance([
       { state: 'succeeded', type: 'create', created_at: '2026-04-10T12:00:00Z' },
-    ]);
-    fixture.detectChanges();
+    ]));
+    await fixture.whenStable();
     const text = (fixture.nativeElement as HTMLElement).textContent ?? '';
     expect(text).toContain('Create');
   });
 
-  it('renders a progress indicator for the in-progress state', () => {
-    component.serviceInstance = makeInstance([
+  it('renders a progress indicator for the in-progress state', async () => {
+    fixture.componentRef.setInput('serviceInstance', makeInstance([
       { state: 'in progress', type: 'create', created_at: '' },
-    ]);
-    fixture.detectChanges();
+    ]));
+    await fixture.whenStable();
     const indicator = fixture.debugElement.query(By.css('app-boolean-indicator'));
     expect(indicator).toBeTruthy();
     expect(indicator.attributes['type']).toBe('progress-progress');
   });
 
-  it('renders a yes/no indicator (success) when the state is succeeded', () => {
-    component.serviceInstance = makeInstance([
+  it('renders a yes/no indicator (success) when the state is succeeded', async () => {
+    fixture.componentRef.setInput('serviceInstance', makeInstance([
       { state: 'succeeded', type: 'create', created_at: '' },
-    ]);
-    fixture.detectChanges();
+    ]));
+    await fixture.whenStable();
     const indicator = fixture.debugElement.query(By.css('app-boolean-indicator'));
     expect(indicator).toBeTruthy();
     expect(indicator.attributes['type']).toBe('yes-no');
   });
 
-  it('renders a yes/no indicator (failure) when the state is failed', () => {
-    component.serviceInstance = makeInstance([
+  it('renders a yes/no indicator (failure) when the state is failed', async () => {
+    fixture.componentRef.setInput('serviceInstance', makeInstance([
       { state: 'failed', type: 'delete', created_at: '' },
-    ]);
-    fixture.detectChanges();
+    ]));
+    await fixture.whenStable();
     const indicator = fixture.debugElement.query(By.css('app-boolean-indicator'));
     expect(indicator).toBeTruthy();
     expect(indicator.attributes['type']).toBe('yes-no');
   });
 
-  it('uses the last binding in the array when multiple are present', () => {
-    component.serviceInstance = makeInstance([
+  it('uses the last binding in the array when multiple are present', async () => {
+    fixture.componentRef.setInput('serviceInstance', makeInstance([
       { state: 'succeeded', type: 'create', created_at: '' },
       { state: 'in progress', type: 'update', created_at: '' },
-    ]);
-    fixture.detectChanges();
+    ]));
+    await fixture.whenStable();
     const text = (fixture.nativeElement as HTMLElement).textContent ?? '';
     expect(text).toContain('Update');
     const indicator = fixture.debugElement.query(By.css('app-boolean-indicator'));

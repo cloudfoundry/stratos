@@ -1,5 +1,6 @@
 import { CommonModule, DatePipe } from '@angular/common';
 import {
+  DestroyRef,
   ChangeDetectionStrategy,
   Component,
   OnInit,
@@ -16,7 +17,6 @@ import {
   SignalListColumn,
   SignalListComponent,
   SignalListConfig,
-  SignalListPillColor,
   SignalListRowAction,
   TailwindSnackBarService,
 } from '@stratosui/core';
@@ -29,6 +29,7 @@ import { boundAppSegments, renderBoundApps } from '../../../shared/signal-list-c
 import { renderServiceKeyCount, serviceKeysLink } from '../../../shared/signal-list-configs/service-keys-count-cell';
 import { dashboardLink, renderDashboard } from '../../../shared/signal-list-configs/dashboard-link-cell';
 import { buildServiceInstanceRowActions } from '../../../shared/signal-list-configs/service-instance/service-instance-row-actions';
+import { lastOperationColumn, lastOperationLabel } from '../../../shared/signal-list-configs/service-instance/service-instance-columns';
 import type { StServiceInstance } from '../../../services/endpoint-data/stratos-types';
 
 /**
@@ -63,6 +64,7 @@ export class ServiceInstancesComponent implements OnInit {
   private readonly route = inject(ActivatedRoute);
   private readonly router = inject(Router);
   private readonly instancesConfig = inject(CfServiceInstancesSignalConfigService);
+  private readonly destroyRef = inject(DestroyRef);
   private readonly confirmDialog = inject(ConfirmationDialogService);
   private readonly snackBar = inject(TailwindSnackBarService);
 
@@ -94,17 +96,6 @@ export class ServiceInstancesComponent implements OnInit {
       return tags.length === 0 ? '—' : tags.join(', ');
     };
 
-    const renderLastOp = (si: StServiceInstance): string =>
-      si.lastOperation?.state ?? '';
-
-    const lastOpColor = (si: StServiceInstance): SignalListPillColor => {
-      const state = (si.lastOperation?.state ?? '').toLowerCase();
-      if (state === 'succeeded') return 'success';
-      if (state === 'in progress') return 'warning';
-      if (state === 'failed') return 'danger';
-      return 'neutral';
-    };
-
     const renderCreated = (si: StServiceInstance): string => {
       if (!si.createdAt) return '';
       const d = new Date(si.createdAt);
@@ -132,13 +123,7 @@ export class ServiceInstancesComponent implements OnInit {
         render: renderPlan,
         widthHint: '10rem',
       },
-      {
-        header: 'Last Operation', key: 'lastOp', sortField: renderLastOp,
-        kind: 'pill',
-        pillColor: lastOpColor,
-        render: renderLastOp,
-        widthHint: '10rem',
-      },
+      lastOperationColumn(),
       {
         header: 'Dashboard', key: 'dashboard', kind: 'link',
         render: renderDashboard,
@@ -207,12 +192,13 @@ export class ServiceInstancesComponent implements OnInit {
     };
 
     this.instancesConfig.registerSortExtractor('plan', renderPlan);
-    this.instancesConfig.registerSortExtractor('lastOp', renderLastOp);
+    this.instancesConfig.registerSortExtractor('lastOp', lastOperationLabel);
     this.instancesConfig.registerSortExtractor('tags', renderTags);
     this.instancesConfig.registerSortExtractor('type', renderType);
     this.instancesConfig.registerFilterExtractor('name', (si) => si.name ?? '');
 
     void this.instancesConfig.loadAll().then(() => this.instancesConfig.ensureServiceKeyCounts());
+    this.instancesConfig.startProgressPolling(this.destroyRef);
   }
 
   // Per-row Edit / Detach / Delete. Restores the V2-era listActionEdit

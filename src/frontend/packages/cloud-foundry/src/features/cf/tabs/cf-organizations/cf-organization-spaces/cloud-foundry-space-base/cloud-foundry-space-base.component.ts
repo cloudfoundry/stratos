@@ -1,9 +1,5 @@
-import { Component, ChangeDetectionStrategy, computed, Injector, OnInit, Signal, inject, signal } from '@angular/core';
-import { toObservable } from '@angular/core/rxjs-interop';
-import { CommonModule } from '@angular/common';
+import { Component, ChangeDetectionStrategy, computed, OnInit, Signal, inject } from '@angular/core';
 import { RouterModule } from '@angular/router';
-import { combineLatest, Observable, of } from 'rxjs';
-import { filter, take, map } from 'rxjs/operators';
 
 import {
   getActionsFromExtensions,
@@ -17,6 +13,8 @@ import { IPageSideNavTab } from '../../../../../../../../core/src/features/dashb
 import { PageHeaderComponent } from '../../../../../../../../core/src/shared/components/page-header/page-header.component';
 import { IHeaderBreadcrumb } from '../../../../../../../../core/src/shared/components/page-header/page-header.types';
 import { LoadingPageComponent } from '../../../../../../../../core/src/shared/components/loading-page/loading-page.component';
+import { PageSubNavComponent } from '../../../../../../../../core/src/shared/components/page-sub-nav/page-sub-nav.component';
+import { CfCliMenuComponent } from '../../../../../../shared/components/cli-menu/cf-cli-menu.component';
 import { UserFavorite } from '../../../../../../../../store/src/types/user-favorites.types';
 import { UserFavoriteManager } from '../../../../../../../../store/src/user-favorite-manager';
 import { spaceEntityType } from '../../../../../../cf-entity-types';
@@ -39,10 +37,11 @@ import { CloudFoundrySpaceService } from '../../../../services/cloud-foundry-spa
   standalone: true,
   changeDetection: ChangeDetectionStrategy.OnPush,
   imports: [
-    CommonModule,
     RouterModule,
     PageHeaderComponent,
-    LoadingPageComponent
+    PageSubNavComponent,
+    LoadingPageComponent,
+    CfCliMenuComponent,
   ],
   providers: [
     getActiveRouteCfOrgSpaceProvider,
@@ -64,15 +63,13 @@ export class CloudFoundrySpaceBaseComponent implements OnInit {
   cfSpaceService = inject(CloudFoundrySpaceService);
   cfOrgService = inject(CloudFoundryOrganizationService);
   spaceDataService = inject(SpaceDataService);
-  private injector = inject(Injector);
 
   // Drives the loading-page overlay from the signal-native data service,
   // replacing the old ngrx EntityMonitor (entityId/entitySchema) path.
-  isLoading$ = toObservable(this.spaceDataService.isLoading);
+  isLoading = this.spaceDataService.isLoading;
 
 
-  // Signal: written after the first render; an OnPush view under zoneless CD only repaints for signal writes.
-  readonly tabLinks = signal<IPageSideNavTab[]>([
+  private readonly baseTabs: IPageSideNavTab[] = [
     {
       link: 'summary',
       label: 'Summary',
@@ -112,9 +109,56 @@ export class CloudFoundrySpaceBaseComponent implements OnInit {
       label: 'Events',
       icon: 'watch_later'
     }
-  ]);
+  ];
 
-  public breadcrumbs$!: Observable<IHeaderBreadcrumb[]>;
+  // The Quota tab joins once the space has loaded, and shows only while a
+  // space-specific quota is linked (quotaGuid set). Extension tabs are
+  // appended unconditionally to match the legacy ordering.
+  private readonly spaceLoaded = computed(() => !!this.spaceDataService.space());
+  private readonly hasSpaceQuota = computed(() => !!this.spaceDataService.space()?.quotaGuid);
+  readonly tabLinks = computed<IPageSideNavTab[]>(() => {
+    if (!this.spaceLoaded()) {
+      return this.baseTabs;
+    }
+    return [
+      ...this.baseTabs,
+      {
+        link: 'space-quota',
+        label: 'Quota',
+        icon: 'data_usage',
+        isHidden: computed(() => !this.hasSpaceQuota()),
+      },
+      ...getTabsFromExtensions(StratosTabType.CloudFoundrySpace),
+    ];
+  });
+
+  // Back to the endpoint's organizations and to the org's spaces, once both
+  // the endpoint and the org are in.
+  readonly breadcrumbs = computed<IHeaderBreadcrumb[] | null>(() => {
+    const endpoint = this.cfEndpointService.endpoint();
+    const org = this.cfOrgService.orgDataService.org();
+    if (!endpoint || !org) return null;
+    return [
+      {
+        breadcrumbs: [
+          {
+            value: endpoint.entity.name,
+            routerLink: `/cloud-foundry/${endpoint.entity.guid}/organizations`
+          },
+          {
+            value: org.name,
+            routerLink: `/cloud-foundry/${endpoint.entity.guid}/organizations/${org.guid}/spaces`
+          }
+        ]
+      },
+      {
+        key: 'services-wall',
+        breadcrumbs: [
+          { value: 'Services', routerLink: `/services` }
+        ]
+      }
+    ];
+  });
 
   // Used to hide tab that is not yet implemented when in production
   public isDevEnvironment = !environment.production;
@@ -144,70 +188,12 @@ export class CloudFoundrySpaceBaseComponent implements OnInit {
       return userFavoriteManager.getFavoriteFromEntity<ISpaceFavMetadata>(
         spaceEntityType, CF_ENDPOINT_TYPE, route.cfGuid, favEntity);
     });
-
-    this.setUpBreadcrumbs(this.cfEndpointService, this.cfOrgService);
-
-    // Add the Quota tab once the space snapshot lands — only show it if a
-    // space-specific quota is linked (quotaGuid set). Extension tabs are
-    // appended unconditionally to match the legacy ordering.
-    toObservable(this.spaceDataService.space, { injector: this.injector }).pipe(
-      filter(s => !!s),
-      take(1),
-    ).subscribe(space => {
-      this.tabLinks.update(tabs => [
-        ...tabs,
-        {
-          link: 'space-quota',
-          label: 'Quota',
-          icon: 'data_usage',
-          hidden$: of(!space!.quotaGuid),
-        },
-        ...getTabsFromExtensions(StratosTabType.CloudFoundrySpace),
-      ]);
-    });
   }
 
   ngOnInit(): void {
     // Trigger initial load. The registry-acquired instance dedupes concurrent
     // load() calls and short-circuits once warm.
     this.spaceDataService.load().subscribe({ error: () => {} });
-  }
-
-  private setUpBreadcrumbs(
-    cfEndpointService: CloudFoundryEndpointService,
-    cfOrgService: CloudFoundryOrganizationService
-  ) {
-    // Org name comes from the V3-native OrgDataService signal; bridge into the
-    // existing breadcrumb pipeline via toObservable so the rest of the chain
-    // stays the same shape. take(1) preserves the original "freeze first
-    // populated value" behaviour.
-    const orgSignal$ = toObservable(cfOrgService.orgDataService.org, { injector: this.injector });
-    this.breadcrumbs$ = combineLatest(
-      cfEndpointService.endpoint$,
-      orgSignal$.pipe(filter(org => !!org)),
-    ).pipe(
-      map(([endpoint, org]) => ([
-        {
-          breadcrumbs: [
-            {
-              value: endpoint.entity.name,
-              routerLink: `/cloud-foundry/${endpoint.entity.guid}/organizations`
-            },
-            {
-              value: org.name,
-              routerLink: `/cloud-foundry/${endpoint.entity.guid}/organizations/${org.guid}/spaces`
-            }
-          ]
-        },
-        {
-          key: 'services-wall',
-          breadcrumbs: [
-            { value: 'Services', routerLink: `/services` }
-          ]
-        }
-      ])),
-      take(1)
-    );
   }
 
 }

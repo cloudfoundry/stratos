@@ -1,10 +1,6 @@
 import { HttpClient } from '@angular/common/http';
-import { Component, OnDestroy, signal, computed, inject, ChangeDetectionStrategy } from '@angular/core';
-import { CommonModule } from '@angular/common';
-import { toObservable } from '@angular/core/rxjs-interop';
+import { Component, OnDestroy, Signal, signal, computed, inject, ChangeDetectionStrategy } from '@angular/core';
 import { ActivatedRoute, RouterModule } from '@angular/router';
-import { Observable } from 'rxjs';
-import { map } from 'rxjs/operators';
 import { BooleanIndicatorComponent, CardWrapperComponent, MetadataItemComponent, CardProgressOverlayComponent } from '@stratosui/core';
 
 import { BooleanIndicatorType } from '../../../../../core/src/shared/components/boolean-indicator/boolean-indicator.component';
@@ -46,7 +42,6 @@ type MessageUpdater = (msg: string) => void;
   changeDetection: ChangeDetectionStrategy.OnPush,
   standalone: true,
   imports: [
-    CommonModule,
     RouterModule,
     BooleanIndicatorComponent,
     CardWrapperComponent,
@@ -99,7 +94,7 @@ export class KubedashConfigurationComponent implements OnDestroy {
     'Delete'
   );
 
-  public breadcrumbs$: Observable<IHeaderBreadcrumb[]>;
+  public breadcrumbs: Signal<IHeaderBreadcrumb[]> = signal([]);
 
   public booleanIndicatorType = BooleanIndicatorType;
 
@@ -120,12 +115,9 @@ export class KubedashConfigurationComponent implements OnDestroy {
 
   // Signals for busy state tracking
   public serviceAccountBusy = signal<boolean>(false);
-  // Observable view — app-card-progress-overlay's `busy` input is an Observable<boolean>
-  public serviceAccountBusy$ = toObservable(this.serviceAccountBusy);
   public serviceAccountMsg = '';
 
   public dashboardUIBusy = signal<boolean>(false);
-  public dashboardUIBusy$ = toObservable(this.dashboardUIBusy);
   public dashboardUIMsg = '';
 
   // Are we busy with an operation - disable buttons if we are
@@ -142,11 +134,15 @@ export class KubedashConfigurationComponent implements OnDestroy {
   constructor() {
     this.dashboardLink = `/kubernetes/${this.kubeEndpointService.kubeGuid}/dashboard`;
 
-    this.breadcrumbs$ = this.kubeEndpointService.endpoint$.pipe(
-      map(endpoint => ([{
-        breadcrumbs: [{ value: endpoint.entity.name, routerLink: `/kubernetes/${endpoint.entity.guid}` }]
-      }]))
-    );
+    this.breadcrumbs = computed((): IHeaderBreadcrumb[] => {
+      const endpoint = this.kubeEndpointService.endpoint();
+      if (!endpoint) {
+        return [];
+      }
+      return [{
+        breadcrumbs: [{ value: endpoint.name, routerLink: `/kubernetes/${endpoint.guid}` }]
+      }];
+    });
 
     // Kick off initial status fetch.
     this.refreshStatus();
@@ -265,20 +261,23 @@ export class KubedashConfigurationComponent implements OnDestroy {
       return;
     }
 
-    obs.subscribe(() => {
-      console.log(okMsg); // Replace with proper notification system if needed
-      msgUpdater(okMsg);
-      busy.set(false);
-      this.refresh();
-    }, (e) => {
-      let msg = errorMsg;
-      if (e && e.error && e.error.error) {
-        msg = e.error.error;
+    obs.subscribe({
+      next: () => {
+        console.log(okMsg); // Replace with proper notification system if needed
+        msgUpdater(okMsg);
+        busy.set(false);
+        this.refresh();
+      },
+      error: (e) => {
+        let msg = errorMsg;
+        if (e && e.error && e.error.error) {
+          msg = e.error.error;
+        }
+        console.error(msg); // Replace with proper notification system if needed
+        msgUpdater(msg);
+        busy.set(false);
+        this.refresh();
       }
-      console.error(msg); // Replace with proper notification system if needed
-      msgUpdater(msg);
-      busy.set(false);
-      this.refresh();
     });
   }
 

@@ -1,5 +1,5 @@
 import { CommonModule } from '@angular/common';
-import { ChangeDetectionStrategy, Component, Input, OnInit, Signal, computed, inject, signal } from '@angular/core';
+import { ChangeDetectionStrategy, Component, OnInit, Signal, computed, inject, signal, input } from '@angular/core';
 
 import { AppStatsDataRegistry } from '../../../services/endpoint-data/app-stats-data.registry';
 
@@ -15,15 +15,16 @@ import { AppStatsDataRegistry } from '../../../services/endpoint-data/app-stats-
 export class RunningInstancesComponent implements OnInit {
   private readonly registry = inject(AppStatsDataRegistry);
 
-  // strict: required @Inputs, always bound by the host template
-  @Input() instances!: number;
-  @Input() cfGuid!: string;
-  @Input() appGuid!: string;
+  // Desired instance count; blank until the host has the app
+  readonly instances = input<number | null>();
+  // Always bound by the host template; they select the stats to load.
+  readonly cfGuid = input.required<string>();
+  readonly appGuid = input.required<string>();
 
   running: Signal<number> = signal(0);
 
   ngOnInit() {
-    const stats = this.registry.acquire(this.cfGuid, this.appGuid);
+    const stats = this.registry.acquire(this.cfGuid(), this.appGuid());
     this.running = computed(() => stats.running());
     stats.load().subscribe();
   }

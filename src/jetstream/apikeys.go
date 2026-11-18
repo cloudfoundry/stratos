@@ -4,10 +4,14 @@ import (
 	"errors"
 	"log/slog"
 	"net/http"
+	"time"
 
 	"github.com/cloudfoundry/stratos/src/jetstream/api/config"
 	"github.com/labstack/echo/v5"
 )
+
+// maxAPIKeyExpiry is the last instant a MySQL TIMESTAMP column can hold.
+var maxAPIKeyExpiry = time.Date(2038, 1, 19, 3, 14, 7, 0, time.UTC)
 
 func (p *portalProxy) checkIfAPIKeysEnabled(userGUID string) error {
 	switch p.Config.APIKeysEnabled {
@@ -43,7 +47,24 @@ func (p *portalProxy) addAPIKey(c *echo.Context) error {
 		return echo.NewHTTPError(http.StatusForbidden, err.Error())
 	}
 
-	apiKey, err := p.APIKeysRepository.AddAPIKey(userGUID, comment)
+	var expiresAt *time.Time
+	if raw := c.FormValue("expires_at"); raw != "" {
+		t, err := time.Parse(time.RFC3339, raw)
+		if err != nil {
+			return echo.NewHTTPError(http.StatusBadRequest, "Expiry must be an RFC 3339 time")
+		}
+		// Stored in a timestamp column without a zone: keep the instant, drop the offset.
+		t = t.UTC()
+		if !t.After(time.Now()) {
+			return echo.NewHTTPError(http.StatusBadRequest, "Expiry must be in the future")
+		}
+		if t.After(maxAPIKeyExpiry) {
+			return echo.NewHTTPError(http.StatusBadRequest, "Expiry must be before 19 January 2038")
+		}
+		expiresAt = &t
+	}
+
+	apiKey, err := p.APIKeysRepository.AddAPIKey(userGUID, comment, expiresAt)
 	if err != nil {
 		slog.Error("error adding an API key", "user", userGUID, "error", err)
 		return errors.New("Error adding API key")

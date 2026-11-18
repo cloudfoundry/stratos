@@ -1,4 +1,4 @@
-import { DestroyRef, EffectRef, Injectable, Injector, Signal, WritableSignal, computed, effect, inject, runInInjectionContext, signal } from '@angular/core';
+import { EffectRef, Injectable, Injector, Signal, WritableSignal, computed, effect, inject, runInInjectionContext, signal } from '@angular/core';
 import { firstValueFrom } from 'rxjs';
 import type { SignalListDropdownOption } from '@stratosui/core';
 import { ListStateStore, naturalCompare } from '@stratosui/core';
@@ -32,7 +32,6 @@ import { CfUsersPagedDataService } from '../../data-services/cf-users-paged-data
 @Injectable({ providedIn: 'root' })
 export class CfUsersSignalConfigService {
   private readonly registry = inject(EndpointDataRegistry);
-  private readonly destroyRef = inject(DestroyRef);
   private readonly injector = inject(Injector);
   private readonly diag = inject(CfUserListDiagnosticsService);
   private readonly usersData = inject(CfUsersPagedDataService);
@@ -276,9 +275,6 @@ export class CfUsersSignalConfigService {
           this.selectedSpace.set(null);
         }
       });
-    });
-    this.destroyRef.onDestroy(() => {
-      this.registry.release(cnsiGuid);
     });
   }
 

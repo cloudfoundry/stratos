@@ -1,12 +1,12 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
-import { provideZonelessChangeDetection } from '@angular/core';
+import { provideZonelessChangeDetection, signal } from '@angular/core';
 import { provideHttpClient } from '@angular/common/http';
-import { provideHttpClientTesting } from '@angular/common/http/testing';
+import { HttpTestingController, provideHttpClientTesting } from '@angular/common/http/testing';
 import { ActivatedRoute } from '@angular/router';
 import { describe, it, expect, beforeEach, vi } from 'vitest';
 import { Subject, of } from 'rxjs';
 
-import { getGitHubAPIURL, GITHUB_API_URL, GitSCMService, GitHubSCM } from '@stratosui/git';
+import { getGitHubAPIURL, GITHUB_API_URL, GitDataService, GitSCMService, GitHubSCM } from '@stratosui/git';
 import {
   EntityCatalogHelper,
   EntityCatalogHelpers,
@@ -17,6 +17,7 @@ import {
 import { createBasicStoreModule, STORE_TEST_PROVIDERS } from '@stratosui/store/testing';
 import { generateCFEntities } from '../../../../cf-entity-generator';
 import { ApplicationDeploySourceTypes, DEPLOY_TYPES_IDS } from '../deploy-application-steps.types';
+import { CfDeployAppDataService } from '../../../../services/domain-data/cf-deploy-app-data.service';
 import { DeployApplicationStep2Component } from './deploy-application-step2.component';
 
 describe('DeployApplicationStep2Component', () => {
@@ -268,7 +269,7 @@ describe('DeployApplicationStep2Component', () => {
   // through the registered endpoint's stored creds (which 404s on a private
   // repo the typed token can actually see). Only Public mode should carry the
   // endpoint guid.
-  describe('projectExistsEndpointGuid (private/enterprise must not proxy via registered endpoint)', () => {
+  describe('activeEndpointGuid (private/enterprise must not proxy via registered endpoint)', () => {
     beforeEach(() => {
       fixture = TestBed.createComponent(DeployApplicationStep2Component);
       component = fixture.componentInstance;
@@ -283,17 +284,17 @@ describe('DeployApplicationStep2Component', () => {
 
     it('uses the registered endpoint guid in Public mode', () => {
       component.gitMode = 'public';
-      expect(component.projectExistsEndpointGuid).toBe('747ed39a-endpoint-guid');
+      expect(component.activeEndpointGuid).toBe('747ed39a-endpoint-guid');
     });
 
     it('drops the endpoint guid in Private mode (use the typed token directly)', () => {
       component.gitMode = 'private';
-      expect(component.projectExistsEndpointGuid).toBe('');
+      expect(component.activeEndpointGuid).toBe('');
     });
 
     it('drops the endpoint guid in Enterprise mode (use the typed token directly)', () => {
       component.gitMode = 'enterprise';
-      expect(component.projectExistsEndpointGuid).toBe('');
+      expect(component.activeEndpointGuid).toBe('');
     });
 
     it('rebuilds the SCM with no endpoint guid when switching to Private', () => {
@@ -308,6 +309,179 @@ describe('DeployApplicationStep2Component', () => {
       const getSCM = vi.spyOn(TestBed.inject(GitSCMService), 'getSCM');
       component.setGitMode('public');
       expect(getSCM).toHaveBeenLastCalledWith('github', '747ed39a-endpoint-guid');
+    });
+  });
+
+  // The backend clones a repository with or without an endpoint; the endpoint
+  // only supplies stored creds. So a Public-tab source with no endpoint
+  // registered must deploy like a Private one without a token, not stop at
+  // Next with nothing saved.
+  describe('onNext for a GitHub source', () => {
+    beforeEach(() => {
+      fixture = TestBed.createComponent(DeployApplicationStep2Component);
+      component = fixture.componentInstance;
+      vi.spyOn(TestBed.inject(GitDataService), 'getRepository')
+        .mockReturnValue({ waitForValue$: of({ clone_url: 'https://github.com/o/r.git' }) } as any);
+      component.repository.set('o/r');
+      component.repositoryBranch = { name: 'main' } as any;
+    });
+
+    it('saves the deploy details in Public mode with no endpoint registered', async () => {
+      const save = vi.spyOn(TestBed.inject(CfDeployAppDataService), 'saveAppDetails');
+      component.sourceType = { id: 'github', group: 'gitscm', name: 'GitHub' } as any;
+      component.gitMode = 'public';
+      const result = await component.onNext();
+      expect(result.success).toBe(true);
+      expect(save).toHaveBeenCalledWith(
+        expect.objectContaining({ projectName: 'o/r', url: 'https://github.com/o/r.git', endpointGuid: '' }),
+        null,
+      );
+    });
+
+    it('saves the registered endpoint in Public mode when one is selected', async () => {
+      const save = vi.spyOn(TestBed.inject(CfDeployAppDataService), 'saveAppDetails');
+      component.sourceType = { id: 'github', group: 'gitscm', name: 'GitHub', endpointGuid: 'ep-1' } as any;
+      component.gitMode = 'public';
+      await component.onNext();
+      expect(save).toHaveBeenCalledWith(expect.objectContaining({ endpointGuid: 'ep-1' }), null);
+    });
+  });
+
+  // On a redeploy the form is disabled and counts as valid, so Next is open
+  // even when the deployed branch is no longer in the repository. onNext is
+  // then the only check left.
+  describe('onNext without a branch', () => {
+    beforeEach(() => {
+      fixture = TestBed.createComponent(DeployApplicationStep2Component);
+      component = fixture.componentInstance;
+      component.scm = TestBed.inject(GitSCMService).getSCM('github', '');
+      component.sourceType = { id: 'github', group: 'gitscm', name: 'GitHub' } as any;
+      component.repository.set('o/r');
+      component.repositoryBranch = undefined;
+    });
+
+    it('reports failure and saves nothing', async () => {
+      const save = vi.spyOn(TestBed.inject(CfDeployAppDataService), 'saveAppDetails');
+      const deployData = TestBed.inject(CfDeployAppDataService);
+      deployData.setSourceType(component.sourceType);
+      deployData.setDeployBranch('gone');
+      fixture.componentRef.setInput('isRedeploy', true);
+      const pending = component.onNext();
+
+      TestBed.inject(HttpTestingController).match(() => true).forEach(r => r.flush({ clone_url: 'u' }));
+      await fixture.whenStable();
+
+      expect(await pending).toEqual({ success: false, message: 'Branch gone was not found in o/r.' });
+      expect(save).not.toHaveBeenCalled();
+    });
+
+    it('asks for a branch outside a redeploy', async () => {
+      const pending = component.onNext();
+
+      TestBed.inject(HttpTestingController).match(() => true).forEach(r => r.flush({ clone_url: 'u' }));
+      await fixture.whenStable();
+
+      expect(await pending).toEqual({ success: false, message: 'Select a branch to deploy from o/r.' });
+    });
+  });
+
+  // The repository lookup runs through the real data service; the testing
+  // backend holds the request until it is flushed with an error.
+  describe('onNext when the repository lookup fails', () => {
+    beforeEach(() => {
+      fixture = TestBed.createComponent(DeployApplicationStep2Component);
+      component = fixture.componentInstance;
+      component.scm = TestBed.inject(GitSCMService).getSCM('github', '');
+      component.sourceType = { id: 'github', group: 'gitscm', name: 'GitHub' } as any;
+      component.gitMode = 'public';
+      component.repository.set('o/missing');
+      component.repositoryBranch = { name: 'main' } as any;
+    });
+
+    it('reports failure with the message and saves nothing', async () => {
+      const save = vi.spyOn(TestBed.inject(CfDeployAppDataService), 'saveAppDetails');
+      const pending = component.onNext();
+
+      TestBed.inject(HttpTestingController)
+        .expectOne('https://api.github.com/repos/o/missing')
+        .flush('nope', { status: 404, statusText: 'Not Found' });
+      await fixture.whenStable();
+
+      expect(await pending).toEqual({ success: false, message: expect.stringContaining('Git request failed(404)') });
+      expect(save).not.toHaveBeenCalled();
+    });
+  });
+
+  // A redeploy looks up the commit recorded for the deployed app. The lookup
+  // only feeds the commit card; the recorded SHA is what gets deployed, so a
+  // slow or failed lookup must not fall back to the branch HEAD.
+  describe('redeploy commit', () => {
+    const githubType = { id: 'github', group: 'gitscm', name: 'GitHub' } as any;
+    const branch = { name: 'main', projectName: 'o/r', commit: { sha: 'head000' } } as any;
+    let commit$: Subject<any>;
+
+    beforeEach(async () => {
+      (TestBed.inject(ApplicationDeploySourceTypes) as any).types = signal([githubType]);
+      const gitData = TestBed.inject(GitDataService);
+      vi.spyOn(gitData, 'getBranches').mockReturnValue(of([branch]));
+      vi.spyOn(gitData, 'getRepository')
+        .mockReturnValue({ waitForValue$: of({ clone_url: 'https://github.com/o/r.git' }) } as any);
+      commit$ = new Subject();
+      vi.spyOn(gitData, 'getCommit').mockReturnValue({ waitForValue$: commit$ } as any);
+
+      const deployData = TestBed.inject(CfDeployAppDataService);
+      deployData.setCfDetails({ cloudFoundry: 'cf-1', org: 'org-1', space: 'space-1' });
+      deployData.setSourceType(githubType);
+      deployData.setDeployBranch('main');
+      deployData.setDeployCommit('rec1234abcd');
+
+      fixture = TestBed.createComponent(DeployApplicationStep2Component);
+      component = fixture.componentInstance;
+      fixture.componentRef.setInput('isRedeploy', true);
+      await fixture.whenStable();
+      // The repository lookup resolves after the step is set up, as it does
+      // in the app; that starts the branch and then the commit lookup.
+      const repo = { full_name: 'o/r', html_url: 'https://github.com/o/r', owner: { avatar_url: '' } };
+      deployData.checkProjectExists({ getRepository: () => of(repo) } as any, 'o/r');
+      await fixture.whenStable();
+      expect(gitData.getCommit).toHaveBeenCalledWith(expect.anything(), 'o/r', 'rec1234abcd');
+    });
+
+    // The project name arrives from the deployed app after the step is set up
+    it('shows the repository of the deployed app in the project field', async () => {
+      const field = fixture.nativeElement.querySelector('input#projectName') as HTMLInputElement;
+      expect(field.value).toBe('o/r');
+    });
+
+    it('shows the commit card once the lookup resolves', async () => {
+      commit$.next({ sha: 'rec1234abcd', commit: { message: 'Recorded change' } });
+      await fixture.whenStable();
+
+      const card = fixture.nativeElement.querySelector('.deploy-step2-form__commit');
+      expect(card?.textContent).toContain('Recorded change');
+    });
+
+    it('hides the previous commit while a new commit is looked up', async () => {
+      commit$.next({ sha: 'rec1234abcd', commit: { message: 'Recorded change' } });
+      await fixture.whenStable();
+
+      TestBed.inject(CfDeployAppDataService).setDeployCommit('new5678efgh');
+      await fixture.whenStable();
+
+      expect(fixture.nativeElement.querySelector('.deploy-step2-form__commit')).toBeNull();
+    });
+
+    it('saves the recorded commit when Next is pressed before the lookup resolves', async () => {
+      const save = vi.spyOn(TestBed.inject(CfDeployAppDataService), 'saveAppDetails');
+      await component.onNext();
+      expect(save).toHaveBeenCalledWith(expect.objectContaining({ commit: 'rec1234abcd' }), null);
+    });
+
+    it('saves the recorded commit when the lookup fails', async () => {
+      commit$.error(new Error('gone'));
+      const save = vi.spyOn(TestBed.inject(CfDeployAppDataService), 'saveAppDetails');
+      await component.onNext();
+      expect(save).toHaveBeenCalledWith(expect.objectContaining({ commit: 'rec1234abcd' }), null);
     });
   });
 
@@ -332,16 +506,16 @@ describe('DeployApplicationStep2Component', () => {
     });
 
     it('wires applyGithubEnterpriseAndToken to the sourceSelectionForm valueChanges stream', () => {
-      // Mock the NgForm ViewChild with a Subject so we can emit form values
+      // Mock the NgForm view query with a Subject so we can emit form values
       // without standing up the full template-driven reactive form. Also mock
       // setupForGit's other upstream collaborators just enough to reach the
       // suggestedRepos$ assignment where the tap callback is registered.
       const valueChanges = new Subject<Record<string, string | undefined>>();
       (component as unknown as {
-        sourceSelectionForm: { valueChanges: Subject<Record<string, string | undefined>> };
-      }).sourceSelectionForm = {
+        sourceSelectionForm: () => { valueChanges: Subject<Record<string, string | undefined>> };
+      }).sourceSelectionForm = () => ({
         valueChanges,
-      };
+      });
       // updateSuggestedRepositories is called inside switchMap; stub it to
       // return an empty result so the pipe completes without network work.
       vi.spyOn(

@@ -1,8 +1,6 @@
 import { CommonModule } from '@angular/common';
 import { Component, ChangeDetectionStrategy, Signal, computed, inject } from '@angular/core';
-import { toObservable, toSignal } from '@angular/core/rxjs-interop';
 import { ActivatedRoute, RouterModule } from '@angular/router';
-import { Observable } from 'rxjs';
 
 import {
   BooleanIndicatorComponent,
@@ -27,6 +25,7 @@ import {
 } from './apply-quota-to-spaces-dialog/apply-quota-to-spaces-dialog.component';
 import { CfEndpointsDataService } from '../../../services/domain-data/cf-endpoints-data.service';
 import { CfCurrentUserPermissions } from '../../../user-permissions/cf-user-permissions-checkers';
+import { CfCliMenuComponent } from '../../../shared/components/cli-menu/cf-cli-menu.component';
 import { ActiveRouteCfOrgSpace } from '../cf-page.types';
 import { getActiveRouteCfOrgSpaceProvider } from '../cf.helpers';
 import { QuotaDefinitionBaseComponent } from '../quota-definition-base/quota-definition-base.component';
@@ -47,6 +46,7 @@ export const QUOTA_SPACE_GUID = 'space';
     CustomTooltipDirective,
     PageHeaderComponent,
     PageSubNavComponent,
+    CfCliMenuComponent,
     LoadingPageComponent,
     BooleanIndicatorComponent,
     TileGridComponent,
@@ -58,8 +58,6 @@ export const QUOTA_SPACE_GUID = 'space';
 export class SpaceQuotaDefinitionComponent extends QuotaDefinitionBaseComponent {
   readonly spaceQuotaDefinition: Signal<StSpaceQuota | null>;
   readonly detailsLoading: Signal<boolean>;
-  // Observable bridge for <app-loading-page>.
-  readonly detailsLoading$: Observable<boolean>;
   readonly editLink: Signal<string[]>;
   readonly canEditQuota: Signal<boolean>;
   // The quota guid this page resolved to (route param, or the assigned quota of
@@ -81,10 +79,7 @@ export class SpaceQuotaDefinitionComponent extends QuotaDefinitionBaseComponent 
     super(endpoints, activeRouteCfOrgSpace, activatedRoute);
 
     const { cfGuid, orgGuid, spaceGuid } = activeRouteCfOrgSpace;
-    this.canEditQuota = toSignal(
-      currentUserPermissionsService.can(CfCurrentUserPermissions.SPACE_QUOTA_EDIT, cfGuid, orgGuid),
-      { initialValue: false },
-    );
+    this.canEditQuota = currentUserPermissionsService.can(CfCurrentUserPermissions.SPACE_QUOTA_EDIT, cfGuid, orgGuid);
     this.isOrg = !spaceGuid;
     this.editParams = { [QUOTA_SPACE_GUID]: spaceGuid };
 
@@ -100,7 +95,6 @@ export class SpaceQuotaDefinitionComponent extends QuotaDefinitionBaseComponent 
     });
     this.spaceQuotaDefinition = computed(() => sourceSignal()?.value() ?? null);
     this.detailsLoading = computed(() => sourceSignal()?.isLoading() ?? false);
-    this.detailsLoading$ = toObservable(this.detailsLoading);
 
     this.editLink = computed(() => {
       const guid = resolvedQuotaGuid();

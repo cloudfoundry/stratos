@@ -1,8 +1,6 @@
 import { CommonModule } from '@angular/common';
 import { Component, ChangeDetectionStrategy, Signal, WritableSignal, computed, inject, signal } from '@angular/core';
-import { toSignal } from '@angular/core/rxjs-interop';
 import { Router, RouterModule } from '@angular/router';
-import { map } from 'rxjs/operators';
 
 import {
   ConfirmationDialogConfig,
@@ -19,12 +17,14 @@ import {
 import {
   UserFavorite,
   UserFavoriteManager,
+  leadPieces,
 } from '@stratosui/store';
 
 import { CfOrgsSignalConfigService } from '../../../../shared/signal-list-configs/org/cf-orgs-signal-config.service';
 import { CfCurrentUserPermissions } from '../../../../user-permissions/cf-user-permissions-checkers';
 import { CloudFoundryEndpointService } from '../../services/cloud-foundry-endpoint.service';
 import type { StOrg } from '../../../../services/endpoint-data/stratos-types';
+import { unknownHowOf, unknownOutcomeMessage } from '../../../../services/async-jobs/unknown-outcome-message';
 
 // Signal-native replacement for CloudFoundryOrganizationsComponent. Reuses
 // SignalListComponent + the app-wall column-kind vocabulary (link, dot,
@@ -55,25 +55,8 @@ export class CloudFoundryOrganizationsSignalComponent {
   // Favorite keys in rowKey format (${cnsiGuid}:${orgGuid}). Mirrors the
   // app-wall treatment: read the favorites store once, rebuild the set
   // on every change, and the star cells re-render via OnPush.
-  private readonly favoriteOrgRowKeys: Signal<ReadonlySet<string>> = toSignal(
-    this.userFavoriteManager.getAllFavorites().pipe(
-      map(([groups, entities]) => {
-        const out = new Set<string>();
-        if (!groups || !entities) return out;
-        for (const epFavGuid in groups) {
-          const g = groups[epFavGuid];
-          if (!g?.entitiesIds) continue;
-          for (const favId of g.entitiesIds) {
-            const fav = entities[favId];
-            if (fav && fav.entityType === 'organization' && fav.endpointType === 'cf') {
-              out.add(`${fav.endpointId}:${fav.entityId}`);
-            }
-          }
-        }
-        return out;
-      }),
-    ),
-    { initialValue: new Set<string>() },
+  private readonly favoriteOrgRowKeys: Signal<ReadonlySet<string>> = computed(() =>
+    this.userFavoriteManager.entityFavoriteKeys('cf', ['organization']),
   );
 
   public listConfig: WritableSignal<SignalListConfig<StOrg> | undefined> = signal(undefined);
@@ -98,10 +81,7 @@ export class CloudFoundryOrganizationsSignalComponent {
     this.orgsConfig.initialize(cfGuid);
     (this as { totalOrganizations: Signal<number> }).totalOrganizations =
       this.orgsConfig.view.totalItems;
-    this.canCreateOrganization = toSignal(
-      currentUserPermissionsService.can(CfCurrentUserPermissions.ORGANIZATION_CREATE, cfGuid),
-      { initialValue: false },
-    );
+    this.canCreateOrganization = currentUserPermissionsService.can(CfCurrentUserPermissions.ORGANIZATION_CREATE, cfGuid);
     this.createOrgAction = {
       label: 'Create Organization',
       icon: 'add',
@@ -213,11 +193,17 @@ export class CloudFoundryOrganizationsSignalComponent {
   }
 
   private buildOrgActions = (org: StOrg): readonly SignalListRowAction<StOrg>[] => {
-    const runAction = async (label: string, op: () => Promise<void>) => {
+    // A delete resolves 'unknown' when it ended with a result nobody can
+    // determine: the row stays and the message says where to look.
+    const runAction = async (label: string, op: () => Promise<unknown>, name?: string) => {
       try {
-        await op();
-      } catch (err: any) {
-        this.snackBar.error(`${label} failed: ${err?.message ?? err}`);
+        const outcome = await op();
+        const how = unknownHowOf(outcome);
+        if (how) {
+          this.snackBar.error(unknownOutcomeMessage(name ? `${label} "${name}"` : label, 'The Organizations list', how));
+        }
+      } catch (err: unknown) {
+        this.snackBar.error(leadPieces(`${label} failed`, err));
       }
     };
     return [
@@ -231,7 +217,7 @@ export class CloudFoundryOrganizationsSignalComponent {
             true,
           );
           this.confirmDialog.open(confirm, async () => {
-            await runAction('Delete', () => this.orgsConfig.deleteOrg(org.cnsiGuid, org.guid, org.name));
+            await runAction('Delete', () => this.orgsConfig.deleteOrg(org.cnsiGuid, org.guid, org.name), org.name);
           });
         },
       },

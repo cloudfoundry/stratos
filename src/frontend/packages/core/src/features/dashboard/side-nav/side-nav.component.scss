@@ -5,11 +5,7 @@
   color: inherit;
   font: inherit;
   cursor: pointer;
-
-  &:focus {
-    outline: 2px solid rgba(255, 255, 255, 0.2);
-    outline-offset: 2px;
-  }
+  // Keyboard focus shows the global :focus-visible outline in the nav text color.
 }
 
 // Logout button styling
@@ -20,10 +16,5 @@
     color: inherit;
     font: inherit;
     cursor: pointer;
-
-    &:focus {
-      outline: 2px solid rgba(255, 255, 255, 0.2);
-      outline-offset: 2px;
-    }
   }
 }

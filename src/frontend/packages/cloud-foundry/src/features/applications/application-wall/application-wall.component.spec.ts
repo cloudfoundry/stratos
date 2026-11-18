@@ -1,20 +1,22 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
-import { importProvidersFrom, provideZonelessChangeDetection, signal } from '@angular/core';
+import { importProvidersFrom, provideZonelessChangeDetection, Signal, signal, WritableSignal } from '@angular/core';
 import { provideHttpClient } from '@angular/common/http';
 import { provideHttpClientTesting } from '@angular/common/http/testing';
 import { ActivatedRoute } from '@angular/router';
 import { provideRouter } from '@angular/router';
-import { of } from 'rxjs';
 import { describe, it, expect, beforeEach, vi } from 'vitest';
+import { appLabelsFilterText } from '../../../shared/signal-list-configs/app/app-labels';
 
-import { TabNavService } from '@stratosui/core';
+import { CurrentUserPermissionsService, TabNavService, TailwindSnackBarService } from '@stratosui/core';
 import { STORE_TEST_PROVIDERS } from '@stratosui/store/testing';
+import { CF_FAILURE_DETAIL, cfRequestFailure, snackText } from '@test-framework/cf';
 import { generateCfBaseTestModulesNoShared } from '@test-framework/cloud-foundry-endpoint-service.helper';
 
 import { ApplicationWallComponent } from './application-wall.component';
 import { countDuplicateUrlEndpoints } from '@stratosui/store';
 import { CfAppsSignalConfigService } from '../../../shared/signal-list-configs/app/cf-apps-signal-config.service';
 import { CloudFoundryService } from '../../../shared/data-services/cloud-foundry.service';
+import { CfCurrentUserPermissions } from '../../../user-permissions/cf-user-permissions-checkers';
 
 function makeStubSignalConfigService() {
   const pageIndex = signal(0);
@@ -79,13 +81,14 @@ describe('ApplicationWallComponent', () => {
   let component: ApplicationWallComponent;
   let fixture: ComponentFixture<ApplicationWallComponent>;
   let stubSignalConfig: ReturnType<typeof makeStubSignalConfigService>;
+  // Source for the wall's own create-application permission check, so a
+  // spec can emit on it after the wall is gone.
+  let canCreate: WritableSignal<boolean>;
 
   beforeEach(async () => {
     stubSignalConfig = makeStubSignalConfigService();
-    // Stub CloudFoundryService so its observables emit and complete
-    // synchronously. The real service pulls from a PaginationMonitor that
-    // never emits in isolation, which makes ngOnInit's
-    // firstValueFrom(connectedCFEndpoints$) hang / throw EmptyError.
+    // Stub CloudFoundryService with fixed endpoint signals; the real one
+    // reads EndpointsDataService, which holds no endpoints in isolation.
     const endpoints: any[] = [
       {
         guid: 'cnsi-1',
@@ -96,10 +99,10 @@ describe('ApplicationWallComponent', () => {
       },
     ];
     const stubCloudFoundryService = {
-      cFEndpoints$: of(endpoints),
-      connectedCFEndpoints$: of(endpoints),
-      hasConnectedCFEndpoints$: of(true),
-      hasRegisteredCFEndpoints$: of(true),
+      cfEndpoints: signal(endpoints),
+      connectedCFEndpoints: signal(endpoints),
+      hasConnectedCFEndpoints: signal(true),
+      hasRegisteredCFEndpoints: signal(true),
     };
     await TestBed.configureTestingModule({
       imports: [
@@ -127,9 +130,17 @@ describe('ApplicationWallComponent', () => {
       ]
     }).compileComponents();
 
+    canCreate = signal(false);
+    const perms = TestBed.inject(CurrentUserPermissionsService);
+    const realCan = perms.can.bind(perms);
+    vi.spyOn(perms, 'can').mockImplementation(((action: unknown, ...rest: unknown[]) =>
+      action === CfCurrentUserPermissions.APPLICATION_CREATE
+        ? canCreate
+        : (realCan as (...a: unknown[]) => Signal<boolean>)(action, ...rest)) as typeof perms.can);
+
     fixture = TestBed.createComponent(ApplicationWallComponent);
     component = fixture.componentInstance;
-    fixture.detectChanges();
+    await fixture.whenStable();
   });
 
   it('should be created', () => {
@@ -204,6 +215,45 @@ describe('ApplicationWallComponent', () => {
     expect(range).toBeDefined();
     expect(range!.valueType).toBe('date');
     expect(range!.selected).toBe(stubSignalConfig.lastRefreshedRange);
+  });
+
+  it('exposes and renders application labels', async () => {
+    await component.ngOnInit();
+    const cfg = component.listConfig()!;
+    expect(cfg.filterColumns).toContain('labels');
+    expect(stubSignalConfig.registerFilterExtractor).toHaveBeenCalledWith('labels', appLabelsFilterText);
+    const column = cfg.columns.find(c => c.key === 'labels')!;
+    expect(column.render({ labels: { team: 'platform', empty: '' } } as any)).toBe('team=platform, empty=');
+    expect(column.render({} as any)).toBe('—');
+  });
+
+  it('shows Create Application while the create permission holds', () => {
+    expect(component.createApplicationAction.visible!()).toBe(false);
+    canCreate.set(true);
+    expect(component.createApplicationAction.visible!()).toBe(true);
+    canCreate.set(false);
+    expect(component.createApplicationAction.visible!()).toBe(false);
+  });
+
+  it('says why a row action failed in Cloud Foundry\'s words', async () => {
+    const snackError = vi.spyOn(TestBed.inject(TailwindSnackBarService), 'error').mockImplementation(() => undefined as never);
+    stubSignalConfig.stopApp.mockRejectedValueOnce(cfRequestFailure());
+    await component.ngOnInit();
+    const row: any = { cnsiGuid: 'cnsi-1', guid: 'app-1', name: 'test', state: 'STARTED', spaceGuid: 'sp', instances: 1 };
+    component.listConfig()!.columns.find(c => c.kind === 'actions')!.actions!(row).find(a => a.label === 'Stop')!.invoke(row);
+    await vi.waitFor(() => expect(snackError).toHaveBeenCalled());
+
+    expect(snackText(snackError.mock.calls[0][0])).toBe(`Stop failed: ${CF_FAILURE_DETAIL}`);
+  });
+
+  it('scopes stats polling to the wall: passes its own DestroyRef', async () => {
+    stubSignalConfig.startStatsPolling.mockClear();
+    await component.ngOnInit();
+    const host = stubSignalConfig.startStatsPolling.mock.calls[0]?.[0] as { destroyed: boolean } | undefined;
+    expect(host?.destroyed).toBe(false);
+
+    fixture.destroy();
+    expect(host?.destroyed).toBe(true);
   });
 });
 

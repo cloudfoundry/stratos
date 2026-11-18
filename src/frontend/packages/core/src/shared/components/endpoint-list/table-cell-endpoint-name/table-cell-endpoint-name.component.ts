@@ -1,11 +1,7 @@
-import { CommonModule } from '@angular/common';
-import { ChangeDetectionStrategy, Component, Injector, Input, inject } from '@angular/core';
-import { toObservable } from '@angular/core/rxjs-interop';
+import { ChangeDetectionStrategy, Component, computed, inject } from '@angular/core';
 import { CustomTooltipDirective } from '../../custom-tooltip/custom-tooltip.directive';
 import { RouterModule } from '@angular/router';
 import { entityCatalog, EndpointModel, EndpointsDataService } from '@stratosui/store';
-import { Observable } from 'rxjs';
-import { filter, map } from 'rxjs/operators';
 
 import { EndpointsService } from '../../../../core/endpoints.service';
 import { TableCellCustom } from '../../signal-list/cell-base';
@@ -20,7 +16,6 @@ export interface RowWithEndpointId {
   templateUrl: './table-cell-endpoint-name.component.html',
   standalone: true,
   imports: [
-    CommonModule,
     RouterModule,
     CustomIconComponent,
     CustomTooltipDirective
@@ -30,27 +25,27 @@ export interface RowWithEndpointId {
 export class TableCellEndpointNameComponent extends TableCellCustom<EndpointModel | RowWithEndpointId>  {
 
   private endpointsData = inject(EndpointsDataService);
-  private injector = inject(Injector);
+  private readonly endpointId = computed<string | undefined>(() => {
+    const row = this.row() as any;
+    return row['endpointId'] || row['guid'];
+  });
 
-  public endpoint$!: Observable<any>;
-
-  @Input()
-  set row(row: EndpointModel | RowWithEndpointId) {
-    super.row = row;
-    /* tslint:disable-next-line:no-string-literal */
-    const id = (row as any)['endpointId'] || (row as any)['guid'];
-    // W36-B Wave 3: read endpoint via EndpointsDataService signal
-    // bridge instead of legacy EntityMonitor.entity$.
-    this.endpoint$ = toObservable(this.endpointsData.endpointById(id), { injector: this.injector }).pipe(
-      filter((data): data is EndpointModel => !!data),
-      map(data => {
-        const ep = data.cnsi_type ? entityCatalog.getEndpoint(data.cnsi_type, data.sub_type)?.definition : undefined;
-        return {
-          ...data,
-          canShowLink: data.connectionStatus === 'connected' || !!ep?.unConnectable,
-          link: EndpointsService.getLinkForEndpoint(data)
-        };
-      })
-    );
-  }
+  // Built once and keyed on the row's id, so a new row swaps the id instead
+  // of adding another endpoint watcher that lives until the cell is destroyed.
+  public readonly endpoint = computed(() => {
+    const id = this.endpointId();
+    const data = id ? this.endpointsData.endpoints().get(id) : undefined;
+    if (!data) {
+      return undefined;
+    }
+    const ep = data.cnsi_type ? entityCatalog.getEndpoint(data.cnsi_type, data.sub_type)?.definition : undefined;
+    // A type with no page of its own (GitHub, the autoscaler) has no link;
+    // like the endpoint card, show its name as plain text.
+    const link = EndpointsService.getLinkForEndpoint(data);
+    return {
+      ...data,
+      canShowLink: !!link && (data.connectionStatus === 'connected' || !!ep?.unConnectable),
+      link
+    };
+  });
 }

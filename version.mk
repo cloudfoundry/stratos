@@ -6,7 +6,7 @@
 #                 nearest git tag, leading 'v' stripped, patch incremented
 #                 ("the next release"). Repos with their own source set it
 #                 before or after the include, e.g.:
-#                   VERSION_CMD := node -p "require('./package.json').version"
+#                   VERSION_CMD := bun -p "require('./package.json').version"
 #   BUILD_TZ      Timezone for BUILD_DATE_TZ: 'local' (default) or a zone
 #                 name (e.g. UTC, America/New_York).
 #   _HIDE         Internal-name prefix, default '_' (hides internals from
@@ -86,7 +86,10 @@ $(_HIDE)BUILD_VCS_URL     := $(shell git remote get-url origin 2>/dev/null || ec
 $(_HIDE)BUILD_VCS_ID      := $(shell git rev-parse --short HEAD 2>/dev/null || echo "unknown")
 $(_HIDE)BUILD_VCS_ID_FULL := $(shell git rev-parse HEAD 2>/dev/null || echo "unknown")
 $(_HIDE)BUILD_VCS_ID_DATE := $(shell TZ=UTC0 git log -1 --date=format-local:"%Y-%m-%dT%H:%M:%SZ" --format=%cd 2>/dev/null || echo "unknown")
-$(_HIDE)BUILD_VCS_BRANCH  := $(shell git rev-parse --abbrev-ref HEAD 2>/dev/null || echo "unknown")
+# A detached checkout (a release build checks out its tag) has no branch;
+# name the tag on HEAD instead, else the short commit. Keep in step with
+# build/store-git-metadata.cjs, which records the same for index.html.
+$(_HIDE)BUILD_VCS_BRANCH  := $(shell git symbolic-ref -q --short HEAD 2>/dev/null || git describe --tags --exact-match HEAD 2>/dev/null || git rev-parse --short HEAD 2>/dev/null || echo "unknown")
 
 # ── Dump action ──────────────────────────────────────────────
 define dump.version
@@ -104,5 +107,6 @@ define dump.version
 	@echo "BUILD_VCS_URL     $($(_HIDE)BUILD_VCS_URL)"
 	@echo "BUILD_VCS_ID      $($(_HIDE)BUILD_VCS_ID)"
 	@echo "BUILD_VCS_ID_DATE $($(_HIDE)BUILD_VCS_ID_DATE)"
+	@echo "BUILD_VCS_BRANCH  $($(_HIDE)BUILD_VCS_BRANCH)"
 	$(dump.version.extra)
 endef

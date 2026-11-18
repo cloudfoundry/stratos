@@ -2,8 +2,10 @@
 package cloudfoundry
 
 import (
+	"context"
 	"log/slog"
 	"net/http"
+	"sort"
 
 	"github.com/fivetwenty-io/capi/v3/pkg/capi"
 	"github.com/labstack/echo/v5"
@@ -28,12 +30,11 @@ import (
 //     The included resources arrive on the v3 ListResponse
 //     via ListResponse[T].Included (per the fork fix in
 //     v3.216.4-fix-apps-delete.10).
-//   - details  — TODO: B-fallback batch lookups for service_plan +
-//     service_offering + service_broker (v3's binding
-//     include only reaches `app, service_instance`, so the
-//     broker chain needs a follow-up SI fetch with the full
-//     include chain). Today details degrades to summary;
-//     no consumer requests details on bindings yet.
+//   - details  — summary + the service plan and offering of managed
+//     instances, resolved by one follow-up service-instances
+//     list (v3's binding include only reaches `app,
+//     service_instance`). The broker is not filled yet; today
+//     details equals summary.
 //
 // Soft-fail on the include join: a malformed entry is skipped and the
 // row falls back to the binding's own name; the response still ships
@@ -101,13 +102,15 @@ func (c *CloudFoundrySpecification) getAppServiceBindings(ctx *echo.Context) err
 	// Decode the included joined resources for summary+.
 	siByGUID := map[string]capi.ServiceInstance{}
 	appByGUID := map[string]capi.App{}
+	planByInstance := map[string]instancePlan{}
 	if mode == ReturnSummary || mode == ReturnDetails {
 		siByGUID, appByGUID = bindingJoinsFromIncluded(rawBindings)
+		planByInstance = servicePlansForInstances(reqCtx, cfClient, siByGUID)
 	}
 
 	out := make([]StServiceCredentialBinding, 0, len(bindings))
 	for _, b := range bindings {
-		out = append(out, toStServiceCredentialBinding(b, cnsiGUID, siByGUID, appByGUID, mode))
+		out = append(out, toStServiceCredentialBinding(b, cnsiGUID, siByGUID, appByGUID, planByInstance, mode))
 	}
 
 	return ctx.JSON(http.StatusOK, StratosPagedResponse[StServiceCredentialBinding]{
@@ -191,13 +194,15 @@ func (c *CloudFoundrySpecification) getServiceInstanceServiceBindings(ctx *echo.
 
 	siByGUID := map[string]capi.ServiceInstance{}
 	appByGUID := map[string]capi.App{}
+	planByInstance := map[string]instancePlan{}
 	if mode == ReturnSummary || mode == ReturnDetails {
 		siByGUID, appByGUID = bindingJoinsFromIncluded(rawBindings)
+		planByInstance = servicePlansForInstances(reqCtx, cfClient, siByGUID)
 	}
 
 	out := make([]StServiceCredentialBinding, 0, len(bindings))
 	for _, b := range bindings {
-		out = append(out, toStServiceCredentialBinding(b, cnsiGUID, siByGUID, appByGUID, mode))
+		out = append(out, toStServiceCredentialBinding(b, cnsiGUID, siByGUID, appByGUID, planByInstance, mode))
 	}
 
 	return ctx.JSON(http.StatusOK, StratosPagedResponse[StServiceCredentialBinding]{
@@ -228,14 +233,15 @@ func bindingJoinsFromIncluded(list *capi.ListResponse[capi.ServiceCredentialBind
 //   - base:    guid + cnsiGuid + type + serviceInstance.{guid} +
 //     (app.{guid} for type=app) + createdAt
 //   - summary: + name + serviceInstance.{name,type} + app.{name?} +
-//     lastOperation + syslogDrainUrl
-//   - details: + servicePlan / serviceOffering / broker (TODO — not
-//     implemented; degrades to summary today).
+//     servicePlan / serviceOffering (managed instances only)
+//   - details: + broker (TODO — not implemented; degrades to summary
+//     today).
 func toStServiceCredentialBinding(
 	b capi.ServiceCredentialBinding,
 	cnsiGUID string,
 	siByGUID map[string]capi.ServiceInstance,
 	appByGUID map[string]capi.App,
+	planByInstance map[string]instancePlan,
 	mode ReturnMode,
 ) StServiceCredentialBinding {
 	siGUID := relationshipGUID(b.Relationships.ServiceInstance)
@@ -270,10 +276,72 @@ func toStServiceCredentialBinding(
 		out.ServiceInstance.Name = b.Name
 	}
 
+	if ip, ok := planByInstance[siGUID]; ok {
+		out.ServicePlan = ip.plan
+		out.ServiceOffering = ip.offering
+	}
+
 	if out.App != nil {
 		if app, ok := appByGUID[out.App.GUID]; ok {
 			out.App.Name = app.Name
 		}
+	}
+	return out
+}
+
+// instancePlan is a managed instance's resolved plan and the plan's
+// offering, as shown on the app Services tab.
+type instancePlan struct {
+	plan     *StServicePlanRef
+	offering *StServiceOfferingRef
+}
+
+// servicePlansForInstances resolves plan and offering names for the
+// managed instances in siByGUID, keyed by instance guid. A binding's
+// include reaches only `app, service_instance`, and /v3/service_instances
+// rejects ?include=, so one follow-up list uses the same fields[] chain
+// as the instances list. User-provided instances have no plan and are
+// not looked up. Soft-fail: an error logs a warning and returns an empty
+// map, leaving the rows without plan and offering.
+func servicePlansForInstances(ctx context.Context, cfClient capi.Client, siByGUID map[string]capi.ServiceInstance) map[string]instancePlan {
+	out := map[string]instancePlan{}
+	guids := make([]string, 0, len(siByGUID))
+	for guid, si := range siByGUID {
+		if si.Type == "managed" {
+			guids = append(guids, guid)
+		}
+	}
+	if len(guids) == 0 {
+		return out
+	}
+	sort.Strings(guids)
+
+	params := applyServiceInstanceIncludeFields(
+		capi.NewQueryParams().WithPerPage(len(guids)).WithFilter("guids", guids...))
+	list, err := cfClient.ServiceInstances().List(ctx, params)
+	if err != nil {
+		slog.Warn("service_credential_bindings: could not look up service plans", "err", err)
+		return out
+	}
+	inc := resolveInstanceIncludes(list, ReturnSummary)
+	for _, si := range list.Resources {
+		if si.Relationships.ServicePlan == nil {
+			continue
+		}
+		planGUID := relationshipGUID(*si.Relationships.ServicePlan)
+		p, ok := inc.plans[planGUID]
+		if !ok {
+			continue
+		}
+		free := p.Free
+		ip := instancePlan{plan: &StServicePlanRef{GUID: planGUID, Name: p.Name, Free: &free}}
+		if og := relationshipGUID(p.Relationships.ServiceOffering); og != "" {
+			ip.offering = &StServiceOfferingRef{GUID: og}
+			if o, ok := inc.offerings[og]; ok {
+				ip.offering.Name = o.Name
+			}
+		}
+		out[si.GUID] = ip
 	}
 	return out
 }

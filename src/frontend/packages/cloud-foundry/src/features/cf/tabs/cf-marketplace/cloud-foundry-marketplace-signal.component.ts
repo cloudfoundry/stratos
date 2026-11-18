@@ -1,8 +1,6 @@
 import { CommonModule } from '@angular/common';
-import { Component, ChangeDetectionStrategy, OnInit, Signal, WritableSignal, inject, signal } from '@angular/core';
-import { toSignal } from '@angular/core/rxjs-interop';
+import { Component, ChangeDetectionStrategy, OnInit, Signal, WritableSignal, inject, signal, computed } from '@angular/core';
 import { Router, RouterModule } from '@angular/router';
-import { map } from 'rxjs/operators';
 
 import {
   CurrentUserPermissionsService,
@@ -50,11 +48,10 @@ export class CloudFoundryMarketplaceSignalComponent implements OnInit {
 
   /** Total offering count for the L5 sub-nav. */
   public totalServiceOfferings!: Signal<number>;
-  /** Reactive permission flag for the Add Service Instance button. Built
-   *  in the constructor (injection context) so toSignal() resolves. */
-  public readonly canCreateServiceInstance: Signal<boolean> = toSignal(
-    this.permissionsService.can(CfCurrentUserPermissions.SERVICE_INSTANCE_CREATE, this.cfEndpointService.cfGuid),
-    { initialValue: false },
+  /** Reactive permission flag for the Add Service Instance button. */
+  public readonly canCreateServiceInstance: Signal<boolean> = this.permissionsService.can(
+    CfCurrentUserPermissions.SERVICE_INSTANCE_CREATE,
+    this.cfEndpointService.cfGuid,
   );
   /** L5 primary action — navigates to the add-service-instance wizard
    *  with the managed-service tile pre-selected (the marketplace context
@@ -69,25 +66,8 @@ export class CloudFoundryMarketplaceSignalComponent implements OnInit {
       { queryParams: { 'auto-select-endpoint': this.cfEndpointService.cfGuid } }),
   };
 
-  private readonly favoriteOfferingRowKeys: Signal<ReadonlySet<string>> = toSignal(
-    this.userFavoriteManager.getAllFavorites().pipe(
-      map(([groups, entities]) => {
-        const out = new Set<string>();
-        if (!groups || !entities) return out;
-        for (const epFavGuid in groups) {
-          const g = groups[epFavGuid];
-          if (!g?.entitiesIds) continue;
-          for (const favId of g.entitiesIds) {
-            const fav = entities[favId];
-            if (fav && fav.entityType === serviceEntityType && fav.endpointType === 'cf') {
-              out.add(`${fav.endpointId}:${fav.entityId}`);
-            }
-          }
-        }
-        return out;
-      }),
-    ),
-    { initialValue: new Set<string>() },
+  private readonly favoriteOfferingRowKeys: Signal<ReadonlySet<string>> = computed(() =>
+    this.userFavoriteManager.entityFavoriteKeys('cf', [serviceEntityType]),
   );
 
   private toggleOfferingFavorite(o: StServiceOffering): void {

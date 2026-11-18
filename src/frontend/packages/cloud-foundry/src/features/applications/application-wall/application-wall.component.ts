@@ -1,11 +1,8 @@
 import { CommonModule, DatePipe } from '@angular/common';
 import {
-  Component, OnInit, ChangeDetectionStrategy, Signal, computed, inject, signal, WritableSignal, Injector, effect,
+  Component, OnInit, ChangeDetectionStrategy, DestroyRef, Signal, computed, inject, signal, WritableSignal, Injector, effect,
 } from '@angular/core';
-import { toSignal } from '@angular/core/rxjs-interop';
 import { ActivatedRoute, Router, RouterModule } from '@angular/router';
-import { Observable, firstValueFrom } from 'rxjs';
-import { filter, map, take } from 'rxjs/operators';
 
 import {
   ConfirmationDialogConfig,
@@ -28,15 +25,18 @@ import {
 import {
   UserFavorite,
   UserFavoriteManager,
+  leadPieces,
 } from '@stratosui/store';
 import { applicationEntityType } from '../../../cf-entity-types';
 import { CfEndpointsMissingComponent } from '../../../shared/components/cf-endpoints-missing/cf-endpoints-missing.component';
 import { CfAppsSignalConfigService } from '../../../shared/signal-list-configs/app/cf-apps-signal-config.service';
+import { appLabelsColumn, appLabelsFilterText } from '../../../shared/signal-list-configs/app/app-labels';
 import { CloudFoundryService } from '../../../shared/data-services/cloud-foundry.service';
 import { CfCurrentUserPermissions } from '../../../user-permissions/cf-user-permissions-checkers';
 import { goToAppWall } from '../../cf/cf.helpers';
 import type { StApp } from '../../../services/endpoint-data/stratos-types';
 import { AppAreaLoaderComponent } from '@stratosui/core';
+import { unknownHowOf, unknownOutcomeMessage } from '../../../services/async-jobs/unknown-outcome-message';
 
 @Component({
   selector: 'app-application-wall',
@@ -65,31 +65,15 @@ export class ApplicationWallComponent implements OnInit {
   private confirmDialog = inject(ConfirmationDialogService);
   private snackBar = inject(TailwindSnackBarService);
   private readonly injector = inject(Injector);
+  private readonly destroyRef = inject(DestroyRef);
 
   // Row keys ({cnsiGuid}:{appGuid}) for apps the user has favorited.
   // Derived from UserFavoriteManager's combined (groups, entities) stream
   // and exposed as a Signal so SignalListColumn.favorite can subscribe to
   // it directly. Recomputes when a favorite is added/removed anywhere,
   // which re-renders the affected star cells under OnPush.
-  private readonly favoriteAppRowKeys: Signal<ReadonlySet<string>> = toSignal(
-    this.userFavoriteManager.getAllFavorites().pipe(
-      map(([groups, entities]) => {
-        const out = new Set<string>();
-        if (!groups || !entities) return out;
-        for (const epFavGuid in groups) {
-          const g = groups[epFavGuid];
-          if (!g?.entitiesIds) continue;
-          for (const favId of g.entitiesIds) {
-            const fav = entities[favId];
-            if (fav && fav.entityType === applicationEntityType && fav.endpointType === 'cf') {
-              out.add(`${fav.endpointId}:${fav.entityId}`);
-            }
-          }
-        }
-        return out;
-      }),
-    ),
-    { initialValue: new Set<string>() },
+  private readonly favoriteAppRowKeys: Signal<ReadonlySet<string>> = computed(() =>
+    this.userFavoriteManager.entityFavoriteKeys('cf', [applicationEntityType]),
   );
 
   private toggleAppFavorite(app: StApp): void {
@@ -108,12 +92,18 @@ export class ApplicationWallComponent implements OnInit {
     const state = (app.state ?? '').toUpperCase();
     const isStarted = state === 'STARTED';
     const isStopped = state === 'STOPPED';
-    const runAction = async (label: string, op: () => Promise<void>) => {
+    // A delete resolves 'unknown' when it ended with a result nobody can
+    // determine: the row stays and the message says where to look.
+    const runAction = async (label: string, op: () => Promise<unknown>, name?: string) => {
       try {
-        await op();
+        const outcome = await op();
         await this.appsConfig.refresh();
-      } catch (err: any) {
-        this.snackBar.error(`${label} failed: ${err?.message ?? err}`);
+        const how = unknownHowOf(outcome);
+        if (how) {
+          this.snackBar.error(unknownOutcomeMessage(name ? `${label} "${name}"` : label, 'The Applications list', how));
+        }
+      } catch (err: unknown) {
+        this.snackBar.error(leadPieces(`${label} failed`, err));
       }
     };
     const actions: SignalListRowAction<StApp>[] = [];
@@ -149,22 +139,28 @@ export class ApplicationWallComponent implements OnInit {
           true,
         );
         this.confirmDialog.open(confirm, async () => {
-          await runAction('Delete', () => this.appsConfig.deleteApp(app.cnsiGuid, app.guid));
+          await runAction('Delete', () => this.appsConfig.deleteApp(app.cnsiGuid, app.guid, app.name), app.name);
         });
       },
     });
     return actions;
   };
 
-  public cfIds$!: Observable<string[]>;
+  // CF endpoint ids, for the page header's endpoint errors; none bound while
+  // redirecting to an endpoint's wall.
+  public readonly cfIds = computed(() => this.redirected ? undefined : this.cloudFoundryService.cfEndpoints()
+    .map(endpoint => endpoint.guid)
+    .filter((guid): guid is string => guid !== undefined));
 
   /**
    * Reactive permission flag for the L5 "+ Create Application" button.
    * Mirrors the previous *appCfUserPermission directive check, but
    * exposed as a signal so the L5 sub-nav can hide/show the button via
    * its `visible` input without depending on directive timing.
+   * No endpoint/org/space scope: true if any connected CF allows it.
    */
-  public canCreateApplication = signal<boolean>(false);
+  public readonly canCreateApplication: Signal<boolean> =
+    inject(CurrentUserPermissionsService).can(CfCurrentUserPermissions.APPLICATION_CREATE);
 
   /**
    * Total app count for the L5 sub-nav. Assigned in ngOnInit once
@@ -182,7 +178,6 @@ export class ApplicationWallComponent implements OnInit {
    */
   public createApplicationAction!: ListSubNavAddAction;
 
-  public haveConnectedCf$!: Observable<boolean>;
 
   // Config for <app-signal-list>. Populated in ngOnInit after the signal
   // config service is initialized with the connected CF GUIDs. Using a
@@ -192,10 +187,8 @@ export class ApplicationWallComponent implements OnInit {
   private redirected = false;
 
   constructor() {
-    const cloudFoundryService = this.cloudFoundryService;
     const activatedRoute = inject(ActivatedRoute);
     const router = inject(Router);
-    const currentUserPermissionsService = inject(CurrentUserPermissionsService);
 
     // If we have an endpoint ID, select it and redirect
     const { endpointId } = activatedRoute.snapshot.params;
@@ -205,19 +198,7 @@ export class ApplicationWallComponent implements OnInit {
       return;
     }
 
-    this.cfIds$ = cloudFoundryService.cFEndpoints$.pipe(
-      map(endpoints => endpoints
-        .map(endpoint => endpoint.guid)
-        .filter((guid): guid is string => guid !== undefined)),
-    );
 
-    // Resolve APPLICATION_CREATE for the current user; mirror the previous
-    // directive call (no endpoint/org/space scope — true if any connected
-    // CF allows it). Push the result into a signal the L5 button reads.
-    currentUserPermissionsService.can(CfCurrentUserPermissions.APPLICATION_CREATE).subscribe({
-      next: can => this.canCreateApplication.set(can),
-      error: err => console.error('Error resolving create-application permission:', err),
-    });
     this.createApplicationAction = {
       label: 'Create Application',
       icon: 'add',
@@ -225,22 +206,14 @@ export class ApplicationWallComponent implements OnInit {
       invoke: () => router.navigate(['/applications/new/']),
     };
 
-    this.haveConnectedCf$ = cloudFoundryService.connectedCFEndpoints$.pipe(
-      map(endpoints => !!endpoints && endpoints.length > 0)
-    );
   }
 
-  async ngOnInit(): Promise<void> {
+  ngOnInit(): void {
     if (this.redirected) {
       return;
     }
     // Resolve connected CF guids once, then initialize the signal config.
-    const connected = await firstValueFrom(
-      this.cloudFoundryService.connectedCFEndpoints$.pipe(
-        filter(endpoints => !!endpoints),
-        take(1),
-      ),
-    );
+    const connected = this.cloudFoundryService.connectedCFEndpoints();
     const cnsiGuids = (connected ?? [])
       .map(ep => ep.guid)
       .filter((guid): guid is string => guid !== undefined);
@@ -364,9 +337,9 @@ export class ApplicationWallComponent implements OnInit {
         ? ['/cloud-foundry', app.cnsiGuid, 'organizations', app.orgGuid, 'spaces', app.spaceGuid]
         : undefined;
       return [
-        { text: cfName, link: cfLink },
-        { text: orgName, link: orgLink },
-        { text: spaceName, link: spaceLink },
+        { text: cfName, link: cfLink, label: 'Endpoint' },
+        { text: orgName, link: orgLink, label: 'Organization' },
+        { text: spaceName, link: spaceLink, label: 'Space' },
       ];
     };
     const buildConfig = (): SignalListConfig<StApp> => {
@@ -423,6 +396,7 @@ export class ApplicationWallComponent implements OnInit {
             widthHint: '18rem',
           },
           ...(withStack ? [stackColumn] : []),
+          appLabelsColumn,
           {
             header: 'Created', key: 'createdAt', sortField: 'createdAt',
             render: (app: StApp) => ApplicationWallComponent.formatDate(app.createdAt),
@@ -457,8 +431,8 @@ export class ApplicationWallComponent implements OnInit {
         },
         nameFilter: this.appsConfig.nameFilter,
         filterColumns: withStack
-          ? ['name', 'state', 'cfOrgSpace', 'stackName', 'lastRefreshedAt']
-          : ['name', 'state', 'cfOrgSpace', 'lastRefreshedAt'],
+          ? ['name', 'state', 'cfOrgSpace', 'stackName', 'labels', 'lastRefreshedAt']
+          : ['name', 'state', 'cfOrgSpace', 'labels', 'lastRefreshedAt'],
         // Status has no visibility gate (always ≥2 possible states) so its
         // entry is unconditional; Stack's is only wired while its column
         // is actually in filterColumns — otherwise a filterField left
@@ -501,6 +475,7 @@ export class ApplicationWallComponent implements OnInit {
     this.appsConfig.registerFilterExtractor('name', (app: StApp) => app.name ?? '');
     this.appsConfig.registerFilterExtractor('state', stateLabel);
     this.appsConfig.registerFilterExtractor('cfOrgSpace', renderCfOrgSpace);
+    this.appsConfig.registerFilterExtractor('labels', appLabelsFilterText);
     if (cnsiGuids.length > 0) {
       void this.appsConfig.loadAll();
     }
@@ -508,7 +483,7 @@ export class ApplicationWallComponent implements OnInit {
     // ticks every 30s so STARTING / CRASHED instances drift toward their
     // terminal state without user input; it ALSO re-fetches whenever
     // pagedItems changes so navigating pages fills the column quickly.
-    this.appsConfig.startStatsPolling();
+    this.appsConfig.startStatsPolling(this.destroyRef);
   }
 
   static formatMb(mb: number | null | undefined): string {

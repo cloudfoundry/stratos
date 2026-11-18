@@ -42,7 +42,7 @@ describe('CfRoutesSignalConfigService — route list fetch guard', () => {
       providers: [
         provideZonelessChangeDetection(),
         { provide: HttpClient, useValue: http },
-        { provide: EndpointDataRegistry, useValue: { acquire: vi.fn(() => eds), peek: vi.fn(() => eds), release: vi.fn() } },
+        { provide: EndpointDataRegistry, useValue: { acquire: vi.fn(() => eds), peek: vi.fn(() => eds) } },
         { provide: EntityDeleteController, useValue: {} },
         CfRoutesSignalConfigService,
       ],

@@ -1,27 +1,61 @@
 <div class="connect">
+  @if (endpointAddress()) {
+    <div class="connect__strip flex flex-wrap items-center gap-2 border-l-2 border-success pl-3 mb-4 text-content-text">
+      <span>Registered at {{ endpointAddress() }}</span>
+      @if (caBadge(); as badge) {
+        <span class="inline-block px-2 py-0.5 rounded text-xs font-medium"
+          [class]="badge === 'expired' ? 'bg-danger-50 text-danger-900 dark:bg-danger-900/40 dark:text-danger-100' : 'bg-warning-50 text-warning-900 dark:bg-warning-900/40 dark:text-warning-100'">
+          {{ badge === 'expired' ? 'CA expired' : 'CA expiring' }}
+        </span>
+      }
+      <button type="button" class="text-sm underline ml-auto" (click)="review.emit()">Review</button>
+    </div>
+  }
   <div class="connect__option">
     <p class="connect__successful-reg-text text-[var(--content-text)]">
-      <b>{{ connectService?.config.name }}</b> has been successfully registered.
+      @if (fromConnect()) {
+        <b>{{ connectService()?.config.name }}</b> is registered.
+      } @else {
+        <b>{{ connectService()?.config.name }}</b> has been successfully registered.
+      }
     </p>
-    <app-checkbox class="connect__checkbox" [(ngModel)]="doConnect">Connect to
-      <b>{{ connectService?.config.name }}</b> now
-      (optional).
-    </app-checkbox>
-    <div class="connect__subtext text-[var(--content-muted)]">You may connect this endpoint at a later date from the
-      endpoints page.
-    </div>
+    <!-- Opened from a connect, the connect is what the user came for: not optional, not for later. -->
+    @if (fromConnect()) {
+      <app-checkbox class="connect__checkbox" [(ngModel)]="doConnect">Connect to
+        <b>{{ connectService()?.config.name }}</b> now.
+      </app-checkbox>
+    } @else {
+      <app-checkbox class="connect__checkbox" [(ngModel)]="doConnect">Connect to
+        <b>{{ connectService()?.config.name }}</b> now
+        (optional).
+      </app-checkbox>
+      <div class="connect__subtext text-content-muted">You may connect this endpoint at a later date from the
+        endpoints page.
+      </div>
+    }
   </div>
+  @if (doConnect) {
   <div>
-    <div class="connect__title">
-      <span class="connect__title-inner text-[var(--content-text)]">Connection Credentials</span>
-      @if (helpDocumentUrl) {
-        <button [appBlur]="true" class="connect__title-help btn btn-icon" type="button" (click)="showHelp()">
+    <!-- The gap and shrink-0 keep the help button off the title's end -->
+    <div class="connect__title gap-2">
+      <span class="connect__title-inner min-w-0 text-[var(--content-text)]">{{ credentialsTitle() }}</span>
+      @if (helpDocumentUrl()) {
+        <button [appBlur]="true" class="connect__title-help btn btn-icon shrink-0" type="button" aria-label="Help on connecting" (click)="showHelp()">
           <app-custom-icon>help</app-custom-icon>
         </button>
       }
     </div>
-    <app-connect-endpoint [disabled]="!doConnect" class="stepper-form" (valid)="valid = $event"
-      (authType)="helpDocumentUrl = $event.help" [connectService]="connectService">
+    <app-connect-endpoint class="stepper-form" (valid)="valid = $event"
+      (authType)="authTypeChanged($event)" (submitted)="submitted.emit()" [connectService]="connectService()">
     </app-connect-endpoint>
+    @if (connectService(); as cs) {
+      @if (!!(cs.connectingError$ | async) && (cs.isBusy$ | async) === false && stillConnected()) {
+        <div class="flex items-center gap-2 text-xs text-content-muted">
+          <span aria-hidden="true" class="material-icons text-base">info</span>
+          <span>Your existing connection is unaffected and remains active.</span>
+        </div>
+      }
+    }
   </div>
+  }
 </div>

@@ -1,6 +1,7 @@
 import { HttpClient, HttpHandler } from '@angular/common/http';
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { Signal, provideZonelessChangeDetection, signal } from '@angular/core';
+import { StratosError } from '../../../services/endpoint-data/kube-types';
 import { describe, it, expect, beforeEach, afterEach, beforeAll, afterAll, vi } from 'vitest';
 
 import { TabNavService } from '../../../../../core/src/tab-nav.service';
@@ -12,6 +13,8 @@ import { KubePodDataService } from '../../../services/domain-data/kube-pod-data.
 import { KubeNodeDataService } from '../../../services/domain-data/kube-node-data.service';
 import { KubeNamespaceDataService } from '../../../services/domain-data/kube-namespace-data.service';
 import { KubernetesSummaryTabComponent } from './kubernetes-summary.component';
+import { By } from '@angular/platform-browser';
+import { CardNumberMetricComponent } from '@stratosui/core';
 
 describe('KubernetesSummaryTabComponent', () => {
   let component: KubernetesSummaryTabComponent;
@@ -20,9 +23,20 @@ describe('KubernetesSummaryTabComponent', () => {
   const podRefresh = vi.fn().mockResolvedValue(undefined);
   const nodeRefresh = vi.fn().mockResolvedValue(undefined);
   const namespaceRefresh = vi.fn().mockResolvedValue(undefined);
-  const podStub = { podsInCluster: (_g: string) => signal([]) as Signal<unknown[]>, refresh: podRefresh };
-  const nodeStub = { nodesInCluster: (_g: string) => signal([]) as Signal<unknown[]>, refresh: nodeRefresh };
-  const namespaceStub = { namespacesForEndpoint: (_g: string) => signal([]) as Signal<unknown[]>, refresh: namespaceRefresh };
+  const nodeErrors = signal<StratosError[]>([]);
+  const nodes = signal<unknown[]>([]);
+  const podStub = {
+    podsInCluster: (_g: string) => signal([]) as Signal<unknown[]>, refresh: podRefresh, scopeErrors: () => [],
+  };
+  const nodeStub = {
+    nodesInCluster: (_g: string) => nodes as Signal<unknown[]>, refresh: nodeRefresh,
+    errors: () => nodeErrors.asReadonly(),
+  };
+  const namespaces = signal<unknown[]>([]);
+  const namespaceStub = {
+    namespacesForEndpoint: (_g: string) => namespaces as Signal<unknown[]>, refresh: namespaceRefresh,
+    namespaceListErrors: () => [],
+  };
 
   beforeEach(async () => {
     vi.clearAllMocks();
@@ -43,11 +57,14 @@ describe('KubernetesSummaryTabComponent', () => {
     }).compileComponents();
   });
 
-  beforeEach(() => {
+  beforeEach(async () => {
+    nodeErrors.set([]);
+    nodes.set([]);
+    namespaces.set([]);
     seedEndpointsDataService([kubeTestEndpoint]);
     fixture = TestBed.createComponent(KubernetesSummaryTabComponent);
     component = fixture.componentInstance;
-    fixture.detectChanges();
+    await fixture.whenStable();
   });
 
   it('should create', () => {
@@ -55,9 +72,50 @@ describe('KubernetesSummaryTabComponent', () => {
   });
 
   it('primes the cluster data services on init instead of dispatching pagination actions', () => {
-    // ngOnInit ran in the second beforeEach via detectChanges.
+    // ngOnInit ran in the second beforeEach's first render.
     expect(podRefresh).toHaveBeenCalled();
     expect(nodeRefresh).toHaveBeenCalled();
     expect(namespaceRefresh).toHaveBeenCalled();
+  });
+
+  it('shows a failed node load as "-" with its reason instead of 0 nodes', async () => {
+    nodeErrors.set([{ code: 'UNAUTHORIZED', title: 'kube-nodes', detail: '401 Unauthorized', affected: ['anything'] }]);
+    await fixture.whenStable();
+
+    const el: HTMLElement = fixture.nativeElement;
+    expect(el.querySelector('[data-test="cluster-load-failure"]')?.textContent).toContain('401 Unauthorized');
+    const nodesTile = el.querySelector('app-card-number-metric');
+    expect(nodesTile?.textContent).toContain('-');
+    expect(nodesTile?.textContent).not.toContain('0');
+  });
+
+  const tiles = () => fixture.debugElement.queryAll(By.directive(CardNumberMetricComponent))
+    .map(d => d.componentInstance as CardNumberMetricComponent);
+
+  it('labels a single namespace "Namespace", not "Node"', async () => {
+    namespaces.set([{ metadata: { name: 'default' } }]);
+    await fixture.whenStable();
+    const namespacesTile = tiles().find(t => t.label() === 'Namespaces')!;
+    expect(namespacesTile.value()).toBe('1');
+    expect(namespacesTile.labelSingular()).toBe('Namespace');
+  });
+
+  it('shows the nodes\' kubelet versions, "-" while none reports one', async () => {
+    const nodeVersion = () => (fixture.nativeElement as HTMLElement)
+      .querySelector('app-metadata-item[label="Node version"]')?.textContent?.replace('Node version', '').trim();
+    expect(nodeVersion()).toBe('-');
+
+    const node = (v: string) => ({ metadata: {}, status: { nodeInfo: { kubeletVersion: v }, conditions: [] } });
+    nodes.set([node('v1.30.1'), node('v1.30.1'), node('v1.31.0')]);
+    await fixture.whenStable();
+    expect(nodeVersion()).toBe('v1.30.1,v1.31.0');
+  });
+
+  it('links each tile to an existing list route', () => {
+    expect(tiles().map(t => t.link())).toEqual([
+      '/kubernetes/anything/nodes',
+      '/kubernetes/anything/namespaces',
+      '/kubernetes/anything/resource/pod',
+    ]);
   });
 });

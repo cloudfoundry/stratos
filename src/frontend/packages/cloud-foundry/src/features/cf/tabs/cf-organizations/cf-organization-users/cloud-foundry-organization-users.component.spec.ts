@@ -4,7 +4,6 @@ import { provideHttpClient } from '@angular/common/http';
 import { provideHttpClientTesting } from '@angular/common/http/testing';
 import { provideRouter } from '@angular/router';
 import { describe, it, expect, beforeEach, vi } from 'vitest';
-import { of } from 'rxjs';
 
 import { CurrentUserPermissionsService, TabNavService } from '@stratosui/core';
 import { STORE_TEST_PROVIDERS } from '@stratosui/store/testing';
@@ -80,7 +79,7 @@ describe('CloudFoundryOrganizationUsersComponent', () => {
           provide: CloudFoundryOrganizationService,
           useValue: { orgGuid: 'org-1', cfGuid: 'cnsi-1', orgDataService: { org: signal(null) } },
         },
-        { provide: UserInviteService, useValue: { configured$: of(false) } },
+        { provide: UserInviteService, useValue: { configured: signal(false) } },
       ],
     }).compileComponents();
 
@@ -174,8 +173,8 @@ async function makeSubNavFixture(canReturn: boolean, filteredItems?: StUser[]): 
         provide: CloudFoundryOrganizationService,
         useValue: { orgGuid: 'org-1', cfGuid: 'cnsi-1', orgDataService: { org: signal(null) } },
       },
-      { provide: CurrentUserPermissionsService, useValue: { can: () => of(canReturn) } },
-      { provide: UserInviteService, useValue: { configured$: of(false) } },
+      { provide: CurrentUserPermissionsService, useValue: { can: () => signal(canReturn) } },
+      { provide: UserInviteService, useValue: { configured: signal(false) } },
     ],
   }).compileComponents();
   const fixture = TestBed.createComponent(CloudFoundryOrganizationUsersComponent);

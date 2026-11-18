@@ -5,6 +5,7 @@ import {
   AppScalingTrigger,
 } from '../../store/app-autoscaler.types';
 import { AutoscalerConstants, getScaleType, isEqual } from './autoscaler-util';
+import { autoscalerDefaultTimezone } from './autoscaler-timezones';
 
 export function autoscalerTransformArrayToMap(policy: AppAutoscalerPolicy) {
   const newPolicy: AppAutoscalerPolicyLocal = {
@@ -29,7 +30,7 @@ export function autoscalerTransformArrayToMap(policy: AppAutoscalerPolicy) {
     }
     buildFormUponMap(newPolicy, metricName);
   });
-  newPolicy.schedules = newPolicy.schedules || { timezone: Intl.DateTimeFormat().resolvedOptions().timeZone };
+  newPolicy.schedules = newPolicy.schedules || { timezone: autoscalerDefaultTimezone() };
   newPolicy.schedules.recurring_schedule = newPolicy.schedules.recurring_schedule || [];
   newPolicy.schedules.specific_date = newPolicy.schedules.specific_date || [];
   return newPolicy;
@@ -89,13 +90,13 @@ export function autoscalerTransformMapToArray(oldPolicy: AppAutoscalerPolicyLoca
       operator: trigger.operator,
       threshold: trigger.threshold
     };
-    if (AutoscalerConstants.getMetricUnit(trigger.metric_type) === '' && trigger.unit && trigger.unit !== '') {
-      newTrigger.unit = trigger.unit;
-    }
     return newTrigger;
   });
   if (scalingRules.length > 0) {
     newPolicy.scaling_rules = scalingRules;
+  }
+  if (oldPolicy.configuration) {
+    newPolicy.configuration = oldPolicy.configuration;
   }
   if (oldPolicy.schedules &&
     (hasNamedSchedule(oldPolicy.schedules.recurring_schedule) || hasNamedSchedule(oldPolicy.schedules.specific_date))) {

@@ -1,0 +1,192 @@
+import { HttpErrorResponse } from '@angular/common/http';
+import { describe, expect, it } from 'vitest';
+import {
+  extractHttpErrorMessage, extractHttpErrorPieces, httpErrorResponseToSafeString, leadError, leadPieces, partialFailureError, stripMarkup,
+} from './jetstream';
+import { ErrorPiece, piecesToText } from './upstream-error-text';
+
+const t = (s: string): ErrorPiece => ({ text: s, style: 'text' });
+const h = (s: string): ErrorPiece => ({ text: s, style: 'heading' });
+const httpError = (error: unknown, status = 502, statusText = 'Bad Gateway'): HttpErrorResponse =>
+  new HttpErrorResponse({ error, status, statusText });
+
+// nginx's default 502 page (src/http/ngx_http_special_response.c).
+const nginx502 = '<html>\r\n<head><title>502 Bad Gateway</title></head>\r\n<body>\r\n'
+  + '<center><h1>502 Bad Gateway</h1></center>\r\n<hr><center>nginx</center>\r\n</body>\r\n</html>\r\n';
+
+describe('stripMarkup', () => {
+  it('keeps the words, drops the tags and collapses whitespace', () => {
+    expect(stripMarkup('<p>Plan <b>small</b>\n  is   gone</p>')).toBe('Plan small is gone');
+    expect(stripMarkup('no markup here')).toBe('no markup here');
+  });
+
+  // The text is a server's error body. A run of '<' with no '>' made the
+  // old pattern backtrack quadratically: 100k characters took seconds.
+  it('stays linear on unclosed tags', () => {
+    const start = performance.now();
+    expect(stripMarkup('<'.repeat(100_000) + 'x')).toBe('<'.repeat(100_000) + 'x');
+    expect(performance.now() - start).toBeLessThan(500);
+    expect(stripMarkup('a < b <i>c</i>')).toBe('a < b c');
+  });
+
+  it('reads an HTML error page as its heading and message, one per line', () => {
+    expect(stripMarkup(nginx502)).toBe('502 Bad Gateway\nnginx');
+  });
+});
+
+describe('extractHttpErrorPieces', () => {
+  it('reads an HTML page quoted in a CF error detail', () => {
+    expect(extractHttpErrorPieces(httpError({ errors: [{ code: 10001, title: 'CF-ServiceBrokerBadResponse', detail: nginx502 }] })))
+      .toEqual([h('502 Bad Gateway'), t('\nnginx')]);
+  });
+
+  it('reads an HTML page sent as the whole response body', () => {
+    expect(extractHttpErrorPieces(httpError(nginx502))).toEqual([h('502 Bad Gateway'), t('\nnginx')]);
+  });
+
+  it('reads an HTML page quoted in a non-envelope error, keeping its prefix', () => {
+    const prefix = 'resource not found (status 404): ';
+    for (const key of ['error', 'message']) {
+      const pieces = extractHttpErrorPieces(httpError({ [key]: prefix + nginx502 }));
+      expect(piecesToText(pieces)).toBe('resource not found (status 404):\n502 Bad Gateway\nnginx');
+      expect(extractHttpErrorMessage(httpError({ [key]: prefix + nginx502 }))).not.toContain('<');
+    }
+    expect(extractHttpErrorMessage(httpError({ error: 'quota <nil> not found' }))).toBe('quota <nil> not found');
+  });
+
+  it('passes a plain-text response body through untouched', () => {
+    expect(extractHttpErrorPieces(httpError('<nil>'))).toEqual([t('<nil>')]);
+    expect(extractHttpErrorMessage(httpError('<nil>'))).toBe('<nil>');
+    expect(extractHttpErrorMessage(httpError('a < b\n<i>c</i>  d'))).toBe('a < b\n<i>c</i>  d');
+  });
+
+  // A Jetstream handler's own error on the wire (api/jetstream_error.go).
+  it('reads the message of Jetstream\'s own wrapped error', () => {
+    const body = {
+      error: { statusCode: 400, status: 'Bad Request', message: 'A Release with that name already exists', method: 'POST' },
+      errorResponse: { method: '' },
+    };
+    expect(extractHttpErrorMessage(httpError(body, 400, 'Bad Request'))).toBe('A Release with that name already exists');
+  });
+
+  // The same wrapper with no message: the proxy's entry for a failed endpoint.
+  it('reads a wrapped error with no message as its status line and the endpoint\'s words', () => {
+    const body = { error: { statusCode: 500, status: 'Error proxying request' }, errorResponse: 'connection refused' };
+    expect(extractHttpErrorMessage(httpError(body, 500, 'Internal Server Error')))
+      .toBe('Error proxying request: connection refused');
+  });
+
+  it('names the HTTP status when an HTML body has no readable text', () => {
+    expect(extractHttpErrorMessage(httpError('<html><body><div></div></body></html>'))).toBe('HTTP 502 Bad Gateway');
+  });
+
+  it('keeps the pieces an Error carries', () => {
+    const err = Object.assign(new Error('502 Bad Gateway nginx'), { pieces: [h('502 Bad Gateway'), t('\nnginx')] });
+    expect(extractHttpErrorPieces(err)).toEqual([h('502 Bad Gateway'), t('\nnginx')]);
+    expect(extractHttpErrorPieces(new Error('boom'))).toEqual([t('boom')]);
+  });
+});
+
+describe('extractHttpErrorPieces (no response)', () => {
+  it('says so when the server could not be reached', () => {
+    expect(extractHttpErrorMessage(httpError(null, 0, 'Unknown Error'))).toBe('Could not reach the server.');
+  });
+});
+
+describe('extractHttpErrorPieces (plain detail)', () => {
+  it('keeps angle-bracket text in a plain CF error detail', () => {
+    expect(extractHttpErrorMessage(httpError({ errors: [{ detail: 'Space <nil> not found', title: 'T' }] })))
+      .toBe('Space <nil> not found');
+  });
+});
+
+describe('extractHttpErrorPieces (inline tags in a plain detail)', () => {
+  it('drops inline HTML tags but keeps other angle-bracket text', () => {
+    expect(extractHttpErrorMessage(httpError({ errors: [{ detail: 'unbind <b>failed</b> for <nil>', title: 'T' }] })))
+      .toBe('unbind failed for <nil>');
+  });
+});
+
+describe('partialFailureError', () => {
+  it('joins the details and reads an HTML page in one', () => {
+    const err = partialFailureError([{ detail: 'name taken' }, { title: 'CF-Bad', detail: nginx502 }]);
+    expect(err.message).toBe('name taken; 502 Bad Gateway\nnginx');
+    expect(err.pieces).toEqual([t('name taken; '), h('502 Bad Gateway'), t('\nnginx')]);
+    expect(extractHttpErrorMessage(err)).toBe(err.message);
+  });
+
+  it('falls back to the title and keeps plain angle brackets', () => {
+    expect(partialFailureError([{ title: 'CF-NotAuthorized' }, { detail: 'no <nil>' }]).message)
+      .toBe('CF-NotAuthorized; no <nil>');
+  });
+});
+
+describe('leadPieces', () => {
+  it('puts the caller\'s lead-in before the message', () => {
+    expect(leadPieces('Delete failed', httpError(nginx502)))
+      .toEqual([t('Delete failed: '), h('502 Bad Gateway'), t('\nnginx')]);
+    expect(leadPieces('Delete failed', new Error('boom'))).toEqual([t('Delete failed: boom')]);
+  });
+});
+
+describe('leadError', () => {
+  it('reads as the lead-in and message, and keeps their pieces', () => {
+    const cause = httpError(nginx502);
+    const err = leadError('Failed to update organization', cause);
+    expect(err).toBeInstanceOf(Error);
+    expect(err.message).toBe('Failed to update organization: 502 Bad Gateway\nnginx');
+    expect(err.cause).toBe(cause);
+    expect(extractHttpErrorPieces(err))
+      .toEqual([t('Failed to update organization: '), h('502 Bad Gateway'), t('\nnginx')]);
+  });
+
+  it('gives a plain message as one text piece', () => {
+    const err = leadError('Failed to create quota', new Error('boom'));
+    expect(err.message).toBe('Failed to create quota: boom');
+    expect(extractHttpErrorPieces(err)).toEqual([t('Failed to create quota: boom')]);
+  });
+});
+
+describe('extractHttpErrorMessage (non-HTTP errors)', () => {
+  it('keeps an Error message and a thrown string', () => {
+    expect(extractHttpErrorMessage(new Error('boom'))).toBe('boom');
+    expect(extractHttpErrorMessage('plain text')).toBe('plain text');
+    expect(extractHttpErrorMessage(undefined)).toBe('unknown error');
+  });
+});
+
+describe('httpErrorResponseToSafeString', () => {
+  it('names the status after the message of a Jetstream error', () => {
+    expect(httpErrorResponseToSafeString(httpError({ error: 'Service key not found' }, 404, 'Not Found')))
+      .toBe('Service key not found (404)');
+  });
+
+  it('keeps a plain text body', () => {
+    expect(httpErrorResponseToSafeString(httpError('upstream down', 503, 'Service Unavailable')))
+      .toBe('upstream down (503)');
+  });
+
+  it('reads an HTML error page as its message, with no markup', () => {
+    expect(httpErrorResponseToSafeString(httpError(nginx502))).toBe('502 Bad Gateway\nnginx (502)');
+  });
+
+  it('reads a Cloud Foundry error body', () => {
+    expect(httpErrorResponseToSafeString(httpError({ errors: [{ detail: 'Quota exceeded' }] }, 422, 'Unprocessable Content')))
+      .toBe('Quota exceeded (422)');
+  });
+
+  it('names the status once when the response has no body', () => {
+    expect(httpErrorResponseToSafeString(httpError(null))).toBe('HTTP 502 Bad Gateway');
+  });
+
+  it('keeps a thrown string and an Error message', () => {
+    expect(httpErrorResponseToSafeString('Backup service returned no response')).toBe('Backup service returned no response');
+    expect(httpErrorResponseToSafeString(new Error('boom'))).toBe('boom');
+  });
+
+  // Callers fall back with `||`, or leave the reason out.
+  it('gives no text when there is nothing to read', () => {
+    expect(httpErrorResponseToSafeString(undefined)).toBe('');
+    expect(httpErrorResponseToSafeString({})).toBe('');
+  });
+});

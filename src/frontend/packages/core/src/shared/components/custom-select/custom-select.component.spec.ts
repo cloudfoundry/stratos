@@ -1,6 +1,7 @@
-import { Component } from '@angular/core';
+import { Component, signal } from '@angular/core';
 import { provideZonelessChangeDetection } from '@angular/core';
 import { TestBed } from '@angular/core/testing';
+import { FormControl, ReactiveFormsModule } from '@angular/forms';
 import { describe, it, expect, beforeEach, vi, onTestFinished } from 'vitest';
 
 import { CustomOptionComponent, CustomSelectComponent } from './custom-select.component';
@@ -59,13 +60,11 @@ describe('CustomSelectComponent with object-valued options', () => {
   it('displayText is always a string, even before content capture', () => {
     const fixture = TestBed.createComponent(ObjectValueHostComponent);
     fixture.detectChanges();
-    const options = fixture.debugElement.children[0].componentInstance.options as { displayText: unknown }[] | undefined;
-    // Access via the select's ContentChildren once rendered.
+    // Access via the select's projected options once rendered.
     const select = fixture.debugElement.children[0].componentInstance as CustomSelectComponent;
-    (select as any).options.forEach((opt: CustomOptionComponent) => {
+    select.options().forEach((opt: CustomOptionComponent) => {
       expect(typeof opt.displayText).toBe('string');
     });
-    void options;
   });
 
   it('opens without throwing when options carry object values', () => {
@@ -85,7 +84,7 @@ describe('CustomSelectComponent with object-valued options', () => {
     const fixture = TestBed.createComponent(EmptyTextObjectValueHostComponent);
     fixture.detectChanges();
     const select = fixture.debugElement.children[0].componentInstance as CustomSelectComponent;
-    (select as any).options.forEach((opt: CustomOptionComponent) => {
+    select.options().forEach((opt: CustomOptionComponent) => {
       expect(typeof opt.displayText).toBe('string');
     });
     const trigger: HTMLElement = fixture.nativeElement.querySelector('[role="combobox"]');
@@ -178,5 +177,217 @@ describe('CustomSelectComponent and the Escape key', () => {
 
     escape(trigger);
     expect(reachedDocument).toHaveBeenCalledTimes(1);
+  });
+});
+
+// The trigger is a combobox, which takes no name from the value it shows.
+@Component({
+  standalone: true,
+  imports: [CustomSelectComponent, CustomOptionComponent],
+  template: `
+    <app-select data-test="named" ariaLabel="Time window" placeholder="Pick one"><app-option value="a">A</app-option></app-select>
+    <app-select data-test="placeholder" placeholder="Domain"><app-option value="a">A</app-option></app-select>
+    <app-select data-test="bare"><app-option value="a">A</app-option></app-select>
+  `,
+})
+class NamedSelectHostComponent {}
+
+describe('CustomSelectComponent accessible name', () => {
+  beforeEach(() => {
+    TestBed.configureTestingModule({
+      providers: [provideZonelessChangeDetection()],
+    });
+  });
+
+  it('names the combobox with ariaLabel, else the placeholder, else nothing', async () => {
+    const fixture = TestBed.createComponent(NamedSelectHostComponent);
+    await fixture.whenStable();
+    const trigger = (name: string) =>
+      (fixture.nativeElement as HTMLElement).querySelector(`[data-test="${name}"] [role="combobox"]`);
+    expect(trigger('named')?.getAttribute('aria-label')).toBe('Time window');
+    expect(trigger('placeholder')?.getAttribute('aria-label')).toBe('Domain');
+    expect(trigger('bare')?.hasAttribute('aria-label')).toBe(false);
+  });
+});
+
+// The Connect dialog's Auth Type select, as a screen reader meets it.
+@Component({
+  standalone: true,
+  imports: [CustomSelectComponent, CustomOptionComponent],
+  template: `
+    <app-select placeholder="Auth Type" [value]="'creds'">
+      <app-option value="creds">Username and Password</app-option>
+      <app-option value="sso">Single Sign-On (SSO)</app-option>
+      <app-option value="none" [disabled]="true">No Authentication</app-option>
+    </app-select>
+  `,
+})
+class AuthTypeHostComponent {}
+
+// The deploy page's Organization select, inactive until a Cloud Foundry is
+// chosen.
+@Component({
+  standalone: true,
+  imports: [CustomSelectComponent, CustomOptionComponent],
+  template: `
+    <app-select placeholder="Organization" [disabled]="disabled()">
+      <app-option value="a">Org A</app-option>
+    </app-select>
+  `,
+})
+class DisabledHostComponent {
+  disabled = signal(true);
+}
+
+describe('CustomSelectComponent roles and states', () => {
+  beforeEach(() => {
+    TestBed.configureTestingModule({
+      providers: [provideZonelessChangeDetection()],
+    });
+  });
+
+  async function render() {
+    const fixture = TestBed.createComponent(AuthTypeHostComponent);
+    await fixture.whenStable();
+    const el: HTMLElement = fixture.nativeElement;
+    const trigger = el.querySelector('[role="combobox"]') as HTMLElement;
+    const listbox = el.querySelector('[role="listbox"]') as HTMLElement;
+    return { fixture, el, trigger, listbox };
+  }
+
+  it('names the combobox and points it at its list, open or closed', async () => {
+    const { fixture, trigger, listbox } = await render();
+    expect(trigger.getAttribute('aria-label')).toBe('Auth Type');
+    expect(listbox.id).toBeTruthy();
+    expect(trigger.getAttribute('aria-controls')).toBe(listbox.id);
+
+    trigger.click();
+    await fixture.whenStable();
+    expect(trigger.getAttribute('aria-expanded')).toBe('true');
+    expect(trigger.getAttribute('aria-controls')).toBe(listbox.id);
+  });
+
+  it('gives each item the option role and its selected and disabled states', async () => {
+    const { fixture, listbox } = await render();
+    const options = () => Array.from(listbox.querySelectorAll('[role="option"]'));
+    expect(options().map(o => o.textContent?.trim())).toEqual(['Username and Password', 'Single Sign-On (SSO)', 'No Authentication']);
+    expect(options().map(o => o.getAttribute('aria-selected'))).toEqual(['true', 'false', 'false']);
+    expect(options().map(o => o.getAttribute('aria-disabled'))).toEqual([null, null, 'true']);
+
+    // Picking another option moves the selected state with it.
+    (options()[1].querySelector('.custom-option-content') as HTMLElement).click();
+    await fixture.whenStable();
+    expect(options().map(o => o.getAttribute('aria-selected'))).toEqual(['false', 'true', 'false']);
+  });
+
+  // The inactive select only looked disabled (faded, no pointer events);
+  // assistive tech was not told (WCAG 4.1.2).
+  it('tells assistive tech when it is disabled', async () => {
+    const fixture = TestBed.createComponent(DisabledHostComponent);
+    await fixture.whenStable();
+    const trigger = () => (fixture.nativeElement as HTMLElement).querySelector('[role="combobox"]') as HTMLElement;
+    expect(trigger().getAttribute('aria-disabled')).toBe('true');
+
+    fixture.componentInstance.disabled.set(false);
+    await fixture.whenStable();
+    expect(trigger().hasAttribute('aria-disabled')).toBe(false);
+  });
+
+  it('keeps list ids apart when selects have no id or name', async () => {
+    const a = await render();
+    const b = await render();
+    expect(a.listbox.id).not.toBe(b.listbox.id);
+  });
+});
+
+// The select takes its value from a bound [value] or from a form control.
+@Component({
+  standalone: true,
+  imports: [CustomSelectComponent, CustomOptionComponent, ReactiveFormsModule],
+  template: `
+    <app-select data-test="bound" [value]="bound()">
+      <app-option value="a">A</app-option>
+      <app-option value="b">B</app-option>
+    </app-select>
+    <app-select data-test="form" [formControl]="control">
+      <app-option value="a">A</app-option>
+      <app-option value="b">B</app-option>
+    </app-select>
+  `,
+})
+class ValueSourceHostComponent {
+  bound = signal<string | undefined>('a');
+  control = new FormControl('b');
+}
+
+describe('CustomSelectComponent value sources', () => {
+  async function render() {
+    TestBed.configureTestingModule({ providers: [provideZonelessChangeDetection()] });
+    const fixture = TestBed.createComponent(ValueSourceHostComponent);
+    await fixture.whenStable();
+    const selected = (name: string) => Array.from(
+      (fixture.nativeElement as HTMLElement).querySelectorAll(`[data-test="${name}"] [role="option"]`)
+    ).filter(o => o.getAttribute('aria-selected') === 'true').map(o => o.textContent?.trim());
+    return { fixture, selected };
+  }
+
+  it('follows a bound value, also when it changes or is cleared later', async () => {
+    const { fixture, selected } = await render();
+    expect(selected('bound')).toEqual(['A']);
+
+    fixture.componentInstance.bound.set('b');
+    await fixture.whenStable();
+    expect(selected('bound')).toEqual(['B']);
+
+    fixture.componentInstance.bound.set(undefined);
+    await fixture.whenStable();
+    expect(selected('bound')).toEqual([]);
+  });
+
+  // With no [value] bound the input is undefined, which is not a value to show.
+  it('keeps the value a form control wrote when no value is bound', async () => {
+    const { selected } = await render();
+    expect(selected('form')).toEqual(['B']);
+  });
+});
+
+// The trigger shows the text of the selected option, which an option only
+// knows once its projected content has rendered.
+@Component({
+  standalone: true,
+  imports: [CustomSelectComponent, CustomOptionComponent],
+  template: `
+    <app-select placeholder="Pick one" [value]="'b'">
+      <app-option value="a">Alpha</app-option>
+      <app-option value="b">Bravo</app-option>
+    </app-select>
+  `,
+})
+class TriggerTextHostComponent {}
+
+describe('CustomSelectComponent trigger text', () => {
+  async function render() {
+    TestBed.configureTestingModule({ providers: [provideZonelessChangeDetection()] });
+    const fixture = TestBed.createComponent(TriggerTextHostComponent);
+    await fixture.whenStable();
+    const el: HTMLElement = fixture.nativeElement;
+    const shown = () => el.querySelector('.select-trigger-value, .select-trigger-placeholder')?.textContent?.trim();
+    return { fixture, el, shown };
+  }
+
+  it('shows the projected text of the selected option', async () => {
+    const { shown } = await render();
+    expect(shown()).toBe('Bravo');
+  });
+
+  it('follows a pick made from the list', async () => {
+    const { fixture, el, shown } = await render();
+    el.querySelector<HTMLElement>('[role="combobox"]')!.click();
+    await fixture.whenStable();
+    el.querySelectorAll<HTMLElement>('.custom-option-content')[0].click();
+    await fixture.whenStable();
+
+    expect(shown()).toBe('Alpha');
+    expect(el.querySelector('[role="combobox"]')!.getAttribute('aria-expanded')).toBe('false');
   });
 });

@@ -1,8 +1,7 @@
 import { CommonModule } from '@angular/common';
-import { ChangeDetectionStrategy, Component, ComponentRef, Input, OnDestroy, OnInit, ViewChild, ViewContainerRef, ChangeDetectorRef, inject } from '@angular/core';
+import { ChangeDetectionStrategy, Component, ComponentRef, OnDestroy, OnInit, ViewContainerRef, ChangeDetectorRef, computed, effect, inject, input, untracked, viewChild } from '@angular/core';
 import { CustomTooltipDirective } from '../../custom-tooltip/custom-tooltip.directive';
 import { RouterModule } from '@angular/router';
-import { toObservable } from '@angular/core/rxjs-interop';
 import {
   EndpointModel,
   entityCatalog,
@@ -15,15 +14,15 @@ import {
 } from '@stratosui/store';
 
 import { EndpointsSignalService } from '../../../../core/signals/endpoints-signal.service';
-import { combineLatest, Observable, ReplaySubject, Subscription } from 'rxjs';
-import { map } from 'rxjs/operators';
+import { Observable, Subscription } from 'rxjs';
 
 import { EndpointsService } from '../../../../core/endpoints.service';
 import { safeUnsubscribe } from '../../../../core/utils.service';
 import { CardCell } from '../../signal-list/cell-base';
 import { EndpointListDetailsComponent, EndpointListHelper } from '../endpoint-list.helpers';
 import { CopyToClipboardComponent } from '../../copy-to-clipboard/copy-to-clipboard.component';
-import { SessionService } from '../../../services/session.service';
+import { CustomIconComponent } from '../../custom-material/custom-material.component';
+import { SessionSignalService } from '../../../../core/signals/session-signal.service';
 import { CurrentUserPermissionsService } from '../../../../core/permissions/current-user-permissions.service';
 import { StratosCurrentUserPermissions } from '../../../../core/permissions/stratos-user-permissions.checker';
 import { MultilineTitleComponent } from '../../multiline-title/multiline-title.component';
@@ -59,73 +58,78 @@ import { DisableRouterLinkDirective } from '../../../../core/disable-router-link
     MultilineTitleComponent,
     CopyToClipboardComponent,
     BooleanIndicatorComponent,
+    CustomIconComponent,
   ],
   changeDetection: ChangeDetectionStrategy.OnPush
 })
 export class EndpointCardComponent extends CardCell<EndpointModel> implements OnInit, OnDestroy {
   private endpointsSignal = inject(EndpointsSignalService);
-  private endpoints$ = toObservable(this.endpointsSignal.endpoints);
   private endpointListHelper = inject(EndpointListHelper);
   private userFavoriteManager = inject(UserFavoriteManager);
   private currentUserPermissionsService = inject(CurrentUserPermissionsService);
-  private sessionService = inject(SessionService);
+  private sessionSignals = inject(SessionSignalService);
   private cdr = inject(ChangeDetectorRef);
 
 
-  public rowObs = new ReplaySubject<EndpointModel>();
   public favorite: UserFavoriteEndpoint | null = null;
-  public address!: string;
-  public isDuplicate$!: Observable<boolean>;
-  public endpointCatalogEntity?: StratosCatalogEndpointEntity;
+
+  // Everything below up to `connectionStatus` follows the row.
+  public readonly endpointCatalogEntity = computed<StratosCatalogEndpointEntity | undefined>(() => {
+    const row = this.row();
+    return row?.cnsi_type ? entityCatalog.getEndpoint(row.cnsi_type, row.sub_type) : undefined;
+  });
+  public readonly address = computed(() => getFullEndpointApiUrl(this.row()));
+  public readonly isDuplicate = computed(() => {
+    const address = this.address();
+    return Object.values(this.endpointsSignal.endpoints()).filter(e => getFullEndpointApiUrl(e) === address).length > 1;
+  });
+  public readonly endpointLink = computed<string | null>(() => {
+    const row = this.row();
+    const definition = this.endpointCatalogEntity()?.definition;
+    if (!row || !definition) {
+      return null;
+    }
+    return row.connectionStatus === 'connected' || definition.unConnectable ? EndpointsService.getLinkForEndpoint(row) : null;
+  });
+  public readonly connectionStatus = computed<string | undefined>(() => {
+    const definition = this.endpointCatalogEntity()?.definition;
+    if (!definition) {
+      return undefined;
+    }
+    return definition.unConnectable ? 'connected' : this.row()?.connectionStatus;
+  });
+
   public hasDetails = true;
-  public endpointLink: string | null = null;
   public endpointParentType!: string;
-  private endpointIds = new ReplaySubject<string[]>();
-  public endpointIds$: Observable<string[]>;
   // strict: never assigned in this component; the meta-card consumes it via
   // an async pipe and tolerates an absent stream.
   public cardStatus$?: Observable<StratosStatus>;
   private subs: Subscription[] = [];
-  public connectionStatus?: string;
-  public viewCreator$!: Observable<boolean>;
+  // The creator shows to admins, and to endpoint admins while user
+  // endpoints are enabled.
+  private readonly userEndpointsEnabled = this.sessionSignals.userEndpointsEnabled;
+  private readonly userEndpointsNotDisabled = this.sessionSignals.userEndpointsNotDisabled;
+  private readonly isAdmin = this.currentUserPermissionsService.can(StratosCurrentUserPermissions.EDIT_ADMIN_ENDPOINT);
+  private readonly isEndpointAdmin = this.currentUserPermissionsService.can(StratosCurrentUserPermissions.EDIT_ENDPOINT);
+  public readonly viewCreator = computed(() =>
+    (this.userEndpointsEnabled() && (this.isAdmin() || this.isEndpointAdmin())) ||
+    (this.userEndpointsNotDisabled() && this.isAdmin()));
 
   private componentRef!: ComponentRef<EndpointListDetailsComponent>;
 
   // Optional per-endpoint kebab menu, rendered by the meta-card header.
   // Consumers that suppress it (e.g. the kubernetes endpoints page) simply
   // leave it unset.
-  @Input() actionMenu: MenuItem[] | null = null;
+  readonly actionMenu = input<MenuItem[] | null>(null);
 
-  @Input() component: EndpointListDetailsComponent | null = null;
-  private endpointDetails!: ViewContainerRef;
-  @ViewChild('endpointDetails', { read: ViewContainerRef, static: true }) set content(content: ViewContainerRef) {
-    this.endpointDetails = content;
-    this.updateInnerComponent();
-  }
+  // The endpoint type's own details component, created into #endpointDetails
+  // by updateInnerComponent().
+  component: EndpointListDetailsComponent | null = null;
+  // In the card's own template, so it is resolved when the view is created,
+  // before the row is bound: the effect in the constructor fills the
+  // container on its first run.
+  private readonly endpointDetails = viewChild('endpointDetails', { read: ViewContainerRef });
 
-  @Input()
-  set row(row: EndpointModel) {
-    super.row = row;
-    if (!row) {
-      console.log('Row set to null/undefined');
-      return;
-    }
-    this.endpointCatalogEntity = row.cnsi_type ? entityCatalog.getEndpoint(row.cnsi_type, row.sub_type) : undefined;
-    this.address = getFullEndpointApiUrl(row);
-    this.isDuplicate$ = this.endpoints$.pipe(
-      map(entities => Object.values(entities).filter(e => getFullEndpointApiUrl(e) === this.address).length > 1)
-    );
-    this.rowObs.next(row);
-    if (this.endpointCatalogEntity?.definition) {
-      this.endpointLink = row.connectionStatus === 'connected' || this.endpointCatalogEntity.definition.unConnectable ?
-        EndpointsService.getLinkForEndpoint(row) : null;
-      this.connectionStatus = this.endpointCatalogEntity.definition.unConnectable ? 'connected' : row.connectionStatus;
-    }
-    this.updateInnerComponent();
-  }
-  get row(): EndpointModel {
-    return super.row;
-  }
   // V2 BaseEndpointsDataSource was deleted in W12 — the kubernetes
   // card consumer never bound [dataSource] and the V2 endpoints list
   // (only other consumer) was the only path that did. cardStatus$ is
@@ -135,23 +139,20 @@ export class EndpointCardComponent extends CardCell<EndpointModel> implements On
 
   constructor() {
     super();
-    this.endpointIds$ = this.endpointIds.asObservable();
+    // Create the details component once the row's type is known, and hand it
+    // each new row. Untracked: only the row and its type should re-run this,
+    // not whatever the details component reads while it is created.
+    effect(() => {
+      const row = this.row();
+      const entity = this.endpointCatalogEntity();
+      untracked(() => this.updateInnerComponent(row, entity));
+    });
   }
 
   ngOnInit() {
-    this.favorite = this.userFavoriteManager.getFavoriteEndpointFromEntity(this.row);
-    const e = this.endpointCatalogEntity?.definition;
+    this.favorite = this.userFavoriteManager.getFavoriteEndpointFromEntity(this.row());
+    const e = this.endpointCatalogEntity()?.definition;
     this.hasDetails = !!e && !!e.listDetailsComponent;
-    this.viewCreator$ = combineLatest([
-      this.sessionService.userEndpointsEnabled(),
-      this.sessionService.userEndpointsNotDisabled(),
-      this.currentUserPermissionsService.can(StratosCurrentUserPermissions.EDIT_ADMIN_ENDPOINT),
-      this.currentUserPermissionsService.can(StratosCurrentUserPermissions.EDIT_ENDPOINT)
-    ]).pipe(
-      map(([userEndpointsEnabled, userEndpointsNotDisabled, isAdmin, isEndpointAdmin]) => {
-        return (userEndpointsEnabled && (isAdmin || isEndpointAdmin)) || (userEndpointsNotDisabled && isAdmin);
-      })
-    );
   }
 
   ngOnDestroy(): void {
@@ -159,30 +160,30 @@ export class EndpointCardComponent extends CardCell<EndpointModel> implements On
     this.endpointListHelper.destroyEndpointDetails({
       componentRef: this.componentRef,
       component: this.component,
-      endpointDetails: this.endpointDetails
+      endpointDetails: this.endpointDetails()
     });
   }
 
-  updateInnerComponent() {
-    if (!this.endpointDetails || !this.row || !this.endpointCatalogEntity) {
+  private updateInnerComponent(row: EndpointModel, entity: StratosCatalogEndpointEntity | undefined) {
+    const endpointDetails = this.endpointDetails();
+    if (!endpointDetails || !row || !entity) {
       return;
     }
-    const e = this.endpointCatalogEntity.definition;
+    const e = entity.definition;
     if (!e || !e.listDetailsComponent) {
       return;
     }
 
     if (!this.component) {
       const res =
-        this.endpointListHelper.createEndpointDetails(e.listDetailsComponent, this.endpointDetails);
+        this.endpointListHelper.createEndpointDetails(e.listDetailsComponent, endpointDetails);
       this.componentRef = res.componentRef;
       this.component = res.component;
     }
 
     if (this.component) {
-      this.component.row = this.row;
+      this.componentRef.setInput('row', row);
       this.component.isTable = false;
-      this.component.row = this.row;
       this.componentRef.changeDetectorRef.detectChanges();
     }
   }

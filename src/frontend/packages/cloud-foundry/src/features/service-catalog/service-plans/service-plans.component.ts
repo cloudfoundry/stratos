@@ -9,7 +9,6 @@ import {
   inject,
   signal,
 } from '@angular/core';
-import { toSignal } from '@angular/core/rxjs-interop';
 import { ActivatedRoute, Router } from '@angular/router';
 
 import {
@@ -78,10 +77,8 @@ export class ServicePlansComponent implements OnInit {
 
   // Reactive permission flag for the per-row Create Instance kebab item.
   // Disabled when the user lacks SERVICE_INSTANCE_CREATE on this CF.
-  private readonly canCreateServiceInstance: Signal<boolean> = toSignal(
-    this.permissionsService.can(CfCurrentUserPermissions.SERVICE_INSTANCE_CREATE, this.cfGuid),
-    { initialValue: false },
-  );
+  private readonly canCreateServiceInstance: Signal<boolean> =
+    this.permissionsService.can(CfCurrentUserPermissions.SERVICE_INSTANCE_CREATE, this.cfGuid);
 
   listConfig: SignalListConfig<StServicePlan> | undefined;
 

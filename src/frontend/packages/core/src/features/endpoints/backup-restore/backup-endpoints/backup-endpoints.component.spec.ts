@@ -17,6 +17,7 @@ import { BackupEndpointsComponent } from './backup-endpoints.component';
 describe('BackupEndpointsComponent', () => {
   let component: BackupEndpointsComponent;
   let fixture: ComponentFixture<BackupEndpointsComponent>;
+  const hydrated = signal(true);
 
   beforeEach(() => {
     TestBed.configureTestingModule({
@@ -59,14 +60,13 @@ describe('BackupEndpointsComponent', () => {
     const helper = TestBed.inject(EntityCatalogHelper);
     EntityCatalogHelpers.SetEntityCatalogHelper(helper);
 
-    // Wave 5 (W36-B): seed EndpointsDataService.endpointsList signal with
-    // a test endpoint so the component's
-    // `toObservable(endpointsData.endpointsList).pipe(take(1))` chain
-    // emits and the constructor doesn't EmptyError.
+    // Seed the EndpointsDataService signals with a test endpoint, loaded.
     const endpointsData = TestBed.inject(EndpointsDataService);
+    hydrated.set(true);
     const endpointsListSignal = signal([testSCFEndpoint]);
     Object.defineProperty(endpointsData, 'endpointsList', { value: endpointsListSignal });
     Object.defineProperty(endpointsData, 'loading', { value: signal(false) });
+    Object.defineProperty(endpointsData, 'hydrated', { value: hydrated });
   });
 
   beforeEach(() => {
@@ -83,5 +83,23 @@ describe('BackupEndpointsComponent', () => {
 
   it('should create', () => {
     expect(component).toBeTruthy();
+  });
+
+  // The selections start from the loaded endpoints; the Select buttons
+  // follow what is selected.
+  it('starts from the loaded endpoints and enables Select All / None by what is selected', async () => {
+    hydrated.set(false);
+    fixture = TestBed.createComponent(BackupEndpointsComponent);
+    component = fixture.componentInstance;
+    await fixture.whenStable();
+    expect(component.service.state[testSCFEndpoint.guid!]).toBeUndefined();
+
+    hydrated.set(true);
+    await fixture.whenStable();
+    expect(component.service.state[testSCFEndpoint.guid!]).toBeDefined();
+    expect(component.service.hasChanges()).toBe(false);
+
+    component.selectAll();
+    expect(component.service.hasChanges()).toBe(true);
   });
 });

@@ -1,5 +1,5 @@
 
-import { ChangeDetectionStrategy, Component, Input  } from '@angular/core';
+import { ChangeDetectionStrategy, Component, computed, input } from '@angular/core';
 import { UserProfileInfo } from '@stratosui/store';
 import { UserAvatarComponent } from '../user-avatar/user-avatar.component';
 
@@ -14,29 +14,17 @@ import { UserAvatarComponent } from '../user-avatar/user-avatar.component';
 })
 export class UserProfileBannerComponent {
 
-  name!: string;
-  email!: string;
-  username!: string;
-  userProfile: any;
-  canUseGravatar!: boolean;
+  readonly allowGravatar = input<boolean>();
+  readonly user = input<UserProfileInfo>();
 
-  @Input()
-  set allowGravatar(allowed: boolean) {
-    this.canUseGravatar = allowed;
-  }
-
-  @Input()
-  set user(user: UserProfileInfo) {
-    this.userProfile = user;
-    if (user) {
-      this.username = user.userName;
-      this.name = user.name.givenName + ' ' + user.name.familyName;
-      this.name = this.name.trim();
-
-      if (user.emails.length > 0) {
-        this.email = user.emails[0].value.trim();
-      }
-    }
-  }
+  readonly username = computed(() => this.user()?.userName);
+  readonly name = computed(() => {
+    const user = this.user();
+    return user ? `${user.name.givenName} ${user.name.familyName}`.trim() : undefined;
+  });
+  readonly email = computed(() => {
+    const emails = this.user()?.emails;
+    return emails && emails.length > 0 ? emails[0].value.trim() : undefined;
+  });
 
 }

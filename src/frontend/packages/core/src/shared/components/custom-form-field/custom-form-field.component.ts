@@ -1,7 +1,5 @@
 import {
   Component,
-  Input,
-  ContentChild,
   ElementRef,
   AfterContentInit,
   Directive,
@@ -11,10 +9,15 @@ import {
   inject,
   ChangeDetectionStrategy,
   forwardRef,
+  contentChildren,
+  input,
+  contentChild,
+  signal,
+  DestroyRef
 } from "@angular/core";
+import { outputToObservable, takeUntilDestroyed } from "@angular/core/rxjs-interop";
 import { FormControl, NgControl } from "@angular/forms";
 
-import { Subject, takeUntil } from "rxjs";
 import { CustomSelectComponent } from "../custom-select/custom-select.component";
 
 /*
@@ -74,11 +77,11 @@ import { CustomSelectComponent } from "../custom-select/custom-select.component"
 export class CustomFormFieldComponent
   implements AfterContentInit, AfterViewInit, OnDestroy
 {
-  @Input() appearance: "legacy" | "standard" | "fill" | "outline" = "standard";
-  @Input() color: "primary" | "accent" | "warn" = "primary";
-  @Input() floatLabel: "always" | "never" | "auto" = "always";
-  @Input() hideRequiredMarker = false;
-  @Input() hintLabel = "";
+  readonly appearance = input<"legacy" | "standard" | "fill" | "outline">("standard");
+  readonly color = input<"primary" | "accent" | "warn">("primary");
+  readonly floatLabel = input<"always" | "never" | "auto">("always");
+  readonly hideRequiredMarker = input(false);
+  readonly hintLabel = input("");
 
   /**
    * When true, the prefix/infix/suffix flex row shrinks to its content
@@ -87,67 +90,81 @@ export class CustomFormFieldComponent
    * `<app-form-field class="w-1/2" [fitContent]="true">` to get a
    * content-width trigger sitting above a 50% underline.
    */
-  @Input() fitContent = false;
+  readonly fitContent = input(false);
 
-  @ContentChild(forwardRef(() => AppInputDirective), {
-    read: ElementRef,
-    static: false,
-  })
-  inputElement!: ElementRef;
-  @ContentChild(CustomSelectComponent, { static: false })
-  selectComponent!: CustomSelectComponent;
-  @ContentChild(NgControl, { static: false }) ngControl!: NgControl;
+  // A field holds an input or a select, with or without a form control, so
+  // none of these is required.
+  readonly inputElement = contentChild(forwardRef(() => AppInputDirective), { read: ElementRef });
+  readonly selectComponent = contentChild(CustomSelectComponent);
+  readonly ngControl = contentChild(NgControl);
+
+  /**
+   * The `<app-error>` children the form renders right now. Forms wrap each
+   * in `@if (control.hasError(...))`; while any is rendered, the error line
+   * shows them instead of the stock `errorMessage`.
+   */
+  readonly projectedErrors = contentChildren(forwardRef(() => AppErrorComponent));
 
   public focused = false;
   public hasValue = false;
-  public placeholder = "";
+  readonly placeholder = signal("");
   public errorMessage = "";
   public isRequired = false;
   public inputId = "";
 
-  private destroy$ = new Subject<void>();
+  private destroyRef = inject(DestroyRef);
   private isInitialized = false;
 
   private cdr = inject(ChangeDetectorRef);
+  private placeholderObserver?: MutationObserver;
 
   ngAfterContentInit() {
     // Handle app-select components
-    if (this.selectComponent) {
-      this.placeholder = this.selectComponent.placeholder || "";
-      this.isRequired = this.selectComponent.required;
+    const selectComponent = this.selectComponent();
+    const inputElement = this.inputElement();
+    if (selectComponent) {
+      this.placeholder.set(selectComponent.placeholder() || "");
+      this.isRequired = selectComponent.required();
       this.inputId =
-        this.selectComponent.id ||
-        this.selectComponent.name ||
+        selectComponent.id() ||
+        selectComponent.name() ||
         `form-field-${Math.random().toString(36).substr(2, 9)}`;
 
       // Set select id if not present
-      if (!this.selectComponent.id) {
-        this.selectComponent.id = this.inputId;
+      if (!selectComponent.id()) {
+        selectComponent.id.set(this.inputId);
       }
 
       // Monitor select value changes
-      this.selectComponent.valueChange
-        .pipe(takeUntil(this.destroy$))
+      outputToObservable(selectComponent.valueChange)
+        .pipe(takeUntilDestroyed(this.destroyRef))
         .subscribe(() => {
           this.hasValue =
-            this.selectComponent.value != null &&
-            (Array.isArray(this.selectComponent.value)
-              ? this.selectComponent.value.length > 0
+            selectComponent.selectedValue != null &&
+            (Array.isArray(selectComponent.selectedValue)
+              ? selectComponent.selectedValue.length > 0
               : true);
           this.cdr.detectChanges();
         });
 
       // Initial value check
       this.hasValue =
-        this.selectComponent.value != null &&
-        (Array.isArray(this.selectComponent.value)
-          ? this.selectComponent.value.length > 0
+        selectComponent.selectedValue != null &&
+        (Array.isArray(selectComponent.selectedValue)
+          ? selectComponent.selectedValue.length > 0
           : true);
     }
     // Handle native input/textarea/select elements
-    else if (this.inputElement) {
-      const input = this.inputElement.nativeElement;
-      this.placeholder = input.placeholder || "";
+    else if (inputElement) {
+      const input = inputElement.nativeElement;
+      this.placeholder.set(input.placeholder || "");
+      // The placeholder is the label. A bound placeholder can arrive after
+      // this read (the Connect dialog's credentials name their fields from
+      // the endpoint type), so follow it.
+      this.placeholderObserver = new MutationObserver(() => {
+        this.placeholder.set(input.placeholder || "");
+      });
+      this.placeholderObserver.observe(input, { attributes: true, attributeFilter: ["placeholder"] });
       this.isRequired = input.required;
       this.inputId =
         input.id || `form-field-${Math.random().toString(36).substr(2, 9)}`;
@@ -187,9 +204,10 @@ export class CustomFormFieldComponent
     }
 
     // Listen to form control status changes if available
-    if (this.ngControl && this.ngControl.statusChanges) {
-      this.ngControl.statusChanges
-        .pipe(takeUntil(this.destroy$))
+    const ngControl = this.ngControl();
+    if (ngControl && ngControl.statusChanges) {
+      ngControl.statusChanges
+        .pipe(takeUntilDestroyed(this.destroyRef))
         .subscribe(() => {
           this.updateErrorMessage();
           this.updateAriaAttributes();
@@ -205,8 +223,9 @@ export class CustomFormFieldComponent
     // This ensures all DOM elements and form controls are ready
     if (this.isInitialized) {
       // Re-read required state now that bindings from projected content have been applied
-      if (this.inputElement) {
-        this.isRequired = this.inputElement.nativeElement.required;
+      const inputElement = this.inputElement();
+      if (inputElement) {
+        this.isRequired = inputElement.nativeElement.required;
       }
       this.updateErrorMessage();
       this.updateAriaAttributes();
@@ -215,30 +234,33 @@ export class CustomFormFieldComponent
   }
 
   ngOnDestroy() {
-    this.destroy$.next();
-    this.destroy$.complete();
+    this.placeholderObserver?.disconnect();
   }
 
   get shouldFloatLabel(): boolean {
+    const floatLabel = this.floatLabel();
     return (
-      this.floatLabel === "always" ||
-      (this.floatLabel === "auto" && (this.focused || this.hasValue))
+      floatLabel === "always" ||
+      (floatLabel === "auto" && (this.focused || this.hasValue))
     );
   }
 
   get isInvalid(): boolean {
-    if (!this.ngControl) return false;
-    return !!(this.ngControl.invalid && this.ngControl.dirty);
+    const ngControl = this.ngControl();
+    if (!ngControl) return false;
+    return !!(ngControl.invalid && ngControl.dirty);
   }
 
   get isValid(): boolean {
-    if (!this.ngControl) return false;
-    return !!(this.ngControl.valid && this.ngControl.dirty);
+    const ngControl = this.ngControl();
+    if (!ngControl) return false;
+    return !!(ngControl.valid && ngControl.dirty);
   }
 
   get isDisabled(): boolean {
-    if (!this.ngControl) return false;
-    return !!this.ngControl.disabled;
+    const ngControl = this.ngControl();
+    if (!ngControl) return false;
+    return !!ngControl.disabled;
   }
 
   get hasPrefix(): boolean {
@@ -278,9 +300,10 @@ export class CustomFormFieldComponent
   get rippleColorClasses(): string {
     const transform = this.focused ? "scale-x-100" : "scale-x-0";
     let bg: string;
-    if (this.isInvalid || this.color === "warn") bg = "bg-danger";
+    const color = this.color();
+    if (this.isInvalid || color === "warn") bg = "bg-danger";
     else if (this.isValid) bg = "bg-success";
-    else if (this.color === "accent") bg = "bg-accent";
+    else if (color === "accent") bg = "bg-accent";
     else bg = "bg-input-focus-border";
     return `${bg} ${transform}`;
   }
@@ -312,12 +335,13 @@ export class CustomFormFieldComponent
   }
 
   private updateErrorMessage(): void {
-    if (!this.ngControl || !this.ngControl.errors) {
+    const ngControl = this.ngControl();
+    if (!ngControl || !ngControl.errors) {
       this.errorMessage = "";
       return;
     }
 
-    const errors = this.ngControl.errors;
+    const errors = ngControl.errors;
 
     if (errors["required"]) {
       this.errorMessage = "This field is required";
@@ -343,9 +367,10 @@ export class CustomFormFieldComponent
   private updateAriaAttributes(): void {
     // For now, only update ARIA attributes for native input elements
     // The app-select component manages its own ARIA attributes
-    if (!this.inputElement) return;
+    const inputElement = this.inputElement();
+    if (!inputElement) return;
 
-    const input = this.inputElement.nativeElement;
+    const input = inputElement.nativeElement;
 
     if (this.isInvalid) {
       input.setAttribute("aria-invalid", "true");
@@ -359,15 +384,15 @@ export class CustomFormFieldComponent
 
 @Component({
   selector: "mat-icon",
-  template: '<i class="material-icons"><ng-content></ng-content></i>',
+  template: '<i class="material-icons" aria-hidden="true"><ng-content></ng-content></i>',
   styleUrls: ["./custom-form-field.component.scss"],
   changeDetection: ChangeDetectionStrategy.OnPush,
   standalone: true,
 })
 export class CustomFormFieldIconComponent {
-  @Input() fontSet = "material-icons";
-  @Input() fontIcon!: string;
-  @Input() svgIcon!: string;
+  readonly fontSet = input("material-icons");
+  readonly fontIcon = input<string>();
+  readonly svgIcon = input<string>();
 }
 
 @Component({
@@ -378,13 +403,13 @@ export class CustomFormFieldIconComponent {
   changeDetection: ChangeDetectionStrategy.OnPush,
   host: {
     class: "mat-icon-button",
-    "[class.mat-button-disabled]": "disabled",
-    "[attr.disabled]": "disabled || null",
+    "[class.mat-button-disabled]": "disabled()",
+    "[attr.disabled]": "disabled() || null",
   },
 })
 export class CustomIconButtonDirective {
-  @Input() disabled = false;
-  @Input() color: "primary" | "accent" | "warn" = "primary";
+  readonly disabled = input(false);
+  readonly color = input<"primary" | "accent" | "warn">("primary");
 }
 
 @Component({
@@ -395,13 +420,13 @@ export class CustomIconButtonDirective {
   changeDetection: ChangeDetectionStrategy.OnPush,
   host: {
     class: "mat-button",
-    "[class.mat-button-disabled]": "disabled",
-    "[attr.disabled]": "disabled || null",
+    "[class.mat-button-disabled]": "disabled()",
+    "[attr.disabled]": "disabled() || null",
   },
 })
 export class CustomButtonDirective {
-  @Input() disabled = false;
-  @Input() color: "primary" | "accent" | "warn" = "primary";
+  readonly disabled = input(false);
+  readonly color = input<"primary" | "accent" | "warn">("primary");
 }
 
 @Directive({
@@ -412,8 +437,8 @@ export class CustomButtonDirective {
   },
 })
 export class MatInputDirective {
-  @Input() formControl!: FormControl<any>;
-  @Input() formControlName!: string;
+  readonly formControl = input<FormControl<any>>();
+  readonly formControlName = input<string>();
 }
 
 @Directive({
@@ -424,8 +449,8 @@ export class MatInputDirective {
   },
 })
 export class AppInputDirective {
-  @Input() formControl!: FormControl<any>;
-  @Input() formControlName!: string;
+  readonly formControl = input<FormControl<any>>();
+  readonly formControlName = input<string>();
 }
 
 @Component({
@@ -442,13 +467,13 @@ export class MatSuffixDirective {}
 @Component({
   selector: "app-label",
   template:
-    '<label class="mat-form-field-label" [attr.for]="labelFor"><ng-content></ng-content></label>',
+    '<label class="mat-form-field-label" [attr.for]="labelFor()"><ng-content></ng-content></label>',
   styleUrls: ["./custom-form-field.component.scss"],
   changeDetection: ChangeDetectionStrategy.OnPush,
   standalone: true,
 })
 export class MatLabelComponent {
-  @Input() labelFor = "";
+  readonly labelFor = input("");
 }
 
 @Component({

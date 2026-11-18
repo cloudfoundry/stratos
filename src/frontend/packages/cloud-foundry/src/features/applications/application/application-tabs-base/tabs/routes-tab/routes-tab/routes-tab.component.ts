@@ -1,7 +1,6 @@
 import {
   ChangeDetectionStrategy,
   Component,
-  OnDestroy,
   OnInit,
   Signal,
   WritableSignal,
@@ -22,12 +21,14 @@ import {
   SignalListRowAction,
   TailwindSnackBarService,
 } from '@stratosui/core';
+import { leadPieces } from '@stratosui/store';
 
 import {
   CfAppRoutesSignalConfigService,
 } from '../../../../../../../shared/signal-list-configs/app-route/cf-app-routes-signal-config.service';
 import { AppRouteActionsService } from '../../../../../../../shared/services/app-route-actions.service';
 import type { StRoute } from '../../../../../../../services/endpoint-data/stratos-types';
+import { unknownHowOf, unknownOutcomeMessage } from '../../../../../../../services/async-jobs/unknown-outcome-message';
 import { AppDetailDataService } from '../../../../../app-detail-data.service';
 
 /**
@@ -58,7 +59,7 @@ import { AppDetailDataService } from '../../../../../app-detail-data.service';
     CfAppRoutesSignalConfigService,
   ],
 })
-export class RoutesTabComponent implements OnInit, OnDestroy {
+export class RoutesTabComponent implements OnInit {
   private dataService = inject(AppDetailDataService);
   private actionsService = inject(AppRouteActionsService);
   private routesConfig = inject(CfAppRoutesSignalConfigService);
@@ -134,11 +135,6 @@ export class RoutesTabComponent implements OnInit, OnDestroy {
     void this.dataService.refresh('routes');
   }
 
-  ngOnDestroy(): void {
-    // No focus-priority hold to release; ngOnDestroy kept for symmetry
-    // with peer tabs and as the place to unwind future subscriptions.
-  }
-
   /**
    * Per-row action factory. Wraps the wave-2 service's Unmap and Delete
    * verbs with confirmation dialogs (legacy text style). On confirm we
@@ -163,8 +159,8 @@ export class RoutesTabComponent implements OnInit, OnDestroy {
             try {
               await this.actionsService.unmapRoute(row.guid);
               this.dataService.removeRoute(row.guid);
-            } catch (err: any) {
-              this.snackBar.error(`Unmap failed: ${err?.message ?? err}`);
+            } catch (err: unknown) {
+              this.snackBar.error(leadPieces('Unmap failed', err));
             }
           });
         },
@@ -181,10 +177,17 @@ export class RoutesTabComponent implements OnInit, OnDestroy {
           );
           this.confirmDialog.open(confirm, async () => {
             try {
-              await this.actionsService.deleteRoute(row.guid);
-              this.dataService.removeRoute(row.guid);
-            } catch (err: any) {
-              this.snackBar.error(`Delete failed: ${err?.message ?? err}`);
+              const outcome = await this.actionsService.deleteRoute(row.guid);
+              if (outcome === 'deleted') {
+                this.dataService.removeRoute(row.guid);
+              } else {
+                // Unknown result (ended, or still running in CF): keep the row and re-read
+                // the routes so the tab shows whether it is still there.
+                void this.dataService.refresh('routes');
+                this.snackBar.error(unknownOutcomeMessage(`Delete "${label}"`, 'The Routes tab', unknownHowOf(outcome) ?? 'ended'));
+              }
+            } catch (err: unknown) {
+              this.snackBar.error(leadPieces('Delete failed', err));
             }
           });
         },

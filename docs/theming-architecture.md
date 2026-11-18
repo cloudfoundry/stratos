@@ -51,13 +51,13 @@ Set by the theme service and used for primary interactive elements.
 
 | Variable | Light | Dark | Usage |
 |----------|-------|------|-------|
-| `--color-primary` | `#3b82f6` | `#60a5fa` | Buttons, links, active states |
-| `--color-secondary` | `#60a5fa` | `#38bdf8` | Secondary actions |
-| `--color-accent` | `#60a5fa` | `#38bdf8` | Accents, highlights |
+| `--color-primary` | `#2563eb` | `#60a5fa` | Buttons, links, active states (4.5:1 as text on the content background) |
+| `--color-secondary` | `#2563eb` | `#38bdf8` | Secondary actions |
+| `--color-accent` | `#2563eb` | `#38bdf8` | Accents, highlights, table links |
 | `--color-success` | `#22c55e` | `#4ade80` | Success states, running apps |
 | `--color-warning` | `#f59e0b` | `#fbbf24` | Warning badges |
 | `--color-danger` | `#ef4444` | `#f87171` | Errors, delete actions |
-| `--color-info` | `#3b82f6` | `#60a5fa` | Info badges |
+| `--color-info` | `#2563eb` | `#60a5fa` | Info badges |
 
 ### Navigation
 
@@ -123,7 +123,7 @@ Controls content areas, cards, and panels within the page.
 | `--input-bg` | `#ffffff` | `#1e293b` | Input background |
 | `--input-border` | `#d1d5db` | `#475569` | Input border |
 | `--input-text` | `#1e293b` | `#f1f5f9` | Input text |
-| `--input-placeholder` | `#9ca3af` | `#64748b` | Placeholder text |
+| `--input-placeholder` | `#64748b` | `#94a3b8` | Placeholder text (4.5:1 on the input background) |
 | `--input-focus-border` | `var(--color-primary)` | `var(--color-primary)` | Focus ring |
 | `--input-disabled-bg` | `#f3f4f6` | `#0f172a` | Disabled state |
 
@@ -388,6 +388,9 @@ interface CompanyConfig {
     // nav entries hidden by endpoint/persistence rules. A debugging
     // affordance — off by default.
     showAllMenuItemsToggle?: boolean;
+    // Log each theme and mode change, with the theme applied, to the
+    // browser console. Off by default.
+    logThemeChanges?: boolean;
   };
   defaults?: {
     themeMode?: 'light' | 'dark' | 'system';

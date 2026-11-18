@@ -1,8 +1,6 @@
 import { CommonModule } from '@angular/common';
 import { Component, ChangeDetectionStrategy, Signal, WritableSignal, computed, inject, signal } from '@angular/core';
-import { toSignal } from '@angular/core/rxjs-interop';
 import { Router, RouterModule } from '@angular/router';
-import { map } from 'rxjs/operators';
 
 import {
   ConfirmationDialogConfig,
@@ -17,6 +15,7 @@ import {
 import {
   UserFavorite,
   UserFavoriteManager,
+  leadPieces,
 } from '@stratosui/store';
 
 import { CurrentUserPermissionsService } from '../../../../../../../core/src/core/permissions/current-user-permissions.service';
@@ -25,6 +24,7 @@ import { CfCurrentUserPermissions } from '../../../../../user-permissions/cf-use
 import { CloudFoundryEndpointService } from '../../../services/cloud-foundry-endpoint.service';
 import { CloudFoundryOrganizationService } from '../../../services/cloud-foundry-organization.service';
 import type { StSpace } from '../../../../../services/endpoint-data/stratos-types';
+import { unknownHowOf, unknownOutcomeMessage } from '../../../../../services/async-jobs/unknown-outcome-message';
 
 // Signal-native replacement for CloudFoundryOrganizationSpacesComponent.
 // Scoped to one org under one CF endpoint (both guids supplied by the
@@ -55,25 +55,8 @@ export class CloudFoundryOrganizationSpacesSignalComponent {
   // Favorite keys in rowKey format (${cnsi}:${spaceGuid}). Reads spaces
   // + orgs favorites from the manager and projects to the row-key set
   // the SignalListColumn.favorite binding expects.
-  private readonly favoriteSpaceRowKeys: Signal<ReadonlySet<string>> = toSignal(
-    this.userFavoriteManager.getAllFavorites().pipe(
-      map(([groups, entities]) => {
-        const out = new Set<string>();
-        if (!groups || !entities) return out;
-        for (const epFavGuid in groups) {
-          const g = groups[epFavGuid];
-          if (!g?.entitiesIds) continue;
-          for (const favId of g.entitiesIds) {
-            const fav = entities[favId];
-            if (fav && fav.entityType === 'space' && fav.endpointType === 'cf') {
-              out.add(`${fav.endpointId}:${fav.entityId}`);
-            }
-          }
-        }
-        return out;
-      }),
-    ),
-    { initialValue: new Set<string>() },
+  private readonly favoriteSpaceRowKeys: Signal<ReadonlySet<string>> = computed(() =>
+    this.userFavoriteManager.entityFavoriteKeys('cf', ['space']),
   );
 
   public listConfig: WritableSignal<SignalListConfig<StSpace> | undefined> = signal(undefined);
@@ -95,10 +78,7 @@ export class CloudFoundryOrganizationSpacesSignalComponent {
       this.spacesConfig.view.totalItems;
     // Creating a space is the org manager's; every other role sees the list
     // without the action, as the sibling create actions already do.
-    const canCreateSpace = toSignal(
-      inject(CurrentUserPermissionsService).can(CfCurrentUserPermissions.SPACE_CREATE, cfGuid, orgGuid),
-      { initialValue: false },
-    );
+    const canCreateSpace = inject(CurrentUserPermissionsService).can(CfCurrentUserPermissions.SPACE_CREATE, cfGuid, orgGuid);
     this.createSpaceAction = {
       label: 'Create Space',
       icon: 'add',
@@ -185,11 +165,17 @@ export class CloudFoundryOrganizationSpacesSignalComponent {
   }
 
   private buildSpaceActions = (space: StSpace): readonly SignalListRowAction<StSpace>[] => {
-    const runAction = async (label: string, op: () => Promise<void>) => {
+    // A delete resolves 'unknown' when it ended with a result nobody can
+    // determine: the row stays and the message says where to look.
+    const runAction = async (label: string, op: () => Promise<unknown>, name?: string) => {
       try {
-        await op();
-      } catch (err: any) {
-        this.snackBar.error(`${label} failed: ${err?.message ?? err}`);
+        const outcome = await op();
+        const how = unknownHowOf(outcome);
+        if (how) {
+          this.snackBar.error(unknownOutcomeMessage(name ? `${label} "${name}"` : label, 'The Spaces list', how));
+        }
+      } catch (err: unknown) {
+        this.snackBar.error(leadPieces(`${label} failed`, err));
       }
     };
     return [
@@ -203,7 +189,7 @@ export class CloudFoundryOrganizationSpacesSignalComponent {
             true,
           );
           this.confirmDialog.open(confirm, async () => {
-            await runAction('Delete', () => this.spacesConfig.deleteSpace(space.cnsiGuid, space.guid));
+            await runAction('Delete', () => this.spacesConfig.deleteSpace(space.cnsiGuid, space.guid, space.name), space.name);
           });
         },
       },

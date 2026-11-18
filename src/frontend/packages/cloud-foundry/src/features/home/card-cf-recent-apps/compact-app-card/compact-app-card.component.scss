@@ -32,30 +32,33 @@
     flex: 1;
     min-width: 0;
     padding-left: 12px;
+    // Room for the focus outline (2 px, 2 px out) inside the box that
+    // clips for the ellipsis; the margin keeps the row height.
+    padding-block: 4px;
+    padding-right: 4px;
+    margin-block: -4px;
     overflow: hidden;
     text-overflow: ellipsis;
     white-space: nowrap;
   }
+  // The link carries the ellipsis, so its box is as wide as the name that
+  // shows and its focus outline stays inside the name box.
+  // The theme's link color, which reaches 7:1 in light and dark mode.
   &__name a {
-    color: rgb(37 99 235); // blue-600
-
-    :host-context(.dark) & {
-      color: rgb(96 165 250); // blue-400
-    }
+    color: var(--color-primary);
+    display: block;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
   }
+  // The date's color is the theme's muted text color, set in the template.
   &__updated {
-    color: rgba(0, 0, 0, 0.6);
     white-space: nowrap;
     margin-left: auto;
     padding-left: 8px;
-
-    :host-context(.dark) & {
-      color: rgba(255, 255, 255, 0.6);
-    }
   }
   &__subtle {
     font-size: 12px;
-    opacity: 0.7;
   }
 }
 

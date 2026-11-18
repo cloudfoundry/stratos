@@ -1,10 +1,11 @@
-@if ((helper.clusters$ | async)) {
+@if (parsedClusters()) {
   <div class="flex-1">
     <app-signal-list [config]="listConfig">
       <ng-template appSignalListCell="name" let-row>
         @if (editRowId() === row._id) {
           <div class="flex items-center gap-1">
             <input
+              aria-label="Name"
               class="flex-1 min-w-0 px-2 py-1 text-sm border border-content-border rounded bg-content-bg text-content-text"
               [value]="editRowName()"
               (click)="$event.stopPropagation()"
@@ -12,26 +13,26 @@
               (blur)="saveEdit(row)"
               (keyup.enter)="saveEdit(row)"
               (keyup.escape)="cancelEdit()" />
-            <button id="kube-config-name-edit-done" type="button" title="Save"
+            <button aria-label="Save" id="kube-config-name-edit-done" type="button" title="Save"
               class="inline-flex items-center justify-center p-0.5 text-success hover:text-success/80"
               (mousedown)="$event.preventDefault()"
               (click)="$event.stopPropagation(); saveEdit(row)">
-              <span class="material-icons text-base leading-none">done</span>
+              <span aria-hidden="true" class="material-icons text-base leading-none">done</span>
             </button>
-            <button id="kube-config-name-edit-cancel" type="button" title="Cancel"
+            <button aria-label="Cancel" id="kube-config-name-edit-cancel" type="button" title="Cancel"
               class="inline-flex items-center justify-center p-0.5 text-content-muted hover:text-content-text"
               (mousedown)="$event.preventDefault()"
               (click)="$event.stopPropagation(); cancelEdit()">
-              <span class="material-icons text-base leading-none">clear</span>
+              <span aria-hidden="true" class="material-icons text-base leading-none">clear</span>
             </button>
           </div>
         } @else {
           <div class="flex items-center gap-1">
             <span class="flex-1 min-w-0 truncate" [attr.title]="row.name">{{ row.name }}</span>
-            <button type="button" title="Edit name"
+            <button aria-label="Edit name" type="button" title="Edit name"
               class="inline-flex items-center justify-center p-0.5 text-content-muted hover:text-accent opacity-60 hover:opacity-100"
               (click)="$event.stopPropagation(); startEdit(row)">
-              <span class="material-icons text-base leading-none">edit</span>
+              <span aria-hidden="true" class="material-icons text-base leading-none">edit</span>
             </button>
           </div>
         }

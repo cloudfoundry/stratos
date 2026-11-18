@@ -1,22 +1,22 @@
-<app-page-header [breadcrumbs]="(breadcrumbs$ | async) ?? []">
+<app-page-header [breadcrumbs]="breadcrumbs()">
   <h1>Kubernetes Terminal</h1>
   <div class="page-header-right">
     <span>
-      @if (sshViewer.isConnected) {
-        <button class="btn btn-icon" matTooltip="Disconnect" name="stop" (click)="sshViewer.disconnect()" [disabled]="sshViewer.attemptingConnection">
-          <span class="material-symbols-outlined">stop</span>
+      @if (sshViewer.isConnected()) {
+        <button aria-label="Disconnect" class="btn btn-icon" matTooltip="Disconnect" name="stop" (click)="sshViewer.disconnect()" [disabled]="sshViewer.attemptingConnection()">
+          <span aria-hidden="true" class="material-icons">stop</span>
         </button>
       }
-      @if (!sshViewer.isConnected) {
-        <button class="btn btn-icon" matTooltip="Connect" name="start" (click)="sshViewer.reconnect()" [disabled]="sshViewer.attemptingConnection">
-          <span class="material-symbols-outlined">play_arrow</span>
+      @if (!sshViewer.isConnected()) {
+        <button aria-label="Connect" class="btn btn-icon" matTooltip="Connect" name="start" (click)="sshViewer.reconnect()" [disabled]="sshViewer.attemptingConnection()">
+          <span aria-hidden="true" class="material-icons">play_arrow</span>
         </button>
       }
-      <button class="btn btn-icon" matTooltip="Back" [routerLink]="kubeSummaryLink">
-        <span class="material-symbols-outlined">close</span>
+      <button aria-label="Back" class="btn btn-icon" matTooltip="Back" [routerLink]="kubeSummaryLink">
+        <span aria-hidden="true" class="material-icons">close</span>
       </button>
     </span>
   </div>
 </app-page-header>
 
-<app-ssh-viewer #sshViewer [errorMessage]="errorMessage" [sshStream]="messages" [sshInput]="sshInput" [connectionStatus]="connectionStatus"></app-ssh-viewer>
+<app-ssh-viewer #sshViewer [errorMessage]="errorMessage()" [sshStream]="messages" [sshInput]="sshInput" [connectionStatus]="connectionStatus"></app-ssh-viewer>

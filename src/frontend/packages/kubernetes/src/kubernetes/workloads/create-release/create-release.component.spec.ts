@@ -7,6 +7,7 @@ import { ActivatedRoute, provideRouter } from '@angular/router';
 import { firstValueFrom, Observable } from 'rxjs';
 import { describe, it, expect, beforeEach, afterEach, vi } from 'vitest';
 
+import { EndpointsService } from '../../../../../core/src/core/endpoints.service';
 import { KubeNamespaceDataService } from '../../../services/domain-data/kube-namespace-data.service';
 
 import { AppTestModule } from '../../../../../core/test-framework/core-test.helper';
@@ -103,14 +104,14 @@ describe('CreateReleaseComponent', () => {
     }).compileComponents();
   });
 
-  beforeEach(() => {
+  beforeEach(async () => {
     httpMock = TestBed.inject(HttpTestingController);
     fixture = TestBed.createComponent(CreateReleaseComponent);
     component = fixture.componentInstance;
 
     // Don't flush the HTTP request yet - this prevents the config from being set
     // which would trigger the ChartValuesEditorComponent initialization
-    fixture.detectChanges();
+    await fixture.whenStable();
 
     // Now flush the chart version request
     const req = httpMock.match('/pp/v1/chartsvc/v1/charts/test-repo/test-chart/versions/test-version')[0];
@@ -154,6 +155,39 @@ describe('CreateReleaseComponent', () => {
 
   it('should be created', () => {
     expect(component).toBeTruthy();
+  });
+
+  it('names the cluster, name and namespace fields', () => {
+    const root: HTMLElement = fixture.nativeElement;
+    const labelOf = (control: string) => {
+      const field = root.querySelector(`[formControlName="${control}"]`);
+      expect(field?.id, `${control} has an id`).toBeTruthy();
+      return root.querySelector(`label[for="${field!.id}"]`)?.textContent?.trim();
+    };
+    expect(root.querySelector('select[formControlName="endpoint"]')?.getAttribute('aria-label'))
+      .toBe('Kubernetes cluster');
+    expect(labelOf('releaseName')).toBe('Name');
+    expect(labelOf('releaseNamespace')).toBe('Namespace');
+  });
+
+  // Endpoint preselection: a single cluster is selected outright, and with
+  // several the first one is preselected.
+  const createWithEndpoints = async (guids: string[]) => {
+    vi.spyOn(TestBed.inject(EndpointsService), 'connectedEndpointsOfTypes')
+      .mockReturnValue(signal(guids.map(guid => ({ guid, name: guid }))) as any);
+    const created = TestBed.createComponent(CreateReleaseComponent);
+    await created.whenStable();
+    // Drop the second component's chart requests; only the form matters here.
+    httpMock.match(() => true);
+    return created.componentInstance;
+  };
+
+  it('selects the only kubernetes endpoint', async () => {
+    expect((await createWithEndpoints(['k1'])).details.controls.endpoint.value).toBe('k1');
+  });
+
+  it('preselects the first of several kubernetes endpoints', async () => {
+    expect((await createWithEndpoints(['k1', 'k2'])).details.controls.endpoint.value).toBe('k1');
   });
 
   it('createNamespace delegates to KubeNamespaceDataService.create on success', async () => {
@@ -232,9 +266,9 @@ describe('CreateReleaseComponent without a version in the route', () => {
 
   // Regression: `install/:endpoint/:repo/:name` (no version) used to request
   // `versions/undefined` and 500. Resolve the chart's latest version instead.
-  it('resolves the latest chart version for the values URL', () => {
+  it('resolves the latest chart version for the values URL', async () => {
     const fixture = TestBed.createComponent(CreateReleaseComponent);
-    fixture.detectChanges();
+    await fixture.whenStable();
 
     // The component provides its own ChartsService, so drive it over HTTP.
     const httpMock = TestBed.inject(HttpTestingController);

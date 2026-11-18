@@ -1,7 +1,5 @@
 import { HttpClient, HttpErrorResponse } from '@angular/common/http';
-import {Component, Input, signal, inject, ChangeDetectionStrategy } from '@angular/core';
-import { CommonModule } from '@angular/common';
-import { toObservable } from '@angular/core/rxjs-interop';
+import {Component, effect, signal, inject, untracked, ChangeDetectionStrategy } from '@angular/core';
 import { CustomCheckboxComponent } from '../../../../../../core/src/shared/components/custom-checkbox/custom-checkbox.component';
 import { AppBusyComponent } from '../../../../../../core/src/shared/components/busy-indicator/busy-indicator.component';
 import { timeout } from 'rxjs/operators';
@@ -24,55 +22,62 @@ selector: 'app-kube-config-table-cert',
   changeDetection: ChangeDetectionStrategy.OnPush,
   standalone: true,
   imports: [
-    CommonModule,
     CustomCheckboxComponent,
     AppBusyComponent
   ]
 })
 export class KubeConfigTableCertComponent extends TableCellCustom<KubeConfigFileCluster> {
 
-  private _initialValue = signal<{
+  readonly initialValue = signal<{
     checked: boolean;
   } | null>(null);
-  initialValue$ = toObservable(this._initialValue);
   initialized = false;
 
-  @Input()
-  set row(row: KubeConfigFileCluster) {
-    super.row = row;
-    if (!this.initialized) {
-      this.initialized = true;
-      if (row.cluster['insecure-skip-tls-verify']) {
-        // User has manually specified default skip option
-        this._initialValue.set({
-          checked: true
-        });
-      } else {
-        // Manually check if a cert is required, if so tick by default
-        this.http.get<CertResponse>(`/pp/v1/kube/cert?url=${row.cluster.server}`).pipe(
-          timeout(5000),
-        ).subscribe(
-          // Success, no cert required
-          (res: CertResponse) => this.update(res.Required),
-          // Failed, check for specific cert required error
-          (_e: HttpErrorResponse) => this.update(false)
-        );
-      }
-    }
-  }
-  get row(): KubeConfigFileCluster {
-    return super.row;
-  }  private helper = inject(KubeConfigHelper);
+  private helper = inject(KubeConfigHelper);
   private http = inject(HttpClient);
 
+  constructor() {
+    super();
+    // The first row decides the initial tick; later rows keep the user's
+    // choice. Untracked: only the row should run this.
+    effect(() => {
+      const row = this.row();
+      untracked(() => this.initialize(row));
+    });
+  }
+
+  private initialize(row: KubeConfigFileCluster) {
+    if (this.initialized) {
+      return;
+    }
+    this.initialized = true;
+    if (row.cluster['insecure-skip-tls-verify']) {
+      // User has manually specified default skip option
+      this.initialValue.set({
+        checked: true
+      });
+    } else {
+      // Manually check if a cert is required, if so tick by default
+      this.http.get<CertResponse>(`/pp/v1/kube/cert?url=${row.cluster.server}`).pipe(
+        timeout(5000),
+      ).subscribe({
+        // Success, no cert required
+        next: (res: CertResponse) => this.update(res.Required),
+        // Failed, check for specific cert required error
+        error: (_e: HttpErrorResponse) => this.update(false)
+      });
+    }
+  }
+
   private update(checked: boolean) {
-    this._initialValue.set({ checked });
+    this.initialValue.set({ checked });
     this.valueChanged(checked);
   }
 
   valueChanged(value: boolean): void {
-    this.row.cluster['insecure-skip-tls-verify'] = value;
-    this.helper.update(this.row);
+    const row = this.row();
+    row.cluster['insecure-skip-tls-verify'] = value;
+    this.helper.update(row);
   }
 
 }

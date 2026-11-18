@@ -1,5 +1,6 @@
 import { Page, Locator } from '@playwright/test';
 import { BasePage } from '../base.page';
+import { ListComponent } from '../../components';
 
 /**
  * Applications List Page Object
@@ -20,14 +21,30 @@ export class ApplicationsPage extends BasePage {
   private readonly cards: Locator;
   private readonly sideNav: Locator;
 
+  // Shared list facade (table/cards/header/pagination) over the wall's
+  // app-signal-list, matching the canonical page-object pattern (EndpointsPage).
+  public readonly list: ListComponent;
+
   constructor(page: Page) {
     super(page);
 
-    this.createButton = page.locator('#appwall-create-application');
-    this.listComponent = page.locator('app-list');
-    this.searchInput = this.listComponent.locator('input[type="search"]');
-    this.cards = this.listComponent.locator('app-card');
+    // Modernized app wall: <app-application-wall> hosts <app-signal-list> (a
+    // config-driven table), with the create action in <app-list-sub-nav>.
+    // The legacy app-list/app-card/mat-select DOM is gone.
+    this.createButton = page.getByRole('button', { name: /create application/i });
+    this.listComponent = page.locator('app-signal-list');
+    this.searchInput = page.getByRole('textbox', { name: /filter by name/i });
+    this.cards = this.listComponent.locator('tbody tr');
     this.sideNav = page.locator('app-side-nav');
+    this.list = new ListComponent(page);
+  }
+
+  /**
+   * Check if currently on the applications wall
+   */
+  async isActivePage(): Promise<boolean> {
+    await this.page.waitForURL(/\/applications/, { timeout: 5000 }).catch(() => {});
+    return this.page.url().includes('/applications');
   }
 
   /**

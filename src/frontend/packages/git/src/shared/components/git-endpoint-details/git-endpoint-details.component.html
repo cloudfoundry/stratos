@@ -1,12 +1,12 @@
-@if (name) {
+@if (name()) {
   <div class="flex items-center space-x-2">
     <div class="flex items-center space-x-2">
-      @if (avatar) {
+      @if (avatar(); as avatar) {
         <span class="shrink-0">
-          <img src="{{ avatar }}" alt="@{{ name }}" class="w-6 h-6 rounded-full">
+          <img src="{{ avatar }}" alt="@{{ name() }}" class="w-6 h-6 rounded-full">
         </span>
       }
-      <span class="text-content-text">{{ name }}</span>
+      <span class="text-content-text">{{ name() }}</span>
     </div>
   </div>
 } @else {

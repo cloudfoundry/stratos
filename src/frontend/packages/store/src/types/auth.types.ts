@@ -43,6 +43,8 @@ export enum UserEndpointsEnabled {
 }
 export interface SessionDataConfig {
   enableTechPreview?: boolean;
+  // Minutes the browser follows a background job (ASYNC_JOB_TRACKING_LIMIT_IN_MINS).
+  jobTrackingLimitMins?: number;
   listMaxSize?: number;
   listAllowLoadMaxed?: boolean;
   APIKeysEnabled?: APIKeysEnabled;

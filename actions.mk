@@ -96,9 +96,12 @@ require_tool = @which $(strip $1) > /dev/null 2>&1 || (echo "$(strip $1) not ins
 
 # ── Modifier validation ──────────────────────────────────────
 # Called inside declare_verb and declare_verb_default. Emits a
-# parse-time warning for each active modifier not registered or
-# allowed for this verb.
-$(_HIDE)check_mods = $(if $(filter $1,$(MAKECMDGOALS)),$(foreach mod,$($(_HIDE)KNOWN_MODS),$(if $(and $($(_HIDE)FLAG_$(mod)),$(if $(filter $(mod),$($(_HIDE)VALID_MODS_$1)),,x)),$(warning WARNING: 'make $1 $(mod)' — '$(mod)' is not a valid modifier for '$1' (ignored)))))
+# parse-time warning for each modifier typed on the command line that
+# is not registered or allowed for this verb. A modifier only turned on
+# by another verb's default (build alone means frontend + backend) is
+# not the user's, so `make build release cf` must not warn that release
+# takes no frontend.
+$(_HIDE)check_mods = $(if $(filter $1,$(MAKECMDGOALS)),$(foreach mod,$($(_HIDE)KNOWN_MODS),$(if $(and $(filter $(mod),$(MAKECMDGOALS)),$($(_HIDE)FLAG_$(mod)),$(if $(filter $(mod),$($(_HIDE)VALID_MODS_$1)),,x)),$(warning WARNING: 'make $1 $(mod)' — '$(mod)' is not a valid modifier for '$1' (ignored)))))
 
 # ── declare_verb(verb) ──────────────────────────────────────
 define $(_HIDE)declare_verb_impl

@@ -19,7 +19,7 @@ describe('ApplyQuotaToSpacesDialogComponent', () => {
   const close = vi.fn();
   const data = { cfGuid: 'cnsi-1', orgGuid: 'org-1', quotaGuid: 'sq-1', quotaName: 'small' };
 
-  beforeEach(() => {
+  beforeEach(async () => {
     close.mockReset();
     TestBed.configureTestingModule({
       imports: [ApplyQuotaToSpacesDialogComponent],
@@ -36,17 +36,19 @@ describe('ApplyQuotaToSpacesDialogComponent', () => {
     fixture = TestBed.createComponent(ApplyQuotaToSpacesDialogComponent);
     component = fixture.componentInstance;
 
-    // On construction the dialog loads the org's spaces.
-    const load = httpMock.expectOne('/pp/v1/cf/org/cnsi-1/org-1/spaces');
-    expect(load.request.method).toBe('GET');
-    load.flush({
-      resources: [
-        { guid: 'space-a', name: 'dev' },
-        { guid: 'space-b', name: 'prod' },
-      ],
-      totalResults: 2,
-    });
+    // On construction the dialog loads every page of the org's spaces
+    // (without per_page the endpoint stops at CF's default 50).
+    const page1 = httpMock.expectOne('/pp/v1/cf/org/cnsi-1/org-1/spaces?per_page=500&page=1');
+    expect(page1.request.method).toBe('GET');
+    page1.flush({ resources: [{ guid: 'space-a', name: 'dev' }], pagination: { totalResults: 2, totalPages: 2 } });
+    await new Promise<void>(resolve => setTimeout(resolve, 0));
+    httpMock.expectOne('/pp/v1/cf/org/cnsi-1/org-1/spaces?per_page=500&page=2')
+      .flush({ resources: [{ guid: 'space-b', name: 'prod' }], pagination: { totalResults: 2, totalPages: 2 } });
     fixture.detectChanges();
+  });
+
+  it('lists the spaces from every page', () => {
+    expect((component as unknown as { spaces: () => { guid: string }[] }).spaces().map(s => s.guid)).toEqual(['space-a', 'space-b']);
   });
 
   afterEach(() => httpMock.verify());

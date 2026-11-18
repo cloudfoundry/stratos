@@ -11,7 +11,7 @@ import {
   FormControl,
   FormGroup,
 } from "@angular/forms";
-import { Observable, of as observableOf } from "rxjs";
+import { Observable } from "rxjs";
 import { map } from "rxjs/operators";
 
 import {
@@ -21,7 +21,7 @@ import {
   ErrorStateMatcher,
   ShowOnDirtyErrorStateMatcher,
   StatefulIconComponent,
-  StepOnNextFunction,
+  StepOnNextResult,
 } from "@stratosui/core";
 import { CreateAppStateService } from "../../../../shared/data-services/create-app-state.service";
 import {
@@ -63,10 +63,10 @@ export class CreateApplicationStep2Component implements OnInit {
   appName = new FormControl<string | null>(null);
   appNameChecking: AppNameUniqueChecking = new AppNameUniqueChecking();
 
-  onNext: StepOnNextFunction = () => {
+  async onNext(): Promise<StepOnNextResult> {
     this.createAppState.setName(this.appName.value ?? "");
-    return observableOf({ success: true });
-  };
+    return { success: true };
+  }
 
   onEnter = () => {
     this.appName.updateValueAndValidity();

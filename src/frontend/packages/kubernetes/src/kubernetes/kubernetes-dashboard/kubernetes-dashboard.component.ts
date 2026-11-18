@@ -1,10 +1,7 @@
-import { Component, ElementRef, OnInit, Renderer2, ViewChild, signal, inject, ChangeDetectionStrategy, Injector } from '@angular/core';
-import { toObservable } from '@angular/core/rxjs-interop';
+import { Component, ElementRef, OnInit, Renderer2, Signal, computed, effect, signal, inject, ChangeDetectionStrategy, untracked, viewChild } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { DomSanitizer, SafeResourceUrl } from '@angular/platform-browser';
 import { ActivatedRoute, RouterModule } from '@angular/router';
-import { Observable } from 'rxjs';
-import { map } from 'rxjs/operators';
 
 import {
   EndpointMissingMessageParts,
@@ -46,46 +43,37 @@ import { KubernetesService } from '../services/kubernetes.service';
 })
 export class KubernetesDashboardTabComponent implements OnInit {
 
-  // The @ViewChild setter is never hit in tests, so this can genuinely be unset;
+  // The iframe is not rendered in tests, so this can genuinely be unset;
   // every read guards with `if (this.pKubeDash ...)`.
   private pKubeDash: ElementRef | undefined;
-  @ViewChild('kubeDash', { read: ElementRef, static: false }) set kubeDash(kubeDash: ElementRef) {
-    if (!this.pKubeDash) {
-      this.pKubeDash = kubeDash;
-      // Need to look at this process again. In tests this is never hit, leading to null references to kubeDash
-      this.setupEventListener();
-    }
-  }
-  get kubeDash(): ElementRef | undefined {
-    return this.pKubeDash;
-  }
+  readonly kubeDash = viewChild('kubeDash', { read: ElementRef });
+  // Keeps the first iframe the query finds and wires its listener.
+  private readonly kubeDashLatch = effect(() => {
+    const kubeDash = this.kubeDash();
+    untracked(() => {
+      if (!this.pKubeDash) {
+        this.pKubeDash = kubeDash;
+        this.setupEventListener();
+      }
+    });
+  });
 
   source!: SafeResourceUrl; // strict: assigned in ngOnInit
   href = '';
-  private isLoadingSignal = signal<boolean>(true);
-  private hasErrorSignal = signal<boolean>(false);
-  isLoading$: Observable<boolean>;
-  hasError$: Observable<boolean>;
+  isLoading = signal<boolean>(true);
+  hasError = signal<boolean>(false);
   expanded = true;
 
   private loadCheckTries = 0;
   private haveSetupEventLister = false;
   private hasIframeLoaded = false;
-  public breadcrumbs$!: Observable<IHeaderBreadcrumb[]>; // strict: assigned in ngOnInit
+  public breadcrumbs: Signal<IHeaderBreadcrumb[]> = signal([]);
 
   public errorMsg = signal<EndpointMissingMessageParts>({} as EndpointMissingMessageParts);
 
   public kubeEndpointService = inject(KubernetesEndpointService);
   private sanitizer = inject(DomSanitizer);
   public renderer = inject(Renderer2);
-  private injector = inject(Injector);
-
-  constructor() {
-    this.hasErrorSignal.set(false);
-    // Convert signals to observables for compatibility with LoadingPageComponent
-    this.isLoading$ = toObservable(this.isLoadingSignal, { injector: this.injector });
-    this.hasError$ = toObservable(this.hasErrorSignal, { injector: this.injector });
-  }
 
   ngOnInit() {
     const guid = this.kubeEndpointService.baseKube.guid;
@@ -94,14 +82,17 @@ export class KubernetesDashboardTabComponent implements OnInit {
     href = href.substr(index + 9);
     this.href = href;
     this.source = this.sanitizer.bypassSecurityTrustResourceUrl(`/pp/v1/kubedash/${guid}/login`);
-    this.breadcrumbs$ = this.kubeEndpointService.endpoint$.pipe(
-      map(endpoint => ([{
+    this.breadcrumbs = computed((): IHeaderBreadcrumb[] => {
+      const endpoint = this.kubeEndpointService.endpoint();
+      if (!endpoint) {
+        return [];
+      }
+      return [{
         breadcrumbs: [
-          { value: endpoint.entity.name, routerLink: `/kubernetes/${endpoint.entity.guid}` },
+          { value: endpoint.name, routerLink: `/kubernetes/${endpoint.guid}` },
         ]
-      }])
-      )
-    );
+      }];
+    });
   }
 
   public configUrl(): string {
@@ -128,7 +119,7 @@ export class KubernetesDashboardTabComponent implements OnInit {
         firstLine: errMsg,
         secondLine: { text: '' }
       });
-      this.hasErrorSignal.set(true);
+      this.hasError.set(true);
     }
 
     const kdToolbar = this.getKubeDashToolbar();
@@ -149,7 +140,7 @@ export class KubernetesDashboardTabComponent implements OnInit {
     }
 
     if (hasLoaded) {
-      this.isLoadingSignal.set(false);
+      this.isLoading.set(false);
       this.toggle(true);
     }
 

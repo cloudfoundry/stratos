@@ -1,51 +1,15 @@
-import { Injectable, signal, WritableSignal, inject } from '@angular/core';
+import { Injectable, Signal, inject, signal } from '@angular/core';
 import * as yaml from 'js-yaml';
-import { BehaviorSubject, combineLatest, Observable, of } from 'rxjs';
-import { filter, map, take, tap } from 'rxjs/operators';
+import { combineLatest, defer, Observable, of } from 'rxjs';
+import { map } from 'rxjs/operators';
 
 import { EndpointsService } from '../../../../core/src/core/endpoints.service';
 import { createGuid } from '../../../../core/src/core/utils.service';
 import { RowState } from '../../../../core/src/shared/components/signal-list/row-state.types';
-import { getFullEndpointApiUrl } from '../../../../store/src/endpoint-utils';
-import { EndpointModel } from '../../../../store/src/public-api';
+import { endpointUrlKey, getFullEndpointApiUrl } from '../../../../store/src/endpoint-utils';
+import { createSignalWrapper, EndpointModel } from '../../../../store/src/public-api';
 import { KubeConfigAuthHelper } from './kube-config-auth.helper';
 import { KubeConfigFile, KubeConfigFileCluster } from './kube-config.types';
-
-/**
- * Signal wrapper providing dual API compatibility with BehaviorSubject
- * Allows gradual migration from BehaviorSubject to Signal patterns
- */
-function createSignalWrapper<T>(initialValue: T) {
-  const _signal = signal<T>(initialValue);
-  // asObservable() must be callable outside injection contexts (wrappers are
-  // created and read from event handlers, e.g. the file-input parse), so it
-  // is backed by a BehaviorSubject kept in sync on every write instead of a
-  // lazy toObservable(), which throws NG0203 there.
-  const _subject = new BehaviorSubject<T>(initialValue);
-  const write = (value: T) => {
-    _signal.set(value);
-    _subject.next(value);
-  };
-  const wrapper = Object.assign(
-    // Make it callable like a signal
-    () => _signal(),
-    {
-      // WritableSignal methods
-      set: write,
-      update: (fn: (value: T) => T) => write(fn(_signal())),
-      asReadonly: () => _signal.asReadonly(),
-      // BehaviorSubject compatibility methods
-      next: write,
-      getValue: () => _signal(),
-      asObservable: () => _subject.asObservable(),
-    }
-  );
-  return wrapper as WritableSignal<T> & {
-    next: (value: T) => void;
-    getValue: () => T;
-    asObservable: () => Observable<T>;
-  };
-}
 
 /**
  * Helper to parse the kubeconfig and transform it into data
@@ -61,20 +25,17 @@ export class KubeConfigHelper {
 
   authHelper = new KubeConfigAuthHelper();
 
-  private _clusters = createSignalWrapper<KubeConfigFileCluster[] | null>(null);
-  clusters$ = this._clusters.asObservable().pipe(
-    filter(clusters => !!clusters)
-  );
+  private _clusters = signal<KubeConfigFileCluster[] | null>(null);
+  /** The parsed clusters; null until a kube config has been parsed. */
+  readonly clusters: Signal<KubeConfigFileCluster[] | null> = this._clusters.asReadonly();
 
   public clustersChanged!: () => void;
   public update = (cluster: KubeConfigFileCluster) => {
     this.checkValidity(cluster).subscribe(() => this.clustersChanged());
   };
 
-  public updateAll(): Observable<KubeConfigFileCluster[]> {
-    return this.clusters$.pipe(
-      tap(clusters => clusters.forEach(cluster => this.update(cluster))),
-    );
+  public updateAll(): void {
+    this._clusters()?.forEach(cluster => this.update(cluster));
   }
 
   public parse(config: string): Observable<string> {
@@ -138,9 +99,10 @@ export class KubeConfigHelper {
       clustersArray.map(cluster => this.checkValidity(cluster))
     ).pipe(
       map(() => {
-        // Notify cluster changes
+        // The new clusters are set before the change is announced, so the
+        // listener reads them.
+        this._clusters.set(Object.values(clusters));
         this.clustersChanged();
-        this._clusters.next(Object.values(clusters));
         return '';
       })
     );
@@ -150,13 +112,8 @@ export class KubeConfigHelper {
   // Check the validity of a cluster for import
   public checkValidity(cluster: KubeConfigFileCluster): Observable<any> {
     // Check endpoint name
-    return combineLatest([
-      this.endpointsService.endpoints$,
-      this._clusters.asObservable() // Might be called before we've loaded clusters, so used the non-filtered one
-    ]).pipe(
-      take(1),
-      map(([eps, clusters]) => this.validate(Object.values(eps), cluster, clusters))
-    );
+    // Might be called before we've loaded clusters, so they may be null
+    return defer(() => of(this.validate(Object.values(this.endpointsService.endpoints()), cluster, this._clusters())));
   }
 
   private validate(endpoints: EndpointModel[], cluster: KubeConfigFileCluster, clusters: KubeConfigFileCluster[] | null) {
@@ -171,7 +128,7 @@ export class KubeConfigHelper {
     const found = endpoints.find(item => item.name === cluster.name);
     if (found) {
       // If the URL is the same, then we will just connect to the existing endpoint
-      if (getFullEndpointApiUrl(found) === cluster.cluster.server && !!cluster._user && !!found.guid) {
+      if (endpointUrlKey(getFullEndpointApiUrl(found)) === endpointUrlKey(cluster.cluster.server) && !!cluster._user && !!found.guid) {
         cluster._guid = found.guid;
         cluster._state.next({
           message: 'This endpoint is already registered — importing will connect it, not register a new one. Rename it to register a separate endpoint.',
@@ -187,7 +144,7 @@ export class KubeConfigHelper {
       // A registered endpoint already uses this URL under a different name.
       // Duplicate URLs are allowed (the endpoints list surfaces them with a
       // warning icon), so inform the user but don't block the import.
-      if (endpoints.find(item => getFullEndpointApiUrl(item) === cluster.cluster.server)) {
+      if (endpoints.find(item => endpointUrlKey(getFullEndpointApiUrl(item)) === endpointUrlKey(cluster.cluster.server))) {
         reset = false;
         cluster._state.next({
           message: 'Another endpoint is already registered at this URL — importing will register this as an additional endpoint.',

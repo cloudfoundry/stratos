@@ -1,8 +1,6 @@
 import { CommonModule } from '@angular/common';
 import { Component, ChangeDetectionStrategy, Signal, WritableSignal, computed, inject, signal } from '@angular/core';
-import { toSignal } from '@angular/core/rxjs-interop';
 import { Router, RouterModule } from '@angular/router';
-import { combineLatest, map } from 'rxjs';
 
 import {
   ConfirmationDialogService,
@@ -37,12 +35,10 @@ import { AddUserDialogComponent } from '../../users/add-user/add-user-dialog.com
 // /cloud-foundry/:cnsi/users. CNSI-wide — shows every user the CF returns,
 // joined with their org and space role grants by the backend handler.
 //
-// Manage Roles + Remove User wizards are still legacy ngrx (separate
-// route entries under /cloud-foundry/:cnsi/users/manage|remove). Manage
-// Roles is selection-driven via the bulk action (forwards the selected
-// users as ?users=g1,g2,…); the per-row kebab now carries only the two
-// Remove entries, which navigate with ?user={guid} to pre-fill the
-// wizard for that row. The Org Roles + Space Roles columns resolve
+// The Manage Roles wizard is a separate route
+// (/cloud-foundry/:cnsi/users/manage), selection-driven via the bulk
+// action (forwards the selected users as ?users=g1,g2,…). Removal is the
+// inline bulk remove. The Org Roles + Space Roles columns resolve
 // org/space names via EndpointDataService signals so cells never render
 // raw GUIDs (no_raw_guids feedback rule).
 @Component({
@@ -157,26 +153,17 @@ export class CloudFoundryUsersComponent {
 
   /** True when the current user holds org or space role-change rights on
    *  this endpoint. Admin satisfies both checks; non-admin must have the
-   *  specific permission in at least one org or space. Bridges the
-   *  Observable from CurrentUserPermissionsService into a signal via
-   *  toSignal; initialValue: false keeps the action safely disabled until
-   *  the first emission resolves. Field initializer (injection context) —
-   *  needs only perms + the endpoint guid, no usersConfig.initialize(). */
-  private readonly canManageRoles: Signal<boolean> = toSignal(
-    combineLatest([
-      this.perms.can(CfCurrentUserPermissions.ORGANIZATION_CHANGE_ROLES, this.cfEndpointService.cfGuid),
-      this.perms.can(CfCurrentUserPermissions.SPACE_CHANGE_ROLES, this.cfEndpointService.cfGuid),
-    ]).pipe(map(([org, space]) => org || space)),
-    { initialValue: false },
-  );
+   *  specific permission in at least one org or space. False until the
+   *  roles load, which keeps the action disabled until then. Needs only
+   *  perms + the endpoint guid, no usersConfig.initialize(). */
+  private readonly canChangeOrgRoles = this.perms.can(CfCurrentUserPermissions.ORGANIZATION_CHANGE_ROLES, this.cfEndpointService.cfGuid);
+  private readonly canChangeSpaceRoles = this.perms.can(CfCurrentUserPermissions.SPACE_CHANGE_ROLES, this.cfEndpointService.cfGuid);
+  private readonly canManageRoles: Signal<boolean> = computed(() => this.canChangeOrgRoles() || this.canChangeSpaceRoles());
 
-  /** True when the CF endpoint has the UAA invite feature configured.
-   *  Bridges UserInviteService.configured$ into a signal; false until the
-   *  first emission so the invite tab stays absent until resolved. */
-  private readonly userInviteAllowed: Signal<boolean> = toSignal(
-    this.userInviteService.configured$,
-    { initialValue: false },
-  );
+  /** True when the CF endpoint has the UAA invite feature configured;
+   *  false until the endpoint has loaded, so the invite tab stays absent
+   *  until resolved. */
+  private readonly userInviteAllowed: Signal<boolean> = this.userInviteService.configured;
 
   /** Resolves the selected row keys against the full filtered list to yield
    *  the concrete StUser objects. Used by the bulk Remove actions to pass

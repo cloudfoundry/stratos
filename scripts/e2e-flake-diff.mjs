@@ -1,4 +1,4 @@
-#!/usr/bin/env node
+#!/usr/bin/env bun
 // Cross-run comparison for Playwright `results.json` reports. Classifies
 // every test that failed in at least one input run:
 //   deterministic — failed in every run where it executed
@@ -20,7 +20,7 @@
 // A test absent from a run (not executed there, e.g. skipped or out of
 // scope) doesn't count against that run for determinism.
 //
-// Usage: node scripts/e2e-flake-diff.mjs <results1.json> <results2.json> [...more] [--json]
+// Usage: bun scripts/e2e-flake-diff.mjs <results1.json> <results2.json> [...more] [--json]
 
 import { readFileSync } from 'node:fs'
 import path from 'node:path'
@@ -28,7 +28,7 @@ import path from 'node:path'
 const JSON_OUT = process.argv.includes('--json')
 const files = process.argv.slice(2).filter((a) => a !== '--json')
 if (files.length < 2) {
-  console.error('Usage: node scripts/e2e-flake-diff.mjs <results1.json> <results2.json> [...more] [--json]')
+  console.error('Usage: bun scripts/e2e-flake-diff.mjs <results1.json> <results2.json> [...more] [--json]')
   process.exit(1)
 }
 

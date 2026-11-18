@@ -1,4 +1,4 @@
-import { ChangeDetectionStrategy, Component, Input} from '@angular/core';
+import { ChangeDetectionStrategy, Component, input } from '@angular/core';
 import { CommonModule } from '@angular/common';
 
 @Component({
@@ -10,11 +10,11 @@ import { CommonModule } from '@angular/common';
 })
 export class PanelComponent {
   // Title of the panel
-  @Input() title = '';
+  readonly title = input('');
   // Display a gray background
-  @Input() background = false;
+  readonly background = input(false);
   // Show a border
-  @Input() border = false;
+  readonly border = input(false);
   // Set the size of the panel to 80%
-  @Input() container = false;
+  readonly container = input(false);
 }

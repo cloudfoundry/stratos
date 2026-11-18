@@ -1,5 +1,4 @@
 import { DestroyRef, EffectRef, Injectable, Injector, Signal, WritableSignal, computed, effect, inject, runInInjectionContext, signal } from '@angular/core';
-import { toSignal } from '@angular/core/rxjs-interop';
 import { HttpClient, HttpParams } from '@angular/common/http';
 import { firstValueFrom } from 'rxjs';
 import type { EndpointModel } from '@stratosui/store';
@@ -11,6 +10,7 @@ import { MergeOrchestrator } from '../../../services/data-sources/merge-orchestr
 import { wireEndpointErrorReporting } from '../endpoint-error-reporting';
 import { EndpointDataRegistry } from '../../../services/endpoint-data/endpoint-data.registry';
 import { EntityDeleteController } from '../../../services/deletes/entity-delete.controller';
+import type { DeleteOutcome } from '../../../services/deletes/delete-event.types';
 import { runCfDelete } from '../../../services/deletes/run-cf-delete';
 import { applicationEntityType, routeEntityType } from '../../../cf-entity-types';
 import { serviceCredentialBindingEntityType } from '../../../entity-relations/signal/cf-relation-registrations';
@@ -18,6 +18,7 @@ import { ViewPipeline, SortSpec } from '../../../services/data-sources/view-pipe
 import type { StApp, StAppRoutesResponse, StOrg, StOrgsResponse, StRoute, StServiceCredentialBinding, StServiceCredentialBindingsResponse, StSpace, StSpacesResponse, StStack } from '../../../services/endpoint-data/stratos-types';
 import { CloudFoundryService } from '../../data-services/cloud-foundry.service';
 import { writeWithJob } from '../../../services/async-jobs/write-with-job';
+import { UnknownOutcome, unknownOutcomeOf } from '../../../services/async-jobs/unknown-outcome-message';
 import type { StratosJob } from '../../../services/async-jobs/async-job.types';
 import type { SignalListDropdownOption, SignalListRangeValue } from '@stratosui/core';
 import { ListStateStore, naturalCompare, rangeMatches } from '@stratosui/core';
@@ -83,15 +84,14 @@ export class CfAppsSignalConfigService {
     signal(new Map());
   readonly appStats: Signal<Map<string, { running: number; total: number }>> =
     computed(() => this._appStats());
-  private statsTimer?: ReturnType<typeof setInterval>;
-  // Reactive stats refresh effect, captured so a re-entry (root singleton +
-  // per-mount startStatsPolling) destroys the prior one instead of stacking.
-  private statsEffect?: EffectRef;
+  // Stops the current stats poll (timer + reactive effect). Captured so a
+  // re-entry (root singleton + per-mount startStatsPolling) stops the prior
+  // one instead of stacking.
+  private stopStats?: () => void;
   // Tracks `${cnsiGuid}:${appGuid}` keys with an in-flight stats request so
   // burst signal updates during initial render don't issue 4× duplicate
   // calls per app — the original symptom on multi-CNSI walls with slow CFs.
   private readonly statsInFlight = new Set<string>();
-  private readonly destroyRef = inject(DestroyRef);
   private readonly injector = inject(Injector);
 
   // Lazy org/space catalog loading. loadNames() runs an org+per-org-spaces
@@ -266,9 +266,13 @@ export class CfAppsSignalConfigService {
   private readonly http = inject(HttpClient);
 
   constructor() {
+    // Hosts stop their own polls; this covers an injector torn down while
+    // a poll is still live (each spec's TestBed reset).
+    inject(DestroyRef).onDestroy(() => this.stopStats?.());
+
     const cfService = inject(CloudFoundryService, { optional: true });
     this.connectedEndpoints = cfService
-      ? toSignal(cfService.connectedCFEndpoints$, { initialValue: [] as EndpointModel[] })
+      ? cfService.connectedCFEndpoints
       : signal<EndpointModel[]>([]).asReadonly();
 
     // CF options come from the connected endpoints list directly.
@@ -1077,44 +1081,43 @@ export class CfAppsSignalConfigService {
   }
 
   // Kick off an initial stats fetch for the currently visible page, plus
-  // an interval-based refresh. Safe to call more than once — the timer
-  // is reset each time. Call from the app-wall once the view pipeline is
-  // initialized; registerDestroy stops the timer on teardown.
+  // an interval-based refresh. Call from the list component once the view
+  // pipeline is initialized, passing the component's DestroyRef: this
+  // service is a root singleton, so only the host knows when its page is
+  // gone, and the poll stops with it. Safe to call more than once — each
+  // call stops the previous poll first, so a re-entry never stacks.
   //
   // Page / sort / filter changes happen more often than the poll tick,
   // so we ALSO re-fetch reactively whenever pagedItems changes — the
   // user navigating to page 2 sees stats fill in within a few hundred
   // ms rather than waiting up to intervalMs.
-  startStatsPolling(intervalMs: number = 30000): void {
-    if (this.statsTimer) {
-      clearInterval(this.statsTimer);
+  startStatsPolling(host: DestroyRef, intervalMs: number = 30000): void {
+    this.stopStats?.();
+    // The callers start polling after an await in ngOnInit; a host that
+    // left in the meantime must not start a poll nobody will stop.
+    if (host.destroyed) {
+      return;
     }
     const runOnce = () => {
       const keys = this.view.pagedItems().map((a) => `${a.cnsiGuid}:${a.guid}`);
       this.refreshStatsForKeys(keys);
     };
     runOnce();
-    this.statsTimer = setInterval(runOnce, intervalMs);
-    // effect() requires an injection context; startStatsPolling is called
-    // from the component's ngOnInit which isn't one. Wrap it explicitly.
-    //
-    // Tear down any previous mount's effect first. This service is a root
-    // singleton, so a re-entry (app-wall remounted on navigation) would
-    // otherwise stack one live effect per visit, multiplying stats fetches
-    // across a session — same reasoning as the statsTimer reset above.
-    this.statsEffect?.destroy();
-    runInInjectionContext(this.injector, () => {
-      this.statsEffect = effect(() => {
-        const keys = this.view.pagedItems().map((a) => `${a.cnsiGuid}:${a.guid}`);
-        this.refreshStatsForKeys(keys);
-      });
-    });
-    this.destroyRef.onDestroy(() => {
-      if (this.statsTimer) {
-        clearInterval(this.statsTimer);
-        this.statsTimer = undefined;
+    const timer = setInterval(runOnce, intervalMs);
+    // effect() requires an injection context; the callers' ngOnInit isn't
+    // one, hence the explicit injector.
+    const statsEffect = effect(runOnce, { injector: this.injector });
+    // stop() only touches its own timer and effect, so a stale host
+    // destroyed after a newer start leaves the newer poll running.
+    const stop = () => {
+      clearInterval(timer);
+      statsEffect.destroy();
+      if (this.stopStats === stop) {
+        this.stopStats = undefined;
       }
-    });
+    };
+    this.stopStats = stop;
+    host.onDestroy(stop);
   }
 
   // Fetches every route currently mapped to an app, via the Stratos-native
@@ -1160,8 +1163,8 @@ export class CfAppsSignalConfigService {
   // chokepoint. The controller removes the binding from
   // EndpointDataService._serviceCredentialBindings and (via reverse edges)
   // marks the bound app + service-instance lists stale.
-  async deleteServiceBinding(cnsiGuid: string, bindingGuid: string): Promise<void> {
-    await runCfDelete(this.deleteController, this.http, {
+  async deleteServiceBinding(cnsiGuid: string, bindingGuid: string): Promise<DeleteOutcome> {
+    return runCfDelete(this.deleteController, this.http, {
       cnsiGuid,
       entityKind: serviceCredentialBindingEntityType,
       deleteGuid: bindingGuid,
@@ -1177,8 +1180,8 @@ export class CfAppsSignalConfigService {
   // attached routes alongside the app. Throws on FAILED terminal state —
   // callers should either surface the error or swallow it (the route may fail
   // to delete because the app delete already cascaded through CF's checks).
-  async deleteRoute(cnsiGuid: string, routeGuid: string): Promise<void> {
-    await runCfDelete(this.deleteController, this.http, {
+  async deleteRoute(cnsiGuid: string, routeGuid: string): Promise<DeleteOutcome> {
+    return runCfDelete(this.deleteController, this.http, {
       cnsiGuid,
       entityKind: routeEntityType,
       deleteGuid: routeGuid,
@@ -1194,17 +1197,17 @@ export class CfAppsSignalConfigService {
   // write callsite a uniform client shape regardless of whether CF itself
   // was sync or async. Thrown StratosJobError surfaces CF errors; callers
   // should catch and surface via snackbar.
-  async startApp(cnsiGuid: string, appGuid: string, opts?: { onProgress?: (job: StratosJob) => void }): Promise<void> {
-    await this.appAction(cnsiGuid, appGuid, 'start', opts);
+  async startApp(cnsiGuid: string, appGuid: string, opts?: { onProgress?: (job: StratosJob) => void }): Promise<UnknownOutcome | undefined> {
+    return this.appAction(cnsiGuid, appGuid, 'start', opts);
   }
-  async stopApp(cnsiGuid: string, appGuid: string, opts?: { onProgress?: (job: StratosJob) => void }): Promise<void> {
-    await this.appAction(cnsiGuid, appGuid, 'stop', opts);
+  async stopApp(cnsiGuid: string, appGuid: string, opts?: { onProgress?: (job: StratosJob) => void }): Promise<UnknownOutcome | undefined> {
+    return this.appAction(cnsiGuid, appGuid, 'stop', opts);
   }
-  async restartApp(cnsiGuid: string, appGuid: string, opts?: { onProgress?: (job: StratosJob) => void }): Promise<void> {
-    await this.appAction(cnsiGuid, appGuid, 'restart', opts);
+  async restartApp(cnsiGuid: string, appGuid: string, opts?: { onProgress?: (job: StratosJob) => void }): Promise<UnknownOutcome | undefined> {
+    return this.appAction(cnsiGuid, appGuid, 'restart', opts);
   }
-  async restageApp(cnsiGuid: string, appGuid: string, opts?: { onProgress?: (job: StratosJob) => void }): Promise<void> {
-    await this.appAction(cnsiGuid, appGuid, 'restage', opts);
+  async restageApp(cnsiGuid: string, appGuid: string, opts?: { onProgress?: (job: StratosJob) => void }): Promise<UnknownOutcome | undefined> {
+    return this.appAction(cnsiGuid, appGuid, 'restage', opts);
   }
 
   private async appAction(
@@ -1212,13 +1215,15 @@ export class CfAppsSignalConfigService {
     appGuid: string,
     action: 'start' | 'stop' | 'restart' | 'restage',
     opts?: { onProgress?: (job: StratosJob) => void },
-  ): Promise<void> {
+  ): Promise<UnknownOutcome | undefined> {
     const call = this.http.post(
       `/pp/v1/cf/apps/${cnsiGuid}/${appGuid}/actions/${action}`,
       null,
       { observe: 'response' },
     );
-    await writeWithJob(this.http, call, { onProgress: opts?.onProgress });
+    // Resolves an UnknownOutcome when nothing can say how the action ended,
+    // so no caller reports it as done.
+    return unknownOutcomeOf(await writeWithJob(this.http, call, { onProgress: opts?.onProgress }));
   }
 
   // Scales the web process of an app through the async-job contract.
@@ -1230,29 +1235,32 @@ export class CfAppsSignalConfigService {
     cnsiGuid: string,
     appGuid: string,
     payload: { instances?: number; memory?: number; disk_quota?: number },
-  ): Promise<void> {
+  ): Promise<UnknownOutcome | undefined> {
     const call = this.http.post(
       `/pp/v1/cf/apps/${cnsiGuid}/${appGuid}/scale`,
       payload,
       { observe: 'response' },
     );
-    await writeWithJob(this.http, call);
+    return unknownOutcomeOf(await writeWithJob(this.http, call));
   }
 
   // Deletes an app through the EntityDeleteController chokepoint, then drops
   // the row from the orchestrator's aggregated view (no-op when there is no
   // orchestrator — the prior cold-fallback branch). The controller removes the
   // app from the EDS cache and marks descendant routes/bindings + the space's
-  // app-count stale.
-  async deleteApp(cnsiGuid: string, appGuid: string, appName: string = appGuid): Promise<void> {
-    await runCfDelete(this.deleteController, this.http, {
+  // app-count stale. An unknown result keeps the row; callers re-read.
+  async deleteApp(cnsiGuid: string, appGuid: string, appName: string = appGuid): Promise<DeleteOutcome> {
+    const outcome = await runCfDelete(this.deleteController, this.http, {
       cnsiGuid,
       entityKind: applicationEntityType,
       deleteGuid: appGuid,
       deleteName: appName,
       path: `/pp/v1/cf/apps/${cnsiGuid}/${appGuid}`,
     });
-    this.orchestrator?.removeRow(cnsiGuid, appGuid);
+    if (outcome === 'deleted') {
+      this.orchestrator?.removeRow(cnsiGuid, appGuid);
+    }
+    return outcome;
   }
 
   // Bulk delete: destroys each app entity. CF v3 does not cascade-delete a

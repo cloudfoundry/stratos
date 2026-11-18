@@ -62,4 +62,33 @@ describe('RecentEntitiesComponent', () => {
     fixture.detectChanges();
     expect(recents.state()['app1'].name).toBe('old app');
   });
+
+  // Each row was a div with a routerLink, which the keyboard cannot reach
+  // (WCAG 2.1.1); the row is the link, with no anchor nested inside it.
+  it('renders a recent entity with a route as a link to its page', async () => {
+    recents.add({
+      guid: 'app1', date: 1, entityType: 'application', endpointType: 'cf', entityId: 'app1',
+      name: 'old app', routerLink: '/x', prettyType: 'Application', endpointId: 'ep1', metadata: { name: 'old app' },
+    } as any);
+    fixture.detectChanges();
+    await fixture.whenStable();
+    const row = fixture.nativeElement.querySelector('.recent-entity') as HTMLElement;
+    expect(row.tagName).toBe('A');
+    expect(row.getAttribute('href')).toBe('/x');
+    expect(row.textContent).toContain('old app');
+    expect(row.querySelector('a')).toBeNull();
+  });
+
+  // #4166: the entity type line was body text at opacity 0.6 (4.04:1 in light mode).
+  it('shows the entity type in the muted text color', async () => {
+    recents.add({
+      guid: 'app1', date: 1, entityType: 'application', endpointType: 'cf', entityId: 'app1',
+      name: 'old app', routerLink: '/x', prettyType: 'Application', endpointId: 'ep1', metadata: { name: 'old app' },
+    } as any);
+    fixture.detectChanges();
+    await fixture.whenStable();
+    const typeInfo = fixture.nativeElement.querySelector('.type-info') as HTMLElement;
+    expect(typeInfo).toBeTruthy();
+    expect(typeInfo.classList).toContain('text-content-muted');
+  });
 });

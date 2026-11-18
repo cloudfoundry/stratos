@@ -1,8 +1,5 @@
 import { CommonModule } from '@angular/common';
-import { Component, ChangeDetectionStrategy, Injector, inject } from '@angular/core';
-import { toObservable } from '@angular/core/rxjs-interop';
-import { Observable } from 'rxjs';
-import { filter, map } from 'rxjs/operators';
+import { Component, ChangeDetectionStrategy, inject } from '@angular/core';
 
 import { PageHeaderComponent, StepComponent, SteppersComponent } from '@stratosui/core';
 import { CloudFoundryUserProvidedServicesService } from '../../../shared/services/cloud-foundry-user-provided-services.service';
@@ -34,20 +31,15 @@ import { EditSpaceStepComponent } from './edit-space-step/edit-space-step.compon
 })
 export class EditSpaceComponent {
 
-  spaceName$: Observable<string>;
+  readonly space = inject(CloudFoundrySpaceService).spaceDataService.space;
   spaceUrl: string;
 
   constructor() {
     const cfSpaceService = inject(CloudFoundrySpaceService);
-    const injector = inject(Injector);
 
     this.spaceUrl = '/cloud-foundry/' +
       `${cfSpaceService.cfGuid}/organizations/` +
       `${cfSpaceService.orgGuid}/spaces/` +
       `${cfSpaceService.spaceGuid}/summary`;
-    this.spaceName$ = toObservable(cfSpaceService.spaceDataService.space, { injector }).pipe(
-      filter(s => !!s),
-      map(s => s!.name),
-    );
   }
 }

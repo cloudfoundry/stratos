@@ -1,8 +1,6 @@
 import { CommonModule } from '@angular/common';
-import { Component, ChangeDetectionStrategy, inject, signal } from '@angular/core';
+import { Component, ChangeDetectionStrategy, computed, inject, Signal, signal } from '@angular/core';
 import { ActivatedRoute, Router } from '@angular/router';
-import { Observable } from 'rxjs';
-import { map } from 'rxjs/operators';
 
 import { PageHeaderComponent, StepComponent, SteppersComponent, BASE_REDIRECT_QUERY, ITileConfig, ITileData, TileSelectorComponent, SignalStepHandle } from '@stratosui/core';
 import {
@@ -53,7 +51,7 @@ export class NewApplicationBaseStepComponent {
 
 
   public serviceType!: string;
-  public tileSelectorConfig$: Observable<ITileConfig<IAppTileData>[]>;
+  public tileSelectorConfig: Signal<ITileConfig<IAppTileData>[]>;
 
   // FWT-957: signal-native step handle. Tile-selector confirmation step
   // (no submission, Next hidden); navigation happens via the tile
@@ -96,25 +94,21 @@ export class NewApplicationBaseStepComponent {
   constructor() {
     const appDeploySourceTypes = inject(ApplicationDeploySourceTypes);
 
-    this.tileSelectorConfig$ = appDeploySourceTypes.types$.pipe(
-      map(types => {
-        return [
-          ...types.map(type =>
-            new ITileConfig<IAppTileData>(
-              type.name,
-              // strict: every deploy SourceType in the catalog defines a graphic
-              // (optional on the shared SourceType type only).
-              type.graphic!,
-              { type: 'deploy', subType: type.id, ...(type.endpointGuid ? { endpointGuid: type.endpointGuid } : {}) },
-            ),
-          ),
-          new ITileConfig<IAppTileData>(
-            'Application Shell',
-            { matIcon: 'border_clear' },
-            { type: 'create' }
-          )
-        ];
-      })
-    );
+    this.tileSelectorConfig = computed(() => [
+      ...appDeploySourceTypes.types().map(type =>
+        new ITileConfig<IAppTileData>(
+          type.name,
+          // strict: every deploy SourceType in the catalog defines a graphic
+          // (optional on the shared SourceType type only).
+          type.graphic!,
+          { type: 'deploy', subType: type.id, ...(type.endpointGuid ? { endpointGuid: type.endpointGuid } : {}) },
+        ),
+      ),
+      new ITileConfig<IAppTileData>(
+        'Application Shell',
+        { matIcon: 'border_clear' },
+        { type: 'create' }
+      )
+    ]);
   }
 }

@@ -1,349 +1,354 @@
-<app-page-sub-nav>
-  @if (appAutoscalerPolicy$ | async; as policy) {
-    <button class="btn my-0 mr-2.5 ml-0 py-0 px-1.5" name="edit" (click)="updatePolicyPage()">
-      <span class="flex items-center">
-        <app-custom-icon class="mr-1.5">edit</app-custom-icon> Edit Policy
-      </span>
-    </button>
-    <button class="btn my-0 mr-2.5 ml-0 py-0 px-1.5" name="delete" (click)="disableAutoscaler()">
-      <span class="flex items-center">
-        <app-custom-icon class="mr-1.5">delete</app-custom-icon> Delete Policy
-      </span>
-    </button>
-    @if (canManageCredentials()) {
-      <button class="btn my-0 mr-2.5 ml-0 py-0 px-1.5" name="credential" (click)="manageCredentialPage()">
-        <span class="flex items-center">
-          <app-custom-icon class="mr-1.5">vpn_key</app-custom-icon> Manage Credentials
-        </span>
-      </button>
-    }
-  } @else {
-    <button class="btn my-0 mr-2.5 ml-0 py-0 px-1.5" name="add" (click)="updatePolicyPage(true)">
-      <span class="flex items-center">
-        <app-custom-icon class="mr-1.5">add</app-custom-icon> Create Policy
-      </span>
-    </button>
+<app-list-sub-nav title="Scaling Rules" [count]="scalingRuleCount" [loading]="policyPending"
+  [actions]="policyActions" [addAction]="createPolicyAction"></app-list-sub-nav>
+<div class="flex flex-col gap-5 p-6 w-full">
+  @if (autoscalerTarget(); as target) {
+    <div class="flex flex-col gap-1 text-sm text-content-muted">
+      @if (target.source === 'registered' && target.endpoint) {
+        <p>Autoscaler: {{ target.endpoint.name }} ({{ target.endpoint.url }})</p>
+      } @else {
+        <p>
+          Autoscaler: {{ guessedUrl() }} (address guessed; not registered)
+          <a routerLink="/endpoints/new/autoscaler" [queryParams]="{ url: guessedUrl() }" class="text-primary hover:underline">Register it</a>
+        </p>
+      }
+      @if (target.duplicates.registered.length > 1) {
+        <p class="text-warning" role="status">
+          This autoscaler is registered {{ target.duplicates.registered.length }} times: {{ registeredNames() }}.
+          Using {{ target.endpoint?.name }}.
+        </p>
+      }
+      @if (target.duplicates.bound.length > 1) {
+        <p class="text-warning" role="status">
+          This app is bound to {{ target.duplicates.bound.length }} autoscalers: {{ boundNames() }}. Each can scale it.
+        </p>
+      }
+    </div>
   }
-</app-page-sub-nav>
-<div class="flex relative w-full">
-  <app-tile-grid class="w-full">
-    @if (appAutoscalerPolicy$ | async; as policy) {
-      <app-tile-group>
-        @if (policy.enabled) {
-          <app-tile>
-            <app-card-autoscaler-default></app-card-autoscaler-default>
-          </app-tile>
-        }
-        @if (policy.enabled) {
-          <app-tile class="flex-[2] min-h-[200px]">
-            @if (policy.scaling_rules.length === 0) {
-              <app-card-app-usage></app-card-app-usage>
-            }
-            @if (policy.scaling_rules.length > 0) {
-              <app-card>
-                <app-card-header>
-                  <app-card-title>Latest Metrics</app-card-title>
-                </app-card-header>
-                <app-card-content>
-                  <div class="flex flex-row">
-                    @for (metric of appAutoscalerAppMetricNames$ | async; track metric) {
-                      <div class="pr-10">
-                        <app-metadata-item class="my-0" label={{metric.name}}>
-                          @if (appAutoscalerAppMetrics()[metric.name] | async; as metricData) {
-                            <canvas baseChart [type]="'doughnut'"
-                              [data]="getGaugeData(metricData)"
-                              [options]="gaugeOptions"
-                              width="80" height="80">
-                            </canvas>
-                          }
-                        </app-metadata-item>
-                      </div>
-                    }
-                  </div>
-                </app-card-content>
-                <app-card-actions class="absolute bottom-2.5 right-6 pt-0 text-right">
-                  <app-polling-indicator [manualPoll]="true" (poll)="loadLatestMetricsUponPolicy()">
-                  </app-polling-indicator>
-                  <button (click)="metricChartPage()" class="btn btn-icon" aria-label="Open metric chart">
-                    <app-custom-icon>launch</app-custom-icon>
-                  </button>
-                </app-card-actions>
-              </app-card>
-            }
-          </app-tile>
-        }
-      </app-tile-group>
-    }
-    @if (appAutoscalerPolicy$ | async; as policy) {
-      <div class="autoscaler-tab-policy">
-        @if (policy.enabled) {
-          <app-tile-group>
-            <app-tile class="autoscaler-tab-policy-trigger">
-              <app-card>
-                <app-card-header>
-                  <app-card-title>Scaling Rules </app-card-title>
-                </app-card-header>
-                <app-card-content>
-                  <div class="block pb-2">
-                    <div class="overflow-x-auto">
-                      <table class="min-w-full divide-y divide-content-border">
-                        <thead class="bg-content-secondary">
-                          <tr>
-                            <th class="px-6 py-3 text-left text-xs font-medium text-content-muted uppercase tracking-wider">
-                              Metric
-                            </th>
-                            <th class="px-6 py-3 text-left text-xs font-medium text-content-muted uppercase tracking-wider">
-                              Condition
-                            </th>
-                            <th class="px-6 py-3 text-left text-xs font-medium text-content-muted uppercase tracking-wider">
-                              Action
-                            </th>
-                          </tr>
-                        </thead>
-                        <tbody class="bg-content-bg divide-y divide-content-border">
-                          @for (element of policy?.scaling_rules_form; track element) {
-                            <tr
-                              class="hover:bg-content-secondary transition-colors">
-                              <td class="px-6 py-4 whitespace-nowrap text-sm text-content-text">
-                                {{element.metric_type}}
-                              </td>
-                              <td class="px-6 py-4 text-sm text-content-text">
-                                {{element.operator}}{{element.threshold}}{{getMetricUnit(element.metric_type, element.unit)}} for
-                                {{element.breach_duration_secs}} secs.
-                              </td>
-                              <td class="px-6 py-4 whitespace-nowrap text-sm text-content-text">
-                                {{element.adjustment}} instances
-                              </td>
-                            </tr>
-                          }
-                        </tbody>
-                      </table>
-                    </div>
-                    @if (policy && policy.scaling_rules_form && policy.scaling_rules_form.length === 0) {
-                      <div class="mt-2 text-center py-8 text-content-muted"
-                        >No scaling rules.
-                      </div>
-                    }
-                  </div>
-                </app-card-content>
-              </app-card>
-            </app-tile>
-            <app-tile class="autoscaler-tab-policy-schedule">
-              <app-card>
-                <app-card-header>
-                  <app-card-title>
-                    Scheduled Limit Rules
-                    @if (policy.schedules) {
-                      <span>
-                        in {{policy.schedules.timezone}}
-                      </span>
-                    }
-                  </app-card-title>
-                </app-card-header>
-                <app-card-content>
-                  <div class="block pb-2 autoscaler-table-policy-specific">
-                    <div class="overflow-x-auto">
-                      <table class="min-w-full divide-y divide-content-border">
-                        <thead class="bg-content-secondary">
-                          <tr>
-                            <th class="px-6 py-3 text-left text-xs font-medium text-content-muted uppercase tracking-wider">
-                              From
-                            </th>
-                            <th class="px-6 py-3 text-left text-xs font-medium text-content-muted uppercase tracking-wider">
-                              To
-                            </th>
-                            <th class="px-6 py-3 text-left text-xs font-medium text-content-muted uppercase tracking-wider">
-                              Initial
-                            </th>
-                            <th class="px-6 py-3 text-left text-xs font-medium text-content-muted uppercase tracking-wider">
-                              Min
-                            </th>
-                            <th class="px-6 py-3 text-left text-xs font-medium text-content-muted uppercase tracking-wider">
-                              Max
-                            </th>
-                          </tr>
-                        </thead>
-                        <tbody class="bg-content-bg divide-y divide-content-border">
-                          @for (element of policy?.schedules?.specific_date; track element) {
-                            <tr
-                              class="hover:bg-content-secondary transition-colors">
-                              <td class="px-6 py-4 whitespace-nowrap text-sm text-content-text">
-                                {{element.start_date_time}}
-                              </td>
-                              <td class="px-6 py-4 whitespace-nowrap text-sm text-content-text">
-                                {{element.end_date_time}}
-                              </td>
-                              <td class="px-6 py-4 whitespace-nowrap text-sm text-content-text">
-                                {{element.initial_min_instance_count?element.initial_min_instance_count:'-'}}
-                              </td>
-                              <td class="px-6 py-4 whitespace-nowrap text-sm text-content-text">
-                                {{element.instance_min_count}}
-                              </td>
-                              <td class="px-6 py-4 whitespace-nowrap text-sm text-content-text">
-                                {{element.instance_max_count}}
-                              </td>
-                            </tr>
-                          }
-                        </tbody>
-                      </table>
-                    </div>
-                    @if (policy && policy.schedules && policy.schedules.specific_date && policy.schedules.specific_date.length === 0) {
-                      <div class="mt-2 text-center py-8 text-content-muted"
-                        >
-                      No specific date schedule.</div>
-                    }
-                  </div>
-                  <br />
-                  <div class="block pb-2 autoscaler-table-policy-recurring">
-                    <div class="overflow-x-auto">
-                      <table class="min-w-full divide-y divide-content-border">
-                        <thead class="bg-content-secondary">
-                          <tr>
-                            <th class="px-6 py-3 text-left text-xs font-medium text-content-muted uppercase tracking-wider">
-                              Effective Duration
-                            </th>
-                            <th class="px-6 py-3 text-left text-xs font-medium text-content-muted uppercase tracking-wider">
-                              Repeats On
-                            </th>
-                            <th class="px-6 py-3 text-left text-xs font-medium text-content-muted uppercase tracking-wider">
-                              From
-                            </th>
-                            <th class="px-6 py-3 text-left text-xs font-medium text-content-muted uppercase tracking-wider">
-                              To
-                            </th>
-                            <th class="px-6 py-3 text-left text-xs font-medium text-content-muted uppercase tracking-wider">
-                              Initial
-                            </th>
-                            <th class="px-6 py-3 text-left text-xs font-medium text-content-muted uppercase tracking-wider">
-                              Min
-                            </th>
-                            <th class="px-6 py-3 text-left text-xs font-medium text-content-muted uppercase tracking-wider">
-                              Max
-                            </th>
-                          </tr>
-                        </thead>
-                        <tbody class="bg-content-bg divide-y divide-content-border">
-                          @for (element of policy?.schedules?.recurring_schedule; track element) {
-                            <tr
-                              class="hover:bg-content-secondary transition-colors">
-                              <td class="px-6 py-4 text-sm text-content-text">
-                                {{ element.start_date? element.start_date + ' ~ ' + element.end_date : 'Always'}}
-                              </td>
-                              <td class="px-6 py-4 text-sm text-content-text">
-                                {{element.days_of_month}} {{element.days_of_week}} of the {{element.days_of_week? 'week': 'month'}}
-                              </td>
-                              <td class="px-6 py-4 whitespace-nowrap text-sm text-content-text">
-                                {{element.start_time}}
-                              </td>
-                              <td class="px-6 py-4 whitespace-nowrap text-sm text-content-text">
-                                {{element.end_time}}
-                              </td>
-                              <td class="px-6 py-4 whitespace-nowrap text-sm text-content-text">
-                                {{element.initial_min_instance_count?element.initial_min_instance_count:'-'}}
-                              </td>
-                              <td class="px-6 py-4 whitespace-nowrap text-sm text-content-text">
-                                {{element.instance_min_count}}
-                              </td>
-                              <td class="px-6 py-4 whitespace-nowrap text-sm text-content-text">
-                                {{element.instance_max_count}}
-                              </td>
-                            </tr>
-                          }
-                        </tbody>
-                      </table>
-                    </div>
-                    @if (policy && policy.schedules && policy.schedules.specific_date && policy.schedules.recurring_schedule.length === 0) {
-                      <div class="mt-2 text-center py-8 text-content-muted"
-                        >
-                      No recurring schedule.</div>
-                    }
-                  </div>
-                </app-card-content>
-              </app-card>
-            </app-tile>
-          </app-tile-group>
-        }
+  @if (appAutoscalerPolicy(); as policy) {
+    @if (policy.enabled) {
+      <!-- The Instances box sets the row height; Latest Readings scrolls within it -->
+      <div class="grid gap-5 lg:grid-cols-2">
+        <app-card-autoscaler-default class="block min-w-0"></app-card-autoscaler-default>
+        <div class="relative min-w-0 h-96 lg:h-auto">
+          <app-card-autoscaler-readings class="block h-full lg:absolute lg:inset-0" [policy]="policy"
+            [metrics]="appAutoscalerAppMetrics()"></app-card-autoscaler-readings>
+        </div>
       </div>
     }
-    @if (showAutoscalerHistory$ | async) {
-      <app-tile-group class="flex-col">
-        @if ((appAutoscalerPolicy$ | async) === false) {
-          <span class="flex items-center mb-3 p-3.5">
-            {{noPolicyMessageFirstLine}}. {{noPolicyMessageSecondLine.text}}
-          </span>
-        }
-        @if (appAutoscalerScalingHistory$ | async; as scalingHistory) {
-          <app-tile>
-            <app-card>
-              <app-card-header class="flex flex-1 h-10 justify-between pt-0">
-                <app-card-title>Latest Events </app-card-title>
-              </app-card-header>
-              <app-card-content>
+    <div class="flex flex-col gap-5">
+      @if (policy.enabled) {
+        <div class="relative min-w-0">
+          @if (!policy.scaling_rules?.length) {
+            <app-card-app-usage></app-card-app-usage>
+          }
+          @if (policy.scaling_rules?.length) {
+            <div class="card">
+              <div class="card-header">
+                <h3 class="card-title">Latest Metrics</h3>
+              </div>
+              <div class="p-4">
+                <div class="grid grid-cols-3 md:grid-cols-4 justify-items-start gap-x-10 gap-y-4">
+                  @for (metric of appAutoscalerAppMetricNames(); track metric) {
+                    <div>
+                      <app-metadata-item class="my-0" label={{metric.name}}>
+                        @if (appAutoscalerAppMetrics()[metric.name]?.(); as metricData) {
+                          <canvas baseChart [type]="'doughnut'"
+                            [data]="getGaugeData(metricData)"
+                            [options]="gaugeOptions"
+                            width="80" height="80">
+                          </canvas>
+                        }
+                      </app-metadata-item>
+                    </div>
+                  }
+                </div>
+              </div>
+              <div class="absolute bottom-2.5 right-6 pt-0 text-right">
+                <app-polling-indicator [manualPoll]="true" (poll)="loadLatestMetricsUponPolicy()">
+                </app-polling-indicator>
+                <button (click)="metricChartPage()" class="btn btn-icon" aria-label="Open metric chart">
+                  <app-custom-icon>launch</app-custom-icon>
+                </button>
+              </div>
+            </div>
+          }
+        </div>
+      }
+    </div>
+  }
+  @if (appAutoscalerPolicy(); as policy) {
+    <div>
+      @if (policy.enabled) {
+        <div class="flex flex-col gap-5">
+          <div class="relative min-w-0">
+            <div class="card">
+              <div class="card-header">
+                <h3 class="card-title">Scaling Rules </h3>
+              </div>
+              <div class="p-4">
                 <div class="block pb-2">
-                  <div class="overflow-x-auto">
+                  <app-scroll-fade>
                     <table class="min-w-full divide-y divide-content-border">
                       <thead class="bg-content-secondary">
                         <tr>
                           <th class="px-6 py-3 text-left text-xs font-medium text-content-muted uppercase tracking-wider">
-                            Event
+                            Metric
                           </th>
                           <th class="px-6 py-3 text-left text-xs font-medium text-content-muted uppercase tracking-wider">
-                            Trigger
+                            Condition
                           </th>
                           <th class="px-6 py-3 text-left text-xs font-medium text-content-muted uppercase tracking-wider">
-                            Date
-                          </th>
-                          <th class="px-6 py-3 text-left text-xs font-medium text-content-muted uppercase tracking-wider">
-                            Error
+                            Action
                           </th>
                         </tr>
                       </thead>
                       <tbody class="bg-content-bg divide-y divide-content-border">
-                        @for (element of scalingHistory; track element) {
+                        @for (element of policy?.scaling_rules_form; track element) {
                           <tr
                             class="hover:bg-content-secondary transition-colors">
-                            <td class="px-6 py-4 text-sm text-content-text">
-                              Instances scaled {{element.old_instances > element.new_instances? 'down' : 'up'}} from {{element.old_instances}} to {{element.new_instances}}
+                            <td class="px-6 py-4 whitespace-nowrap text-sm text-content-text">
+                              {{element.metric_type}}
                             </td>
                             <td class="px-6 py-4 text-sm text-content-text">
-                              {{element.reason}} {{element.message}}
+                              {{element.operator}} {{element.threshold}}{{getMetricUnit(element.metric_type, element.unit)}} for
+                              {{element.breach_duration_secs}} secs.
                             </td>
                             <td class="px-6 py-4 whitespace-nowrap text-sm text-content-text">
-                              {{element.timestamp / 1000000 | date:'medium'}}
-                            </td>
-                            <td class="px-6 py-4 text-sm text-content-text">
-                              {{element.error}}
+                              {{element.adjustment}} instances
                             </td>
                           </tr>
                         }
                       </tbody>
                     </table>
-                  </div>
-                  @if (scalingHistory.length === 0) {
+                  </app-scroll-fade>
+                  @if (policy && policy.scaling_rules_form && policy.scaling_rules_form.length === 0) {
                     <div class="mt-2 text-center py-8 text-content-muted"
-                      >
-                    No events.</div>
+                      >No scaling rules.
+                    </div>
                   }
                 </div>
-              </app-card-content>
-              <app-card-actions class="absolute bottom-2.5 right-6 pt-0 text-right">
-                <app-polling-indicator (poll)="fetchScalingHistory()"
-                  [manualPoll]="(scalingHistoryLoading$ | async) === false"
-                  [isPolling]="(scalingHistoryLoading$ | async)">
-                </app-polling-indicator>
-                <button (click)="scaleHistoryPage()" class="btn btn-icon" aria-label="Open scale history">
-                  <app-custom-icon>launch</app-custom-icon>
-                </button>
-              </app-card-actions>
-            </app-card>
-          </app-tile>
-        }
-      </app-tile-group>
-    }
-    @if (showNoPolicyMessage$ | async) {
-      <app-no-content-message [icon]="'meter'" [iconFont]="'stratos-icons'"
-        [firstLine]="noPolicyMessageFirstLine" [secondLine]="noPolicyMessageSecondLine">
-      </app-no-content-message>
-    }
-  </app-tile-grid>
+              </div>
+            </div>
+          </div>
+          <div class="relative min-w-0">
+            <div class="card">
+              <div class="card-header">
+                <h3 class="card-title">
+                  Scheduled Limit Rules
+                  @if (policy.schedules) {
+                    <span>
+                      in {{policy.schedules.timezone}}
+                    </span>
+                  }
+                </h3>
+              </div>
+              <div class="p-4">
+                <div class="block pb-2 autoscaler-table-policy-specific">
+                  <app-scroll-fade>
+                    <table class="min-w-full divide-y divide-content-border">
+                      <thead class="bg-content-secondary">
+                        <tr>
+                          <th class="px-6 py-3 text-left text-xs font-medium text-content-muted uppercase tracking-wider">
+                            From
+                          </th>
+                          <th class="px-6 py-3 text-left text-xs font-medium text-content-muted uppercase tracking-wider">
+                            To
+                          </th>
+                          <th class="px-6 py-3 text-left text-xs font-medium text-content-muted uppercase tracking-wider">
+                            Initial
+                          </th>
+                          <th class="px-6 py-3 text-left text-xs font-medium text-content-muted uppercase tracking-wider">
+                            Min
+                          </th>
+                          <th class="px-6 py-3 text-left text-xs font-medium text-content-muted uppercase tracking-wider">
+                            Max
+                          </th>
+                        </tr>
+                      </thead>
+                      <tbody class="bg-content-bg divide-y divide-content-border">
+                        @for (element of policy?.schedules?.specific_date; track element) {
+                          <tr
+                            class="hover:bg-content-secondary transition-colors">
+                            <td class="px-6 py-4 whitespace-nowrap text-sm text-content-text">
+                              {{element.start_date_time}}
+                            </td>
+                            <td class="px-6 py-4 whitespace-nowrap text-sm text-content-text">
+                              {{element.end_date_time}}
+                            </td>
+                            <td class="px-6 py-4 whitespace-nowrap text-sm text-content-text">
+                              {{element.initial_min_instance_count?element.initial_min_instance_count:'-'}}
+                            </td>
+                            <td class="px-6 py-4 whitespace-nowrap text-sm text-content-text">
+                              {{element.instance_min_count}}
+                            </td>
+                            <td class="px-6 py-4 whitespace-nowrap text-sm text-content-text">
+                              {{element.instance_max_count}}
+                            </td>
+                          </tr>
+                        }
+                      </tbody>
+                    </table>
+                  </app-scroll-fade>
+                  @if (policy && policy.schedules && policy.schedules.specific_date && policy.schedules.specific_date.length === 0) {
+                    <div class="mt-2 text-center py-8 text-content-muted"
+                      >
+                    No specific date schedule.</div>
+                  }
+                </div>
+                <br />
+                <div class="block pb-2 autoscaler-table-policy-recurring">
+                  <app-scroll-fade>
+                    <table class="min-w-full divide-y divide-content-border">
+                      <thead class="bg-content-secondary">
+                        <tr>
+                          <th class="px-6 py-3 text-left text-xs font-medium text-content-muted uppercase tracking-wider">
+                            Effective Duration
+                          </th>
+                          <th class="px-6 py-3 text-left text-xs font-medium text-content-muted uppercase tracking-wider">
+                            Repeats On
+                          </th>
+                          <th class="px-6 py-3 text-left text-xs font-medium text-content-muted uppercase tracking-wider">
+                            From
+                          </th>
+                          <th class="px-6 py-3 text-left text-xs font-medium text-content-muted uppercase tracking-wider">
+                            To
+                          </th>
+                          <th class="px-6 py-3 text-left text-xs font-medium text-content-muted uppercase tracking-wider">
+                            Initial
+                          </th>
+                          <th class="px-6 py-3 text-left text-xs font-medium text-content-muted uppercase tracking-wider">
+                            Min
+                          </th>
+                          <th class="px-6 py-3 text-left text-xs font-medium text-content-muted uppercase tracking-wider">
+                            Max
+                          </th>
+                        </tr>
+                      </thead>
+                      <tbody class="bg-content-bg divide-y divide-content-border">
+                        @for (element of policy?.schedules?.recurring_schedule; track element) {
+                          <tr
+                            class="hover:bg-content-secondary transition-colors">
+                            <td class="px-6 py-4 text-sm text-content-text">
+                              {{ element.start_date? element.start_date + ' ~ ' + element.end_date : 'Always'}}
+                            </td>
+                            <td class="px-6 py-4 text-sm text-content-text">
+                              {{element.days_of_month}} {{element.days_of_week}} of the {{element.days_of_week? 'week': 'month'}}
+                            </td>
+                            <td class="px-6 py-4 whitespace-nowrap text-sm text-content-text">
+                              {{element.start_time}}
+                            </td>
+                            <td class="px-6 py-4 whitespace-nowrap text-sm text-content-text">
+                              {{element.end_time}}
+                            </td>
+                            <td class="px-6 py-4 whitespace-nowrap text-sm text-content-text">
+                              {{element.initial_min_instance_count?element.initial_min_instance_count:'-'}}
+                            </td>
+                            <td class="px-6 py-4 whitespace-nowrap text-sm text-content-text">
+                              {{element.instance_min_count}}
+                            </td>
+                            <td class="px-6 py-4 whitespace-nowrap text-sm text-content-text">
+                              {{element.instance_max_count}}
+                            </td>
+                          </tr>
+                        }
+                      </tbody>
+                    </table>
+                  </app-scroll-fade>
+                  @if (policy && policy.schedules && policy.schedules.specific_date && !policy.schedules.recurring_schedule?.length) {
+                    <div class="mt-2 text-center py-8 text-content-muted"
+                      >
+                    No recurring schedule.</div>
+                  }
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      }
+    </div>
+  }
+  @if (showAutoscalerHistory()) {
+    <div class="flex flex-col gap-5">
+      @if (noPolicy()) {
+        <span class="flex items-center mb-3 p-3.5">
+          {{noPolicyMessageFirstLine}}. {{noPolicyMessageSecondLine.text}}
+        </span>
+      }
+      @if (appAutoscalerScalingHistory(); as scalingHistory) {
+        <div class="relative">
+          <div class="card">
+            <div class="card-header">
+              <h3 class="card-title">Latest Events </h3>
+            </div>
+            <div class="p-4">
+              <div class="block pb-2">
+                <app-scroll-fade>
+                  <table class="min-w-full divide-y divide-content-border">
+                    <thead class="bg-content-secondary">
+                      <tr>
+                        <th class="px-6 py-3 text-left text-xs font-medium text-content-muted uppercase tracking-wider">
+                          Event
+                        </th>
+                        <th class="px-6 py-3 text-left text-xs font-medium text-content-muted uppercase tracking-wider">
+                          Trigger
+                        </th>
+                        <th class="px-6 py-3 text-left text-xs font-medium text-content-muted uppercase tracking-wider">
+                          Date
+                        </th>
+                        <th class="px-6 py-3 text-left text-xs font-medium text-content-muted uppercase tracking-wider">
+                          Error
+                        </th>
+                      </tr>
+                    </thead>
+                    <tbody class="bg-content-bg divide-y divide-content-border">
+                      @for (element of scalingHistory; track element) {
+                        <tr
+                          class="hover:bg-content-secondary transition-colors">
+                          <td class="px-6 py-4 text-sm text-content-text">
+                            Instances scaled {{element.old_instances > element.new_instances? 'down' : 'up'}} from {{element.old_instances}} to {{element.new_instances}}
+                          </td>
+                          <td class="px-6 py-4 text-sm text-content-text">
+                            {{element.reason}} {{element.message}}
+                          </td>
+                          <td class="px-6 py-4 whitespace-nowrap text-sm text-content-text">
+                            {{element.timestamp / 1000000 | date:'medium'}}
+                          </td>
+                          <td class="px-6 py-4 text-sm text-content-text">
+                            {{element.error}}
+                          </td>
+                        </tr>
+                      }
+                    </tbody>
+                  </table>
+                </app-scroll-fade>
+                @if (scalingHistory.length === 0) {
+                  <div class="mt-2 text-center py-8 text-content-muted"
+                    >
+                  No events.</div>
+                }
+              </div>
+            </div>
+            <div class="absolute bottom-2.5 right-6 pt-0 text-right">
+              <app-polling-indicator (poll)="fetchScalingHistory()"
+                [manualPoll]="!scalingHistoryLoading()"
+                [isPolling]="scalingHistoryLoading()">
+              </app-polling-indicator>
+              <button (click)="scaleHistoryPage()" class="btn btn-icon" aria-label="Open scale history">
+                <app-custom-icon>launch</app-custom-icon>
+              </button>
+            </div>
+          </div>
+        </div>
+      }
+    </div>
+  }
+  @if (policyError() && !appAutoscalerPolicy()) {
+    <app-no-content-message [icon]="'meter'" [iconFont]="'stratos-icons'" [firstLine]="policyError()!">
+    </app-no-content-message>
+  }
+  @if (showNoPolicyMessage()) {
+    <app-no-content-message [icon]="'meter'" [iconFont]="'stratos-icons'"
+      [firstLine]="noPolicyMessageFirstLine" [secondLine]="noPolicyMessageSecondLine">
+    </app-no-content-message>
+  }
 </div>

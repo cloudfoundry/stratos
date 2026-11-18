@@ -1,8 +1,6 @@
 import { CommonModule } from '@angular/common';
 import { Component, ChangeDetectionStrategy, Signal, computed, inject } from '@angular/core';
-import { toObservable, toSignal } from '@angular/core/rxjs-interop';
 import { ActivatedRoute, RouterModule } from '@angular/router';
-import { Observable } from 'rxjs';
 
 import {
   BooleanIndicatorComponent,
@@ -23,6 +21,7 @@ import { QuotaDataService } from '../../../services/endpoint-data/quota-data.ser
 import { StOrgDetail, StOrgQuota, StSpace } from '../../../services/endpoint-data/stratos-types';
 import { CfEndpointsDataService } from '../../../services/domain-data/cf-endpoints-data.service';
 import { CfCurrentUserPermissions } from '../../../user-permissions/cf-user-permissions-checkers';
+import { CfCliMenuComponent } from '../../../shared/components/cli-menu/cf-cli-menu.component';
 import { ActiveRouteCfOrgSpace } from '../cf-page.types';
 import { getActiveRouteCfOrgSpaceProvider } from '../cf.helpers';
 import { QuotaDefinitionBaseComponent } from '../quota-definition-base/quota-definition-base.component';
@@ -47,6 +46,7 @@ export const QUOTA_ORG_GUID = 'org';
     CustomTooltipDirective,
     PageHeaderComponent,
     PageSubNavComponent,
+    CfCliMenuComponent,
     BooleanIndicatorComponent,
     LoadingPageComponent,
     CardNumberMetricComponent,
@@ -58,8 +58,6 @@ export const QUOTA_ORG_GUID = 'org';
 export class QuotaDefinitionComponent extends QuotaDefinitionBaseComponent {
   readonly quotaDefinition: Signal<StOrgQuota | null>;
   readonly detailsLoading: Signal<boolean>;
-  // Observable bridge for <app-loading-page> until it migrates to Signal inputs.
-  readonly detailsLoading$: Observable<boolean>;
   readonly editLink: Signal<string[]>;
   readonly canEditQuota: Signal<boolean>;
 
@@ -78,10 +76,7 @@ export class QuotaDefinitionComponent extends QuotaDefinitionBaseComponent {
     super(endpoints, activeRouteCfOrgSpace, activatedRoute);
 
     const { cfGuid, orgGuid } = activeRouteCfOrgSpace;
-    this.canEditQuota = toSignal(
-      currentUserPermissionsService.can(CfCurrentUserPermissions.QUOTA_EDIT, cfGuid),
-      { initialValue: false },
-    );
+    this.canEditQuota = currentUserPermissionsService.can(CfCurrentUserPermissions.QUOTA_EDIT, cfGuid);
     this.isCf = !orgGuid;
     this.editParams = { [QUOTA_ORG_GUID]: orgGuid };
 
@@ -99,7 +94,6 @@ export class QuotaDefinitionComponent extends QuotaDefinitionBaseComponent {
     });
     this.quotaDefinition = computed(() => sourceSignal()?.value() ?? null);
     this.detailsLoading = computed(() => sourceSignal()?.isLoading() ?? false);
-    this.detailsLoading$ = toObservable(this.detailsLoading);
 
     this.editLink = computed(() => {
       const guid = resolvedQuotaGuid();

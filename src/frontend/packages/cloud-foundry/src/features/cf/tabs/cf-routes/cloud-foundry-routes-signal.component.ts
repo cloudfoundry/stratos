@@ -1,9 +1,7 @@
 import { CommonModule } from '@angular/common';
 import { HttpClient } from '@angular/common/http';
 import { Component, ChangeDetectionStrategy, Signal, WritableSignal, computed, inject, signal } from '@angular/core';
-import { toSignal } from '@angular/core/rxjs-interop';
 import { Router, RouterModule } from '@angular/router';
-import { map } from 'rxjs/operators';
 
 import {
   ConfirmationDialogConfig,
@@ -20,13 +18,15 @@ import {
 import {
   UserFavorite,
   UserFavoriteManager,
+  leadPieces,
 } from '@stratosui/store';
 
 import { BulkResult, CfRoutesSignalConfigService } from '../../../../shared/signal-list-configs/route/cf-routes-signal-config.service';
 import { CloudFoundryEndpointService } from '../../services/cloud-foundry-endpoint.service';
 import { runBulkWithProgress } from '../../../../services/async-jobs/bulk-progress';
 import type { StApp, StRoute } from '../../../../services/endpoint-data/stratos-types';
-import { extractHttpErrorMessage } from '../../../../services/extract-error-message';
+import { routeHref } from '../../../applications/app-detail-data.service';
+import { unknownHowOf, unknownOutcomeMessage } from '../../../../services/async-jobs/unknown-outcome-message';
 
 // Signal-native replacement for CloudFoundryRoutesComponent at
 // /cloud-foundry/:cnsi/routes. CNSI-wide — shows every route the CF
@@ -58,25 +58,8 @@ export class CloudFoundryRoutesSignalComponent {
   private snackBar = inject(TailwindSnackBarService);
   private http = inject(HttpClient);
 
-  private readonly favoriteRouteRowKeys: Signal<ReadonlySet<string>> = toSignal(
-    this.userFavoriteManager.getAllFavorites().pipe(
-      map(([groups, entities]) => {
-        const out = new Set<string>();
-        if (!groups || !entities) return out;
-        for (const epFavGuid in groups) {
-          const g = groups[epFavGuid];
-          if (!g?.entitiesIds) continue;
-          for (const favId of g.entitiesIds) {
-            const fav = entities[favId];
-            if (fav && fav.entityType === 'route' && fav.endpointType === 'cf') {
-              out.add(`${fav.endpointId}:${fav.entityId}`);
-            }
-          }
-        }
-        return out;
-      }),
-    ),
-    { initialValue: new Set<string>() },
+  private readonly favoriteRouteRowKeys: Signal<ReadonlySet<string>> = computed(() =>
+    this.userFavoriteManager.entityFavoriteKeys('cf', ['route']),
   );
 
   private readonly appNameByGuid: Signal<Map<string, string>> = computed(() => {
@@ -102,19 +85,16 @@ export class CloudFoundryRoutesSignalComponent {
       r.url && r.url.length > 0 ? r.url : ((r.host ?? '') + (r.path ?? ''));
 
     const displayUrl = (r: StRoute): string => {
-      // Prefix with http:// for HTTP routes to match the legacy UI's
-      // Route column, which always rendered the full URL with scheme.
-      // TCP routes aren't HTTP so they render as host:port without scheme.
+      // The full URL with scheme, as the legacy UI's Route column showed it,
+      // https like the app's Visit button. TCP routes aren't HTTP so they
+      // render as host:port without scheme.
       const base = routeBase(r);
       if (r.port != null) return `${base}:${r.port}`;
       // A route on a domain root (no host/path/url and no port) has nothing to
       // display; fall back to a short guid so the row is still distinguishable.
       // The full guid is on hover (urlTooltip).
       if (base === '') return `(unnamed) ${r.guid.slice(0, 8)}`;
-      // Avoid double-prepending if CF has already rendered scheme into url
-      // (shouldn't today, but future-proof).
-      if (/^https?:\/\//i.test(base)) return base;
-      return `http://${base}`;
+      return routeHref(base);
     };
 
     // Hover tooltip for the Route title: full guid for unnamed routes (the
@@ -220,6 +200,9 @@ export class CloudFoundryRoutesSignalComponent {
           kind: 'text',
           render: displayUrl,
           tooltip: urlTooltip,
+          // Domain-root routes show a guid placeholder: nothing to link or copy.
+          externalLink: (r: StRoute) => r.port == null && routeBase(r) !== '' ? displayUrl(r) : null,
+          copyValue: (r: StRoute) => routeBase(r) === '' && r.port == null ? null : displayUrl(r),
           widthHint: '22rem',
         },
         {
@@ -321,7 +304,7 @@ export class CloudFoundryRoutesSignalComponent {
   // straight to the final summary for that kind.
   private async runBulk(
     kind: 'delete' | 'unmap',
-    count: number,
+    targets: readonly { guid: string; url: string }[],
     op: () => Promise<BulkResult>,
   ): Promise<void> {
     try {
@@ -339,7 +322,8 @@ export class CloudFoundryRoutesSignalComponent {
         // pends, so refreshAfterPending is a no-op for it.
         refresh: () => this.routesConfig.refresh(),
         refreshAfterPending: kind === 'delete',
-        count,
+        count: targets.length,
+        names: new Map(targets.map(t => [t.guid, t.url])),
       });
     } finally {
       this.selectedRouteKeys.set(new Set());
@@ -372,7 +356,7 @@ export class CloudFoundryRoutesSignalComponent {
             true,
           );
           this.confirmDialog.open(confirm, async () => {
-            await this.runBulk('unmap', targets.length, () =>
+            await this.runBulk('unmap', targets, () =>
               this.routesConfig.bulkUnmapRoutes(cnsi, targets.map(r => r.guid)));
           });
         },
@@ -389,7 +373,7 @@ export class CloudFoundryRoutesSignalComponent {
             true,
           );
           this.confirmDialog.open(confirm, async () => {
-            await this.runBulk('delete', targets.length, () =>
+            await this.runBulk('delete', targets, () =>
               this.routesConfig.bulkDeleteRoutes(cnsi, targets.map(r => r.guid)));
           });
         },
@@ -404,11 +388,17 @@ export class CloudFoundryRoutesSignalComponent {
   // Delete also detaches but additionally destroys the route entity.
   // Unmap is disabled when the route has no bindings — nothing to do.
   private buildRouteActions = (route: StRoute): readonly SignalListRowAction<StRoute>[] => {
-    const runAction = async (label: string, op: () => Promise<void>) => {
+    // A delete resolves 'unknown' when it ended with a result nobody can
+    // determine: the row stays and the message says where to look.
+    const runAction = async (label: string, op: () => Promise<unknown>, name?: string) => {
       try {
-        await op();
+        const outcome = await op();
+        const how = unknownHowOf(outcome);
+        if (how) {
+          this.snackBar.error(unknownOutcomeMessage(name ? `${label} "${name}"` : label, 'The Routes list', how));
+        }
       } catch (err: unknown) {
-        this.snackBar.error(`${label} failed: ${extractHttpErrorMessage(err)}`);
+        this.snackBar.error(leadPieces(`${label} failed`, err));
       }
     };
     const appGuids = route.appGuids ?? [];
@@ -451,7 +441,7 @@ export class CloudFoundryRoutesSignalComponent {
             true,
           );
           this.confirmDialog.open(confirm, async () => {
-            await runAction('Delete', () => this.routesConfig.deleteRoute(route.cnsiGuid, route.guid));
+            await runAction('Delete', () => this.routesConfig.deleteRoute(route.cnsiGuid, route.guid), route.url || route.guid);
           });
         },
       },

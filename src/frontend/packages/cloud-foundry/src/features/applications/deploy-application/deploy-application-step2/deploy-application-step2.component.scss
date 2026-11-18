@@ -22,12 +22,6 @@
     img {
       @apply h-[51px] w-[51px];
     }
-    .description {
-      @apply flex-row ml-6 absolute;
-      .centered {
-        @apply block mx-auto w-2/5;
-      }
-    }
   }
 }
 

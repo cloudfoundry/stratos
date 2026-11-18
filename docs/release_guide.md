@@ -108,7 +108,7 @@ make bump dev DRYRUN=yes
 make release cf FINAL=strip
 
 # Or set an explicit version
-./build/version-bump.sh set v5.0.0
+make bump set TO=5.0.0
 
 # Commit version bump (both files are updated automatically)
 git add package.json src/jetstream/VERSION
@@ -840,7 +840,7 @@ gh pr list --label "release"
 ./scripts/generate-changelog.sh v4.9.3..v5.0.0
 
 # Update all version files (package.json + src/jetstream/VERSION)
-./build/version-bump.sh set v5.0.0
+make bump set TO=5.0.0
 # Or use a make bump verb for lifecycle stages:
 make bump major   # or: minor, patch, dev, alpha, beta, rc, prerelease
 ```

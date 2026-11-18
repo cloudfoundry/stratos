@@ -1,4 +1,4 @@
-import { AfterViewInit, ChangeDetectionStrategy, Component, Input, OnDestroy, ViewChild, inject, signal } from '@angular/core';
+import { AfterViewInit, ChangeDetectionStrategy, Component, OnDestroy, inject, signal, input, viewChild } from '@angular/core';
 import { ActivatedRoute, Router } from '@angular/router';
 import { firstValueFrom, Subscription } from 'rxjs';
 
@@ -8,6 +8,7 @@ import { ActiveRouteCfOrgSpace } from '../../cf-page.types';
 import { getActiveRouteCfOrgSpaceProvider } from '../../cf.helpers';
 import { SpaceQuotaDefinitionFormComponent } from '../../space-quota-definition-form/space-quota-definition-form.component';
 import { formToSpaceQuotaCreateBody } from '../../quota-definition-form/quota-form-mapping';
+import { leadError } from '@stratosui/store';
 
 @Component({
   selector: 'app-create-space-quota-step',
@@ -30,11 +31,11 @@ export class CreateSpaceQuotaStepComponent implements AfterViewInit, OnDestroy {
   cfGuid: string;
   orgGuid: string;
 
-  @ViewChild('form', { static: true })
-  form!: SpaceQuotaDefinitionFormComponent;
+  readonly form = viewChild.required<SpaceQuotaDefinitionFormComponent>('form');
 
   /** FWT-957: post-success navigation target supplied by parent. */
-  @Input() redirectUrl!: string;
+  // The one host stepper binds where to go on success.
+  readonly redirectUrl = input.required<string>();
 
   private validSignal = signal(false);
   private formStatusSub?: Subscription;
@@ -42,14 +43,14 @@ export class CreateSpaceQuotaStepComponent implements AfterViewInit, OnDestroy {
   signalHandle: SignalStepHandle = {
     valid: this.validSignal.asReadonly(),
     submit: async () => {
-      const formValues = this.form.formGroup.getRawValue();
+      const formValues = this.form().formGroup.getRawValue();
       const body = formToSpaceQuotaCreateBody(formValues, this.orgGuid);
       try {
         await firstValueFrom(this.quotaData.createSpaceQuota(this.cfGuid, body));
       } catch (err: unknown) {
-        throw new Error(`Failed to create space quota: ${err instanceof Error ? err.message : String(err)}`, { cause: err });
+        throw leadError('Failed to create space quota', err);
       }
-      await this.router.navigateByUrl(this.redirectUrl);
+      await this.router.navigateByUrl(this.redirectUrl());
     },
   };
 
@@ -60,10 +61,11 @@ export class CreateSpaceQuotaStepComponent implements AfterViewInit, OnDestroy {
   }
 
   ngAfterViewInit() {
-    if (this.form?.formGroup) {
-      this.validSignal.set(this.form.formGroup.valid);
-      this.formStatusSub = this.form.formGroup.statusChanges.subscribe(
-        () => this.validSignal.set(this.form.formGroup.valid)
+    const form = this.form();
+    if (form?.formGroup) {
+      this.validSignal.set(form.formGroup.valid);
+      this.formStatusSub = form.formGroup.statusChanges.subscribe(
+        () => this.validSignal.set(this.form().formGroup.valid)
       );
     }
   }

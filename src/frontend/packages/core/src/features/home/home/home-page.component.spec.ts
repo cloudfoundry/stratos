@@ -1,5 +1,5 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
-import { ApplicationRef, EmbeddedViewRef, ViewContainerRef, provideZonelessChangeDetection } from '@angular/core';
+import { ApplicationRef, EmbeddedViewRef, ViewContainerRef, provideZonelessChangeDetection, signal } from '@angular/core';
 import { By } from '@angular/platform-browser';
 import { provideHttpClient } from '@angular/common/http';
 import { provideHttpClientTesting } from '@angular/common/http/testing';
@@ -7,7 +7,6 @@ import { Router } from '@angular/router';
 import { describe, it, expect, vi } from 'vitest';
 import { NoopAnimationsModule } from '@angular/platform-browser/animations';
 import { RouterTestingModule } from '@angular/router/testing';
-import { of } from 'rxjs';
 import { createBasicStoreModule, STORE_TEST_PROVIDERS } from '@test-framework';
 import {
   EndpointModel,
@@ -27,10 +26,11 @@ import { HomePageComponent } from './home-page.component';
 
 function makeStubEndpointsService(disablePersistenceFeatures: boolean, endpoints: Record<string, EndpointModel> = {}): Partial<EndpointsService> {
   return {
-    disablePersistenceFeatures$: of(disablePersistenceFeatures),
-    haveRegistered$: of(Object.keys(endpoints).length > 0),
-    connectedEndpoints$: of(Object.values(endpoints).filter(ep => ep.connectionStatus === 'connected')),
-    endpoints$: of(endpoints),
+    connectedEndpoints: signal(Object.values(endpoints).filter(ep => ep.connectionStatus === 'connected')),
+    endpoints: signal(endpoints),
+    disablePersistenceFeatures: signal(disablePersistenceFeatures),
+    haveRegistered: signal(Object.keys(endpoints).length > 0),
+    haveConnected: signal(Object.values(endpoints).some(ep => ep.connectionStatus === 'connected')),
   } as Partial<EndpointsService>;
 }
 
@@ -62,7 +62,7 @@ describe('HomePageComponent', () => {
         provideHttpClient(),
         provideHttpClientTesting(),
         { provide: EndpointsService, useValue: endpointsServiceStub },
-        ...(favGroups ? [{ provide: UserFavoriteManager, useValue: { getAllFavorites: () => of([favGroups, []]) } }] : []),
+        ...(favGroups ? [{ provide: UserFavoriteManager, useValue: { allFavorites: signal([favGroups, {}]) } }] : []),
       ]
     }).compileComponents();
 
@@ -169,6 +169,49 @@ describe('HomePageComponent', () => {
       expect(component.endpoints().map(ep => ep.name)).toEqual(['cf10', 'cf2', 'cf1']);
     });
 
+    it('orders dup2, "dup 3", dup4 the same in favorites, all and connected modes', async () => {
+      const mk = (guid: string, name: string, connectionStatus: string): EndpointModel =>
+        ({ ...downCf, guid, name, connectionStatus } as EndpointModel);
+      const eps: Record<string, EndpointModel> = {
+        a: mk('a', 'dup4', 'connected'),
+        b: mk('b', 'dup2', 'connected'),
+        c: mk('c', 'dup 3', 'connected'),
+        z: mk('z', 'zed', 'connected'),
+      };
+      // dup4 and dup 3 are direct favourites; dup2 is a child favourite
+      const groups: IUserFavoritesGroups = {
+        a: { ethereal: false, endpoint: { endpointId: 'a' } as any, entitiesIds: [] },
+        c: { ethereal: false, endpoint: { endpointId: 'c' } as any, entitiesIds: [] },
+        b: { ethereal: true, endpoint: { endpointId: 'b' } as any, entitiesIds: [] },
+      };
+      await configureTestBed(makeStubEndpointsService(false, eps), groups);
+      fixture = TestBed.createComponent(HomePageComponent);
+      component = fixture.componentInstance;
+      const names = () => component.endpoints().map(ep => ep.name);
+      component.setShowMode('favorites');
+      // direct favourites first (dup 3 < dup4), then the child favourite
+      expect(names()).toEqual(['dup 3', 'dup4', 'dup2']);
+      component.setShowMode('all');
+      expect(names()).toEqual(['dup 3', 'dup4', 'dup2', 'zed']);
+      component.setShowMode('connected');
+      expect(names()).toEqual(['dup 3', 'dup4', 'dup2', 'zed']);
+    });
+
+    it('orders ungrouped dup2, "dup 3", dup4 numerically in all and connected modes', async () => {
+      const mk = (guid: string, name: string): EndpointModel =>
+        ({ ...downCf, guid, name, connectionStatus: 'connected' } as EndpointModel);
+      const eps: Record<string, EndpointModel> = {
+        a: mk('a', 'dup4'), b: mk('b', 'dup2'), c: mk('c', 'dup 3'),
+      };
+      await configureTestBed(makeStubEndpointsService(false, eps), {});
+      fixture = TestBed.createComponent(HomePageComponent);
+      component = fixture.componentInstance;
+      for (const mode of ['all', 'connected'] as const) {
+        component.setShowMode(mode);
+        expect(component.endpoints().map(ep => ep.name)).toEqual(['dup2', 'dup 3', 'dup4']);
+      }
+    });
+
     it('connected mode still only shows connected endpoints', async () => {
       await configureTestBed(makeStubEndpointsService(false, { ep1: downCf }), starredGroup(false));
       fixture = TestBed.createComponent(HomePageComponent);
@@ -195,11 +238,11 @@ describe('HomePageComponent', () => {
       await configureTestBed(makeStubEndpointsService(false));
       fixture = TestBed.createComponent(HomePageComponent);
       component = fixture.componentInstance;
-      fixture.detectChanges();
+      await fixture.whenStable();
 
       const headerDe = fixture.debugElement.query(By.directive(PageHeaderComponent));
       const header = headerDe.componentInstance as PageHeaderComponent;
-      const view = headerDe.injector.get(ViewContainerRef).createEmbeddedView(header.pageHeaderTmpl);
+      const view = headerDe.injector.get(ViewContainerRef).createEmbeddedView(header.pageHeaderTmpl());
       view.detectChanges();
 
       const root = view.rootNodes.find((n: Node) => n instanceof HTMLElement) as HTMLElement;
@@ -230,9 +273,38 @@ describe('HomePageComponent', () => {
       // The trigger is projected content, so its bindings are checked with the
       // home component's view rather than the header's embedded one.
       trigger.click();
-      fixture.detectChanges();
+      await fixture.whenStable();
       view.detectChanges();
       expect(trigger.getAttribute('aria-expanded')).toBe('true');
+    });
+
+    it('Escape closes the card layout menu and returns focus to its trigger', async () => {
+      const { root } = await renderHeader();
+      const trigger = root.querySelector('.dropdown > button') as HTMLButtonElement;
+      trigger.click();
+      expect(component.layoutMenuOpen()).toBe(true);
+
+      const option = root.querySelector('.layout-dropdown__option') as HTMLButtonElement;
+      option.dispatchEvent(new KeyboardEvent('keydown', { key: 'Escape', bubbles: true }));
+
+      expect(component.layoutMenuOpen()).toBe(false);
+      expect(document.activeElement).toBe(trigger);
+
+      trigger.click();
+      trigger.dispatchEvent(new KeyboardEvent('keydown', { key: 'Escape', bubbles: true }));
+      expect(component.layoutMenuOpen()).toBe(false);
+    });
+
+    it('a click outside closes the card layout menu; one on its panel does not', async () => {
+      const { root } = await renderHeader();
+      const trigger = root.querySelector('.dropdown > button') as HTMLButtonElement;
+      trigger.click();
+
+      (root.querySelector('.layout-dropdown__panel') as HTMLElement).click();
+      expect(component.layoutMenuOpen()).toBe(true);
+
+      document.body.click();
+      expect(component.layoutMenuOpen()).toBe(false);
     });
 
     // The tick is only faded to opacity-0 for unselected layouts, so without

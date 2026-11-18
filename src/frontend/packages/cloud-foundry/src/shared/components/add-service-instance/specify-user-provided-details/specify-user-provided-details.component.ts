@@ -1,8 +1,8 @@
 import { CommonModule } from '@angular/common';
-import { AppErrorComponent, AppInputDirective, CustomFormFieldComponent, MatLabelComponent } from '@stratosui/core';
+import { AppErrorComponent, AppInputDirective, CustomFormFieldComponent } from '@stratosui/core';
 import { HttpParams, HttpRequest } from '@angular/common/http';
-import { Component, Input, OnDestroy, signal, computed, ChangeDetectionStrategy, inject } from '@angular/core';
-import { ReactiveFormsModule, FormsModule, Validators, FormControl, FormGroup } from '@angular/forms';
+import { Component, OnDestroy, OnInit, signal, computed, ChangeDetectionStrategy, inject, input } from '@angular/core';
+import { ReactiveFormsModule, FormsModule, Validators, FormControl, FormGroup, ValidatorFn } from '@angular/forms';
 import { CustomSelectComponent, CustomOptionComponent } from '@stratosui/core';
 import { ActivatedRoute } from '@angular/router';
 
@@ -20,10 +20,12 @@ interface BindExistingInstanceForm {
 }
 
 import { StatefulIconComponent, safeUnsubscribe, urlValidationExpression, environment, StepOnNextResult, isValidJsonValidator } from '@stratosui/core';
+import { leadPieces, piecesToText } from '@stratosui/store';
+import { unknownOutcomeMessage } from '../../../../services/async-jobs/unknown-outcome-message';
 import { AppNameUniqueDirective } from '../../../directives/app-name-unique.directive/app-name-unique.directive';
 import { toObservable } from '@angular/core/rxjs-interop';
-import { combineLatest as obsCombineLatest, Observable, of as observableOf, Subscription, from } from 'rxjs';
-import { take, filter, map, publishReplay, refCount, startWith, switchMap, withLatestFrom } from 'rxjs/operators';
+import { combineLatest as obsCombineLatest, Observable, of as observableOf, Subscription, firstValueFrom, from } from 'rxjs';
+import { take, filter, map, shareReplay, startWith, switchMap, withLatestFrom } from 'rxjs/operators';
 
 import { IUserProvidedServiceInstanceData } from '../../../../cf-api-svc.types';
 import { AppDetailDataService } from '../../../../features/applications/app-detail-data.service';
@@ -43,6 +45,22 @@ export interface UpsPickerRow {
 }
 
 const { proxyAPIVersion } = environment;
+
+// CF takes syslog://, syslog-tls:// and https:// log drains. The drain keeps
+// the shared URL check's host, port and path rules (and its http scheme) but
+// also takes the two syslog schemes. A route service URL "must use the https
+// protocol", so it keeps the same rules with https alone.
+const syslogDrainUrlExpression = urlValidationExpression.replace('^https?:', '^(?:syslog|syslog-tls|https?):');
+const routeServiceUrlExpression = urlValidationExpression.replace('^https?:', '^https:');
+
+// app-form-field shows one error line per field: the first error's own
+// message, else a stock text ("Invalid value" for a check it does not
+// know). It does not project <app-error> children, so each check here
+// carries the text the field shows.
+function withMessage(validator: ValidatorFn, key: string, message: string): ValidatorFn {
+  return control => validator(control) ? { [key]: { message } } : null;
+}
+const invalidUrl = (expression: string) => withMessage(Validators.pattern(expression), 'invalidUrl', 'Invalid URL');
 
 // Replace every leaf value with the '<redacted>' marker, keeping the key
 // structure (nested objects and array shapes included) browsable. Angle
@@ -69,14 +87,13 @@ function redactValues(value: unknown): unknown {
     AppErrorComponent,
     AppInputDirective,
     CustomFormFieldComponent,
-    MatLabelComponent,
     CustomSelectComponent,
     CustomOptionComponent,
     AppNameUniqueDirective,
     StatefulIconComponent
   ]
 })
-export class SpecifyUserProvidedDetailsComponent implements OnDestroy {
+export class SpecifyUserProvidedDetailsComponent implements OnInit, OnDestroy {
   private route = inject(ActivatedRoute);
   private upsService = inject(CloudFoundryUserProvidedServicesService);
   modeService = inject(CsiModeService);
@@ -100,13 +117,16 @@ export class SpecifyUserProvidedDetailsComponent implements OnDestroy {
 
     this.createEditServiceInstance = new FormGroup<CreateEditServiceInstanceForm>({
       name: new FormControl('', { validators: [Validators.required, Validators.maxLength(50)], nonNullable: true }),
-      syslog_drain_url: new FormControl('', { validators: [Validators.pattern(urlValidationExpression)], nonNullable: true }),
-      credentials: new FormControl('', { validators: isValidJsonValidator(), nonNullable: true }),
-      route_service_url: new FormControl('', { validators: [Validators.pattern(urlValidationExpression)], nonNullable: true }),
+      syslog_drain_url: new FormControl('', { validators: [invalidUrl(syslogDrainUrlExpression)], nonNullable: true }),
+      credentials: new FormControl('', {
+        validators: withMessage(isValidJsonValidator(), 'notValidJson', 'Not a valid JSON object.'), nonNullable: true }),
+      route_service_url: new FormControl('', {
+        validators: [withMessage(Validators.pattern(routeServiceUrlExpression), 'invalidUrl', 'Invalid URL (route services need https)')],
+        nonNullable: true,
+      }),
       tags: new FormControl<any[]>([], { nonNullable: true }) });
     this.bindExistingInstance = new FormGroup<BindExistingInstanceForm>({
       serviceInstances: new FormControl('', { validators: [Validators.required], nonNullable: true }) });
-    this.initUpdate(serviceInstanceId, endpointId);
     this.setupValidate();
     // Fetch on load so the redacted structure preview renders without a
     // click; real values stay off-screen until explicitly shown.
@@ -199,19 +219,16 @@ export class SpecifyUserProvidedDetailsComponent implements OnDestroy {
   public validate = signal(false);
   private subscriptions: Subscription[] = [];
 
-  @Input()
-  public cfGuid!: string;
-  @Input()
-  public spaceGuid!: string;
-  @Input()
-  public appId!: string;
-  @Input()
-  public serviceInstanceId!: string;
+  // The one host (add-service-instance) always binds both.
+  public readonly cfGuid = input.required<string>();
+  public readonly spaceGuid = input.required<string>();
+  public readonly appId = input<string>();
+  public readonly serviceInstanceId = input<string>();
 
-  @Input()
-  public showModeSelection = false;
+  public readonly showModeSelection = input(false);
 
   public appNameChecking = new AppNameUniqueChecking();
+  public readonly nameTakenMessage = 'A service instance with this name already exists. Please enter a different one.';
 
   public serviceBindingForApplication$ = this.serviceInstancesForApplication();
   formModes = [
@@ -227,6 +244,14 @@ export class SpecifyUserProvidedDetailsComponent implements OnDestroy {
   formMode = CreateServiceFormMode.CreateServiceInstance;
 
   private originalFormValue: IUserProvidedServiceInstanceData | null = null;
+
+  ngOnInit(): void {
+    // Not in the constructor: the update snapshot (originalFormValue) reads
+    // the spaceGuid input, which is only set once the component is created.
+    const { endpointId, serviceInstanceId } =
+      this.route && this.route.snapshot ? this.route.snapshot.params : { endpointId: null, serviceInstanceId: null };
+    this.initUpdate(serviceInstanceId, endpointId);
+  }
 
   ngOnDestroy(): void {
     safeUnsubscribe(...this.subscriptions);
@@ -317,14 +342,14 @@ export class SpecifyUserProvidedDetailsComponent implements OnDestroy {
         });
       }),
       startWith(null),
-      publishReplay(1),
-      refCount()
+      shareReplay({ bufferSize: 1, refCount: true })
     );
   }
 
   private boundServiceInstanceGuidsForApp(): Set<string> {
     const out = new Set<string>();
-    if (!this.appId || !this.appDetailData) {
+    const appId = this.appId();
+    if (!appId || !this.appDetailData) {
       return out;
     }
     const bindings = this.appDetailData.serviceBindings();
@@ -335,7 +360,7 @@ export class SpecifyUserProvidedDetailsComponent implements OnDestroy {
       // type=app bindings carry an app ref; the picker only cares about
       // bindings to *this* app since UPS-to-other-app bindings remain
       // selectable for binding to the current app.
-      if (b.type === 'app' && b.app?.guid === this.appId && b.serviceInstance?.guid) {
+      if (b.type === 'app' && b.app?.guid === appId && b.serviceInstance?.guid) {
         out.add(b.serviceInstance.guid);
       }
     }
@@ -377,39 +402,38 @@ export class SpecifyUserProvidedDetailsComponent implements OnDestroy {
       .set('return', 'counts')
       .set('type', 'user-provided')
       .set('names', name)
-      .set('space_guids', this.spaceGuid);
+      .set('space_guids', this.spaceGuid());
     return new HttpRequest(
       'GET',
-      `/pp/${proxyAPIVersion}/cf/service_instances/${this.cfGuid}`,
+      `/pp/${proxyAPIVersion}/cf/service_instances/${this.cfGuid()}`,
       { params },
     );
   };
 
-  public onNext = (): Observable<StepOnNextResult> => {
-    return this.isUpdate ?
+  // onNextBind follows csiState$, which never completes: take the first result only
+  public async onNext(): Promise<StepOnNextResult> {
+    return firstValueFrom(this.isUpdate ?
       this.onNextUpdate() :
-      this.formMode === CreateServiceFormMode.CreateServiceInstance ? this.onNextCreate() : this.onNextBind();
-  };
+      this.formMode === CreateServiceFormMode.CreateServiceInstance ? this.onNextCreate() : this.onNextBind());
+  }
 
   private onNextCreate(): Observable<StepOnNextResult> {
     const data = this.getServiceData();
-    const guid = `user-services-instance-${this.cfGuid}-${this.spaceGuid}-${data.name}`;
+    const guid = `user-services-instance-${this.cfGuid()}-${this.spaceGuid()}-${data.name}`;
     return this.upsService.createUserProvidedService(
-      this.cfGuid,
+      this.cfGuid(),
       guid,
       data as IUserProvidedServiceInstanceData,
     ).pipe(
       withLatestFrom(this.csiState$),
       switchMap(([result, state]) => {
         if (!result.success) {
-          return observableOf({
-            success: false,
-            redirect: false,
-            message: 'Failed to create User Provided Service Instance. Reason: "' + (result.message ?? '') + '"',
-          });
+          const messagePieces = leadPieces(
+            'Failed to create User Provided Service Instance. Reason', result.error ?? result.message);
+          return observableOf({ success: false, redirect: false, message: piecesToText(messagePieces), messagePieces });
         }
         if (state.bindAppGuid && result.guid) {
-          return this.createApplicationServiceBinding(result.guid, state);
+          return this.createApplicationServiceBinding(result.guid, state, data.name);
         }
         return observableOf({ success: true, redirect: true });
       })
@@ -422,12 +446,31 @@ export class SpecifyUserProvidedDetailsComponent implements OnDestroy {
     );
   }
 
-  private createApplicationServiceBinding(serviceGuid: string, data: any): Observable<StepOnNextResult> {
+  // createdName: set when this step has just created the instance, so an
+  // outcome that is not a plain success can say the instance exists.
+  private createApplicationServiceBinding(serviceGuid: string, data: any, createdName?: string): Observable<StepOnNextResult> {
     return this.modeService.createApplicationServiceBinding(serviceGuid, data.cfGuid, data.bindAppGuid, data.bindAppParams)
       .pipe(
         map(req => {
+          if (req.unknown) {
+            return {
+              success: false,
+              message: unknownOutcomeMessage(
+                createdName
+                  ? `User-provided service instance "${createdName}" was created. Binding it to the application`
+                  : 'Binding the service instance to the application',
+                'The application\'s Services tab',
+                req.unknown,
+              ),
+            };
+          }
           if (!req.success) {
-            return { success: false, message: `Failed to create service instance binding: ${req.message}` };
+            const messagePieces = leadPieces(
+              createdName
+                ? `User-provided service instance "${createdName}" was created, but binding it to the application failed`
+                : 'Failed to create service instance binding',
+              req.error ?? req.message);
+            return { success: false, message: piecesToText(messagePieces), messagePieces };
           } else {
             // Bind succeeded — CF mutates VCAP_SERVICES on the app. Refresh
             // env vars on AppDetailDataService when bind happened from inside
@@ -445,24 +488,29 @@ export class SpecifyUserProvidedDetailsComponent implements OnDestroy {
 
   private onNextUpdate(): Observable<StepOnNextResult> {
     const updateData = this.getServiceData();
+    // Update mode is set from the route, which also names the instance
+    // that initUpdate loaded.
+    const serviceInstanceId = this.serviceInstanceId() || this.route.snapshot.params.serviceInstanceId;
     return this.upsService.updateUserProvidedService(
-      this.cfGuid,
-      this.serviceInstanceId,
+      this.cfGuid(),
+      serviceInstanceId,
       updateData
     ).pipe(
       switchMap(result => {
         if (!result.success) {
+          const messagePieces = leadPieces('Failed to update service instance', result.error ?? result.message);
           return observableOf<StepOnNextResult>({
             success: false,
             redirect: false,
-            message: `Failed to update service instance: ${result.message ?? ''}`,
+            message: piecesToText(messagePieces),
+            messagePieces,
           });
         }
         // The bound app's denormalized service-instance data (name, tags,
         // syslog drain url, etc.) is included via ?return=summary on the v3
         // bindings handler — refreshing pulls in the just-updated UPS shape.
         // No-op outside the app-detail route hierarchy.
-        const appId = this.appId || this.route.snapshot.queryParamMap.get('appId');
+        const appId = this.appId() || this.route.snapshot.queryParamMap.get('appId');
         const refresh = this.appDetailData && appId
           ? from(this.appDetailData.refresh('serviceBindings'))
           : observableOf<void>(undefined);
@@ -474,7 +522,7 @@ export class SpecifyUserProvidedDetailsComponent implements OnDestroy {
   private getServiceData(): IUserProvidedServiceInstanceData {
     const formValue = this.createEditServiceInstance.value;
     return {
-      spaceGuid: this.spaceGuid,
+      spaceGuid: this.spaceGuid(),
       name: formValue.name!,
       route_service_url: formValue.route_service_url || undefined,
       syslog_drain_url: formValue.syslog_drain_url || undefined,

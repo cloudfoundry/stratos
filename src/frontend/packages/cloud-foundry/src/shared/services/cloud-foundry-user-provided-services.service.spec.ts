@@ -1,5 +1,7 @@
+import { readFileSync } from 'fs';
+import { join } from 'path';
 import { TestBed } from '@angular/core/testing';
-import { provideHttpClient } from '@angular/common/http';
+import { HttpErrorResponse, provideHttpClient } from '@angular/common/http';
 import { HttpTestingController, provideHttpClientTesting } from '@angular/common/http/testing';
 import { firstValueFrom } from 'rxjs';
 import { describe, it, beforeEach, afterEach, expect } from 'vitest';
@@ -102,6 +104,21 @@ describe('CloudFoundryUserProvidedServicesService — V3 write surface', () => {
     const res = await promise;
     expect(res.success).toBe(false);
     expect(res.message).toContain('nope');
+  });
+
+  // nginx's own 502 page, as a proxy in front of Stratos sends it.
+  it('reads an error page as its message and hands back the error', async () => {
+    const page = readFileSync(join(import.meta.dirname, '../../../../store/src/testdata/upstream-errors/nginx-502.body'), 'utf8');
+    const result = service.createUserProvidedService('cnsi-1', 'g', { spaceGuid: 's', name: 'x' } as any);
+    const promise = new Promise<any>((resolve) => result.subscribe(resolve));
+
+    httpMock.expectOne('/pp/v1/cf/user_provided_service_instances/cnsi-1')
+      .flush(page, { status: 502, statusText: 'Bad Gateway' });
+
+    const res = await promise;
+    expect(res.success).toBe(false);
+    expect(res.message).toBe('502 Bad Gateway\nnginx/1.28.0');
+    expect(res.error).toBeInstanceOf(HttpErrorResponse);
   });
 });
 

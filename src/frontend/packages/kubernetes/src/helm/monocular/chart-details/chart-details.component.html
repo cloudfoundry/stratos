@@ -1,29 +1,31 @@
 <div>
-  @if (!chart && !initing) {
+  @if (!chart() && !initing()) {
     <app-panel class="app-panel--container">
       <h2>Sorry, we couldn't find the chart</h2>
     </app-panel>
   }
-  @if (chart && !currentVersion && !initing) {
+  @if (chart() && !currentVersion() && !initing()) {
     <app-panel class="app-panel--container">
       <h2>Sorry, we couldn't find the version information for this chart</h2>
     </app-panel>
   }
-  <app-loader [loading]="loading">
-    @if (chart && currentVersion) {
-      <div class="flex">
-        <app-entity-summary-title class="flex-[3] block" [title]="chart.attributes.name" [subTitle]="chartSubTitle"
-          [subText]="chart.attributes.description" [imagePath]="iconUrl">
-          <div class="w-full flex flex-col-reverse px-8 pb-8 break-words md:flex-row md:h-full">
-            <article class="md:overflow-auto md:pr-4 md:min-w-0 md:flex-[3]">
-              <app-chart-details-readme [currentVersion]="currentVersion"></app-chart-details-readme>
-            </article>
-          </div>
-        </app-entity-summary-title>
-        <aside class="md:mr-12 md:overflow-auto">
-          <app-chart-details-info [chart]="chart" [currentVersion]="currentVersion"></app-chart-details-info>
-        </aside>
-      </div>
+  <app-loader [loading]="loading()">
+    @if (chart(); as chart) {
+      @if (currentVersion(); as currentVersion) {
+        <div class="flex">
+          <app-entity-summary-title class="flex-[3] block" [title]="chart.attributes.name" [subTitle]="chartSubTitle()"
+            [subText]="chart.attributes.description" [imagePath]="iconUrl()">
+            <div class="w-full flex flex-col-reverse px-8 pb-8 break-words md:flex-row md:h-full">
+              <article class="md:overflow-auto md:pr-4 md:min-w-0 md:flex-[3]">
+                <app-chart-details-readme [currentVersion]="currentVersion"></app-chart-details-readme>
+              </article>
+            </div>
+          </app-entity-summary-title>
+          <aside class="md:mr-12 md:overflow-auto">
+            <app-chart-details-info [chart]="chart" [currentVersion]="currentVersion"></app-chart-details-info>
+          </aside>
+        </div>
+      }
     }
   </app-loader>
 </div>

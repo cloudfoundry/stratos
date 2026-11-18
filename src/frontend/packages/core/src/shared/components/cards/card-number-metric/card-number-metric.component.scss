@@ -1,7 +1,25 @@
 .number-metric-card {
   height: 100%;
+  // A block, so the global :focus-visible outline has a box to go round
+  // (an inline anchor round the card's blocks drew no visible outline);
+  // drawn inside, so a card container that clips cannot cut it off.
   &__anchor {
+    border-radius: 0.5rem;
     cursor: pointer;
+    display: block;
+    height: 100%;
+    &:focus-visible {
+      outline-offset: -2px;
+    }
+    // The card inside is positioned and has a background, so it paints over
+    // an outline drawn inside the link: draw the outline on the card.
+    &:focus-visible:has(.card) {
+      outline: none;
+    }
+    &:focus-visible .card {
+      outline: 2px solid var(--focus-ring, var(--color-primary));
+      outline-offset: -2px;
+    }
   }
   &__container {
     align-items: center;
@@ -34,9 +52,6 @@
   }
   &__value {
     font-size: 23px;
-    &--unlimited {
-      opacity: 0.3;
-    }
   }
   &__limit {
     font-size: 18px;

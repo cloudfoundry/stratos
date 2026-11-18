@@ -1,9 +1,10 @@
 <!-- Org multi-select picker (hidden when lockedOrg is set) -->
-@if (!lockedOrg) {
+@if (!lockedOrg()) {
   <div data-testid="org-picker" class="role-assignment__picker rounded border border-content-border bg-content-bg-alt overflow-hidden">
     <input
       type="text"
       placeholder="Search organizations…"
+      aria-label="Search organizations"
       [value]="orgSearchText()"
       (input)="orgSearchText.set($any($event.target).value)"
       class="role-assignment__search w-full px-3 py-2 text-sm bg-transparent text-content-text placeholder:text-content-muted border-b border-content-border focus:outline-none"
@@ -12,6 +13,18 @@
       <div class="flex items-center gap-2 px-3 py-4 text-sm text-content-muted">
         <app-busy class="text-primary" size="1.25rem" context="role-assignment"></app-busy>
         Loading organizations…
+      </div>
+    } @else if (orgsError()) {
+      <div role="alert" class="flex items-center gap-3 px-3 py-4 text-sm text-content-text">
+        <span class="text-danger">{{ orgsError() }}</span>
+        <button
+          type="button"
+          data-testid="org-retry"
+          (click)="loadOrgs()"
+          class="px-2 py-1 text-xs rounded border border-content-border bg-content-bg text-content-text hover:bg-primary-50"
+        >
+          Retry
+        </button>
       </div>
     } @else {
       <ul class="role-assignment__org-list list-none m-0 p-1 max-h-40 overflow-y-auto custom-scrollbar">
@@ -28,7 +41,11 @@
           </li>
         }
         @if (filteredAllowedOrgs().length === 0) {
-          <li class="px-3 py-2 text-sm text-content-muted">No organizations match.</li>
+          @if (orgSearchText()) {
+            <li class="px-3 py-2 text-sm text-content-muted">No organizations match.</li>
+          } @else {
+            <li class="px-3 py-2 text-sm text-content-muted">You have no organizations where you can manage roles.</li>
+          }
         }
       </ul>
     }
@@ -37,7 +54,7 @@
 
 <!-- View toggle: accordion ↔ split. Hidden for lockedOrg (single org) and
      until at least one org is picked. -->
-@if (!lockedOrg && pickedOrgs().length > 0) {
+@if (!lockedOrg() && pickedOrgs().length > 0) {
   <div class="role-assignment__toolbar flex items-center justify-end mt-3">
     <button
       type="button"
@@ -47,7 +64,7 @@
       [attr.aria-pressed]="viewMode() === 'split'"
       class="role-assignment__view-toggle flex items-center gap-1.5 px-2 py-1 text-xs rounded border border-content-border bg-content-bg text-content-text hover:bg-primary-50"
     >
-      <span class="material-icons text-base leading-5">{{ viewMode() === 'accordion' ? 'view_column' : 'view_agenda' }}</span>
+      <span aria-hidden="true" class="material-icons text-base leading-5">{{ viewMode() === 'accordion' ? 'view_column' : 'view_agenda' }}</span>
       {{ viewMode() === 'accordion' ? 'Two-pane' : 'Stacked' }}
     </button>
   </div>
@@ -72,7 +89,7 @@
           <div data-testid="org-role-cell" class="role-assignment__role-cell">
             <app-role-tristate-checkbox
               [checked]="checkedForOrg(org.metadata.guid, def.name)"
-              [disabled]="!canEditOrg(org.metadata.guid) || (def.name === orgUserRole && isOrgUserDisabled(org.metadata.guid))"
+              [disabled]="loading() || !canEditOrg(org.metadata.guid) || (def.name === orgUserRole && isOrgUserDisabled(org.metadata.guid))"
               [label]="def.label"
               (toggled)="onToggleOrgRole(org, def.name, $event)"
             ></app-role-tristate-checkbox>
@@ -89,10 +106,23 @@
           <app-busy class="text-primary" size="1.25rem" context="role-assignment"></app-busy>
           Loading spaces…
         </div>
+      } @else if (spacesFailedFor(org.metadata.guid)) {
+        <div role="alert" class="flex items-center gap-3 py-2 text-sm text-content-text">
+          <span class="text-danger">Could not load spaces.</span>
+          <button
+            type="button"
+            data-testid="space-retry"
+            (click)="loadSpacesFor(org.metadata.guid)"
+            class="px-2 py-1 text-xs rounded border border-content-border bg-content-bg text-content-text hover:bg-primary-50"
+          >
+            Retry
+          </button>
+        </div>
       } @else {
         <input
           type="text"
           placeholder="Filter spaces…"
+          [attr.aria-label]="'Filter spaces in ' + org.entity.name"
           [value]="spaceFilterFor(org.metadata.guid)"
           (input)="setSpaceFilter(org.metadata.guid, $any($event.target).value)"
           class="role-assignment__space-search w-full max-w-xs px-3 py-1.5 text-sm rounded border border-content-border bg-transparent text-content-text placeholder:text-content-muted focus:outline-none"
@@ -106,7 +136,7 @@
                   <div data-testid="space-role-cell" class="role-assignment__role-cell">
                     <app-role-tristate-checkbox
                       [checked]="checkedForSpace(org.metadata.guid, space.guid, def.name)"
-                      [disabled]="!canChangeSpaceRoles(org.metadata.guid, space.guid)"
+                      [disabled]="loading() || !canChangeSpaceRoles(org.metadata.guid, space.guid)"
                       [label]="def.label"
                       (toggled)="onToggleSpaceRole(org, space, def.name, $event)"
                     ></app-role-tristate-checkbox>
@@ -135,7 +165,7 @@
   }
 </ng-template>
 
-@if (viewMode() === 'split' && !lockedOrg) {
+@if (viewMode() === 'split' && !lockedOrg()) {
   <!-- Two-pane master/detail. Panes stack on narrow widths (grid-cols-1). -->
   <div
     data-testid="role-pane-split"
@@ -209,7 +239,7 @@
         <span class="role-assignment__summary shrink-0 text-xs text-content-muted" data-testid="org-role-summary">
           <ng-container [ngTemplateOutlet]="orgSummary" [ngTemplateOutletContext]="{ orgGuid: org.metadata.guid }"></ng-container>
         </span>
-        @if (!lockedOrg) {
+        @if (!lockedOrg()) {
           <button
             type="button"
             (click)="removePickedOrg(org.metadata.guid)"

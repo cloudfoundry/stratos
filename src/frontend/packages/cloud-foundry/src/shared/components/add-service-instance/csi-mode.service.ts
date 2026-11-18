@@ -6,9 +6,12 @@ import { Observable, defer, firstValueFrom, from } from 'rxjs';
 import { SpaceScopedService } from '../../../../../cloud-foundry/src/features/service-catalog/services-helper';
 import { getIdFromRoute } from '../../../../../core/src/core/utils.service';
 import { TailwindSnackBarService } from '../../../../../core/src/shared/services/tailwind-snackbar.service';
-import { StratosJobError } from '../../../services/async-jobs/async-job.types';
+import type { AsyncJobResult } from '../../../services/async-jobs/async-job.types';
+import { UnknownHow, unknownHow, unknownOutcomeMessage } from '../../../services/async-jobs/unknown-outcome-message';
 import { writeWithJob } from '../../../services/async-jobs/write-with-job';
 import { EndpointDataRegistry } from '../../../services/endpoint-data/endpoint-data.registry';
+import { lastOperationReason } from '../../signal-list-configs/service-instance/service-instance-columns';
+import { extractHttpErrorMessage, leadPieces } from '@stratosui/store';
 
 export enum CreateServiceInstanceMode {
   MARKETPLACE_MODE = 'marketPlaceMode',
@@ -56,6 +59,24 @@ const defaultViewDetail = {
   showBindApp: true,
   showSpecifyDetails: true
 };
+
+/**
+ * How an app bind requested by the wizard ended. `unknown`: nobody can say
+ * whether it happened (it ended with no known result, or was still running
+ * in CF when Stratos stopped following it), so it must not be reported as
+ * bound (nor as failed).
+ */
+export interface BindResult {
+  success: boolean;
+  unknown?: UnknownHow;
+  // The instance is still being provisioned, so the bind has not happened:
+  // it is retried in the background and its outcome reported separately.
+  // success is true (the step may leave) but the app is not bound yet.
+  deferred?: boolean;
+  message?: string;
+  // What a failed bind threw, so a step can show `message` styled.
+  error?: unknown;
+}
 
 @Injectable({
   providedIn: 'root'
@@ -171,7 +192,7 @@ export class CsiModeService {
     cfGuid: string,
     appGuid: string,
     params: object | undefined,
-  ): Observable<{ success: boolean; message?: string }> {
+  ): Observable<BindResult> {
     return defer(() => from(this.bindWithProvisioningWait(serviceInstanceGuid, cfGuid, appGuid, params)));
   }
 
@@ -187,7 +208,7 @@ export class CsiModeService {
     params: object | undefined,
     inlineWaitMs = 15_000,
     backgroundWaitMs = 600_000,
-  ): Promise<{ success: boolean; message?: string }> {
+  ): Promise<BindResult> {
     const body: Record<string, unknown> = {
       type: 'app',
       relationships: {
@@ -198,8 +219,8 @@ export class CsiModeService {
     if (params && Object.keys(params).length > 0) {
       body['parameters'] = params;
     }
-    const fireBind = async () => {
-      await writeWithJob<unknown>(
+    const fireBind = async (): Promise<AsyncJobResult<unknown>> => {
+      const result = await writeWithJob<unknown>(
         this.http,
         this.http.post(`/pp/v1/cf/service_bindings/${cfGuid}`, body, { observe: 'response' }),
       );
@@ -210,14 +231,17 @@ export class CsiModeService {
       // serviceInstanceReducer cross-entity update as cache invalidation;
       // covers both the inline and the background-retry bind paths.
       this.endpointDataRegistry.peek(cfGuid)?.applyCascade('serviceBinding.create');
+      return result;
     };
+    // UNKNOWN: nobody can say whether the bind happened.
+    const outcome = (result: AsyncJobResult<unknown>): BindResult =>
+      result.status === 'UNKNOWN' ? { success: false, unknown: unknownHow(result) } : { success: true };
 
     try {
-      await fireBind();
-      return { success: true };
+      return outcome(await fireBind());
     } catch (err: unknown) {
       if (!isOperationInProgressError(err)) {
-        return { success: false, message: extractErrorMessage(err) };
+        return { success: false, message: extractHttpErrorMessage(err), error: err };
       }
     }
 
@@ -230,24 +254,23 @@ export class CsiModeService {
     }
     if (settled.state === 'succeeded') {
       try {
-        await fireBind();
-        return { success: true };
+        return outcome(await fireBind());
       } catch (err: unknown) {
-        return { success: false, message: extractErrorMessage(err) };
+        return { success: false, message: extractHttpErrorMessage(err), error: err };
       }
     }
     // Slow broker. Detach the bind so the wizard doesn't keep spinning;
     // background poll + retry bind, and surface the outcome via snackbar
     // when CF settles. The user is free to navigate away in the meantime.
     void this.runBindInBackground(serviceInstanceGuid, cfGuid, appGuid, fireBind, backgroundWaitMs);
-    return { success: true };
+    return { success: true, deferred: true };
   }
 
   private async runBindInBackground(
     siGuid: string,
     cfGuid: string,
     appGuid: string,
-    fireBind: () => Promise<unknown>,
+    fireBind: () => Promise<AsyncJobResult<unknown>>,
     waitMs: number,
   ): Promise<void> {
     this.snackBar.open(
@@ -258,10 +281,15 @@ export class CsiModeService {
     const settled = await this.waitForServiceInstanceReady(cfGuid, siGuid, waitMs);
     if (settled.state === 'succeeded') {
       try {
-        await fireBind();
-        this.snackBar.open(`Service instance bound to app.`, undefined, { duration: 10_000 });
+        const bound = await fireBind();
+        if (bound.status === 'UNKNOWN') {
+          this.snackBar.error(unknownOutcomeMessage(
+            'Service instance ready. Binding it to the app', 'The application\'s Services tab', unknownHow(bound)));
+        } else {
+          this.snackBar.open(`Service instance bound to app.`, undefined, { duration: 10_000 });
+        }
       } catch (err: unknown) {
-        this.snackBar.error(`Service instance ready, but bind failed: ${extractErrorMessage(err)}`);
+        this.snackBar.error(leadPieces('Service instance ready, but bind failed', err));
       }
       return;
     }
@@ -286,7 +314,7 @@ export class CsiModeService {
         const op = si?.lastOperation;
         const state = op?.state ?? '';
         if (state === 'succeeded' || state === 'failed') {
-          return { state, detail: op?.description ?? '' };
+          return { state, detail: lastOperationReason(si) };
         }
       } catch {
         // Transient — try again until deadline.
@@ -345,31 +373,3 @@ function isOperationInProgressError(err: unknown): boolean {
   return typeof first?.detail === 'string' && first.detail.includes('operation in progress');
 }
 
-function extractErrorMessage(err: unknown): string {
-  if (err instanceof StratosJobError) return err.message;
-  if (err instanceof HttpErrorResponse) {
-    const body = err.error;
-    if (body && typeof body === 'object') {
-      // Handles three backend shapes: CF passthrough errors[].detail/title,
-      // Stratos job envelope errors[].message, and handleCapiError's
-      // top-level {error}. Without this the user sees Angular's generic
-      // "Http failure response for ... 502 OK" with no clue what broke.
-      const errors = (body as { errors?: Array<{ detail?: unknown; title?: string; message?: string }> }).errors;
-      const first = errors?.[0];
-      if (first) {
-        if (typeof first.detail === 'string' && first.detail) return first.detail;
-        if (first.title) return first.title;
-        if (first.message) return first.message;
-      }
-      const top = body as { message?: string; error?: string };
-      if (top.message) return top.message;
-      if (top.error) return top.error;
-    }
-    if (typeof body === 'string' && body) return body;
-    return err.statusText && err.statusText !== 'OK'
-      ? `HTTP ${err.status} ${err.statusText}`
-      : `HTTP ${err.status}`;
-  }
-  if (err instanceof Error) return err.message;
-  return 'unknown error';
-}

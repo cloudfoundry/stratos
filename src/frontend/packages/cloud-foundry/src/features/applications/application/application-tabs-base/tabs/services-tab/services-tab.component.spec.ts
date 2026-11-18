@@ -9,7 +9,6 @@ import {
   signal,
 } from '@angular/core';
 import { provideRouter, Router } from '@angular/router';
-import { of } from 'rxjs';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 
 import { ApplicationService, CloudFoundryService } from '@stratosui/cloud-foundry';
@@ -17,6 +16,7 @@ import { ApplicationServiceMock } from '@test-framework/cf';
 import {
   ConfirmationDialogConfig,
   ConfirmationDialogService,
+  CurrentUserPermissionsService,
   TailwindSnackBarService,
 } from '@stratosui/core';
 
@@ -36,6 +36,7 @@ describe('ServicesTabComponent', () => {
   let removeServiceBinding: ReturnType<typeof vi.fn>;
   let unbindService: ReturnType<typeof vi.fn>;
   let confirmOpen: ReturnType<typeof vi.fn>;
+  let snackError: ReturnType<typeof vi.fn>;
   let routerNavigate: ReturnType<typeof vi.fn>;
 
   /** Minimal AppDetailDataService stub. */
@@ -43,6 +44,7 @@ describe('ServicesTabComponent', () => {
     refreshScope = vi.fn(async () => undefined);
     removeServiceBinding = vi.fn();
     return {
+      app: signal<any>({ entity: { space_guid: 'space-1' } }).asReadonly(),
       serviceBindings: signal<any[] | null>(null).asReadonly(),
       serviceBindingsCount: signal(0).asReadonly(),
       loading: signal({ serviceBindings: false } as any).asReadonly(),
@@ -52,7 +54,7 @@ describe('ServicesTabComponent', () => {
   };
 
   const makeBindingsActionsStub = () => {
-    unbindService = vi.fn(async () => undefined);
+    unbindService = vi.fn(async () => 'deleted');
     return {
       transitioningBindingGuid: signal<string | null>(null).asReadonly(),
       inFlight: signal(false).asReadonly(),
@@ -105,7 +107,10 @@ describe('ServicesTabComponent', () => {
     return { open: confirmOpen };
   };
 
-  const makeSnackStub = () => ({ open: vi.fn() });
+  const makeSnackStub = () => {
+    snackError = vi.fn();
+    return { open: vi.fn(), error: snackError };
+  };
 
   beforeEach(async () => {
     routerNavigate = vi.fn(async () => true);
@@ -117,7 +122,7 @@ describe('ServicesTabComponent', () => {
         provideZonelessChangeDetection(),
         provideRouter([]),
         { provide: ApplicationService, useClass: ApplicationServiceMock },
-        { provide: CloudFoundryService, useValue: { cFEndpoints$: of([]), connectedCFEndpoints$: of([]) } },
+        { provide: CloudFoundryService, useValue: { cfEndpoints: signal([]) } },
         { provide: AppDetailDataService, useFactory: makeDataStub },
         { provide: ConfirmationDialogService, useFactory: makeConfirmStub },
         { provide: TailwindSnackBarService, useFactory: makeSnackStub },
@@ -161,17 +166,26 @@ describe('ServicesTabComponent', () => {
     expect(component).toBeTruthy();
   });
 
-  it('renders without throwing', () => {
-    expect(() => fixture.detectChanges()).not.toThrow();
+  it('renders without throwing', async () => {
+    await expect(fixture.whenStable()).resolves.toBeDefined();
   });
 
-  it('triggers an initial serviceBindings fetch on init', () => {
-    fixture.detectChanges();
+  it('shows Bind Service while the user can create instances in the app\'s space', () => {
+    const canBind = signal(false);
+    const can = vi.spyOn(TestBed.inject(CurrentUserPermissionsService), 'can').mockReturnValue(canBind);
+    expect(component.bindServiceAction.visible!()).toBe(false);
+    expect(can).toHaveBeenCalledWith('create.service-instance', expect.any(String), 'space-1');
+    canBind.set(true);
+    expect(component.bindServiceAction.visible!()).toBe(true);
+  });
+
+  it('triggers an initial serviceBindings fetch on init', async () => {
+    await fixture.whenStable();
     expect(refreshScope).toHaveBeenCalledWith('serviceBindings');
   });
 
-  it('builds a signal-list config from the bindings config service', () => {
-    fixture.detectChanges();
+  it('builds a signal-list config from the bindings config service', async () => {
+    await fixture.whenStable();
     expect(component.listConfig).toBeTruthy();
     expect(component.listConfig.pagedItems).toBeTruthy();
     const actionsCol = component.listConfig.columns.find(c => c.key === 'actions');
@@ -180,7 +194,7 @@ describe('ServicesTabComponent', () => {
   });
 
   it('Unbind row action opens confirm and on confirm calls unbindService + evicts row', async () => {
-    fixture.detectChanges();
+    await fixture.whenStable();
     const row = { guid: 'bind-1', serviceInstance: { name: 'redis-cache', guid: 'si-1' } };
     const actionsCol = component.listConfig.columns.find(c => c.key === 'actions') as any;
     const actions = actionsCol.actions(row);
@@ -197,8 +211,26 @@ describe('ServicesTabComponent', () => {
     expect(removeServiceBinding).toHaveBeenCalledWith('bind-1');
   });
 
-  it('Edit row action navigates to /services/:type/:cnsi/:siGuid/edit with appId + cancel-url', () => {
-    fixture.detectChanges();
+  it('keeps the row, re-reads bindings and says so when an unbind ends with an unknown result', async () => {
+    unbindService.mockResolvedValueOnce('unknown');
+    await fixture.whenStable();
+    const row = { guid: 'bind-2', serviceInstance: { name: 'redis-cache', guid: 'si-1' } };
+    const actionsCol = component.listConfig.columns.find(c => c.key === 'actions') as any;
+    actionsCol.actions(row).find((a: any) => a.label === 'Unbind').invoke();
+    const [, onConfirm] = confirmOpen.mock.calls[0];
+    refreshScope.mockClear();
+    await onConfirm();
+
+    expect(removeServiceBinding).not.toHaveBeenCalled();
+    expect(refreshScope).toHaveBeenCalledWith('serviceBindings');
+    expect(snackError).toHaveBeenCalledWith(
+      'Unbind "redis-cache": the operation ended, but its result could not be determined. '
+      + 'The Services tab shows the current state.',
+    );
+  });
+
+  it('Edit row action navigates to /services/:type/:cnsi/:siGuid/edit with appId + cancel-url', async () => {
+    await fixture.whenStable();
     const row = {
       guid: 'bind-1',
       serviceInstance: { name: 'redis-cache', guid: 'si-1', type: 'managed' },

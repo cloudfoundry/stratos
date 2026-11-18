@@ -1,24 +1,22 @@
 import { HttpClient } from '@angular/common/http';
-import { Injectable, inject } from '@angular/core';
-import { toObservable } from '@angular/core/rxjs-interop';
+import { Injectable, Injector, inject } from '@angular/core';
 import { combineLatest, EMPTY, from, Observable, of as observableOf, of } from 'rxjs';
 import { take,
   catchError,
-  combineLatest as combineLatestOperators,
+  combineLatestWith,
   distinctUntilChanged,
   expand,
   filter,
   map,
   mergeMap,
-  publishReplay,
   reduce,
-  refCount,
   shareReplay,
   startWith,
   switchMap,
 } from 'rxjs/operators';
 
 import { naturalCompare } from '@stratosui/core';
+import { combineLatestOrEmpty, observeSignal } from '@stratosui/store';
 
 import { CurrentUserPermissionsService } from '../../../../../../core/src/core/permissions/current-user-permissions.service';
 import { APIResource, EntityInfo } from '../../../../../../store/src/types/api.types';
@@ -55,6 +53,7 @@ export class CfRolesService {
   private userPerms = inject(CurrentUserPermissionsService);
   private rolesData = inject(CfUsersRolesDataService);
   private http = inject(HttpClient);
+  private injector = inject(Injector);
 
 
   existingRoles$: Observable<CfUserRolesSelected>;
@@ -77,11 +76,12 @@ export class CfRolesService {
     cfGuid: string,
   ): Observable<APIResource<T>[]> {
     return orgOrSpaces$.pipe(
-      // Create an observable containing the original list of organisations and a corresponding list of whether an org can be edited
+      // Create an observable containing the original list of organisations and a corresponding list of whether an org can be edited.
+      // An empty list must still emit, or the caller waits forever.
       switchMap(orgsOrSpaces => {
-        return combineLatest(
+        return combineLatest([
           observableOf(orgsOrSpaces),
-          combineLatest(orgsOrSpaces.map(orgOrSpace => CfRolesService.canEditOrgOrSpace(
+          combineLatestOrEmpty(orgsOrSpaces.map(orgOrSpace => CfRolesService.canEditOrgOrSpace(
             userPerms,
             orgOrSpace.metadata.guid,
             // entity.cfGuid is typed optional on IOrganization/ISpace; the cnsi
@@ -89,7 +89,7 @@ export class CfRolesService {
             orgOrSpace.entity.cfGuid ?? cfGuid,
             isOrg ? orgOrSpace.metadata.guid : ((orgOrSpace as APIResource<ISpace>).entity.organization_guid),
             isOrg ? CfUserPermissionsChecker.ALL_SPACES : orgOrSpace.metadata.guid,
-          ))));
+          )))]);
       }),
       // Filter out orgs than the current user cannot edit
       map(([orgs, canEdit]) => orgs.filter(org => {
@@ -108,30 +108,31 @@ export class CfRolesService {
     cfGuid: string,
     orgGuid: string,
     spaceGuid: string): Observable<{ guid: string, canEdit: boolean, }> {
-    return canUpdateOrgSpaceRoles(userPerms, cfGuid, orgGuid, spaceGuid).pipe(
-      take(1),
-      map(canEdit => ({ guid, canEdit }))
-    );
+    // Read once, as the list is filtered when it arrives.
+    return observableOf({ guid, canEdit: canUpdateOrgSpaceRoles(userPerms, cfGuid, orgGuid, spaceGuid)() });
   }
 
   constructor() {
-    this.users$ = toObservable(this.rolesData.users);
+    // This service is a root singleton shared by every dialog. observeSignal
+    // reads the signal fresh on each subscribe, and shareReplay with refCount
+    // drops the cached value once the last subscriber leaves, so a new dialog
+    // never sees the previous dialog's users or roles. (toObservable() would
+    // replay the last value it pushed, which can be the previous users.)
+    this.users$ = observeSignal(this.rolesData.users, this.injector);
     this.existingRoles$ = this.users$.pipe(
-      combineLatestOperators(toObservable(this.rolesData.cfGuid)),
+      combineLatestWith(observeSignal(this.rolesData.cfGuid, this.injector)),
       filter(([_users, cfGuid]) => !!cfGuid),
       switchMap(([users, cfGuid]) => this.populateRoles(cfGuid, users)),
       distinctUntilChanged(),
-      publishReplay(1),
-      refCount()
+      shareReplay({ bufferSize: 1, refCount: true }),
     );
-    this.newRoles$ = toObservable(this.rolesData.newRoles).pipe(
+    this.newRoles$ = observeSignal(this.rolesData.newRoles, this.injector).pipe(
       distinctUntilChanged(),
-      publishReplay(1),
-      refCount()
+      shareReplay({ bufferSize: 1, refCount: true }),
     );
 
     this.loading$ = this.existingRoles$.pipe(
-      combineLatestOperators(this.newRoles$),
+      combineLatestWith(this.newRoles$),
       map(([existingRoles, newRoles]) => !existingRoles || !newRoles),
       startWith(true),
     );
@@ -208,7 +209,7 @@ export class CfRolesService {
    */
   createRolesDiff(orgGuid: string): Observable<CfRoleChange[]> {
     return this.existingRoles$.pipe(
-      combineLatestOperators(
+      combineLatestWith(
         this.newRoles$,
         this.users$,
       ),
@@ -309,18 +310,22 @@ export class CfRolesService {
     );
   }
 
+  /**
+   * Orgs the connected user can edit roles in, sorted by name. A failed fetch
+   * errors (so the caller can say why there are no orgs) and is not cached:
+   * shareReplay resets on error, so the next subscriber fetches again. A
+   * successful result is cached for this service instance.
+   */
   fetchOrgs(cfGuid: string): Observable<APIResource<IOrganization>[]> {
     if (!this.cfOrgs[cfGuid]) {
       const orgs$ = this.http.get<{ resources: StOrg[]; totalResults: number }>(
         `/pp/v1/cf/orgs/${cfGuid}?per_page=500`,
       ).pipe(
         map(resp => (resp?.resources ?? []).map(adaptOrgToApiResource)),
-        catchError(() => of([] as APIResource<IOrganization>[])),
       );
       this.cfOrgs[cfGuid] = CfRolesService.filterEditableOrgOrSpace<IOrganization>(this.userPerms, true, orgs$, cfGuid).pipe(
         map(orgs => orgs.sort((a, b) => naturalCompare(a.entity.name, b.entity.name))),
-        publishReplay(1),
-        refCount()
+        shareReplay({ bufferSize: 1, refCount: false }),
       );
     }
     return this.cfOrgs[cfGuid];
@@ -336,12 +341,14 @@ export class CfRolesService {
   private fetchOrgNames(cfGuid: string): Observable<StOrg[]> {
     if (!this.cfOrgNames[cfGuid]) {
       this.cfOrgNames[cfGuid] = this.drainCfList<StOrg>(`/pp/v1/cf/orgs/${cfGuid}`).pipe(
-        catchError(() => of([] as StOrg[])),
-        publishReplay(1),
-        refCount(),
+        shareReplay({ bufferSize: 1, refCount: false }),
       );
     }
-    return this.cfOrgNames[cfGuid];
+    // Recover outside the cache: this call still resolves (without names),
+    // and the next call fetches again instead of replaying the failure.
+    return this.cfOrgNames[cfGuid].pipe(
+      catchError(() => of([] as StOrg[])),
+    );
   }
 
   // Drains EVERY page of a native /pp/v1/cf list endpoint into one array. The
