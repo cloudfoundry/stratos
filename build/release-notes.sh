@@ -36,7 +36,12 @@ FRAG_DIR="${FRAG_DIR:-${ROOT_DIR}/changelog.d}"
 # does — retiring an unmaintained dependency, consolidating forked or
 # vendored code, clearing a scanner finding. A reader upgrading wants it
 # above routine bumps, but it is not a feature or a fix.
-SECTION_ORDER='Breaking Changes|Features|BugFixes|Maintainability|Chores|Security Updates'
+#
+# Accessibility follows the fixes as a section of its own, so a reader
+# looking for WCAG changes finds them in one place; an Accessibility
+# subcategory written under any other section is assembled there too,
+# and WCAG criteria are its subcategories.
+SECTION_ORDER='Breaking Changes|Features|BugFixes|Accessibility|Maintainability|Chores|Security Updates'
 
 fragments() {
   find "${FRAG_DIR}" -maxdepth 1 -name '[0-9]*.md' 2>/dev/null | LC_ALL=C sort
@@ -297,6 +302,7 @@ cmd_assemble() {
         printf "ERROR: %s: unknown section [%s]\n", FILENAME, s > "/dev/stderr"
         err = 1; exit 1
       }
+      if (sc == "Accessibility") { s = "Accessibility"; sc = "" }
       if (sc != "" && !((s, sc) in seen)) {
         seen[s, sc] = 1
         subs[s, ++nsubs[s]] = sc

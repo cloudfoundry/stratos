@@ -56,3 +56,30 @@ test('the section before the colon must still be a known one', () => {
   assert.notEqual(status, 0)
   assert.match(err, /unknown section \[Feature\]/)
 })
+
+test('accessibility is its own section, after the bug fixes', () => {
+  const { out, status } = assemble({
+    '0001-a.md': '[Accessibility]\n- A1.\n',
+    '0002-b.md': '[BugFixes]\n- B1.\n\n[Features]\n- F1.\n',
+  })
+  assert.equal(status, 0)
+  assert.equal(out, '## Features\n\n- F1.\n\n## Bug Fixes\n\n- B1.\n\n## Accessibility\n\n- A1.\n')
+})
+
+test('an Accessibility subcategory in any section lands in the Accessibility section', () => {
+  const { out, status } = assemble({
+    '0001-a.md': '[BugFixes: Accessibility]\n- A1.\n',
+    '0002-b.md': '[Features: Accessibility]\n- A2.\n\n[BugFixes]\n- B1.\n',
+  })
+  assert.equal(status, 0)
+  assert.equal(out, '## Bug Fixes\n\n- B1.\n\n## Accessibility\n\n- A1.\n- A2.\n')
+})
+
+test('WCAG criteria group as subcategories of the Accessibility section', () => {
+  const { out, status } = assemble({
+    '0001-a.md': '[Accessibility: 1.4.3 Contrast (Minimum)]\n- C1.\n',
+    '0002-b.md': '[Accessibility]\n- Plain.\n\n[Accessibility: 1.4.3 Contrast (Minimum)]\n- C2.\n',
+  })
+  assert.equal(status, 0)
+  assert.equal(out, '## Accessibility\n\n- Plain.\n\n### 1.4.3 Contrast (Minimum)\n\n- C1.\n- C2.\n')
+})
