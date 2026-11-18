@@ -71,7 +71,14 @@ group by criterion:
 
 **Maintainability** and **Chores** publish together as one **Maintenance**
 section, in the order the fragments landed; subcategories with the same
-name merge.
+name merge. Every `| Package | From | To |` table in them is merged into
+one `Package | Versions` table at the end of the section's bullets, with
+each package's moves chained in landing order
+(`10.11.0 → 10.12.0 → 10.14.0`). A step that does not start where the last
+one ended starts a new run after `;`, which usually means a bump nobody
+wrote up. The bullet that introduced a table loses its colon: a bare
+"Dependency updates:" is dropped, and any other wording stays as a
+sentence.
 
 ### Subcategories
 
@@ -114,7 +121,8 @@ so in each section the plugin fixes follow the core ones.
 When an entry covers several items, lay them out instead of chaining them
 into one sentence:
 
-- **Version moves** → a table with `From` and `To` columns.
+- **Version moves** → a `| Package | From | To |` table (that exact
+  header, so assembly merges it into the release's dependency table).
 - **Named items with a meaning** (advisories, removed pins, renamed
   files) → a two-column table, such as `Advisory | What it fixes`.
 - **A short list of plain items** → a nested list under the bullet.
@@ -128,7 +136,7 @@ table) so the table stays narrow.
 [Chores]
 - Backend dependency updates:
 
-| Component  | From   | To     |
+| Package    | From   | To     |
 |------------|--------|--------|
 | Helm       | 3.21.4 | 3.22.0 |
 | go-sqlite3 | 0.35.4 | 0.35.6 |
