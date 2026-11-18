@@ -104,8 +104,7 @@ test('dependency tables merge into one table of version chains', () => {
     '## Maintenance',
     '',
     '- A chore.',
-    '- Backend updates, from moving to the CLI',
-    '  branch.',
+    '- Backend updates, from moving to the CLI branch.',
     '- Dependency updates:',
     '',
     '| Package | Versions                   |',
@@ -130,4 +129,31 @@ test('a list that held a dependency table stays one list', () => {
   })
   assert.equal(status, 0)
   assert.equal(out, '## Maintenance\n\n- Before.\n- After.\n- Dependency updates:\n\n| Package | Versions |\n|---------|----------|\n| x       | 1 → 2    |\n')
+})
+
+// A GitHub release body draws every newline as a line break, so a bullet
+// wrapped by hand shows as a narrow column, and one wrapped inside a code
+// span shows as one long line. Each bullet is published on one line and
+// the page wraps it.
+test('a wrapped bullet is published on one line', () => {
+  const { out, status } = assemble({
+    '0001-a.md': '[Features]\n- One two\n  three `code\n  span` four.\n- Next.\n',
+  })
+  assert.equal(status, 0)
+  assert.equal(out, '## Features\n\n- One two three `code span` four.\n- Next.\n')
+})
+
+test('nested items stay separate, each on one line', () => {
+  const { out, status } = assemble({
+    '0001-a.md': '[Features]\n- Parent\n  text:\n  - child one\n    wrapped\n  - child two\n',
+  })
+  assert.equal(status, 0)
+  assert.equal(out, '## Features\n\n- Parent text:\n  - child one wrapped\n  - child two\n')
+})
+
+test('code blocks, tables and paragraph breaks inside a bullet are kept', () => {
+  const body = '[Features]\n- Run:\n\n  ```bash\n  make one\n    two\n  ```\n\n  | A | B |\n  |---|---|\n  | 1 | 2 |\n\n  Second\n  paragraph.\n'
+  const { out, status } = assemble({ '0001-a.md': body })
+  assert.equal(status, 0)
+  assert.equal(out, '## Features\n\n- Run:\n\n  ```bash\n  make one\n    two\n  ```\n\n  | A | B |\n  |---|---|\n  | 1 | 2 |\n\n  Second paragraph.\n')
 })
