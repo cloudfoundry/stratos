@@ -83,3 +83,12 @@ test('WCAG criteria group as subcategories of the Accessibility section', () => 
   assert.equal(status, 0)
   assert.equal(out, '## Accessibility\n\n- Plain.\n\n### 1.4.3 Contrast (Minimum)\n\n- C1.\n- C2.\n')
 })
+
+test('Maintainability and Chores assemble as one Maintenance section', () => {
+  const { out, status } = assemble({
+    '0001-a.md': '[Maintainability]\n- M1.\n\n[Chores: Services]\n- S1.\n',
+    '0002-b.md': '[Chores]\n- C1.\n\n[Maintainability: Services]\n- S2.\n',
+  })
+  assert.equal(status, 0)
+  assert.equal(out, '## Maintenance\n\n- M1.\n- C1.\n\n### Services\n\n- S1.\n- S2.\n')
+})

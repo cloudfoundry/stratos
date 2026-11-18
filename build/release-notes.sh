@@ -31,11 +31,11 @@ FRAG_DIR="${FRAG_DIR:-${ROOT_DIR}/changelog.d}"
 # Section order is the release-notes layout: Breaking Changes lead when
 # present; Security Updates (CVE table) close.
 #
-# Maintainability sits between the user-facing sections and Chores: work
-# that keeps the codebase current rather than changing what the console
-# does — retiring an unmaintained dependency, consolidating forked or
-# vendored code, clearing a scanner finding. A reader upgrading wants it
-# above routine bumps, but it is not a feature or a fix.
+# Maintainability (keeping the codebase current: retiring an unmaintained
+# dependency, consolidating forked code, clearing a scanner finding) and
+# Chores (routine bumps, CI, build, docs) stay separate tags for authors
+# but publish as one Maintenance section: readers found the split hard to
+# follow.
 #
 # Accessibility follows the fixes as a section of its own, so a reader
 # looking for WCAG changes finds them in one place; an Accessibility
@@ -303,6 +303,7 @@ cmd_assemble() {
         err = 1; exit 1
       }
       if (sc == "Accessibility") { s = "Accessibility"; sc = "" }
+      if (s == "Chores") s = "Maintainability"
       if (sc != "" && !((s, sc) in seen)) {
         seen[s, sc] = 1
         subs[s, ++nsubs[s]] = sc
@@ -356,8 +357,9 @@ cmd_assemble() {
         # bracketed literal it renders as plain text wherever these notes
         # land — a GitHub release body is markdown — so the published notes
         # had no headings at all. BugFixes is an identifier and gets a
-        # display name; the rest already read as titles.
-        label = (s == "BugFixes") ? "Bug Fixes" : s
+        # display name, Maintainability publishes as Maintenance (Chores
+        # included); the rest already read as titles.
+        label = (s == "BugFixes") ? "Bug Fixes" : (s == "Maintainability") ? "Maintenance" : s
         printf "## %s\n\n%s", label, body
         out = 1
       }

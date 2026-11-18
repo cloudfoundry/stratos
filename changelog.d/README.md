@@ -69,6 +69,10 @@ group by criterion:
 - Placeholder text in form fields now meets 4.5:1.
 ```
 
+**Maintainability** and **Chores** publish together as one **Maintenance**
+section, in the order the fragments landed; subcategories with the same
+name merge.
+
 ### Subcategories
 
 A header can name a subcategory after a colon. Bullets that share one are
