@@ -1,0 +1,17 @@
+{
+  "guid": "0095a066-bd90-4c36-8aaf-50207e25f7af",
+  "created_at": "2026-10-14T04:25:35Z",
+  "updated_at": "2026-10-14T04:26:38Z",
+  "operation": "service_instance.create",
+  "state": "COMPLETE",
+  "errors": [],
+  "warnings": [],
+  "links": {
+    "self": {
+      "href": "https://api.example.com/v3/jobs/0095a066-bd90-4c36-8aaf-50207e25f7af"
+    },
+    "service_instances": {
+      "href": "https://api.example.com/v3/service_instances/6e1a2814-b77a-4174-8993-0493279c88ff"
+    }
+  }
+}

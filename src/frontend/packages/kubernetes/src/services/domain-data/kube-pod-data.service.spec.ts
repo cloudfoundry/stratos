@@ -5,6 +5,7 @@ import { TestBed } from '@angular/core/testing';
 import { afterEach, beforeEach, describe, expect, it } from 'vitest';
 
 import { KubeEndpointDataRegistry } from '../endpoint-data/kube-endpoint-data.registry';
+import { KubeEndpointEviction } from '../endpoint-data/kube-endpoint-eviction';
 import { KubePodDataService } from './kube-pod-data.service';
 
 const KUBE_GUID = 'kube-1';
@@ -150,6 +151,37 @@ describe('KubePodDataService', () => {
     expect(errs[0].code).toBe('UNAUTHORIZED');
   });
 
+  it('keeps the newest 50 errors and drops the oldest', async () => {
+    for (let i = 0; i <= 50; i++) {
+      const refreshing = svc.refresh({ kubeGuid: `kube-${i}` });
+      httpMock.expectOne(CLUSTER_PODS_URL).flush('boom', { status: 500, statusText: 'Server Error' });
+      await refreshing;
+    }
+    const errs = svc.errors()();
+    expect(errs).toHaveLength(50);
+    expect(errs[0].affected?.[0]).toBe('kube-1');
+    expect(errs[49].affected?.[0]).toBe('kube-50');
+  });
+
+  // A failed scope's error goes once that scope loads; another scope's
+  // error on the same endpoint (e.g. a cluster-wide 403 under namespace-only
+  // RBAC) stays.
+  it('clears a scope error when that scope reloads successfully', async () => {
+    const cluster = svc.refresh({ kubeGuid: KUBE_GUID });
+    httpMock.expectOne(CLUSTER_PODS_URL).flush('forbidden', { status: 403, statusText: 'Forbidden' });
+    await cluster;
+    const failing = svc.refresh({ kubeGuid: KUBE_GUID, namespace: 'default' });
+    httpMock.expectOne(NS_PODS_URL('default')).flush('boom', { status: 500, statusText: 'Server Error' });
+    await failing;
+    expect(svc.errors()().map(e => e.title)).toEqual(['kube-pods-cluster', 'kube-pods-namespace']);
+
+    const ok = svc.refresh({ kubeGuid: KUBE_GUID, namespace: 'default' });
+    httpMock.expectOne(NS_PODS_URL('default')).flush({ [KUBE_GUID]: { items: [] } });
+    await ok;
+
+    expect(svc.errors()().map(e => e.title)).toEqual(['kube-pods-cluster']);
+  });
+
   it('dedupes concurrent reads on the same scope', async () => {
     // Two reads on the same cluster scope back-to-back should produce
     // exactly one HTTP request (the second is satisfied by shareReplay
@@ -201,5 +233,99 @@ describe('KubePodDataService', () => {
       await done;
       expect(svc.podsInWorkload('cnsi-1', 'ns-a', 'rel-x')().map(p => p.metadata.name)).toEqual(['p2']);
     });
+  });
+
+  // A response already on the wire when its endpoint departs carries the
+  // old credentials' data; it must not land after the eviction.
+  describe('eviction while a load is in flight', () => {
+    const OTHER = 'kube-2';
+    const pending = (guid: string) =>
+      httpMock.expectOne(r => r.url === CLUSTER_PODS_URL && r.headers.get('x-cap-cnsi-list') === guid);
+    const listOf = (guid: string) => ({ [guid]: { items: [{ metadata: { name: 'p' }, status: {} }] } });
+
+    it('drops the departed endpoint\'s late response and keeps the other\'s', () => {
+      const a = svc.podsInCluster(KUBE_GUID);
+      const b = svc.podsInCluster(OTHER);
+      const reqA = pending(KUBE_GUID);
+      const reqB = pending(OTHER);
+
+      TestBed.inject(KubeEndpointEviction).evict(KUBE_GUID);
+      reqA.flush(listOf(KUBE_GUID));
+      reqB.flush(listOf(OTHER));
+
+      expect(a()).toEqual([]);
+      expect(b()).toHaveLength(1);
+    });
+
+    it('drops the departed endpoint\'s late failure', () => {
+      svc.podsInCluster(KUBE_GUID);
+      const reqA = pending(KUBE_GUID);
+
+      TestBed.inject(KubeEndpointEviction).evict(KUBE_GUID);
+      reqA.flush('nope', { status: 403, statusText: 'Forbidden' });
+
+      expect(svc.errors()()).toEqual([]);
+    });
+
+    it('a late completion leaves the newer load\'s dedupe entry in place', () => {
+      svc.podsInCluster(KUBE_GUID);
+      const old = pending(KUBE_GUID);
+      TestBed.inject(KubeEndpointEviction).evict(KUBE_GUID);
+      svc.podsInCluster(KUBE_GUID);
+      const fresh = pending(KUBE_GUID);
+
+      old.flush(listOf(KUBE_GUID));
+      // Still in flight: this read must join the fresh request.
+      svc.podsInCluster(KUBE_GUID);
+      const extra = httpMock.match(r => r.url === CLUSTER_PODS_URL);
+      extra.forEach(r => r.flush(listOf(KUBE_GUID)));
+      fresh.flush(listOf(KUBE_GUID));
+
+      expect(extra).toHaveLength(0);
+    });
+
+    // A page still open after the disconnect re-reads when the eviction
+    // empties its scope; that read must not bring the registry entry back.
+    it('a read for a departed endpoint does not re-create its registry entry', () => {
+      const registry = TestBed.inject(KubeEndpointDataRegistry);
+      registry.getService(KUBE_GUID);
+      registry.unregister(KUBE_GUID);
+      TestBed.inject(KubeEndpointEviction).evict(KUBE_GUID);
+
+      svc.podsInCluster(KUBE_GUID);
+      pending(KUBE_GUID).flush(listOf(KUBE_GUID));
+
+      expect(registry.getSnapshot().instances.map(i => i.kubeGuid)).toEqual([]);
+    });
+  });
+
+  // The proxy answers 200 with a per-endpoint error entry for a failed call.
+  it('records a per-endpoint proxy error with its reason instead of an empty list', async () => {
+    const refreshing = svc.refresh({ kubeGuid: KUBE_GUID });
+    httpMock.expectOne(CLUSTER_PODS_URL).flush({ [KUBE_GUID]: { error: { statusCode: 500, status: 'Error proxying request' }, errorResponse: 'dial tcp: i/o timeout' } });
+    await refreshing;
+
+    expect(svc.podsInCluster(KUBE_GUID)()).toEqual([]);
+    expect(svc.errors()()).toEqual([expect.objectContaining({
+      code: 'FETCH_ERROR',
+      detail: 'Error proxying request: dial tcp: i/o timeout',
+    })]);
+  });
+
+  it('rejects a pod delete the endpoint refused', async () => {
+    const deleting = svc.delete(KUBE_GUID, 'p1', 'ns');
+    httpMock.expectOne('/pp/v1/proxy/api/v1/namespaces/ns/pods/p1').flush({ [KUBE_GUID]: { error: { statusCode: 403, status: '403 Forbidden' }, errorResponse: { kind: 'Status', message: 'denied' } } });
+    await expect(deleting).rejects.toThrow('403 Forbidden: denied');
+  });
+
+  it('scopeErrors keeps a cluster-wide failure off the node and namespace scopes', async () => {
+    const refreshing = svc.refresh({ kubeGuid: KUBE_GUID });
+    httpMock.expectOne(CLUSTER_PODS_URL).flush({ [KUBE_GUID]: { error: { statusCode: 500, status: 'Error proxying request' } } });
+    await refreshing;
+
+    expect(svc.scopeErrors({ kubeGuid: KUBE_GUID })).toHaveLength(1);
+    expect(svc.scopeErrors({ kubeGuid: KUBE_GUID, nodeName: 'node-1' })).toEqual([]);
+    expect(svc.scopeErrors({ kubeGuid: KUBE_GUID, namespace: 'ns' })).toEqual([]);
+    expect(svc.scopeErrors({ kubeGuid: 'other' })).toEqual([]);
   });
 });

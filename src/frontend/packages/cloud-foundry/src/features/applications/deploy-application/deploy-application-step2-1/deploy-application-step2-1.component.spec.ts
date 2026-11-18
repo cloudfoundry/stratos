@@ -1,6 +1,6 @@
 import { describe, it, expect, beforeEach, vi } from 'vitest';
 import { ComponentFixture, TestBed } from '@angular/core/testing';
-import { provideZonelessChangeDetection } from '@angular/core';
+import { provideZonelessChangeDetection, signal, WritableSignal } from '@angular/core';
 
 import { GitCommit } from '@stratosui/git';
 import { CfDeployAppDataService } from '../../../../services/domain-data/cf-deploy-app-data.service';
@@ -47,21 +47,35 @@ describe('DeployApplicationStep21Component', () => {
       expect(DeployApplicationStep21Component.isStepValid(false, null)).toBe(false);
     });
 
-    it('onNext pins the selected commit SHA when not deploying latest HEAD', () => {
-      (component as unknown as { selectedCommitSubject: { next(c: GitCommit): void } }).selectedCommitSubject.next(commit);
-      // strict: onNext's impl is a zero-arg arrow that ignores the stepper's
-      // (index, step) contract args; call it via its real runtime shape.
-      (component.onNext as () => unknown)();
+    // Stands in for the commit list wrapper the step enters with
+    const enterWith = (selected: GitCommit | null, latestHead: boolean) => {
+      const wrapper = { selectedCommit: signal(selected), useLatestHead: signal(latestHead) };
+      (component as unknown as { wrapper: WritableSignal<unknown> }).wrapper.set(wrapper);
+      return wrapper;
+    };
+
+    it('onNext pins the selected commit SHA when not deploying latest HEAD', async () => {
+      enterWith(commit, false);
+      await component.onNext();
       expect(deployData.setDeployCommit).toHaveBeenCalledWith('abc123def456');
     });
 
-    it('onNext sends an empty commit (deploy latest HEAD) when that option is chosen', () => {
+    it('onNext sends an empty commit (deploy latest HEAD) when that option is chosen', async () => {
       // Even with a commit still selected underneath, latest-HEAD wins and unpins.
-      (component as unknown as { selectedCommitSubject: { next(c: GitCommit): void } }).selectedCommitSubject.next(commit);
-      (component as unknown as { useLatestHeadSubject: { next(v: boolean): void } }).useLatestHeadSubject.next(true);
-      // strict: see above — onNext ignores the (index, step) contract args.
-      (component.onNext as () => unknown)();
+      enterWith(commit, true);
+      await component.onNext();
       expect(deployData.setDeployCommit).toHaveBeenCalledWith('');
+    });
+
+    it('validate follows the wrapper\'s selection', () => {
+      expect(component.validate()).toBe(false);
+      const wrapper = enterWith(null, false);
+      expect(component.validate()).toBe(false);
+      wrapper.selectedCommit.set(commit);
+      expect(component.validate()).toBe(true);
+      wrapper.selectedCommit.set(null);
+      wrapper.useLatestHead.set(true);
+      expect(component.validate()).toBe(true);
     });
   });
 });

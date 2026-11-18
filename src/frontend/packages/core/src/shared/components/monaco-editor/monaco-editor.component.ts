@@ -1,15 +1,17 @@
-import { ChangeDetectionStrategy, AfterViewInit,
+import {
+  ChangeDetectionStrategy, AfterViewInit,
   Component,
+  computed,
   effect,
   ElementRef,
-  EventEmitter,
   forwardRef,
   inject,
-  Input,
   OnDestroy,
-  Output,
-  ViewChild,
- } from '@angular/core';
+  input,
+  output,
+  signal,
+  viewChild
+} from '@angular/core';
 import { ControlValueAccessor, NG_VALUE_ACCESSOR } from '@angular/forms';
 
 import { StratosBrandingService } from '../../../../../theme/stratos-branding.service';
@@ -33,10 +35,46 @@ export interface MonacoEditorOptions {
   [key: string]: any;
 }
 
+type MonacoApi = Awaited<ReturnType<typeof loadMonacoEditor>>;
+
+// "Tab moves focus", page-wide like Monaco's own toggle, which it replaces:
+// Monaco keeps that state where no editor API can read it, so a hint could
+// not follow it. Monaco's key is Ctrl+M, or Ctrl+Shift+M on macOS; Ctrl+M is
+// Enter in a terminal, so Ctrl+Shift+M is the key everywhere, the SSH
+// terminal's too.
+const tabMovesFocus = signal(false);
+let monacoApi: MonacoApi | undefined;
+let nextHintId = 0;
+
+export function toggleTabMovesFocus(): void {
+  tabMovesFocus.update(v => !v);
+  monacoApi?.editor.getEditors().forEach(e => e.updateOptions({ tabFocusMode: tabMovesFocus() }));
+}
+
+function addTabFocusKey(monaco: MonacoApi): void {
+  if (monacoApi) {
+    return;
+  }
+  monacoApi = monaco;
+  const { KeyMod, KeyCode } = monaco;
+  const mac = /Mac|iP(hone|ad|od)/.test(navigator.platform);
+  monaco.editor.registerCommand('stratos.toggleTabMovesFocus', toggleTabMovesFocus);
+  monaco.editor.addKeybindingRules([
+    {
+      keybinding: mac ? KeyMod.WinCtrl | KeyMod.Shift | KeyCode.KeyM : KeyMod.CtrlCmd | KeyCode.KeyM,
+      command: '-editor.action.toggleTabFocusMode',
+    },
+    {
+      keybinding: (mac ? KeyMod.WinCtrl : KeyMod.CtrlCmd) | KeyMod.Shift | KeyCode.KeyM,
+      command: 'stratos.toggleTabMovesFocus',
+    },
+  ]);
+}
+
 @Component({
   selector: 'app-monaco-editor',
   templateUrl: './monaco-editor.component.html',
-  host: { class: 'block w-full h-full' },
+  host: { class: 'relative block w-full h-full' },
   standalone: true,
   changeDetection: ChangeDetectionStrategy.OnPush,
   providers: [
@@ -48,18 +86,26 @@ export interface MonacoEditorOptions {
   ]
 })
 export class MonacoEditorComponent implements AfterViewInit, OnDestroy, ControlValueAccessor {
-  @ViewChild('editorContainer', { static: true }) editorContainer!: ElementRef<HTMLDivElement>;
+  readonly editorContainer = viewChild.required<ElementRef<HTMLDivElement>>('editorContainer');
 
-  @Input() options: MonacoEditorOptions = {};
-  @Input() model?: MonacoEditorModel;
-  @Output() editorInit = new EventEmitter<MonacoEditorComponent>();
+  readonly options = input<MonacoEditorOptions>({});
+  readonly model = input<MonacoEditorModel>();
+  readonly editorInit = output<MonacoEditorComponent>();
   // Fires for every content change, including ones no ngModel is bound to —
   // consumers without a CVA binding have no other change signal.
-  @Output() valueChange = new EventEmitter<string>();
+  readonly valueChange = output<string>();
+
+  // Tab indents. The hint names the key that makes Tab leave the editor
+  // (WCAG 2.1.2); it is the editor's description and shows while focused.
+  readonly hintId = `monaco-tab-hint-${nextHintId++}`;
+  readonly focused = signal(false);
+  readonly tabHint = computed(() => tabMovesFocus()
+    ? 'Tab moves focus. Press Ctrl+Shift+M so Tab indents.'
+    : 'Tab indents. Press Ctrl+Shift+M so Tab moves focus.');
 
   private branding = inject(StratosBrandingService);
   private editor: import('monaco-editor').editor.IStandaloneCodeEditor | undefined;
-  private monaco: Awaited<ReturnType<typeof loadMonacoEditor>> | undefined;
+  private monaco: MonacoApi | undefined;
 
   constructor() {
     // Monaco's theme is process-global (monaco.editor.setTheme), so one
@@ -67,7 +113,7 @@ export class MonacoEditorComponent implements AfterViewInit, OnDestroy, ControlV
     // Callers that pin options.theme opt out of the sync.
     effect(() => {
       const dark = this.branding.isDarkMode();
-      if (!this.editor || this.options.theme || !this.monaco) {
+      if (!this.editor || this.options().theme || !this.monaco) {
         return;
       }
       this.monaco.editor.setTheme(dark ? 'vs-dark' : 'vs');
@@ -109,26 +155,28 @@ export class MonacoEditorComponent implements AfterViewInit, OnDestroy, ControlV
     // Merge default options with provided options
     const editorOptions = {
       value: this.value,
-      language: this.model?.language || 'plaintext',
-      theme: this.options.theme || (this.branding.isDarkMode() ? 'vs-dark' : 'vs'),
+      language: this.model()?.language || 'plaintext',
+      theme: this.options().theme || (this.branding.isDarkMode() ? 'vs-dark' : 'vs'),
       automaticLayout: false,
       readOnly: this.disabled,
-      ...this.options,
+      tabFocusMode: tabMovesFocus(),
+      ...this.options(),
     };
 
     // Create the editor
-    const editor = monaco.editor.create(this.editorContainer.nativeElement, editorOptions);
+    const editor = monaco.editor.create(this.editorContainer().nativeElement, editorOptions);
     this.editor = editor;
 
     // Set model if uri is provided
-    if (this.model?.uri) {
-      const uri = monaco.Uri.parse(this.model.uri);
+    const modelValue = this.model();
+    if (modelValue?.uri) {
+      const uri = monaco.Uri.parse(modelValue.uri);
       let model = monaco.editor.getModel(uri);
 
       if (!model) {
         model = monaco.editor.createModel(
           this.value,
-          this.model.language || 'plaintext',
+          modelValue.language || 'plaintext',
           uri
         );
       }
@@ -148,11 +196,17 @@ export class MonacoEditorComponent implements AfterViewInit, OnDestroy, ControlV
 
     // Listen for blur events
     editor.onDidBlurEditorText(() => {
+      this.focused.set(false);
       this.onTouched();
     });
+    editor.onDidFocusEditorText(() => this.focused.set(true));
+
+    addTabFocusKey(monaco);
+    this.editorContainer().nativeElement.querySelector('[role="textbox"], textarea')
+      ?.setAttribute('aria-describedby', this.hintId);
 
     // Setup resize observer if automaticLayout is false
-    if (this.options.automaticLayout === false) {
+    if (this.options().automaticLayout === false) {
       this.setupResizeObserver();
     }
 
@@ -168,7 +222,7 @@ export class MonacoEditorComponent implements AfterViewInit, OnDestroy, ControlV
         }
       });
 
-      this.resizeObserver.observe(this.editorContainer.nativeElement);
+      this.resizeObserver.observe(this.editorContainer().nativeElement);
     }
   }
 

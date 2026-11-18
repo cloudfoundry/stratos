@@ -1,6 +1,6 @@
 @if (!isWebLink) {
-  <span>{{ buildPack || '-' }}</span>
+  <span>{{ buildPack() || '-' }}</span>
 }
 @if (isWebLink) {
-  <a target="buildPack" href="{{ buildPack }}" rel="noopener noreferrer">{{ buildPack }}</a>
+  <a target="buildPack" href="{{ buildPack() }}" rel="noopener noreferrer">{{ buildPack() }}</a>
 }

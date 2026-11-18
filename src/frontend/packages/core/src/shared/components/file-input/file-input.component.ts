@@ -1,5 +1,5 @@
 import { CommonModule } from '@angular/common';
-import { ChangeDetectionStrategy, Component, ElementRef, EventEmitter, Input, OnDestroy, OnInit, Output, ViewChild, inject, signal } from '@angular/core';
+import { ChangeDetectionStrategy, Component, ElementRef, OnDestroy, OnInit, inject, signal, input, output, viewChild } from '@angular/core';
 import { ControlContainer, FormGroupName } from '@angular/forms';
 import { Subscription } from 'rxjs';
 
@@ -19,16 +19,20 @@ export class FileInputComponent implements OnInit, OnDestroy {
   private parent = inject(ControlContainer, { optional: true, host: true, skipSelf: true });
 
 
-  @ViewChild('inputFile', { static: true }) nativeInputFile!: ElementRef;
+  readonly nativeInputFile = viewChild.required<ElementRef>('inputFile');
 
-  @Input() accept!: string;
-  @Input() placeholder = '';
-  @Output() fileSelect: EventEmitter<File> = new EventEmitter();
-  @Output() fileData: EventEmitter<string> = new EventEmitter();
+  readonly accept = input<string>();
+  readonly placeholder = input('');
+  readonly fileSelect = output<File>();
+  readonly fileData = output<string>();
 
-  @Input() fileFormControlName!: string;
+  readonly fileFormControlName = input<string>();
 
-  @Input() buttonLabel = '';
+  readonly buttonLabel = input('');
+
+  // Id of a caption the consumer shows for the picker. When set, it names
+  // the path field instead of the placeholder.
+  readonly labelledBy = input('');
 
   private files!: File[];
 
@@ -75,7 +79,7 @@ export class FileInputComponent implements OnInit, OnDestroy {
   }
 
   selectFile($event: Event) {
-    this.nativeInputFile.nativeElement.click();
+    this.nativeInputFile().nativeElement.click();
     $event.preventDefault();
     return false;
   }
@@ -84,19 +88,15 @@ export class FileInputComponent implements OnInit, OnDestroy {
     $event.preventDefault();
     this.files = [];
     this.name = '';
-    this.nativeInputFile.nativeElement.value = '';
-    if (this.formGroupControl) {
-      this.formGroupControl.control.controls[this.fileFormControlName].setValue('');
-    }
+    this.nativeInputFile().nativeElement.value = '';
+    this.fileControl()?.setValue('');
     this.fileData.emit('');
   }
 
   onPathInput($event: Event) {
     const input = $event.target as HTMLInputElement;
     this.name = input.value;
-    if (this.formGroupControl) {
-      this.formGroupControl.control.controls[this.fileFormControlName].setValue(input.value);
-    }
+    this.fileControl()?.setValue(input.value);
     this.fileData.emit(input.value);
   }
 
@@ -113,6 +113,13 @@ export class FileInputComponent implements OnInit, OnDestroy {
   }
 
   private updateFileState(value: string | ArrayBuffer | null) {
-    this.formGroupControl.control.controls[this.fileFormControlName].setValue(value);
+    this.fileControl()?.setValue(value);
+  }
+
+  // The control this input writes: set only inside a FormGroupName and
+  // with fileFormControlName bound.
+  private fileControl() {
+    const name = this.fileFormControlName();
+    return this.formGroupControl && name ? this.formGroupControl.control.controls[name] : undefined;
   }
 }

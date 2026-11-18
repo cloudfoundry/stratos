@@ -1,6 +1,8 @@
 package main
 
 import (
+	"slices"
+	"strings"
 	"testing"
 
 	"github.com/cloudfoundry/stratos/src/jetstream/api"
@@ -62,18 +64,17 @@ func TestLoadPortalConfig(t *testing.T) {
 	var pc api.PortalConfig
 
 	result, err := loadPortalConfig(pc, env.NewVarSet(env.WithMapLookup(map[string]string{
-		"HTTP_CLIENT_TIMEOUT_IN_SECS":             "10",
-		"HTTP_CLIENT_TIMEOUT_MUTATING_IN_SECS":    "35",
-		"HTTP_CLIENT_TIMEOUT_LONGRUNNING_IN_SECS": "123",
-		"SKIP_SSL_VALIDATION":                     "true",
-		"CONSOLE_PROXY_TLS_ADDRESS":               ":8080",
-		"CONSOLE_CLIENT":                          "portal-proxy",
-		"CONSOLE_CLIENT_SECRET":                   "ohsosecret!",
-		"CF_CLIENT":                               "portal-proxy",
-		"CF_CLIENT_SECRET":                        "ohsosecret!",
-		"UAA_ENDPOINT":                            "https://login.cf.org.com:443",
-		"ALLOWED_ORIGINS":                         "https://localhost,https://127.0.0.1",
-		"SESSION_STORE_SECRET":                    "cookiesecret",
+		"HTTP_CLIENT_TIMEOUT_IN_SECS":          "10",
+		"HTTP_CLIENT_TIMEOUT_MUTATING_IN_SECS": "35",
+		"SKIP_SSL_VALIDATION":                  "true",
+		"CONSOLE_PROXY_TLS_ADDRESS":            ":8080",
+		"CONSOLE_CLIENT":                       "portal-proxy",
+		"CONSOLE_CLIENT_SECRET":                "ohsosecret!",
+		"CF_CLIENT":                            "portal-proxy",
+		"CF_CLIENT_SECRET":                     "ohsosecret!",
+		"UAA_ENDPOINT":                         "https://login.cf.org.com:443",
+		"ALLOWED_ORIGINS":                      "https://localhost,https://127.0.0.1",
+		"SESSION_STORE_SECRET":                 "cookiesecret",
 	})))
 
 	if err != nil {
@@ -274,5 +275,140 @@ func TestLoadPortalConfigCustomHSTS(t *testing.T) {
 	}
 	if result.HSTSPolicy != custom {
 		t.Errorf("Expected the custom HSTS policy verbatim, got %q", result.HSTSPolicy)
+	}
+}
+
+// CONSOLE_CSP_GIT_HOSTS adds the deploy wizard's Git hosts to the built-in
+// policy: connect-src so the browser may call them, img-src so their avatars
+// show. Nothing else in the policy moves.
+func TestLoadPortalConfigCSPGitHosts(t *testing.T) {
+	var pc api.PortalConfig
+	result, err := loadPortalConfig(pc, env.NewVarSet(env.WithMapLookup(map[string]string{
+		"CONSOLE_CSP_GIT_HOSTS": "https://api.github.com, https://git.example.com:8443/",
+	})))
+	if err != nil {
+		t.Fatalf("Unable to load portal config: %v", err)
+	}
+	for _, directive := range []string{"connect-src", "img-src"} {
+		sources := directiveSources(t, result.CSPPolicy, directive)
+		for _, host := range []string{"https://api.github.com", "https://git.example.com:8443"} {
+			if !slices.Contains(sources, host) {
+				t.Errorf("%s must allow %s: %v", directive, host, sources)
+			}
+		}
+	}
+	for _, directive := range strings.Split(policyWithReporting(defaultCSPPolicy), "; ") {
+		if strings.HasPrefix(directive, "connect-src ") || strings.HasPrefix(directive, "img-src ") {
+			continue
+		}
+		if !strings.Contains(result.CSPPolicy, directive) {
+			t.Errorf("only connect-src and img-src may change, lost %q: %q", directive, result.CSPPolicy)
+		}
+	}
+}
+
+// A custom CONSOLE_CSP is used verbatim, so the setting cannot apply to it.
+func TestLoadPortalConfigCSPGitHostsIgnoredWithCustomPolicy(t *testing.T) {
+	var pc api.PortalConfig
+	const custom = "default-src 'self'"
+	result, err := loadPortalConfig(pc, env.NewVarSet(env.WithMapLookup(map[string]string{
+		"CONSOLE_CSP":           custom,
+		"CONSOLE_CSP_GIT_HOSTS": "https://api.github.com",
+	})))
+	if err != nil {
+		t.Fatalf("Unable to load portal config: %v", err)
+	}
+	if result.CSPPolicy != policyWithReporting(custom) {
+		t.Errorf("a custom policy must stay as given, got %q", result.CSPPolicy)
+	}
+}
+
+// Each entry is written into the policy header, so anything but a bare https
+// origin is refused rather than spliced in: a ';' would start a directive of
+// its own.
+func TestLoadPortalConfigCSPGitHostsRefusesNonOrigins(t *testing.T) {
+	var pc api.PortalConfig
+	for _, val := range []string{
+		"http://git.example.com",
+		"git.example.com",
+		"https://",
+		"https://git.example.com/api/v4",
+		"https://git.example.com; script-src *",
+		"https://'unsafe-inline'",
+		"https://git example.com",
+		"https://user@git.example.com",
+		"https://git.example.com?x=1",
+		"*",
+	} {
+		_, err := loadPortalConfig(pc, env.NewVarSet(env.WithMapLookup(map[string]string{
+			"CONSOLE_CSP_GIT_HOSTS": val,
+		})))
+		if err == nil || !strings.Contains(err.Error(), "CONSOLE_CSP_GIT_HOSTS") {
+			t.Errorf("CONSOLE_CSP_GIT_HOSTS=%q must be refused with an error naming the setting, got %v", val, err)
+		}
+	}
+}
+
+// gitlab.com is already a built-in avatar host, and listing it for the wizard
+// must not name it twice in img-src.
+func TestLoadPortalConfigCSPGitHostsNamesEachSourceOnce(t *testing.T) {
+	var pc api.PortalConfig
+	result, err := loadPortalConfig(pc, env.NewVarSet(env.WithMapLookup(map[string]string{
+		"CONSOLE_CSP_GIT_HOSTS": "https://api.github.com,https://gitlab.com,https://gitlab.com",
+	})))
+	if err != nil {
+		t.Fatalf("Unable to load portal config: %v", err)
+	}
+	for _, directive := range []string{"connect-src", "img-src"} {
+		sources := directiveSources(t, result.CSPPolicy, directive)
+		seen := map[string]bool{}
+		for _, source := range sources {
+			if seen[source] {
+				t.Errorf("%s names %s twice: %v", directive, source, sources)
+			}
+			seen[source] = true
+		}
+	}
+}
+
+// ASYNC_JOB_TRACKING_LIMIT_IN_MINS is applied once, at load: unset is the
+// default, and an explicit 0 is under a minute like any other, so 1.
+func TestLoadPortalConfigJobTrackingLimit(t *testing.T) {
+	var pc api.PortalConfig
+	for _, c := range []struct {
+		value string
+		set   bool
+		want  int
+	}{
+		{"", false, 60},
+		{"0", true, 1},
+		{"-5", true, 1},
+		{"90", true, 90},
+		{"5000", true, 360},
+	} {
+		vars := map[string]string{}
+		if c.set {
+			vars["ASYNC_JOB_TRACKING_LIMIT_IN_MINS"] = c.value
+		}
+		result, err := loadPortalConfig(pc, env.NewVarSet(env.WithMapLookup(vars)))
+		if err != nil {
+			t.Fatalf("loadPortalConfig(%q): %v", c.value, err)
+		}
+		if result.AsyncJobTrackingLimitMins != c.want {
+			t.Errorf("ASYNC_JOB_TRACKING_LIMIT_IN_MINS=%q (set %v): got %d, want %d",
+				c.value, c.set, result.AsyncJobTrackingLimitMins, c.want)
+		}
+	}
+}
+
+// A value that does not parse stops startup, as for any setting, and the
+// error names the setting so the operator knows which one to fix.
+func TestLoadPortalConfigNamesABadSetting(t *testing.T) {
+	var pc api.PortalConfig
+	_, err := loadPortalConfig(pc, env.NewVarSet(env.WithMapLookup(map[string]string{
+		"ASYNC_JOB_TRACKING_LIMIT_IN_MINS": "ten",
+	})))
+	if err == nil || !strings.Contains(err.Error(), "ASYNC_JOB_TRACKING_LIMIT_IN_MINS") {
+		t.Fatalf("expected an error naming ASYNC_JOB_TRACKING_LIMIT_IN_MINS, got %v", err)
 	}
 }

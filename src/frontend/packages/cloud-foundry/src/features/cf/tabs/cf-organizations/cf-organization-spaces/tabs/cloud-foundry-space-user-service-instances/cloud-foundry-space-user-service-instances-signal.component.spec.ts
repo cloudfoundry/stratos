@@ -3,7 +3,6 @@ import { importProvidersFrom, provideZonelessChangeDetection, signal } from '@an
 import { provideHttpClient } from '@angular/common/http';
 import { provideHttpClientTesting } from '@angular/common/http/testing';
 import { provideRouter, Router } from '@angular/router';
-import { of } from 'rxjs';
 import { describe, it, expect, beforeEach, vi } from 'vitest';
 
 import { CurrentUserPermissionsService, TabNavService } from '@stratosui/core';
@@ -38,6 +37,7 @@ function makeStubSignalConfigService() {
     hasLoadedOnce: signal(true).asReadonly(),
     initialize: vi.fn(),
     loadAll: vi.fn().mockResolvedValue(undefined),
+    startProgressPolling: vi.fn(),
     refresh: vi.fn().mockResolvedValue(undefined),
     registerSortExtractor: vi.fn(),
     registerFilterExtractor: vi.fn(),
@@ -77,7 +77,7 @@ describe('CloudFoundrySpaceUserServiceInstancesSignalComponent', () => {
         importProvidersFrom(generateCfBaseTestModulesNoShared()),
         TabNavService,
         { provide: CfServiceInstancesSignalConfigService, useValue: stubSignalConfig },
-        { provide: CurrentUserPermissionsService, useValue: { can: () => of(true) } },
+        { provide: CurrentUserPermissionsService, useValue: { can: () => signal(true) } },
         { provide: CloudFoundryEndpointService, useValue: { cfGuid: 'cnsi-1' } },
         { provide: CloudFoundryOrganizationService, useValue: { orgGuid: 'org-1', cfGuid: 'cnsi-1' } },
         { provide: CloudFoundrySpaceService, useValue: { spaceGuid: 'space-1', orgGuid: 'org-1', cfGuid: 'cnsi-1' } },
@@ -107,6 +107,18 @@ describe('CloudFoundrySpaceUserServiceInstancesSignalComponent', () => {
       cnsiGuid: 'cnsi-1', guid: 'si-2', name: 'legacy-db', type: 'user-provided',
       tags: [], createdAt: '',
     } as any)).toBe('cnsi-1:si-2');
+  });
+
+  // The pill names the operation, gives a failure's reason on hover and
+  // survives an instance with no last operation (the backend omits it).
+  it('Last Operation names the operation and hovers with a failure reason', () => {
+    const col = component.listConfig()!.columns.find(c => c.key === 'lastOp')!;
+    const si: any = { lastOperation: { type: 'update', state: 'failed', description: '<b>quota</b> exceeded' } };
+    expect(col.render(si)).toBe('Update failed');
+    expect(col.tooltip!(si)).toBe('Update failed — quota exceeded');
+    expect(col.render({} as any)).toBe('');
+    const sortBy = stubSignalConfig.registerSortExtractor.mock.calls.find((c: unknown[]) => c[0] === 'lastOp')![1];
+    expect(sortBy(si)).toBe('Update failed');
   });
 
   it('Name column links to the /services/user-service/:cnsi/:siGuid detail page', () => {
@@ -144,5 +156,13 @@ describe('CloudFoundrySpaceUserServiceInstancesSignalComponent', () => {
     expect(cfg!.columns.find(c => c.key === 'type')).toBeUndefined();
     expect(cfg!.columns.find(c => c.key === 'cf')).toBeUndefined();
     expect(cfg!.columns.find(c => c.key === 'service')).toBeUndefined();
+  });
+  // The progress poll must end with this page, not run on in the root config.
+  it('polls operations in progress only while this page is open', async () => {
+    const host = stubSignalConfig.startProgressPolling.mock.calls.at(-1)?.[0] as { destroyed: boolean } | undefined;
+    expect(host?.destroyed).toBe(false);
+
+    fixture.destroy();
+    expect(host?.destroyed).toBe(true);
   });
 });

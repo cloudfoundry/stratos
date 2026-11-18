@@ -1,8 +1,6 @@
 import { CommonModule } from '@angular/common';
-import { Component, ChangeDetectionStrategy, OnInit, Signal, WritableSignal, inject, signal } from '@angular/core';
-import { toSignal } from '@angular/core/rxjs-interop';
+import { DestroyRef, Component, ChangeDetectionStrategy, OnInit, Signal, WritableSignal, inject, signal, computed } from '@angular/core';
 import { Router, RouterModule } from '@angular/router';
-import { map } from 'rxjs/operators';
 
 import {
   ConfirmationDialogService,
@@ -28,6 +26,7 @@ import {
 import { CfCurrentUserPermissions } from '../../../../user-permissions/cf-user-permissions-checkers';
 import { CloudFoundryEndpointService } from '../../services/cloud-foundry-endpoint.service';
 import { buildServiceInstanceRowActions } from '../../../../shared/signal-list-configs/service-instance/service-instance-row-actions';
+import { lastOperationColumn, lastOperationLabel } from '../../../../shared/signal-list-configs/service-instance/service-instance-columns';
 import { renderServiceKeyCount, serviceKeysLink, serviceKeysLinkQueryParams } from '../../../../shared/signal-list-configs/service-keys-count-cell';
 import { dashboardLink, renderDashboard } from '../../../../shared/signal-list-configs/dashboard-link-cell';
 import type { StServiceInstance } from '../../../../services/endpoint-data/stratos-types';
@@ -51,6 +50,7 @@ import type { StServiceInstance } from '../../../../services/endpoint-data/strat
 export class CloudFoundryServicesSignalComponent implements OnInit {
   cfEndpointService = inject(CloudFoundryEndpointService);
   private instancesConfig = inject(CfServiceInstancesSignalConfigService);
+  private readonly destroyRef = inject(DestroyRef);
   private userFavoriteManager = inject(UserFavoriteManager);
   private confirmDialog = inject(ConfirmationDialogService);
   private snackBar = inject(TailwindSnackBarService);
@@ -59,11 +59,10 @@ export class CloudFoundryServicesSignalComponent implements OnInit {
 
   /** Total service-instance count for the L5 sub-nav. */
   public totalServiceInstances!: Signal<number>;
-  /** Reactive permission flag for the Add Service Instance button. Built
-   *  in the constructor (injection context) so toSignal() resolves. */
-  public readonly canCreateServiceInstance: Signal<boolean> = toSignal(
-    this.permissionsService.can(CfCurrentUserPermissions.SERVICE_INSTANCE_CREATE, this.cfEndpointService.cfGuid),
-    { initialValue: false },
+  /** Reactive permission flag for the Add Service Instance button. */
+  public readonly canCreateServiceInstance: Signal<boolean> = this.permissionsService.can(
+    CfCurrentUserPermissions.SERVICE_INSTANCE_CREATE,
+    this.cfEndpointService.cfGuid,
   );
   /** L5 primary action — navigates to the add-service-instance wizard's
    *  type selector (Managed Service vs User Provided). Forwards the cnsi
@@ -76,27 +75,8 @@ export class CloudFoundryServicesSignalComponent implements OnInit {
       { queryParams: { 'auto-select-endpoint': this.cfEndpointService.cfGuid } }),
   };
 
-  private readonly favoriteInstanceRowKeys: Signal<ReadonlySet<string>> = toSignal(
-    this.userFavoriteManager.getAllFavorites().pipe(
-      map(([groups, entities]) => {
-        const out = new Set<string>();
-        if (!groups || !entities) return out;
-        for (const epFavGuid in groups) {
-          const g = groups[epFavGuid];
-          if (!g?.entitiesIds) continue;
-          for (const favId of g.entitiesIds) {
-            const fav = entities[favId];
-            if (!fav || fav.endpointType !== 'cf') continue;
-            if (fav.entityType === serviceInstancesEntityType
-              || fav.entityType === userProvidedServiceInstanceEntityType) {
-              out.add(`${fav.endpointId}:${fav.entityId}`);
-            }
-          }
-        }
-        return out;
-      }),
-    ),
-    { initialValue: new Set<string>() },
+  private readonly favoriteInstanceRowKeys: Signal<ReadonlySet<string>> = computed(() =>
+    this.userFavoriteManager.entityFavoriteKeys('cf', [serviceInstancesEntityType, userProvidedServiceInstanceEntityType]),
   );
 
   private toggleInstanceFavorite(si: StServiceInstance): void {
@@ -149,17 +129,6 @@ export class CloudFoundryServicesSignalComponent implements OnInit {
     const typeColor = (si: StServiceInstance): SignalListPillColor =>
       si.type === 'user-provided' ? 'warning' : 'neutral';
 
-    const renderLastOp = (si: StServiceInstance): string =>
-      si.lastOperation.state ?? '';
-
-    const lastOpColor = (si: StServiceInstance): SignalListPillColor => {
-      const state = (si.lastOperation.state ?? '').toLowerCase();
-      if (state === 'succeeded') return 'success';
-      if (state === 'in progress') return 'warning';
-      if (state === 'failed') return 'danger';
-      return 'neutral';
-    };
-
     const renderCreated = (si: StServiceInstance): string =>
       CloudFoundryServicesSignalComponent.formatDate(si.createdAt);
 
@@ -192,13 +161,7 @@ export class CloudFoundryServicesSignalComponent implements OnInit {
           render: renderService,
           widthHint: '12rem',
         },
-        {
-          header: 'Last Operation', key: 'lastOp', sortField: renderLastOp,
-          kind: 'pill',
-          pillColor: lastOpColor,
-          render: renderLastOp,
-          widthHint: '10rem',
-        },
+        lastOperationColumn(),
         {
           header: 'Dashboard', key: 'dashboard', kind: 'link',
           render: renderDashboard,
@@ -270,7 +233,7 @@ export class CloudFoundryServicesSignalComponent implements OnInit {
     });
 
     this.instancesConfig.registerSortExtractor('service', renderService);
-    this.instancesConfig.registerSortExtractor('lastOp', renderLastOp);
+    this.instancesConfig.registerSortExtractor('lastOp', lastOperationLabel);
     this.instancesConfig.registerSortExtractor('tags', renderTags);
     this.instancesConfig.registerSortExtractor('type', renderType);
     this.instancesConfig.registerFilterExtractor('name', (si: StServiceInstance) => si.name ?? '');
@@ -278,6 +241,7 @@ export class CloudFoundryServicesSignalComponent implements OnInit {
     this.instancesConfig.registerFilterExtractor('tags', renderTags);
 
     void this.instancesConfig.loadAll().then(() => this.instancesConfig.ensureServiceKeyCounts());
+    this.instancesConfig.startProgressPolling(this.destroyRef);
   }
 
   private buildInstanceActions = (si: StServiceInstance): readonly SignalListRowAction<StServiceInstance>[] =>

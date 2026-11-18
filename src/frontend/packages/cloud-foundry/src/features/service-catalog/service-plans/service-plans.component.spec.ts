@@ -1,15 +1,16 @@
-import { provideZonelessChangeDetection } from '@angular/core';
+import { provideZonelessChangeDetection, signal } from '@angular/core';
 import { provideHttpClient } from '@angular/common/http';
 import { provideHttpClientTesting, HttpTestingController } from '@angular/common/http/testing';
 import { provideRouter } from '@angular/router';
 import { provideNoopAnimations } from '@angular/platform-browser/animations';
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { describe, it, expect, beforeEach } from 'vitest';
-import { of } from 'rxjs';
 
 import { CurrentUserPermissionsService } from '@stratosui/core';
 
 import { ServicePlansComponent } from './service-plans.component';
+
+const canCreate = signal(false);
 
 describe('ServicePlansComponent', () => {
   let component: ServicePlansComponent;
@@ -33,7 +34,7 @@ describe('ServicePlansComponent', () => {
         // the spec just needs the signal to resolve without injection
         // errors. Default to false (lacking permission) so the kebab
         // item renders as disabled — matches the safer fallback.
-        { provide: CurrentUserPermissionsService, useValue: { can: () => of(false) } },
+        { provide: CurrentUserPermissionsService, useValue: { can: () => canCreate } },
       ],
     }).compileComponents();
 
@@ -47,6 +48,15 @@ describe('ServicePlansComponent', () => {
     // No route guids means no fetch — drain anything that did fire so
     // the verify() below doesn't trip.
     httpMock.match(() => true).forEach(req => req.flush({ resources: [] }));
+  });
+
+  it('enables Create Instance only while the user may create instances', () => {
+    const actionsColumn = component.listConfig!.columns.find(c => c.key === 'actions') as any;
+    const createDisabled = () => actionsColumn.actions({ guid: 'plan-1' })[0].disabled;
+    canCreate.set(false);
+    expect(createDisabled()).toBe(true);
+    canCreate.set(true);
+    expect(createDisabled()).toBe(false);
   });
 
   it('should create', () => {

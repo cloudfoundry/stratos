@@ -1,19 +1,18 @@
 import { HttpClient } from '@angular/common/http';
-import { Injectable, inject } from '@angular/core';
-import { toObservable } from '@angular/core/rxjs-interop';
+import { Injectable, Signal, computed, inject } from '@angular/core';
 import { TailwindSnackBarService } from '@stratosui/core';
 import { AuthDataService } from '@stratosui/store';
-import { combineLatest, Observable, of as observableOf } from 'rxjs';
-import { catchError, filter, map, switchMap } from 'rxjs/operators';
+import { Observable, of as observableOf } from 'rxjs';
+import { catchError, map } from 'rxjs/operators';
 
 import { CurrentUserPermissionsService } from '../../../../../core/src/core/permissions/current-user-permissions.service';
 import { environment } from '../../../../../core/src/environments/environment.prod';
 import { ConfirmationDialogConfig } from '../../../../../core/src/shared/components/confirmation-dialog.config';
 import { ConfirmationDialogService } from '../../../../../core/src/shared/components/confirmation-dialog.service';
-import { CfCurrentUserRolesSignalService } from '../../../user-permissions/cf-current-user-roles-signal.service';
 import { CfCurrentUserPermissions } from '../../../user-permissions/cf-user-permissions-checkers';
+import { ICfRolesState } from '../../../store/types/cf-current-user-roles.types';
+import { CfCurrentUserRolesDataService } from '../../../services/cf-current-user-roles-data.service';
 import { ActiveRouteCfOrgSpace } from '../cf-page.types';
-import { waitForCFPermissions } from '../cf.helpers';
 import { CloudFoundryEndpointService } from '../services/cloud-foundry-endpoint.service';
 
 const { proxyAPIVersion } = environment;
@@ -126,51 +125,65 @@ export class UserInviteConfigureService {
 })
 export class UserInviteService {
   private authData = inject(AuthDataService);
-  private cfRoles = inject(CfCurrentUserRolesSignalService);
+  private rolesData = inject(CfCurrentUserRolesDataService);
   private http = inject(HttpClient);
   private currentUserPermissionsService = inject(CurrentUserPermissionsService);
   private activeRouteCfOrgSpace = inject(ActiveRouteCfOrgSpace);
 
 
-  configured$!: Observable<boolean>;
-  enabled$!: Observable<boolean>;
-  canConfigure$!: Observable<boolean>;
+  /** Whether the CF endpoint allows user invitations; false until the
+   *  endpoint record has loaded. */
+  readonly configured: Signal<boolean>;
+  /** Whether the user may configure invitations; false until the roles have loaded. */
+  readonly canConfigure: Signal<boolean>;
+  private readonly cfRolesState: Signal<ICfRolesState | null>;
+  private readonly endpointLoaded: Signal<boolean>;
 
   constructor() {
     const cfEndpointService = inject(CloudFoundryEndpointService);
 
-    this.configured$ = cfEndpointService.endpoint$.pipe(
-      filter(v => !!v && !!v.entity),
-      // Note - metadata could be falsy if smtp server not configured/other metadata properties are missing
-      map(v => !!v.entity.metadata && v.entity.metadata.userInviteAllowed === 'true')
-    );
+    this.configured = computed(() => {
+      // metadata is missing when no SMTP server or other invite
+      // settings are configured
+      const metadata = cfEndpointService.endpoint()?.entity?.metadata;
+      return !!metadata && metadata.userInviteAllowed === 'true';
+    });
+    this.endpointLoaded = computed(() => !!cfEndpointService.endpoint()?.entity);
 
-    this.canConfigure$ = combineLatest(
-      waitForCFPermissions(this.cfRoles, this.activeRouteCfOrgSpace.cfGuid),
-      toObservable(this.authData.sessionData)
-    ).pipe(
-      map(([cf, sessionData]) =>
-        cf.global.isAdmin &&
-        !!sessionData?.['plugin-config'] && sessionData['plugin-config'].userInvitationsEnabled === 'true')
-    );
+    this.cfRolesState = this.rolesData.cfEndpointRolesState(this.activeRouteCfOrgSpace.cfGuid);
+    this.canConfigure = computed(() => {
+      const cf = this.cfRolesState();
+      if (!cf?.state.initialised) {
+        return false;
+      }
+      const sessionData = this.authData.sessionData();
+      return cf.global.isAdmin &&
+        !!sessionData?.['plugin-config'] && sessionData['plugin-config'].userInvitationsEnabled === 'true';
+    });
   }
 
-
-
-  canShowInviteUser(cfGuid: string, orgGuid: string, spaceGuid: string): Observable<boolean> {
+  /**
+   * Whether to offer inviting users to the org or space; null until the
+   * endpoint and the roles have loaded.
+   */
+  canShowInviteUser(cfGuid: string, orgGuid: string, spaceGuid: string): Signal<boolean | null> {
     // Can only invite someone to an org or space and user must be admin or org manager
-    return !orgGuid ? observableOf(false) : waitForCFPermissions(this.cfRoles, cfGuid).pipe(
-      switchMap(() => combineLatest(
-        this.configured$,
-        this.currentUserPermissionsService.can(
-          CfCurrentUserPermissions.ORGANIZATION_CHANGE_ROLES,
-          cfGuid,
-          orgGuid,
-          spaceGuid
-        )
-      )),
-      map(([configured, canChangeRoles]) => !!configured && !!canChangeRoles)
+    if (!orgGuid) {
+      return computed(() => false);
+    }
+    const canChangeRoles = this.currentUserPermissionsService.can(
+      CfCurrentUserPermissions.ORGANIZATION_CHANGE_ROLES,
+      cfGuid,
+      orgGuid,
+      spaceGuid
     );
+    const rolesState = this.rolesData.cfEndpointRolesState(cfGuid);
+    return computed(() => {
+      if (!rolesState()?.state.initialised || !this.endpointLoaded()) {
+        return null;
+      }
+      return this.configured() && canChangeRoles();
+    });
   }
 
   invite(cfGuid: string, orgGuid: string, spaceGuid: string, spaceRole: UserInviteSendSpaceRoles, emails: string[]):

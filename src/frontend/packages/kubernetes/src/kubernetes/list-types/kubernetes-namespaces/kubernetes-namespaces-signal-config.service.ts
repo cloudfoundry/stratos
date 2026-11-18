@@ -1,4 +1,4 @@
-import { EffectRef, Injectable, Injector, Signal, WritableSignal, computed, effect, inject, runInInjectionContext, signal } from '@angular/core';
+import { EffectRef, Injectable, Injector, Signal, WritableSignal, effect, inject, runInInjectionContext, signal } from '@angular/core';
 
 import { ListStateStore, SignalListSort } from '@stratosui/core';
 
@@ -65,18 +65,16 @@ export class KubernetesNamespacesSignalConfigService {
   // of stacking one live effect per navigation on the root injector.
   private filterEffect?: EffectRef;
 
-  // Tristate visibility — when the kube version / namespace fetch is
-  // listed in the endpoint service's `unavailable`, we surface that to
-  // the consumer so the page can render "Not Available" rather than a
-  // spinner.
+  // The namespace list's load failures (version and node failures from
+  // the same endpoint load are not this list's). refresh() clears them
+  // when it succeeds.
   errors(): Signal<StratosError[]> {
-    const svc = this.kubeGuid ? this.registry.getService(this.kubeGuid) : null;
-    return computed(() => svc?.errors() ?? []);
+    return this.kubeGuid ? this.namespaceData.listErrors(this.kubeGuid) : signal<StratosError[]>([]).asReadonly();
   }
 
+  // The namespace list's load (load() or refresh('namespaces')).
   isLoading(): Signal<boolean> {
-    const svc = this.kubeGuid ? this.registry.getService(this.kubeGuid) : null;
-    return computed(() => svc?.isLoading() ?? false);
+    return this.kubeGuid ? this.namespaceData.listLoading(this.kubeGuid) : signal(false).asReadonly();
   }
 
   initialize(kubeGuid: string): void {

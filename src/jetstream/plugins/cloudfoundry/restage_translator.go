@@ -48,11 +48,20 @@ func NewRestageJobTranslator(cf *CloudFoundrySpecification) *RestageJobTranslato
 // Kind returns the stable kind prefix for restage jobs.
 func (t *RestageJobTranslator) Kind() string { return RestageJobKind }
 
+// RefOwner implements stratosjobs.OwnedRefTranslator: the restage is the
+// session user's whose token drives it.
+func (t *RestageJobTranslator) RefOwner(ref interface{}) string {
+	if rRef, ok := ref.(*RestageRef); ok {
+		return rRef.UserGuid
+	}
+	return ""
+}
+
 // Fetch advances the restage state machine by one stage and translates
 // the orchestrator's outcome onto the Stratos job tuple.
 //
 // Concurrency: the tracker calls Fetch without holding the per-job lock
-// (Refresh RUnlocks before invoking the translator). With the in-memory
+// (Refresh unlocks before invoking the translator). With the in-memory
 // tracker that's tolerable — frontend polls a single job sequentially —
 // but slice 9's handler must guarantee one in-flight Refresh per job to
 // avoid concurrent advanceRestage calls mutating the same *RestageRef.

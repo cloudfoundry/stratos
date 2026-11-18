@@ -1,4 +1,4 @@
-import { ChangeDetectionStrategy, ChangeDetectorRef, Component, OnDestroy, OnInit, inject } from '@angular/core';
+import { ChangeDetectionStrategy, Component, OnDestroy, OnInit, inject, signal } from '@angular/core';
 
 import { MAT_DIALOG_DATA } from '../../shared/services/tailwind-material-replacements';
 import { TailwindDialogRef } from '../../shared/services/tailwind-dialog.service';
@@ -20,13 +20,11 @@ export class LogOutDialogComponent implements OnInit, OnDestroy {
   dialogRef = inject<TailwindDialogRef<LogOutDialogComponent>>('TailwindDialogRef' as any);
   data = inject(MAT_DIALOG_DATA, { optional: true });
   private router = inject(Router);
-  private cdr = inject(ChangeDetectorRef);
 
 
   private autoLogout!: Subscription;
-  private countDown!: number;
   private countdownTotal!: number;
-  public percentage = 0;
+  readonly percentage = signal(0);
 
   ngOnInit() {
     const updateInterval = 500;
@@ -35,21 +33,20 @@ export class LogOutDialogComponent implements OnInit, OnDestroy {
       .pipe(
         tap(() => {
           // Recalculate this every time, as `interval` slows down when tab not focused
-          this.countDown = this.calcCountdown();
-          if (this.countDown <= 0) {
+          const countDown = this.calcCountdown();
+          if (countDown <= 0) {
             this.autoLogout.unsubscribe();
             this.router.navigate(['/login/logout']);
             this.dialogRef.close(false);
           } else {
-            this.percentage = ((this.countdownTotal - this.countDown) / this.countdownTotal) * 100;
-            this.cdr.markForCheck();
+            this.percentage.set(((this.countdownTotal - countDown) / this.countdownTotal) * 100);
           }
         })
       ).subscribe();
   }
 
   ngOnDestroy() {
-    this.percentage = 0;
+    this.percentage.set(0);
     this.autoLogout.unsubscribe();
   }
 

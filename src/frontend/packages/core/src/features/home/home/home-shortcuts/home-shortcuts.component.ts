@@ -1,4 +1,4 @@
-import { ChangeDetectionStrategy, Component, Input  } from '@angular/core';
+import { ChangeDetectionStrategy, Component, input } from '@angular/core';
 
 import { RouterModule } from '@angular/router';
 
@@ -18,6 +18,6 @@ import { CustomIconComponent } from '../../../../shared/components/custom-materi
 })
 export class HomeShortcutsComponent {
 
-  @Input() shortcuts: HomeCardShortcut[] = [];
+  readonly shortcuts = input<HomeCardShortcut[]>([]);
 
 }

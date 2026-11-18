@@ -1,7 +1,10 @@
-#!/usr/bin/env node
+#!/usr/bin/env bun
 /**
  * index-transformer.js
  * Transforms index.html to inject git metadata and theme loading assets
+ *
+ * Runs on the built index.html after each `ng build stratos`, never on the
+ * tracked source, so the source stays clean and every build is fresh.
  *
  * Replaces webpack's index.transform.js for Angular 20 compatibility
  */
@@ -95,6 +98,10 @@ function findThemeLoadingAssets(rootDir) {
   return { name: 'default', css: null, html: null };
 }
 
+function escapeHtml(value) {
+  return String(value).replace(/[&<>"]/g, (c) => `&#${c.charCodeAt(0)};`);
+}
+
 /**
  * Transform index.html with all metadata and assets
  */
@@ -113,21 +120,31 @@ function transformIndexHtml(indexHtml, options = {}) {
 
   let transformed = indexHtml;
 
-  // 1. Replace title
-  transformed = transformed.replace(/@@TITLE@@/g, title);
+  // The source index.html holds plain defaults so the dev server shows a
+  // sane page; the build output gets the real values. Replacing element
+  // contents rather than tokens lets this run again on its own output.
+  // Replacer functions keep `$` in a value from acting as a pattern.
 
-  // 2. Replace git metadata in meta tags
-  transformed = transformed.replace(/@@stratos_git_project@@/g, gitMetadata.project || 'stratos');
-  transformed = transformed.replace(/@@stratos_git_branch@@/g, gitMetadata.branch || 'unknown');
-  transformed = transformed.replace(/@@stratos_git_commit@@/g, gitMetadata.commit || 'unknown');
+  // 1. Replace title (head and the no-javascript message)
+  transformed = transformed.replace(/<title>[^<]*<\/title>/, () => `<title>${escapeHtml(title)}</title>`);
+  transformed = transformed.replace(/(<div class="message title">)[^<]*(<\/div>)/,
+    (_, open, close) => open + escapeHtml(title) + close);
 
-  // 3. Replace build date
-  const buildDate = new Date().toString();
-  transformed = transformed.replace(/@@stratos_build_date@@/g, buildDate);
+  // 2. Replace git metadata and build date in meta tags
+  const meta = {
+    stratos_git_project: gitMetadata.project || 'stratos',
+    stratos_git_branch: gitMetadata.branch || 'unknown',
+    stratos_git_commit: gitMetadata.commit || 'unknown',
+    stratos_build_date: new Date().toString()
+  };
+  for (const [name, value] of Object.entries(meta)) {
+    transformed = transformed.replace(new RegExp(`(<meta name="${name}" content=")[^"]*(")`),
+      (_, open, close) => open + escapeHtml(value) + close);
+  }
 
   // 4. Replace loading CSS if theme provides it
   if (theme.css) {
-    transformed = transformed.replace(/\/\*\* @@LOADING_CSS@@ \*\*\//g, theme.css);
+    transformed = transformed.replace(/\/\*\* @@LOADING_CSS@@ \*\*\//g, () => theme.css);
   } else {
     // Remove placeholder if no CSS
     transformed = transformed.replace(/\/\*\* @@LOADING_CSS@@ \*\*\//g, '');
@@ -135,7 +152,7 @@ function transformIndexHtml(indexHtml, options = {}) {
 
   // 5. Replace loading HTML if theme provides it
   if (theme.html) {
-    transformed = transformed.replace(/<!-- @@LOADING_HTML@@ -->/g, theme.html);
+    transformed = transformed.replace(/<!-- @@LOADING_HTML@@ -->/g, () => theme.html);
   } else {
     // Remove placeholder if no HTML
     transformed = transformed.replace(/<!-- @@LOADING_HTML@@ -->/g, '');
@@ -180,7 +197,7 @@ if (import.meta.url.endsWith(process.argv[1].replace(/\\/g, '/'))) {
 
   if (args.length === 0 || args.includes('--help') || args.includes('-h')) {
     console.log(`
-Usage: node index-transformer.js [options] <input> [output]
+Usage: bun index-transformer.js [options] <input> [output]
 
 Options:
   --root <path>   Root directory of the project (default: current directory)
@@ -191,14 +208,14 @@ Arguments:
   output          Path to output file (default: same as input)
 
 Examples:
-  # Transform in place
-  node index-transformer.js src/frontend/packages/core/src/index.html
+  # Transform the build output in place (the build does this)
+  bun index-transformer.js dist/frontend/browser/index.html
 
   # Transform to different file
-  node index-transformer.js src/index.html dist/index.html
+  bun index-transformer.js src/index.html dist/index.html
 
   # Specify root directory
-  node index-transformer.js --root /path/to/stratos src/index.html
+  bun index-transformer.js --root /path/to/stratos src/index.html
 `);
     process.exit(0);
   }

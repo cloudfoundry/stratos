@@ -1,5 +1,5 @@
 import { CommonModule } from '@angular/common';
-import { ChangeDetectionStrategy, Component, Injector, Input, OnDestroy, OnInit, Signal, computed, effect, inject, runInInjectionContext, signal } from '@angular/core';
+import { ChangeDetectionStrategy, Component, Injector, OnInit, Signal, computed, effect, inject, input, runInInjectionContext, signal, untracked } from '@angular/core';
 import { RouterModule } from '@angular/router';
 
 import {
@@ -10,6 +10,7 @@ import {
   MetaCardKeyComponent,
   MetaCardTitleComponent,
   MetaCardValueComponent,
+  UrlPartsPipe,
 } from '@stratosui/core';
 import { ServiceCatalogDataService, SignalSource } from '../../../../services/endpoint-data/service-catalog-data.service';
 import { SpaceDataRegistry } from '../../../../services/endpoint-data/space-data.registry';
@@ -48,30 +49,39 @@ interface BrokerSpaceLink {
     BooleanIndicatorComponent,
     ClickStopPropagationDirective,
     TristateValueComponent,
+    UrlPartsPipe,
   ],
 })
-export class ServiceBrokerCardComponent implements OnInit, OnDestroy {
+export class ServiceBrokerCardComponent implements OnInit {
   private serviceCatalog = inject(ServiceCatalogDataService);
   private spaceRegistry = inject(SpaceDataRegistry);
   private injector = inject(Injector);
 
-  private readonly _cfGuid = signal('');
-  private readonly _brokerGuid = signal('');
+  readonly cfGuid = input('', { transform: (value: string | null | undefined) => value ?? '' });
+  readonly brokerGuid = input('', { transform: (value: string | null | undefined) => value ?? '' });
+
   private readonly _brokerSource = signal<SignalSource<StServiceBroker | null> | null>(null);
 
-  // Acquired SpaceDataService (or null when no broker.space.guid yet).
-  // The registry refCounts per (cnsi, spaceGuid); we release on swap +
-  // destroy so warm caches stay shared with other consumers.
-  private _spaceData: SpaceDataService | null = null;
-  private _spaceKey: { cnsi: string, guid: string } | null = null;
+  // Acquired SpaceDataService (or null when no broker.space.guid yet),
+  // shared per (cnsi, spaceGuid) through the registry. A signal so
+  // `spaceLink` re-evaluates when the effect swaps it in.
+  private readonly _spaceData = signal<SpaceDataService | null>(null);
 
   readonly broker: Signal<StServiceBroker | null> = computed(
     () => this._brokerSource()?.value() ?? null,
   );
 
+  // Compared by value so a broker re-fetch with the same space does not
+  // re-run the acquire effect.
+  private readonly _spaceKey = computed(() => {
+    const guid = this.broker()?.space?.guid;
+    const cnsi = this.cfGuid();
+    return guid && cnsi ? { cnsi, guid } : null;
+  }, { equal: (a, b) => a?.cnsi === b?.cnsi && a?.guid === b?.guid });
+
   readonly spaceLink: Signal<BrokerSpaceLink | null> = computed(() => {
-    const cfGuid = this._cfGuid();
-    const space = this._spaceData?.space();
+    const cfGuid = this.cfGuid();
+    const space = this._spaceData()?.space();
     if (!space || !cfGuid) return null;
     return {
       name: space.name,
@@ -79,60 +89,38 @@ export class ServiceBrokerCardComponent implements OnInit, OnDestroy {
     };
   });
 
-  @Input()
-  set cfGuid(value: string) {
-    this._cfGuid.set(value ?? '');
-    this.refreshBroker();
-  }
-
-  @Input()
-  set brokerGuid(value: string | null | undefined) {
-    this._brokerGuid.set(value ?? '');
-    this.refreshBroker();
-  }
-
-  private refreshBroker(): void {
-    const cfGuid = this._cfGuid();
-    const brokerGuid = this._brokerGuid();
-    if (!cfGuid || !brokerGuid) {
-      this._brokerSource.set(null);
-      return;
-    }
-    this._brokerSource.set(this.serviceCatalog.serviceBroker(cfGuid, brokerGuid));
-  }
-
-  ngOnInit(): void {
-    // Acquire/release SpaceDataService when broker.space.guid changes.
-    // Effect re-runs on broker swap (new SignalSource) and on broker
-    // value flip (HTTP landed) — same shape regardless of which triggered
-    // the change.
-    runInInjectionContext(this.injector, () => {
-      effect(() => {
-        const broker = this.broker();
-        const cfGuid = this._cfGuid();
-        const targetGuid = broker?.space?.guid ?? null;
-        const targetKey = targetGuid && cfGuid ? { cnsi: cfGuid, guid: targetGuid } : null;
-        const curr = this._spaceKey;
-        if (curr?.cnsi === targetKey?.cnsi && curr?.guid === targetKey?.guid) return;
-        if (curr) {
-          this.spaceRegistry.release(curr.cnsi, curr.guid);
-          this._spaceData = null;
-          this._spaceKey = null;
-        }
-        if (targetKey) {
-          this._spaceData = this.spaceRegistry.acquire(targetKey.cnsi, targetKey.guid);
-          this._spaceData.load().subscribe();
-          this._spaceKey = targetKey;
-        }
-      });
+  constructor() {
+    // Fetch the broker whenever either guid changes. An effect, not a
+    // computed: the fetch creates and writes signals.
+    effect(() => {
+      const cfGuid = this.cfGuid();
+      const brokerGuid = this.brokerGuid();
+      untracked(() => this._brokerSource.set(
+        cfGuid && brokerGuid ? this.serviceCatalog.serviceBroker(cfGuid, brokerGuid) : null,
+      ));
     });
   }
 
-  ngOnDestroy(): void {
-    if (this._spaceKey) {
-      this.spaceRegistry.release(this._spaceKey.cnsi, this._spaceKey.guid);
-      this._spaceData = null;
-      this._spaceKey = null;
-    }
+  ngOnInit(): void {
+    // Acquire SpaceDataService when broker.space.guid changes. The
+    // cleanup ends the load when the space swaps and when the card is
+    // destroyed.
+    runInInjectionContext(this.injector, () => {
+      effect(onCleanup => {
+        const key = this._spaceKey();
+        if (!key) {
+          this._spaceData.set(null);
+          return;
+        }
+        // load() reads the service's own signals; untracked so the space
+        // landing does not re-run this effect and end the load.
+        untracked(() => {
+          const spaceData = this.spaceRegistry.acquire(key.cnsi, key.guid);
+          const load = spaceData.load().subscribe();
+          onCleanup(() => load.unsubscribe());
+          this._spaceData.set(spaceData);
+        });
+      });
+    });
   }
 }

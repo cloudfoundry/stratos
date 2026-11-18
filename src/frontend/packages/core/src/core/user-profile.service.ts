@@ -1,16 +1,13 @@
-import { Injectable, inject } from '@angular/core';
-import { toObservable } from '@angular/core/rxjs-interop';
+import { Injectable, Signal, computed, effect, inject, linkedSignal, signal, untracked } from '@angular/core';
 import {
   ActionState,
   getDefaultActionState,
-  SessionData,
-  SessionUser,
   UserProfileDataService,
   UserProfileInfo,
   UserProfileInfoEmail,
   UserProfileInfoUpdates } from '@stratosui/store';
-import { combineLatest, defer, Observable, of as observableOf } from 'rxjs';
-import { take, filter, map } from 'rxjs/operators';
+import { combineLatest, Observable, of as observableOf } from 'rxjs';
+import { filter } from 'rxjs/operators';
 
 import { AuthSignalService } from './signals/auth-signal.service';
 
@@ -23,60 +20,50 @@ export class UserProfileService {
   private userProfileData = inject(UserProfileDataService);
 
 
-  isError$: Observable<boolean>;
-
-  isFetching$: Observable<boolean>;
-
-  userProfile$: Observable<UserProfileInfo>;
-
-  private userGuid$: Observable<string>;
-
   private fetchStarted = false;
+  // Counts the asks to fetch; the fetch itself waits for the user's guid.
+  private readonly fetchRequests = signal(0);
+
+  /**
+   * The user's profile, null until it has loaded. Reading it does not fetch:
+   * call loadUserProfile() where the profile is shown.
+   */
+  readonly userProfile: Signal<UserProfileInfo | null> = computed(() => {
+    const profile = this.userProfileData.profile();
+    return profile && profile.id ? profile : null;
+  });
+
+  /**
+   * Whether the last fetch failed. While a fetch runs it keeps the previous
+   * answer, as the error is only known once the fetch has settled.
+   */
+  readonly isError: Signal<boolean> = linkedSignal<{ fetching: boolean; error: boolean; }, boolean>({
+    source: () => ({ fetching: this.userProfileData.fetching(), error: this.userProfileData.error() }),
+    computation: ({ fetching, error }, previous) => fetching ? (previous?.value ?? false) : error,
+  });
 
   constructor() {
-    // Source the user GUID from the signal-native auth projection. The
-    // upstream pipe order matches the legacy implementation: wait for
-    // populated sessionData, then a populated `user`, then take the first
-    // GUID and complete.
-    this.userGuid$ = toObservable(this.authSignals.sessionData).pipe(
-      filter((sessionData): sessionData is SessionData & { user: SessionUser } => !!sessionData?.user),
-      take(1),
-      map(data => data.user.guid)
-    );
-
-    // Read the profile off the signal-native UserProfileDataService (replaces
-    // the ngrx `userProfile` EntityService). Same emission shape as before:
-    // only emit a populated profile. The legacy EntityService's
-    // `waitForEntity$` auto-fetched on first subscribe; the signal store is
-    // passive, so re-establish that here — without it, consumers that never
-    // call fetchUserProfile() (profile page, page header) wait forever.
-    this.userProfile$ = defer(() => {
-      if (!this.fetchStarted) {
-        this.fetchUserProfile();
+    // Once there is a request and the session has a user, fetch their profile.
+    const userGuid = computed(() => this.authSignals.sessionData()?.user?.guid);
+    effect(() => {
+      const requests = this.fetchRequests();
+      const guid = userGuid();
+      if (requests && guid) {
+        untracked(() => this.userProfileData.fetch(guid));
       }
-      return this.userProfileData.profile$;
-    }).pipe(
-      filter((data): data is UserProfileInfo => !!data && !!data.id)
-    );
-    this.isFetching$ = this.userProfileData.fetching$;
+    });
+  }
 
-    // Mirror the legacy behaviour: only report the error once the fetch has
-    // settled (not while still fetching).
-    this.isError$ = combineLatest([
-      this.userProfileData.fetching$,
-      this.userProfileData.error$
-    ]).pipe(
-      filter(([fetching]) => !fetching),
-      map(([, error]) => error)
-    );
+  /** Fetch the profile once, the first time any page asks for it. */
+  loadUserProfile() {
+    if (!this.fetchStarted) {
+      this.fetchUserProfile();
+    }
   }
 
   fetchUserProfile() {
     this.fetchStarted = true;
-    // Once we have the user's guid, fetch their profile
-    this.userGuid$.pipe(take(1)).subscribe(userGuid => {
-      if (userGuid) { this.userProfileData.fetch(userGuid); }
-    });
+    this.fetchRequests.update(n => n + 1);
   }
 
   getPrimaryEmailAddress(profile: UserProfileInfo): string {
@@ -111,10 +98,10 @@ export class UserProfileService {
     const didChangePassword = !!(profileChanges.newPassword && profileChanges.currentPassword);
     const profileObs$ = didChangeProfile ? this.updateProfileInfo(profile, profileChanges) : observableOf(getDefaultActionState());
     const passwordObs$ = didChangePassword ? this.updatePassword(profile, profileChanges) : observableOf(getDefaultActionState());
-    return combineLatest(
+    return combineLatest([
       profileObs$,
       passwordObs$
-    );
+    ]);
   }
 
   private updateProfileInfo(profile: UserProfileInfo, profileChanges: UserProfileInfoUpdates): Observable<ActionState> {

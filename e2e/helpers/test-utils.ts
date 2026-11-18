@@ -1,4 +1,5 @@
 import { Page } from '@playwright/test';
+import { randomBytes } from 'node:crypto';
 
 /**
  * Test Utilities
@@ -21,8 +22,13 @@ export const CUSTOM_ORG_SPACE_LABEL = E2E_ITEM_PREFIX + (process.env.CUSTOM_ORG_
  * Helps identify acceptance test artifacts in case they leak
  */
 export function createCustomName(prefix: string, isoTime?: string): string {
-  const timestamp = isoTime || new Date().toISOString().replace(/[-:.]+/g, '');
-  return `${prefix}-${timestamp}`;
+  if (isoTime) {
+    return `${prefix}-${isoTime}`;
+  }
+  // Millisecond timestamps collide across parallel workers (CF answers 422
+  // CF-UniquenessError), so add a short random suffix.
+  const timestamp = new Date().toISOString().replace(/[-:.]+/g, '');
+  return `${prefix}-${timestamp}-${randomBytes(2).toString('hex')}`;
 }
 
 /**

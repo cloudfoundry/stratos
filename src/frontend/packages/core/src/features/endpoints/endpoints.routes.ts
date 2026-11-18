@@ -13,6 +13,7 @@ import {
 } from './create-endpoint/create-endpoint-base-step/create-endpoint-base-step.component';
 import { CreateEndpointComponent } from './create-endpoint/create-endpoint.component';
 import { EditEndpointComponent } from './edit-endpoint/edit-endpoint.component';
+import { canEditEndpointGuard } from './endpoint-permissions.service';
 import { EndpointsPageComponent } from './endpoints-page/endpoints-page.component';
 
 export const ENDPOINTS_ROUTES: Routes = [
@@ -24,30 +25,38 @@ export const ENDPOINTS_ROUTES: Routes = [
   },
   {
     path: 'new',
+    title: 'Register Endpoint',
     component: CreateEndpointBaseStepComponent
   },
   {
     path: 'new/:type/:subtype',
+    title: 'Register Endpoint',
     component: CreateEndpointComponent
   },
   {
     path: 'new/:type',
+    title: 'Register Endpoint',
     component: CreateEndpointComponent
   },
   {
     path: 'edit/:id',
-    component: EditEndpointComponent
+    title: 'Edit Endpoint',
+    component: EditEndpointComponent,
+    canActivate: [canEditEndpointGuard]
   },
   {
     path: 'backup-restore',
+    title: 'Backup/Restore Endpoints',
     component: BackupRestoreEndpointsComponent
   },
   {
     path: 'backup-restore/backup',
+    title: 'Backup Endpoints',
     component: BackupEndpointsComponent
   },
   {
     path: 'backup-restore/restore',
+    title: 'Restore Endpoints',
     component: RestoreEndpointsComponent
   },
   {

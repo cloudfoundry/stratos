@@ -1,24 +1,21 @@
-import { Directive, ElementRef, Input, NgZone, OnChanges, inject } from '@angular/core';
+import { Directive, ElementRef, OnChanges, inject, input } from '@angular/core';
 
 @Directive({
 selector: '[appFocus]',
 standalone: true
 })
 export class FocusDirective implements OnChanges {
-  @Input() appFocus!: boolean;
+  readonly appFocus = input<boolean>();
 
   private element = inject(ElementRef);
-  private ngZone = inject(NgZone);
 
   public ngOnChanges() {
-    if (this.appFocus) {
+    if (this.appFocus()) {
       this.focus();
     }
   }
 
   private focus() {
-    this.ngZone.runOutsideAngular(() => {
-      setTimeout(() => this.element.nativeElement.focus(), 250);
-    });
+    setTimeout(() => this.element.nativeElement.focus(), 250);
   }
 }

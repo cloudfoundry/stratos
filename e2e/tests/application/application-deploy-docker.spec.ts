@@ -1,514 +1,114 @@
 import { test, expect } from '../../fixtures/test-base';
-import { DockerDeployStepperPage } from '../../pages/application/docker-deploy-stepper.page';
 import { createCustomName } from '../../helpers/test-utils';
 
 /**
  * Application Deploy Docker E2E Tests
- * Migrated from src/test-e2e/application/application-deploy-docker-e2e.spec.ts
  *
- * Tests Docker image deployment
- *
- * CF Helpers Integration:
- * - ✅ Uses CF API for Docker app creation
- * - ✅ UI wizard tests with Docker deployment page objects
- * - ⏳ Full Docker deployment requires registry access and image pulling
- *
- * NOTE: Full Docker deployment workflow requires:
- * - Docker support enabled in CF
- * - Registry access (public or authenticated private)
- * - Image pulling infrastructure in CF
- * - Extended test timeouts for image pulls
- *
- * Fixtures Used:
- * - connectedEndpointsAdminPage: CF admin access
- * - applicationHelper: App management utilities
- * - cfApi: CF API operations
+ * Live coverage: the CF API path for creating Docker-lifecycle apps (via the
+ * Stratos passthrough proxy). The UI wizard portion is deferred — see the
+ * skipped block at the bottom for why.
  */
 
 test.describe('Application Deploy (Docker)', () => {
 
   test.describe('Basic Docker Setup', () => {
-    test('should create Docker-based app', async ({ applicationHelper, cfApi }) => {
-      // Create a Docker app (lifecycle type 'docker' instead of 'buildpack')
-      const appData = {
+    // Docker apps are a per-foundation opt-in: CF answers 403
+    // CF-FeatureDisabled to every docker create while diego_docker is off.
+    // Turn it on for each test and put it back after; serial keeps the flag
+    // in one worker's hands.
+    test.describe.configure({ mode: 'serial' });
+    let dockerWasEnabled = true;
+
+    test.beforeEach(async ({ cfApi }) => {
+      dockerWasEnabled = await cfApi.isFeatureFlagEnabled('diego_docker');
+      if (!dockerWasEnabled) {
+        await cfApi.setFeatureFlag('diego_docker', true);
+      }
+    });
+
+    test.afterEach(async ({ cfApi }) => {
+      if (!dockerWasEnabled) {
+        await cfApi.setFeatureFlag('diego_docker', false);
+      }
+    });
+
+    test('should create Docker-based app', async ({ cfApi, secrets }) => {
+      const spaceGuid = secrets.cloudFoundry[0].testSpaceGuid;
+
+      // Docker lifecycle (type 'docker' instead of 'buildpack'). Routed through
+      // cfApi.createApp so it uses the correct passthrough proxy (x-cap-cnsi-list
+      // header) rather than a hand-rolled URL.
+      const app = await cfApi.createApp({
         name: createCustomName('docker-app'),
-        space_guid: applicationHelper['defaultSpaceGuid'],
-        lifecycle: {
-          type: 'docker',
-          data: {}
-        },
-        metadata: {
-          labels: {
-            'stratos-e2e-test': 'true'
-          }
-        }
-      };
+        spaceGuid,
+        lifecycle: { type: 'docker', data: {} },
+      });
 
-      const response = await cfApi['request'].post(
-        `/pp/v1/proxy/v3/cf/${cfApi['cfGuid']}/apps`,
-        appData
-      );
+      expect(app.guid).toBeTruthy();
+      expect(app.lifecycle.type).toBe('docker');
+      expect(app.state).toBe('STOPPED');
 
-      expect(response.guid).toBeTruthy();
-      expect(response.lifecycle.type).toBe('docker');
-      expect(response.state).toBe('STOPPED');
-
-      // Cleanup
-      await cfApi.deleteApp(response.guid);
+      await cfApi.deleteApp(app.guid);
     });
 
-    test('should create Docker app with environment variables', async ({ applicationHelper, cfApi }) => {
-      const appData = {
+    test('should create Docker app with environment variables', async ({ cfApi, secrets }) => {
+      const spaceGuid = secrets.cloudFoundry[0].testSpaceGuid;
+
+      const app = await cfApi.createApp({
         name: createCustomName('docker-env-app'),
-        space_guid: applicationHelper['defaultSpaceGuid'],
-        lifecycle: {
-          type: 'docker',
-          data: {}
+        spaceGuid,
+        lifecycle: { type: 'docker', data: {} },
+        // Use non-reserved names: CF rejects system-managed vars like PORT
+        // ("Var cannot set PORT", 422).
+        environmentVariables: {
+          DOCKER_IMAGE: 'nginx:latest',
+          LOG_LEVEL: 'info',
         },
-        environment_variables: {
-          'DOCKER_IMAGE': 'nginx:latest',
-          'PORT': '8080'
-        },
-        metadata: {
-          labels: {
-            'stratos-e2e-test': 'true'
-          }
-        }
-      };
-
-      const response = await cfApi['request'].post(
-        `/pp/v1/proxy/v3/cf/${cfApi['cfGuid']}/apps`,
-        appData
-      );
-
-      expect(response.guid).toBeTruthy();
-      expect(response.lifecycle.type).toBe('docker');
-      expect(response.environment_variables).toBeDefined();
-
-      await cfApi.deleteApp(response.guid);
-    });
-  });
-
-  test.describe('Public Docker Image (UI)', () => {
-    /**
-     * Feature detection for Docker deployment UI
-     * Docker deployment requires Docker support enabled in CF
-     */
-    async function isDockerDeploymentAvailable(page: any, cfGuid: string): Promise<boolean> {
-      const deployPage = new DockerDeployStepperPage(page);
-
-      try {
-        await deployPage.navigateTo(cfGuid);
-        await deployPage.waitForStepper();
-        return await deployPage.isOnDockerDeploymentWizard();
-      } catch (error) {
-        return false;
-      }
-    }
-
-    test('should accept Docker image URL', async ({ connectedEndpointsAdminPage }) => {
-      const { page, cfGuid } = connectedEndpointsAdminPage;
-      const dockerAvailable = await isDockerDeploymentAvailable(page, cfGuid);
-
-      if (!dockerAvailable) {
-        test.skip(true, 'Docker deployment not available in this CF deployment');
-      }
-
-      const deployPage = new DockerDeployStepperPage(page);
-      await deployPage.navigateTo(cfGuid);
-
-      // Enter a public Docker image URL
-      const imageUrl = 'nginx:latest';
-      await deployPage.enterDockerImage(imageUrl);
-
-      // Verify URL was accepted
-      const enteredUrl = await deployPage.getDockerImageUrl();
-      expect(enteredUrl).toBe(imageUrl);
-    });
-
-    test('should validate image format', async ({ connectedEndpointsAdminPage }) => {
-      const { page, cfGuid } = connectedEndpointsAdminPage;
-      const dockerAvailable = await isDockerDeploymentAvailable(page, cfGuid);
-
-      if (!dockerAvailable) {
-        test.skip(true, 'Docker deployment not available');
-      }
-
-      const deployPage = new DockerDeployStepperPage(page);
-      await deployPage.navigateTo(cfGuid);
-
-      // Test valid formats
-      const validImages = [
-        'nginx:latest',
-        'ubuntu:22.04',
-        'gcr.io/project/image:tag',
-        'registry.example.com/org/app:v1.0.0'
-      ];
-
-      for (const image of validImages) {
-        await deployPage.enterDockerImage(image);
-        const isValid = await deployPage.isValidImageFormat();
-        expect(isValid).toBe(true);
-      }
-
-      // Test invalid format
-      await deployPage.enterDockerImage('not a valid image');
-      const isValid = await deployPage.isValidImageFormat();
-      // Validation might not catch all cases, just verify validation runs
-      expect(isValid).toBeDefined();
-    });
-
-    test('should pull public image', async ({ connectedEndpointsAdminPage }) => {
-      const { page, cfGuid } = connectedEndpointsAdminPage;
-      const dockerAvailable = await isDockerDeploymentAvailable(page, cfGuid);
-
-      if (!dockerAvailable) {
-        test.skip(true, 'Docker deployment not available');
-      }
-
-      test.skip();
-      // Would test:
-      // - Enter public image URL
-      // - Start deployment
-      // - Monitor image pull progress
-      // - Verify pull succeeds
-    });
-
-    test('should deploy Docker container', async ({ connectedEndpointsAdminPage }) => {
-      const { page, cfGuid } = connectedEndpointsAdminPage;
-      const dockerAvailable = await isDockerDeploymentAvailable(page, cfGuid);
-
-      if (!dockerAvailable) {
-        test.skip(true, 'Docker deployment not available');
-      }
-
-      test.skip();
-      // Would test complete deployment flow:
-      // - Configure Docker app
-      // - Pull image
-      // - Stage container
-      // - Start container
-    });
-
-    test('should start container successfully', async ({ connectedEndpointsAdminPage }) => {
-      const { page, cfGuid } = connectedEndpointsAdminPage;
-      test.skip();
-    });
-
-    test('should show container status', async ({ connectedEndpointsAdminPage }) => {
-      const { page, cfGuid } = connectedEndpointsAdminPage;
-      test.skip();
-    });
-  });
-
-  test.describe('Private Docker Registry (UI)', () => {
-    test('should require registry credentials', async ({ connectedEndpointsAdminPage }) => {
-      const { page, cfGuid } = connectedEndpointsAdminPage;
-      const dockerAvailable = await (async () => {
-        const deployPage = new DockerDeployStepperPage(page);
-        try {
-          await deployPage.navigateTo(cfGuid);
-          await deployPage.waitForStepper();
-          return await deployPage.isOnDockerDeploymentWizard();
-        } catch {
-          return false;
-        }
-      })();
-
-      if (!dockerAvailable) {
-        test.skip(true, 'Docker deployment not available');
-      }
-
-      const deployPage = new DockerDeployStepperPage(page);
-      await deployPage.navigateTo(cfGuid);
-
-      // Enter private registry image
-      await deployPage.enterDockerImage('registry.example.com/private/app:latest');
-
-      // Check if private registry auth is available
-      const authAvailable = await deployPage.isPrivateRegistryEnabled();
-
-      if (!authAvailable) {
-        // Enable private registry
-        await deployPage.enablePrivateRegistry();
-      }
-
-      // Verify credentials fields are present
-      const isEnabled = await deployPage.isPrivateRegistryEnabled();
-      expect(isEnabled).toBe(true);
-    });
-
-    test('should authenticate with registry', async ({ connectedEndpointsAdminPage }) => {
-      const { page, cfGuid } = connectedEndpointsAdminPage;
-      const dockerAvailable = await (async () => {
-        const deployPage = new DockerDeployStepperPage(page);
-        try {
-          await deployPage.navigateTo(cfGuid);
-          await deployPage.waitForStepper();
-          return await deployPage.isOnDockerDeploymentWizard();
-        } catch {
-          return false;
-        }
-      })();
-
-      if (!dockerAvailable) {
-        test.skip(true, 'Docker deployment not available');
-      }
-
-      const deployPage = new DockerDeployStepperPage(page);
-      await deployPage.navigateTo(cfGuid);
-
-      // Enter private image and credentials
-      await deployPage.enterDockerImage('registry.example.com/private/app:latest');
-      await deployPage.enterRegistryCredentials({
-        url: 'registry.example.com',
-        username: 'test-user',
-        password: 'test-password'
       });
 
-      // Verify credentials were entered
-      const isEnabled = await deployPage.isPrivateRegistryEnabled();
-      expect(isEnabled).toBe(true);
+      expect(app.guid).toBeTruthy();
+      expect(app.lifecycle.type).toBe('docker');
 
-      // Note: Cannot test actual authentication without valid credentials
-    });
+      // CF v3 does NOT echo environment_variables on the create response (they
+      // are a separate sub-resource); read them back and assert they stuck.
+      const env = await cfApi.getAppEnvironment(app.guid);
+      expect(env.DOCKER_IMAGE).toBe('nginx:latest');
+      expect(env.LOG_LEVEL).toBe('info');
 
-    test('should pull private image', async ({ connectedEndpointsAdminPage }) => {
-      const { page, cfGuid } = connectedEndpointsAdminPage;
-      test.skip();
-      // Would test:
-      // - Enter private image URL
-      // - Provide valid credentials
-      // - Initiate pull
-      // - Verify authenticated pull succeeds
-    });
-
-    test('should deploy private image', async ({ connectedEndpointsAdminPage }) => {
-      const { page, cfGuid } = connectedEndpointsAdminPage;
-      test.skip();
-      // Would test:
-      // - Complete private image deployment
-      // - Verify app runs with private image
+      await cfApi.deleteApp(app.guid);
     });
   });
 
-  test.describe('Docker Configuration (UI)', () => {
-    test('should set container command', async ({ connectedEndpointsAdminPage }) => {
-      const { page, cfGuid } = connectedEndpointsAdminPage;
-      const dockerAvailable = await (async () => {
-        const deployPage = new DockerDeployStepperPage(page);
-        try {
-          await deployPage.navigateTo(cfGuid);
-          await deployPage.waitForStepper();
-          return await deployPage.isOnDockerDeploymentWizard();
-        } catch {
-          return false;
-        }
-      })();
-
-      if (!dockerAvailable) {
-        test.skip(true, 'Docker deployment not available');
-      }
-
-      const deployPage = new DockerDeployStepperPage(page);
-      await deployPage.navigateTo(cfGuid);
-
-      // Enter Docker image
-      await deployPage.enterDockerImage('nginx:latest');
-      await deployPage.clickNext();
-
-      // Set container start command
-      await deployPage.setStartCommand('/bin/sh -c "nginx -g \'daemon off;\'"');
-
-      // Verify can proceed
-      const canProceed = await deployPage.canProceed();
-      expect(canProceed).toBe(true);
-    });
-
-    test('should configure environment variables', async ({ connectedEndpointsAdminPage }) => {
-      const { page, cfGuid } = connectedEndpointsAdminPage;
-      const dockerAvailable = await (async () => {
-        const deployPage = new DockerDeployStepperPage(page);
-        try {
-          await deployPage.navigateTo(cfGuid);
-          await deployPage.waitForStepper();
-          return await deployPage.isOnDockerDeploymentWizard();
-        } catch {
-          return false;
-        }
-      })();
-
-      if (!dockerAvailable) {
-        test.skip(true, 'Docker deployment not available');
-      }
-
-      const deployPage = new DockerDeployStepperPage(page);
-      await deployPage.navigateTo(cfGuid);
-
-      await deployPage.enterDockerImage('nginx:latest');
-      await deployPage.clickNext();
-
-      // Add environment variables
-      await deployPage.setEnvironmentVariables({
-        'ENV': 'production',
-        'LOG_LEVEL': 'info',
-        'PORT': '8080'
-      });
-
-      // Verify variables were added
-      const envVarCount = await deployPage.getEnvVarCount();
-      expect(envVarCount).toBeGreaterThanOrEqual(3);
-    });
-
-    test('should set exposed ports', async ({ connectedEndpointsAdminPage }) => {
-      const { page, cfGuid } = connectedEndpointsAdminPage;
-      const dockerAvailable = await (async () => {
-        const deployPage = new DockerDeployStepperPage(page);
-        try {
-          await deployPage.navigateTo(cfGuid);
-          await deployPage.waitForStepper();
-          return await deployPage.isOnDockerDeploymentWizard();
-        } catch {
-          return false;
-        }
-      })();
-
-      if (!dockerAvailable) {
-        test.skip(true, 'Docker deployment not available');
-      }
-
-      test.skip();
-      // CF handles port mapping automatically
-      // Port is usually set via PORT environment variable
-    });
-
-    test('should configure health checks', async ({ connectedEndpointsAdminPage }) => {
-      const { page, cfGuid } = connectedEndpointsAdminPage;
-      const dockerAvailable = await (async () => {
-        const deployPage = new DockerDeployStepperPage(page);
-        try {
-          await deployPage.navigateTo(cfGuid);
-          await deployPage.waitForStepper();
-          return await deployPage.isOnDockerDeploymentWizard();
-        } catch {
-          return false;
-        }
-      })();
-
-      if (!dockerAvailable) {
-        test.skip(true, 'Docker deployment not available');
-      }
-
-      const deployPage = new DockerDeployStepperPage(page);
-      await deployPage.navigateTo(cfGuid);
-
-      await deployPage.enterDockerImage('nginx:latest');
-      await deployPage.clickNext();
-
-      // Configure health check
-      await deployPage.configureHealthCheck({
-        type: 'http',
-        endpoint: '/health',
-        timeout: 30
-      });
-
-      // Health check configuration is optional
-      const canProceed = await deployPage.canProceed();
-      expect(canProceed).toBe(true);
-    });
-
-    test('should set memory limits', async ({ connectedEndpointsAdminPage }) => {
-      const { page, cfGuid } = connectedEndpointsAdminPage;
-      const dockerAvailable = await (async () => {
-        const deployPage = new DockerDeployStepperPage(page);
-        try {
-          await deployPage.navigateTo(cfGuid);
-          await deployPage.waitForStepper();
-          return await deployPage.isOnDockerDeploymentWizard();
-        } catch {
-          return false;
-        }
-      })();
-
-      if (!dockerAvailable) {
-        test.skip(true, 'Docker deployment not available');
-      }
-
-      const deployPage = new DockerDeployStepperPage(page);
-      await deployPage.navigateTo(cfGuid);
-
-      await deployPage.enterDockerImage('nginx:latest');
-      await deployPage.clickNext();
-
-      // Set memory and disk
-      await deployPage.fillContainerConfiguration({
-        instances: 2,
-        memory: 512,
-        disk: 1024
-      });
-
-      // Verify configuration accepted
-      const canProceed = await deployPage.canProceed();
-      expect(canProceed).toBe(true);
-    });
+  /**
+   * Docker deploy UI e2e — DEFERRED (honest skip, tracked for a follow-up).
+   *
+   * The prior tests here were hollow-green: their page object navigated to
+   * routes that no longer exist (/applications/deploy/docker,
+   * /applications/new/:cf/:space/docker), so a try/catch feature-detect always
+   * returned false and every test skipped with the misleading reason "Docker
+   * deployment not available in this CF deployment". Docker deploy IS
+   * available — the nav was simply dead.
+   *
+   * The modern flow lives at /applications/deploy and reaches the Docker image
+   * field only by driving the full wizard: step 1 (CF/org/space custom
+   * app-select, same heavy control as the create wizard) then picking the
+   * "Docker" source type in step 2, which reveals #dockerAppName / #dockerImg
+   * (placeholder "repo/image:tag"; errors "Image is required" / "Invalid Image"
+   * as div.text-danger) / #dockerUsername (optional). Overrides live in the
+   * Overrides step (formControlName startCmd / instances / memory /
+   * healthCheckType).
+   *
+   * Several old tests also modelled UI that no longer exists: a private-registry
+   * URL/password/checkbox (modern Docker auth is the single optional
+   * #dockerUsername field + the app's CF_DOCKER_PASSWORD env var) and an
+   * env-var editor (not part of the deploy wizard). Those must be dropped, not
+   * re-selectored.
+   */
+  test.describe.skip('Docker deploy UI (deferred — needs the /applications/deploy step1+step2 drive)', () => {
+    test.fixme('accept + validate Docker image (#dockerImg, "Invalid Image" error)', () => {});
+    test.fixme('start command + memory overrides (Overrides step formControls)', () => {});
+    test.fixme('optional Docker username — no registry URL/password/checkbox UI exists', () => {});
+    test.fixme('env vars are not set through the deploy wizard — seed via cfApi instead', () => {});
   });
 
-  test.describe('Docker Deploy Errors (UI)', () => {
-    test('should handle invalid image URL', async ({ connectedEndpointsAdminPage }) => {
-      const { page, cfGuid } = connectedEndpointsAdminPage;
-      const dockerAvailable = await (async () => {
-        const deployPage = new DockerDeployStepperPage(page);
-        try {
-          await deployPage.navigateTo(cfGuid);
-          await deployPage.waitForStepper();
-          return await deployPage.isOnDockerDeploymentWizard();
-        } catch {
-          return false;
-        }
-      })();
-
-      if (!dockerAvailable) {
-        test.skip(true, 'Docker deployment not available');
-      }
-
-      const deployPage = new DockerDeployStepperPage(page);
-      await deployPage.navigateTo(cfGuid);
-
-      // Enter clearly invalid image URL
-      await deployPage.enterDockerImage('this is not a valid docker image!@#');
-
-      // Check for validation error
-      const error = await deployPage.getValidationError();
-      // Validation behavior depends on UI implementation
-      // Just verify validation system is working
-      expect(error).toBeDefined();
-    });
-
-    test('should show authentication errors', async ({ connectedEndpointsAdminPage }) => {
-      const { page, cfGuid } = connectedEndpointsAdminPage;
-      test.skip();
-      // Would test:
-      // - Private image with wrong credentials
-      // - Attempt deployment
-      // - Verify auth error displayed
-    });
-
-    test('should handle pull failures', async ({ connectedEndpointsAdminPage }) => {
-      const { page, cfGuid } = connectedEndpointsAdminPage;
-      test.skip();
-      // Would test:
-      // - Non-existent image
-      // - Network failure during pull
-      // - Error message displayed
-    });
-
-    test('should display container start errors', async ({ connectedEndpointsAdminPage }) => {
-      const { page, cfGuid } = connectedEndpointsAdminPage;
-      test.skip();
-      // Would test:
-      // - Image with invalid command
-      // - Container crashes on start
-      // - Error message with logs
-    });
-  });
 });

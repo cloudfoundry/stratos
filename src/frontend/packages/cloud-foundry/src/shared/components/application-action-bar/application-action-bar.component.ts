@@ -1,5 +1,4 @@
-import { CommonModule } from '@angular/common';
-import { ChangeDetectionStrategy, Component, ElementRef, OnDestroy, OnInit, inject } from '@angular/core';
+import { ChangeDetectionStrategy, Component, ElementRef, OnDestroy, OnInit, computed, inject } from '@angular/core';
 import { RouterModule } from '@angular/router';
 
 import {
@@ -7,11 +6,15 @@ import {
   PageSubNavSectionComponent,
 } from '@stratosui/core';
 
+import { AppDetailDataService } from '../../../features/applications/app-detail-data.service';
 import { ApplicationService } from '../../../features/applications/application.service';
+import { activeTabKey } from '../../active-tab-key';
 import { CfCurrentUserPermissions } from '../../../user-permissions/cf-user-permissions-checkers';
 import { CfUserPermissionDirective } from '../../directives/cf-user-permission/cf-user-permission.directive';
 import { AppApplicationActionsService } from '../../services/application-actions.service';
 import { AppLifecycleProgressService } from '../app-lifecycle-progress/app-lifecycle-progress.service';
+import { APPLICATION_CLI_COMMANDS, CliCommandNames, commandsForTab } from '../cli-info/cli-commands';
+import { CliMenuComponent } from '../cli-menu/cli-menu.component';
 
 /**
  * AppApplicationActionBarComponent
@@ -33,11 +36,11 @@ import { AppLifecycleProgressService } from '../app-lifecycle-progress/app-lifec
   standalone: true,
   changeDetection: ChangeDetectionStrategy.OnPush,
   imports: [
-    CommonModule,
     RouterModule,
     PageSubNavComponent,
     PageSubNavSectionComponent,
     CfUserPermissionDirective,
+    CliMenuComponent,
   ],
   // AppApplicationActionsService is now provided at ApplicationTabsBaseComponent
   // level so the BuildTab status card can read its inFlight signal too (for
@@ -46,6 +49,7 @@ import { AppLifecycleProgressService } from '../app-lifecycle-progress/app-lifec
 })
 export class AppApplicationActionBarComponent implements OnInit, OnDestroy {
   applicationService = inject(ApplicationService);
+  detail = inject(AppDetailDataService);
   actions = inject(AppApplicationActionsService);
   private host = inject(ElementRef);
   private progressSvc = inject(AppLifecycleProgressService);
@@ -58,6 +62,18 @@ export class AppApplicationActionBarComponent implements OnInit, OnDestroy {
   // the bar appears with the rest of the page header.
   get isBusy(): boolean { return this.actions.inFlight(); }
   manageAppPermission = CfCurrentUserPermissions.APPLICATION_MANAGE;
+
+  // The CF CLI menu: the commands of the open tab, with the names filled in.
+  private activeTab = activeTabKey();
+  readonly cliCommands = computed(() => commandsForTab(APPLICATION_CLI_COMMANDS, this.activeTab()));
+  readonly cliNames = computed((): CliCommandNames => ({
+    appName: this.detail.app()?.entity?.name,
+    orgName: this.detail.org()?.name ?? '',
+    spaceName: this.detail.space()?.name ?? '',
+  }));
+  // The Visit link is live only for a started app with a route.
+  readonly cannotVisit = computed(() => this.detail.url() === null || !this.detail.running());
+  readonly cliAllLink = ['/applications', this.applicationService.cfGuid, this.applicationService.appGuid, 'cli'];
 
   ngOnInit(): void {
     this.progressSvc.setAnchor(this.host);

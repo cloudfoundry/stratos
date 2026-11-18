@@ -1,4 +1,4 @@
-import { AfterViewInit, Component, ElementRef, Input, Renderer2, ViewChild, inject, ChangeDetectionStrategy } from '@angular/core';
+import { AfterViewInit, Component, ElementRef, Renderer2, inject, ChangeDetectionStrategy, input, viewChild } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { RouterModule } from '@angular/router';
 import { CustomIconComponent } from '../custom-material/custom-material.component';
@@ -22,19 +22,19 @@ export interface NoContentMessageLine {
 })
 export class NoContentMessageComponent implements AfterViewInit {
 
-  @Input() icon?: string;
-  @Input() iconFont?: string;
-  @Input() firstLine?: string;
-  @Input() secondLine?: NoContentMessageLine | null;
-  @Input() otherLines?: NoContentMessageLine[];
-  @Input() toolbarLink?: {
+  readonly icon = input<string>();
+  readonly iconFont = input<string>();
+  readonly firstLine = input<string>();
+  readonly secondLine = input<NoContentMessageLine | null>();
+  readonly otherLines = input<NoContentMessageLine[]>();
+  readonly toolbarLink = input<{
     text: string;
-  };
-  @Input() toolbarAlign?: string;
+}>();
+  readonly toolbarAlign = input<string>();
 
-  @Input() mode?: string;
+  readonly mode = input<string>();
 
-  @ViewChild('toolBarLinkElement', { static: false }) toolBarLinkElement?: ElementRef;
+  readonly toolBarLinkElement = viewChild<ElementRef>('toolBarLinkElement');
   private renderer = inject(Renderer2);
 
   ngAfterViewInit() {
@@ -42,12 +42,22 @@ export class NoContentMessageComponent implements AfterViewInit {
     // Note - Only execute after a delay. The final place of the target element may change given visibility of other menu items
     // (polling disabled, notification bell). We should come back to this and replace the timeout with a better way of determining readyness
     setTimeout(() => {
-      if (this.toolBarLinkElement && this.toolbarAlign) {
-        const elem = document.getElementById(this.toolbarAlign);
+      const toolbarAlign = this.toolbarAlign();
+      const toolBarLinkElement = this.toolBarLinkElement();
+      if (toolBarLinkElement && toolbarAlign) {
+        const elem = document.getElementById(toolbarAlign);
         if (elem) {
-          const right = document.body.clientWidth - elem.getBoundingClientRect().right - 3;
-          this.renderer.setStyle(this.toolBarLinkElement.nativeElement, 'right', right + 'px');
-          this.renderer.addClass(this.toolBarLinkElement.nativeElement, 'app-no-content-container__link--show');
+          // The prompt is placed inside its container, which starts well
+          // below the toolbar, so measure both offsets from the container.
+          // Its arrow starts below the page header's bar, which draws over
+          // anything inside it.
+          const link: HTMLElement = toolBarLinkElement.nativeElement;
+          const target = elem.getBoundingClientRect();
+          const top = (elem.closest('.page-header-outer') ?? elem).getBoundingClientRect().bottom;
+          const box = link.parentElement!.getBoundingClientRect();
+          this.renderer.setStyle(link, 'top', (top - box.top) + 'px');
+          this.renderer.setStyle(link, 'right', (box.right - target.right - 3) + 'px');
+          this.renderer.addClass(toolBarLinkElement.nativeElement, 'app-no-content-container__link--show');
         }
       }
     }, 500);

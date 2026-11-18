@@ -1,8 +1,6 @@
 import { CommonModule } from '@angular/common';
-import { ChangeDetectionStrategy, Component, Signal, WritableSignal, computed, inject, signal } from '@angular/core';
-import { toSignal } from '@angular/core/rxjs-interop';
+import { DestroyRef, ChangeDetectionStrategy, Component, Signal, WritableSignal, computed, inject, signal } from '@angular/core';
 import { Router, RouterModule } from '@angular/router';
-import { map } from 'rxjs/operators';
 
 import {
   ConfirmationDialogService,
@@ -11,7 +9,6 @@ import {
   ListSubNavComponent,
   SignalListComponent,
   SignalListConfig,
-  SignalListPillColor,
   SignalListRowAction,
   TailwindSnackBarService,
 } from '@stratosui/core';
@@ -29,6 +26,7 @@ import { boundAppSegments, renderBoundApps } from '../../../../../../../shared/s
 import { renderServiceKeyCount, serviceKeysLink, serviceKeysLinkQueryParams } from '../../../../../../../shared/signal-list-configs/service-keys-count-cell';
 import { dashboardLink, renderDashboard } from '../../../../../../../shared/signal-list-configs/dashboard-link-cell';
 import { buildServiceInstanceRowActions } from '../../../../../../../shared/signal-list-configs/service-instance/service-instance-row-actions';
+import { lastOperationColumn, lastOperationLabel } from '../../../../../../../shared/signal-list-configs/service-instance/service-instance-columns';
 import type { StServiceInstance } from '../../../../../../../services/endpoint-data/stratos-types';
 
 // Scoped to one space under one org under one CF endpoint. Reuses the wall's
@@ -58,6 +56,7 @@ export class CloudFoundrySpaceServiceInstancesSignalComponent {
   cfOrgService = inject(CloudFoundryOrganizationService);
   cfSpaceService = inject(CloudFoundrySpaceService);
   private instancesConfig = inject(CfServiceInstancesSignalConfigService);
+  private readonly destroyRef = inject(DestroyRef);
   private userFavoriteManager = inject(UserFavoriteManager);
   private confirmDialog = inject(ConfirmationDialogService);
   private snackBar = inject(TailwindSnackBarService);
@@ -73,15 +72,11 @@ export class CloudFoundrySpaceServiceInstancesSignalComponent {
   public readonly countPending: Signal<boolean> = computed(() => !this.instancesConfig.hasLoadedOnce());
 
   /** Gate the Add button on space-scoped SERVICE_INSTANCE_CREATE
-   *  (SPACE_DEVELOPER). Built here in the injection context so toSignal()
-   *  resolves. */
-  public readonly canCreateServiceInstance: Signal<boolean> = toSignal(
-    this.permissionsService.can(
-      CfCurrentUserPermissions.SERVICE_INSTANCE_CREATE,
-      this.cfEndpointService.cfGuid,
-      this.cfSpaceService.spaceGuid,
-    ),
-    { initialValue: false },
+   *  (SPACE_DEVELOPER). */
+  public readonly canCreateServiceInstance: Signal<boolean> = this.permissionsService.can(
+    CfCurrentUserPermissions.SERVICE_INSTANCE_CREATE,
+    this.cfEndpointService.cfGuid,
+    this.cfSpaceService.spaceGuid,
   );
 
   /** L5 primary action — opens the add-service-instance wizard straight to
@@ -100,26 +95,8 @@ export class CloudFoundrySpaceServiceInstancesSignalComponent {
   // service-instance favorites only. The wall ORs both managed and
   // user-provided entity types because either kind shows up there;
   // here we narrow to the managed bucket since the page is too.
-  private readonly favoriteRowKeys: Signal<ReadonlySet<string>> = toSignal(
-    this.userFavoriteManager.getAllFavorites().pipe(
-      map(([groups, entities]) => {
-        const out = new Set<string>();
-        if (!groups || !entities) return out;
-        for (const epFavGuid in groups) {
-          const g = groups[epFavGuid];
-          if (!g?.entitiesIds) continue;
-          for (const favId of g.entitiesIds) {
-            const fav = entities[favId];
-            if (!fav || fav.endpointType !== 'cf') continue;
-            if (fav.entityType === serviceInstancesEntityType) {
-              out.add(`${fav.endpointId}:${fav.entityId}`);
-            }
-          }
-        }
-        return out;
-      }),
-    ),
-    { initialValue: new Set<string>() },
+  private readonly favoriteRowKeys: Signal<ReadonlySet<string>> = computed(() =>
+    this.userFavoriteManager.entityFavoriteKeys('cf', [serviceInstancesEntityType]),
   );
 
   public listConfig: WritableSignal<SignalListConfig<StServiceInstance> | undefined> = signal(undefined);
@@ -139,16 +116,6 @@ export class CloudFoundrySpaceServiceInstancesSignalComponent {
     const renderTags = (si: StServiceInstance): string => {
       const tags = si.tags ?? [];
       return tags.length === 0 ? '—' : tags.join(', ');
-    };
-
-    const renderLastOp = (si: StServiceInstance): string => si.lastOperation.state ?? '';
-
-    const lastOpColor = (si: StServiceInstance): SignalListPillColor => {
-      const state = (si.lastOperation.state ?? '').toLowerCase();
-      if (state === 'succeeded') return 'success';
-      if (state === 'in progress') return 'warning';
-      if (state === 'failed') return 'danger';
-      return 'neutral';
     };
 
     const renderCreated = (si: StServiceInstance): string =>
@@ -181,13 +148,7 @@ export class CloudFoundrySpaceServiceInstancesSignalComponent {
           render: renderService,
           widthHint: '12rem',
         },
-        {
-          header: 'Last Operation', key: 'lastOp', sortField: renderLastOp,
-          kind: 'pill',
-          pillColor: lastOpColor,
-          render: renderLastOp,
-          widthHint: '10rem',
-        },
+        lastOperationColumn(),
         {
           header: 'Dashboard', key: 'dashboard', kind: 'link',
           render: renderDashboard,
@@ -254,11 +215,12 @@ export class CloudFoundrySpaceServiceInstancesSignalComponent {
     });
 
     this.instancesConfig.registerSortExtractor('service', renderService);
-    this.instancesConfig.registerSortExtractor('lastOp', renderLastOp);
+    this.instancesConfig.registerSortExtractor('lastOp', lastOperationLabel);
     this.instancesConfig.registerSortExtractor('tags', renderTags);
     this.instancesConfig.registerFilterExtractor('name', (si: StServiceInstance) => si.name ?? '');
 
     void this.instancesConfig.loadAll().then(() => this.instancesConfig.ensureServiceKeyCounts());
+    this.instancesConfig.startProgressPolling(this.destroyRef);
   }
 
   private toggleFavorite(si: StServiceInstance): void {

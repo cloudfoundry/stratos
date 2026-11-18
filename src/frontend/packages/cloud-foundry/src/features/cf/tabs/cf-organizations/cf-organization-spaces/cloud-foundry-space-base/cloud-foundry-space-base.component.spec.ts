@@ -1,5 +1,5 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
-import { provideZonelessChangeDetection } from '@angular/core';
+import { provideZonelessChangeDetection, signal } from '@angular/core';
 import { provideRouter } from '@angular/router';
 import { provideHttpClient } from '@angular/common/http';
 import { provideHttpClientTesting } from '@angular/common/http/testing';
@@ -15,82 +15,43 @@ import { ActiveRouteCfOrgSpace } from '../../../../cf-page.types';
 import { CloudFoundrySpaceService } from '../../../../services/cloud-foundry-space.service';
 import { CloudFoundryOrganizationService } from '../../../../services/cloud-foundry-organization.service';
 import { CloudFoundryEndpointService } from '../../../../services/cloud-foundry-endpoint.service';
+import { SpaceDataService } from '../../../../../../services/endpoint-data/space-data.service';
 import { CloudFoundrySpaceBaseComponent } from './cloud-foundry-space-base.component';
 
 describe('CloudFoundrySpaceBaseComponent', () => {
   let component: CloudFoundrySpaceBaseComponent;
   let fixture: ComponentFixture<CloudFoundrySpaceBaseComponent>;
 
+  const mockSpaceDataService = {
+    space: signal<{ guid: string; name: string; quotaGuid?: string } | null>(null),
+    isLoading: signal(false),
+    load: () => of(undefined),
+  };
+
+  // The CLI menu in the sub-nav reads the space's name.
   const mockSpaceService = {
     cfGuid: 'cf-guid',
     orgGuid: 'org-guid',
     spaceGuid: 'space-guid',
-    space$: of({
-      entity: {
-        entity: {
-          name: 'test-space',
-          guid: 'space-guid',
-          space_quota_definition: null
-        },
-        metadata: {
-          guid: 'space-guid'
-        }
-      },
-      entityRequestInfo: {
-        fetching: false,
-        error: false,
-        deleting: { busy: false, deleted: false }
-      }
-    })
+    spaceDataService: mockSpaceDataService,
   };
 
+  const org = signal<{ guid: string, name: string } | null>(null);
   const mockOrgService = {
     cfGuid: 'cf-guid',
     orgGuid: 'org-guid',
-    org$: of({
-      entity: {
-        entity: {
-          name: 'test-org',
-          guid: 'org-guid'
-        },
-        metadata: {
-          guid: 'org-guid'
-        }
-      },
-      entityRequestInfo: {
-        fetching: false,
-        error: false
-      }
-    })
+    orgDataService: { org },
   };
 
   const mockEndpointService = {
     cfGuid: 'cf-guid',
-    endpoint$: of({
+    endpoint: signal({
       entity: {
         guid: 'cf-guid',
         name: 'Test CF',
         api_endpoint: { Host: 'api.example.com' }
       }
     }),
-    currentUser$: of({
-      guid: 'user-guid',
-      name: 'test-user',
-      admin: false
-    }),
-    apps$: of([]),
-    hasApps$: of(true),
-    appsLoading$: of(false),
-    getAppsInOrgViaAllApps: () => of([]),
-    getMetricFromApps: () => 0,
-    fetchApps: () => {},
-    // A.#1 added instance methods on CloudFoundryEndpointService; the
-    // component re-instantiates CloudFoundryOrganizationService via its
-    // own component-level provider (overriding the test's mock org
-    // service), so the real org service runs against this mocked endpoint
-    // and needs the instance count helpers stubbed.
-    fetchAppCount: () => of(0),
-    fetchRouteCount: () => of(0),
   };
 
   const mockActiveRoute = {
@@ -131,6 +92,15 @@ describe('CloudFoundrySpaceBaseComponent', () => {
         TailwindSnackBarService,
       ]
     })
+      .overrideComponent(CloudFoundrySpaceBaseComponent, {
+        set: {
+          providers: [
+            { provide: CloudFoundrySpaceService, useValue: mockSpaceService },
+            { provide: CloudFoundryOrganizationService, useValue: mockOrgService },
+            { provide: SpaceDataService, useValue: mockSpaceDataService },
+          ]
+        }
+      })
       .compileComponents();
 
     // Set EntityCatalogHelper after TestBed is configured
@@ -138,13 +108,43 @@ describe('CloudFoundrySpaceBaseComponent', () => {
     EntityCatalogHelpers.SetEntityCatalogHelper(helper);
   });
 
-  beforeEach(() => {
+  beforeEach(async () => {
     fixture = TestBed.createComponent(CloudFoundrySpaceBaseComponent);
     component = fixture.componentInstance;
-    fixture.detectChanges();
+    await fixture.whenStable();
   });
 
   it('should create', () => {
     expect(component).toBeTruthy();
+  });
+
+  // Both crumbs wait for the org: the space page names its org.
+  it('links back to the endpoint\'s organizations and the org\'s spaces once the org is in', () => {
+    expect(component.breadcrumbs()).toBeNull();
+    org.set({ guid: 'org-guid', name: 'test-org' });
+    expect(component.breadcrumbs()?.[0].breadcrumbs).toEqual([
+      { value: 'Test CF', routerLink: '/cloud-foundry/cf-guid/organizations' },
+      { value: 'test-org', routerLink: '/cloud-foundry/cf-guid/organizations/org-guid/spaces' },
+    ]);
+    org.set(null);
+  });
+
+  // The Quota tab stayed hidden (or shown) as it was when the space first
+  // loaded, however the space's quota changed afterwards.
+  it('shows the Quota tab once the space gets a quota, and hides it again when it loses it', async () => {
+    const quotaTab = () => component.tabLinks().find(t => t.link === 'space-quota');
+    expect(quotaTab()).toBeUndefined();
+
+    mockSpaceDataService.space.set({ guid: 'space-guid', name: 's' });
+    await fixture.whenStable();
+    expect(quotaTab()?.isHidden?.()).toBe(true);
+
+    mockSpaceDataService.space.set({ guid: 'space-guid', name: 's', quotaGuid: 'quota-1' });
+    await fixture.whenStable();
+    expect(quotaTab()?.isHidden?.()).toBe(false);
+
+    mockSpaceDataService.space.set({ guid: 'space-guid', name: 's' });
+    await fixture.whenStable();
+    expect(quotaTab()?.isHidden?.()).toBe(true);
   });
 });

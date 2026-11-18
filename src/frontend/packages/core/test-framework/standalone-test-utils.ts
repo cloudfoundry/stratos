@@ -36,7 +36,7 @@ export interface TestHostConfig {
  *   template: `<app-my-component [input]="testInput"></app-my-component>`
  * })
  * class TestHostComponent {
- *   @Input() testInput: any;
+ *   testInput: any;
  * }
  * ```
  *
@@ -144,7 +144,7 @@ export function configureStandaloneTestBed(
  *      template: `<app-my-component [input]="data"></app-my-component>`
  *    })
  *    class TestHostComponent {
- *      @Input() data: any;
+ *      data: any;
  *    }
  *
  *    beforeEach(() => {

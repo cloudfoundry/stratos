@@ -62,9 +62,11 @@ export function buildMetricData(
       };
       result.markline = buildMarkLineData(target, trigger);
     }
+    const latest = data.resources[data.resources.length - 1];
     result.latest.target = [{
       name: metricName,
-      value: Number(data.resources[data.resources.length - 1].value)
+      value: Number(latest.value),
+      time: Math.round(latest.timestamp / AutoscalerConstants.S2NS),
     }];
     result.latest.colorTarget = buildMetricColorData(result.latest.target, trigger);
   }

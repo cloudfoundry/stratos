@@ -1,26 +1,23 @@
 import { HttpClient } from '@angular/common/http';
 import { Injectable, Injector, Signal, computed, inject, signal } from '@angular/core';
-import { toObservable, toSignal } from '@angular/core/rxjs-interop';
-import { EMPTY, Observable, Subscription, from } from 'rxjs';
-import { catchError, take, filter, map, publishReplay, refCount } from 'rxjs/operators';
-import { of } from 'rxjs';
+import { toSignal } from '@angular/core/rxjs-interop';
+import { Observable, from, of } from 'rxjs';
+import { catchError, map } from 'rxjs/operators';
 
 import { CfInfoDataRegistry } from '../../../services/endpoint-data/cf-info-data.registry';
 import { CfInfoDataService } from '../../../services/endpoint-data/cf-info-data.service';
-import { CnsiUsersSnapshotService } from '../../../services/endpoint-data/cnsi-users-snapshot.service';
+import { CfUsersPagedDataService } from '../../../shared/data-services/cf-users-paged-data.service';
 import { EndpointDataRegistry } from '../../../services/endpoint-data/endpoint-data.registry';
 import { EndpointDataService } from '../../../services/endpoint-data/endpoint-data.service';
 import { stAppToAPIResource } from '../../../services/endpoint-data/st-app-adapter';
-import { stOrgToAPIResource } from '../../../services/endpoint-data/st-org-adapter';
 
 import {
   EndpointsDataService,
   getDefaultRequestState,
   APIResource,
   EntityInfo,
-  EndpointModel,
-  EndpointUser } from '@stratosui/store';
-import { IApp, ICfV2Info, IOrganization, ISpace } from '../../../cf-api.types';
+  EndpointModel } from '@stratosui/store';
+import { IApp, ICfV2Info } from '../../../cf-api.types';
 import { CfApplicationState } from '../../../store/types/application.types';
 import { ActiveRouteCfOrgSpace } from '../cf-page.types';
 
@@ -42,7 +39,7 @@ export function appDataSort(app1: APIResource<IApp>, app2: APIResource<IApp>): n
 })
 export class CloudFoundryEndpointService {
   activeRouteCfOrgSpace = inject(ActiveRouteCfOrgSpace);
-  private cnsiUsers = inject(CnsiUsersSnapshotService);
+  private cnsiUsers = inject(CfUsersPagedDataService);
   private endpointDataRegistry = inject(EndpointDataRegistry);
   private cfInfoDataRegistry = inject(CfInfoDataRegistry);
   private endpointsData = inject(EndpointsDataService);
@@ -50,41 +47,30 @@ export class CloudFoundryEndpointService {
   private injector = inject(Injector);
 
 
-  hasSSHAccess$!: Observable<boolean>;
-  totalMem$!: Observable<number>;
-  paginationSubscription!: Subscription;
-  // Signal-native apps stream — backed by EndpointDataService.apps via the
-  // EndpointDataRegistry-managed load() / loadDetails() pipeline. Replaces
-  // the legacy `appsPagObs` PaginationObservables that hit
-  // /pp/v1/cf/apps?...&results-per-page=100 in parallel with the
-  // signal-native ?per_page=500 fetch and double-fired every downstream
-  // consumer (recent-apps stats fetch, totals, list filters).
+  apps!: Signal<APIResource<IApp>[]>;
+  appsLoading!: Signal<boolean>;
+  /**
+   * Apps for the recently-updated card: the full list once it has been
+   * fetched, before that the newest apps from the counts call, so the
+   * card does not say "no applications" while the full list loads.
+   */
+  recentApps!: Signal<APIResource<IApp>[]>;
+  hasApps!: Signal<boolean>;
+  appCount!: Signal<number>;
+  totalMem!: Signal<number>;
+  usersCount!: Signal<number | null>;
+  info!: Signal<ICfV2Info | null>;
+  hasSSHAccess!: Signal<boolean>;
+
+  // Signal-native apps — backed by EndpointDataService.apps via the
+  // EndpointDataRegistry-managed load() / loadDetails() pipeline.
   endpointData!: EndpointDataService;
-  apps$!: Observable<APIResource<IApp>[]>;
-  appsLoading$!: Observable<boolean>;
-  hasApps$!: Observable<boolean>;
-  appCount$!: Observable<number>;
-  usersCount$!: Observable<number | null>;
-  orgs$!: Observable<APIResource<IOrganization>[]>;
   // V3-native: CF info flows as ICfV2Info directly (no EntityInfo/APIResource
   // envelope). Field names still match the legacy /v2/info wire shape so
   // consumers reading p.api_version / p.app_ssh_endpoint etc. keep working.
-  info$!: Observable<ICfV2Info>;
   cfInfoData!: CfInfoDataService;
-  endpoint$!: Observable<EntityInfo<EndpointModel>>;
-  /**
-   * Sync signal mirror of `endpoint$`. Hot read from anywhere — no race,
-   * no observable subscription. Use this for one-shot reads at action
-   * time (e.g. building a confirm dialog) where awaiting an observable
-   * loses to the 1s fallback when the underlying observable hasn't yet
-   * emitted a value through fresh subscribers (post route-recreate).
-   * `endpoint$` stays for stream consumers (combineLatest, derived
-   * observables, async-pipe templates).
-   */
+  /** The endpoint, undefined until the endpoints list has it. */
   endpoint!: Signal<EntityInfo<EndpointModel> | undefined>;
-  cfEndpointEntityService: any;
-  connected$!: Observable<boolean>;
-  currentUser$!: Observable<EndpointUser>;
   cfGuid: string;
 
   // Instance helpers replacing the static V2 ngrx-pagination count fetchers.
@@ -120,38 +106,30 @@ export class CloudFoundryEndpointService {
     const activeRouteCfOrgSpace = this.activeRouteCfOrgSpace;
 
     this.cfGuid = activeRouteCfOrgSpace.cfGuid;
-    // W36-B Wave 3: keep cfEndpointEntityService unset — the legacy
-    // EntityService is no longer the source for endpoint reads. The
-    // field is retained as `any` for backward-compat (some downstream
-    // tests still reference its type) but no consumer reads from it
-    // directly within this service.
-    this.cfEndpointEntityService = null;
 
     // Guard: when constructed outside a CF route subtree (e.g. CDK overlay
     // injector for the Add User dialog) cfGuid is undefined. Skip ALL data
     // prefetches — no acquire(), no load(), no HTTP — to prevent the 502
-    // storm of /pp/v1/cf/<resource>/undefined requests. All observable
-    // fields are initialised to inert empty streams so downstream consumers
-    // that happen to read them do not throw.
+    // storm of /pp/v1/cf/<resource>/undefined requests. All members are
+    // initialised to inert values so downstream consumers that happen to
+    // read them do not throw.
     if (!this.cfGuid) {
       this.cfInfoData = { info: signal(null) } as unknown as CfInfoDataService;
-      this.endpoint$ = EMPTY;
+      this.apps = signal([]);
+      this.recentApps = signal([]);
+      this.appsLoading = signal(false);
+      this.hasApps = signal(false);
+      this.appCount = signal(0);
+      this.totalMem = signal(0);
+      this.usersCount = signal(null);
+      this.info = signal(null);
+      this.hasSSHAccess = signal(false);
       this.endpoint = signal(undefined);
-      this.info$ = EMPTY;
-      this.usersCount$ = EMPTY;
-      this.apps$ = EMPTY;
-      this.appsLoading$ = EMPTY;
-      this.hasApps$ = EMPTY;
-      this.appCount$ = EMPTY;
-      this.orgs$ = EMPTY;
-      this.hasSSHAccess$ = EMPTY;
-      this.totalMem$ = EMPTY;
-      this.connected$ = EMPTY;
-      this.currentUser$ = EMPTY;
       this.endpointData = {
         apps: signal([]),
         orgs: signal([]),
         appCount: signal(0),
+        orgCount: signal(0),
         isLoadingDetails: signal(false),
       } as unknown as EndpointDataService;
       return;
@@ -164,36 +142,31 @@ export class CloudFoundryEndpointService {
     this.cfInfoData = this.cfInfoDataRegistry.acquire(this.cfGuid);
     this.cfInfoData.load().subscribe({ error: () => {} });
     this.constructCoreObservables();
-    this.constructSecondaryObservable();
   }
 
   private constructCoreObservables() {
-    // W36-B Wave 3: replace cfEndpointEntityService.waitForEntity$ with
-    // the signal-native EndpointsDataService.waitFor() promise lifted
-    // to an Observable. Wrap in EntityInfo envelope so existing
-    // downstream consumers (`endpoint$.entity.foo`) keep working —
-    // those consumers are out of Wave 3 scope.
-    this.endpoint$ = from(this.endpointsData.waitFor(this.cfGuid)).pipe(
+    // EndpointsDataService.waitFor() resolves once the endpoints list has
+    // the endpoint; wrapped in the EntityInfo envelope readers expect.
+    const endpoint$ = from(this.endpointsData.waitFor(this.cfGuid)).pipe(
       map((endpoint: EndpointModel) => ({
         entity: endpoint,
         entityRequestInfo: getDefaultRequestState(),
       } as EntityInfo<EndpointModel>)),
     );
-    // Sync mirror — backs the new `endpoint` signal. toSignal needs an
-    // injection context; we have one because constructCoreObservables runs
-    // during constructor execution.
-    this.endpoint = toSignal(this.endpoint$, { initialValue: undefined, injector: this.injector });
+    // toSignal needs an injection context: this runs in the constructor.
+    this.endpoint = toSignal(endpoint$, { initialValue: undefined, injector: this.injector });
 
-    this.info$ = toObservable(this.cfInfoData.info, { injector: this.injector }).pipe(
-      filter((info): info is ICfV2Info => !!info),
-    );
+    this.info = this.cfInfoData.info;
+    this.hasSSHAccess = computed(() => {
+      const info = this.info();
+      return !!(info?.app_ssh_endpoint && info.app_ssh_host_key_fingerprint && info.app_ssh_oauth_client);
+    });
 
-    // V3-native: lazy snapshot of /pp/v1/cf/users/:cnsi. Counts every user
+    // V3-native: lazy read of the /pp/v1/cf/users/:cnsi cache. Counts every user
     // visible to the connected principal — admin sees the whole CNSI; non-
     // admin sees the role-restricted subset that getNativeUsers returns.
-    this.usersCount$ = toObservable(this.cnsiUsers.users(this.cfGuid), { injector: this.injector }).pipe(
-      map(users => users === null ? null : users.length),
-    );
+    const users = this.cnsiUsers.users(this.cfGuid);
+    this.usersCount = computed(() => users()?.length ?? null);
 
     this.constructAppObs();
   }
@@ -201,68 +174,16 @@ export class CloudFoundryEndpointService {
   constructAppObs() {
     // Signal-native apps pipeline — acquire() schedules load() (counts +
     // recent apps fast path) which chains into loadDetails() (full apps
-    // list at ?per_page=500). The legacy ngrx pagination fetcher
-    // (cfEntityCatalog.application.store.getPaginationService) is gone;
-    // every CF page-tree consumer now reads through these observables
-    // bridged off the EndpointDataService signals.
+    // list at ?per_page=500).
     this.endpointData = this.endpointDataRegistry.acquire(this.cfGuid);
-    const appsResources = computed(() => this.endpointData.apps().map(stAppToAPIResource));
-    this.apps$ = toObservable(appsResources, { injector: this.injector });
-    this.appsLoading$ = toObservable(this.endpointData.isLoadingDetails, { injector: this.injector });
-    this.hasApps$ = toObservable(
-      computed(() => this.endpointData.apps().length > 0),
-      { injector: this.injector },
-    );
-    this.appCount$ = toObservable(this.endpointData.appCount, { injector: this.injector });
-
-    // V3-native orgs pipeline — replaces the legacy
-    // cfEntityCatalog.org.actions.getMultiple(... includeRelations: [...])
-    // path that fired ?include-relations=spaces,domains,quotas,private_domains
-    // on every CF endpoint nav. EndpointDataService.loadDetails() drains all
-    // pages from /pp/v1/cf/orgs/{cnsi} (page 1 inline, pages 2..N parallel)
-    // so the full org list is exposed — bridge StOrg[] back into the legacy
-    // APIResource<IOrganization>[] envelope so add-/edit-organization name-
-    // uniqueness checks (the only remaining consumers) keep compiling.
-    const orgsResources = computed(() => this.endpointData.orgs().map(stOrgToAPIResource));
-    this.orgs$ = toObservable(orgsResources, { injector: this.injector });
-  }
-
-  private constructSecondaryObservable() {
-    this.hasSSHAccess$ = this.info$.pipe(
-      map(info => !!(info.app_ssh_endpoint
-        && info.app_ssh_host_key_fingerprint
-        && info.app_ssh_oauth_client))
-    );
-    this.totalMem$ = this.apps$.pipe(map(apps => this.getMetricFromApps(apps, 'memory')));
-
-    this.connected$ = this.endpoint$.pipe(
-      map(p => p.entity.connectionStatus === 'connected')
-    );
-
-    this.currentUser$ = this.endpoint$.pipe(
-      map(e => e.entity.user),
-      filter((user): user is EndpointUser => !!user),
-      take(1), publishReplay(1), refCount());
-  }
-
-  public getAppsInOrgViaAllApps(org: APIResource<IOrganization>): Observable<APIResource<IApp>[]> {
-    return this.apps$.pipe(
-      filter(allApps => !!allApps),
-      map(allApps => {
-        const spaces = org.entity.spaces || [];
-        const orgSpaces = spaces.map(s => s.metadata.guid);
-        return allApps.filter(a => orgSpaces.indexOf(a.entity.space_guid) !== -1);
-      })
-    );
-  }
-
-  public getAppsInSpaceViaAllApps(space: APIResource<ISpace>): Observable<APIResource<IApp>[]> {
-    return this.apps$.pipe(
-      filter(allApps => !!allApps),
-      map(apps => {
-        return apps.filter(a => a.entity.space_guid === space.metadata.guid);
-      })
-    );
+    this.apps = computed(() => this.endpointData.apps().map(stAppToAPIResource));
+    this.appsLoading = this.endpointData.isLoadingDetails;
+    this.recentApps = computed(() => this.endpointData.appsLastFetched()
+      ? this.apps()
+      : this.endpointData.recentApps().map(stAppToAPIResource));
+    this.hasApps = computed(() => this.endpointData.apps().length > 0);
+    this.appCount = this.endpointData.appCount;
+    this.totalMem = computed(() => this.getMetricFromApps(this.apps(), 'memory'));
   }
 
   public getMetricFromApps(apps: APIResource<IApp>[], statMetric: string): number {

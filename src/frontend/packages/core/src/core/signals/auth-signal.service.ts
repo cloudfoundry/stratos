@@ -1,5 +1,6 @@
-import { Injectable, Signal, inject } from '@angular/core';
-import { AuthDataService, AuthState, RouterRedirect, SessionData } from '@stratosui/store';
+import { Injectable, Injector, Signal, inject } from '@angular/core';
+import { AuthDataService, AuthState, observeSignal, RouterRedirect, SessionData } from '@stratosui/store';
+import { Observable } from 'rxjs';
 
 /**
  * W36-C Wave 1 — thin signal-native facade over {@link AuthDataService}.
@@ -19,6 +20,13 @@ export class AuthSignalService {
 
   /** Raw auth slice. `undefined` until the data service mirrors its first value. */
   readonly auth: Signal<AuthState | undefined> = this.authData.auth;
+
+  /**
+   * `auth` as an observable, built once for the route guards. Each subscriber
+   * gets its own watcher, which ends when it unsubscribes. toObservable()
+   * called per guard run left a root watcher behind on every navigation.
+   */
+  readonly auth$: Observable<AuthState | undefined> = observeSignal(this.auth, inject(Injector));
 
   readonly loggedIn: Signal<boolean> = this.authData.loggedIn;
   readonly loggingIn: Signal<boolean> = this.authData.loggingIn;

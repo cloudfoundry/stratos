@@ -10,6 +10,7 @@ import { AppApplicationActionsService } from '../../shared/services/application-
 import { AppLifecycleStateService } from './app-lifecycle-state.service';
 import { ApplicationStateService } from '../../shared/services/application-state.service';
 import { StAppDetail, StRoute } from '../../services/endpoint-data/stratos-types';
+import { EndpointDataRegistry } from '../../services/endpoint-data/endpoint-data.registry';
 
 // ---------------------------------------------------------------------------
 // Constants
@@ -136,11 +137,12 @@ const MOCK_DOMAINS_RESPONSE = {
 };
 
 /**
- * Yield to the microtask queue so that Promise.all / await chains inside
- * AppDetailDataService can advance between HTTP-flush phases.
+ * Flush effects (resource requests start there) and yield to the microtask
+ * queue so AppDetailDataService can advance between HTTP-flush phases.
  */
 async function tick(times = 4): Promise<void> {
   for (let i = 0; i < times; i++) {
+    TestBed.tick();
     await Promise.resolve();
   }
 }
@@ -177,6 +179,30 @@ describe('AppDetailDataService', () => {
   });
 
   afterEach(() => httpMock.verify());
+
+  it('update() clears its busy state when the endpoint data cannot be acquired', async () => {
+    vi.spyOn(TestBed.inject(EndpointDataRegistry), 'acquire').mockImplementation(() => {
+      throw new Error('registry unavailable');
+    });
+    await expect(svc.update({ name: 'x' })).rejects.toThrow('registry unavailable');
+    expect(svc.updating()).toBe(false);
+  });
+
+  it('update() re-reads the app and rejects when a sub-call failed', async () => {
+    const updating = svc.update({ name: 'taken', enable_ssh: false });
+    expect(svc.updating()).toBe(true);
+    httpMock.expectOne(r => r.method === 'PATCH' && r.url === `/pp/v1/cf/apps/${CNSI}/${APP_GUID}`)
+      .flush({ guid: APP_GUID, _meta: { errors: [
+        { code: 'CF-10008', title: 'CF-UnprocessableEntity', detail: 'name must be unique in space', affected: ['name'] },
+      ] } });
+    await tick();
+    // The SSH change did apply, so the detail is re-read before rejecting.
+    httpMock.expectOne(DETAIL_URL).flush({ ...MOCK_APP_DETAIL, sshEnabled: false });
+    await expect(updating).rejects.toThrow('name must be unique in space');
+    expect(svc.appDetail()?.sshEnabled).toBe(false);
+    expect(svc.updating()).toBe(false);
+    for (const pending of httpMock.match(() => true)) pending.flush({ resources: [], pagination: { totalResults: 0, totalPages: 0 } });
+  });
 
   // -------------------------------------------------------------------------
   // Initial state
@@ -287,10 +313,35 @@ describe('AppDetailDataService', () => {
   // fetching() derived signal
   // -------------------------------------------------------------------------
 
-  it('fetching() is true while any entity loading flag is set', () => {
-    svc['_loading'].update(m => ({ ...m, app: true }));
+  it('traces each fetch only when localStorage.stratosDebug is set', async () => {
+    const debug = vi.spyOn(console, 'debug').mockImplementation(() => {});
+    try {
+      localStorage.removeItem('stratosDebug');
+      let done = svc.refresh('app');
+      await tick();
+      httpMock.expectOne(DETAIL_URL).flush(MOCK_APP_DETAIL);
+      await done;
+      expect(debug).not.toHaveBeenCalled();
+
+      localStorage.setItem('stratosDebug', '1');
+      done = svc.refresh('app');
+      await tick();
+      httpMock.expectOne(DETAIL_URL).flush(MOCK_APP_DETAIL);
+      await done;
+      await tick();
+      expect(debug).toHaveBeenCalledWith('[AppDetailData]', 'app', 'ok', expect.stringMatching(/ms$/), DETAIL_URL, '');
+    } finally {
+      localStorage.removeItem('stratosDebug');
+      debug.mockRestore();
+    }
+  });
+
+  it('fetching() is true while any entity request is in flight', async () => {
+    const done = svc.refresh('app');
     expect(svc.fetching()).toBe(true);
-    svc['_loading'].update(m => ({ ...m, app: false }));
+    await tick();
+    httpMock.expectOne(DETAIL_URL).flush(MOCK_APP_DETAIL);
+    await done;
     expect(svc.fetching()).toBe(false);
   });
 
@@ -428,6 +479,83 @@ describe('AppDetailDataService', () => {
     httpMock.expectNone(STATS_URL);
   });
 
+  // A poll asks for one kind again. The kinds already loaded keep their
+  // data and are not fetched again: a request built anew starts the
+  // resource over, its value goes undefined, and the tab that shows it
+  // is removed and drawn again (its open parts closed, focus lost).
+  it('refresh("stats") after a full load re-reads only the stats and keeps the loaded data', async () => {
+    const all = svc.refresh('all');
+    await tick();
+    httpMock.expectOne(DETAIL_URL).flush(MOCK_APP_DETAIL);
+    httpMock.expectOne(ENV_URL).flush(MOCK_ENV);
+    await tick();
+    httpMock.expectOne(STATS_URL).flush(MOCK_STATS_RESPONSE);
+    await tick();
+    httpMock.expectOne(`/pp/v1/cf/spaces/cnsi-1/sp-1`).flush(MOCK_SPACE);
+    await tick();
+    httpMock.expectOne(`/pp/v1/cf/org/cnsi-1/org-1`).flush(MOCK_ORG);
+    await tick();
+    httpMock.expectOne(`/pp/v1/cf/org/cnsi-1/org-1/private_domains`).flush(MOCK_DOMAINS_RESPONSE);
+    await all;
+
+    const stats = svc.refresh('stats');
+    await tick();
+    expect(svc.appDetail()).toEqual(MOCK_APP_DETAIL);
+    expect(svc.space()).toEqual(MOCK_SPACE);
+    httpMock.expectNone(DETAIL_URL);
+    httpMock.expectNone(ENV_URL);
+    httpMock.expectNone(`/pp/v1/cf/spaces/cnsi-1/sp-1`);
+    httpMock.expectNone(`/pp/v1/cf/org/cnsi-1/org-1`);
+    httpMock.expectNone(`/pp/v1/cf/org/cnsi-1/org-1/private_domains`);
+    httpMock.expectOne(STATS_URL).flush(MOCK_STATS_RESPONSE);
+    await stats;
+    expect(svc.appDetail()).toEqual(MOCK_APP_DETAIL);
+    expect(svc.envVars()).toEqual(MOCK_ENV);
+    expect(svc.org()).toEqual(MOCK_ORG);
+  });
+
+  async function loadAll(): Promise<void> {
+    const all = svc.refresh('all');
+    await tick();
+    httpMock.expectOne(DETAIL_URL).flush(MOCK_APP_DETAIL);
+    httpMock.expectOne(ENV_URL).flush(MOCK_ENV);
+    await tick();
+    httpMock.expectOne(STATS_URL).flush(MOCK_STATS_RESPONSE);
+    await tick();
+    httpMock.expectOne(`/pp/v1/cf/spaces/cnsi-1/sp-1`).flush(MOCK_SPACE);
+    await tick();
+    httpMock.expectOne(`/pp/v1/cf/org/cnsi-1/org-1`).flush(MOCK_ORG);
+    await tick();
+    httpMock.expectOne(`/pp/v1/cf/org/cnsi-1/org-1/private_domains`).flush(MOCK_DOMAINS_RESPONSE);
+    await all;
+  }
+
+  it('refresh("routes") after a full load asks for the routes and keeps the loaded data', async () => {
+    await loadAll();
+    const routes = svc.refresh('routes');
+    await tick();
+    expect(svc.appDetail()).toEqual(MOCK_APP_DETAIL);
+    httpMock.expectNone(DETAIL_URL);
+    httpMock.expectNone(ENV_URL);
+    httpMock.expectOne(ROUTES_URL).flush(MOCK_ROUTES_RESPONSE);
+    await routes;
+    expect(svc.appDetail()).toEqual(MOCK_APP_DETAIL);
+    expect(svc.space()).toEqual(MOCK_SPACE);
+  });
+
+  it('refresh("app") after a full load keeps the space, which comes from the same space guid', async () => {
+    await loadAll();
+    const app = svc.refresh('app');
+    await tick();
+    httpMock.expectOne(DETAIL_URL).flush({ ...MOCK_APP_DETAIL, sshEnabled: false });
+    await app;
+    await tick();
+    httpMock.expectNone(`/pp/v1/cf/spaces/cnsi-1/sp-1`);
+    expect(svc.appDetail()?.sshEnabled).toBe(false);
+    expect(svc.space()).toEqual(MOCK_SPACE);
+    expect(svc.org()).toEqual(MOCK_ORG);
+  });
+
   // -------------------------------------------------------------------------
   // loading / error signal lifecycle
   // -------------------------------------------------------------------------
@@ -455,6 +583,21 @@ describe('AppDetailDataService', () => {
     expect(svc.appDetail()).toBeUndefined();
   });
 
+  it('refresh() after a write re-reads when a poll is already in flight', async () => {
+    const poll = svc.refresh('app'); // no value yet, so the raw status is 'loading'
+    await tick();
+    const pollReq = httpMock.expectOne(DETAIL_URL); // a poll that started before the write
+
+    const afterWrite = svc.refresh('app');
+    await tick();
+    pollReq.flush(MOCK_APP_DETAIL); // pre-write response
+    await tick();
+    // The refresh that follows the write must send its own request.
+    httpMock.expectOne(DETAIL_URL).flush({ ...MOCK_APP_DETAIL, sshEnabled: false });
+    await Promise.all([poll, afterWrite]);
+    expect(svc.appDetail()).toEqual({ ...MOCK_APP_DETAIL, sshEnabled: false });
+  });
+
   it('clears a previous error on successful re-fetch', async () => {
     const p1 = svc.refresh('app');
     await tick();
@@ -467,6 +610,25 @@ describe('AppDetailDataService', () => {
     httpMock.expectOne(DETAIL_URL).flush(MOCK_APP_DETAIL);
     await p2;
     expect(svc.errors().app).toBeNull();
+  });
+
+  it('keeps the loaded env vars through a reload after a failed poll and a second failure', async () => {
+    await loadAll();
+    expect(svc.envVars()).toEqual(MOCK_ENV); // a view reads it, which keeps the value alive
+    const failed = svc.refresh('envVars');
+    await tick();
+    httpMock.expectOne(ENV_URL).flush('err', { status: 500, statusText: 'Server Error' });
+    await failed;
+    expect(svc.envVars()).toEqual(MOCK_ENV);
+
+    const again = svc.refresh('envVars');
+    await tick();
+    // The reload that follows an error is loading: the kept value must stay.
+    expect(svc.envVars()).toEqual(MOCK_ENV);
+    httpMock.expectOne(ENV_URL).flush('err', { status: 500, statusText: 'Server Error' });
+    await again;
+    expect(svc.errors().envVars).not.toBeNull();
+    expect(svc.envVars()).toEqual(MOCK_ENV);
   });
 
   // -------------------------------------------------------------------------
@@ -732,7 +894,7 @@ describe('AppDetailDataService', () => {
 
   it('addRoute(stRoute) appends to _routes signal (Routes tab list)', () => {
     svc['_appDetail'].set(MOCK_APP_DETAIL);
-    svc['_routes'].set([]);
+    svc['routesRes'].set({ resources: [], totalResults: 0 });
     expect(svc.routes()).toEqual([]);
 
     svc.addRoute(MOCK_NEW_ROUTE);
@@ -743,7 +905,7 @@ describe('AppDetailDataService', () => {
 
   it('addRoute(stRoute) is idempotent on _routes signal too', () => {
     svc['_appDetail'].set(MOCK_APP_DETAIL);
-    svc['_routes'].set([MOCK_NEW_ROUTE]);
+    svc['routesRes'].set({ resources: [MOCK_NEW_ROUTE], totalResults: 1 });
     const before = svc.routes();
 
     svc.addRoute(MOCK_NEW_ROUTE);
@@ -777,7 +939,7 @@ describe('AppDetailDataService', () => {
       app: { ...MOCK_APP_DETAIL.app, routes: [...MOCK_APP_DETAIL.app.routes, MOCK_NEW_ROUTE] },
     };
     svc['_appDetail'].set(detailWithNewRoute);
-    svc['_routes'].set([]);
+    svc['routesRes'].set({ resources: [], totalResults: 0 });
 
     svc.addRoute(MOCK_NEW_ROUTE);
 
@@ -833,6 +995,7 @@ describe('AppDetailDataService', () => {
 
       // After a further 5s (10s total) the re-armed interval fires.
       await vi.advanceTimersByTimeAsync(5000);
+      TestBed.tick();
       httpMock.expectOne(STATS_URL).flush(MOCK_STATS_RESPONSE);
 
       release();
@@ -862,10 +1025,12 @@ describe('AppDetailDataService', () => {
 
       // Advance 5s — first interval fires refresh('stats').
       await vi.advanceTimersByTimeAsync(5000);
+      TestBed.tick();
       httpMock.expectOne(STATS_URL).flush(MOCK_STATS_RESPONSE);
 
       // Advance another 5s — second tick fires.
       await vi.advanceTimersByTimeAsync(5000);
+      TestBed.tick();
       httpMock.expectOne(STATS_URL).flush(MOCK_STATS_RESPONSE);
 
       // Release focus — effect cleanup clears the interval.

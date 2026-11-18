@@ -17,6 +17,9 @@ export interface StratosMeta {
 export interface StratosError {
   scope?: 'envelope' | 'row';
   code: 'UNAUTHORIZED' | 'FETCH_ERROR' | 'PARSE_ERROR';
+  // The failed request's HTTP (or upstream, for a proxy error entry)
+  // status, when there was one.
+  status?: number;
   title: string;
   detail?: string;
   guid?: string;

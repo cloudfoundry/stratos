@@ -192,10 +192,7 @@ func (a *localAuth) generateLoginSuccessResponse(c *echo.Context, userGUID strin
 	sessionValues["user_id"] = userGUID
 	sessionValues["exp"] = expiry
 
-	// Ensure that login disregards cookies from the request
-	req := c.Request()
-	req.Header.Set("Cookie", "")
-	if err = a.p.setSessionValues(c, sessionValues); err != nil {
+	if err = a.p.setLoginSession(c, sessionValues); err != nil {
 		return err
 	}
 

@@ -1,20 +1,18 @@
 import {
   ChangeDetectionStrategy,
   Component,
-  EventEmitter,
-  Input,
   OnDestroy,
   OnInit,
-  Output,
+  Signal,
   computed,
   effect,
   inject,
   input,
   signal,
+  output
 } from '@angular/core';
 import { NgTemplateOutlet } from '@angular/common';
-import { Subscription, combineLatest } from 'rxjs';
-import { map } from 'rxjs/operators';
+import { Subscription } from 'rxjs';
 
 import { CurrentUserPermissionsService } from '../../../../../core/src/core/permissions/current-user-permissions.service';
 import { APIResource } from '../../../../../store/src/types/api.types';
@@ -78,14 +76,26 @@ function readPersistedViewMode(): RoleAssignmentViewMode {
   imports: [AppBusyComponent, RoleTristateCheckboxComponent, NgTemplateOutlet],
 })
 export class RoleAssignmentComponent implements OnInit, OnDestroy {
-  @Input({ required: true }) cfGuid!: string;
+  readonly cfGuid = input.required<string>();
   readonly users = input<StUser[]>([]);
   readonly baseline = input<CfUserRolesSelected>({});
-  /** True while the host is still resolving existing roles (existingRoles$). */
+  /** True while the host is still resolving existing roles (existingRoles$); role cells stay disabled until it clears. */
   readonly loading = input<boolean>(false);
-  @Input() lockedOrg?: { guid: string; name: string };
+  readonly lockedOrg = input<{
+    guid: string;
+    name: string;
+}>();
+  /** Set when the wizard opens at space scope: only this space is listed. */
+  readonly lockedSpaceGuid = input<string>();
 
-  @Output() changeSet = new EventEmitter<CfRoleChange[]>();
+  /**
+   * True when the ticked roles are to be removed (the remove wizard). A ticked
+   * space role then does not imply the org User role, and a role ticked for
+   * removal does not hold the org User cell fixed.
+   */
+  readonly removeMode = input(false);
+
+  readonly changeSet = output<CfRoleChange[]>();
 
   // --- Role definitions ---
 
@@ -113,14 +123,25 @@ export class RoleAssignmentComponent implements OnInit, OnDestroy {
   /** True until the org list fetch resolves (drives the picker spinner). */
   readonly orgsLoading = signal(true);
 
+  /** Set when the org list fetch fails; the picker shows it with a retry. */
+  readonly orgsError = signal<string | null>(null);
+
   /** Orgs whose per-org space fetch is in flight (drives per-section spinner). */
   private readonly spacesLoading = signal<Set<string>>(new Set());
   spacesLoadingFor(orgGuid: string): boolean {
     return this.spacesLoading().has(orgGuid);
   }
 
+  /** Orgs whose last space fetch failed (the section shows an error with a retry). */
+  private readonly spacesFailed = signal<Set<string>>(new Set());
+  spacesFailedFor(orgGuid: string): boolean {
+    return this.spacesFailed().has(orgGuid);
+  }
+
+  /** Permission checks per org guid; canEditByOrg reads them. */
+  private readonly orgChecks = signal<Record<string, Signal<boolean>>>({});
   /** Permission map: orgGuid → can edit */
-  private readonly canEditByOrg = signal<Record<string, boolean>>({});
+  private readonly canEditByOrg = computed(() => readChecks(this.orgChecks()));
 
   /** Orgs the picker offers.
    *
@@ -132,8 +153,10 @@ export class RoleAssignmentComponent implements OnInit, OnDestroy {
    */
   readonly allowedOrgs = computed(() => this.allOrgs());
 
+  /** Permission checks per `${orgGuid}:${spaceGuid}`; canChangeSpaceByKey reads them. */
+  private readonly spaceChecks = signal<Record<string, Signal<boolean>>>({});
   /** Per-space permission map: `${orgGuid}:${spaceGuid}` → can change space roles */
-  private readonly canChangeSpaceByKey = signal<Record<string, boolean>>({});
+  private readonly canChangeSpaceByKey = computed(() => readChecks(this.spaceChecks()));
 
   /** The orgs the user has selected (or the locked org) */
   readonly pickedOrgs = signal<APIResource<IOrganization>[]>([]);
@@ -188,7 +211,7 @@ export class RoleAssignmentComponent implements OnInit, OnDestroy {
     effect(() => {
       const orgs = this.allOrgs();
       const baseline = this.baseline();
-      if (this.baselineSeeded || this.lockedOrg || orgs.length === 0) {
+      if (this.baselineSeeded || this.lockedOrg() || orgs.length === 0) {
         return;
       }
       const orgGuids = new Set<string>();
@@ -228,16 +251,10 @@ export class RoleAssignmentComponent implements OnInit, OnDestroy {
   // --- Lifecycle ---
 
   ngOnInit(): void {
-    // Fetch all orgs, then resolve permissions per org
-    const orgsSub = this.cfRolesService.fetchOrgs(this.cfGuid).subscribe(orgs => {
-      this.allOrgs.set(orgs);
-      this.resolvePermissions(orgs);
-      this.orgsLoading.set(false);
-    });
-    this.subs.add(orgsSub);
+    this.loadOrgs();
 
     // lockedOrg: seed pickedOrgs from it once orgs load (or immediately if lockedOrg is set)
-    if (this.lockedOrg) {
+    if (this.lockedOrg()) {
       // We create a minimal APIResource shape from the lockedOrg hint
       // We'll wait for allOrgs to fill so we get the real entity, or use stub
       this.seedLockedOrg();
@@ -248,41 +265,59 @@ export class RoleAssignmentComponent implements OnInit, OnDestroy {
     this.subs.unsubscribe();
   }
 
+  /**
+   * Fetch all orgs, then resolve permissions per org. The spinner clears on
+   * every outcome: a value, an error, or completion without a value.
+   */
+  loadOrgs(): void {
+    this.orgsLoading.set(true);
+    this.orgsError.set(null);
+    const orgsSub = this.cfRolesService.fetchOrgs(this.cfGuid()).subscribe({
+      next: orgs => {
+        this.allOrgs.set(orgs);
+        // A locked org seeded before this list arrived is a placeholder
+        // with no name: swap it for the real org.
+        this.pickedOrgs.update(picked =>
+          picked.map(p => orgs.find(o => o.metadata.guid === p.metadata.guid) ?? p));
+        this.resolvePermissions(orgs);
+        this.orgsLoading.set(false);
+      },
+      error: () => {
+        this.orgsError.set('Could not load organizations.');
+        this.orgsLoading.set(false);
+      },
+      complete: () => this.orgsLoading.set(false),
+    });
+    this.subs.add(orgsSub);
+  }
+
   // --- Permission resolution ---
 
   private resolvePermissions(orgs: APIResource<IOrganization>[]): void {
     if (!orgs.length) {
       return;
     }
-    // Build one combineLatest over all per-org observables, resolve once
-    const obs = orgs.map(o =>
-      this.userPerms.can(CfCurrentUserPermissions.ORGANIZATION_CHANGE_ROLES, this.cfGuid, o.metadata.guid).pipe(
-        map(can => ({ guid: o.metadata.guid, can })),
-      ),
-    );
+    const checks: Record<string, Signal<boolean>> = {};
+    for (const o of orgs) {
+      checks[o.metadata.guid] =
+        this.userPerms.can(CfCurrentUserPermissions.ORGANIZATION_CHANGE_ROLES, this.cfGuid(), o.metadata.guid);
+    }
+    this.orgChecks.set(checks);
 
-    const permSub = combineLatest(obs).subscribe(results => {
-      const map: Record<string, boolean> = {};
-      for (const { guid, can } of results) {
-        map[guid] = can;
-      }
-      this.canEditByOrg.set(map);
-
-      // If lockedOrg is set, seed from real org list once permissions resolved
-      if (this.lockedOrg && this.pickedOrgs().length === 0) {
-        this.seedLockedOrg();
-      }
-    });
-    this.subs.add(permSub);
+    // If lockedOrg is set, seed from the real org list
+    if (this.lockedOrg() && this.pickedOrgs().length === 0) {
+      this.seedLockedOrg();
+    }
   }
 
   // --- Locked org seeding ---
 
   private seedLockedOrg(): void {
-    if (!this.lockedOrg) {
+    const lockedOrg = this.lockedOrg();
+    if (!lockedOrg) {
       return;
     }
-    const existing = this.allOrgs().find(o => o.metadata.guid === this.lockedOrg!.guid);
+    const existing = this.allOrgs().find(o => o.metadata.guid === this.lockedOrg()!.guid);
     if (existing) {
       this.pickedOrgs.set([existing]);
       this.loadSpacesFor(existing.metadata.guid);
@@ -291,16 +326,16 @@ export class RoleAssignmentComponent implements OnInit, OnDestroy {
       // Org not yet loaded — create a stub so the UI can render
       const stub: APIResource<IOrganization> = {
         metadata: {
-          guid: this.lockedOrg.guid,
+          guid: lockedOrg.guid,
           created_at: '',
           updated_at: '',
           url: '',
         },
-        entity: { name: this.lockedOrg.name },
+        entity: { name: lockedOrg.name },
       };
       this.pickedOrgs.set([stub]);
-      this.loadSpacesFor(this.lockedOrg.guid);
-      this.expandedByOrg.update(set => { const next = new Set(set); next.add(this.lockedOrg!.guid); return next; });
+      this.loadSpacesFor(lockedOrg.guid);
+      this.expandedByOrg.update(set => { const next = new Set(set); next.add(this.lockedOrg()!.guid); return next; });
     }
   }
 
@@ -376,15 +411,28 @@ export class RoleAssignmentComponent implements OnInit, OnDestroy {
 
   // --- Space loading ---
 
-  private loadSpacesFor(orgGuid: string): void {
+  /** Also the section's Retry: a failed fetch leaves spacesByOrg unset, so this fetches again. */
+  protected loadSpacesFor(orgGuid: string): void {
     if (this.spacesByOrg()[orgGuid]) {
       return; // already loaded
     }
     this.spacesLoading.update(s => { const next = new Set(s); next.add(orgGuid); return next; });
-    const spaceSub = this.cfRolesService.fetchSpacesForOrg(this.cfGuid, orgGuid).subscribe(spaces => {
-      this.spacesByOrg.update(m => ({ ...m, [orgGuid]: spaces }));
-      this.spacesLoading.update(s => { const next = new Set(s); next.delete(orgGuid); return next; });
-      this.resolveSpacePermissions(orgGuid, spaces);
+    this.spacesFailed.update(s => { const next = new Set(s); next.delete(orgGuid); return next; });
+    // The spinner clears on every outcome: a value, an error, or completion without a value.
+    const done = () => this.spacesLoading.update(s => { const next = new Set(s); next.delete(orgGuid); return next; });
+    const spaceSub = this.cfRolesService.fetchSpacesForOrg(this.cfGuid(), orgGuid).subscribe({
+      next: all => {
+        const lock = this.lockedSpaceGuid();
+        const spaces = lock ? all.filter(s => s.guid === lock) : all;
+        this.spacesByOrg.update(m => ({ ...m, [orgGuid]: spaces }));
+        done();
+        this.resolveSpacePermissions(orgGuid, spaces);
+      },
+      error: () => {
+        this.spacesFailed.update(s => { const next = new Set(s); next.add(orgGuid); return next; });
+        done();
+      },
+      complete: done,
     });
     this.subs.add(spaceSub);
   }
@@ -394,21 +442,12 @@ export class RoleAssignmentComponent implements OnInit, OnDestroy {
     if (!spaces.length) {
       return;
     }
-    const obs = spaces.map(space =>
-      this.userPerms.can(CfCurrentUserPermissions.SPACE_CHANGE_ROLES, this.cfGuid, orgGuid, space.guid).pipe(
-        map(can => ({ key: `${orgGuid}:${space.guid}`, can })),
-      ),
-    );
-    const permSub = combineLatest(obs).subscribe(results => {
-      this.canChangeSpaceByKey.update(current => {
-        const next = { ...current };
-        for (const { key, can } of results) {
-          next[key] = can;
-        }
-        return next;
-      });
-    });
-    this.subs.add(permSub);
+    const checks: Record<string, Signal<boolean>> = {};
+    for (const space of spaces) {
+      checks[`${orgGuid}:${space.guid}`] =
+        this.userPerms.can(CfCurrentUserPermissions.SPACE_CHANGE_ROLES, this.cfGuid(), orgGuid, space.guid);
+    }
+    this.spaceChecks.update(current => ({ ...current, ...checks }));
   }
 
   spacesFor(orgGuid: string): SpaceEntry[] {
@@ -455,13 +494,14 @@ export class RoleAssignmentComponent implements OnInit, OnDestroy {
     const spacesByOrg = this.spacesByOrg();
     const users = this.users();
     const baseline = this.baseline();
+    const removeMode = this.removeMode();
     const result: Record<string, boolean> = {};
 
     for (const orgGuid of Object.keys(sel).concat(Object.keys(spacesByOrg))) {
       if (orgGuid in result) {
         continue;
       }
-      result[orgGuid] = this._computeOrgUserDisabled(orgGuid, sel, spacesByOrg, users, baseline);
+      result[orgGuid] = this._computeOrgUserDisabled(orgGuid, sel, spacesByOrg, users, baseline, removeMode);
     }
     return result;
   });
@@ -472,31 +512,43 @@ export class RoleAssignmentComponent implements OnInit, OnDestroy {
     spacesByOrg: Record<string, SpaceEntry[]>,
     users: StUser[],
     baseline: CfUserRolesSelected,
+    removeMode: boolean,
   ): boolean {
     const selOrg = sel[orgGuid];
+    // Removing roles: a role ticked now is one being taken away, so only the
+    // roles the users already hold keep the org User role in place.
+    const held = (role: OrgUserRoleNames | SpaceUserRoleNames, spaceGuid?: string) =>
+      !removeMode || computeChecked(role, users, baseline, {}, orgGuid, spaceGuid) !== false;
 
     // Check org roles other than USER
     const otherOrgRoles = [OrgUserRoleNames.MANAGER, OrgUserRoleNames.BILLING_MANAGERS, OrgUserRoleNames.AUDITOR];
     for (const role of otherOrgRoles) {
       const checked = computeChecked(role, users, baseline, sel, orgGuid);
-      if (checked !== false) {
+      if (checked !== false && held(role)) {
         return true;
       }
     }
 
     // Check all space roles across loaded spaces (computeChecked reads baseline + selection)
-    const spaces = spacesByOrg[orgGuid] ?? [];
-    for (const space of spaces) {
+    // Space scope lists one space, but the user's roles in the org's other
+    // spaces still hold the org User role in place, so scan the baseline too.
+    const spaceGuids = new Set<string>((spacesByOrg[orgGuid] ?? []).map(space => space.guid));
+    for (const userGuid of Object.keys(baseline)) {
+      for (const spaceGuid of Object.keys(baseline[userGuid]?.[orgGuid]?.spaces ?? {})) {
+        spaceGuids.add(spaceGuid);
+      }
+    }
+    for (const spaceGuid of spaceGuids) {
       for (const def of this.spaceRoleDefs) {
-        const checked = computeChecked(def.name, users, baseline, sel, orgGuid, space.guid);
-        if (checked !== false) {
+        const checked = computeChecked(def.name, users, baseline, sel, orgGuid, spaceGuid);
+        if (checked !== false && held(def.name, spaceGuid)) {
           return true;
         }
       }
     }
 
     // Check selection's explicit space-role overrides for spaces not yet loaded
-    if (selOrg?.spaces) {
+    if (selOrg?.spaces && !removeMode) {
       for (const [, spaceEntry] of Object.entries(selOrg.spaces)) {
         for (const [, val] of Object.entries(spaceEntry.roles)) {
           if (val === true) {
@@ -580,7 +632,7 @@ export class RoleAssignmentComponent implements OnInit, OnDestroy {
   /** Returns true if the logged-in user may change roles in the given space.
    * Resolves to true for org managers (ORGANIZATION_CHANGE_ROLES arm) and
    * space managers of that specific space (SPACE_MANAGER arm).
-   * Defaults to false until the space-permission observable fires.
+   * False until that space's check reads true.
    */
   canChangeSpaceRoles(orgGuid: string, spaceGuid: string): boolean {
     return this.canChangeSpaceByKey()[`${orgGuid}:${spaceGuid}`] ?? false;
@@ -606,8 +658,14 @@ export class RoleAssignmentComponent implements OnInit, OnDestroy {
     });
   }
 
+  /** Orgs whose org User role was ticked for the user by a space role, not by the user. */
+  private readonly impliedOrgUser = new Set<string>();
+
   onToggleOrgRole(org: APIResource<IOrganization>, role: OrgUserRoleNames, value: boolean): void {
     const orgGuid = org.metadata.guid;
+    if (role === OrgUserRoleNames.USER) {
+      this.impliedOrgUser.delete(orgGuid);
+    }
     this.ensureOrgInSelection(org);
     this.selection.update(sel => ({
       ...sel,
@@ -627,23 +685,44 @@ export class RoleAssignmentComponent implements OnInit, OnDestroy {
     this.ensureOrgInSelection(org);
     this.selection.update(sel => {
       const existingSpaces = sel[orgGuid].spaces;
-      return {
-        ...sel,
-        [orgGuid]: {
-          ...sel[orgGuid],
-          spaces: {
-            ...existingSpaces,
-            [space.guid]: {
-              spaceName: space.name,
-              roles: {
-                ...(existingSpaces[space.guid]?.roles ?? {}),
-                [role]: value,
-              },
-            },
+      const spaces = {
+        ...existingSpaces,
+        [space.guid]: {
+          spaceName: space.name,
+          roles: {
+            ...(existingSpaces[space.guid]?.roles ?? {}),
+            [role]: value,
           },
         },
       };
+      let orgRoles = sel[orgGuid].orgRoles;
+      if (value && !this.removeMode()) {
+        // Cloud Foundry gives a space role only to a member of the org, so
+        // a space role brings the org User role with it.
+        if (orgRoles[OrgUserRoleNames.USER] !== true) {
+          this.impliedOrgUser.add(orgGuid);
+        }
+        orgRoles = { ...orgRoles, [OrgUserRoleNames.USER]: true };
+      } else if (!value && this.impliedOrgUser.has(orgGuid) && !hasTickedSpaceRole(spaces)) {
+        // The last space role is gone, and the user never asked for org User.
+        const { [OrgUserRoleNames.USER]: _implied, ...rest } = orgRoles;
+        orgRoles = rest;
+        this.impliedOrgUser.delete(orgGuid);
+      }
+      return { ...sel, [orgGuid]: { ...sel[orgGuid], orgRoles, spaces } };
     });
     this.changeSet.emit(diffToChanges(this.users(), this.baseline(), this.selection()));
   }
+}
+
+function hasTickedSpaceRole(spaces: RoleSelection[string]['spaces']): boolean {
+  return Object.values(spaces).some(entry => Object.values(entry.roles).some(val => val === true));
+}
+
+function readChecks(checks: Record<string, Signal<boolean>>): Record<string, boolean> {
+  const read: Record<string, boolean> = {};
+  for (const [key, check] of Object.entries(checks)) {
+    read[key] = check();
+  }
+  return read;
 }

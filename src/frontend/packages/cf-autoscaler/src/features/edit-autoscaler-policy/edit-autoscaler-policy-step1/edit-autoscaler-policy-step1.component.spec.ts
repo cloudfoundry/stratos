@@ -1,8 +1,11 @@
 import { DatePipe } from '@angular/common';
 import { ComponentFixture, TestBed } from '@angular/core/testing';
+import { provideHttpClient } from '@angular/common/http';
+import { HttpTestingController, provideHttpClientTesting } from '@angular/common/http/testing';
 import { provideZonelessChangeDetection } from '@angular/core';
 import { ActivatedRoute } from '@angular/router';
-import { describe, it, expect, beforeEach } from 'vitest';
+import { describe, it, expect, beforeEach, vi } from 'vitest';
+import { firstValueFrom } from 'rxjs';
 import { NoopAnimationsModule } from '@angular/platform-browser/animations';
 import { RouterTestingModule } from '@angular/router/testing';
 import { createEmptyStoreModule } from '@stratosui/store/testing';
@@ -28,6 +31,8 @@ describe('EditAutoscalerPolicyStep1Component', () => {
       ],
       providers: [
         provideZonelessChangeDetection(),
+        provideHttpClient(),
+        provideHttpClientTesting(),
         DatePipe,
         { provide: ApplicationService, useClass: ApplicationServiceMock },
         TabNavService,
@@ -53,5 +58,54 @@ describe('EditAutoscalerPolicyStep1Component', () => {
 
   it('should be created', () => {
     expect(component).toBeTruthy();
+  });
+
+  // The defaults (min 1, max 10, the browser timezone) are a valid policy,
+  // so Next must be enabled on a new policy.
+  it('reports the default limits as valid', async () => {
+    // A new policy: the autoscaler has none for the app yet.
+    TestBed.inject(HttpTestingController).expectOne(r => r.url.endsWith('/policy'))
+      .flush('Policy Not Found', { status: 404, statusText: 'Not Found' });
+    // The state reaches the form once the load settles and the view renders.
+    await vi.waitFor(() => expect(component.editLimitForm.controls.instance_min_count.value).toBe(1));
+    expect(component.editLimitForm.controls.instance_max_count.value).toBe(10);
+    expect(component.editLimitForm.valid).toBe(true);
+    expect(await firstValueFrom(component.valid$)).toBe(true);
+  });
+
+  // The autoscaler rejects only min > max, so a pinned policy (min == max)
+  // must be accepted.
+  it('allows the minimum count up to the maximum count', async () => {
+    TestBed.inject(HttpTestingController).expectOne(r => r.url.endsWith('/policy'))
+      .flush('Policy Not Found', { status: 404, statusText: 'Not Found' });
+    await vi.waitFor(() => expect(component.editLimitForm.controls.instance_max_count.value).toBe(10));
+    const { instance_min_count: min, instance_max_count: max } = component.editLimitForm.controls;
+
+    max.setValue(1);
+    min.setValue(1);
+    expect(min.valid).toBe(true);
+    expect(max.valid).toBe(true);
+
+    min.setValue(2);
+    expect(min.hasError('alertInvalidPolicyMinimumRange')).toBe(true);
+    expect(max.hasError('alertInvalidPolicyMaximumRange')).toBe(true);
+  });
+
+  // Next stores the entered limits in the editor state, which the later
+  // steps and the final save read.
+  it('stores the entered limits in the editor state on next', async () => {
+    TestBed.inject(HttpTestingController).expectOne(r => r.url.endsWith('/policy'))
+      .flush('Policy Not Found', { status: 404, statusText: 'Not Found' });
+    await vi.waitFor(() => expect(component.editLimitForm.controls.instance_max_count.value).toBe(10));
+    component.editLimitForm.controls.instance_max_count.setValue(5);
+    component.editLimitForm.controls.instance_min_count.setValue(2);
+
+    const setState = vi.spyOn(TestBed.inject(EditAutoscalerPolicyService), 'setState');
+
+    const result = await component.onNext();
+
+    expect(result).toEqual({ success: true });
+    expect(setState).toHaveBeenCalledTimes(1);
+    expect(setState.mock.calls[0][0]).toMatchObject({ instance_min_count: 2, instance_max_count: 5 });
   });
 });

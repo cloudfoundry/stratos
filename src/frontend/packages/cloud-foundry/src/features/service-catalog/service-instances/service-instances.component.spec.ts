@@ -38,6 +38,7 @@ describe('ServiceInstancesComponent (signal-native)', () => {
       registerSortExtractor: vi.fn(),
       registerFilterExtractor: vi.fn(),
       loadAll: vi.fn(async () => undefined),
+      startProgressPolling: vi.fn(),
       refresh: vi.fn(async () => undefined),
       clearFilters: vi.fn(),
       deleteServiceInstance: vi.fn(async () => undefined),
@@ -92,6 +93,19 @@ describe('ServiceInstancesComponent (signal-native)', () => {
     expect(keys).toEqual(['name', 'plan', 'lastOp', 'dashboard', 'boundApps', 'serviceKeys', 'tags', 'createdAt', 'type', 'actions']);
   });
 
+  // The pill names the operation, gives a failure's reason on hover and
+  // survives an instance with no last operation (the backend omits it).
+  it('Last Operation names the operation and hovers with a failure reason', () => {
+    fixture.detectChanges();
+    const col = component.listConfig!.columns.find(c => c.key === 'lastOp')!;
+    const si: any = { lastOperation: { type: 'update', state: 'failed', description: '<b>quota</b> exceeded' } };
+    expect(col.render(si)).toBe('Update failed');
+    expect(col.tooltip!(si)).toBe('Update failed — quota exceeded');
+    expect(col.render({} as any)).toBe('');
+    const sortBy = configStub.registerSortExtractor.mock.calls.find((c: unknown[]) => c[0] === 'lastOp')![1];
+    expect(sortBy(si)).toBe('Update failed');
+  });
+
   it('Service Keys column links to the keys page and renders the lazy count', () => {
     fixture.detectChanges();
     const cols = component.listConfig!.columns;
@@ -130,5 +144,14 @@ describe('ServiceInstancesComponent (signal-native)', () => {
     const onConfirm = confirmDialog.open.mock.calls[0][1];
     await onConfirm();
     expect(configStub.deleteServiceInstance).toHaveBeenCalledWith('cnsi-1', 'si-7');
+  });
+  // The progress poll must end with this page, not run on in the root config.
+  it('polls operations in progress only while this page is open', async () => {
+    fixture.detectChanges();
+    const host = configStub.startProgressPolling.mock.calls.at(-1)?.[0] as { destroyed: boolean } | undefined;
+    expect(host?.destroyed).toBe(false);
+
+    fixture.destroy();
+    expect(host?.destroyed).toBe(true);
   });
 });

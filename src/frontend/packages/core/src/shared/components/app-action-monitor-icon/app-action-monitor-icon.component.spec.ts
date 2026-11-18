@@ -33,10 +33,10 @@ describe('AppActionMonitorIconComponent', () => {
     expect(component).toBeTruthy();
   });
 
-  it('passes the [state] input straight through to currentState', () => {
+  it('passes the [state] input straight through to currentState', async () => {
     const state: IActionMonitorComponentState = { busy: true, error: false, completed: false, message: 'Working' };
-    component.state = of(state);
-    fixture.detectChanges();
+    fixture.componentRef.setInput('state', of(state));
+    await fixture.whenStable();
     let seen: IActionMonitorComponentState | undefined;
     component.currentState.subscribe(s => (seen = s));
     expect(seen).toEqual(state);

@@ -1,14 +1,13 @@
 import {
   ChangeDetectionStrategy,
   Component,
-  Input,
-  Output,
-  EventEmitter,
-  ContentChildren,
-  QueryList,
   AfterContentInit,
-  ViewChild,
   TemplateRef,
+  input,
+  model,
+  output,
+  viewChild,
+  contentChildren
 } from "@angular/core";
 import { NgTemplateOutlet } from "@angular/common";
 
@@ -24,11 +23,11 @@ export interface MatTabChangeEvent {
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class CustomTabComponent {
-  @Input() label = "";
-  @Input() disabled = false;
-  @Input() textLabel = "";
+  readonly label = input("");
+  readonly disabled = input(false);
+  readonly textLabel = input("");
 
-  @ViewChild(TemplateRef, { static: true }) content!: TemplateRef<any>;
+  readonly content = viewChild.required(TemplateRef);
 
   isActive = false;
 }
@@ -42,32 +41,31 @@ export class CustomTabComponent {
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class CustomTabGroupComponent implements AfterContentInit {
-  @Input() selectedIndex = 0;
-  @Input() backgroundColor = "primary";
-  @Input() color = "primary";
+  // A model: selecting a tab sets it and emits selectedIndexChange.
+  readonly selectedIndex = model(0);
+  readonly backgroundColor = input("primary");
+  readonly color = input("primary");
 
-  @Output() selectedIndexChange = new EventEmitter<number>();
-  @Output() selectedTabChange = new EventEmitter<MatTabChangeEvent>();
+  readonly selectedTabChange = output<MatTabChangeEvent>();
 
   // strict: @ContentChildren is populated by Angular before ngAfterContentInit
-  @ContentChildren(CustomTabComponent) tabs!: QueryList<CustomTabComponent>;
+  readonly tabs = contentChildren(CustomTabComponent);
 
   ngAfterContentInit() {
-    this.selectTab(this.selectedIndex);
+    this.selectTab(this.selectedIndex());
   }
 
   selectTab(index: number) {
-    if (index < 0 || index >= this.tabs.length) return;
+    if (index < 0 || index >= this.tabs().length) return;
 
-    const newTab = this.tabs.toArray()[index];
-    if (newTab.disabled) return;
+    const newTab = this.tabs()[index];
+    if (newTab.disabled()) return;
 
-    this.tabs.forEach((tab, i) => {
+    this.tabs().forEach((tab, i) => {
       tab.isActive = i === index;
     });
 
-    this.selectedIndex = index;
-    this.selectedIndexChange.emit(index);
+    this.selectedIndex.set(index);
     this.selectedTabChange.emit({
       index: index,
       tab: newTab,
@@ -75,7 +73,7 @@ export class CustomTabGroupComponent implements AfterContentInit {
   }
 
   getTabsArray() {
-    return this.tabs ? this.tabs.toArray() : [];
+    return this.tabs();
   }
 
   getActiveTab() {

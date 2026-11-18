@@ -32,7 +32,7 @@ export class EndpointManagementHelper {
 
   private baseURL: string;
 
-  constructor(baseURL: string = 'https://127.0.0.1:4200') {
+  constructor(baseURL: string) {
     this.baseURL = baseURL;
     this.adminRequest = new RequestHelper(baseURL);
     this.userRequest = new RequestHelper(baseURL);

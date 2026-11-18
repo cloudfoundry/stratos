@@ -2,6 +2,10 @@ import { describe, it, expect, vi, beforeEach } from 'vitest';
 import { TestBed } from '@angular/core/testing';
 import { Component, signal } from '@angular/core';
 import { provideRouter } from '@angular/router';
+import { provideHttpClient } from '@angular/common/http';
+import { provideHttpClientTesting } from '@angular/common/http/testing';
+import { EndpointModel } from '@stratosui/store';
+import { seedEndpointsDataService } from '@stratosui/store/testing';
 import { SignalListComponent } from './signal-list.component';
 import type { SignalListConfig, SignalListDropdown, SignalListDropdownOption, SignalListMultiFilter, SignalListRowState } from './signal-list.component';
 import type { SignalListRangeValue } from './range-filter';
@@ -9,9 +13,18 @@ import { SignalListCellTemplateDirective } from './signal-list-cell-template.dir
 
 // SignalListComponent now applies [routerLink] to the card / table row when a
 // link column is present, so the RouterLink directive needs a router injector.
+// The error banner names endpoints from EndpointsDataService, which needs an
+// HttpClient (the testing backend: no request leaves the test).
 beforeEach(() => {
-  TestBed.configureTestingModule({ providers: [provideRouter([])] });
+  TestBed.configureTestingModule({ providers: [provideRouter([]), provideHttpClient(), provideHttpClientTesting()] });
 });
+
+// A button that can be off is never `disabled`: Chromium takes focus off a
+// focused button that becomes disabled and puts it on the page body (WCAG
+// 2.4.3), and pressing Refresh, Clear or Next page turns that button off.
+// It is aria-disabled instead, and its handler ignores the press.
+const isOff = (b: HTMLButtonElement) => !b.disabled && b.getAttribute('aria-disabled') === 'true';
+const isOn = (b: HTMLButtonElement) => !b.disabled && !b.hasAttribute('aria-disabled');
 
 @Component({
   standalone: true,
@@ -22,7 +35,9 @@ class Host {
   items = signal([{ name: 'one' }, { name: 'two' }]);
   pageIndex = signal(0);
   pageSize = signal(10);
-  config: SignalListConfig<{ name: string }> = {
+  // Signal-backed so a test that swaps the config after the first
+  // render schedules change detection (zoneless, like the app).
+  readonly configState = signal<SignalListConfig<{ name: string }>>({
     pagedItems: this.items.asReadonly(),
     totalFilteredResults: signal(2).asReadonly(),
     totalPages: signal(1).asReadonly(),
@@ -36,20 +51,58 @@ class Host {
     // present for the button (and therefore the refreshing-state spinner)
     // to render.
     onRefresh: () => {},
-  };
+  });
+  get config(): SignalListConfig<{ name: string }> { return this.configState(); }
+  set config(value: SignalListConfig<{ name: string }>) { this.configState.set(value); }
 }
 
 describe('SignalListComponent', () => {
-  it('renders a row per paged item', () => {
+  it('renders a row per paged item', async () => {
     const fixture = TestBed.createComponent(Host);
-    fixture.detectChanges();
+    await fixture.whenStable();
     const rows = fixture.nativeElement.querySelectorAll('[data-test="row"]');
     expect(rows.length).toBe(2);
     expect(rows[0].textContent).toContain('one');
     expect(rows[1].textContent).toContain('two');
   });
 
-  it('row-action menu items expose data-test hooks (label default, dataTest override)', () => {
+  // Cards are 16rem minimum by default; a list of wide cards (the autoscaler
+  // metric charts) sets its own minimum so one card is not squeezed.
+  it('lays out cards with the configured minimum width', async () => {
+    const columns = async (cardMinWidth?: string) => {
+      const fixture = TestBed.createComponent(Host);
+      fixture.componentInstance.config = {
+        ...fixture.componentInstance.config,
+        viewMode: signal<'table' | 'card'>('card'),
+        cardMinWidth,
+      };
+      await fixture.whenStable();
+      return (fixture.nativeElement.querySelector('[data-test="card-grid"]') as HTMLElement).style.gridTemplateColumns;
+    };
+    expect(await columns()).toBe('repeat(auto-fill, minmax(16rem, 1fr))');
+    expect(await columns('40rem')).toBe('repeat(auto-fill, minmax(40rem, 1fr))');
+  });
+
+  // The star / kebab column had an empty header cell (WCAG 1.3.1); it is
+  // named for assistive technology only, since the cells need no visible label.
+  it('names the control column header for screen readers', async () => {
+    const headerText = async (columns: SignalListConfig<{ name: string }>['columns']) => {
+      const fixture = TestBed.createComponent(Host);
+      fixture.componentInstance.config = { ...fixture.componentInstance.config, columns };
+      await fixture.whenStable();
+      const th = fixture.nativeElement.querySelector('thead th') as HTMLElement;
+      expect(th.querySelector('.sr-only')).not.toBeNull();
+      return th.textContent?.trim();
+    };
+    const name = { header: 'Name', render: (r: { name: string }) => r.name };
+    const favorite = { header: '', kind: 'favorite' as const, render: () => '', favorite: { keys: signal(new Set<string>()), toggle: () => {} } };
+    const actions = { header: '', kind: 'actions' as const, render: () => '', actions: () => [{ label: 'Delete', invoke: () => {} }] };
+    expect(await headerText([name, favorite])).toBe('Favorite');
+    expect(await headerText([name, actions])).toBe('Actions');
+    expect(await headerText([name, favorite, actions])).toBe('Favorite and actions');
+  });
+
+  it('row-action menu items expose data-test hooks (label default, dataTest override)', async () => {
     const fixture = TestBed.createComponent(Host);
     fixture.componentInstance.config = {
       ...fixture.componentInstance.config,
@@ -64,16 +117,97 @@ describe('SignalListComponent', () => {
         },
       ],
     };
-    fixture.detectChanges();
+    await fixture.whenStable();
     fixture.nativeElement.querySelector('[data-test="row-actions"]').click();
-    fixture.detectChanges();
+    await fixture.whenStable();
     const menu = fixture.nativeElement.querySelector('[data-test="row-actions-menu"]');
     expect(menu.querySelector('[data-test="row-action-Delete"]')).not.toBeNull();
     expect(menu.querySelector('[data-test="rename-row"]')).not.toBeNull();
   });
 
+  // Typing in the name filter or picking a filter changed the list with
+  // nothing said (WCAG 4.1.3). A status line, empty until the person
+  // changes a filter, then says how many results the list holds.
+  it('says the result count once the person changes a filter', async () => {
+    const fixture = TestBed.createComponent(Host);
+    const nameFilter = signal('');
+    const total = signal(2);
+    fixture.componentInstance.config = {
+      ...fixture.componentInstance.config,
+      nameFilter,
+      totalFilteredResults: total.asReadonly(),
+    };
+    await fixture.whenStable();
+    const status = () => (fixture.nativeElement as HTMLElement).querySelector('[data-test="result-status"]');
+    expect(status()?.getAttribute('role')).toBe('status');
+    expect(status()!.textContent!.trim()).toBe('');
+
+    nameFilter.set('node');
+    total.set(1);
+    await fixture.whenStable();
+    expect(status()!.textContent!.trim()).toBe('1 result');
+
+    nameFilter.set('');
+    total.set(2);
+    await fixture.whenStable();
+    expect(status()!.textContent!.trim()).toBe('2 results');
+  });
+
+  // A field's edge shows where to type: it takes the field border token,
+  // drawn at 3:1 or more (WCAG 1.4.11), not the faint card border.
+  it('draws the toolbar fields with the field border', async () => {
+    const fixture = TestBed.createComponent(Host);
+    await fixture.whenStable();
+    const fields = [...fixture.nativeElement.querySelectorAll('input[type=text], select')] as HTMLElement[];
+    expect(fields.length).toBeGreaterThan(0);
+    for (const f of fields) {
+      expect(f.className, f.outerHTML.slice(0, 80)).toContain('border-input-border');
+      expect(f.className).not.toContain('border-content-border');
+    }
+  });
+
+  // Two links in one cell can have the same text: an app's org and space
+  // are both "e2e". A label read before each by screen readers only tells
+  // them apart (WCAG 2.4.4); the visible text stays at the end of the name.
+  it('reads a compound segment label before its text, for screen readers only', async () => {
+    const fixture = TestBed.createComponent(Host);
+    fixture.componentInstance.config = {
+      ...fixture.componentInstance.config,
+      columns: [
+        { header: 'Name', render: r => r.name },
+        {
+          header: 'Org/Space', kind: 'compound', render: () => '',
+          compound: () => [
+            { text: 'e2e', link: ['/org'], label: 'Organization' },
+            { text: 'e2e', link: ['/space'], label: 'Space' },
+          ],
+        },
+      ],
+    };
+    await fixture.whenStable();
+    const links = [...fixture.nativeElement.querySelector('tbody tr').querySelectorAll('td a')].filter((a: HTMLElement) => a.textContent?.includes('e2e'));
+    expect(links.map((a: HTMLElement) => a.textContent?.replace(/\s+/g, ' ').trim())).toEqual(['Organization e2e', 'Space e2e']);
+    expect(links[0].querySelector('.sr-only')?.textContent?.trim()).toBe('Organization');
+  });
+
+  // Links stacked in one cell were 17.5 px tall and touching: each line is
+  // now 24 px tall, the WCAG 2.5.8 minimum for a target.
+  it('gives each stacked compound line a 24 px line height', async () => {
+    const fixture = TestBed.createComponent(Host);
+    fixture.componentInstance.config = {
+      ...fixture.componentInstance.config,
+      columns: [
+        { header: 'Name', render: r => r.name },
+        { header: 'Org/Space', kind: 'compound', render: () => '', compound: () => [{ text: 'a', link: ['/a'] }, { text: 'b', link: ['/b'] }] },
+      ],
+    };
+    await fixture.whenStable();
+    const stack = fixture.nativeElement.querySelector('tbody tr td a')!.parentElement as HTMLElement;
+    expect(stack.classList.contains('leading-6')).toBe(true);
+  });
+
   describe('row-action menu and the Escape key', () => {
-    function withActions() {
+    async function withActions() {
       const fixture = TestBed.createComponent(Host);
       fixture.componentInstance.config = {
         ...fixture.componentInstance.config,
@@ -82,24 +216,51 @@ describe('SignalListComponent', () => {
           { header: '', kind: 'actions', render: () => '', actions: () => [{ label: 'Delete', invoke: () => {} }] },
         ],
       };
-      fixture.detectChanges();
+      await fixture.whenStable();
       return fixture;
     }
     const menu = (el: HTMLElement) => el.querySelector('[data-test="row-actions-menu"]');
     const escape = (target: EventTarget) =>
       target.dispatchEvent(new KeyboardEvent('keydown', { key: 'Escape', bubbles: true }));
 
-    it('closes the open menu and returns focus to its kebab button', () => {
-      const fixture = withActions();
+    // The popup is a plain group of buttons, Tab moves through it and it
+    // has no arrow keys, so it is not a menu: aria-haspopup="menu" told a
+    // screen reader to expect one (WCAG 4.1.2). The button shows and hides
+    // the group, and says whether it is open.
+    it('presents the actions button as a show/hide button, not a menu button', async () => {
+      const fixture = await withActions();
+      const kebab = fixture.nativeElement.querySelector('[data-test="row-actions"]') as HTMLButtonElement;
+      expect(kebab.hasAttribute('aria-haspopup')).toBe(false);
+      expect(kebab.getAttribute('aria-expanded')).toBe('false');
+      kebab.click();
+      await fixture.whenStable();
+      expect(kebab.getAttribute('aria-expanded')).toBe('true');
+    });
+
+    // The checklist popup listens for the same document click; a second
+    // listener for one host event was dropped, so only Escape closed the menu.
+    it('closes the open menu on a click outside it', async () => {
+      const fixture = await withActions();
+      (fixture.nativeElement.querySelector('[data-test="row-actions"]') as HTMLButtonElement).click();
+      await fixture.whenStable();
+      expect(menu(fixture.nativeElement)).not.toBeNull();
+
+      document.body.dispatchEvent(new MouseEvent('click', { bubbles: true }));
+      await fixture.whenStable();
+      expect(menu(fixture.nativeElement)).toBeNull();
+    });
+
+    it('closes the open menu and returns focus to its kebab button', async () => {
+      const fixture = await withActions();
       const kebab = fixture.nativeElement.querySelector('[data-test="row-actions"]') as HTMLButtonElement;
       kebab.click();
-      fixture.detectChanges();
+      await fixture.whenStable();
       // A keyboard user is inside the menu when they press Escape.
       const item = menu(fixture.nativeElement)!.querySelector('[data-test="row-action-Delete"]') as HTMLButtonElement;
       item.focus();
 
       escape(item);
-      fixture.detectChanges();
+      await fixture.whenStable();
 
       expect(menu(fixture.nativeElement)).toBeNull();
       expect(kebab.getAttribute('aria-expanded')).toBe('false');
@@ -108,18 +269,18 @@ describe('SignalListComponent', () => {
 
     // Dialogs and the side panel close on any Escape that reaches the
     // document. With the menu open, one press must close only the menu.
-    it('keeps the Escape that closes the menu from reaching the document', () => {
-      const fixture = withActions();
+    it('keeps the Escape that closes the menu from reaching the document', async () => {
+      const fixture = await withActions();
       const kebab = fixture.nativeElement.querySelector('[data-test="row-actions"]') as HTMLButtonElement;
       kebab.click();
-      fixture.detectChanges();
+      await fixture.whenStable();
       const item = menu(fixture.nativeElement)!.querySelector('[data-test="row-action-Delete"]') as HTMLButtonElement;
       item.focus();
       const reachedDocument = vi.fn();
       document.addEventListener('keydown', reachedDocument);
       try {
         escape(item);
-        fixture.detectChanges();
+        await fixture.whenStable();
         expect(menu(fixture.nativeElement)).toBeNull();
         expect(reachedDocument).not.toHaveBeenCalled();
 
@@ -131,23 +292,50 @@ describe('SignalListComponent', () => {
       }
     });
 
-    it('does nothing, and leaves focus alone, when no menu is open', () => {
-      const fixture = withActions();
+    // A dialog an action opens hands focus back, when it closes, to what had
+    // focus when it opened. The menu item that was pressed is gone by then,
+    // so the action must start with focus on the kebab, not on the item.
+    it('runs an action with focus on its kebab, for a dialog to hand focus back to', async () => {
+      const fixture = TestBed.createComponent(Host);
+      let focusedAtInvoke: Element | null = null;
+      fixture.componentInstance.config = {
+        ...fixture.componentInstance.config,
+        columns: [
+          { header: 'Name', render: r => r.name },
+          { header: '', kind: 'actions', render: () => '', actions: () => [{ label: 'Delete', invoke: () => { focusedAtInvoke = document.activeElement; } }] },
+        ],
+      };
+      await fixture.whenStable();
+      const kebab = fixture.nativeElement.querySelector('[data-test="row-actions"]') as HTMLButtonElement;
+      kebab.click();
+      await fixture.whenStable();
+      const item = menu(fixture.nativeElement)!.querySelector('[data-test="row-action-Delete"]') as HTMLButtonElement;
+      item.focus();
+
+      item.click();
+      await fixture.whenStable();
+
+      expect(focusedAtInvoke).toBe(kebab);
+      expect(menu(fixture.nativeElement)).toBeNull();
+    });
+
+    it('does nothing, and leaves focus alone, when no menu is open', async () => {
+      const fixture = await withActions();
       const refresh = fixture.nativeElement.querySelector('[data-test="refresh"]') as HTMLButtonElement;
       refresh.focus();
 
       escape(refresh);
-      fixture.detectChanges();
+      await fixture.whenStable();
 
       expect(menu(fixture.nativeElement)).toBeNull();
       expect(document.activeElement).toBe(refresh);
     });
   });
 
-  it('swaps the refresh button into the refreshing-state indicator when items present and isAnyLoading is true', () => {
+  it('swaps the refresh button into the refreshing-state indicator when items present and isAnyLoading is true', async () => {
     const fixture = TestBed.createComponent(Host);
     fixture.componentInstance.config = { ...fixture.componentInstance.config, isAnyLoading: signal(true).asReadonly() };
-    fixture.detectChanges();
+    await fixture.whenStable();
     // The same button toggles from data-test="refresh" → data-test="refresh-loading"
     // (and from refresh icon → spinner) when a reload is mid-flight against
     // a populated table — no separate row, no layout shift.
@@ -156,9 +344,9 @@ describe('SignalListComponent', () => {
     expect(fixture.nativeElement.querySelector('[data-test="refresh-loading"] app-busy')).not.toBeNull();
   });
 
-  it('shows the refresh icon (not spinner) when not loading', () => {
+  it('shows the refresh icon (not spinner) when not loading', async () => {
     const fixture = TestBed.createComponent(Host);
-    fixture.detectChanges();
+    await fixture.whenStable();
     expect(fixture.nativeElement.querySelector('[data-test="refresh"]')).not.toBeNull();
     expect(fixture.nativeElement.querySelector('[data-test="refresh-loading"]')).toBeNull();
   });
@@ -175,41 +363,41 @@ describe('SignalListComponent', () => {
       ...fixture.componentInstance.config,
       onRefresh: () => refreshPromise,
     };
-    fixture.detectChanges();
+    await fixture.whenStable();
     const component = fixture.debugElement.children[0].componentInstance as SignalListComponent<{ name: string }>;
 
     expect(fixture.nativeElement.querySelector('[data-test="refresh"]')).not.toBeNull();
     const result = component.invokeRefresh();
-    fixture.detectChanges();
+    await fixture.whenStable();
     expect(fixture.nativeElement.querySelector('[data-test="refresh-loading"]')).not.toBeNull();
     expect(fixture.nativeElement.querySelector('[data-test="refresh-loading"] app-busy')).not.toBeNull();
 
     resolveRefresh();
     await result;
-    fixture.detectChanges();
+    await fixture.whenStable();
     expect(fixture.nativeElement.querySelector('[data-test="refresh"]')).not.toBeNull();
     expect(fixture.nativeElement.querySelector('[data-test="refresh-loading"]')).toBeNull();
   });
 
-  it('renders the full loading indicator when no items and isAnyLoading is true', () => {
+  it('renders the full loading indicator when no items and isAnyLoading is true', async () => {
     const fixture = TestBed.createComponent(Host);
     fixture.componentInstance.config = {
       ...fixture.componentInstance.config,
       totalFilteredResults: signal(0).asReadonly(),
       isAnyLoading: signal(true).asReadonly(),
     };
-    fixture.detectChanges();
+    await fixture.whenStable();
     // Empty + loading: show prominent centered spinner
     expect(fixture.nativeElement.querySelector('[data-test="loading"]')).not.toBeNull();
   });
 
-  it('renders the empty state when totalFilteredResults is 0', () => {
+  it('renders the empty state when totalFilteredResults is 0', async () => {
     const fixture = TestBed.createComponent(Host);
     fixture.componentInstance.config = {
       ...fixture.componentInstance.config,
       totalFilteredResults: signal(0).asReadonly(),
     };
-    fixture.detectChanges();
+    await fixture.whenStable();
     const empty = fixture.nativeElement.querySelector('[data-test="empty"]');
     expect(empty).not.toBeNull();
     expect(empty.textContent).toContain('There are no items');
@@ -225,7 +413,7 @@ describe('SignalListComponent', () => {
       errorMessage: 'Failed to load organizations',
       onRefresh,
     };
-    fixture.detectChanges();
+    await fixture.whenStable();
     // Failed-load state replaces the plain empty state...
     expect(fixture.nativeElement.querySelector('[data-test="empty"]')).toBeNull();
     const errorState = fixture.nativeElement.querySelector('[data-test="empty-error"]');
@@ -239,21 +427,62 @@ describe('SignalListComponent', () => {
     expect(onRefresh).toHaveBeenCalledTimes(1);
   });
 
-  it('prefers the plain empty state when empty without errors', () => {
+  it('names each failing endpoint in the error banner, by name when it is known', async () => {
+    seedEndpointsDataService([{ guid: 'cnsi-1', name: 'prod-cf' } as EndpointModel]);
+    const fixture = TestBed.createComponent(Host);
+    fixture.componentInstance.config = {
+      ...fixture.componentInstance.config,
+      errorsByCnsi: signal(new Map<string, unknown>([['cnsi-1', new Error('boom')], ['cnsi-gone', new Error('boom')]])).asReadonly(),
+    };
+    await fixture.whenStable();
+    const lines = [...fixture.nativeElement.querySelectorAll('[data-test="errors"] > div')]
+      .map((d: Element) => d.textContent!.trim());
+    expect(lines).toEqual(['prod-cf: failed to load', 'cnsi-gone: failed to load']);
+    // The fixed red shades are 4.4:1 and do not follow dark mode (#4166);
+    // the theme's alert tokens do both.
+    const banner: HTMLElement = fixture.nativeElement.querySelector('[data-test="errors"]');
+    expect(banner.className).toContain('bg-[var(--danger-bg)]');
+    expect(banner.className).toContain('text-[var(--danger-text)]');
+  });
+
+  it('shows the failed-load reason from errorDetail and follows its changes', async () => {
+    const detail = signal<string | undefined>('Error proxying request: dial tcp: i/o timeout');
+    const fixture = TestBed.createComponent(Host);
+    fixture.componentInstance.config = {
+      ...fixture.componentInstance.config,
+      totalFilteredResults: signal(0).asReadonly(),
+      errorsByCnsi: signal(new Map<string, unknown>([['cnsi-1', new Error('boom')]])).asReadonly(),
+      errorDetail: detail.asReadonly(),
+    };
+    await fixture.whenStable();
+    const reason = () => fixture.nativeElement.querySelector('[data-test="empty-error-detail"]');
+    expect(reason()?.textContent.trim()).toBe('Error proxying request: dial tcp: i/o timeout');
+
+    detail.set('401 Unauthorized');
+    await fixture.whenStable();
+    expect(reason()?.textContent.trim()).toBe('401 Unauthorized');
+
+    detail.set(undefined);
+    await fixture.whenStable();
+    expect(reason()).toBeNull();
+    expect(fixture.nativeElement.querySelector('[data-test="empty-error"]')).not.toBeNull();
+  });
+
+  it('prefers the plain empty state when empty without errors', async () => {
     const fixture = TestBed.createComponent(Host);
     fixture.componentInstance.config = {
       ...fixture.componentInstance.config,
       totalFilteredResults: signal(0).asReadonly(),
     };
-    fixture.detectChanges();
+    await fixture.whenStable();
     expect(fixture.nativeElement.querySelector('[data-test="empty-error"]')).toBeNull();
     expect(fixture.nativeElement.querySelector('[data-test="empty"]')).not.toBeNull();
   });
 
-  it('resets pageIndex to 0 when page size changes', () => {
+  it('resets pageIndex to 0 when page size changes', async () => {
     const fixture = TestBed.createComponent(Host);
     fixture.componentInstance.pageIndex.set(3);
-    fixture.detectChanges();
+    await fixture.whenStable();
     const component = fixture.debugElement.children[0].componentInstance as SignalListComponent<{ name: string }>;
     component.onPageSizeChange('20');
     expect(fixture.componentInstance.pageSize()).toBe(20);
@@ -265,35 +494,57 @@ describe('SignalListComponent', () => {
       return fixture.debugElement.children[0].componentInstance as SignalListComponent<{ name: string }>;
     }
 
-    it('appends All (-1) to card-mode options and labels it', () => {
+    it('appends All (-1) to card-mode options and labels it', async () => {
       const fixture = TestBed.createComponent(Host);
+      fixture.componentInstance.pageSize.set(6);
       fixture.componentInstance.config = {
         ...fixture.componentInstance.config,
         viewMode: signal<'table' | 'card'>('card'),
         pageSizeOptions: { table: [10, 25], card: [6, 12] },
       };
-      fixture.detectChanges();
+      await fixture.whenStable();
       const component = componentWith(fixture);
       expect(component.pageSizeOptions()).toEqual([6, 12, -1]);
       expect(component.pageSizeLabel(-1)).toBe('All');
       expect(component.pageSizeLabel(12)).toBe('12');
     });
 
-    it('does not add All to table-mode options', () => {
+    // A list whose size is not one of the choices (API Keys: 10 of
+    // 5/20/50/80) showed "5" while paging by 10.
+    it('offers the current page size when it is not one of the choices', async () => {
+      const fixture = TestBed.createComponent(Host);
+      await fixture.whenStable();
+      expect(componentWith(fixture).pageSizeOptions()).toEqual([5, 10, 20, 50, 80]);
+      const select = fixture.nativeElement.querySelector('select[aria-label="Items per page"]') as HTMLSelectElement;
+      expect(select.selectedOptions[0].textContent?.trim()).toBe('10');
+    });
+
+    it('keeps All last when adding the current size', async () => {
+      const fixture = TestBed.createComponent(Host);
+      fixture.componentInstance.config = {
+        ...fixture.componentInstance.config,
+        viewMode: signal<'table' | 'card'>('card'),
+        pageSizeOptions: { table: [10, 25], card: [6, 12] },
+      };
+      await fixture.whenStable();
+      expect(componentWith(fixture).pageSizeOptions()).toEqual([6, 10, 12, -1]);
+    });
+
+    it('does not add All to table-mode options', async () => {
       const fixture = TestBed.createComponent(Host);
       fixture.componentInstance.config = {
         ...fixture.componentInstance.config,
         viewMode: signal<'table' | 'card'>('table'),
         pageSizeOptions: { table: [10, 25], card: [6, 12] },
       };
-      fixture.detectChanges();
+      await fixture.whenStable();
       expect(componentWith(fixture).pageSizeOptions()).toEqual([10, 25]);
     });
 
-    it('accepts -1 from the select and reports the full range', () => {
+    it('accepts -1 from the select and reports the full range', async () => {
       const fixture = TestBed.createComponent(Host);
       fixture.componentInstance.pageIndex.set(2);
-      fixture.detectChanges();
+      await fixture.whenStable();
       const component = componentWith(fixture);
       component.onPageSizeChange('-1');
       expect(fixture.componentInstance.pageSize()).toBe(-1);
@@ -301,9 +552,9 @@ describe('SignalListComponent', () => {
       expect(component.rangeText()).toBe('1 – 2 of 2');
     });
 
-    it('still rejects zero and garbage page sizes', () => {
+    it('still rejects zero and garbage page sizes', async () => {
       const fixture = TestBed.createComponent(Host);
-      fixture.detectChanges();
+      await fixture.whenStable();
       const component = componentWith(fixture);
       component.onPageSizeChange('0');
       component.onPageSizeChange('bogus');
@@ -315,7 +566,7 @@ describe('SignalListComponent', () => {
     // from) the clamped page — the raw index produced "85 – 1 of 1" over a
     // one-row list.
     describe('stale out-of-range pageIndex', () => {
-      function staleFixture() {
+      async function staleFixture() {
         const fixture = TestBed.createComponent(Host);
         fixture.componentInstance.pageIndex.set(14);
         fixture.componentInstance.pageSize.set(6);
@@ -324,20 +575,20 @@ describe('SignalListComponent', () => {
           totalFilteredResults: signal(1).asReadonly(),
           totalPages: signal(1).asReadonly(),
         };
-        fixture.detectChanges();
+        await fixture.whenStable();
         return fixture;
       }
 
-      it('range label describes the clamped page, not the stale index', () => {
-        const fixture = staleFixture();
+      it('range label describes the clamped page, not the stale index', async () => {
+        const fixture = await staleFixture();
         expect(componentWith(fixture).rangeText()).toBe('1 – 1 of 1');
       });
 
-      it('clamps effectivePageIndex and disables prev/next on the only page', () => {
-        const fixture = staleFixture();
+      it('clamps effectivePageIndex and disables prev/next on the only page', async () => {
+        const fixture = await staleFixture();
         expect(componentWith(fixture).effectivePageIndex()).toBe(0);
-        expect(fixture.nativeElement.querySelector('[title="Previous page"]').disabled).toBe(true);
-        expect(fixture.nativeElement.querySelector('[title="Next page"]').disabled).toBe(true);
+        expect(isOff(fixture.nativeElement.querySelector('[title="Previous page"]'))).toBe(true);
+        expect(isOff(fixture.nativeElement.querySelector('[title="Next page"]'))).toBe(true);
       });
     });
 
@@ -345,12 +596,12 @@ describe('SignalListComponent', () => {
     // pager returns to page 1 — matching the dropdown/sort/filter-field
     // behaviour. Staying mid-list showed a filtered set's last page and
     // hid matches that sort earlier.
-    it('typing in the name filter resets pageIndex to 0', () => {
+    it('typing in the name filter resets pageIndex to 0', async () => {
       const fixture = TestBed.createComponent(Host);
       const nameFilter = signal('');
       fixture.componentInstance.config = { ...fixture.componentInstance.config, nameFilter };
       fixture.componentInstance.pageIndex.set(3);
-      fixture.detectChanges();
+      await fixture.whenStable();
       componentWith(fixture).onNameFilterChange('cf');
       expect(nameFilter()).toBe('cf');
       expect(fixture.componentInstance.pageIndex()).toBe(0);
@@ -360,12 +611,12 @@ describe('SignalListComponent', () => {
     // the unfiltered position and erasing it restores it, so a user who
     // filters from page 2 lands back on page 2 — even after paging within
     // the filtered results.
-    it('erasing the filter restores the pre-filter page', () => {
+    it('erasing the filter restores the pre-filter page', async () => {
       const fixture = TestBed.createComponent(Host);
       const nameFilter = signal('');
       fixture.componentInstance.config = { ...fixture.componentInstance.config, nameFilter };
       fixture.componentInstance.pageIndex.set(2);
-      fixture.detectChanges();
+      await fixture.whenStable();
       const component = componentWith(fixture);
       component.onNameFilterChange('cf');
       expect(fixture.componentInstance.pageIndex()).toBe(0);
@@ -374,16 +625,16 @@ describe('SignalListComponent', () => {
       expect(fixture.componentInstance.pageIndex()).toBe(2);
     });
 
-    it('erasing a filter that was never entered stays on page 0', () => {
+    it('erasing a filter that was never entered stays on page 0', async () => {
       const fixture = TestBed.createComponent(Host);
       const nameFilter = signal('');
       fixture.componentInstance.config = { ...fixture.componentInstance.config, nameFilter };
-      fixture.detectChanges();
+      await fixture.whenStable();
       componentWith(fixture).onNameFilterChange('');
       expect(fixture.componentInstance.pageIndex()).toBe(0);
     });
 
-    it('does not snap All away when switching to card view', () => {
+    it('does not snap All away when switching to card view', async () => {
       // Regression: setViewMode must validate against the effective card
       // options (which include -1), not the raw config list — otherwise a
       // per-view remembered "All" is destroyed on return to card view.
@@ -395,12 +646,12 @@ describe('SignalListComponent', () => {
         viewMode,
         pageSizeOptions: { table: [10, 25], card: [6, 12] },
       };
-      fixture.detectChanges();
+      await fixture.whenStable();
       componentWith(fixture).setViewMode('card');
       expect(fixture.componentInstance.pageSize()).toBe(-1);
     });
 
-    it('snaps All back to a concrete size when switching to table view', () => {
+    it('snaps All back to a concrete size when switching to table view', async () => {
       const fixture = TestBed.createComponent(Host);
       const viewMode = signal<'table' | 'card'>('card');
       fixture.componentInstance.pageSize.set(-1);
@@ -409,13 +660,13 @@ describe('SignalListComponent', () => {
         viewMode,
         pageSizeOptions: { table: [10, 25], card: [6, 12] },
       };
-      fixture.detectChanges();
+      await fixture.whenStable();
       componentWith(fixture).setViewMode('table');
       expect(fixture.componentInstance.pageSize()).toBe(10);
     });
   });
 
-  it('renders a filter dropdown per config.filterDropdowns entry', () => {
+  it('renders a filter dropdown per config.filterDropdowns entry', async () => {
     const fixture = TestBed.createComponent(Host);
     const selected = signal<string | null>(null);
     const options = signal<SignalListDropdownOption[]>([
@@ -432,7 +683,7 @@ describe('SignalListComponent', () => {
       ...fixture.componentInstance.config,
       filterDropdowns: [dropdown],
     };
-    fixture.detectChanges();
+    await fixture.whenStable();
     const ddEl = fixture.nativeElement.querySelector('[data-test="dropdown-Cloud Foundry"]');
     expect(ddEl).not.toBeNull();
     const opts = ddEl.querySelectorAll('option');
@@ -441,7 +692,7 @@ describe('SignalListComponent', () => {
     expect(opts[1].textContent).toContain('CF-1');
   });
 
-  it('renders a Clear button when config.onClear is provided', () => {
+  it('renders a Clear button when config.onClear is provided', async () => {
     const fixture = TestBed.createComponent(Host);
     const nameFilter = signal('');
     fixture.componentInstance.config = {
@@ -449,18 +700,18 @@ describe('SignalListComponent', () => {
       nameFilter,
       onClear: () => { /* no-op */ },
     };
-    fixture.detectChanges();
+    await fixture.whenStable();
     const btn = fixture.nativeElement.querySelector('[data-test="clear-filters"]');
     expect(btn).not.toBeNull();
     // Disabled when no filter is active.
-    expect(btn.disabled).toBe(true);
+    expect(isOff(btn)).toBe(true);
     // Setting nameFilter to a non-empty string activates the button.
     nameFilter.set('foo');
-    fixture.detectChanges();
-    expect(btn.disabled).toBe(false);
+    await fixture.whenStable();
+    expect(isOn(btn)).toBe(true);
   });
 
-  it('clicking the Clear button invokes config.onClear', () => {
+  it('clicking the Clear button invokes config.onClear', async () => {
     const fixture = TestBed.createComponent(Host);
     const onClear = vi.fn();
     const nameFilter = signal('foo');
@@ -469,13 +720,13 @@ describe('SignalListComponent', () => {
       nameFilter,
       onClear,
     };
-    fixture.detectChanges();
+    await fixture.whenStable();
     const btn = fixture.nativeElement.querySelector('[data-test="clear-filters"]');
     btn.click();
     expect(onClear).toHaveBeenCalledOnce();
   });
 
-  it('Clear button is enabled when a dropdown has a non-null selection', () => {
+  it('Clear button is enabled when a dropdown has a non-null selection', async () => {
     const fixture = TestBed.createComponent(Host);
     const selected = signal<string | null>('cf-1');
     const dropdown: SignalListDropdown = {
@@ -488,15 +739,15 @@ describe('SignalListComponent', () => {
       filterDropdowns: [dropdown],
       onClear: () => { /* no-op */ },
     };
-    fixture.detectChanges();
+    await fixture.whenStable();
     const btn = fixture.nativeElement.querySelector('[data-test="clear-filters"]');
-    expect(btn.disabled).toBe(false);
+    expect(isOn(btn)).toBe(true);
     selected.set(null);
-    fixture.detectChanges();
-    expect(btn.disabled).toBe(true);
+    await fixture.whenStable();
+    expect(isOff(btn)).toBe(true);
   });
 
-  it('Clear button is enabled when a filterMultis selection is non-null (narrowed or explicitly empty)', () => {
+  it('Clear button is enabled when a filterMultis selection is non-null (narrowed or explicitly empty)', async () => {
     const fixture = TestBed.createComponent(Host);
     const selected = signal<string[] | null>(null);
     const fm: SignalListMultiFilter = {
@@ -509,18 +760,18 @@ describe('SignalListComponent', () => {
       filterMultis: [fm],
       onClear: () => { /* no-op */ },
     };
-    fixture.detectChanges();
+    await fixture.whenStable();
     const btn = fixture.nativeElement.querySelector('[data-test="clear-filters"]');
-    expect(btn.disabled).toBe(true);
+    expect(isOff(btn)).toBe(true);
     selected.set(['a']);
-    fixture.detectChanges();
-    expect(btn.disabled).toBe(false);
+    await fixture.whenStable();
+    expect(isOn(btn)).toBe(true);
     selected.set([]);
-    fixture.detectChanges();
-    expect(btn.disabled).toBe(false);
+    await fixture.whenStable();
+    expect(isOn(btn)).toBe(true);
     selected.set(null);
-    fixture.detectChanges();
-    expect(btn.disabled).toBe(true);
+    await fixture.whenStable();
+    expect(isOff(btn)).toBe(true);
   });
 
   // Note: SignalListConfig.headerActions was removed (see commit
@@ -530,10 +781,10 @@ describe('SignalListComponent', () => {
   // along with the field. The replacement page-level "+ Add" pattern
   // is now driven by ListSubNavComponent and tested per-consumer.
 
-  it('onDropdownChange updates selected and resets pageIndex', () => {
+  it('onDropdownChange updates selected and resets pageIndex', async () => {
     const fixture = TestBed.createComponent(Host);
     fixture.componentInstance.pageIndex.set(4);
-    fixture.detectChanges();
+    await fixture.whenStable();
     const component = fixture.debugElement.children[0].componentInstance as SignalListComponent<{ name: string }>;
     const selected = signal<string | null>(null);
     const dropdown: SignalListDropdown = {
@@ -553,7 +804,7 @@ describe('SignalListComponent', () => {
   // and pushed the username out of the viewport (see
   // project_signallist_row_overflow.md). The cap renders a fixed number
   // of segments + a "…and N more" affordance that toggles to show all.
-  it('caps compound-cell segments to maxVisible and expands on click', () => {
+  it('caps compound-cell segments to maxVisible and expands on click', async () => {
     @Component({
       standalone: true,
       imports: [SignalListComponent],
@@ -564,7 +815,9 @@ describe('SignalListComponent', () => {
       items = signal([{ name: 'admin' }]);
       pageIndex = signal(0);
       pageSize = signal(10);
-      config: SignalListConfig<{ name: string }> = {
+      // Signal-backed so a test that swaps the config after the first
+      // render schedules change detection (zoneless, like the app).
+      readonly configState = signal<SignalListConfig<{ name: string }>>({
         pagedItems: this.items.asReadonly(),
         totalFilteredResults: signal(1).asReadonly(),
         totalPages: signal(1).asReadonly(),
@@ -584,11 +837,13 @@ describe('SignalListComponent', () => {
           },
         ],
         getRowKey: r => r.name,
-      };
+      });
+      get config(): SignalListConfig<{ name: string }> { return this.configState(); }
+      set config(value: SignalListConfig<{ name: string }>) { this.configState.set(value); }
     }
 
     const fixture = TestBed.createComponent(CompoundHost);
-    fixture.detectChanges();
+    await fixture.whenStable();
 
     // Compound cell — only the first 3 segments visible.
     const cell = fixture.nativeElement.querySelectorAll('td')[1] as HTMLElement;
@@ -604,7 +859,7 @@ describe('SignalListComponent', () => {
 
     // Click expands.
     expandBtn.click();
-    fixture.detectChanges();
+    await fixture.whenStable();
     expect(cell.textContent).toContain('seg-9');
     const collapseBtn = cell.querySelector('[data-test="compound-collapse"]') as HTMLButtonElement;
     expect(collapseBtn).not.toBeNull();
@@ -613,13 +868,13 @@ describe('SignalListComponent', () => {
 
     // Click again collapses back to 3.
     collapseBtn.click();
-    fixture.detectChanges();
+    await fixture.whenStable();
     expect(cell.textContent).not.toContain('seg-9');
     expect(cell.querySelector('[data-test="compound-expand"]')).not.toBeNull();
     expect(cell.querySelector('[data-test="compound-collapse"]')).toBeNull();
   });
 
-  it('renders all segments when count is at or below maxVisible (no affordance)', () => {
+  it('renders all segments when count is at or below maxVisible (no affordance)', async () => {
     @Component({
       standalone: true,
       imports: [SignalListComponent],
@@ -629,7 +884,9 @@ describe('SignalListComponent', () => {
       items = signal([{ name: 'a' }]);
       pageIndex = signal(0);
       pageSize = signal(10);
-      config: SignalListConfig<{ name: string }> = {
+      // Signal-backed so a test that swaps the config after the first
+      // render schedules change detection (zoneless, like the app).
+      readonly configState = signal<SignalListConfig<{ name: string }>>({
         pagedItems: this.items.asReadonly(),
         totalFilteredResults: signal(1).asReadonly(),
         totalPages: signal(1).asReadonly(),
@@ -648,10 +905,12 @@ describe('SignalListComponent', () => {
           },
         ],
         getRowKey: r => r.name,
-      };
+      });
+      get config(): SignalListConfig<{ name: string }> { return this.configState(); }
+      set config(value: SignalListConfig<{ name: string }>) { this.configState.set(value); }
     }
     const fixture = TestBed.createComponent(SmallHost);
-    fixture.detectChanges();
+    await fixture.whenStable();
     const cell = fixture.nativeElement.querySelectorAll('td')[1] as HTMLElement;
     expect(cell.textContent).toContain('one');
     expect(cell.textContent).toContain('two');
@@ -659,7 +918,7 @@ describe('SignalListComponent', () => {
     expect(cell.querySelector('[data-test="compound-collapse"]')).toBeNull();
   });
 
-  it('renders all segments when maxVisible is unset (zero behavior change for existing pages)', () => {
+  it('renders all segments when maxVisible is unset (zero behavior change for existing pages)', async () => {
     @Component({
       standalone: true,
       imports: [SignalListComponent],
@@ -669,7 +928,9 @@ describe('SignalListComponent', () => {
       items = signal([{ name: 'a' }]);
       pageIndex = signal(0);
       pageSize = signal(10);
-      config: SignalListConfig<{ name: string }> = {
+      // Signal-backed so a test that swaps the config after the first
+      // render schedules change detection (zoneless, like the app).
+      readonly configState = signal<SignalListConfig<{ name: string }>>({
         pagedItems: this.items.asReadonly(),
         totalFilteredResults: signal(1).asReadonly(),
         totalPages: signal(1).asReadonly(),
@@ -687,17 +948,19 @@ describe('SignalListComponent', () => {
           },
         ],
         getRowKey: r => r.name,
-      };
+      });
+      get config(): SignalListConfig<{ name: string }> { return this.configState(); }
+      set config(value: SignalListConfig<{ name: string }>) { this.configState.set(value); }
     }
     const fixture = TestBed.createComponent(UncappedHost);
-    fixture.detectChanges();
+    await fixture.whenStable();
     const cell = fixture.nativeElement.querySelectorAll('td')[1] as HTMLElement;
     expect(cell.textContent).toContain('s0');
     expect(cell.textContent).toContain('s49');
     expect(cell.querySelector('[data-test="compound-expand"]')).toBeNull();
   });
 
-  it('compound expansion is independent across two compound columns on the same row', () => {
+  it('compound expansion is independent across two compound columns on the same row', async () => {
     // Two compound columns on the same row both overflow. Expanding one
     // must not expand the other — keying is by (rowKey, columnKey).
     @Component({
@@ -709,7 +972,9 @@ describe('SignalListComponent', () => {
       items = signal([{ name: 'admin' }]);
       pageIndex = signal(0);
       pageSize = signal(10);
-      config: SignalListConfig<{ name: string }> = {
+      // Signal-backed so a test that swaps the config after the first
+      // render schedules change detection (zoneless, like the app).
+      readonly configState = signal<SignalListConfig<{ name: string }>>({
         pagedItems: this.items.asReadonly(),
         totalFilteredResults: signal(1).asReadonly(),
         totalPages: signal(1).asReadonly(),
@@ -735,10 +1000,12 @@ describe('SignalListComponent', () => {
           },
         ],
         getRowKey: r => r.name,
-      };
+      });
+      get config(): SignalListConfig<{ name: string }> { return this.configState(); }
+      set config(value: SignalListConfig<{ name: string }>) { this.configState.set(value); }
     }
     const fixture = TestBed.createComponent(TwoCompoundHost);
-    fixture.detectChanges();
+    await fixture.whenStable();
 
     const cells = fixture.nativeElement.querySelectorAll('td');
     const orgsCell = cells[1] as HTMLElement;
@@ -750,7 +1017,7 @@ describe('SignalListComponent', () => {
 
     // Click expand on Orgs only.
     (orgsCell.querySelector('[data-test="compound-expand"]') as HTMLButtonElement).click();
-    fixture.detectChanges();
+    await fixture.whenStable();
 
     expect(orgsCell.textContent).toContain('org-5');
     // Spaces should still be collapsed.
@@ -773,7 +1040,9 @@ describe('SignalListComponent', () => {
       selected = signal<string | null>(null);
       pageIndex = signal(0);
       pageSize = signal(10);
-      config: SignalListConfig<{ name: string }> = {
+      // Signal-backed so a test that swaps the config after the first
+      // render schedules change detection (zoneless, like the app).
+      readonly configState = signal<SignalListConfig<{ name: string }>>({
         pagedItems: this.items.asReadonly(),
         totalFilteredResults: signal(3).asReadonly(),
         totalPages: signal(1).asReadonly(),
@@ -794,52 +1063,54 @@ describe('SignalListComponent', () => {
           { header: 'Name', render: r => r.name },
         ],
         getRowKey: r => r.name,
-      };
+      });
+      get config(): SignalListConfig<{ name: string }> { return this.configState(); }
+      set config(value: SignalListConfig<{ name: string }>) { this.configState.set(value); }
     }
 
-    it('renders one radio input per row', () => {
+    it('renders one radio input per row', async () => {
       const fixture = TestBed.createComponent(RadioHost);
-      fixture.detectChanges();
+      await fixture.whenStable();
       const radios = fixture.nativeElement.querySelectorAll('[data-test="row-radio"]');
       expect(radios.length).toBe(3);
     });
 
-    it('clicking a radio writes the row key to the selection signal', () => {
+    it('clicking a radio writes the row key to the selection signal', async () => {
       const fixture = TestBed.createComponent(RadioHost);
-      fixture.detectChanges();
+      await fixture.whenStable();
       const radios = fixture.nativeElement.querySelectorAll('[data-test="row-radio"]') as NodeListOf<HTMLInputElement>;
       radios[1].click();
-      fixture.detectChanges();
+      await fixture.whenStable();
       expect(fixture.componentInstance.selected()).toBe('two');
     });
 
-    it('selected row reads checked from the signal', () => {
+    it('selected row reads checked from the signal', async () => {
       const fixture = TestBed.createComponent(RadioHost);
       fixture.componentInstance.selected.set('one');
-      fixture.detectChanges();
+      await fixture.whenStable();
       const radios = fixture.nativeElement.querySelectorAll('[data-test="row-radio"]') as NodeListOf<HTMLInputElement>;
       expect(radios[0].checked).toBe(true);
       expect(radios[1].checked).toBe(false);
     });
 
-    it('disabled rows render disabled radio and clicks are no-ops', () => {
+    it('disabled rows render disabled radio and clicks are no-ops', async () => {
       const fixture = TestBed.createComponent(RadioHost);
-      fixture.detectChanges();
+      await fixture.whenStable();
       const radios = fixture.nativeElement.querySelectorAll('[data-test="row-radio"]') as NodeListOf<HTMLInputElement>;
       expect(radios[2].disabled).toBe(true);
       radios[2].click();
-      fixture.detectChanges();
+      await fixture.whenStable();
       expect(fixture.componentInstance.selected()).toBe(null);
     });
 
-    it('selecting a different row replaces the previous selection (single-select)', () => {
+    it('selecting a different row replaces the previous selection (single-select)', async () => {
       const fixture = TestBed.createComponent(RadioHost);
-      fixture.detectChanges();
+      await fixture.whenStable();
       const radios = fixture.nativeElement.querySelectorAll('[data-test="row-radio"]') as NodeListOf<HTMLInputElement>;
       radios[0].click();
-      fixture.detectChanges();
+      await fixture.whenStable();
       radios[1].click();
-      fixture.detectChanges();
+      await fixture.whenStable();
       expect(fixture.componentInstance.selected()).toBe('two');
       expect(radios[0].checked).toBe(false);
       expect(radios[1].checked).toBe(true);
@@ -861,7 +1132,9 @@ describe('SignalListComponent', () => {
       selected = signal<ReadonlySet<string>>(new Set<string>());
       pageIndex = signal(0);
       pageSize = signal(10);
-      config: SignalListConfig<{ name: string }> = {
+      // Signal-backed so a test that swaps the config after the first
+      // render schedules change detection (zoneless, like the app).
+      readonly configState = signal<SignalListConfig<{ name: string }>>({
         pagedItems: this.items.asReadonly(),
         totalFilteredResults: signal(3).asReadonly(),
         totalPages: signal(1).asReadonly(),
@@ -882,48 +1155,50 @@ describe('SignalListComponent', () => {
           { header: 'Name', render: r => r.name },
         ],
         getRowKey: r => r.name,
-      };
+      });
+      get config(): SignalListConfig<{ name: string }> { return this.configState(); }
+      set config(value: SignalListConfig<{ name: string }>) { this.configState.set(value); }
     }
 
-    it('renders one checkbox per row', () => {
+    it('renders one checkbox per row', async () => {
       const fixture = TestBed.createComponent(CheckboxHost);
-      fixture.detectChanges();
+      await fixture.whenStable();
       const boxes = fixture.nativeElement.querySelectorAll('[data-test="row-checkbox"]');
       expect(boxes.length).toBe(3);
     });
 
-    it('clicking a checkbox adds the row key to the selection set', () => {
+    it('clicking a checkbox adds the row key to the selection set', async () => {
       const fixture = TestBed.createComponent(CheckboxHost);
-      fixture.detectChanges();
+      await fixture.whenStable();
       const boxes = fixture.nativeElement.querySelectorAll('[data-test="row-checkbox"]') as NodeListOf<HTMLInputElement>;
       boxes[0].click();
-      fixture.detectChanges();
+      await fixture.whenStable();
       boxes[1].click();
-      fixture.detectChanges();
+      await fixture.whenStable();
       const selected = fixture.componentInstance.selected();
       expect(selected.has('one')).toBe(true);
       expect(selected.has('two')).toBe(true);
       expect(selected.size).toBe(2);
     });
 
-    it('clicking a selected checkbox removes the row key', () => {
+    it('clicking a selected checkbox removes the row key', async () => {
       const fixture = TestBed.createComponent(CheckboxHost);
       fixture.componentInstance.selected.set(new Set(['one']));
-      fixture.detectChanges();
+      await fixture.whenStable();
       const boxes = fixture.nativeElement.querySelectorAll('[data-test="row-checkbox"]') as NodeListOf<HTMLInputElement>;
       expect(boxes[0].checked).toBe(true);
       boxes[0].click();
-      fixture.detectChanges();
+      await fixture.whenStable();
       expect(fixture.componentInstance.selected().size).toBe(0);
     });
 
-    it('disabled rows render disabled checkbox and clicks are no-ops', () => {
+    it('disabled rows render disabled checkbox and clicks are no-ops', async () => {
       const fixture = TestBed.createComponent(CheckboxHost);
-      fixture.detectChanges();
+      await fixture.whenStable();
       const boxes = fixture.nativeElement.querySelectorAll('[data-test="row-checkbox"]') as NodeListOf<HTMLInputElement>;
       expect(boxes[2].disabled).toBe(true);
       boxes[2].click();
-      fixture.detectChanges();
+      await fixture.whenStable();
       expect(fixture.componentInstance.selected().has('three-disabled')).toBe(false);
     });
   });
@@ -947,7 +1222,9 @@ describe('SignalListComponent', () => {
       ]);
       pageIndex = signal(0);
       pageSize = signal(10);
-      config: SignalListConfig<{ name: string }> = {
+      // Signal-backed so a test that swaps the config after the first
+      // render schedules change detection (zoneless, like the app).
+      readonly configState = signal<SignalListConfig<{ name: string }>>({
         pagedItems: this.items.asReadonly(),
         totalFilteredResults: signal(2).asReadonly(),
         totalPages: signal(1).asReadonly(),
@@ -965,19 +1242,21 @@ describe('SignalListComponent', () => {
           },
         ],
         getRowKey: r => r.name,
-      };
+      });
+      get config(): SignalListConfig<{ name: string }> { return this.configState(); }
+      set config(value: SignalListConfig<{ name: string }>) { this.configState.set(value); }
     }
 
-    it('renders the named template once per row with the row context', () => {
+    it('renders the named template once per row with the row context', async () => {
       const fixture = TestBed.createComponent(TemplateHost);
-      fixture.detectChanges();
+      await fixture.whenStable();
       const cells = fixture.nativeElement.querySelectorAll('[data-test="custom-cell"]');
       expect(cells.length).toBe(2);
       expect(cells[0].textContent).toContain('CUSTOM:one');
       expect(cells[1].textContent).toContain('CUSTOM:two');
     });
 
-    it('falls through cleanly when templateName has no matching ng-template', () => {
+    it('falls through cleanly when templateName has no matching ng-template', async () => {
       const fixture = TestBed.createComponent(TemplateHost);
       // Mutate config so templateName references a missing template.
       fixture.componentInstance.config = {
@@ -987,7 +1266,7 @@ describe('SignalListComponent', () => {
           { header: 'Custom', key: 'custom', kind: 'template', templateName: 'missing', render: () => '' },
         ],
       };
-      fixture.detectChanges();
+      await fixture.whenStable();
       // Should not throw; missing-template cells just render empty.
       expect(fixture.nativeElement.querySelectorAll('[data-test="custom-cell"]').length).toBe(0);
     });
@@ -1007,7 +1286,9 @@ describe('SignalListComponent', () => {
     class CardBulkHost {
       items = signal([{ name: 'one', guid: 'g-one' }, { name: 'two', guid: 'g-two' }]);
       selected = signal<ReadonlySet<string>>(new Set<string>());
-      config: SignalListConfig<{ name: string; guid: string }> = {
+      // Signal-backed so a test that swaps the config after the first
+      // render schedules change detection (zoneless, like the app).
+      readonly configState = signal<SignalListConfig<{ name: string; guid: string }>>({
         pagedItems: this.items.asReadonly(),
         totalFilteredResults: signal(2).asReadonly(),
         totalPages: signal(1).asReadonly(),
@@ -1026,25 +1307,27 @@ describe('SignalListComponent', () => {
         ],
         bulkActions: [{ label: 'Delete', run: () => undefined }],
         getRowKey: r => r.name,
-      };
+      });
+      get config(): SignalListConfig<{ name: string; guid: string }> { return this.configState(); }
+      set config(value: SignalListConfig<{ name: string; guid: string }>) { this.configState.set(value); }
     }
 
-    it('renders the checkbox in the header cluster; selecting drives the bulk bar', () => {
+    it('renders the checkbox in the header cluster; selecting drives the bulk bar', async () => {
       const fixture = TestBed.createComponent(CardBulkHost);
-      fixture.detectChanges();
+      await fixture.whenStable();
       const boxes = fixture.nativeElement
         .querySelectorAll('[data-test="card-select-checkbox"]') as NodeListOf<HTMLInputElement>;
       expect(boxes.length).toBe(2);
       expect(fixture.nativeElement.querySelector('[data-test="bulk-action-bar"]')).toBeNull();
       boxes[0].click();
-      fixture.detectChanges();
+      await fixture.whenStable();
       expect(fixture.componentInstance.selected().has('one')).toBe(true);
       expect(fixture.nativeElement.querySelector('[data-test="bulk-action-bar"]')).not.toBeNull();
     });
 
-    it('uses the first non-control column as the title (checkbox does not blank it)', () => {
+    it('uses the first non-control column as the title (checkbox does not blank it)', async () => {
       const fixture = TestBed.createComponent(CardBulkHost);
-      fixture.detectChanges();
+      await fixture.whenStable();
       const cards = fixture.nativeElement.querySelectorAll('[data-test="card"]');
       // Title text is the Name column, not the empty checkbox column.
       expect((cards[0] as HTMLElement).textContent).toContain('one');
@@ -1053,9 +1336,9 @@ describe('SignalListComponent', () => {
       expect(title.getAttribute('title')).toBe('g-one');
     });
 
-    it('does not also render the title column as a body detail row', () => {
+    it('does not also render the title column as a body detail row', async () => {
       const fixture = TestBed.createComponent(CardBulkHost);
-      fixture.detectChanges();
+      await fixture.whenStable();
       const card = fixture.nativeElement.querySelector('[data-test="card"]') as HTMLElement;
       // The title column is the header; it must not repeat as a label:value
       // detail row. A doubled title means the suppression missed it.
@@ -1077,7 +1360,9 @@ describe('SignalListComponent', () => {
       items = signal([{ name: 'one' }]);
       selected = signal<ReadonlySet<string>>(new Set(['one']));
       running = signal(true);
-      config: SignalListConfig<{ name: string }> = {
+      // Signal-backed so a test that swaps the config after the first
+      // render schedules change detection (zoneless, like the app).
+      readonly configState = signal<SignalListConfig<{ name: string }>>({
         pagedItems: this.items.asReadonly(),
         totalFilteredResults: signal(1).asReadonly(),
         totalPages: signal(1).asReadonly(),
@@ -1093,20 +1378,22 @@ describe('SignalListComponent', () => {
         bulkActions: [{ label: 'Delete', run: () => undefined }],
         bulkRunning: this.running,
         getRowKey: r => r.name,
-      };
+      });
+      get config(): SignalListConfig<{ name: string }> { return this.configState(); }
+      set config(value: SignalListConfig<{ name: string }>) { this.configState.set(value); }
     }
 
-    it('shows the spinner and disables actions while running, clears when done', () => {
+    it('shows the spinner and disables actions while running, clears when done', async () => {
       const fixture = TestBed.createComponent(BulkRunningHost);
-      fixture.detectChanges();
+      await fixture.whenStable();
       const del = () => fixture.nativeElement.querySelector('[data-test="bulk-action-Delete"]') as HTMLButtonElement;
       expect(fixture.nativeElement.querySelector('[data-test="bulk-running"]')).not.toBeNull();
-      expect(del().disabled).toBe(true);
+      expect(isOff(del())).toBe(true);
 
       fixture.componentInstance.running.set(false);
-      fixture.detectChanges();
+      await fixture.whenStable();
       expect(fixture.nativeElement.querySelector('[data-test="bulk-running"]')).toBeNull();
-      expect(del().disabled).toBe(false);
+      expect(isOn(del())).toBe(true);
     });
   });
 
@@ -1123,7 +1410,9 @@ describe('SignalListComponent', () => {
       ]);
       pageIndex = signal(0);
       pageSize = signal(10);
-      config: SignalListConfig<{ name: string; url: string }> = {
+      // Signal-backed so a test that swaps the config after the first
+      // render schedules change detection (zoneless, like the app).
+      readonly configState = signal<SignalListConfig<{ name: string; url: string }>>({
         pagedItems: this.items.asReadonly(),
         totalFilteredResults: signal(2).asReadonly(),
         totalPages: signal(1).asReadonly(),
@@ -1140,12 +1429,14 @@ describe('SignalListComponent', () => {
           },
         ],
         getRowKey: r => r.name,
-      };
+      });
+      get config(): SignalListConfig<{ name: string; url: string }> { return this.configState(); }
+      set config(value: SignalListConfig<{ name: string; url: string }>) { this.configState.set(value); }
     }
 
-    it('renders a new-tab external anchor for rows with a url, plain text otherwise', () => {
+    it('renders a new-tab external anchor for rows with a url, plain text otherwise', async () => {
       const fixture = TestBed.createComponent(ExtHost);
-      fixture.detectChanges();
+      await fixture.whenStable();
       const anchor = fixture.nativeElement.querySelector('a[href="https://dash.example/x"]') as HTMLAnchorElement | null;
       expect(anchor).not.toBeNull();
       expect(anchor!.getAttribute('target')).toBe('_blank');
@@ -1156,18 +1447,127 @@ describe('SignalListComponent', () => {
       expect(fixture.nativeElement.textContent).toContain('None');
     });
 
-    it('renders the external anchor in card view too', () => {
+    it('renders the external anchor in card view too', async () => {
       const fixture = TestBed.createComponent(ExtHost);
       fixture.componentInstance.config = {
         ...fixture.componentInstance.config,
         viewMode: signal<'table' | 'card'>('card'),
       };
-      fixture.detectChanges();
+      await fixture.whenStable();
       const anchor = fixture.nativeElement.querySelector('a[href="https://dash.example/x"]') as HTMLAnchorElement | null;
       expect(anchor).not.toBeNull();
       expect(anchor!.getAttribute('target')).toBe('_blank');
       expect(anchor!.textContent).toContain('View');
     });
+
+    // A card's title is its first column. Route lists put the route URL
+    // there, so the title has to honour externalLink and copyValue too.
+    @Component({
+      standalone: true,
+      imports: [SignalListComponent],
+      template: `<app-signal-list [config]="config" />`,
+    })
+    class RouteHost {
+      items = signal([{ url: 'app.example.com/p' }]);
+      // Signal-backed so a test that swaps the config after the first
+      // render schedules change detection (zoneless, like the app).
+      readonly configState = signal<SignalListConfig<{ url: string }>>({
+        pagedItems: this.items.asReadonly(),
+        totalFilteredResults: signal(1).asReadonly(),
+        totalPages: signal(1).asReadonly(),
+        pageIndex: signal(0),
+        pageSize: signal(10),
+        isAnyLoading: signal(false).asReadonly(),
+        errorsByCnsi: signal(new Map<string, unknown>()).asReadonly(),
+        columns: [
+          {
+            header: 'Route', key: 'url',
+            render: r => r.url,
+            externalLink: r => `https://${r.url}`,
+            copyValue: r => `https://${r.url}`,
+          },
+          { header: 'Other', key: 'other', render: () => 'x' },
+        ],
+        getRowKey: r => r.url,
+      });
+      get config(): SignalListConfig<{ url: string }> { return this.configState(); }
+      set config(value: SignalListConfig<{ url: string }>) { this.configState.set(value); }
+    }
+
+    function copyButtons(fixture: { nativeElement: HTMLElement }): HTMLButtonElement[] {
+      return Array.from(fixture.nativeElement.querySelectorAll('app-copy-to-clipboard button'));
+    }
+
+    it('links the card title when its column has externalLink', async () => {
+      const fixture = TestBed.createComponent(RouteHost);
+      fixture.componentInstance.config = { ...fixture.componentInstance.config, viewMode: signal<'table' | 'card'>('card') };
+      await fixture.whenStable();
+      const anchor = fixture.nativeElement.querySelector('a[href="https://app.example.com/p"]') as HTMLAnchorElement | null;
+      expect(anchor).not.toBeNull();
+      expect(anchor!.getAttribute('target')).toBe('_blank');
+      expect(anchor!.textContent).toContain('app.example.com/p');
+    });
+
+    it('puts a copy button beside a copyValue column in card view', async () => {
+      const fixture = TestBed.createComponent(RouteHost);
+      fixture.componentInstance.config = { ...fixture.componentInstance.config, viewMode: signal<'table' | 'card'>('card') };
+      await fixture.whenStable();
+      expect(copyButtons(fixture).length).toBe(1);
+      expect(copyButtons(fixture)[0].getAttribute('aria-label')).toBe('Copy https://app.example.com/p');
+    });
+
+    it('puts a copy button beside a copyValue column in table view', async () => {
+      const fixture = TestBed.createComponent(RouteHost);
+      await fixture.whenStable();
+      expect(copyButtons(fixture).length).toBe(1);
+      expect(copyButtons(fixture)[0].getAttribute('aria-label')).toBe('Copy https://app.example.com/p');
+    });
+  });
+
+  // A pill holds a short state; its column's tooltip can say more on hover
+  // (the service-instance lists put a failed operation's reason there).
+  describe('pill column hover text (tooltip)', () => {
+    @Component({
+      standalone: true,
+      imports: [SignalListComponent],
+      template: `<app-signal-list [config]="config" />`,
+    })
+    class PillHost {
+      items = signal([{ name: 'db', state: 'Update failed', reason: 'quota exceeded' }]);
+      // Signal-backed so a test that swaps the config after the first
+      // render schedules change detection (zoneless, like the app).
+      readonly configState = signal<SignalListConfig<{ name: string; state: string; reason: string }>>({
+        pagedItems: this.items.asReadonly(),
+        totalFilteredResults: signal(1).asReadonly(),
+        totalPages: signal(1).asReadonly(),
+        pageIndex: signal(0),
+        pageSize: signal(10),
+        isAnyLoading: signal(false).asReadonly(),
+        errorsByCnsi: signal(new Map<string, unknown>()).asReadonly(),
+        columns: [
+          { header: 'Name', key: 'name', render: r => r.name },
+          { header: 'State', key: 'state', kind: 'pill', render: r => r.state, tooltip: r => `${r.state} — ${r.reason}` },
+          { header: 'Plain', key: 'plain', kind: 'pill', render: r => r.state },
+        ],
+        getRowKey: r => r.name,
+      });
+      get config(): SignalListConfig<{ name: string; state: string; reason: string }> { return this.configState(); }
+      set config(value: SignalListConfig<{ name: string; state: string; reason: string }>) { this.configState.set(value); }
+    }
+
+    // The title sits on the pill's cell (table) or value span (card).
+    const pillTitles = (fixture: { nativeElement: HTMLElement }) =>
+      Array.from(fixture.nativeElement.querySelectorAll('span.rounded'))
+        .map(pill => pill.parentElement!.getAttribute('title'));
+
+    for (const viewMode of ['table', 'card'] as const) {
+      it(`titles a pill with its tooltip, else its text (${viewMode})`, async () => {
+        const fixture = TestBed.createComponent(PillHost);
+        fixture.componentInstance.config = { ...fixture.componentInstance.config, viewMode: signal(viewMode) };
+        await fixture.whenStable();
+        expect(pillTitles(fixture)).toEqual(['Update failed — quota exceeded', 'Update failed']);
+      });
+    }
   });
 
   describe('bulk-action bar (bulkActions slot)', () => {
@@ -1182,7 +1582,9 @@ describe('SignalListComponent', () => {
       pageIndex = signal(0);
       pageSize = signal(10);
       runSpy = vi.fn();
-      config: SignalListConfig<{ name: string }> = {
+      // Signal-backed so a test that swaps the config after the first
+      // render schedules change detection (zoneless, like the app).
+      readonly configState = signal<SignalListConfig<{ name: string }>>({
         pagedItems: this.items.asReadonly(),
         totalFilteredResults: signal(3).asReadonly(),
         totalPages: signal(1).asReadonly(),
@@ -1199,19 +1601,21 @@ describe('SignalListComponent', () => {
         bulkActions: [
           { label: 'Delete', icon: 'delete', danger: true, run: this.runSpy },
         ],
-      };
+      });
+      get config(): SignalListConfig<{ name: string }> { return this.configState(); }
+      set config(value: SignalListConfig<{ name: string }>) { this.configState.set(value); }
     }
 
-    it('does not render the bar when selection is empty', () => {
+    it('does not render the bar when selection is empty', async () => {
       const fixture = TestBed.createComponent(BulkHost);
-      fixture.detectChanges();
+      await fixture.whenStable();
       expect(fixture.nativeElement.querySelector('[data-test="bulk-action-bar"]')).toBeNull();
     });
 
-    it('renders the bar with count and action when 1+ rows are selected', () => {
+    it('renders the bar with count and action when 1+ rows are selected', async () => {
       const fixture = TestBed.createComponent(BulkHost);
       fixture.componentInstance.selected.set(new Set(['one', 'two']));
-      fixture.detectChanges();
+      await fixture.whenStable();
       const bar = fixture.nativeElement.querySelector('[data-test="bulk-action-bar"]');
       expect(bar).not.toBeNull();
       expect(fixture.nativeElement.querySelector('[data-test="bulk-selected-count"]').textContent).toContain('2 selected');
@@ -1221,7 +1625,7 @@ describe('SignalListComponent', () => {
     it('clicking a bulk action invokes run with the selection snapshot', async () => {
       const fixture = TestBed.createComponent(BulkHost);
       fixture.componentInstance.selected.set(new Set(['one', 'three']));
-      fixture.detectChanges();
+      await fixture.whenStable();
       const btn = fixture.nativeElement.querySelector('[data-test="bulk-action-Delete"]') as HTMLButtonElement;
       btn.click();
       await fixture.whenStable();
@@ -1232,30 +1636,30 @@ describe('SignalListComponent', () => {
       expect(passed.size).toBe(2);
     });
 
-    it('Clear button empties the selection', () => {
+    it('Clear button empties the selection', async () => {
       const fixture = TestBed.createComponent(BulkHost);
       fixture.componentInstance.selected.set(new Set(['one', 'two']));
-      fixture.detectChanges();
+      await fixture.whenStable();
       const clear = fixture.nativeElement.querySelector('[data-test="bulk-clear"]') as HTMLButtonElement;
       clear.click();
-      fixture.detectChanges();
+      await fixture.whenStable();
       expect(fixture.componentInstance.selected().size).toBe(0);
       expect(fixture.nativeElement.querySelector('[data-test="bulk-action-bar"]')).toBeNull();
     });
 
-    it('bar stays hidden when bulkActions is undefined even with selection', () => {
+    it('bar stays hidden when bulkActions is undefined even with selection', async () => {
       const fixture = TestBed.createComponent(BulkHost);
       fixture.componentInstance.config = { ...fixture.componentInstance.config, bulkActions: undefined };
       fixture.componentInstance.selected.set(new Set(['one']));
-      fixture.detectChanges();
+      await fixture.whenStable();
       expect(fixture.nativeElement.querySelector('[data-test="bulk-action-bar"]')).toBeNull();
     });
 
-    it('bar stays hidden when bulkActions is empty array', () => {
+    it('bar stays hidden when bulkActions is empty array', async () => {
       const fixture = TestBed.createComponent(BulkHost);
       fixture.componentInstance.config = { ...fixture.componentInstance.config, bulkActions: [] };
       fixture.componentInstance.selected.set(new Set(['one']));
-      fixture.detectChanges();
+      await fixture.whenStable();
       expect(fixture.nativeElement.querySelector('[data-test="bulk-action-bar"]')).toBeNull();
     });
 
@@ -1267,9 +1671,9 @@ describe('SignalListComponent', () => {
         bulkActions: [{ label: 'Delete', run: spy, disabled: signal(true).asReadonly() }],
       };
       fixture.componentInstance.selected.set(new Set(['one']));
-      fixture.detectChanges();
+      await fixture.whenStable();
       const btn = fixture.nativeElement.querySelector('[data-test="bulk-action-Delete"]') as HTMLButtonElement;
-      expect(btn.disabled).toBe(true);
+      expect(isOff(btn)).toBe(true);
       btn.click();
       await fixture.whenStable();
       expect(spy).not.toHaveBeenCalled();
@@ -1288,7 +1692,9 @@ class RowStateHost {
     one: signal<SignalListRowState>({ warning: true, message: 'name taken' }),
     two: signal<SignalListRowState>({}),
   };
-  config: SignalListConfig<{ name: string }> = {
+  // Signal-backed so a test that swaps the config after the first
+  // render schedules change detection (zoneless, like the app).
+  readonly configState = signal<SignalListConfig<{ name: string }>>({
     pagedItems: this.items.asReadonly(),
     totalFilteredResults: signal(2).asReadonly(),
     totalPages: signal(1).asReadonly(),
@@ -1299,21 +1705,23 @@ class RowStateHost {
     columns: [{ header: 'Name', render: r => r.name }],
     getRowKey: r => r.name,
     rowState: r => this.states[r.name] ?? null,
-  };
+  });
+  get config(): SignalListConfig<{ name: string }> { return this.configState(); }
+  set config(value: SignalListConfig<{ name: string }>) { this.configState.set(value); }
 }
 
 describe('SignalListComponent rowState', () => {
-  it('renders a message sub-row only for rows with a message', () => {
+  it('renders a message sub-row only for rows with a message', async () => {
     const fixture = TestBed.createComponent(RowStateHost);
-    fixture.detectChanges();
+    await fixture.whenStable();
     const msgs = fixture.nativeElement.querySelectorAll('[data-test="row-message"]');
     expect(msgs.length).toBe(1);
     expect(msgs[0].textContent).toContain('name taken');
   });
 
-  it('tints the message strip (not the data row) and uses the warning icon for warning state', () => {
+  it('tints the message strip (not the data row) and uses the warning icon for warning state', async () => {
     const fixture = TestBed.createComponent(RowStateHost);
-    fixture.detectChanges();
+    await fixture.whenStable();
     const rows = fixture.nativeElement.querySelectorAll('[data-test="row"]');
     expect(rows[0].className).not.toContain('border-warning-300');
     const msg = fixture.nativeElement.querySelector('[data-test="row-message"]');
@@ -1322,11 +1730,11 @@ describe('SignalListComponent rowState', () => {
     expect(icon.textContent).toContain('warning');
   });
 
-  it('uses the info icon for info state and red tint on the error message strip', () => {
+  it('uses the info icon for info state and red tint on the error message strip', async () => {
     const fixture = TestBed.createComponent(RowStateHost);
     fixture.componentInstance.states['one'].set({ info: true, message: 'just connecting' });
     fixture.componentInstance.states['two'].set({ error: true, message: 'bad' });
-    fixture.detectChanges();
+    await fixture.whenStable();
     const rows = fixture.nativeElement.querySelectorAll('[data-test="row"]');
     expect(rows[1].className).not.toContain('border-danger-300');
     const msgs = fixture.nativeElement.querySelectorAll('[data-test="row-message"]');
@@ -1336,17 +1744,17 @@ describe('SignalListComponent rowState', () => {
     expect(icons[1].textContent).toContain('warning'); // error → warning glyph
   });
 
-  it('re-renders a row when its state signal changes (no pagedItems identity change)', () => {
+  it('re-renders a row when its state signal changes (no pagedItems identity change)', async () => {
     const fixture = TestBed.createComponent(RowStateHost);
-    fixture.detectChanges();
+    await fixture.whenStable();
     expect(fixture.nativeElement.querySelectorAll('[data-test="row-message"]').length).toBe(1);
     fixture.componentInstance.states['two'].set({ error: true, message: 'now invalid' });
-    fixture.detectChanges();
+    await fixture.whenStable();
     expect(fixture.nativeElement.querySelectorAll('[data-test="row-message"]').length).toBe(2);
     expect(fixture.nativeElement.textContent).toContain('now invalid');
   });
 
-  it('renders structured segments: bold, line break, and link', () => {
+  it('renders structured segments: bold, line break, and link', async () => {
     const fixture = TestBed.createComponent(RowStateHost);
     fixture.componentInstance.states['one'].set({
       error: true,
@@ -1355,7 +1763,7 @@ describe('SignalListComponent rowState', () => {
         { text: 'see docs', break: true, link: ['/help'] },
       ],
     });
-    fixture.detectChanges();
+    await fixture.whenStable();
     const msg = fixture.nativeElement.querySelector('[data-test="row-message"]');
     expect(msg.querySelector('.font-semibold')?.textContent).toContain('Conflict');
     expect(msg.querySelector('br')).not.toBeNull();
@@ -1364,10 +1772,10 @@ describe('SignalListComponent rowState', () => {
     expect(link.textContent).toContain('see docs');
   });
 
-  it('renders no message rows and no tint when rowState returns null', () => {
+  it('renders no message rows and no tint when rowState returns null', async () => {
     const fixture = TestBed.createComponent(RowStateHost);
     fixture.componentInstance.config = { ...fixture.componentInstance.config, rowState: () => null };
-    fixture.detectChanges();
+    await fixture.whenStable();
     expect(fixture.nativeElement.querySelectorAll('[data-test="row-message"]').length).toBe(0);
     const rows = fixture.nativeElement.querySelectorAll('[data-test="row"]');
     expect(rows[0].className).not.toContain('border-warning-300');
@@ -1386,7 +1794,9 @@ describe('SignalListComponent rowState', () => {
 })
 class RowMessageTemplateHost {
   items = signal([{ name: 'one' }]);
-  config: SignalListConfig<{ name: string }> = {
+  // Signal-backed so a test that swaps the config after the first
+  // render schedules change detection (zoneless, like the app).
+  readonly configState = signal<SignalListConfig<{ name: string }>>({
     pagedItems: this.items.asReadonly(),
     totalFilteredResults: signal(1).asReadonly(),
     totalPages: signal(1).asReadonly(),
@@ -1397,13 +1807,15 @@ class RowMessageTemplateHost {
     columns: [{ header: 'Name', render: r => r.name }],
     getRowKey: r => r.name,
     rowState: () => signal<SignalListRowState>({ warning: true, message: 'plain that should be overridden' }).asReadonly(),
-  };
+  });
+  get config(): SignalListConfig<{ name: string }> { return this.configState(); }
+  set config(value: SignalListConfig<{ name: string }>) { this.configState.set(value); }
 }
 
 describe('SignalListComponent rowState __rowMessage template', () => {
-  it('projects the custom message template instead of the declarative message', () => {
+  it('projects the custom message template instead of the declarative message', async () => {
     const fixture = TestBed.createComponent(RowMessageTemplateHost);
-    fixture.detectChanges();
+    await fixture.whenStable();
     const msg = fixture.nativeElement.querySelector('[data-test="row-message"]');
     expect(msg).not.toBeNull();
     expect(msg.querySelector('[data-test="custom-msg"]')?.textContent).toContain('custom for one');
@@ -1420,7 +1832,9 @@ class SelectAllHost {
   items = signal([{ name: 'one' }, { name: 'two' }, { name: 'three' }]);
   selected = signal<ReadonlySet<string>>(new Set());
   toggled = 0;
-  config: SignalListConfig<{ name: string }> = {
+  // Signal-backed so a test that swaps the config after the first
+  // render schedules change detection (zoneless, like the app).
+  readonly configState = signal<SignalListConfig<{ name: string }>>({
     pagedItems: this.items.asReadonly(),
     totalFilteredResults: signal(3).asReadonly(),
     totalPages: signal(1).asReadonly(),
@@ -1442,51 +1856,53 @@ class SelectAllHost {
       { header: 'Name', key: 'name', render: r => r.name },
     ],
     getRowKey: r => r.name,
-  };
+  });
+  get config(): SignalListConfig<{ name: string }> { return this.configState(); }
+  set config(value: SignalListConfig<{ name: string }>) { this.configState.set(value); }
 }
 
 describe('SignalListComponent checkbox select-all header', () => {
-  it('renders a tri-state select-all header checkbox for a checkbox column with selectAll', () => {
+  it('renders a tri-state select-all header checkbox for a checkbox column with selectAll', async () => {
     const fixture = TestBed.createComponent(SelectAllHost);
-    fixture.detectChanges();
+    await fixture.whenStable();
     expect(fixture.nativeElement.querySelector('[data-test="select-all"]')).not.toBeNull();
   });
 
-  it('is unchecked + not indeterminate when nothing is selected', () => {
+  it('is unchecked + not indeterminate when nothing is selected', async () => {
     const fixture = TestBed.createComponent(SelectAllHost);
-    fixture.detectChanges();
+    await fixture.whenStable();
     const cb = fixture.nativeElement.querySelector('[data-test="select-all"]') as HTMLInputElement;
     expect(cb.checked).toBe(false);
     expect(cb.indeterminate).toBe(false);
   });
 
-  it('is indeterminate when some but not all rows are selected', () => {
+  it('is indeterminate when some but not all rows are selected', async () => {
     const fixture = TestBed.createComponent(SelectAllHost);
     fixture.componentInstance.selected.set(new Set(['one']));
-    fixture.detectChanges();
+    await fixture.whenStable();
     const cb = fixture.nativeElement.querySelector('[data-test="select-all"]') as HTMLInputElement;
     expect(cb.checked).toBe(false);
     expect(cb.indeterminate).toBe(true);
   });
 
-  it('is checked when all selectable rows are selected', () => {
+  it('is checked when all selectable rows are selected', async () => {
     const fixture = TestBed.createComponent(SelectAllHost);
     fixture.componentInstance.selected.set(new Set(['one', 'two', 'three']));
-    fixture.detectChanges();
+    await fixture.whenStable();
     const cb = fixture.nativeElement.querySelector('[data-test="select-all"]') as HTMLInputElement;
     expect(cb.checked).toBe(true);
     expect(cb.indeterminate).toBe(false);
   });
 
-  it('invokes onToggle when the header checkbox is clicked', () => {
+  it('invokes onToggle when the header checkbox is clicked', async () => {
     const fixture = TestBed.createComponent(SelectAllHost);
-    fixture.detectChanges();
+    await fixture.whenStable();
     const cb = fixture.nativeElement.querySelector('[data-test="select-all"]') as HTMLInputElement;
     cb.click();
     expect(fixture.componentInstance.toggled).toBe(1);
   });
 
-  it('renders no select-all header when the checkbox binding omits selectAll', () => {
+  it('renders no select-all header when the checkbox binding omits selectAll', async () => {
     const fixture = TestBed.createComponent(SelectAllHost);
     fixture.componentInstance.config = {
       ...fixture.componentInstance.config,
@@ -1495,35 +1911,35 @@ describe('SignalListComponent checkbox select-all header', () => {
         { header: 'Name', key: 'name', render: r => r.name },
       ],
     };
-    fixture.detectChanges();
+    await fixture.whenStable();
     expect(fixture.nativeElement.querySelector('[data-test="select-all"]')).toBeNull();
   });
 });
 
 describe('SignalListComponent rowState blocked/deleting/busy (multiline-ops feedback)', () => {
-  it('renders a "Deleting" bar and dims/locks the row when deleting', () => {
+  it('renders a "Deleting" bar and dims/locks the row when deleting', async () => {
     const fixture = TestBed.createComponent(RowStateHost);
     fixture.componentInstance.states['one'].set({ deleting: true });
-    fixture.detectChanges();
+    await fixture.whenStable();
     expect(fixture.nativeElement.querySelector('[data-test="row-deleting"]')).not.toBeNull();
     expect(fixture.nativeElement.querySelector('[data-test="row-deleting"]').textContent).toContain('Deleting');
     const rows = fixture.nativeElement.querySelectorAll('[data-test="row"]');
     expect(rows[0].className).toContain('pointer-events-none');
   });
 
-  it('dims and locks a blocked row', () => {
+  it('dims and locks a blocked row', async () => {
     const fixture = TestBed.createComponent(RowStateHost);
     fixture.componentInstance.states['two'].set({ blocked: true });
-    fixture.detectChanges();
+    await fixture.whenStable();
     const rows = fixture.nativeElement.querySelectorAll('[data-test="row"]');
     expect(rows[1].className).toContain('opacity-60');
     expect(rows[1].className).toContain('pointer-events-none');
   });
 
-  it('renders a busy spinner row when busy', () => {
+  it('renders a busy spinner row when busy', async () => {
     const fixture = TestBed.createComponent(RowStateHost);
     fixture.componentInstance.states['one'].set({ busy: true, message: 'working' });
-    fixture.detectChanges();
+    await fixture.whenStable();
     expect(fixture.nativeElement.querySelector('[data-test="row-busy"]')).not.toBeNull();
   });
 });
@@ -1546,7 +1962,9 @@ class MultiFilterHost {
   filterField = signal('stackName');
   selectedStacks = signal<string[] | null>(null);
   stackOptions = signal(['cflinuxfs4', 'cflinuxfs5', 'windows']);
-  config: SignalListConfig<{ name: string; stack: string }> = {
+  // Signal-backed so a test that swaps the config after the first
+  // render schedules change detection (zoneless, like the app).
+  readonly configState = signal<SignalListConfig<{ name: string; stack: string }>>({
     pagedItems: this.items.asReadonly(),
     totalFilteredResults: signal(2).asReadonly(),
     totalPages: signal(1).asReadonly(),
@@ -1567,7 +1985,9 @@ class MultiFilterHost {
       options: this.stackOptions.asReadonly(),
       selected: this.selectedStacks,
     }],
-  };
+  });
+  get config(): SignalListConfig<{ name: string; stack: string }> { return this.configState(); }
+  set config(value: SignalListConfig<{ name: string; stack: string }>) { this.configState.set(value); }
 }
 
 describe('SignalListComponent checklist-popup filter (filterMultis)', () => {
@@ -1575,182 +1995,182 @@ describe('SignalListComponent checklist-popup filter (filterMultis)', () => {
     return fixture.debugElement.children[0].componentInstance as SignalListComponent<{ name: string; stack: string }>;
   }
 
-  it('renders the checklist toggle instead of the text input when filterField matches a filterMultis entry', () => {
+  it('renders the checklist toggle instead of the text input when filterField matches a filterMultis entry', async () => {
     const fixture = TestBed.createComponent(MultiFilterHost);
-    fixture.detectChanges();
+    await fixture.whenStable();
     expect(fixture.nativeElement.querySelector('[data-test="multi-filter-toggle"]')).not.toBeNull();
     expect(fixture.nativeElement.querySelector('[data-test="name-filter"]')).toBeNull();
   });
 
-  it('falls back to the text input when filterField does not match any filterMultis entry', () => {
+  it('falls back to the text input when filterField does not match any filterMultis entry', async () => {
     const fixture = TestBed.createComponent(MultiFilterHost);
     fixture.componentInstance.filterField.set('name');
-    fixture.detectChanges();
+    await fixture.whenStable();
     expect(fixture.nativeElement.querySelector('[data-test="multi-filter-toggle"]')).toBeNull();
     expect(fixture.nativeElement.querySelector('[data-test="name-filter"]')).not.toBeNull();
   });
 
   describe('multiSummary() — the four button-label states', () => {
-    it('reads "All (n)" when selected is null (the default)', () => {
+    it('reads "All (n)" when selected is null (the default)', async () => {
       const fixture = TestBed.createComponent(MultiFilterHost);
-      fixture.detectChanges();
+      await fixture.whenStable();
       const component = componentWith(fixture);
       expect(component.multiSummary(component.activeMulti()!)).toBe('All (3)');
     });
 
-    it('reads "All (n)" when every option is explicitly selected', () => {
+    it('reads "All (n)" when every option is explicitly selected', async () => {
       const fixture = TestBed.createComponent(MultiFilterHost);
       fixture.componentInstance.selectedStacks.set(['cflinuxfs4', 'cflinuxfs5', 'windows']);
-      fixture.detectChanges();
+      await fixture.whenStable();
       const component = componentWith(fixture);
       expect(component.multiSummary(component.activeMulti()!)).toBe('All (3)');
     });
 
-    it('reads the bare value when exactly one option is selected', () => {
+    it('reads the bare value when exactly one option is selected', async () => {
       const fixture = TestBed.createComponent(MultiFilterHost);
       fixture.componentInstance.selectedStacks.set(['cflinuxfs4']);
-      fixture.detectChanges();
+      await fixture.whenStable();
       const component = componentWith(fixture);
       expect(component.multiSummary(component.activeMulti()!)).toBe('cflinuxfs4');
     });
 
-    it('reads "x of y selected" for a partial pick', () => {
+    it('reads "x of y selected" for a partial pick', async () => {
       const fixture = TestBed.createComponent(MultiFilterHost);
       fixture.componentInstance.selectedStacks.set(['cflinuxfs4', 'windows']);
-      fixture.detectChanges();
+      await fixture.whenStable();
       const component = componentWith(fixture);
       expect(component.multiSummary(component.activeMulti()!)).toBe('2 of 3 selected');
     });
 
-    it('reads "None — showing all" when the selection is explicitly emptied', () => {
+    it('reads "None — showing all" when the selection is explicitly emptied', async () => {
       const fixture = TestBed.createComponent(MultiFilterHost);
       fixture.componentInstance.selectedStacks.set([]);
-      fixture.detectChanges();
+      await fixture.whenStable();
       const component = componentWith(fixture);
       expect(component.multiSummary(component.activeMulti()!)).toBe('None — showing all');
     });
   });
 
   describe('toggleMultiOption() set math', () => {
-    it('starting from null (all), unchecking one option produces the explicit remaining set', () => {
+    it('starting from null (all), unchecking one option produces the explicit remaining set', async () => {
       const fixture = TestBed.createComponent(MultiFilterHost);
-      fixture.detectChanges();
+      await fixture.whenStable();
       const component = componentWith(fixture);
       component.toggleMultiOption(component.activeMulti()!, 'windows');
       expect(fixture.componentInstance.selectedStacks()).toEqual(['cflinuxfs4', 'cflinuxfs5']);
     });
 
-    it('checking every option back on collapses the selection to null, not an explicit full list', () => {
+    it('checking every option back on collapses the selection to null, not an explicit full list', async () => {
       const fixture = TestBed.createComponent(MultiFilterHost);
       fixture.componentInstance.selectedStacks.set(['cflinuxfs4', 'cflinuxfs5']);
-      fixture.detectChanges();
+      await fixture.whenStable();
       const component = componentWith(fixture);
       component.toggleMultiOption(component.activeMulti()!, 'windows');
       expect(fixture.componentInstance.selectedStacks()).toBe(null);
     });
 
-    it('unchecking the last remaining option leaves an explicit empty array, not null', () => {
+    it('unchecking the last remaining option leaves an explicit empty array, not null', async () => {
       // Distinguishing [] from null is what lets the popup show the
       // "showing all" note instead of silently reverting to "all".
       const fixture = TestBed.createComponent(MultiFilterHost);
       fixture.componentInstance.selectedStacks.set(['cflinuxfs4']);
-      fixture.detectChanges();
+      await fixture.whenStable();
       const component = componentWith(fixture);
       component.toggleMultiOption(component.activeMulti()!, 'cflinuxfs4');
       expect(fixture.componentInstance.selectedStacks()).toEqual([]);
     });
 
-    it('resets pageIndex to 0', () => {
+    it('resets pageIndex to 0', async () => {
       const fixture = TestBed.createComponent(MultiFilterHost);
       fixture.componentInstance.pageIndex.set(3);
-      fixture.detectChanges();
+      await fixture.whenStable();
       const component = componentWith(fixture);
       component.toggleMultiOption(component.activeMulti()!, 'windows');
       expect(fixture.componentInstance.pageIndex()).toBe(0);
     });
   });
 
-  it('shows the "Nothing selected — showing all" note in the popup when the selection is explicitly empty', () => {
+  it('shows the "Nothing selected — showing all" note in the popup when the selection is explicitly empty', async () => {
     const fixture = TestBed.createComponent(MultiFilterHost);
     fixture.componentInstance.selectedStacks.set([]);
-    fixture.detectChanges();
+    await fixture.whenStable();
     (fixture.nativeElement.querySelector('[data-test="multi-filter-toggle"]') as HTMLButtonElement).click();
-    fixture.detectChanges();
+    await fixture.whenStable();
     expect(fixture.nativeElement.textContent).toContain('Nothing selected — showing all');
   });
 
-  it('toggling a checkbox in the popup updates the selection', () => {
+  it('toggling a checkbox in the popup updates the selection', async () => {
     const fixture = TestBed.createComponent(MultiFilterHost);
-    fixture.detectChanges();
+    await fixture.whenStable();
     (fixture.nativeElement.querySelector('[data-test="multi-filter-toggle"]') as HTMLButtonElement).click();
-    fixture.detectChanges();
+    await fixture.whenStable();
     const boxes = fixture.nativeElement.querySelectorAll('input[type="checkbox"]') as NodeListOf<HTMLInputElement>;
     boxes[0].click();
-    fixture.detectChanges();
+    await fixture.whenStable();
     expect(fixture.componentInstance.selectedStacks()).toEqual(['cflinuxfs5', 'windows']);
   });
 
-  it('closes the popup on the Close button and on any click outside the control', () => {
+  it('closes the popup on the Close button and on any click outside the control', async () => {
     const fixture = TestBed.createComponent(MultiFilterHost);
-    fixture.detectChanges();
+    await fixture.whenStable();
     const component = componentWith(fixture);
     (fixture.nativeElement.querySelector('[data-test="multi-filter-toggle"]') as HTMLButtonElement).click();
-    fixture.detectChanges();
+    await fixture.whenStable();
     expect(component.multiPopupOpen()).toBe(true);
 
     document.body.dispatchEvent(new MouseEvent('click', { bubbles: true }));
-    fixture.detectChanges();
+    await fixture.whenStable();
     expect(component.multiPopupOpen()).toBe(false);
   });
 
-  it('Escape closes the popup — the same affordance the text input it replaces offers', () => {
+  it('Escape closes the popup — the same affordance the text input it replaces offers', async () => {
     const fixture = TestBed.createComponent(MultiFilterHost);
-    fixture.detectChanges();
+    await fixture.whenStable();
     const component = componentWith(fixture);
     const wrap = fixture.nativeElement.querySelector('[data-test="multi-filter-wrap"]') as HTMLElement;
     (wrap.querySelector('[data-test="multi-filter-toggle"]') as HTMLButtonElement).click();
-    fixture.detectChanges();
+    await fixture.whenStable();
     expect(component.multiPopupOpen()).toBe(true);
 
     wrap.dispatchEvent(new KeyboardEvent('keydown', { key: 'Escape', bubbles: true }));
-    fixture.detectChanges();
+    await fixture.whenStable();
     expect(component.multiPopupOpen()).toBe(false);
   });
 
-  it('changing filterField closes an open popup', () => {
+  it('changing filterField closes an open popup', async () => {
     const fixture = TestBed.createComponent(MultiFilterHost);
-    fixture.detectChanges();
+    await fixture.whenStable();
     const component = componentWith(fixture);
     (fixture.nativeElement.querySelector('[data-test="multi-filter-toggle"]') as HTMLButtonElement).click();
-    fixture.detectChanges();
+    await fixture.whenStable();
     expect(component.multiPopupOpen()).toBe(true);
     component.onFilterFieldChange('name');
     expect(component.multiPopupOpen()).toBe(false);
   });
 
   describe('popup Clear button', () => {
-    function openPopup(fixture: ReturnType<typeof TestBed.createComponent<MultiFilterHost>>): HTMLButtonElement {
+    async function openPopup(fixture: ReturnType<typeof TestBed.createComponent<MultiFilterHost>>): Promise<HTMLButtonElement> {
       (fixture.nativeElement.querySelector('[data-test="multi-filter-toggle"]') as HTMLButtonElement).click();
-      fixture.detectChanges();
+      await fixture.whenStable();
       return fixture.nativeElement.querySelector('[data-test="multi-filter-clear"]') as HTMLButtonElement;
     }
 
-    it('is disabled while the filter is already inactive (null selection)', () => {
+    it('is disabled while the filter is already inactive (null selection)', async () => {
       const fixture = TestBed.createComponent(MultiFilterHost);
-      fixture.detectChanges();
-      expect(openPopup(fixture).disabled).toBe(true);
+      await fixture.whenStable();
+      expect(isOff((await openPopup(fixture)))).toBe(true);
     });
 
-    it('resets the selection to null, pages back to 0, and leaves the popup open', () => {
+    it('resets the selection to null, pages back to 0, and leaves the popup open', async () => {
       const fixture = TestBed.createComponent(MultiFilterHost);
       fixture.componentInstance.selectedStacks.set(['cflinuxfs4']);
       fixture.componentInstance.pageIndex.set(3);
-      fixture.detectChanges();
-      const clear = openPopup(fixture);
-      expect(clear.disabled).toBe(false);
+      await fixture.whenStable();
+      const clear = await openPopup(fixture);
+      expect(isOn(clear)).toBe(true);
 
       clear.click();
-      fixture.detectChanges();
+      await fixture.whenStable();
 
       expect(fixture.componentInstance.selectedStacks()).toBe(null);
       expect(fixture.componentInstance.pageIndex()).toBe(0);
@@ -1759,7 +2179,7 @@ describe('SignalListComponent checklist-popup filter (filterMultis)', () => {
       // Visible feedback: the popup stays up while the toggle summary and
       // the button's own disabled state flip to the neutral form
       expect(fixture.nativeElement.querySelector('[data-test="multi-filter-clear"]')).not.toBeNull();
-      expect((fixture.nativeElement.querySelector('[data-test="multi-filter-clear"]') as HTMLButtonElement).disabled).toBe(true);
+      expect(isOff((fixture.nativeElement.querySelector('[data-test="multi-filter-clear"]') as HTMLButtonElement))).toBe(true);
       expect(component.multiSummary(component.activeMulti()!)).toBe('All (3)');
     });
   });
@@ -1782,7 +2202,9 @@ class RangeFilterHost {
   pageSize = signal(10);
   filterField = signal('lastRefreshedAt');
   selectedRange = signal<SignalListRangeValue | null>(null);
-  config: SignalListConfig<{ name: string; lastRefreshedAt: string }> = {
+  // Signal-backed so a test that swaps the config after the first
+  // render schedules change detection (zoneless, like the app).
+  readonly configState = signal<SignalListConfig<{ name: string; lastRefreshedAt: string }>>({
     pagedItems: this.items.asReadonly(),
     totalFilteredResults: signal(2).asReadonly(),
     totalPages: signal(1).asReadonly(),
@@ -1803,7 +2225,9 @@ class RangeFilterHost {
       valueType: 'date',
       selected: this.selectedRange,
     }],
-  };
+  });
+  get config(): SignalListConfig<{ name: string; lastRefreshedAt: string }> { return this.configState(); }
+  set config(value: SignalListConfig<{ name: string; lastRefreshedAt: string }>) { this.configState.set(value); }
 }
 
 describe('SignalListComponent range filter (filterRanges)', () => {
@@ -1811,17 +2235,17 @@ describe('SignalListComponent range filter (filterRanges)', () => {
     return fixture.debugElement.children[0].componentInstance as SignalListComponent<{ name: string; lastRefreshedAt: string }>;
   }
 
-  it('activeRange resolves when filterField names a range field, activeMulti stays undefined', () => {
+  it('activeRange resolves when filterField names a range field, activeMulti stays undefined', async () => {
     const fixture = TestBed.createComponent(RangeFilterHost);
-    fixture.detectChanges();
+    await fixture.whenStable();
     const component = componentWith(fixture);
     expect(component.activeRange()?.field).toBe('lastRefreshedAt');
     expect(component.activeMulti()).toBeUndefined();
   });
 
-  it('updateRange collapses an empty primary bound to null (no constraint)', () => {
+  it('updateRange collapses an empty primary bound to null (no constraint)', async () => {
     const fixture = TestBed.createComponent(RangeFilterHost);
-    fixture.detectChanges();
+    await fixture.whenStable();
     const component = componentWith(fixture);
     const fr = component.activeRange()!;
     component.updateRange(fr, { op: 'gte', a: '2026-05-01' });
@@ -1830,18 +2254,18 @@ describe('SignalListComponent range filter (filterRanges)', () => {
     expect(fixture.componentInstance.selectedRange()).toBe(null);
   });
 
-  it('updateRange resets to page 0', () => {
+  it('updateRange resets to page 0', async () => {
     const fixture = TestBed.createComponent(RangeFilterHost);
     fixture.componentInstance.pageIndex.set(3);
-    fixture.detectChanges();
+    await fixture.whenStable();
     const component = componentWith(fixture);
     component.updateRange(component.activeRange()!, { op: 'gte', a: '2026-05-01' });
     expect(fixture.componentInstance.pageIndex()).toBe(0);
   });
 
-  it('hasActiveFilter sees a non-null range selection and Clear resets it', () => {
+  it('hasActiveFilter sees a non-null range selection and Clear resets it', async () => {
     const fixture = TestBed.createComponent(RangeFilterHost);
-    fixture.detectChanges();
+    await fixture.whenStable();
     const component = componentWith(fixture);
     fixture.componentInstance.selectedRange.set({ op: 'lt', a: '2026-01-01' });
     expect(component.hasActiveFilter()).toBe(true);
@@ -1849,9 +2273,9 @@ describe('SignalListComponent range filter (filterRanges)', () => {
     expect(component.hasActiveFilter()).toBe(false);
   });
 
-  it('rangeSummary renders Any / single-bound / between forms', () => {
+  it('rangeSummary renders Any / single-bound / between forms', async () => {
     const fixture = TestBed.createComponent(RangeFilterHost);
-    fixture.detectChanges();
+    await fixture.whenStable();
     const component = componentWith(fixture);
     const fr = component.activeRange()!;
     expect(component.rangeSummary(fr)).toBe('Any');
@@ -1870,9 +2294,9 @@ describe('SignalListComponent range filter (filterRanges)', () => {
   // between-branch gate (`selected()?.op === 'between'`) can ever see the
   // op and render the second input + inclusive checkboxes.
   describe('updateRange sequence: pick "between" before typing any bound', () => {
-    it('(a) op-only patch to "between" with empty bounds stores a non-null selection with op "between"', () => {
+    it('(a) op-only patch to "between" with empty bounds stores a non-null selection with op "between"', async () => {
       const fixture = TestBed.createComponent(RangeFilterHost);
-      fixture.detectChanges();
+      await fixture.whenStable();
       const component = componentWith(fixture);
       const fr = component.activeRange()!;
       component.updateRange(fr, { op: 'between' });
@@ -1880,9 +2304,9 @@ describe('SignalListComponent range filter (filterRanges)', () => {
       expect(component.hasActiveFilter()).toBe(false);
     });
 
-    it('(b) then typing the first bound keeps op "between" (not reset to gte)', () => {
+    it('(b) then typing the first bound keeps op "between" (not reset to gte)', async () => {
       const fixture = TestBed.createComponent(RangeFilterHost);
-      fixture.detectChanges();
+      await fixture.whenStable();
       const component = componentWith(fixture);
       const fr = component.activeRange()!;
       component.updateRange(fr, { op: 'between' });
@@ -1891,9 +2315,9 @@ describe('SignalListComponent range filter (filterRanges)', () => {
       expect(component.hasActiveFilter()).toBe(false);
     });
 
-    it('(c) then typing the second bound completes the range and activates the filter', () => {
+    it('(c) then typing the second bound completes the range and activates the filter', async () => {
       const fixture = TestBed.createComponent(RangeFilterHost);
-      fixture.detectChanges();
+      await fixture.whenStable();
       const component = componentWith(fixture);
       const fr = component.activeRange()!;
       component.updateRange(fr, { op: 'between' });
@@ -1903,9 +2327,9 @@ describe('SignalListComponent range filter (filterRanges)', () => {
       expect(component.hasActiveFilter()).toBe(true);
     });
 
-    it('(d) clearing both bounds one at a time collapses back to null', () => {
+    it('(d) clearing both bounds one at a time collapses back to null', async () => {
       const fixture = TestBed.createComponent(RangeFilterHost);
-      fixture.detectChanges();
+      await fixture.whenStable();
       const component = componentWith(fixture);
       const fr = component.activeRange()!;
       component.updateRange(fr, { op: 'between' });
@@ -1923,18 +2347,18 @@ describe('SignalListComponent range filter (filterRanges)', () => {
   // their own change event — same separate-events discipline as the
   // between sequence above.
   describe('relative bound modes', () => {
-    it('a mode-only patch stores the mode without collapsing to null', () => {
+    it('a mode-only patch stores the mode without collapsing to null', async () => {
       const fixture = TestBed.createComponent(RangeFilterHost);
-      fixture.detectChanges();
+      await fixture.whenStable();
       const component = componentWith(fixture);
       component.updateRange(component.activeRange()!, { mode: 'days' });
       expect(fixture.componentInstance.selectedRange()).toEqual({ op: 'gte', a: '', mode: 'days' });
       expect(component.hasActiveFilter()).toBe(false);
     });
 
-    it('switching mode clears the bounds but keeps the op — a date is not a count', () => {
+    it('switching mode clears the bounds but keeps the op — a date is not a count', async () => {
       const fixture = TestBed.createComponent(RangeFilterHost);
-      fixture.detectChanges();
+      await fixture.whenStable();
       const component = componentWith(fixture);
       const fr = component.activeRange()!;
       component.updateRange(fr, { op: 'lt' });
@@ -1943,17 +2367,17 @@ describe('SignalListComponent range filter (filterRanges)', () => {
       expect(fixture.componentInstance.selectedRange()).toEqual({ op: 'lt', a: '', mode: 'days' });
     });
 
-    it('switching to businessDays seeds a Mon–Fri working week', () => {
+    it('switching to businessDays seeds a Mon–Fri working week', async () => {
       const fixture = TestBed.createComponent(RangeFilterHost);
-      fixture.detectChanges();
+      await fixture.whenStable();
       const component = componentWith(fixture);
       component.updateRange(component.activeRange()!, { mode: 'businessDays' });
       expect(fixture.componentInstance.selectedRange()?.workingDays).toEqual([1, 2, 3, 4, 5]);
     });
 
-    it('toggleWorkingDay flips membership in both directions', () => {
+    it('toggleWorkingDay flips membership in both directions', async () => {
       const fixture = TestBed.createComponent(RangeFilterHost);
-      fixture.detectChanges();
+      await fixture.whenStable();
       const component = componentWith(fixture);
       const fr = component.activeRange()!;
       component.updateRange(fr, { mode: 'businessDays' });
@@ -1963,9 +2387,9 @@ describe('SignalListComponent range filter (filterRanges)', () => {
       expect(fixture.componentInstance.selectedRange()?.workingDays).toEqual([1, 2, 3, 4, 0]);
     });
 
-    it('full event sequence: mode, then count, then toggles, then holidays', () => {
+    it('full event sequence: mode, then count, then toggles, then holidays', async () => {
       const fixture = TestBed.createComponent(RangeFilterHost);
-      fixture.detectChanges();
+      await fixture.whenStable();
       const component = componentWith(fixture);
       const fr = component.activeRange()!;
       component.updateRange(fr, { op: 'lt' });
@@ -1981,9 +2405,9 @@ describe('SignalListComponent range filter (filterRanges)', () => {
       expect(component.hasActiveFilter()).toBe(true);
     });
 
-    it('the last working day cannot be toggled off — a 7-day weekend is refused', () => {
+    it('the last working day cannot be toggled off — a 7-day weekend is refused', async () => {
       const fixture = TestBed.createComponent(RangeFilterHost);
-      fixture.detectChanges();
+      await fixture.whenStable();
       const component = componentWith(fixture);
       const fr = component.activeRange()!;
       component.updateRange(fr, { mode: 'businessDays' });
@@ -1995,9 +2419,9 @@ describe('SignalListComponent range filter (filterRanges)', () => {
       expect(component.hasActiveFilter()).toBe(true);
     });
 
-    it('clearing the count in a relative range keeps mode, week, and holidays', () => {
+    it('clearing the count in a relative range keeps mode, week, and holidays', async () => {
       const fixture = TestBed.createComponent(RangeFilterHost);
-      fixture.detectChanges();
+      await fixture.whenStable();
       const component = componentWith(fixture);
       const fr = component.activeRange()!;
       component.updateRange(fr, { mode: 'businessDays' });
@@ -2011,9 +2435,9 @@ describe('SignalListComponent range filter (filterRanges)', () => {
       expect(component.hasActiveFilter()).toBe(false); // inert, but config survives
     });
 
-    it('holidayCount patches are floored to non-negative integers', () => {
+    it('holidayCount patches are floored to non-negative integers', async () => {
       const fixture = TestBed.createComponent(RangeFilterHost);
-      fixture.detectChanges();
+      await fixture.whenStable();
       const component = componentWith(fixture);
       const fr = component.activeRange()!;
       component.updateRange(fr, { mode: 'businessDays' });
@@ -2025,9 +2449,9 @@ describe('SignalListComponent range filter (filterRanges)', () => {
       expect(fixture.componentInstance.selectedRange()?.holidayCount).toBe(0);
     });
 
-    it('rangeSummary renders relative forms', () => {
+    it('rangeSummary renders relative forms', async () => {
       const fixture = TestBed.createComponent(RangeFilterHost);
-      fixture.detectChanges();
+      await fixture.whenStable();
       const component = componentWith(fixture);
       const fr = component.activeRange()!;
 
@@ -2044,14 +2468,15 @@ describe('SignalListComponent range filter (filterRanges)', () => {
       expect(component.rangeSummary(fr)).toBe('90 – 30 days ago');
     });
 
-    it('resolvedDayLabel names the resolved day for a complete relative bound, null otherwise', () => {
+    it('resolvedDayLabel names the resolved day for a complete relative bound, null otherwise', async () => {
       // Frozen clock: the component and the expectation must see the same
-      // "today", or a run straddling local midnight flakes.
-      vi.useFakeTimers();
+      // "today", or a run straddling local midnight flakes. Only Date is
+      // faked: whenStable() needs the real timers the scheduler runs on.
+      vi.useFakeTimers({ toFake: ['Date'] });
       vi.setSystemTime(new Date(2026, 7, 10, 12, 0)); // Mon 2026-08-10
       try {
         const fixture = TestBed.createComponent(RangeFilterHost);
-        fixture.detectChanges();
+        await fixture.whenStable();
         const component = componentWith(fixture);
         const fr = component.activeRange()!;
 
@@ -2070,29 +2495,29 @@ describe('SignalListComponent range filter (filterRanges)', () => {
       }
     });
 
-    it('holiday warning is singular for one bound, plural with per-bound remedies for between', () => {
+    it('holiday warning is singular for one bound, plural with per-bound remedies for between', async () => {
       const fixture = TestBed.createComponent(RangeFilterHost);
-      fixture.detectChanges();
+      await fixture.whenStable();
       const component = componentWith(fixture);
       (fixture.nativeElement.querySelector('[data-test="range-filter-toggle"]') as HTMLButtonElement).click();
-      fixture.detectChanges();
+      await fixture.whenStable();
       const fr = component.activeRange()!;
       component.updateRange(fr, { mode: 'businessDays' });
-      fixture.detectChanges();
+      await fixture.whenStable();
       const warnText = () =>
         (fixture.nativeElement.querySelector('[data-test="range-holiday-warning"]') as HTMLElement).textContent!.replace(/\s+/g, ' ').trim();
       expect(warnText()).toContain('the resolved date');
       expect(warnText()).not.toContain('either');
 
       component.updateRange(fr, { op: 'between' });
-      fixture.detectChanges();
+      await fixture.whenStable();
       expect(warnText()).toContain('either resolved date');
       expect(warnText()).toContain('holiday count shifts both dates');
     });
 
-    it('opLabel wording follows the mode', () => {
+    it('opLabel wording follows the mode', async () => {
       const fixture = TestBed.createComponent(RangeFilterHost);
-      fixture.detectChanges();
+      await fixture.whenStable();
       const component = componentWith(fixture);
       const fr = component.activeRange()!;
       expect(component.opLabel(fr, 'lt')).toBe('before');
@@ -2103,38 +2528,365 @@ describe('SignalListComponent range filter (filterRanges)', () => {
   });
 
   describe('popup Clear button', () => {
-    function openPopup(fixture: ReturnType<typeof TestBed.createComponent<RangeFilterHost>>): HTMLButtonElement {
+    async function openPopup(fixture: ReturnType<typeof TestBed.createComponent<RangeFilterHost>>): Promise<HTMLButtonElement> {
       (fixture.nativeElement.querySelector('[data-test="range-filter-toggle"]') as HTMLButtonElement).click();
-      fixture.detectChanges();
+      await fixture.whenStable();
       return fixture.nativeElement.querySelector('[data-test="range-filter-clear"]') as HTMLButtonElement;
     }
 
-    it('is disabled while the filter is already inactive (null selection)', () => {
+    it('is disabled while the filter is already inactive (null selection)', async () => {
       const fixture = TestBed.createComponent(RangeFilterHost);
-      fixture.detectChanges();
-      expect(openPopup(fixture).disabled).toBe(true);
+      await fixture.whenStable();
+      expect(isOff((await openPopup(fixture)))).toBe(true);
     });
 
-    it('discards a configured relative range, pages back to 0, and leaves the popup open reading Any', () => {
+    it('discards a configured relative range, pages back to 0, and leaves the popup open reading Any', async () => {
       const fixture = TestBed.createComponent(RangeFilterHost);
       // A relative range with configuration beyond its bounds — exactly the
       // state updateRange's implicit collapse refuses to destroy; the
       // explicit Clear is allowed to.
       fixture.componentInstance.selectedRange.set({ op: 'lte', a: '5', mode: 'businessDays', workingDays: [1, 2, 3, 4], holidayCount: 2 });
       fixture.componentInstance.pageIndex.set(2);
-      fixture.detectChanges();
-      const clear = openPopup(fixture);
-      expect(clear.disabled).toBe(false);
+      await fixture.whenStable();
+      const clear = await openPopup(fixture);
+      expect(isOn(clear)).toBe(true);
 
       clear.click();
-      fixture.detectChanges();
+      await fixture.whenStable();
 
       expect(fixture.componentInstance.selectedRange()).toBe(null);
       expect(fixture.componentInstance.pageIndex()).toBe(0);
       const component = componentWith(fixture);
       expect(component.multiPopupOpen()).toBe(true);
-      expect((fixture.nativeElement.querySelector('[data-test="range-filter-clear"]') as HTMLButtonElement).disabled).toBe(true);
+      expect(isOff((fixture.nativeElement.querySelector('[data-test="range-filter-clear"]') as HTMLButtonElement))).toBe(true);
       expect(component.rangeSummary(component.activeRange()!)).toBe('Any');
     });
   });
 });
+
+// Controls that show no text of their own take their names from what sits
+// beside them: the row's title cell, the column being filtered, or the
+// "Sort:" / "Items per page:" captions.
+describe('SignalListComponent control names', () => {
+  const name = (el: Element | null) => el?.getAttribute('aria-label');
+
+  it('names the row checkboxes after their row and the select-all box', async () => {
+    const fixture = TestBed.createComponent(SelectAllHost);
+    await fixture.whenStable();
+    const root: HTMLElement = fixture.nativeElement;
+    expect(name(root.querySelector('[data-test="select-all"]'))).toBe('Select all');
+    const boxes = Array.from(root.querySelectorAll('[data-test="row-checkbox"]'));
+    expect(boxes.map(name)).toEqual(['Select one', 'Select two', 'Select three']);
+
+    fixture.componentInstance.config = { ...fixture.componentInstance.config, viewMode: signal<'table' | 'card'>('card') };
+    await fixture.whenStable();
+    const cardBoxes = Array.from(root.querySelectorAll('[data-test="card-select-checkbox"]'));
+    expect(cardBoxes.map(name)).toEqual(['Select one', 'Select two', 'Select three']);
+  });
+
+  it('names the row radios after their column and row', async () => {
+    const fixture = TestBed.createComponent(Host);
+    fixture.componentInstance.config = {
+      ...fixture.componentInstance.config,
+      columns: [
+        { header: 'Name', render: r => r.name },
+        { header: 'Pick', key: 'pick', kind: 'radio', render: () => '', radio: { selectedKey: signal<string | null>(null) } },
+      ],
+    };
+    await fixture.whenStable();
+    const root: HTMLElement = fixture.nativeElement;
+    expect(Array.from(root.querySelectorAll('[data-test="row-radio"]')).map(name)).toEqual(['Pick one', 'Pick two']);
+
+    fixture.componentInstance.config = { ...fixture.componentInstance.config, viewMode: signal<'table' | 'card'>('card') };
+    await fixture.whenStable();
+    expect(Array.from(root.querySelectorAll('[data-test="row-radio"]')).map(name)).toEqual(['Pick one', 'Pick two']);
+  });
+
+  // A screen reader says which column sorts the table, and which way: the
+  // sorted header has aria-sort, and only that one (WCAG 1.3.1).
+  it('marks the sorted column header with aria-sort', async () => {
+    const fixture = TestBed.createComponent(Host);
+    const sort = signal<{ field: string; direction: 'asc' | 'desc' }>({ field: 'name', direction: 'asc' });
+    fixture.componentInstance.config = {
+      ...fixture.componentInstance.config,
+      columns: [
+        { key: 'name', header: 'Name', sortField: 'name', render: r => r.name },
+        { key: 'size', header: 'Size', sortField: r => r.name, render: r => r.name },
+      ],
+      sort,
+    };
+    await fixture.whenStable();
+    const ths = () => Array.from((fixture.nativeElement as HTMLElement).querySelectorAll('thead th')).map(th => th.getAttribute('aria-sort'));
+    expect(ths()).toEqual(['ascending', null]);
+    ((fixture.nativeElement as HTMLElement).querySelector('thead th button') as HTMLButtonElement).click();
+    await fixture.whenStable();
+    expect(ths()).toEqual(['descending', null]);
+  });
+
+  it('names the sort and items-per-page drop-downs after their captions', async () => {
+    const fixture = TestBed.createComponent(Host);
+    fixture.componentInstance.config = {
+      ...fixture.componentInstance.config,
+      viewMode: signal<'table' | 'card'>('card'),
+      columns: [{ header: 'Name', sortField: 'name', render: r => r.name }],
+      sort: signal({ field: 'name', direction: 'asc' as const }),
+    };
+    await fixture.whenStable();
+    const root: HTMLElement = fixture.nativeElement;
+    expect(name(root.querySelector('[data-test="sort-controls"] select'))).toBe('Sort');
+    expect(name(root.querySelector('[data-test="page-size"]'))).toBe('Items per page');
+  });
+
+  it('names the range popup fields after the filtered column', async () => {
+    const fixture = TestBed.createComponent(RangeFilterHost);
+    await fixture.whenStable();
+    const root: HTMLElement = fixture.nativeElement;
+    (root.querySelector('[data-test="range-filter-toggle"]') as HTMLButtonElement).click();
+    await fixture.whenStable();
+    expect(name(root.querySelector('[data-test="range-mode"]'))).toBe('Last Refreshed range type');
+    expect(name(root.querySelector('[data-test="range-op"]'))).toBe('Last Refreshed comparison');
+    expect(name(root.querySelector('[data-test="range-a"]'))).toBe('Last Refreshed value');
+
+    fixture.componentInstance.selectedRange.set({ op: 'between', a: '2026-05-01', b: '2026-06-01' });
+    await fixture.whenStable();
+    expect(name(root.querySelector('[data-test="range-a"]'))).toBe('Last Refreshed start');
+    expect(name(root.querySelector('[data-test="range-b"]'))).toBe('Last Refreshed end');
+  });
+});
+
+// Material icon ligatures are text: left exposed, a glyph names an icon-only
+// button ("first_page") or prefixes a menu item ("link Connect").
+describe('SignalListComponent icon glyphs and accessible names', () => {
+  const render = async (extra: Partial<SignalListConfig<{ name: string }>> = {}) => {
+    const fixture = TestBed.createComponent(Host);
+    fixture.componentInstance.config = {
+      ...fixture.componentInstance.config,
+      columns: [
+        { header: 'Name', render: r => r.name },
+        {
+          header: '', kind: 'actions', render: () => '',
+          actions: () => [{ label: 'Connect', icon: 'link', invoke: () => {} }],
+        },
+      ],
+      ...extra,
+    };
+    await fixture.whenStable();
+    return fixture;
+  };
+
+  it('names the icon-only refresh and paging buttons', async () => {
+    const fixture = await render();
+    const el: HTMLElement = fixture.nativeElement;
+    expect(el.querySelector('[data-test="refresh"]')!.getAttribute('aria-label')).toBe('Refresh');
+    const labels = Array.from(el.querySelectorAll('button[title$=" page"]')).map(b => b.getAttribute('aria-label'));
+    expect(labels).toEqual(['First page', 'Previous page', 'Next page', 'Last page']);
+  });
+
+  it('hides icon glyphs, so a menu item is named by its label alone', async () => {
+    const fixture = await render();
+    const el: HTMLElement = fixture.nativeElement;
+    (el.querySelector('[data-test="row-actions"]') as HTMLButtonElement).click();
+    await fixture.whenStable();
+
+    const exposed = Array.from(el.querySelectorAll('.material-icons'))
+      .filter(i => i.getAttribute('aria-hidden') !== 'true')
+      .map(i => i.textContent!.trim());
+    expect(exposed).toEqual([]);
+  });
+
+  it('hides the glyphs of card view and the empty state too', async () => {
+    const card = await render({ viewMode: signal<'table' | 'card'>('card') });
+    (card.nativeElement.querySelector('[data-test="row-actions"]') as HTMLButtonElement).click();
+    await card.whenStable();
+    const empty = await render({ pagedItems: signal([]).asReadonly(), totalFilteredResults: signal(0).asReadonly() });
+
+    for (const el of [card.nativeElement, empty.nativeElement] as HTMLElement[]) {
+      const exposed = Array.from(el.querySelectorAll('.material-icons'))
+        .filter(i => i.getAttribute('aria-hidden') !== 'true')
+        .map(i => i.textContent!.trim());
+      expect(exposed).toEqual([]);
+    }
+  });
+});
+
+// WCAG 2.4.3: a control that turns itself off, or goes away, when pressed
+// must not leave keyboard focus on the page body.
+describe('SignalListComponent keeps focus on a pressed control', () => {
+  const button = (root: HTMLElement, text: string) =>
+    Array.from(root.querySelectorAll('button')).find(b => b.textContent!.trim() === text) as HTMLButtonElement;
+
+  it('Refresh stays focusable while it works and ignores a second press', async () => {
+    let resolveRefresh!: () => void;
+    const onRefresh = vi.fn(() => new Promise<void>(r => { resolveRefresh = r; }));
+    const fixture = TestBed.createComponent(Host);
+    fixture.componentInstance.config = { ...fixture.componentInstance.config, onRefresh };
+    await fixture.whenStable();
+    const refresh = fixture.nativeElement.querySelector('[data-test="refresh"]') as HTMLButtonElement;
+    refresh.focus();
+
+    refresh.click();
+    await fixture.whenStable();
+    expect(isOff(refresh)).toBe(true);
+    expect(document.activeElement).toBe(refresh);
+    refresh.click();
+    expect(onRefresh).toHaveBeenCalledOnce();
+
+    resolveRefresh();
+    await fixture.whenStable();
+    expect(isOn(refresh)).toBe(true);
+  });
+
+  it('Clear filters and sort ignores a press while no filter is set', async () => {
+    const fixture = TestBed.createComponent(Host);
+    const onClear = vi.fn();
+    fixture.componentInstance.config = { ...fixture.componentInstance.config, nameFilter: signal(''), onClear };
+    await fixture.whenStable();
+    (fixture.nativeElement.querySelector('[data-test="clear-filters"]') as HTMLButtonElement).click();
+    expect(onClear).not.toHaveBeenCalled();
+  });
+
+  it('the pager buttons at either end ignore a press', async () => {
+    const fixture = TestBed.createComponent(Host);
+    fixture.componentInstance.config = { ...fixture.componentInstance.config, totalPages: signal(2).asReadonly() };
+    await fixture.whenStable();
+    const pager = (title: string) => fixture.nativeElement.querySelector(`[title="${title}"]`) as HTMLButtonElement;
+
+    // First and Last set the page they are already on, so only Previous and
+    // Next show the press is ignored; all four must be off.
+    expect(isOff(pager('First page'))).toBe(true);
+    expect(isOff(pager('Previous page'))).toBe(true);
+    pager('Previous page').click();
+    await fixture.whenStable();
+    expect(fixture.componentInstance.pageIndex()).toBe(0);
+
+    fixture.componentInstance.pageIndex.set(1);
+    await fixture.whenStable();
+    expect(isOff(pager('Next page'))).toBe(true);
+    expect(isOff(pager('Last page'))).toBe(true);
+    pager('Next page').click();
+    await fixture.whenStable();
+    expect(fixture.componentInstance.pageIndex()).toBe(1);
+  });
+
+  it('the checklist popup Clear ignores a press while the filter is not set', async () => {
+    const fixture = TestBed.createComponent(MultiFilterHost);
+    fixture.componentInstance.pageIndex.set(3);
+    await fixture.whenStable();
+    (fixture.nativeElement.querySelector('[data-test="multi-filter-toggle"]') as HTMLButtonElement).click();
+    await fixture.whenStable();
+    (fixture.nativeElement.querySelector('[data-test="multi-filter-clear"]') as HTMLButtonElement).click();
+    expect(fixture.componentInstance.pageIndex()).toBe(3);
+  });
+
+  it('the range popup Clear ignores a press while the filter is not set', async () => {
+    const fixture = TestBed.createComponent(RangeFilterHost);
+    fixture.componentInstance.pageIndex.set(3);
+    await fixture.whenStable();
+    (fixture.nativeElement.querySelector('[data-test="range-filter-toggle"]') as HTMLButtonElement).click();
+    await fixture.whenStable();
+    (fixture.nativeElement.querySelector('[data-test="range-filter-clear"]') as HTMLButtonElement).click();
+    expect(fixture.componentInstance.pageIndex()).toBe(3);
+  });
+
+  it('Close on the checklist popup puts focus back on the button that opened it', async () => {
+    const fixture = TestBed.createComponent(MultiFilterHost);
+    await fixture.whenStable();
+    const toggle = fixture.nativeElement.querySelector('[data-test="multi-filter-toggle"]') as HTMLButtonElement;
+    toggle.click();
+    await fixture.whenStable();
+    const close = button(fixture.nativeElement, 'Close');
+    close.focus();
+
+    close.click();
+    await fixture.whenStable();
+
+    expect(listOf(fixture).multiPopupOpen()).toBe(false);
+    expect(document.activeElement).toBe(toggle);
+  });
+
+  it('Escape in the checklist popup puts focus back on the button that opened it', async () => {
+    const fixture = TestBed.createComponent(MultiFilterHost);
+    await fixture.whenStable();
+    const toggle = fixture.nativeElement.querySelector('[data-test="multi-filter-toggle"]') as HTMLButtonElement;
+    toggle.click();
+    await fixture.whenStable();
+    const box = fixture.nativeElement.querySelector('[data-test="multi-filter-wrap"] input[type="checkbox"]') as HTMLInputElement;
+    box.focus();
+
+    box.dispatchEvent(new KeyboardEvent('keydown', { key: 'Escape', bubbles: true }));
+    await fixture.whenStable();
+
+    expect(listOf(fixture).multiPopupOpen()).toBe(false);
+    expect(document.activeElement).toBe(toggle);
+  });
+
+  it('Close on the range popup puts focus back on the button that opened it', async () => {
+    const fixture = TestBed.createComponent(RangeFilterHost);
+    await fixture.whenStable();
+    const toggle = fixture.nativeElement.querySelector('[data-test="range-filter-toggle"]') as HTMLButtonElement;
+    toggle.click();
+    await fixture.whenStable();
+    const close = button(fixture.nativeElement, 'Close');
+    close.focus();
+
+    close.click();
+    await fixture.whenStable();
+
+    expect(listOf(fixture).multiPopupOpen()).toBe(false);
+    expect(document.activeElement).toBe(toggle);
+  });
+
+  async function bulkFixture(selectAll: boolean) {
+    const fixture = TestBed.createComponent(SelectAllHost);
+    const running = signal(false);
+    const run = vi.fn();
+    const config = fixture.componentInstance.config;
+    const [sel, ...rest] = config.columns;
+    fixture.componentInstance.config = {
+      ...config,
+      columns: [selectAll ? sel : { ...sel, checkbox: { selectedKeys: sel.checkbox!.selectedKeys } }, ...rest],
+      bulkActions: [{ label: 'Delete', run }],
+      bulkRunning: running,
+    };
+    fixture.componentInstance.selected.set(new Set(['two']));
+    await fixture.whenStable();
+    return { fixture, running, run };
+  }
+
+  it('a bulk action stays focusable while one runs and ignores the press', async () => {
+    const { fixture, running, run } = await bulkFixture(true);
+    running.set(true);
+    await fixture.whenStable();
+    const del = fixture.nativeElement.querySelector('[data-test="bulk-action-Delete"]') as HTMLButtonElement;
+    expect(isOff(del)).toBe(true);
+    del.click();
+    expect(run).not.toHaveBeenCalled();
+  });
+
+  it('Clear in the bulk-action bar puts focus on Select all', async () => {
+    const { fixture } = await bulkFixture(true);
+    const clear = fixture.nativeElement.querySelector('[data-test="bulk-clear"]') as HTMLButtonElement;
+    clear.focus();
+
+    clear.click();
+    await fixture.whenStable();
+
+    expect(fixture.nativeElement.querySelector('[data-test="bulk-action-bar"]')).toBeNull();
+    expect(document.activeElement).toBe(fixture.nativeElement.querySelector('[data-test="select-all"]'));
+  });
+
+  it('Clear in the bulk-action bar puts focus on the first row checkbox when there is no Select all', async () => {
+    const { fixture } = await bulkFixture(false);
+    const clear = fixture.nativeElement.querySelector('[data-test="bulk-clear"]') as HTMLButtonElement;
+    clear.focus();
+
+    clear.click();
+    await fixture.whenStable();
+
+    expect(document.activeElement).toBe(fixture.nativeElement.querySelector('[data-test="row-checkbox"]'));
+  });
+});
+
+function listOf<H>(fixture: ReturnType<typeof TestBed.createComponent<H>>) {
+  return fixture.debugElement.children[0].componentInstance as SignalListComponent<any>;
+}

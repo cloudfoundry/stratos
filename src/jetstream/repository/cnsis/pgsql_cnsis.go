@@ -27,10 +27,6 @@ var findCNSI = `SELECT guid, name, cnsi_type, api_endpoint, auth_endpoint, token
 						FROM cnsis
 						WHERE guid=$1`
 
-var findCNSIByAPIEndpoint = `SELECT guid, name, cnsi_type, api_endpoint, auth_endpoint, token_endpoint, doppler_logging_endpoint, skip_ssl_validation, client_id, client_secret, sso_allowed, sub_type, meta_data, creator, ca_cert
-						FROM cnsis
-						WHERE api_endpoint=$1`
-
 var saveCNSI = `INSERT INTO cnsis (guid, name, cnsi_type, api_endpoint, auth_endpoint, token_endpoint, doppler_logging_endpoint, skip_ssl_validation, client_id, client_secret, sso_allowed, sub_type, meta_data, creator, ca_cert)
 						VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15)`
 
@@ -61,7 +57,6 @@ func InitRepositoryProvider(databaseProvider string) {
 	listCNSIsByUser = datastore.ModifySQLStatement(listCNSIsByUser, databaseProvider)
 	listCNSIsByCreator = datastore.ModifySQLStatement(listCNSIsByCreator, databaseProvider)
 	findCNSI = datastore.ModifySQLStatement(findCNSI, databaseProvider)
-	findCNSIByAPIEndpoint = datastore.ModifySQLStatement(findCNSIByAPIEndpoint, databaseProvider)
 	saveCNSI = datastore.ModifySQLStatement(saveCNSI, databaseProvider)
 	deleteCNSI = datastore.ModifySQLStatement(deleteCNSI, databaseProvider)
 	updateCNSI = datastore.ModifySQLStatement(updateCNSI, databaseProvider)
@@ -202,12 +197,6 @@ func (p *PostgresCNSIRepository) ListByCreator(userGUID string, encryptionKey []
 	return p.listBy(listCNSIsByCreator, userGUID, encryptionKey)
 }
 
-// ListByAPIEndpoint - Returns a a list of CNSIs with the same APIEndpoint
-func (p *PostgresCNSIRepository) ListByAPIEndpoint(endpoint string, encryptionKey []byte) ([]*api.CNSIRecord, error) {
-	slog.Debug("listByAPIEndpoint", "apiEndpoint", endpoint)
-	return p.listBy(findCNSIByAPIEndpoint, endpoint, encryptionKey)
-}
-
 // listBy - Returns a list of CNSI Records found using the given query looking for match
 func (p *PostgresCNSIRepository) listBy(query string, match string, encryptionKey []byte) ([]*api.CNSIRecord, error) {
 	rows, err := p.db.Query(query, match)
@@ -279,12 +268,6 @@ func (p *PostgresCNSIRepository) listBy(query string, match string, encryptionKe
 func (p *PostgresCNSIRepository) Find(guid string, encryptionKey []byte) (api.CNSIRecord, error) {
 	slog.Debug("Find", "endpoint", guid)
 	return p.findBy(findCNSI, guid, encryptionKey)
-}
-
-// FindByAPIEndpoint - Returns a single CNSI Record
-func (p *PostgresCNSIRepository) FindByAPIEndpoint(endpoint string, encryptionKey []byte) (api.CNSIRecord, error) {
-	slog.Debug("FindByAPIEndpoint", "apiEndpoint", endpoint)
-	return p.findBy(findCNSIByAPIEndpoint, endpoint, encryptionKey)
 }
 
 // FindBy - Returns a single CNSI Record found using the given query looking for match

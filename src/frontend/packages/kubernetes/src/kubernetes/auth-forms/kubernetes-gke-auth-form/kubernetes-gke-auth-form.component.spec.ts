@@ -32,11 +32,18 @@ describe('KubernetesGKEAuthFormComponent', () => {
         gkeconfig: ''
       }),
     });
-    component.formGroup = form;
+    fixture.componentRef.setInput('formGroup', form);
     fixture.detectChanges();
   });
 
   it('should create', () => {
     expect(component).toBeTruthy();
+  });
+
+  it('names the credentials file picker after its caption', () => {
+    const root: HTMLElement = fixture.nativeElement;
+    const path = root.querySelector('app-file-input input[type="text"]');
+    const caption = root.querySelector(`#${path?.getAttribute('aria-labelledby')}`);
+    expect(caption?.textContent?.trim()).toBe("Select an `Application Default Credentials' file:");
   });
 });

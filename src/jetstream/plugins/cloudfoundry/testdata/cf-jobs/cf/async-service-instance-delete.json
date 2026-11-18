@@ -1,0 +1,14 @@
+{
+  "guid": "d2deb0f5-8906-4b22-8478-19b8896df92b",
+  "created_at": "2026-10-14T04:32:08Z",
+  "updated_at": "2026-10-14T04:33:10Z",
+  "operation": "service_instance.delete",
+  "state": "COMPLETE",
+  "errors": [],
+  "warnings": [],
+  "links": {
+    "self": {
+      "href": "https://api.example.com/v3/jobs/d2deb0f5-8906-4b22-8478-19b8896df92b"
+    }
+  }
+}

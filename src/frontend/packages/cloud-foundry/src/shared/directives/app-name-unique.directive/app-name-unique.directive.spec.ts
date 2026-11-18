@@ -1,14 +1,28 @@
-import { provideZonelessChangeDetection } from '@angular/core';
+import { Component, provideZonelessChangeDetection, signal } from '@angular/core';
 import { provideHttpClient } from '@angular/common/http';
 import { HttpTestingController, provideHttpClientTesting } from '@angular/common/http/testing';
 import { FormControl } from '@angular/forms';
 import { TestBed } from '@angular/core/testing';
+import { By } from '@angular/platform-browser';
 import { firstValueFrom } from 'rxjs';
 import { describe, it, expect, beforeEach } from 'vitest';
 
 import { createBasicStoreModule } from '@stratosui/store/testing';
 import { CreateAppStateService } from '../../data-services/create-app-state.service';
-import { AppNameUniqueDirective } from './app-name-unique.directive';
+import { AppNameUniqueChecking, AppNameUniqueDirective } from './app-name-unique.directive';
+
+// The directive's inputs are signal inputs, set through a template. The
+// `formControl` attribute only satisfies the directive's selector; the tests
+// call validate() with their own control.
+@Component({
+  template: `<input formControl [appApplicationNameUnique]="checking"
+    [appApplicationNameUniqueMessage]="message()">`,
+  imports: [AppNameUniqueDirective],
+})
+class HostComponent {
+  checking = new AppNameUniqueChecking();
+  message = signal<string | undefined>(undefined);
+}
 
 describe('AppNameUniqueDirective', () => {
 
@@ -29,10 +43,12 @@ describe('AppNameUniqueDirective', () => {
     expect(directive).toBeTruthy();
   });
 
-  function setupValidation(name: string) {
+  function setupValidation(name: string, message?: string) {
     TestBed.inject(CreateAppStateService).setCFDetails({ cloudFoundry: 'cf-1', org: 'org-1', space: 'space-1' });
-    const directive = TestBed.runInInjectionContext(() => new AppNameUniqueDirective());
-    directive.ngOnInit();
+    const fixture = TestBed.createComponent(HostComponent);
+    fixture.componentInstance.message.set(message);
+    fixture.detectChanges();
+    const directive = fixture.debugElement.query(By.directive(AppNameUniqueDirective)).injector.get(AppNameUniqueDirective);
     const control = new FormControl(name);
     control.markAsDirty();
     return firstValueFrom(directive.validate(control));
@@ -54,6 +70,18 @@ describe('AppNameUniqueDirective', () => {
     req.flush({ resources: [], totalResults: 1 });
 
     expect(await result).toEqual({ appNameTaken: true });
+    http.verify();
+  });
+
+  // app-form-field shows an error's own message as the field's error text.
+  it('carries the given message on a taken name', async () => {
+    const http = TestBed.inject(HttpTestingController);
+    const result = setupValidation('my-app', 'That name is taken.');
+
+    await debounce();
+    http.expectOne(r => r.url === '/pp/v1/cf/apps/cf-1').flush({ resources: [], totalResults: 1 });
+
+    expect(await result).toEqual({ appNameTaken: { message: 'That name is taken.' } });
     http.verify();
   });
 

@@ -8,9 +8,7 @@ import {
   inject,
   signal,
 } from '@angular/core';
-import { toSignal } from '@angular/core/rxjs-interop';
 import { Router } from '@angular/router';
-import { switchMap } from 'rxjs/operators';
 
 import {
   ConfirmationDialogConfig,
@@ -35,6 +33,7 @@ import { CfCurrentUserPermissions } from '../../../../../../user-permissions/cf-
 import { CSI_CANCEL_URL } from '../../../../../../shared/components/add-service-instance/csi-mode.service';
 import { SERVICE_INSTANCE_TYPES } from '../../../../../../shared/components/add-service-instance/add-service-instance-base-step/add-service-instance.types';
 import type { StServiceCredentialBinding } from '../../../../../../services/endpoint-data/stratos-types';
+import { unknownHowOf, unknownOutcomeMessage } from '../../../../../../services/async-jobs/unknown-outcome-message';
 
 /**
  * ServicesTabComponent — signal-native rewrite of the app-detail Service
@@ -95,16 +94,16 @@ export class ServicesTabComponent implements OnInit {
    *  require SERVICE_INSTANCE_CREATE permission on the app's space —
    *  same predicate the legacy ngrx list-config exposed before it was
    *  retired in Stage 9d. */
-  private readonly canBindSignal: Signal<boolean> = toSignal(
-    this.appService.waitForAppEntity$.pipe(
-      switchMap(app => this.permissions.can(
-        CfCurrentUserPermissions.SERVICE_INSTANCE_CREATE,
-        this.appService.cfGuid,
-        app.entity.entity.space_guid,
-      )),
-    ),
-    { initialValue: false },
-  );
+  private readonly bindCheck = computed(() => {
+    const spaceGuid = this.dataService.app()?.entity?.space_guid;
+    return spaceGuid ? this.permissions.can(
+      CfCurrentUserPermissions.SERVICE_INSTANCE_CREATE,
+      this.appService.cfGuid,
+      spaceGuid,
+    ) : null;
+  });
+  // The Bind action waits for the app's space.
+  private readonly canBindSignal: Signal<boolean> = computed(() => this.bindCheck()?.() ?? false);
 
   readonly bindServiceAction: ListSubNavAddAction = {
     label: 'Bind Service',
@@ -204,8 +203,15 @@ export class ServicesTabComponent implements OnInit {
           );
           this.confirmDialog.open(confirm, async () => {
             try {
-              await this.actionsService.unbindService(row.guid);
-              this.dataService.removeServiceBinding(row.guid);
+              const outcome = await this.actionsService.unbindService(row.guid);
+              if (outcome === 'deleted') {
+                this.dataService.removeServiceBinding(row.guid);
+              } else {
+                // Unknown result (ended, or still running in CF): keep the row and re-read
+                // the bindings so the tab shows whether it is still bound.
+                void this.dataService.refresh('serviceBindings');
+                this.snackBar.error(unknownOutcomeMessage(`Unbind "${siName}"`, 'The Services tab', unknownHowOf(outcome) ?? 'ended'));
+              }
             } catch (err: unknown) {
               const msg = (err as { message?: string })?.message ?? String(err);
               this.snackBar.error(`Unbind failed: ${msg}`);

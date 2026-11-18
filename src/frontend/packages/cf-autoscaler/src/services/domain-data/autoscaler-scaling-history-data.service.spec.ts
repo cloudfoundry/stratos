@@ -104,6 +104,25 @@ describe('AutoscalerScalingHistoryDataService', () => {
     expect(svc.error(ENDPOINT_GUID, APP_GUID)()).toBeNull();
   });
 
+  // The autoscaler returns 50 events per page by default; the events page
+  // showed only the newest 50. loadAll() follows every page.
+  it('loadAll() follows every page, newest first', async () => {
+    const promise = svc.loadAll(ENDPOINT_GUID, APP_GUID);
+    const first = httpMock.expectOne(r => r.url === HISTORY_URL);
+    expect(first.request.params.get('page')).toBe('1');
+    expect(first.request.params.get('order-direction')).toBe('desc');
+    first.flush({ total_results: 3, total_pages: 2, page: 1, resources: [{ timestamp: 3 }, { timestamp: 2 }] });
+    await new Promise(r => setTimeout(r));
+    const second = httpMock.expectOne(r => r.url === HISTORY_URL);
+    expect(second.request.params.get('page')).toBe('2');
+    second.flush({ total_results: 3, total_pages: 2, page: 2, resources: [{ timestamp: 1 }] });
+    await promise;
+
+    expect(svc.events(ENDPOINT_GUID, APP_GUID)().map(e => e.timestamp)).toEqual([3, 2, 1]);
+    expect(svc.totalResults(ENDPOINT_GUID, APP_GUID)()).toBe(3);
+    expect(svc.loading(ENDPOINT_GUID, APP_GUID)()).toBe(false);
+  });
+
   it('load() with no params still issues a GET (no query params required)', async () => {
     const promise = svc.load(ENDPOINT_GUID, APP_GUID);
 

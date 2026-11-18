@@ -1,8 +1,7 @@
-import { CUSTOM_ELEMENTS_SCHEMA } from '@angular/core';
+import { CUSTOM_ELEMENTS_SCHEMA, signal } from '@angular/core';
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { provideZonelessChangeDetection } from '@angular/core';
 import { describe, it, expect, beforeEach } from 'vitest';
-import { of as observableOf } from 'rxjs';
 
 import { createBasicStoreModule } from '@stratosui/store/testing';
 import { entityCatalog, TestEntityCatalog } from '@stratosui/store';
@@ -23,8 +22,8 @@ describe('CfEndpointsMissingComponent', () => {
     });
 
     const mockCloudFoundryService = {
-      hasConnectedCFEndpoints$: observableOf(false),
-      hasRegisteredCFEndpoints$: observableOf(false),
+      hasConnectedCFEndpoints: signal(false),
+      hasRegisteredCFEndpoints: signal(false),
     };
 
     TestBed.configureTestingModule({

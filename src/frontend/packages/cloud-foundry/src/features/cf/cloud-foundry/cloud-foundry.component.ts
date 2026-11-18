@@ -19,6 +19,7 @@ import {
   SignalListConfig,
   SignalListPillColor,
   SignalListSort,
+  endpointNameCompare,
   naturalCompare,
 } from '@stratosui/core';
 import { EndpointsDataService } from '../../../../../store/src/services/endpoints-data.service';
@@ -122,13 +123,17 @@ export class CloudFoundryComponent {
       const items = filtered();
       const { field, direction } = sortState();
       const extract = sortExtractors[field] ?? sortExtractors.name;
-      const dir = direction === 'desc' ? -1 : 1;
+      // Names get one collection-aware context so `dup 3` sits between
+      // dup2 and dup4; direction goes into the comparator, never multiplied.
+      const nameCompare = endpointNameCompare(items.map(e => e.name ?? ''), direction);
       return [...items].sort((a, b) => {
         const av = extract(a), bv = extract(b);
         if (av == null && bv == null) return 0;
         if (av == null) return 1;
         if (bv == null) return -1;
-        return naturalCompare(String(av), String(bv)) * dir;
+        return field === 'name'
+          ? nameCompare(String(av), String(bv))
+          : naturalCompare(String(av), String(bv), false, direction);
       });
     });
     const pageSize: WritableSignal<number> = signal(24);

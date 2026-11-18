@@ -4,8 +4,10 @@ package cloudfoundry
 import (
 	"context"
 	"encoding/json"
+	"errors"
 	"fmt"
 	"net/http"
+	"time"
 
 	"github.com/cloudfoundry/stratos/src/jetstream/plugins/stratosjobs"
 	"github.com/fivetwenty-io/capi/v3/pkg/capi"
@@ -73,6 +75,15 @@ func (cf *CloudFoundrySpecification) applyNativeRoleChanges(c *echo.Context) err
 		return err
 	}
 
+	// CF refuses to delete an org User role while the user still holds a
+	// space role in that org, and it deletes roles in background jobs. When
+	// the batch removes an org User, the deletes ordered before it wait for
+	// their jobs to finish rather than the usual fast-path window.
+	deleteWait := stratosjobs.FastPathOptions{Kind: "cf.role.delete"}
+	if removesOrgUser(reqBody.Changes) {
+		deleteWait.Window = orgUserRemovalWait
+	}
+
 	results := make([]nativeRoleChangeResult, 0, len(reqBody.Changes))
 	for _, i := range orderRoleChanges(reqBody.Changes) {
 		ch := reqBody.Changes[i]
@@ -94,6 +105,9 @@ func (cf *CloudFoundrySpecification) applyNativeRoleChanges(c *echo.Context) err
 
 		if ch.Add {
 			role, addErr := cfClient.Roles().Create(reqCtx, roleCreateRequestFor(ch))
+			if addErr != nil && roleAlreadyHeld(reqCtx, cfClient, ch, addErr) {
+				addErr = nil
+			}
 			res := nativeRoleChangeResult{Index: i, Action: "add", Success: addErr == nil, Role: role}
 			if addErr != nil {
 				res.Error = addErr.Error()
@@ -123,9 +137,7 @@ func (cf *CloudFoundrySpecification) applyNativeRoleChanges(c *echo.Context) err
 		// frontend can poll /pp/v1/stratos/jobs/{id}. Mirrors deleteNativeRole.
 		if cf.asyncTracker != nil && cf.asyncTranslator != nil && job != nil && job.GUID != "" {
 			ref := CFJobRef{CnsiGUID: cnsiGUID, UserGUID: userGUID, JobGUID: job.GUID}
-			fp := stratosjobs.RunFastPath(reqCtx, cf.asyncTracker, cf.asyncTranslator, ref, stratosjobs.FastPathOptions{
-				Kind: "cf.role.delete",
-			})
+			fp := stratosjobs.RunFastPath(reqCtx, cf.asyncTracker, cf.asyncTranslator, ref, deleteWait)
 			res.State = string(fp.State)
 			if fp.State == stratosjobs.JobStateFailed {
 				res.Success = false
@@ -143,33 +155,47 @@ func (cf *CloudFoundrySpecification) applyNativeRoleChanges(c *echo.Context) err
 // requires it to exist before any space role is assigned to the user.
 const orgUserRoleType = "organization_user"
 
+// orgUserRemovalWait bounds how long a role delete waits for its CF job when
+// an org User removal follows it in the same batch.
+const orgUserRemovalWait = 30 * time.Second
+
+func isOrgUserChange(ch nativeRoleChange) bool {
+	return ch.OrgGUID != "" && ch.SpaceGUID == "" && ch.Type == orgUserRoleType
+}
+
+func removesOrgUser(changes []nativeRoleChange) bool {
+	for _, ch := range changes {
+		if isOrgUserChange(ch) && !ch.Add {
+			return true
+		}
+	}
+	return false
+}
+
 // orderRoleChanges returns indices into changes in execution order. The
-// org-user (membership) role must be created before other roles and removed
-// after them, mirroring the legacy executeUsersRolesChange$ ordering — CF
+// org-user (membership) role adds run before other roles and its removes
+// run after them, each by its own direction, mirroring the legacy
+// executeUsersRolesChange$ ordering. CF
 // rejects a space role for a non-member, and removing membership first would
 // orphan the remaining space roles.
 func orderRoleChanges(changes []nativeRoleChange) []int {
-	orgUser := make([]int, 0, len(changes))
+	orgUserAdds := make([]int, 0, len(changes))
+	orgUserRemoves := make([]int, 0, len(changes))
 	other := make([]int, 0, len(changes))
 	for i, ch := range changes {
-		if ch.OrgGUID != "" && ch.SpaceGUID == "" && ch.Type == orgUserRoleType {
-			orgUser = append(orgUser, i)
-		} else {
+		switch {
+		case !isOrgUserChange(ch):
 			other = append(other, i)
+		case ch.Add:
+			orgUserAdds = append(orgUserAdds, i)
+		default:
+			orgUserRemoves = append(orgUserRemoves, i)
 		}
 	}
-	if len(orgUser) == 0 {
-		return other
-	}
 	order := make([]int, 0, len(changes))
-	if changes[orgUser[0]].Add {
-		order = append(order, orgUser...)
-		order = append(order, other...)
-	} else {
-		order = append(order, other...)
-		order = append(order, orgUser...)
-	}
-	return order
+	order = append(order, orgUserAdds...)
+	order = append(order, other...)
+	return append(order, orgUserRemoves...)
 }
 
 // roleCreateRequestFor builds a V3 RoleCreateRequest from a change. Space
@@ -206,10 +232,36 @@ func findUserGUID(ctx context.Context, cfClient capi.Client, username, origin st
 		return "", err
 	}
 	if list == nil || len(list.Resources) == 0 {
-		return "", fmt.Errorf("user not found: %s", username)
+		return "", fmt.Errorf("%w: %s", errUserNotFound, username)
 	}
 	return list.Resources[0].GUID, nil
 }
+
+// roleAlreadyHeld reports whether a refused add asked for a role the user
+// already holds. CF answers that with the generic unprocessable-entity code,
+// so the role is looked up rather than the message read. A space role
+// brings the org User role with it, and the Add User dialog cannot tell
+// whether the user is already a member, so this case is routine.
+func roleAlreadyHeld(ctx context.Context, cfClient capi.Client, ch nativeRoleChange, addErr error) bool {
+	var respErr *capi.ResponseError
+	if !errors.As(addErr, &respErr) || respErr.FirstError() == nil ||
+		respErr.FirstError().Code != capi.ErrorCodeUnprocessableEntity {
+		return false
+	}
+	if ch.Username != "" {
+		guid, err := findUserGUID(ctx, cfClient, ch.Username, ch.Origin)
+		if err != nil {
+			return false
+		}
+		ch.UserGUID = guid
+	}
+	_, err := resolveRoleGUID(ctx, cfClient, ch)
+	return err == nil
+}
+
+// errUserNotFound is findUserGUID's answer when the lookup succeeded but
+// listed no user, as opposed to a failed CF call.
+var errUserNotFound = errors.New("user not found")
 
 // resolveRoleGUID finds the GUID of an existing role for a (user, scope, type)
 // tuple via a filtered V3 roles list. CF v3 deletes roles by GUID, but the

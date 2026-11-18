@@ -1,6 +1,7 @@
 import { CommonModule } from '@angular/common';
-import { ChangeDetectorRef, Component, ElementRef, Input, OnDestroy, OnInit, ViewChild, inject, ChangeDetectionStrategy } from '@angular/core';
-import { Observable, Subject, Subscription, takeUntil } from 'rxjs';
+import { Component, DestroyRef, ElementRef, OnDestroy, OnInit, computed, inject, signal, ChangeDetectionStrategy, input, viewChild } from '@angular/core';
+import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
+import { Observable, Subject, Subscription } from 'rxjs';
 import { Terminal } from 'xterm';
 import { FitAddon } from 'xterm-addon-fit';
 
@@ -20,28 +21,43 @@ import { AppProgressBarComponent } from '../progress-bar/app-progress-bar.compon
   ]
 })
 export class SshViewerComponent implements OnInit, OnDestroy {
-  private changeDetector = inject(ChangeDetectorRef);
   private resizer = inject(EventWatcherService);
 
-  @Input()
-  errorMessage?: string;
+  // The parent's error, e.g. a failed web socket. The parent clears it at the
+  // start of each attempt.
+  readonly errorMessage = input<string>();
 
-  @Input()
-  sshStream!: Observable<any>;
+  // An error the backend sends as a '!' window title. It stays after the
+  // stream closes, so the user sees why; reconnect() clears it.
+  private readonly streamError = signal<string | undefined>(undefined);
 
-  @Input()
-  sshInput!: Subject<string>;
+  public readonly error = computed(() => this.streamError() ?? this.errorMessage());
 
-  @Input()
-  public connectionStatus!: Observable<number>;
+  // Both hosts (app SSH, kube console) bind the stream pair; the
+  // terminal cannot connect without them.
+  readonly sshStream = input.required<Observable<any>>();
 
-  public isConnected = false;
-  public attemptingConnection = false;
-  private isDestroying = false;
+  readonly sshInput = input.required<Subject<string>>();
 
-  public message = '';
+  public readonly connectionStatus = input<Observable<number>>();
 
-  @ViewChild('terminal', { static: true }) container!: ElementRef;
+  public readonly isConnected = signal(false);
+  public readonly attemptingConnection = signal(false);
+
+  // A progress window title from the backend, e.g. while a pod starts.
+  public readonly message = signal('');
+
+  // Tab goes to the shell. Ctrl+Shift+M, the code editors' key too, makes
+  // Tab move focus instead; once the session has ended Tab always leaves
+  // (WCAG 2.1.2). Ctrl+M cannot be used: it is Enter in a terminal.
+  public readonly tabMovesFocus = signal(false);
+  public readonly tabHint = computed(() => !this.isConnected() ? '' : this.tabMovesFocus()
+    ? 'Tab moves focus. Press Ctrl+Shift+M so Tab goes to the shell.'
+    : 'Tab goes to the shell. Press Ctrl+Shift+M so Tab moves focus.');
+  public readonly statusText = computed(() => this.error()
+    ?? (!this.isConnected() && !this.attemptingConnection() ? 'Disconnected' : ''));
+
+  readonly container = viewChild.required<ElementRef>('terminal');
   private xterm!: Terminal;
 
   private xtermFitAddon = new FitAddon();
@@ -50,53 +66,66 @@ export class SshViewerComponent implements OnInit, OnDestroy {
   private connectSubscription!: Subscription;
   private resizeSubscription!: Subscription;
   private resizeTimers: ReturnType<typeof setTimeout>[] = [];
-  private destroy$ = new Subject<void>();
+  private destroyRef = inject(DestroyRef);
 
   ngOnInit() {
-    if (!this.connectionStatus) {
+    const connectionStatus = this.connectionStatus();
+    if (!connectionStatus) {
       return;
     }
 
     this.resizeSubscription = this.resizer.resizeEvent$
-      .pipe(takeUntil(this.destroy$))
+      .pipe(takeUntilDestroyed(this.destroyRef))
       .subscribe(_r => {
         if (this.xtermFitAddon) {
           this.resize();
         }
       });
 
-    this.connectSubscription = this.connectionStatus
-      .pipe(takeUntil(this.destroy$))
+    this.connectSubscription = connectionStatus
+      .pipe(takeUntilDestroyed(this.destroyRef))
       .subscribe((count: number) => {
-        this.isConnected = (count !== 0);
-        if (this.isConnected) {
+        this.isConnected.set(count !== 0);
+        if (this.isConnected()) {
           this.xterm.focus();
-          this.attemptingConnection = false;
+          this.attemptingConnection.set(false);
           this.resize();
-        }
-        if (!this.isDestroying) {
-          this.changeDetector.detectChanges();
         }
       });
 
     this.xterm = new Terminal();
     this.xterm.loadAddon(this.xtermFitAddon);
-    this.xterm.open(this.container.nativeElement);
+    this.xterm.open(this.container().nativeElement);
+    this.xterm.textarea?.setAttribute('aria-describedby', 'ssh-tab-hint');
+    // false: xterm leaves the key to the browser, so Tab moves focus.
+    this.xterm.attachCustomKeyEventHandler(e => this.handleKey(e));
     this.resize();
 
     this.xterm.onKey(e => {
       if (this.msgSubscription && !this.msgSubscription.closed) {
-        this.sshInput.next(JSON.stringify({ key: e.key }));
+        this.sshInput().next(JSON.stringify({ key: e.key }));
       }
     });
 
     this.xterm.onResize(size => {
       if (this.msgSubscription && !this.msgSubscription.closed) {
-        this.sshInput.next(JSON.stringify({ cols: size.cols, rows: size.rows }));
+        this.sshInput().next(JSON.stringify({ cols: size.cols, rows: size.rows }));
       }
     });
 
     this.reconnect();
+  }
+
+  handleKey(e: KeyboardEvent): boolean {
+    if (e.ctrlKey && e.shiftKey && e.code === 'KeyM') {
+      // Chrome opens its profile menu on Ctrl+Shift+M otherwise.
+      e.preventDefault();
+      if (e.type === 'keydown') {
+        this.tabMovesFocus.update(v => !v);
+      }
+      return false;
+    }
+    return !(e.key === 'Tab' && (this.tabMovesFocus() || !this.isConnected()));
   }
 
   public resize() {
@@ -107,10 +136,6 @@ export class SshViewerComponent implements OnInit, OnDestroy {
   }
 
   ngOnDestroy() {
-    this.isDestroying = true;
-    this.destroy$.next();
-    this.destroy$.complete();
-
     // Clear all pending timers
     this.resizeTimers.forEach(timerId => clearTimeout(timerId));
     this.resizeTimers = [];
@@ -133,9 +158,8 @@ export class SshViewerComponent implements OnInit, OnDestroy {
   }
 
   disconnect() {
-    this.attemptingConnection = false;
-    this.isConnected = false;
-    this.errorMessage = undefined;
+    this.attemptingConnection.set(false);
+    this.isConnected.set(false);
     if (this.msgSubscription && !this.msgSubscription.closed) {
       this.msgSubscription.unsubscribe();
     }
@@ -143,35 +167,28 @@ export class SshViewerComponent implements OnInit, OnDestroy {
 
   reconnect() {
     this.disconnect();
-    this.attemptingConnection = true;
-    this.changeDetector.detectChanges();
-    this.errorMessage = undefined;
+    this.attemptingConnection.set(true);
+    this.streamError.set(undefined);
+    this.message.set('');
     this.xterm.reset();
-    this.msgSubscription = this.sshStream
-      .pipe(takeUntil(this.destroy$))
-      .subscribe(
-        (data: string) => {
+    this.msgSubscription = this.sshStream()
+      .pipe(takeUntilDestroyed(this.destroyRef))
+      .subscribe({
+        next: (data: string) => {
           // Check for a window title message
           if (!this.isWindowTitle(data)) {
             for (const c of data.split(' ')) {
               this.xterm.write(String.fromCharCode(parseInt(c, 16)));
             }
-          } else {
-            console.error('Error: ', this.errorMessage);
-            const eMsg = this.errorMessage;
-            this.errorMessage = eMsg;
           }
         },
-        (_err) => {
+        error: () => {
           this.disconnect();
         },
-        () => {
+        complete: () => {
           this.disconnect();
-          if (!this.isDestroying) {
-            this.changeDetector.detectChanges();
-          }
         }
-      );
+      });
   }
   private isWindowTitle(data: string): boolean {
     const chars = data.split(' ');
@@ -185,11 +202,11 @@ export class SshViewerComponent implements OnInit, OnDestroy {
         title += String.fromCharCode(parseInt(chars[i], 16));
       }
       if (title.length > 0 && title.charAt(0) === '!') {
-        this.errorMessage = title.substr(1);
-        console.error(this.errorMessage);
+        this.streamError.set(title.substring(1));
+        console.error(this.streamError());
         return true;
       }
-      this.message = title;
+      this.message.set(title);
     }
     return false;
   }

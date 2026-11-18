@@ -1,9 +1,11 @@
 import { HttpClient } from '@angular/common/http';
 import { computed, signal, Signal } from '@angular/core';
-import { EMPTY, merge, Observable, of, ReplaySubject } from 'rxjs';
+import { EMPTY, merge, Observable, of } from 'rxjs';
 import { catchError, finalize, map, shareReplay, tap, timeout } from 'rxjs/operators';
 import { StratosDiagnostics } from '../diagnostics/stratos-diagnostics.service';
+import { drainCfPages } from './drain-pages';
 import { StError, StOrgDetail, StSpace } from './stratos-types';
+import { extractHttpErrorMessage } from '@stratosui/store';
 
 export class OrgDataService {
   private readonly _org = signal<StOrgDetail | null>(null);
@@ -11,6 +13,8 @@ export class OrgDataService {
   private readonly _isLoading = signal<boolean>(false);
   private readonly _errors = signal<StError[]>([]);
   private readonly _lastFetched = signal<Date | null>(null);
+  private readonly _orgSettled = signal(false);
+  private readonly _spacesSettled = signal(false);
 
   readonly org: Signal<StOrgDetail | null> = this._org.asReadonly();
   readonly spaces: Signal<StSpace[]> = this._spaces.asReadonly();
@@ -18,10 +22,12 @@ export class OrgDataService {
   readonly isLoading: Signal<boolean> = this._isLoading.asReadonly();
   readonly errors: Signal<StError[]> = this._errors.asReadonly();
   readonly lastFetched: Signal<Date | null> = this._lastFetched.asReadonly();
+  // Each half of load() settles on its own (success or failure): the org
+  // page waits only for the org, while the spaces list, whose per-space
+  // counts are the slow part on a large org, fills in behind it.
+  readonly orgSettled: Signal<boolean> = this._orgSettled.asReadonly();
+  readonly spacesSettled: Signal<boolean> = this._spacesSettled.asReadonly();
 
-  // ReplaySubject so late subscribers see the last completion immediately
-  // (matches EndpointDataService convention).
-  readonly loaded$ = new ReplaySubject<void>(1);
 
   // In-flight dedup. Concurrent callers before the first HTTP completes share
   // the same Observable instead of each firing their own fan-out — mirrors
@@ -55,25 +61,40 @@ export class OrgDataService {
       this.http.get<StOrgDetail>(`/pp/v1/cf/org/${this.cnsiGuid}/${this.orgGuid}`).pipe(
         tap(org => this._org.set(org)),
         catchError(err => { this.addError('org', err); return EMPTY; }),
+        finalize(() => this._orgSettled.set(true)),
       ),
-      this.http.get<{ resources: StSpace[]; totalResults: number }>(
-        `/pp/v1/cf/org/${this.cnsiGuid}/${this.orgGuid}/spaces`,
-      ).pipe(
-        tap(resp => this._spaces.set(resp.resources)),
-        catchError(err => { this.addError('spaces', err); return EMPTY; }),
-      ),
+      this.drainSpaces(),
     ).pipe(
       timeout(60_000),
       map(() => undefined),
       finalize(() => {
         this._isLoading.set(false);
         this._lastFetched.set(new Date());
-        this.loaded$.next();
         this._inFlightLoad = null;
       }),
       shareReplay({ bufferSize: 1, refCount: false }),
     );
     return this._inFlightLoad;
+  }
+
+  // Re-read the org's spaces (the Spaces tab's refresh, an unknown delete
+  // result). Rows stay visible until the new list lands.
+  refreshSpaces(): Observable<void> {
+    return this.drainSpaces().pipe(map(() => undefined));
+  }
+
+  // Every page: without per_page the endpoint returns CF's default first
+  // page of 50, so larger orgs lost spaces from the tile, the count and the
+  // apps filtered by space.
+  private drainSpaces(): Observable<unknown> {
+    return drainCfPages<StSpace>(this.http, `/pp/v1/cf/org/${this.cnsiGuid}/${this.orgGuid}/spaces`).pipe(
+      tap(resp => {
+        this._spaces.set(resp.resources);
+        this._errors.update(errors => errors.filter(e => e.resource !== 'spaces'));
+      }),
+      catchError(err => { this.addError('spaces', err); return EMPTY; }),
+      finalize(() => this._spacesSettled.set(true)),
+    );
   }
 
   // Merge a partial update into the cached org detail. Called by stepper
@@ -104,7 +125,7 @@ export class OrgDataService {
     this._errors.update(errors => [...errors, {
       resource,
       severity: 'error' as const,
-      message: err instanceof Error ? err.message : String(err),
+      message: extractHttpErrorMessage(err),
       recoverable: true,
       detail: err,
     }]);

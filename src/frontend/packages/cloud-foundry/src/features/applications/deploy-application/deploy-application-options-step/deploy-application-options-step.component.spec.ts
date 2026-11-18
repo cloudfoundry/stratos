@@ -7,6 +7,8 @@ import { provideNoopAnimations } from '@angular/platform-browser/animations';
 import { provideRouter } from '@angular/router';
 
 import { ApplicationEnvVarsHelper } from '../../application/application-tabs-base/tabs/build-tab/application-env-vars.service';
+import { CfDeployAppDataService } from '../../../../services/domain-data/cf-deploy-app-data.service';
+import { DEPLOY_TYPES_IDS } from '../deploy-application-steps.types';
 import { DeployApplicationOptionsStepComponent } from './deploy-application-options-step.component';
 
 describe('DeployApplicationOptionsStepComponent', () => {
@@ -30,7 +32,7 @@ describe('DeployApplicationOptionsStepComponent', () => {
 
     fixture = TestBed.createComponent(DeployApplicationOptionsStepComponent);
     component = fixture.componentInstance;
-    fixture.detectChanges();
+    await fixture.whenStable();
   });
 
   it('should create', () => {
@@ -63,5 +65,36 @@ describe('DeployApplicationOptionsStepComponent', () => {
 
     c.no_route.setValue(true);
     expect(c.random_route.disabled).toBe(true);
+  });
+
+  it('names every text field and drop-down with a visible label', async () => {
+    TestBed.inject(CfDeployAppDataService).setSourceType({ id: DEPLOY_TYPES_IDS.GIT_URL, name: 'Git URL' });
+    await fixture.whenStable();
+
+    const root: HTMLElement = fixture.nativeElement;
+    const fields = Array.from(root.querySelectorAll<HTMLInputElement | HTMLSelectElement>(
+      'input:not([type="checkbox"]), select'));
+    expect(fields.length).toBe(14);
+    for (const field of fields) {
+      const name = field.getAttribute('formControlName');
+      expect(field.id, `${name} has an id`).not.toBe('');
+      const label = root.querySelector(`label[for="${field.id}"]`);
+      expect(label?.textContent?.trim(), `${name} is labelled`).toBeTruthy();
+      if (field instanceof HTMLInputElement) {
+        expect(label?.textContent?.trim()).toBe(field.placeholder);
+      }
+    }
+  });
+
+  // A redeploy of a docker app brings its image details back into the form
+  it('fills the docker fields from the deploy state', async () => {
+    const deployData = TestBed.inject(CfDeployAppDataService);
+    deployData.setSourceType({ id: DEPLOY_TYPES_IDS.DOCKER_IMG, name: 'Docker Image' });
+    deployData.saveAppDetails(null, { applicationName: 'my-app', dockerImage: 'repo/img:1', dockerUsername: 'someone' });
+    await fixture.whenStable();
+
+    expect(component.deployOptionsForm.getRawValue()).toEqual(expect.objectContaining({
+      name: 'my-app', dockerImage: 'repo/img:1', dockerUsername: 'someone',
+    }));
   });
 });

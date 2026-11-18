@@ -1,3 +1,7 @@
+import { ActiveRouteCfOrgSpace } from '../cf-page.types';
+import { TemplatePortal } from '@angular/cdk/portal';
+import { CloudFoundryOrganizationService } from '../services/cloud-foundry-organization.service';
+import { CloudFoundrySpaceService } from '../services/cloud-foundry-space.service';
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { provideZonelessChangeDetection, importProvidersFrom, signal } from '@angular/core';
 import { provideRouter } from '@angular/router';
@@ -171,5 +175,57 @@ describe('SpaceQuotaDefinitionComponent — apply-to-spaces affordance', () => {
     const [dialogCmp, config] = openSpy.mock.calls[0] as [unknown, { data: { quotaGuid: string } }];
     expect(dialogCmp).toBe(ApplyQuotaToSpacesDialogComponent);
     expect(config.data.quotaGuid).toBe('guid');
+  });
+});
+
+// A tab's own sub-nav shows instead of the page shell's, so it carries the
+// CF CLI menu too.
+describe('SpaceQuotaDefinitionComponent sub-nav CF CLI menu', () => {
+  it('offers the space-quota commands in its own sub-nav row', async () => {
+    const cfGuid = testSCFEndpointGuid;
+    TestBed.configureTestingModule({
+      imports: [SpaceQuotaDefinitionComponent],
+      providers: [
+        provideZonelessChangeDetection(),
+        provideRouter([]),
+        provideHttpClient(),
+        provideHttpClientTesting(),
+        provideNoopAnimations(),
+        ...STORE_TEST_PROVIDERS,
+        importProvidersFrom(EntityCatalogTestModule),
+        { provide: TEST_CATALOGUE_ENTITIES, useValue: [...generateStratosEntities(), ...generateCFEntities()] },
+        ...cfCurrentUserPermissionsService,
+        {
+          provide: ActivatedRoute,
+          useValue: { snapshot: { queryParams: { cfGuid, orgGuid: 'org1', spaceGuid: 'space1' }, params: { quotaId: 'guid' } } }
+        },
+        generateTestCfEndpointServiceProvider(),
+        { provide: CloudFoundryOrganizationService, useValue: { orgDataService: { org: signal({ name: 'my org' }) } } },
+        { provide: CloudFoundrySpaceService, useValue: { spaceDataService: { space: signal({ name: 'my space' }) } } },
+        TabNavService,
+      ]
+    });
+    TestBed.overrideComponent(SpaceQuotaDefinitionComponent, {
+      set: { providers: [{ provide: ActiveRouteCfOrgSpace, useValue: { cfGuid, orgGuid: 'org1', spaceGuid: 'space1' } }] }
+    });
+    EntityCatalogHelpers.SetEntityCatalogHelper(TestBed.inject(EntityCatalogHelper));
+    const fixture = TestBed.createComponent(SpaceQuotaDefinitionComponent);
+    await fixture.whenStable();
+
+    const portal = TestBed.inject(TabNavService).tabSubNav() as TemplatePortal;
+    expect(portal).toBeTruthy();
+    const view = portal.viewContainerRef.createEmbeddedView(portal.templateRef);
+    view.detectChanges();
+    const button = (view.rootNodes.filter((n: Node) => n instanceof HTMLElement) as HTMLElement[])
+      .map(n => n.matches('button[aria-label="CF CLI"]') ? n : n.querySelector('button[aria-label="CF CLI"]'))
+      .find(Boolean) as HTMLButtonElement;
+    expect(button).toBeTruthy();
+    button.click();
+    await fixture.whenStable();
+    view.detectChanges();
+    const labels = view.rootNodes.flatMap((n: Node) => n instanceof HTMLElement ? Array.from(n.querySelectorAll('.cli-menu__label')) : [])
+      .map(l => l.textContent?.trim());
+    expect(labels).toEqual(['cf space-quotas', 'CF CLI All']);
+    view.destroy();
   });
 });

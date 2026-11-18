@@ -1,4 +1,6 @@
 import { Routes } from '@angular/router';
+import { tabTitle } from '@stratosui/core';
+import { appTitle } from '../../route-titles';
 
 import { dynamicExtensionRoutesGuard } from '../../../../core/src/core/extension/dynamic-extension-routes';
 import { StratosActionType, StratosTabType } from '../../../../core/src/core/extension/extension-service';
@@ -43,20 +45,24 @@ import { SshApplicationComponent } from './ssh-application/ssh-application.compo
 export const APPLICATIONS_ROUTES: Routes = [
   {
     path: 'new',
+    title: 'New Application',
     component: NewApplicationBaseStepComponent,
     pathMatch: 'full'
   },
   {
     path: 'new/:endpointId',
+    title: 'New Application',
     component: NewApplicationBaseStepComponent,
     pathMatch: 'full'
   },
   {
     path: 'create',
+    title: 'Create Application',
     component: CreateApplicationComponent,
   },
   {
     path: 'deploy',
+    title: 'Deploy Application',
     component: DeployApplicationComponent
   },
   {
@@ -77,6 +83,7 @@ export const APPLICATIONS_ROUTES: Routes = [
       },
       {
         path: ':endpointId/:id',
+        title: appTitle,
         component: ApplicationBaseComponent,
         // Keep the app-detail shell alive while the user switches side tabs
         // (Summary/Logs/Variables/...). Without this the CustomReuseStrategy
@@ -91,22 +98,27 @@ export const APPLICATIONS_ROUTES: Routes = [
         children: [
           {
             path: 'delete',
+            title: tabTitle('Delete application'),
             component: ApplicationDeleteComponent
           },
           {
             path: 'edit',
+            title: tabTitle('Edit Application'),
             component: EditApplicationComponent,
           },
           {
             path: 'ssh/:index',
+            title: tabTitle(route => `SSH (#${route.paramMap.get('index')})`),
             component: SshApplicationComponent,
           },
           {
             path: 'cli',
+            title: tabTitle('CF CLI All'),
             component: CliInfoApplicationComponent,
           },
           {
             path: 'bind',
+            title: tabTitle('Choose Service Type'),
             component: AddServiceInstanceBaseStepComponent,
             data: {
               bind: true
@@ -145,20 +157,20 @@ export const APPLICATIONS_ROUTES: Routes = [
                 },
                 pathMatch: 'full',
               },
-              { path: 'summary', component: BuildTabComponent },
+              { path: 'summary', title: tabTitle('Summary'), component: BuildTabComponent },
               // Instances content now lives in an accordion on the Summary tab;
               // redirect legacy deep links/bookmarks so they don't 404.
               { path: 'instances', redirectTo: 'summary', pathMatch: 'full' },
-              { path: 'routes', component: RoutesTabComponent },
-              { path: 'log-stream', component: LogStreamTabComponent },
-              { path: 'services', component: ServicesTabComponent },
-              { path: 'variables', component: VariablesTabComponent },
-              { path: 'events', component: EventsTabComponent },
-              { path: 'gitscm', component: GitSCMTabComponent },
-              { path: 'metrics', component: MetricsTabComponent },
-              { path: 'revisions', component: RevisionsTabComponent },
-              { path: 'revisions/compare', component: RevisionsCompareComponent },
-              { path: 'revisions/:revisionGuid', component: RevisionDetailComponent },
+              { path: 'routes', title: tabTitle('Routes'), component: RoutesTabComponent },
+              { path: 'log-stream', title: tabTitle('Log Stream'), component: LogStreamTabComponent },
+              { path: 'services', title: tabTitle('Services'), component: ServicesTabComponent },
+              { path: 'variables', title: tabTitle('Variables'), component: VariablesTabComponent },
+              { path: 'events', title: tabTitle('Events'), component: EventsTabComponent },
+              { path: 'gitscm', title: tabTitle('Git'), component: GitSCMTabComponent },
+              { path: 'metrics', title: tabTitle('Metrics'), component: MetricsTabComponent },
+              { path: 'revisions', title: tabTitle('Revisions'), component: RevisionsTabComponent },
+              { path: 'revisions/compare', title: tabTitle('Compare Revisions'), component: RevisionsCompareComponent },
+              { path: 'revisions/:revisionGuid', title: tabTitle('Revision'), component: RevisionDetailComponent },
               {
                 path: '**',
                 component: PageNotFoundComponentComponent,
@@ -171,6 +183,7 @@ export const APPLICATIONS_ROUTES: Routes = [
           },
           {
             path: 'add-route',
+            title: tabTitle('Create Route'),
             component: AddRouteStepperComponent,
           },
           {

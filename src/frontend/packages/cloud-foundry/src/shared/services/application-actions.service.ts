@@ -1,4 +1,4 @@
-import { Injectable, computed, inject, signal, Signal } from '@angular/core';
+import { DestroyRef, Injectable, computed, inject, signal, Signal } from '@angular/core';
 import { Router } from '@angular/router';
 
 import { ConfirmationDialogConfig, ConfirmationDialogService, TailwindSnackBarService } from '@stratosui/core';
@@ -9,9 +9,11 @@ import { AppDetailDataService } from '../../features/applications/app-detail-dat
 import { AppLifecycleStateService } from '../../features/applications/app-lifecycle-state.service';
 import { CloudFoundryEndpointService } from '../../features/cf/services/cloud-foundry-endpoint.service';
 import { AppStatsDataRegistry } from '../../services/endpoint-data/app-stats-data.registry';
-import { extractHttpErrorMessage } from '../../services/extract-error-message';
 import { CfAppsSignalConfigService } from '../signal-list-configs/app/cf-apps-signal-config.service';
 import type { JobStage, StratosJob } from '../../services/async-jobs/async-job.types';
+import { unknownHowOf, unknownOutcomeMessage } from '../../services/async-jobs/unknown-outcome-message';
+import type { DeleteOutcome } from '../../services/deletes/delete-event.types';
+import { extractHttpErrorMessage } from '@stratosui/store';
 
 /**
  * AppApplicationActionsService
@@ -41,7 +43,8 @@ interface OperationLogEntry {
   at: Date;
   verb: LifecycleVerb;
   target: { app: string; cf: string; org: string; space: string };
-  event: 'begin' | 'stage' | 'success' | 'fail';
+  // unknown: the op ended but its result could not be determined.
+  event: 'begin' | 'stage' | 'success' | 'fail' | 'unknown';
   stage?: JobStage;
   error?: { code: string; message: string };
 }
@@ -90,20 +93,23 @@ export class AppApplicationActionsService {
   readonly currentTarget = this._currentTarget.asReadonly();
   // outcome() exposes the terminal event of the most recent op for the
   // snackbar's linger-window display. Null while in flight.
-  readonly outcome = computed<'success' | 'fail' | null>(() => {
+  readonly outcome = computed<'success' | 'fail' | 'unknown' | null>(() => {
     if (this.inFlight()) return null;
     const log = this._log();
     for (let i = log.length - 1; i >= 0; i--) {
-      if (log[i].event === 'success') return 'success';
-      if (log[i].event === 'fail') return 'fail';
+      const event = log[i].event;
+      if (event === 'success' || event === 'fail' || event === 'unknown') return event;
     }
     return null;
   });
+  // The message shown under the label: the failure reason, or why the
+  // result of an op that ended is unknown.
   readonly outcomeError = computed<string | null>(() => {
-    if (this.outcome() !== 'fail') return null;
+    const outcome = this.outcome();
+    if (outcome !== 'fail' && outcome !== 'unknown') return null;
     const log = this._log();
     for (let i = log.length - 1; i >= 0; i--) {
-      if (log[i].event === 'fail') return log[i].error?.message ?? 'Operation failed';
+      if (log[i].event === outcome) return log[i].error?.message ?? 'Operation failed';
     }
     return null;
   });
@@ -128,6 +134,7 @@ export class AppApplicationActionsService {
     if (inFlight) return gerund[v];
     if (this.outcome() === 'success') return past[v];
     if (this.outcome() === 'fail') return `${action[v]} failed`;
+    if (this.outcome() === 'unknown') return `${action[v]} result unknown`;
     return gerund[v];
   });
 
@@ -161,7 +168,9 @@ export class AppApplicationActionsService {
   private runLifecycleAction(
     verb: 'start' | 'stop' | 'restart' | 'restage' | 'delete',
     target: string,
-    action: (opts: { onProgress: (job: StratosJob) => void }) => Promise<void>,
+    // Resolves 'unknown' or 'still-running' when nobody can say how the op
+    // ended (see unknownHowOf).
+    action: (opts: { onProgress: (job: StratosJob) => void }) => Promise<void | undefined | DeleteOutcome>,
     onAfter?: () => void,
   ): void {
     const { cfGuid, appGuid } = this.applicationService;
@@ -204,7 +213,21 @@ export class AppApplicationActionsService {
     };
 
     void action({ onProgress })
-      .then(() => {
+      .then((result) => {
+        const how = unknownHowOf(result);
+        if (how) {
+          // Result unknown (ended, or still running in CF when Stratos
+          // stopped following it): nothing may act as if it worked (no row
+          // eviction, no navigating away). Say so and re-read the app.
+          const leadIn = `${verb[0].toUpperCase()}${verb.slice(1)} "${parsedTarget.app}"`;
+          this.appendLog({
+            at: new Date(), verb: lifecycleVerb, target: parsedTarget, event: 'unknown',
+            error: { code: '', message: unknownOutcomeMessage(leadIn, 'This page', how) },
+          });
+          this.refreshAppStats();
+          void this.dataService.refresh('all');
+          return;
+        }
         this.appendLog({ at: new Date(), verb: lifecycleVerb, target: parsedTarget, event: 'success' });
         // Eagerly drop the deleted app's row from the app-wall orchestrator
         // so the post-delete window doesn't leave the gone-app's
@@ -255,15 +278,11 @@ export class AppApplicationActionsService {
         onAfter?.();
       })
       .catch((err: any) => {
-        const firstError = err?.job?.errors?.[0];
-        // A synchronous CF 4xx (e.g. 422 "Assign a droplet before starting
-        // this app.") throws a raw HttpErrorResponse with no `.job`, so the
-        // job-shaped extraction misses and the snackbar shows a generic
-        // "Operation failed". Fall back to the CF error-envelope extractor
-        // so the operator sees the real reason. (#5520)
-        const error = firstError
-          ? { code: String(firstError.code), message: String(firstError.message) }
-          : { code: '', message: extractHttpErrorMessage(err) };
+        // The reason CF or the broker gave, from a failed job or a synchronous
+        // CF 4xx (e.g. 422 "Assign a droplet before starting this app.",
+        // #5520) alike; a job's errors[0].message is only CF's error name.
+        const code = err?.job?.errors?.[0]?.code;
+        const error = { code: code === undefined ? '' : String(code), message: extractHttpErrorMessage(err) };
         this.appendLog({
           at: new Date(), verb: lifecycleVerb, target: parsedTarget, event: 'fail',
           error,
@@ -296,6 +315,18 @@ export class AppApplicationActionsService {
     });
   }
 
+  // Polls every 100 ms: the names are a CF round trip or two away.
+  private async orgAndSpaceLoaded(timeoutMs: number): Promise<void> {
+    const settled = () => {
+      const errors = this.dataService.errors();
+      // A failed space fetch also leaves the org unfetched.
+      return !!errors.space || (!!this.dataService.space() && (!!this.dataService.org() || !!errors.org));
+    };
+    for (let waited = 0; !settled() && waited < timeoutMs; waited += 100) {
+      await new Promise(resolve => setTimeout(resolve, 100));
+    }
+  }
+
   // Parse the target string produced by buildDialog:
   // "<appName> on <cfName> / <orgName> / <spaceName>"
   private parseTarget(target: string): { app: string; cf: string; org: string; space: string } {
@@ -324,6 +355,13 @@ export class AppApplicationActionsService {
   // are stable; a full refresh('all') fired loading signals on every
   // kind and caused visible UI flicker across summary/info/cf cards.
   private settlingTimer: ReturnType<typeof setInterval> | null = null;
+  // Provided per page: leaving the page must end the poll.
+  private readonly stopSettlingOnDestroy = inject(DestroyRef).onDestroy(() => {
+    if (this.settlingTimer) {
+      clearInterval(this.settlingTimer);
+      this.settlingTimer = null;
+    }
+  });
   private startSettlingPoll(): void {
     if (this.settlingTimer) {
       clearInterval(this.settlingTimer);
@@ -491,6 +529,14 @@ export class AppApplicationActionsService {
     bindings: { guid: string }[],
     preResolvedTarget?: { appName: string; endpointName: string; orgName: string; spaceName: string },
   ): Promise<void> {
+    // On a direct load into the delete wizard the org and space names come
+    // from the data service, which fetches the space and then the org after
+    // the app; a quick Confirm gets here first. The dialog and the progress
+    // overlay are built once, so wait for both names - but not past a
+    // failed fetch or 10 s.
+    if (!preResolvedTarget?.orgName || !preResolvedTarget?.spaceName) {
+      await this.orgAndSpaceLoaded(10_000);
+    }
     const { cfg, target } = this.buildDialog('Delete', 'Are you sure you want to delete', 'Delete', preResolvedTarget);
     const appName = preResolvedTarget?.appName ?? this.parseTarget(target).app;
     this.confirmDialog.open(cfg, () => {
@@ -525,7 +571,7 @@ export class AppApplicationActionsService {
             await Promise.all(bindings.map(b => this.apps.deleteServiceBinding(cfGuid, b.guid)));
           }
           emit('DELETE_APP', 'Deleting application');
-          await this.apps.deleteApp(cfGuid, appGuid);
+          return this.apps.deleteApp(cfGuid, appGuid);
         },
         () => {
           // App is gone. The in-page lifecycle-progress overlay is

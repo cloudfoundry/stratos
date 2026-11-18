@@ -1,4 +1,4 @@
-#!/usr/bin/env node
+#!/usr/bin/env bun
 // Explain a lockfile change by package, not by line.
 //
 // A dependency bump can rewrite thousands of lockfile lines, and a text diff
@@ -19,8 +19,8 @@
 // Reads npm package-lock.json (v2/v3) and bun.lock. An argument of the form
 // <rev>:<path> is read from git, so a branch can be checked against its base:
 //
-//   node scripts/lockdiff.mjs origin/develop:bun.lock bun.lock
-//   node scripts/lockdiff.mjs HEAD~1:src/frontend/packages/devkit/package-lock.json \
+//   bun scripts/lockdiff.mjs origin/develop:bun.lock bun.lock
+//   bun scripts/lockdiff.mjs HEAD~1:src/frontend/packages/devkit/package-lock.json \
 //     src/frontend/packages/devkit/package-lock.json --detail
 //
 // --detail lists every re-versioned, new and gone package name; --all lists
@@ -182,7 +182,7 @@ function read(arg) {
 function main(argv) {
   const files = argv.filter((x) => !x.startsWith('--'))
   if (files.length !== 2) {
-    console.error('usage: node scripts/lockdiff.mjs <old-lock> <new-lock> [--detail] [--all]')
+    console.error('usage: bun scripts/lockdiff.mjs <old-lock> <new-lock> [--detail] [--all]')
     process.exit(2)
   }
   const [a, b] = files.map((f) => parseLock(read(f), f))

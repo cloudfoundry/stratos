@@ -1,22 +1,22 @@
-<app-page-header [breadcrumbs]="breadcrumbs$ | async">
+<app-page-header [breadcrumbs]="breadcrumbs()">
   <h1>SSH (#{{ instanceId }})</h1>
   <div class="page-header-right">
     <span>
-      @if (sshViewer.isConnected) {
-        <button class="btn btn-icon" matTooltip="Disconnect" aria-label="Disconnect" name="stop" (click)="sshViewer.disconnect()" [disabled]="sshViewer.attemptingConnection">
-          <span class="material-icons">stop</span>
+      @if (sshViewer.isConnected()) {
+        <button class="btn btn-icon" matTooltip="Disconnect" aria-label="Disconnect" name="stop" (click)="sshViewer.disconnect()" [disabled]="sshViewer.attemptingConnection()">
+          <span aria-hidden="true" class="material-icons">stop</span>
         </button>
       }
-      @if (!sshViewer.isConnected) {
-        <button class="btn btn-icon" matTooltip="Connect" aria-label="Connect" name="start" (click)="sshViewer.reconnect()" [disabled]="sshViewer.attemptingConnection">
-          <span class="material-icons">play_arrow</span>
+      @if (!sshViewer.isConnected()) {
+        <button class="btn btn-icon" matTooltip="Connect" aria-label="Connect" name="start" (click)="sshViewer.reconnect()" [disabled]="sshViewer.attemptingConnection()">
+          <span aria-hidden="true" class="material-icons">play_arrow</span>
         </button>
       }
       <button class="btn btn-icon" matTooltip="Back to App" aria-label="Back to App" [routerLink]="appInstanceLink">
-        <span class="material-icons">close</span>
+        <span aria-hidden="true" class="material-icons">close</span>
       </button>
     </span>
   </div>
 </app-page-header>
 
-<app-ssh-viewer #sshViewer [errorMessage]="errorMessage" [sshStream]="messages" [sshInput]="sshInput" [connectionStatus]="connectionStatus"></app-ssh-viewer>
+<app-ssh-viewer #sshViewer [errorMessage]="errorMessage()" [sshStream]="messages" [sshInput]="sshInput" [connectionStatus]="connectionStatus"></app-ssh-viewer>

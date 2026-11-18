@@ -1,17 +1,15 @@
 import { CommonModule, DatePipe } from '@angular/common';
-import { ChangeDetectionStrategy, Component, WritableSignal, computed, effect, inject, signal } from '@angular/core';
-import { toObservable } from '@angular/core/rxjs-interop';
-import { Observable } from 'rxjs';
+import { ChangeDetectionStrategy, Component, Injector, WritableSignal, computed, effect, inject, signal } from '@angular/core';
 
 import { EndpointsSignalService } from '../../../../../core/src/core/signals/endpoints-signal.service';
 import { DuplicateUrlBannerComponent } from '../../../../../core/src/shared/components/duplicate-url-banner/duplicate-url-banner.component';
 import { PageHeaderComponent } from '../../../../../core/src/shared/components/page-header/page-header.component';
 import { SignalListComponent, SignalListConfig, SignalListDropdownOption } from '../../../../../core/src/shared/components/signal-list/signal-list.component';
-import { EndpointModel } from '../../../../../store/src/public-api';
 import { HELM_ENDPOINT_TYPE } from '../../../helm/helm-entity-factory';
 import { KUBERNETES_ENDPOINT_TYPE } from '../../kubernetes-entity-factory';
-import { HelmRelease } from '../../../services/endpoint-data/kube-types';
+import { HelmRelease, StratosError } from '../../../services/endpoint-data/kube-types';
 import { HelmReleasesSignalConfigService } from '../list-types/helm-releases-signal-config.service';
+import { reportKubeListErrors } from '../../list-types/kube-list-errors';
 
 // Signal-native helm-releases (workloads) tab. Replaces the legacy
 // ngrx-backed HelmReleasesListConfig + HelmReleasesDataSource pipeline
@@ -32,15 +30,14 @@ import { HelmReleasesSignalConfigService } from '../list-types/helm-releases-sig
   providers: [DatePipe],
 })
 export class HelmReleasesTabComponent {
-  public helmIds$: Observable<string[]>;
-  public connectedKubeEndpoints$: Observable<EndpointModel[]>;
   private endpointsSignals = inject(EndpointsSignalService);
   private datePipe = inject(DatePipe);
   readonly signalConfig = inject(HelmReleasesSignalConfigService);
+  private readonly injector = inject(Injector);
 
   // Helm endpoint guids for the page header chips. Replaces the legacy
   // `store.select(endpointOfTypeSelector(HELM_ENDPOINT_TYPE))` read.
-  private readonly helmEndpointIds = computed(() =>
+  public readonly helmEndpointIds = computed(() =>
     Object.values(this.endpointsSignals.endpoints())
       .filter(ep => ep?.cnsi_type === HELM_ENDPOINT_TYPE)
       .map(ep => ep.guid)
@@ -49,7 +46,7 @@ export class HelmReleasesTabComponent {
 
   // Connected k8s endpoints for the duplicate-URL banner — scoped to k8s so
   // it never mentions unrelated CF/helm duplicates on this page.
-  private readonly connectedKubeEndpoints = computed(() =>
+  protected readonly connectedKubeEndpoints = computed(() =>
     this.endpointsSignals.connectedEndpoints().filter(ep => ep?.cnsi_type === KUBERNETES_ENDPOINT_TYPE),
   );
 
@@ -79,11 +76,6 @@ export class HelmReleasesTabComponent {
   });
 
   constructor() {
-    // Endpoint-id stream for the page header. Bridges the helmEndpointIds
-    // computed signal to an Observable for PageHeaderComponent's input.
-    this.helmIds$ = toObservable(this.helmEndpointIds);
-    this.connectedKubeEndpoints$ = toObservable(this.connectedKubeEndpoints);
-
     this.signalConfig.initialize();
     void this.signalConfig.loadAll();
 
@@ -92,6 +84,14 @@ export class HelmReleasesTabComponent {
     const kubeSelected: WritableSignal<string | null> = signal<string | null>(null);
     const nsSelected: WritableSignal<string | null> = signal<string | null>(null);
 
+    // Endpoint failures also go to the endpoint error history; a failure
+    // of the whole request names no endpoint, so it stays in the list.
+    const releaseErrors = this.signalConfig.errorsByEndpoint();
+    reportKubeListErrors(
+      computed(() => new Map([...releaseErrors()].filter(([, e]) => !!(e as StratosError).affected?.length))),
+      this.injector,
+    );
+
     this.listConfig.set({
       pagedItems: this.signalConfig.view.pagedItems,
       totalFilteredResults: this.signalConfig.view.totalFilteredResults,
@@ -99,7 +99,8 @@ export class HelmReleasesTabComponent {
       pageIndex: this.signalConfig.pageIndex,
       pageSize: this.signalConfig.pageSize,
       isAnyLoading: this.signalConfig.isLoading(),
-      errorsByCnsi: signal(new Map()),
+      errorsByCnsi: releaseErrors,
+      errorDetail: this.signalConfig.errorDetail(),
       pageSizeOptions: { table: [10, 25, 50, 100], card: [9, 45, 90] },
       columns: [
         {

@@ -73,7 +73,7 @@ describe('CfAppAutoscalerEventsSignalConfigService', () => {
     // rejection rather than surface it as an unhandled promise rejection.
     svc.initialize(CNSI, APP);
     const promise = svc.loadAll();
-    httpMock.expectOne(EVENTS_URL).flush('boom', { status: 500, statusText: 'Server Error' });
+    httpMock.expectOne(r => r.url === EVENTS_URL).flush('boom', { status: 500, statusText: 'Server Error' });
 
     await expect(promise).resolves.toBeUndefined();
     expect(svc.hasLoadedOnce()).toBe(true);
@@ -83,7 +83,7 @@ describe('CfAppAutoscalerEventsSignalConfigService', () => {
     svc.initialize(CNSI, APP);
     const promise = svc.loadAll();
 
-    const req = httpMock.expectOne(EVENTS_URL);
+    const req = httpMock.expectOne(r => r.url === EVENTS_URL);
     expect(req.request.method).toBe('GET');
     expect(req.request.headers.get('x-cap-api-host')).toBe('autoscaler');
     expect(req.request.headers.get('x-cap-cnsi-list')).toBe(CNSI);
@@ -108,7 +108,7 @@ describe('CfAppAutoscalerEventsSignalConfigService', () => {
     const appRef = TestBed.inject(ApplicationRef);
     svc.initialize(CNSI, APP);
     const promise = svc.loadAll();
-    httpMock.expectOne(EVENTS_URL).flush({
+    httpMock.expectOne(r => r.url === EVENTS_URL).flush({
       total_results: 3,
       total_pages: 1,
       resources: [
@@ -149,11 +149,11 @@ describe('CfAppAutoscalerEventsSignalConfigService', () => {
   it('refresh() re-issues the events fetch', async () => {
     svc.initialize(CNSI, APP);
     const p1 = svc.loadAll();
-    httpMock.expectOne(EVENTS_URL).flush({ total_results: 0, total_pages: 0, resources: [] });
+    httpMock.expectOne(r => r.url === EVENTS_URL).flush({ total_results: 0, total_pages: 0, resources: [] });
     await p1;
 
     const p2 = svc.refresh();
-    httpMock.expectOne(EVENTS_URL).flush({ total_results: 0, total_pages: 0, resources: [] });
+    httpMock.expectOne(r => r.url === EVENTS_URL).flush({ total_results: 0, total_pages: 0, resources: [] });
     await p2;
   });
 });

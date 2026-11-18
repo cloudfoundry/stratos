@@ -1,5 +1,5 @@
 import { CommonModule } from '@angular/common';
-import { ChangeDetectionStrategy, Component, ContentChild, ContentChildren, Input, QueryList, HostListener } from '@angular/core';
+import { ChangeDetectionStrategy, Component, HostListener, computed, contentChild, contentChildren, signal, input, linkedSignal } from '@angular/core';
 import { combineLatest, Observable, of as observableOf, of } from 'rxjs';
 import { map } from 'rxjs/operators';
 
@@ -19,14 +19,6 @@ import { MetaCardItemComponent } from '../meta-card-item/meta-card-item.componen
 import { MetaCardTitleComponent } from '../meta-card-title/meta-card-title.component';
 
 
-export function createMetaCardMenuItemSeparator(): MenuItem {
-  return {
-    label: '-',
-    separator: true,
-    action: () => { }
-  };
-}
-
 @Component({
   selector: 'app-meta-card',
   templateUrl: './meta-card.component.html',
@@ -44,53 +36,49 @@ export function createMetaCardMenuItemSeparator(): MenuItem {
   changeDetection: ChangeDetectionStrategy.OnPush
 })
 export class MetaCardComponent {
-  public menuOpen = false;
+  readonly menuOpen = signal(false);
 
-  @ContentChildren(MetaCardItemComponent)
-  metaItems!: QueryList<MetaCardItemComponent>;
+  // Signal query so items a card adds after the first render (behind an
+  // @if waiting on async data) re-render this OnPush view.
+  readonly metaItems = contentChildren(MetaCardItemComponent);
 
-  @ContentChild(MetaCardTitleComponent, { static: true })
-  title!: MetaCardTitleComponent;
+  // Optional: a card without a title renders no header.
+  readonly title = contentChild(MetaCardTitleComponent);
 
-  @Input()
-  status$?: Observable<StratosStatus>;
+  readonly status$ = input<Observable<StratosStatus>>();
 
-  @Input()
-  favorite?: UserFavorite<IFavoriteMetadata> | null;
+  readonly favorite = input<UserFavorite<IFavoriteMetadata> | null>();
 
   // Vestigial no-op input. The legacy ngrx favorite-star fallback (entity
   // monitor -> UserFavoriteManager.getFavorite) was removed with the rest of
   // the ngrx list framework — live cards supply [favorite] explicitly. The
   // only remaining [entityConfig] binder, card-app, is dead `list/` code
   // deleted in workstream D; this input keeps it compiling until then.
-  @Input()
-  entityConfig: unknown;
+  readonly entityConfig = input<unknown>();
 
-  @Input()
-  public confirmFavoriteRemoval = false;
+  public readonly confirmFavoriteRemoval = input(false);
 
-  @Input()
-  statusIcon = true;
+  readonly statusIcon = input(true);
 
-  @Input()
-  statusIconByTitle = false;
+  readonly statusIconByTitle = input(false);
 
-  @Input()
-  statusIconTooltip!: string;
+  readonly statusIconTooltip = input<string>();
 
-  @Input()
-  statusBackground = false;
+  readonly statusBackground = input(false);
 
-  @Input()
-  mode!: string;
+  readonly mode = input<string>();
 
-  @Input()
-  clickAction?: () => void;
+  readonly clickAction = input<() => void>();
 
-  @Input()
-  set actionMenu(actionMenu: MenuItem[] | null) {
-    if (actionMenu) {
-      this.pActionMenu = actionMenu.map(menuItem => {
+  readonly actionMenu = input<MenuItem[] | null>();
+
+  // The menu to show: the last one bound, since binding null or undefined
+  // keeps the previous menu. The defaults are filled in on the caller's own
+  // items, so the items shown are the ones the caller passed.
+  readonly menuItems = linkedSignal<MenuItem[] | null | undefined, MenuItem[] | undefined>({
+    source: this.actionMenu,
+    computation: (actionMenu, previous) => actionMenu
+      ? actionMenu.map(menuItem => {
         if (!menuItem.can) {
           menuItem.separator = menuItem.label === '-';
           menuItem.can = of(true);
@@ -99,40 +87,42 @@ export class MetaCardComponent {
           menuItem.disabled = observableOf(false);
         }
         return menuItem;
-      });
+      })
+      : previous?.value,
+  });
 
-      const nonSeparators = actionMenu
-        .filter(menuItem => !menuItem.separator)
-        .map(menuItem => menuItem.can);
-      this.showMenu$ = combineLatest(nonSeparators).pipe(
-        map(cans => cans.some(can => can))
-      );
+  // True when the user may run at least one of the actions.
+  readonly showMenu$ = computed(() => {
+    const menuItems = this.menuItems();
+    if (!menuItems) {
+      return undefined;
     }
-  }
-  get actionMenu(): MenuItem[] {
-    return this.pActionMenu;
-  }
+    const nonSeparators = menuItems
+      .filter(menuItem => !menuItem.separator)
+      .map(menuItem => menuItem.can ?? of(true));
+    return combineLatest(nonSeparators).pipe(
+      map(cans => cans.some(can => can))
+    );
+  });
 
-  public showMenu$!: Observable<boolean>;
   public isDeleting$: Observable<boolean> = observableOf(false);
-  private pActionMenu!: MenuItem[];
 
   toggleMenu(): void {
-    this.menuOpen = !this.menuOpen;
+    this.menuOpen.update(open => !open);
   }
 
   menuItemClick(menuItem: MenuItem): void {
     menuItem.action();
-    this.menuOpen = false;
+    this.menuOpen.set(false);
   }
 
   @HostListener('document:click', ['$event'])
   onDocumentClick(event: MouseEvent): void {
     // Close menu when clicking outside
-    if (this.menuOpen) {
+    if (this.menuOpen()) {
       const target = event.target as HTMLElement;
       if (!target.closest('.meta-card__header-container__actions')) {
-        this.menuOpen = false;
+        this.menuOpen.set(false);
       }
     }
   }

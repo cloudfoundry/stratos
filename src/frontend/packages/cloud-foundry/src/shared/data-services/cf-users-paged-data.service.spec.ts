@@ -1,3 +1,4 @@
+import { ApplicationRef } from '@angular/core';
 import { TestBed } from '@angular/core/testing';
 import { provideHttpClient } from '@angular/common/http';
 import { HttpTestingController, provideHttpClientTesting } from '@angular/common/http/testing';
@@ -129,6 +130,61 @@ describe('CfUsersPagedDataService', () => {
     });
   });
 
+  describe('users (lazy read for summary tiles)', () => {
+    it('starts one drain on first read and stays null until it lands', async () => {
+      const sig = svc.users(CNSI);
+      expect(sig()).toBeNull();
+      expect(svc.users(CNSI)()).toBeNull(); // a second read joins the same drain
+      http.expectOne(P1).flush({ resources: [mkUser('a')], pagination: { totalResults: 1, totalPages: 1 } });
+      await TestBed.inject(ApplicationRef).whenStable();
+      expect(sig()!.map(u => u.guid)).toEqual(['a']);
+    });
+
+    it('reads a loaded cache without another request', async () => {
+      const p = firstValueFrom(svc.loadUsers(CNSI));
+      http.expectOne(P1).flush({ resources: [mkUser('a')], pagination: { totalResults: 1, totalPages: 1 } });
+      await p;
+      expect(svc.users(CNSI)()!.map(u => u.guid)).toEqual(['a']);
+      http.expectNone(P1);
+    });
+
+    // Tiles render 0 / None after a failure instead of a loading dash forever;
+    // the error stays readable through errorsByCnsi.
+    it('settles to an empty list on a failed drain', async () => {
+      const sig = svc.users(CNSI);
+      http.expectOne(P1).flush('boom', { status: 500, statusText: 'Server Error' });
+      await TestBed.inject(ApplicationRef).whenStable();
+      expect(sig()).toEqual([]);
+      expect(svc.errorsByCnsi()(CNSI)).toBeTruthy();
+    });
+
+    it('reflects an inline role patch without a refetch', async () => {
+      const sig = svc.users(CNSI);
+      http.expectOne(P1).flush({ resources: [mkUser('a')], pagination: { totalResults: 1, totalPages: 1 } });
+      await TestBed.inject(ApplicationRef).whenStable();
+      svc.applyRoleChange(CNSI, 'a', 'org-1', undefined, 'manager', true);
+      expect(sig()![0].orgRoles).toEqual([{ orgGuid: 'org-1', roles: ['manager'] }]);
+    });
+  });
+
+  describe('refreshIfLoaded', () => {
+    it('does nothing for a CF whose users were never loaded', () => {
+      svc.refreshIfLoaded(CNSI);
+      http.expectNone(P1);
+    });
+
+    it('refetches a loaded cache and keeps the old rows visible meanwhile', async () => {
+      const sig = svc.users(CNSI);
+      http.expectOne(P1).flush({ resources: [mkUser('a')], pagination: { totalResults: 1, totalPages: 1 } });
+      await TestBed.inject(ApplicationRef).whenStable();
+      svc.refreshIfLoaded(CNSI);
+      expect(sig()!.map(u => u.guid)).toEqual(['a']);
+      http.expectOne(P1).flush({ resources: [mkUser('a'), mkUser('b')], pagination: { totalResults: 2, totalPages: 1 } });
+      await TestBed.inject(ApplicationRef).whenStable();
+      expect(sig()!.map(u => u.guid)).toEqual(['a', 'b']);
+    });
+  });
+
   describe('upsertUser (insert a user the cache has never seen)', () => {
     const seed = async () => {
       const p = firstValueFrom(svc.loadUsers(CNSI));
@@ -148,6 +204,55 @@ describe('CfUsersPagedDataService', () => {
       svc.upsertUser(CNSI, { ...mkUser('a'), orgRoles: [{ orgGuid: 'org-1', roles: ['manager'] }] });
       expect(svc.usersSignal(CNSI)()[0].orgRoles).toEqual([]);
       expect(svc.count(CNSI)()).toBe(1);
+    });
+  });
+
+  describe('a drain that predates a role mutation', () => {
+    const body = (roles: string[]) => ({
+      resources: [{ ...mkUser('a'), orgRoles: roles.length ? [{ orgGuid: 'org-1', roles }] : [] }],
+      pagination: { totalResults: 1, totalPages: 1 },
+    });
+
+    it('does not mark the cache fresh, and a refresh re-reads', async () => {
+      // First load (the startup pre-warm) is still draining when the mutation lands.
+      const first = firstValueFrom(svc.loadUsers(CNSI));
+      const old = http.expectOne(P1);
+      svc.applyRoleChange(CNSI, 'a', 'org-1', undefined, 'manager', true);
+      svc.markStale(CNSI);
+      svc.refreshIfLoaded(CNSI);
+      const fresh = http.expectOne(P1);
+      // The old response carries pre-change roles and lands last.
+      fresh.flush(body(['manager']));
+      old.flush(body([]));
+      await first;
+      http.expectNone(P1);
+      expect(svc.usersSignal(CNSI)()[0].orgRoles).toEqual([{ orgGuid: 'org-1', roles: ['manager'] }]);
+      // Fresh: a later load does not read again.
+      await firstValueFrom(svc.loadUsers(CNSI));
+      http.expectNone(P1);
+    });
+
+    it('marks stale without a refresh: the next load re-reads, not the old drain', async () => {
+      const first = firstValueFrom(svc.loadUsers(CNSI));
+      const old = http.expectOne(P1);
+      svc.markStale(CNSI);
+      old.flush(body([]));
+      // the superseded drain starts its own re-read for its waiters
+      http.expectOne(P1).flush(body(['manager']));
+      await first;
+      expect(svc.usersSignal(CNSI)()[0].orgRoles).toEqual([{ orgGuid: 'org-1', roles: ['manager'] }]);
+    });
+
+    it('refresh() during an older drain starts a new drain instead of joining it', async () => {
+      const first = firstValueFrom(svc.loadUsers(CNSI));
+      const old = http.expectOne(P1);
+      const refreshed = firstValueFrom(svc.refresh(CNSI));
+      const fresh = http.expectOne(P1);
+      old.flush(body([]));
+      fresh.flush(body(['manager']));
+      await Promise.all([first, refreshed]);
+      expect(svc.usersSignal(CNSI)()[0].orgRoles).toEqual([{ orgGuid: 'org-1', roles: ['manager'] }]);
+      http.expectNone(P1);
     });
   });
 });

@@ -1,15 +1,14 @@
 import {
   ChangeDetectionStrategy,
   Component,
-  EventEmitter,
-  Input,
-  Output,
   Signal,
   WritableSignal,
   computed,
   effect,
   inject,
   signal,
+  input,
+  output
 } from '@angular/core';
 import { CommonModule } from '@angular/common';
 
@@ -46,15 +45,15 @@ export type VisibilityType = 'public' | 'admin' | 'organization' | 'space';
 export class ServicePlanVisibilityEditorComponent {
   private serviceCatalog = inject(ServiceCatalogDataService);
 
-  @Input() servicePlan: StServicePlan | null = null;
+  readonly servicePlan = input<StServicePlan | null>(null);
 
   // Candidate orgs the admin can grant the plan to. Supplied by the
   // parent (which owns the org list fetch) so this component has no
   // store dependency and the multi-select is trivially testable.
-  @Input() organizations: readonly VisibilityOrgOption[] = [];
+  readonly organizations = input<readonly VisibilityOrgOption[]>([]);
 
   // Emits the applied visibility record once the write lands.
-  @Output() applied = new EventEmitter<StServicePlanVisibility>();
+  readonly applied = output<StServicePlanVisibility>();
 
   readonly visibilityTypes: readonly VisibilityType[] = ['public', 'admin', 'organization', 'space'];
 
@@ -72,7 +71,7 @@ export class ServicePlanVisibilityEditorComponent {
   // organization-scoped apply needs at least one org selected; the other
   // scopes need no target.
   readonly canApply: Signal<boolean> = computed(() => {
-    if (!this.servicePlan) {
+    if (!this.servicePlan()) {
       return false;
     }
     if (this._type() === 'organization') {
@@ -118,7 +117,7 @@ export class ServicePlanVisibilityEditorComponent {
   }
 
   selectAllOrgs(): void {
-    this._selectedOrgGuids.set(new Set(this.organizations.map(o => o.guid)));
+    this._selectedOrgGuids.set(new Set(this.organizations().map(o => o.guid)));
   }
 
   clearOrgs(): void {
@@ -130,7 +129,7 @@ export class ServicePlanVisibilityEditorComponent {
   // fan-out the surface exists for. Re-emits the result to the parent so
   // it can refresh the read-only visibility badge.
   apply(mode: 'replace' | 'merge' = 'replace'): void {
-    const plan = this.servicePlan;
+    const plan = this.servicePlan();
     if (!plan || !this.canApply()) {
       return;
     }

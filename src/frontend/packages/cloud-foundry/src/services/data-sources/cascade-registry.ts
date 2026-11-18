@@ -63,8 +63,9 @@ export const CASCADE_RULES: Readonly<Record<CascadeKey, readonly EntityKind[]>> 
   'route.delete': ['apps'],
   'route.create': ['apps'],
 
-  'serviceInstance.create': [],
-  'serviceInstance.update': [],
+  // The instance list's own slice: nothing else patches it after a write.
+  'serviceInstance.create': ['serviceInstances'],
+  'serviceInstance.update': ['serviceInstances'],
 
   // Service bindings link apps ↔ instances.
   'serviceBinding.create': ['apps', 'serviceInstances'],

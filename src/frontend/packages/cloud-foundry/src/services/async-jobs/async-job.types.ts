@@ -6,6 +6,8 @@
 //
 // Design doc: KS stratos/docs/2026-04-22-async-job-contract.md
 
+import { ErrorPiece, htmlToPieces, piecesToText } from '@stratosui/store';
+
 export type JobState = 'PROCESSING' | 'COMPLETE' | 'FAILED';
 
 export const isTerminalJobState = (s: JobState): boolean =>
@@ -52,6 +54,8 @@ export interface AsyncJobResult<T> {
   status: AsyncJobStatus;
   state: T | undefined;
   jobId?: string;
+  /** UNKNOWN only: Stratos stopped following a job that was still running in Cloud Foundry. */
+  stillRunning?: boolean;
 }
 
 // StratosJobError is thrown when a polled job terminates in FAILED. It
@@ -59,22 +63,21 @@ export interface AsyncJobResult<T> {
 // error details where useful.
 export class StratosJobError extends Error {
   readonly job: StratosJob;
+  /** The message as styled text: an HTML page in the detail keeps its heading. */
+  readonly pieces: readonly ErrorPiece[];
 
   constructor(job: StratosJob) {
     const first = job.errors?.[0];
-    // Prefer the human detail CF attaches (the broker's own explanation)
-    // over the bare error code; the code stays reachable through `job`.
-    // CF embeds a broker's raw response body in the detail, markup and all;
-    // keep the words, drop the tags.
-    const detail = typeof first?.detail === 'string'
-      ? first.detail.replace(/<[^>]+>/g, ' ').replace(/\s+/g, ' ').trim()
-      : '';
-    super(
-      !first ? `job ${job.id} failed`
-        : detail ? `${first.message}. ${detail}`
-          : `${first.code}: ${first.message}`,
-    );
+    // The message is the broker's own explanation when CF attaches one,
+    // else CF's title; callers add their own lead-in. The code and title
+    // stay reachable through `job`, and writeWithJob logs them.
+    const detail = typeof first?.detail === 'string' ? htmlToPieces(first.detail) : [];
+    const pieces: readonly ErrorPiece[] = detail.length
+      ? detail
+      : [{ text: !first ? `job ${job.id} failed` : first.message, style: 'text' }];
+    super(piecesToText(pieces));
     this.name = 'StratosJobError';
     this.job = job;
+    this.pieces = pieces;
   }
 }

@@ -76,6 +76,7 @@
     &__icon {
       font-size: $icon-size;
       height: $icon-size;
+      line-height: $icon-size;
       opacity: 0.6;
       width: $icon-size;
     }
@@ -103,8 +104,10 @@
 .tile-selector-parent {
   @include create;
 
+  // An 80px font icon, like the logos, still clears a two-line label
+  // (Register Endpoint's "Cloud Foundry Autoscaler").
   &.smaller {
-    @include create(160px, 60px);
+    @include create(160px, 80px);
   }
 
   &.compact {

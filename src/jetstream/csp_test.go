@@ -528,3 +528,24 @@ func TestDefaultCSPPolicyForbidsPluginContent(t *testing.T) {
 		t.Errorf("object-src must be exactly 'none', got %v", sources)
 	}
 }
+
+// The built-in policy names no Git host: browser calls to one are what
+// CONSOLE_CSP_GIT_HOSTS opts into, deployment by deployment. Every host listed
+// here would be one an injected script could send data to on every deployment.
+func TestDefaultCSPPolicyConnectsOnlyToSelf(t *testing.T) {
+	if sources := directiveSources(t, defaultCSPPolicy, "connect-src"); !slices.Equal(sources, []string{"'self'"}) {
+		t.Errorf("connect-src must be exactly 'self', got %v", sources)
+	}
+}
+
+// The same wizard cards and the app's Git tab render the owner and commit
+// author avatars the provider returns (avatar_url): GitHub serves them from
+// avatars.githubusercontent.com, GitLab from its own host or Gravatar.
+func TestDefaultCSPPolicyAllowsGitAvatars(t *testing.T) {
+	sources := directiveSources(t, defaultCSPPolicy, "img-src")
+	for _, host := range []string{"https://avatars.githubusercontent.com", "https://gitlab.com", "https://secure.gravatar.com"} {
+		if !slices.Contains(sources, host) {
+			t.Errorf("img-src must allow %s for Git avatars: %q", host, defaultCSPPolicy)
+		}
+	}
+}

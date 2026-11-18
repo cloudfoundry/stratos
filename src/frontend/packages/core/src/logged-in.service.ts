@@ -1,10 +1,11 @@
 import { DOCUMENT } from '@angular/common';
-import { Injectable, NgZone, inject } from '@angular/core';
+import { Injectable, Injector, inject } from '@angular/core';
 import { toObservable } from '@angular/core/rxjs-interop';
 import { TailwindDialogService } from './shared/services/tailwind-dialog.service';
-import { AuthState } from '@stratosui/store';
+import { AuthState, observeSignal } from '@stratosui/store';
 
 import { DashboardState } from './core/dashboard-data.service';
+
 import { combineLatest, fromEvent, interval, merge, Subscription } from 'rxjs';
 import { tap, withLatestFrom } from 'rxjs/operators';
 
@@ -21,15 +22,14 @@ import { DashboardSignalService } from './core/signals/dashboard-signal.service'
 export class LoggedInService {
   private document = inject<Document>(DOCUMENT);
   private dialog = inject(TailwindDialogService);
-  private ngZone = inject(NgZone);
   private currentUserPermissionsService = inject(CurrentUserPermissionsService);
   private authSignals = inject(AuthSignalService);
   private dashboardSignals = inject(DashboardSignalService);
+  private injector = inject(Injector);
 
-  // Bridge signals → observables once at construction time so the
+  // Bridge the signal → observable once at construction time so the
   // injection context is available for toObservable().
   private auth$ = toObservable(this.authSignals.auth);
-  private dashboardState$ = toObservable(this.dashboardSignals.dashboard);
 
   private userInteractionChecker!: Subscription;
   private lastUserInteraction = Date.now();
@@ -66,7 +66,10 @@ export class LoggedInService {
       return fromEvent(this.document, eventName);
     });
 
-    const canNotLogout$ = this.currentUserPermissionsService.can(StratosCurrentUserPermissions.CAN_NOT_LOGOUT);
+    const canNotLogout$ = observeSignal(
+      this.currentUserPermissionsService.can(StratosCurrentUserPermissions.CAN_NOT_LOGOUT),
+      this.injector,
+    );
     this.sub = combineLatest([this.auth$, canNotLogout$]).subscribe(([auth, canNotLogout]) => {
       if (!auth) {
         return;
@@ -75,7 +78,7 @@ export class LoggedInService {
         if (!this.sessionChecker || this.sessionChecker.closed) {
           this.openSessionCheckerPoll();
         }
-        if (!this.userInteractionChecker) {
+        if (!this.userInteractionChecker || this.userInteractionChecker.closed) {
           this.userInteractionChecker = merge(...eventStreams).subscribe(() => {
             this.lastUserInteraction = Date.now();
           });
@@ -100,29 +103,20 @@ export class LoggedInService {
     }
   }
 
-  // Run outside Angular zone to prevent E2E test timeouts
-  // Polling intervals should not block Angular change detection
   private openSessionCheckerPoll() {
     this.closeSessionCheckerPoll();
     // Ensure interval configuration is valid
     const intervalTime = this.checkSessionInterval || 5000;
-    this.ngZone.runOutsideAngular(() => {
-      this.sessionChecker = interval(intervalTime)
-        .pipe(
-          withLatestFrom(
-            this.dashboardState$,
-            this.auth$
-          ),
-          tap(([, dashboardState, authState]) => {
-            if (!authState) {
-              return;
-            }
-            this.ngZone.run(() => {
-              this._checkSession(dashboardState, authState);
-            });
-          })
-        ).subscribe();
-    });
+    this.sessionChecker = interval(intervalTime)
+      .pipe(
+        withLatestFrom(this.auth$),
+        tap(([, authState]) => {
+          if (!authState) {
+            return;
+          }
+          this._checkSession(this.dashboardSignals.dashboard(), authState);
+        })
+      ).subscribe();
   }
 
   private closeSessionCheckerPoll() {
@@ -137,7 +131,9 @@ export class LoggedInService {
 
     const dialogRef = this.dialog.open(LogOutDialogComponent, {
       data: { expiryDate },
-      disableClose: true
+      disableClose: true,
+      // Escape answers the prompt: a user pressing a key is still there.
+      escapeResult: true
     });
 
     dialogRef.afterClosed().subscribe((verify: boolean = false) => {

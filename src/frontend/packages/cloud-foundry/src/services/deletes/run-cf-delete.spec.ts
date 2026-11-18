@@ -1,5 +1,10 @@
-import { describe, it, expect, vi } from 'vitest';
-import { HttpClient, HttpResponse } from '@angular/common/http';
+import { describe, it, expect, vi, beforeEach } from 'vitest';
+import { provideZonelessChangeDetection } from '@angular/core';
+import { TestBed } from '@angular/core/testing';
+import { HttpClient, HttpResponse, provideHttpClient } from '@angular/common/http';
+import { HttpTestingController, provideHttpClientTesting } from '@angular/common/http/testing';
+import { answerServiceWrite, RESOLVE_PATHS, serviceWriteContract } from '@test-framework/cf';
+import { serviceInstancesEntityType } from '../../cf-entity-types';
 import { firstValueFrom, of } from 'rxjs';
 import { runCfDelete } from './run-cf-delete';
 import { EntityDeleteController } from './entity-delete.controller';
@@ -67,12 +72,55 @@ describe('runCfDelete', () => {
     ).rejects.toBe(boom);
   });
 
-  it('resolves void on success', async () => {
+  it('resolves deleted on success', async () => {
     const controller = makeController({});
     await expect(
       runCfDelete(controller, makeHttp(), {
         cnsiGuid: 'c1', entityKind: 'space', deleteGuid: 's1', path: '/pp/v1/cf/spaces/c1/s1',
       }),
-    ).resolves.toBeUndefined();
+    ).resolves.toBe('deleted');
   });
+
+  it('resolves unknown when the delete ended with an unknown result', async () => {
+    const controller = makeController({ state: 'unknown' });
+    await expect(
+      runCfDelete(controller, makeHttp(), {
+        cnsiGuid: 'c1', entityKind: 'space', deleteGuid: 's1', path: '/pp/v1/cf/spaces/c1/s1',
+      }),
+    ).resolves.toBe('unknown');
+  });
+
+  it('resolves still-running when Stratos stopped following a delete CF was still running', async () => {
+    const controller = makeController({ state: 'unknown', stillRunning: true });
+    await expect(
+      runCfDelete(controller, makeHttp(), {
+        cnsiGuid: 'c1', entityKind: 'space', deleteGuid: 's1', path: '/pp/v1/cf/spaces/c1/s1',
+      }),
+    ).resolves.toBe('still-running');
+  });
+});
+
+// Recorded backend answers: deleting a service instance behind a sync or
+// async broker, resolved on either path, ends the same way.
+describe('runCfDelete — service instance, recorded backend answers', () => {
+  beforeEach(() => {
+    TestBed.configureTestingModule({
+      providers: [provideZonelessChangeDetection(), provideHttpClient(), provideHttpClientTesting()],
+    });
+  });
+
+  for (const broker of ['sync', 'async']) {
+    for (const path of RESOLVE_PATHS) {
+      it(`deletes: ${broker} broker, ${path} path`, async () => {
+        const httpMock = TestBed.inject(HttpTestingController);
+        const done = runCfDelete(TestBed.inject(EntityDeleteController), TestBed.inject(HttpClient), {
+          cnsiGuid: 'cnsi-1', entityKind: serviceInstancesEntityType, deleteGuid: 'si-1',
+          path: '/pp/v1/cf/service_instances/cnsi-1/si-1',
+        });
+        await answerServiceWrite(httpMock, '/pp/v1/cf/service_instances/cnsi-1/si-1', serviceWriteContract(`${broker}-service-instance-delete`), path);
+
+        await expect(done).resolves.toBe('deleted');
+      });
+    }
+  }
 });

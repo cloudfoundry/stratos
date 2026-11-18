@@ -30,10 +30,10 @@ describe('BackupConnectionCellComponent', () => {
   beforeEach(() => {
     fixture = TestBed.createComponent(BackupConnectionCellComponent);
     component = fixture.componentInstance;
-    component.row = {
+    fixture.componentRef.setInput('row', {
       guid: 'test',
       cnsi_type: 'metrics',
-    } as EndpointModel;
+    } as EndpointModel);
     component.service.initialize([{
       guid: 'test'
     } as EndpointModel]);
@@ -42,5 +42,12 @@ describe('BackupConnectionCellComponent', () => {
 
   it('should create', () => {
     expect(component).toBeTruthy();
+  });
+
+  it('names its drop-down "Connection Details"', async () => {
+    await fixture.whenStable();
+    const trigger = (fixture.nativeElement as HTMLElement).querySelector('[role="combobox"]');
+    expect(trigger).toBeTruthy();
+    expect(trigger!.getAttribute('aria-label')).toBe('Connection Details');
   });
 });

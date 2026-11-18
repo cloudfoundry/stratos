@@ -154,7 +154,7 @@ function build_devkit() {
   echo -e "${YELLOW}${BOLD}= Package: @stratosui/devkit${RESET}"
   echo
 
-  npm run build-devkit
+  bun run build-devkit
 
   rm -rf ${STRATOS}/npm_pkg/devkit
   cp -r ${STRATOS}/dist-devkit ${STRATOS}/npm_pkg/devkit

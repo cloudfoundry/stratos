@@ -1,7 +1,6 @@
-import { ChangeDetectionStrategy, Component, EventEmitter, Input, OnInit, Output, computed, inject } from '@angular/core';
+import { ChangeDetectionStrategy, Component, OnInit, Signal, computed, effect, inject, input, linkedSignal, output } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { Router, RouterModule } from '@angular/router';
-import { Observable, map } from 'rxjs';
 
 import { StratosBrandingService } from '../../../../../theme/stratos-branding.service';
 import { AuthSignalService } from '../../../core/signals/auth-signal.service';
@@ -22,7 +21,7 @@ export interface SideNavItem extends TabNavItem {
   matIconFont?: string;
   link: string;
   position?: number;
-  hidden?: Observable<boolean>;
+  hidden?: Signal<boolean>;
   requiresEndpointType?: string;
   requiresPersistence?: boolean;
 }
@@ -48,9 +47,8 @@ export class SideNavComponent implements OnInit {
 
   // Same guard the page header uses: the 'stratos.noauth' scope means there
   // is no session to end, so offering Sign Out is meaningless.
-  public canLogout$: Observable<boolean> = this.permissionsService
-    .can(StratosCurrentUserPermissions.CAN_NOT_LOGOUT)
-    .pipe(map(noLogout => !noLogout));
+  private readonly noLogout = this.permissionsService.can(StratosCurrentUserPermissions.CAN_NOT_LOGOUT);
+  public readonly canLogout = computed(() => !this.noLogout());
 
   // HIDE_NAV_LOGOUT removes this button only. The header user menu keeps its
   // own Sign Out, so hiding it here is presentation, not a capability change.
@@ -101,20 +99,26 @@ export class SideNavComponent implements OnInit {
     const cs = inject(CustomizationService);
 
     this.customizations = cs.get();
-  }
-  @Input() set iconMode(isIconMode: boolean) {
-    if (isIconMode !== this.isIconMode) {
-      this.isIconMode = isIconMode;
-      this.changedMode.next(void 0);
-    }
-  }
-  get iconMode() {
-    return this.isIconMode;
+
+    // Tell the host each time the bound mode changes.
+    let boundMode = true;
+    effect(() => {
+      const mode = this.iconMode();
+      if (mode !== boundMode) {
+        boundMode = mode;
+        this.changedMode.emit(void 0);
+      }
+    });
   }
 
-  @Input() tabs: SideNavItem[] = [];
-  @Output() changedMode = new EventEmitter();
-  private isIconMode = true;
+  // Icons only, as the dashboard binds it.
+  readonly iconMode = input(true);
+  // The mode shown: the bound one, except that a fixed side nav starts in
+  // icon mode whatever is bound (ngOnInit).
+  readonly isIconMode = linkedSignal(() => this.iconMode());
+
+  readonly tabs = input<SideNavItem[]>([]);
+  readonly changedMode = output();
 
   public toggleSidenav() {
     this.dashboardData.toggleSideNav();
@@ -128,7 +132,7 @@ export class SideNavComponent implements OnInit {
   ngOnInit() {
     // Default to icon mode if the environment specifies a fixed side nav
     if (environment.fixedSideNav) {
-      this.isIconMode = true;
+      this.isIconMode.set(true);
       this.tooltipDelay = 2000;
     }
 

@@ -1,73 +1,65 @@
-import { Directive, Input, OnDestroy, OnInit, TemplateRef, ViewContainerRef, inject } from '@angular/core';
-import { Observable, of as observableOf, Subscription } from 'rxjs';
-import { switchMap } from 'rxjs/operators';
+import { Directive, TemplateRef, ViewContainerRef, computed, effect, inject, input } from '@angular/core';
 
 import { CurrentUserPermissionsService } from '@stratosui/core';
-import { CfCurrentUserPermissions, CfCurrentUserRolesSignalService, waitForCFPermissions } from '@stratosui/cloud-foundry';
+import { CfCurrentUserPermissions, CfCurrentUserRolesDataService } from '@stratosui/cloud-foundry';
 
 @Directive({
   selector: '[appCfUserPermission]',
   standalone: true
 })
-export class CfUserPermissionDirective implements OnDestroy, OnInit {
-  private cfRoles = inject(CfCurrentUserRolesSignalService);
+export class CfUserPermissionDirective {
+  private rolesData = inject(CfCurrentUserRolesDataService);
   private templateRef = inject<TemplateRef<any>>(TemplateRef);
   private viewContainer = inject(ViewContainerRef);
   private currentUserPermissionsService = inject(CurrentUserPermissionsService);
 
-  @Input()
-  public appCfUserPermission!: CfCurrentUserPermissions;
+  // The structural directive's own expression; every use names the permission.
+  public readonly appCfUserPermission = input.required<CfCurrentUserPermissions>();
 
-  @Input()
-  public appCfUserPermissionEndpointGuid!: string;
+  public readonly appCfUserPermissionEndpointGuid = input<string>();
 
-  @Input()
-  private appCfUserPermissionOrganizationGuid!: string;
+  protected readonly appCfUserPermissionOrganizationGuid = input<string>();
 
-  @Input()
-  private appCfUserPermissionSpaceGuid!: string;
+  protected readonly appCfUserPermissionSpaceGuid = input<string>();
 
-  private canSub!: Subscription;
+  // True once the endpoint's roles have loaded (at once without an endpoint).
+  private readonly ready = computed(() => {
+    const endpointGuid = this.appCfUserPermissionEndpointGuid();
+    return !endpointGuid || !!this.rolesData.cfRolesState()?.[endpointGuid]?.state.initialised;
+  });
+  private readonly check = computed(() => this.currentUserPermissionsService.can(
+    this.appCfUserPermission(),
+    this.appCfUserPermissionEndpointGuid(),
+    this.getOrgOrSpaceGuid(),
+    this.getSpaceGuid()
+  ));
+  private hasView = false;
 
-  public ngOnInit() {
-    this.canSub = this.waitForEndpointPermissions(this.appCfUserPermissionEndpointGuid).pipe(
-      switchMap(() => this.currentUserPermissionsService.can(
-        this.appCfUserPermission,
-        this.appCfUserPermissionEndpointGuid,
-        this.getOrgOrSpaceGuid(),
-        this.getSpaceGuid()
-      ))
-    ).subscribe(
-      can => {
-        if (can) {
-          this.viewContainer.createEmbeddedView(this.templateRef);
-        } else {
-          this.viewContainer.clear();
-        }
+  constructor() {
+    effect(() => {
+      const can = this.ready() && this.check()();
+      if (can && !this.hasView) {
+        this.viewContainer.createEmbeddedView(this.templateRef);
+        this.hasView = true;
+      } else if (!can && this.hasView) {
+        this.viewContainer.clear();
+        this.hasView = false;
       }
-    );
-  }
-
-  private waitForEndpointPermissions(endpointGuid: string): Observable<any> {
-    return endpointGuid && endpointGuid.length > 0 ? waitForCFPermissions(this.cfRoles, endpointGuid) : observableOf(true);
-  }
-
-  public ngOnDestroy() {
-    if (this.canSub) {
-      this.canSub.unsubscribe();
-    }
+    });
   }
 
   private getOrgOrSpaceGuid() {
-    if (this.appCfUserPermissionSpaceGuid && !this.appCfUserPermissionOrganizationGuid) {
-      return this.appCfUserPermissionSpaceGuid;
+    const appCfUserPermissionSpaceGuid = this.appCfUserPermissionSpaceGuid();
+    const appCfUserPermissionOrganizationGuid = this.appCfUserPermissionOrganizationGuid();
+    if (appCfUserPermissionSpaceGuid && !appCfUserPermissionOrganizationGuid) {
+      return appCfUserPermissionSpaceGuid;
     }
-    return this.appCfUserPermissionOrganizationGuid;
+    return appCfUserPermissionOrganizationGuid;
   }
 
   private getSpaceGuid() {
-    if (this.appCfUserPermissionOrganizationGuid) {
-      return this.appCfUserPermissionSpaceGuid;
+    if (this.appCfUserPermissionOrganizationGuid()) {
+      return this.appCfUserPermissionSpaceGuid();
     }
     return null;
   }

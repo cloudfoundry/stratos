@@ -1,11 +1,11 @@
 import { CommonModule } from '@angular/common';
-import { ActivatedRoute } from '@angular/router';
-import { ChangeDetectionStrategy, Component, WritableSignal, inject, signal } from '@angular/core';
+import { ChangeDetectionStrategy, Component, Injector, WritableSignal, inject, signal } from '@angular/core';
 
 import { SignalListComponent, SignalListConfig } from '@stratosui/core';
 
 import { KubernetesEndpointService } from '../../services/kubernetes-endpoint.service';
 import { KubeNamespace } from '../../../services/endpoint-data/kube-types';
+import { kubeListErrorState, reportKubeListErrors } from '../../list-types/kube-list-errors';
 import {
   KubernetesNamespacesSignalConfigService,
 } from '../../list-types/kubernetes-namespaces/kubernetes-namespaces-signal-config.service';
@@ -32,9 +32,9 @@ import {
   imports: [CommonModule, SignalListComponent],
 })
 export class KubernetesNamespacesTabComponent {
-  private readonly activatedRoute = inject(ActivatedRoute);
   private readonly kubeEndpointService = inject(KubernetesEndpointService);
   readonly signalConfig = inject(KubernetesNamespacesSignalConfigService);
+  private readonly injector = inject(Injector);
 
   readonly listConfig: WritableSignal<SignalListConfig<KubeNamespace> | undefined> = signal(undefined);
 
@@ -43,6 +43,9 @@ export class KubernetesNamespacesTabComponent {
     this.signalConfig.initialize(kubeGuid);
     void this.signalConfig.loadAll();
 
+    const errorState = kubeListErrorState(kubeGuid, this.signalConfig.errors());
+    reportKubeListErrors(errorState.errorsByCnsi, this.injector);
+
     this.listConfig.set({
       pagedItems: this.signalConfig.view.pagedItems,
       totalFilteredResults: this.signalConfig.view.totalFilteredResults,
@@ -50,7 +53,7 @@ export class KubernetesNamespacesTabComponent {
       pageIndex: this.signalConfig.pageIndex,
       pageSize: this.signalConfig.pageSize,
       isAnyLoading: this.signalConfig.isLoading(),
-      errorsByCnsi: signal(new Map()),
+      ...errorState,
       columns: [
         {
           header: 'Name', key: 'name',
@@ -89,11 +92,6 @@ export class KubernetesNamespacesTabComponent {
       viewMode: this.signalConfig.viewMode,
       sort: this.signalConfig.sort,
     });
-
-    // Touch activatedRoute so the linter doesn't complain about an
-    // unused field — kept for parity with the legacy component which
-    // injected it (sub-routes may need it later).
-    void this.activatedRoute;
   }
 }
 

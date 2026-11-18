@@ -103,7 +103,7 @@ describe('EntityCatalogService', () => {
     entityCatalog.register(new StratosCatalogEndpointEntity(endpoint));
     const catalogEntity = entityCatalog.getEndpoint(endpoint.type);
     expect(catalogEntity).not.toBeUndefined();
-    expect(catalogEntity.definition).toEqual({
+    expect(catalogEntity?.definition).toEqual({
       ...endpoint,
       schema: {
         default: stratosEntityFactory(endpointEntityType),
@@ -143,7 +143,7 @@ describe('EntityCatalogService', () => {
     };
     const catalogEntity = entityCatalog.getEndpoint(endpoint.type, SUBTYPE_TYPE);
     expect(catalogEntity).not.toBeUndefined();
-    expect(catalogEntity.definition).toEqual(expected);
+    expect(catalogEntity?.definition).toEqual(expected);
   });
 
   it('should get entity subtype', () => {

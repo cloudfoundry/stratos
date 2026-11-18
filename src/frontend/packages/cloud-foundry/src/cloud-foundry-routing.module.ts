@@ -4,6 +4,7 @@ import { RouterModule, Routes } from '@angular/router';
 const customRoutes: Routes = [
   {
     path: 'applications',
+    title: 'Applications',
     loadChildren: () => import('./features/applications/applications.routes').then(m => m.APPLICATIONS_ROUTES),
     data: {
       stratosNavigation: {
@@ -16,6 +17,7 @@ const customRoutes: Routes = [
   },
   {
     path: 'marketplace',
+    title: 'Marketplace',
     loadChildren: () => import('./features/service-catalog/service-catalog.routes')
       .then(m => m.SERVICE_CATALOG_ROUTES),
     data: {
@@ -29,6 +31,7 @@ const customRoutes: Routes = [
   },
   {
     path: 'services',
+    title: 'Services',
     loadChildren: () => import('./features/services/services.routes').then(m => m.SERVICES_ROUTES),
     data: {
       stratosNavigation: {
@@ -42,6 +45,7 @@ const customRoutes: Routes = [
   },
   {
     path: 'cloud-foundry',
+    title: 'Cloud Foundry',
     loadChildren: () => import('./features/cf/cloud-foundry-section.routes').then(m => m.CLOUD_FOUNDRY_SECTION_ROUTES),
     data: {
       stratosNavigation: {

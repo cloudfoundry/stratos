@@ -1,9 +1,7 @@
-import { Component, OnInit, signal, ChangeDetectionStrategy, inject } from '@angular/core';
+import { HttpClient } from '@angular/common/http';
+import { Component, OnInit, Signal, signal, computed, effect, untracked, ChangeDetectionStrategy, inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
-import { toObservable } from '@angular/core/rxjs-interop';
-import { combineLatest, Observable, of } from 'rxjs';
-import { take, defaultIfEmpty, map, publishReplay, refCount, startWith, switchMap } from 'rxjs/operators';
 
 import {
   AppInputDirective,
@@ -14,15 +12,15 @@ import {
   StackedInputActionsComponent,
   StackedInputActionsState,
   StackedInputActionsUpdate,
-  StepOnNextFunction,
+  StepOnNextResult,
 } from '@stratosui/core';
 import { CFFeatureFlagTypes } from '../../../../../cf-api.types';
+import { CfCurrentUserRolesDataService } from '../../../../../services/cf-current-user-roles-data.service';
 import { CfUsersRolesDataService } from '../../../../../services/domain-data/cf-users-roles-data.service';
 import { StUser } from '../../../../../services/endpoint-data/stratos-types';
-import { CfCurrentUserRolesSignalService } from '../../../../../user-permissions/cf-current-user-roles-signal.service';
 import { CfPermissionTypes } from '../../../../../user-permissions/cf-user-permissions-checkers';
+import { getFeatureFlagsSource } from '../../../../../user-permissions/feature-flags-cache';
 import { ActiveRouteCfOrgSpace } from '../../../cf-page.types';
-import { waitForCFPermissions } from '../../../cf.helpers';
 
 export class ManageUsersSetUsernamesHelper {
   static createGuid(username: string, cfGuid: string, orgGuid: string): string {
@@ -55,13 +53,14 @@ export class ManageUsersSetUsernamesComponent implements OnInit {
 
 
   public stepValid = signal<boolean>(false);
-  public valid$: Observable<boolean> = toObservable(this.stepValid);
   private usernames!: StackedInputActionsUpdate;
   public origin!: string;
-  public canAdd$: Observable<boolean>;
-  public canRemove$: Observable<boolean>;
-  public blocked$: Observable<boolean>;
-  public currentValue!: boolean;
+  public readonly canAdd: Signal<boolean>;
+  public readonly canRemove: Signal<boolean>;
+  /** True until the roles and the feature flags the add/remove choice depends on have loaded. */
+  public readonly blocked: Signal<boolean>;
+  /** The add/remove choice: true removes roles; undefined until it is first set. */
+  public readonly currentValue = signal<boolean | undefined>(undefined);
 
   public stackedActionConfig: StackedInputActionConfig = {
     isEmailInput: false,
@@ -73,43 +72,38 @@ export class ManageUsersSetUsernamesComponent implements OnInit {
   };
 
   public stateIn = signal<StackedInputActionsState[]>([]);
-  public stateIn$: Observable<StackedInputActionsState[]>;
 
   constructor() {
     const activeRouteCfOrgSpace = this.activeRouteCfOrgSpace;
-    const cfRoles = inject(CfCurrentUserRolesSignalService);
+    const rolesData = inject(CfCurrentUserRolesDataService);
     const userPerms = inject(CurrentUserPermissionsService);
+    const http = inject(HttpClient);
 
-    this.stateIn$ = toObservable(this.stateIn);
     const ffSetPermConfig = new PermissionConfig(CfPermissionTypes.FEATURE_FLAG, CFFeatureFlagTypes.set_roles_by_username);
     const ffRemovePermConfig = new PermissionConfig(CfPermissionTypes.FEATURE_FLAG, CFFeatureFlagTypes.unset_roles_by_username);
-    this.canAdd$ = waitForCFPermissions(cfRoles, activeRouteCfOrgSpace.cfGuid).pipe(
-      switchMap(() => userPerms.can(ffSetPermConfig, activeRouteCfOrgSpace.cfGuid)),
-      take(1),
-      publishReplay(1),
-      refCount()
-    );
-    this.canRemove$ = waitForCFPermissions(cfRoles, activeRouteCfOrgSpace.cfGuid).pipe(
-      switchMap(() => userPerms.can(ffRemovePermConfig, activeRouteCfOrgSpace.cfGuid)),
-      take(1),
-      publishReplay(1),
-      refCount()
-    );
+    const canSet = userPerms.can(ffSetPermConfig, activeRouteCfOrgSpace.cfGuid);
+    const canUnset = userPerms.can(ffRemovePermConfig, activeRouteCfOrgSpace.cfGuid);
+    this.canAdd = computed(() => canSet());
+    this.canRemove = computed(() => canUnset());
 
-    const canAddRemove = combineLatest([this.canAdd$, this.canRemove$]);
-
-    // Set starting value of add/remove radio button
-    canAddRemove.pipe(take(1), defaultIfEmpty([false, false] as [boolean, boolean])).subscribe(([canAdd]) => this.setIsRemove({ source: null, value: !canAdd }));
-
-    // Block content until we know the add/remove state
-    this.blocked$ = canAddRemove.pipe(
-      map(() => false),
-      take(1),
-      startWith(true),
-      publishReplay(1),
-      refCount(),
-    );
-
+    // The checks read false until the roles and the flags load, so the
+    // choice is made, and the content shown, once both have.
+    const flagsLoaded = signal(false);
+    this.blocked = computed(() => !flagsLoaded());
+    const rolesState = rolesData.cfEndpointRolesState(activeRouteCfOrgSpace.cfGuid);
+    const loadFlags = effect(() => {
+      if (!rolesState()?.state.initialised) {
+        return;
+      }
+      untracked(() => {
+        void getFeatureFlagsSource(activeRouteCfOrgSpace.cfGuid, http).load().then(() => {
+          // Set starting value of add/remove radio button
+          this.setIsRemove({ source: null, value: !canSet() });
+          flagsLoaded.set(true);
+        });
+      });
+      loadFlags.destroy();
+    });
   }
 
   ngOnInit() {
@@ -132,10 +126,10 @@ export class ManageUsersSetUsernamesComponent implements OnInit {
 
   setIsRemove(event: {source: any, value: boolean}) {
     this.rolesData.setIsRemove(event.value);
-    this.currentValue = event.value;
+    this.currentValue.set(event.value);
   }
 
-  onNext: StepOnNextFunction = () => {
+  async onNext(): Promise<StepOnNextResult> {
     // Set-by-username seeds synthetic StUser rows: the username is the real
     // identity and `guid` is the composite (username/cfGuid/orgGuid) the
     // executeChanges payload keys off. There's no fetched CF user yet, so the
@@ -150,8 +144,6 @@ export class ManageUsersSetUsernamesComponent implements OnInit {
       } as StUser;
     });
     this.rolesData.setUsers(this.activeRouteCfOrgSpace.cfGuid, users, this.origin);
-    return of({
-      success: true
-    });
-  };
+    return { success: true };
+  }
 }

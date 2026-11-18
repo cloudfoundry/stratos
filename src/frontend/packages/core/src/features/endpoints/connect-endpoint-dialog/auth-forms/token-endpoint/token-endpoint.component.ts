@@ -1,4 +1,4 @@
-import { ChangeDetectionStrategy, Component, Input  } from '@angular/core';
+import { ChangeDetectionStrategy, Component, input } from '@angular/core';
 import { ReactiveFormsModule, FormControl, FormGroup } from '@angular/forms';
 import { AppInputDirective, CustomFormFieldComponent } from '../../../../../shared/components/custom-form-field/custom-form-field.component';
 
@@ -25,7 +25,7 @@ interface TokenAuthForm {
 export class TokenEndpointComponent implements IAuthForm {
   public showToken = false;
 
-  @Input() formGroup!: FormGroup<TokenAuthForm>;
+  readonly formGroup = input.required<FormGroup<TokenAuthForm>>();
 
-  @Input() config: any = {};
+  readonly config = input<any>({});
 }

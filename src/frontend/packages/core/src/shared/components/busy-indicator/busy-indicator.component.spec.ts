@@ -21,32 +21,32 @@ describe('AppBusyComponent', () => {
     return (fixture.nativeElement as HTMLElement).querySelector('[data-test="busy"]')!;
   }
 
-  it('defaults to the arc variant sized 1em with a status role', () => {
-    fixture.detectChanges();
+  it('defaults to the arc variant sized 1em with a status role', async () => {
+    await fixture.whenStable();
     expect(root().getAttribute('role')).toBe('status');
     expect(root().style.width).toBe('1em');
     expect(root().querySelector('.animate-spin')).toBeTruthy();
   });
 
-  it('renders three blinking dots for the dots variant', () => {
-    component.variant = 'dots';
-    fixture.detectChanges();
+  it('renders three blinking dots for the dots variant', async () => {
+    fixture.componentRef.setInput('variant', 'dots');
+    await fixture.whenStable();
     expect(root().querySelectorAll('.busy-blink-dot').length).toBe(3);
     expect(root().querySelector('.animate-spin')).toBeNull();
   });
 
-  it('renders the theme logo image for the logo variant', () => {
-    component.variant = 'logo';
-    fixture.detectChanges();
+  it('renders the theme logo image for the logo variant', async () => {
+    fixture.componentRef.setInput('variant', 'logo');
+    await fixture.whenStable();
     const img = root().querySelector('img')!;
     expect(img).toBeTruthy();
     expect(img.getAttribute('src')).toContain('logo');
   });
 
-  it('pinned variant beats context; context picks deterministically', () => {
-    component.variant = 'dash';
-    component.context = 'anything';
-    fixture.detectChanges();
+  it('pinned variant beats context; context picks deterministically', async () => {
+    fixture.componentRef.setInput('variant', 'dash');
+    fixture.componentRef.setInput('context', 'anything');
+    await fixture.whenStable();
     expect(root().querySelector('.border-dashed')).toBeTruthy();
 
     // Same context string → same variant, every time.
@@ -57,9 +57,9 @@ describe('AppBusyComponent', () => {
     }
   });
 
-  it('honors an explicit size', () => {
-    component.size = '2rem';
-    fixture.detectChanges();
+  it('honors an explicit size', async () => {
+    fixture.componentRef.setInput('size', '2rem');
+    await fixture.whenStable();
     expect(root().style.width).toBe('2rem');
     expect(root().style.height).toBe('2rem');
   });

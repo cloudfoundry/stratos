@@ -18,6 +18,31 @@
   h4 { @apply text-base font-semibold; }
 }
 
+/* Keyboard focus. One default for every element the keyboard reaches. It is
+ * in @layer base so an element that draws its own ring (`focus:outline-none
+ * focus:ring-*`) keeps it: utilities win over base. `--focus-ring` lets a
+ * surface pick an outline color that contrasts with it; the header and the
+ * side nav set it through the same classes that paint their background.
+ * 2px solid with a 2px offset satisfies WCAG 2.4.7 and the 2.4.11 minimum
+ * area and contrast against the surfaces the tokens cover. */
+@layer base {
+  :focus-visible {
+    outline: 2px solid var(--focus-ring, var(--color-primary));
+    outline-offset: 2px;
+  }
+  .bg-header-bg { --focus-ring: var(--header-text); }
+  .bg-nav-bg { --focus-ring: var(--nav-text); }
+}
+
+/* A control marked aria-disabled stays in the Tab order and is faded with
+ * opacity, which fades its focus outline too: under 3:1, so the focus could
+ * not be seen (WCAG 2.4.13, the list's paging and clear buttons). While it
+ * has keyboard focus it is drawn at full opacity. Outside the layers, so it
+ * wins over the opacity utilities. */
+[aria-disabled='true']:focus-visible {
+  opacity: 1;
+}
+
 /* Icon font styles - supports both material-icons and custom icon fonts.
  * In @layer base so text-size utilities (@layer utilities) can override
  * the default 24px glyph size; unlayered these rules would beat every
@@ -72,7 +97,7 @@
   --app-bg: oklch(98.415% 0.0034 247.86);
   --body-bg: oklch(96.826% 0.0069 247.9);
   --app-text: oklch(27.95% 0.0368 260.03);
-  --text-muted: oklch(55.439% 0.0407 257.42);
+  --text-muted: oklch(44.553% 0.0374 257.28);
   --header-bg: oklch(100% 0 none);
   --header-text: oklch(27.95% 0.0368 260.03);
   --header-border: oklch(92.876% 0.0126 255.51);
@@ -80,7 +105,7 @@
   --content-secondary: oklch(98.415% 0.0034 247.86);
   --content-border: oklch(92.876% 0.0126 255.51);
   --content-text: oklch(27.95% 0.0368 260.03);
-  --content-muted: oklch(55.439% 0.0407 257.42);
+  --content-muted: oklch(44.553% 0.0374 257.28);
 
   /* Login page */
   --login-bg: oklch(97.015% 0 none);
@@ -92,9 +117,9 @@
 
   /* Interactive elements - light theme */
   --input-bg: oklch(100% 0 none);
-  --input-border: oklch(87.168% 0.0093 258.34);
+  --input-border: oklch(55.439% 0.0407 257.42);
   --input-text: oklch(27.95% 0.0368 260.03);
-  --input-placeholder: oklch(71.366% 0.0192 261.32);
+  --input-placeholder: oklch(55.439% 0.0407 257.42);
   --input-focus-border: var(--color-primary);
   --input-disabled-bg: oklch(96.696% 0.0029 264.54);
 
@@ -119,7 +144,7 @@
   --step-inactive-bg: oklch(92.758% 0.0058 264.53);
   --step-inactive-text: oklch(44.611% 0.0263 256.8);
   --step-skip-bg: oklch(96.696% 0.0029 264.54);
-  --step-skip-text: oklch(71.366% 0.0192 261.32);
+  --step-skip-text: oklch(44.611% 0.0263 256.8);
 
   /* Status and state colors */
   --success-bg: oklch(96.241% 0.0434 156.74);
@@ -138,6 +163,15 @@
   --info-text: oklch(42.445% 0.1809 265.64);
   --info-border: oklch(80.907% 0.0956 251.81);
 
+  /* Status icons. An icon needs 3:1 against the card (WCAG 1.4.11), not
+     the 4.5:1 of text, so it keeps its hue: the brand green and amber are
+     2.3:1 and 2.2:1 on white, these are 3.2:1. */
+  --success-icon: oklch(62.7% 0.194 149.214);
+  --warning-icon: oklch(66.6% 0.179 58.318);
+  --danger-icon: var(--color-danger);
+  --info-icon: var(--color-info);
+  --tentative-icon: oklch(55.439% 0.0407 257.42);
+
   /* Shadow system */
   --shadow-sm: 0 1px 2px 0 rgba(0, 0, 0, 0.05);
   --shadow-md: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
@@ -145,16 +179,17 @@
   --shadow-xl: 0 20px 25px -5px rgba(0, 0, 0, 0.1);
 }
 
-/* Dark Theme - WCAG AA Compliant */
+/* Dark Theme - text colors reach 7:1 (WCAG 1.4.6) */
 .dark-theme {
   /* Brand colors - adjusted for dark theme with higher contrast */
-  --color-primary: oklch(71.374% 0.1434 254.62);
-  --color-secondary: oklch(75.351% 0.139 232.66);
-  --color-accent: oklch(75.351% 0.139 232.66);
+  --color-primary: oklch(80.907% 0.0956 251.81);
+  --color-secondary: oklch(82.759% 0.1013 230.32);
+  --color-accent: oklch(82.759% 0.1013 230.32);
   --color-success: oklch(80.035% 0.1821 151.71);
   --color-warning: oklch(83.686% 0.1644 84.43);
   --color-danger: oklch(71.063% 0.1661 22.22);
-  --color-info: oklch(71.374% 0.1434 254.62);
+  --color-info: oklch(80.907% 0.0956 251.81);
+  --color-on-primary: oklch(20.768% 0.0398 265.75);
 
   /* Navigation colors - dark theme */
   --nav-bg: oklch(20.768% 0.0398 265.75);
@@ -169,7 +204,7 @@
   --app-bg: oklch(20.768% 0.0398 265.75);
   --body-bg: oklch(12.88% 0.0406 264.7);
   --app-text: oklch(96.826% 0.0069 247.9);
-  --text-muted: oklch(71.067% 0.0351 256.79);
+  --text-muted: oklch(86.898% 0.0198 252.89);
   --header-bg: oklch(27.95% 0.0368 260.03);
   --header-text: oklch(96.826% 0.0069 247.9);
   --header-border: oklch(37.17% 0.0392 257.29);
@@ -177,7 +212,7 @@
   --content-secondary: oklch(20.768% 0.0398 265.75);
   --content-border: oklch(37.17% 0.0392 257.29);
   --content-text: oklch(96.826% 0.0069 247.9);
-  --content-muted: oklch(71.067% 0.0351 256.79);
+  --content-muted: oklch(86.898% 0.0198 252.89);
 
   /* Login page - dark theme */
   --login-bg: oklch(20.768% 0.0398 265.75);
@@ -189,9 +224,9 @@
 
   /* Interactive elements - dark theme */
   --input-bg: oklch(27.95% 0.0368 260.03);
-  --input-border: oklch(44.553% 0.0374 257.28);
+  --input-border: oklch(71.067% 0.0351 256.79);
   --input-text: oklch(96.826% 0.0069 247.9);
-  --input-placeholder: oklch(55.439% 0.0407 257.42);
+  --input-placeholder: oklch(71.067% 0.0351 256.79);
   --input-focus-border: var(--color-primary);
   --input-disabled-bg: oklch(20.768% 0.0398 265.75);
 
@@ -216,7 +251,7 @@
   --step-inactive-bg: oklch(37.17% 0.0392 257.29);
   --step-inactive-text: oklch(86.898% 0.0198 252.89);
   --step-skip-bg: oklch(27.95% 0.0368 260.03);
-  --step-skip-text: oklch(55.439% 0.0407 257.42);
+  --step-skip-text: oklch(71.067% 0.0351 256.79);
 
   /* Status and state colors - dark theme with WCAG AA compliance */
   --success-bg: oklch(39.253% 0.0896 152.54);
@@ -234,6 +269,13 @@
   --info-bg: oklch(37.906% 0.1378 265.52);
   --info-text: oklch(80.907% 0.0956 251.81);
   --info-border: oklch(62.308% 0.188 259.81);
+
+  /* Status icons: the dark brand colors pass 3:1 on the dark card. */
+  --success-icon: var(--color-success);
+  --warning-icon: var(--color-warning);
+  --danger-icon: var(--color-danger);
+  --info-icon: var(--color-info);
+  --tentative-icon: oklch(71.366% 0.0192 261.32);
 
   /* Shadow system - enhanced for dark theme */
   --shadow-sm: 0 1px 2px 0 rgba(0, 0, 0, 0.3);
@@ -312,20 +354,24 @@ router-outlet + * {
     @apply transition-all duration-200 cursor-pointer;
     @apply focus:outline-none focus:ring-2 focus:ring-offset-2;
     @apply disabled:opacity-50 disabled:cursor-not-allowed disabled:shadow-none;
+    /* A button that turns off while it works stays focusable: aria-disabled,
+       not disabled (a disabled button drops focus to the page body). */
+    @apply aria-disabled:opacity-50 aria-disabled:cursor-not-allowed aria-disabled:shadow-none;
   }
 
   /* Primary Button */
   .btn-primary {
-    @apply text-white shadow-sm;
+    @apply shadow-sm;
+    color: var(--color-on-primary);
     background-color: var(--color-primary);
 
-    &:hover:not(:disabled) {
+    &:hover:not(:disabled, [aria-disabled="true"]) {
       @apply shadow-md;
       background-color: color-mix(in srgb, var(--color-primary) 90%, black);
       transform: translateY(-1px);
     }
 
-    &:active:not(:disabled) {
+    &:active:not(:disabled, [aria-disabled="true"]) {
       transform: translateY(0);
     }
 
@@ -341,7 +387,7 @@ router-outlet + * {
     background-color: var(--card-bg);
     border-color: var(--content-border);
 
-    &:hover:not(:disabled) {
+    &:hover:not(:disabled, [aria-disabled="true"]) {
       @apply shadow;
       background-color: color-mix(in srgb, var(--card-bg) 95%, black);
       border-color: var(--content-border);
@@ -354,10 +400,11 @@ router-outlet + * {
 
   /* Success Button */
   .btn-success {
-    @apply text-white shadow-sm;
+    @apply shadow-sm;
+    color: var(--color-on-success);
     background-color: var(--color-success);
 
-    &:hover:not(:disabled) {
+    &:hover:not(:disabled, [aria-disabled="true"]) {
       @apply shadow-md;
       background-color: color-mix(in srgb, var(--color-success) 90%, black);
       transform: translateY(-1px);
@@ -370,10 +417,11 @@ router-outlet + * {
 
   /* Warning Button */
   .btn-warning {
-    @apply text-white shadow-sm;
+    @apply shadow-sm;
+    color: var(--color-on-warning);
     background-color: var(--color-warning);
 
-    &:hover:not(:disabled) {
+    &:hover:not(:disabled, [aria-disabled="true"]) {
       @apply shadow-md;
       background-color: color-mix(in srgb, var(--color-warning) 90%, black);
       transform: translateY(-1px);
@@ -386,10 +434,11 @@ router-outlet + * {
 
   /* Danger Button */
   .btn-danger {
-    @apply text-white shadow-sm;
+    @apply shadow-sm;
+    color: var(--color-on-danger);
     background-color: var(--color-danger);
 
-    &:hover:not(:disabled) {
+    &:hover:not(:disabled, [aria-disabled="true"]) {
       @apply shadow-md;
       background-color: color-mix(in srgb, var(--color-danger) 90%, black);
       transform: translateY(-1px);
@@ -411,10 +460,14 @@ router-outlet + * {
 
   /* Info Button */
   .btn-info {
-    @apply text-white shadow-sm;
+    @apply shadow-sm;
+    /* Info shares the primary blue by default, so it takes the text color
+       made for it: white on the light-mode blue (8.7:1), dark on the lighter
+       dark-mode blue, where white was 2.5:1 (now 7.0:1). */
+    color: var(--color-on-primary);
     background-color: var(--color-info);
 
-    &:hover:not(:disabled) {
+    &:hover:not(:disabled, [aria-disabled="true"]) {
       @apply shadow-md;
       background-color: color-mix(in srgb, var(--color-info) 90%, black);
       transform: translateY(-1px);
@@ -431,7 +484,7 @@ router-outlet + * {
     color: var(--content-text);
     border-color: var(--content-border);
 
-    &:hover:not(:disabled) {
+    &:hover:not(:disabled, [aria-disabled="true"]) {
       background-color: color-mix(in srgb, var(--card-bg) 90%, var(--content-text));
       border-color: var(--content-text);
     }
@@ -443,9 +496,10 @@ router-outlet + * {
     border-color: var(--color-primary);
     color: var(--color-primary);
 
-    &:hover:not(:disabled) {
+    &:hover:not(:disabled, [aria-disabled="true"]) {
       background-color: var(--color-primary);
-      @apply text-white shadow-sm;
+      color: var(--color-on-primary);
+      @apply shadow-sm;
     }
   }
 
@@ -454,7 +508,7 @@ router-outlet + * {
     color: var(--content-text);
     border-color: var(--content-border);
 
-    &:hover:not(:disabled) {
+    &:hover:not(:disabled, [aria-disabled="true"]) {
       background-color: color-mix(in srgb, var(--card-bg) 90%, var(--content-text));
       border-color: var(--content-text);
     }
@@ -469,9 +523,17 @@ router-outlet + * {
   .btn-icon {
     @extend %btn-icon-base;
     @apply w-9 h-9 min-w-[36px] min-h-[36px];
+  }
+
+  /* A plain icon button draws the icon in the text color on the card. A filled
+     variant (btn-info, btn-danger…) keeps its own icon color and hover: this
+     rule comes after the variants in the same layer and would otherwise win,
+     drawing a dark icon on the filled background. :where keeps the
+     specificity at one class. */
+  .btn-icon:not(:where(.btn-primary, .btn-success, .btn-warning, .btn-danger, .btn-info)) {
     color: var(--content-text);
 
-    &:hover:not(:disabled) {
+    &:hover:not(:disabled, [aria-disabled="true"]) {
       background-color: color-mix(in srgb, var(--card-bg) 90%, var(--content-text));
     }
   }
@@ -523,8 +585,7 @@ router-outlet + * {
     color: var(--input-text);
 
     &::placeholder {
-      color: var(--content-muted);
-      opacity: 0.7;
+      color: var(--input-placeholder);
     }
 
     &:focus {
@@ -826,6 +887,39 @@ body.modal-open {
     color: var(--color-secondary);
   }
 
+  /* Status colors as text: the brand success/warning/danger/info values are
+     tuned for badges and buttons and fall short of 4.5:1 as text (green
+     2.3:1, amber 2.2:1, red 3.8:1 on white). The status text tokens pass in
+     both modes, so the text utilities use those; bg-*, border-* keep the
+     brand values. */
+  .text-success {
+    color: var(--success-text);
+  }
+
+  .text-warning {
+    color: var(--warning-text);
+  }
+
+  .text-danger {
+    color: var(--danger-text);
+  }
+
+  .text-info {
+    color: var(--info-text);
+  }
+
+  /* The same classes on an icon (the application state icon, status
+     indicators) take the icon tokens: 3:1 is enough for an icon, and the
+     text tokens' dark shades turned amber into brown. Two classes' worth
+     of specificity outranks the single class above. */
+  :is(app-custom-icon, .material-icons, .icon) {
+    &.text-success { color: var(--success-icon); }
+    &.text-warning { color: var(--warning-icon); }
+    &.text-danger { color: var(--danger-icon); }
+    &.text-info { color: var(--info-icon); }
+    &.text-tentative { color: var(--tentative-icon); }
+  }
+
   .bg-primary {
     background-color: var(--color-primary);
   }
@@ -916,5 +1010,15 @@ body.modal-open {
 
   .custom-scrollbar::-webkit-scrollbar-thumb:hover {
     background: var(--input-border);
+  }
+}
+
+/* While the side panel (help) is open, full-screen dialog backdrops stop at
+   its left edge, so a dialog re-centres beside the panel instead of under it
+   and keeps its close and action buttons usable. The panel is w-96. On a
+   narrow screen the panel covers the width anyway, so leave the backdrop. */
+@media (min-width: 768px) {
+  body.side-panel-open .fixed.inset-0 {
+    right: 24rem;
   }
 }

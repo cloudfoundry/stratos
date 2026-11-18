@@ -2,8 +2,11 @@ import { HttpClient, HttpErrorResponse } from '@angular/common/http';
 import { Injectable, Signal, computed, inject, signal } from '@angular/core';
 import { firstValueFrom } from 'rxjs';
 
+import { extractHttpErrorMessage, isProxyErrorEntry, proxyErrorReason } from '@stratosui/store';
+
 import { TailwindSnackBarService } from '../../../../core/src/shared/services/tailwind-snackbar.service';
 import { EndpointModel } from '../../../../store/src/types/endpoint.types';
+import { KubeEndpointEviction } from './kube-endpoint-eviction';
 import {
   HelmInstallPayload,
   HelmRelease,
@@ -20,7 +23,8 @@ import {
 // Wire model (preserved verbatim from the legacy `helm/store/helm.effects.ts`
 // and `kubernetes/workloads/store/workloads.effects.ts`):
 //   - Helm releases:       GET    /pp/v1/helm/releases
-//                          (response keyed by endpointId, value = HelmRelease[])
+//                          (response keyed by endpointId, value = HelmRelease[],
+//                           or the endpoint's error entry, see ProxyErrorEntry)
 //   - Helm release detail: GET    /pp/v1/helm/releases/{endpoint}/{ns}/{name}
 //   - Helm install:        POST   /pp/v1/helm/install
 //                          (body = HelmInstallPayload)
@@ -40,6 +44,7 @@ import {
 export class KubeHelmDataService {
   private readonly http = inject(HttpClient);
   private readonly snackBar = inject(TailwindSnackBarService);
+  private readonly eviction = inject(KubeEndpointEviction);
 
   // --- Release state ---
   private readonly _releases = signal<HelmRelease[]>([]);
@@ -60,6 +65,13 @@ export class KubeHelmDataService {
     ...this._releaseErrors(),
     ...this._chartErrors(),
   ]);
+
+  constructor() {
+    this.eviction.register(kubeGuid =>
+      this._releases.update(curr => curr.some(r => r.endpointId === kubeGuid)
+        ? curr.filter(r => r.endpointId !== kubeGuid)
+        : curr));
+  }
 
   // --- Public read API ---
 
@@ -95,23 +107,44 @@ export class KubeHelmDataService {
     return this.errorsSignal;
   }
 
+  // The last release load's failures: one per endpoint that could not be
+  // listed (`affected` names it), or one for the whole request.
+  releaseErrors(): Signal<StratosError[]> {
+    return this._releaseErrors.asReadonly();
+  }
+
   // --- Load / refresh ---
 
   // Fetch releases across ALL connected helm-bearing endpoints. The
   // legacy effect calls /pp/v1/helm/releases without a CNSI header —
   // Jetstream fans the request out to every connected k8s endpoint and
-  // returns a dict keyed by endpoint guid.
+  // returns a dict keyed by endpoint guid. An endpoint evicted while the
+  // request was on the wire is dropped from the response: its releases
+  // were read with the old credentials.
   async loadReleases(): Promise<void> {
     if (this._releasesLoading()) return;
     this._releasesLoading.set(true);
     this._releaseErrors.set([]);
+    const live = this.eviction.currentAny();
     try {
       const resp = await firstValueFrom(
-        this.http.get<Record<string, HelmRelease[] | null>>('/pp/v1/helm/releases'),
+        this.http.get<Record<string, unknown>>('/pp/v1/helm/releases'),
       );
       const all: HelmRelease[] = [];
       Object.keys(resp ?? {}).forEach(endpointId => {
         const list = resp[endpointId];
+        if (!live(endpointId)) return;
+        if (isProxyErrorEntry(list)) {
+          this._releaseErrors.update(curr => [...curr, {
+            scope: 'envelope',
+            code: list.error.statusCode === 401 || list.error.statusCode === 403 ? 'UNAUTHORIZED' : 'FETCH_ERROR',
+            status: list.error.statusCode,
+            title: 'helm-releases',
+            detail: proxyErrorReason(list),
+            affected: [endpointId],
+          } satisfies StratosError]);
+          return;
+        }
         if (!Array.isArray(list)) return;
         list.forEach(raw => {
           all.push(this.normalizeRelease(raw, endpointId));
@@ -284,10 +317,11 @@ export class KubeHelmDataService {
     const next: StratosError = {
       scope: 'envelope',
       code,
+      status,
       title,
       detail: this.unwrapErrorMessage(err),
     };
-    target.update(curr => [...curr, next].slice(0, 50));
+    target.update(curr => [...curr, next].slice(-50));
   }
 
   private errorMessage(err: unknown, fallback: string): string {
@@ -295,18 +329,9 @@ export class KubeHelmDataService {
     return detail ? `${fallback}: ${detail}` : fallback;
   }
 
+  // A Helm handler's failure is Jetstream's own wrapped error,
+  // { error: { message, status } }; the shared reader gives its message.
   private unwrapErrorMessage(err: unknown): string {
-    if (!err) return '';
-    const httpErr = err as HttpErrorResponse;
-    // Jetstream wraps backend errors as { error: { message, status } }
-    const inner = httpErr?.error;
-    if (inner && typeof inner === 'object') {
-      const innerMsg = (inner as { message?: string; status?: string }).message
-        ?? (inner as { status?: string }).status;
-      if (innerMsg) return innerMsg;
-    }
-    if (httpErr?.message) return httpErr.message;
-    if (err instanceof Error) return err.message;
-    return String(err);
+    return err ? extractHttpErrorMessage(err) : '';
   }
 }

@@ -1,4 +1,4 @@
-import { ChangeDetectionStrategy, Component, Input, computed, inject } from '@angular/core';
+import { ChangeDetectionStrategy, Component, computed, inject, input } from '@angular/core';
 
 import { StratosBrandingService } from '../../../../../theme/stratos-branding.service';
 
@@ -49,7 +49,7 @@ export function pickBusyVariant(context: string): BusyVariant {
   changeDetection: ChangeDetectionStrategy.OnPush,
   template: `
     <span class="inline-flex items-center justify-center align-middle"
-          [style.width]="size" [style.height]="size"
+          [style.width]="size()" [style.height]="size()"
           role="status" aria-label="Loading" data-test="busy">
       @switch (resolved()) {
         @case ('dual-ring') {
@@ -80,13 +80,13 @@ export function pickBusyVariant(context: string): BusyVariant {
 })
 export class AppBusyComponent {
   /** Pin a specific variant; overrides `context`. */
-  @Input() variant?: BusyVariant;
+  readonly variant = input<BusyVariant>();
 
   /** Stable string used to pick a variant deterministically. */
-  @Input() context?: string;
+  readonly context = input<string>();
 
   /** CSS size of the indicator square. Defaults to text height. */
-  @Input() size = '1em';
+  readonly size = input('1em');
 
   private branding = inject(StratosBrandingService, { optional: true });
 
@@ -95,8 +95,10 @@ export class AppBusyComponent {
   );
 
   protected resolved(): BusyVariant {
-    if (this.variant) return this.variant;
-    if (this.context) return pickBusyVariant(this.context);
+    const variant = this.variant();
+    if (variant) return variant;
+    const context = this.context();
+    if (context) return pickBusyVariant(context);
     return 'arc';
   }
 }

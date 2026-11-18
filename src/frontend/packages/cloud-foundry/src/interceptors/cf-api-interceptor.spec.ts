@@ -4,6 +4,7 @@ import { signal } from '@angular/core';
 import { TestBed } from '@angular/core/testing';
 import { Router } from '@angular/router';
 import { ConnectEndpointDialogComponent, EndpointsSignalService, TailwindDialogService } from '@stratosui/core';
+import { Observable } from 'rxjs';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 import { StratosDiagnostics } from '../services/diagnostics/stratos-diagnostics.service';
 import { cfApiInterceptor } from './cf-api-interceptor';
@@ -93,7 +94,7 @@ describe('cfApiInterceptor', () => {
   //
   // Helper: capture banner messages and the action label passed alongside.
   const captureSnackbar = async () => {
-    const calls: { msg: string; action?: string; ref: { dismissWithAction: () => void } }[] = [];
+    const calls: { msg: string; action?: string; ref: { dismissWithAction: () => void; afterDismissed: () => Observable<unknown> } }[] = [];
     const { TailwindSnackBarService } = await import('@stratosui/core');
     const snackbar = TestBed.inject(TailwindSnackBarService);
     const origError = snackbar.error.bind(snackbar);
@@ -121,6 +122,25 @@ describe('cfApiInterceptor', () => {
     expect(calls[0].msg).not.toContain(cnsi); // GUID dropped from the banner
     expect(calls[0].msg).toContain('Authentication expired');
     expect(calls[0].action).toBe('Reconnect');
+  });
+
+  it('the auth_expired banner closes once the endpoint answers 2xx again', async () => {
+    const cnsi = 'CSnSysOkvwBD6A-UQyQW6gmKPhI';
+    endpointsStub.endpoints.set({ [cnsi]: { name: 'Kevin' } });
+    const calls = await captureSnackbar();
+
+    http.get(`/pp/v1/cf/info/${cnsi}`).subscribe({ error: () => undefined });
+    ctrl.expectOne(`/pp/v1/cf/info/${cnsi}`).flush(
+      JSON.stringify({ reason: 'auth_expired', detail: 'token rejected' }),
+      { status: 502, statusText: 'Bad Gateway', headers: { 'X-Stratos-Error-Reason': 'auth_expired' } },
+    );
+    let closed = false;
+    calls[0].ref.afterDismissed().subscribe(() => closed = true);
+
+    http.get(`/pp/v1/cf/info/${cnsi}`).subscribe();
+    ctrl.expectOne(`/pp/v1/cf/info/${cnsi}`).flush({});
+
+    expect(closed).toBe(true);
   });
 
   // #5621: the Reconnect action must actually reconnect — it opens the
@@ -249,6 +269,43 @@ describe('cfApiInterceptor', () => {
     );
 
     expect(calls).toHaveLength(0); // component handles its own 404
+  });
+
+  // The native middleware passes a CF 4xx through with CF's status and its
+  // own JSON body (empty reason, upstream status when known). The endpoint
+  // answered, so this is the calling component's error, not a banner.
+  it.each([
+    [400, 'Bad Request', '', 'CF-BadQueryParameter'],
+    [404, 'Not Found', '404', 'CF-ResourceNotFound'],
+    [422, 'Unprocessable Entity', '422', 'CF-UnprocessableEntity'],
+  ])('shaped CF %i with no reason header → no banner', async (status, statusText, upstream, title) => {
+    const cnsi = 'CSnSysOkvwBD6A-UQyQW6gmKPhI';
+    endpointsStub.endpoints.set({ [cnsi]: { name: 'Kevin' } });
+    const calls = await captureSnackbar();
+
+    http.get(`/pp/v1/cf/apps/${cnsi}?return=summary`).subscribe({ error: () => undefined });
+    ctrl.expectOne(`/pp/v1/cf/apps/${cnsi}?return=summary`).flush(
+      JSON.stringify({ reason: '', ...(upstream ? { upstreamStatus: Number(upstream) } : {}), detail: `listing apps: ${title}`, cnsiGuid: cnsi }),
+      { status, statusText, headers: upstream ? { 'X-Stratos-Upstream-Status': upstream } : {} },
+    );
+
+    expect(calls).toHaveLength(0);
+  });
+
+  it('operation_failed reason (a job the endpoint ran and failed) → no endpoint banner', async () => {
+    // The endpoint answered; the broker behind it rejected the operation.
+    // The component that made the call reports that failure.
+    const cnsi = 'CSnSysOkvwBD6A-UQyQW6gmKPhI';
+    endpointsStub.endpoints.set({ [cnsi]: { name: 'Kevin' } });
+    const calls = await captureSnackbar();
+
+    http.post(`/pp/v1/cf/service_instances/${cnsi}`, {}).subscribe({ error: () => undefined });
+    ctrl.expectOne(`/pp/v1/cf/service_instances/${cnsi}`).flush(
+      JSON.stringify({ state: 'FAILED', errors: [{ code: 'cf.v3.10009', message: 'CF-UnableToPerform', detail: 'Operation failed' }] }),
+      { status: 422, statusText: 'Unprocessable Entity', headers: { 'X-Stratos-Error-Reason': 'operation_failed' } },
+    );
+
+    expect(calls).toHaveLength(0);
   });
 
   it('no reason header → neutral "request failed" banner naming the endpoint', async () => {

@@ -124,6 +124,23 @@ describe('AuthDataService', () => {
     expect(svc.sessionData()).toBeNull();
   });
 
+  // The keepalive verify runs near session expiry. When it fails, nothing
+  // verifies again, so a reset that leaves verifying set holds the auth
+  // guard (which waits for !verifying) and every later navigation hangs.
+  it('a failed keepalive verify leaves the session settled, not verifying', async () => {
+    const svc = TestBed.inject(AuthDataService);
+    const login = svc.verifySession(true, true);
+    httpMock.expectOne(VERIFY_URL).flush(okEnvelope(), { headers: { 'x-cap-session-expires-on': '5' } });
+    await login;
+
+    const keepalive = svc.verifySession(false, false);
+    httpMock.expectOne(VERIFY_URL).flush('fail', { status: 502, statusText: 'Bad Gateway' });
+    await keepalive;
+
+    expect(svc.loggedIn()).toBe(false);
+    expect(svc.verifying()).toBe(false);
+  });
+
   it('login posts the credentials then runs a verify cycle', async () => {
     const svc = TestBed.inject(AuthDataService);
     const p = svc.login('alice', 's3cret');

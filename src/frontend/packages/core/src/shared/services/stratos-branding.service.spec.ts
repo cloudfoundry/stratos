@@ -6,6 +6,7 @@ import { HttpTestingController, provideHttpClientTesting } from '@angular/common
 
 import { StratosBrandingService, defaultTheme } from '@stratosui/theme';
 import { BUILD_INFO } from '../../environments/build-info';
+import { luminance } from '../../../../theme/derive-dark';
 
 describe('StratosBrandingService', () => {
   let service: StratosBrandingService;
@@ -63,6 +64,19 @@ describe('StratosBrandingService', () => {
       expect(root.style.getPropertyValue('--color-secondary')).toBe(defaultTheme.colors.secondary);
       expect(root.style.getPropertyValue('--nav-bg')).toBe(defaultTheme.navigation.background);
       expect(root.style.getPropertyValue('--app-bg')).toBe(defaultTheme.layout.background);
+    });
+
+    // A field's edge is the only thing that shows where to type: WCAG 1.4.11
+    // asks for 3:1 against the field, in both modes.
+    it('draws field edges at 3:1 or more against the field, in light and dark', () => {
+      const style = document.documentElement.style;
+      const edge = () => {
+        const [a, b] = [luminance(style.getPropertyValue('--input-border'))!, luminance(style.getPropertyValue('--input-bg'))!];
+        return (Math.max(a, b) + 0.05) / (Math.min(a, b) + 0.05);
+      };
+      expect(edge()).toBeGreaterThanOrEqual(3);
+      service.setThemeMode('dark');
+      expect(edge()).toBeGreaterThanOrEqual(3);
     });
 
     it('should start in light mode', () => {

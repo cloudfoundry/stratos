@@ -1,7 +1,5 @@
-import { AsyncPipe } from "@angular/common";
-import { Component, inject, ChangeDetectionStrategy } from "@angular/core";
+import { Component, computed, inject, ChangeDetectionStrategy } from "@angular/core";
 import { ActivatedRoute, RouterLink } from "@angular/router";
-import { Observable } from "rxjs";
 
 import { PreviewableComponent } from "../../../../../core/src/shared/previewable-component";
 import { SessionService } from "../../../../../core/src/core/session.service";
@@ -16,7 +14,7 @@ import { KubernetesService } from "../../services/kubernetes.service";
   templateUrl: "./kubernetes-namespace-preview.component.html",
   changeDetection: ChangeDetectionStrategy.OnPush,
   standalone: true,
-  imports: [AsyncPipe, RouterLink],
+  imports: [RouterLink],
   providers: [
     {
       provide: BaseKubeGuid,
@@ -34,16 +32,10 @@ import { KubernetesService } from "../../services/kubernetes.service";
   ],
 })
 export class KubernetesNamespacePreviewComponent implements PreviewableComponent {
-  showAnalysis$: Observable<boolean>;
-
   link!: string; // strict: assigned via setProps (PreviewableComponent contract) before the view reads it
   private session = inject(SessionService);
 
-  constructor() {
-    this.showAnalysis$ = KubernetesAnalysisService.isAnalysisEnabled(
-      this.session,
-    );
-  }
+  readonly showAnalysis = computed(() => KubernetesAnalysisService.analysisEnabled(this.session));
 
   setProps(props: { [key: string]: any }): void {
     const { resource, endpointId } = props;

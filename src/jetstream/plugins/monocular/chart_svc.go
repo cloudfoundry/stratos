@@ -125,7 +125,7 @@ func (m *Monocular) getIcon(c *echo.Context) error {
 	iconFilePath, _ := m.cacheChartIcon(*chart)
 	if len(iconFilePath) == 0 {
 		// No icon or error downloading
-		http.Redirect(c.Response(), c.Request(), "/core/assets/custom/placeholder.png", http.StatusTemporaryRedirect)
+		http.Redirect(c.Response(), c.Request(), "/kubernetes/assets/custom/placeholder.png", http.StatusTemporaryRedirect)
 		return nil
 	}
 

@@ -60,6 +60,7 @@ export {
 export { RequestTypes, APIResponse } from './actions/request.actions';
 export { LocalPaginationHelpers } from './helpers/local-list.helpers';
 export { pick } from './helpers/reducer.helper';
+export { observeSignal, combineLatestOrEmpty, createSignalWrapper } from './helpers/signal-interop';
 export type { ApiKey } from './apiKey.types';
 export type {
   PaginationPageIteratorConfig,
@@ -85,15 +86,23 @@ export {
   StratosCatalogEndpointEntity,
   StratosCatalogEntity,
 } from './entity-catalog/entity-catalog-entity/entity-catalog-entity';
-export { getFavoriteInfoObservable } from './helpers/store-helpers';
 export {
   JetStreamErrorResponse,
+  extractHttpErrorMessage,
+  extractHttpErrorPieces,
   httpErrorResponseToSafeString,
   isHttpErrorResponse,
+  leadError,
+  leadPieces,
+  partialFailureError,
   proxyAPIVersion,
+  stripMarkup,
 } from './jetstream';
+export type { PartialFailure } from './jetstream';
+export type { ErrorPiece, ErrorPieceStyle } from './upstream-error-text';
+export { htmlToPieces, piecesToText } from './upstream-error-text';
 export type { RoutingEvent } from './types/routing.type';
-export type { IFavoriteMetadata, IFavoritesInfo, UserFavoriteEndpoint, IEndpointFavMetadata, FavoriteIconData } from './types/user-favorites.types';
+export type { IFavoriteMetadata, UserFavoriteEndpoint, IEndpointFavMetadata, FavoriteIconData } from './types/user-favorites.types';
 export { UserFavorite } from './types/user-favorites.types';
 export { UserFavoriteManager } from './user-favorite-manager';
 export { UserFavoritesDataService } from './services/user-favorites-data.service';
@@ -141,6 +150,7 @@ export {
 export type { APIResource, EntityInfo, NormalizedResponse } from './types/api.types';
 export {
   getFullEndpointApiUrl,
+  endpointUrlKey,
   countDuplicateUrlEndpoints,
   countDuplicateUrlEndpointsByType,
   duplicateUrlStats,
@@ -191,6 +201,7 @@ export type {
   EndpointUpdateOptions,
 } from './services/endpoints-data.service';
 export { EndpointDisconnectCleanupService } from './services/endpoint-disconnect-cleanup.service';
+export { describeLastConnectError, EndpointLastErrorService } from './services/endpoint-last-error.service';
 
 // W-a1 — signal-native metrics data service. Replaces the V2
 // MetricsAction / EntityServiceFactory / getPaginationObservables paths
@@ -198,6 +209,7 @@ export { EndpointDisconnectCleanupService } from './services/endpoint-disconnect
 // metrics.effects.ts once all consumers (chart component + range
 // selectors + 4 call sites) migrate to this service.
 export { MetricsDataService } from './services/metrics-data.service';
+export { ProxyErrorEntry, isProxyErrorEntry, proxyErrorReason } from './services/proxy-error-entry';
 export type {
   MetricsFetchState,
   MetricsObservation,
@@ -216,12 +228,8 @@ export { AuthDataService } from './services/auth-data.service';
 // NavigationEnd events.
 export { RoutingHistoryService } from './services/routing-history.service';
 
-// W36-C Wave 2 — signal-native current-user-roles data service. Single
-// bridge over the legacy `currentUserRoles` ngrx slice. Replaces direct
-// `store.select(getCurrentUserStratosRole(...))` /
-// `store.select(getCurrentUserStratosHasScope(...))` reads in
-// `CurrentUserRolesSignalService` and underpins the cf-side
-// `CfCurrentUserRolesDataService` in the cloud-foundry package.
+// Current-user roles as signals: the Stratos permission checker reads it,
+// and the cf-side `CfCurrentUserRolesDataService` builds on it.
 export { CurrentUserRolesDataService } from './services/current-user-roles-data.service';
 // Shared favorites/recents cleanup for entity deletes — invoked by signal-native
 // delete paths (CF delete controller hook, kube resource delete) so they stay

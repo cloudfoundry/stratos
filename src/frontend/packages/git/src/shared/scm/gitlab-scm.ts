@@ -296,6 +296,10 @@ export class GitLabSCM extends BaseSCM implements GitSCM {
   }
 
   parseErrorAsString(error: unknown): string {
+    const unreachable = this.unreachableHostMessage(error);
+    if (unreachable) {
+      return unreachable;
+    }
     const errorResponse = error as { status?: number };
     return 'Git request failed' + (errorResponse.status ? `(${errorResponse.status})` : '');
   }

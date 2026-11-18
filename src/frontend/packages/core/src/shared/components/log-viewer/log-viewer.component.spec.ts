@@ -1,8 +1,8 @@
-import { Component, CUSTOM_ELEMENTS_SCHEMA, provideZonelessChangeDetection, ViewChild } from '@angular/core';
+import { Component, CUSTOM_ELEMENTS_SCHEMA, provideZonelessChangeDetection, signal, ViewChild } from '@angular/core';
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { RouterTestingModule } from '@angular/router/testing';
 import { describe, it, expect, beforeEach, vi } from 'vitest';
-import { firstValueFrom, from as observableFrom, Subject } from 'rxjs';
+import { firstValueFrom, from as observableFrom, Observable, Subject } from 'rxjs';
 import { filter, take } from 'rxjs/operators';
 import { CoreModule } from '../../../core/core.module';
 import { MDAppModule } from '../../../core/md.module';
@@ -12,12 +12,13 @@ describe('LogViewerComponent', () => {
   @Component({
     standalone: true,
     selector: `app-host-component`,
-    template: `<app-log-viewer></app-log-viewer>`,
+    template: `<app-log-viewer [logStream]="stream()"></app-log-viewer>`,
     imports: [LogViewerComponent]
   })
   class TestHostComponent {
     @ViewChild(LogViewerComponent, { static: true })
     public logViewer!: LogViewerComponent;
+    readonly stream = signal<Observable<string> | undefined>(undefined);
   }
 
   let component: TestHostComponent;
@@ -40,18 +41,32 @@ describe('LogViewerComponent', () => {
       TestBed.compileComponents();
   });
 
-  beforeEach(() => {
+  // Binds a stream and waits for the viewer to switch to it.
+  const show = async (next: Observable<string>) => {
+    component.stream.set(next);
+    await fixture.whenStable();
+  };
+
+  beforeEach(async () => {
     fixture = TestBed.createComponent(TestHostComponent);
     component = fixture.componentInstance;
-    contentEl = component.logViewer.content.nativeElement as HTMLDivElement;
+    contentEl = component.logViewer.content().nativeElement as HTMLDivElement;
     stream = new Subject();
-    component.logViewer.logStream = stream;
-    fixture.detectChanges();
+    await show(stream);
   });
 
-  it('should be created', () => {
-    component.logViewer.logStream = observableFrom('jhgjgh');
+  it('should be created', async () => {
+    await show(observableFrom('jhgjgh'));
     expect(component).toBeTruthy();
+  });
+
+  // WCAG 2.1.1: a keyboard user can scroll the log, so the scroll box
+  // takes focus (it holds no control of its own) and has a name.
+  it('lets the keyboard reach the scroll box', () => {
+    const scroller = fixture.nativeElement.querySelector('.log-scroller') as HTMLElement;
+    expect(scroller.getAttribute('tabindex')).toBe('0');
+    expect(scroller.getAttribute('role')).toBe('region');
+    expect(scroller.getAttribute('aria-label')).toBe('Log');
   });
 
   it('should add logline from observable', async () => {
@@ -65,7 +80,6 @@ describe('LogViewerComponent', () => {
     // Need to wait for sampleTime(500) + buffer processing + DOM update
     await vi.waitFor(
       () => {
-        fixture.detectChanges();
         expect(contentEl.children.length).toEqual(1);
       },
       { timeout: 2000, interval: 50 }
@@ -73,6 +87,42 @@ describe('LogViewerComponent', () => {
 
     expect(contentEl.children[0].children[0].innerHTML).toEqual(logText);
   }, 3000);
+
+  describe('when the log stream changes', () => {
+    const shown = async (text: string) => vi.waitFor(() => expect(contentEl.textContent).toContain(text));
+
+    it('clears the lines of the previous stream', async () => {
+      stream.next('old');
+      await shown('old');
+
+      const next = new Subject<string>();
+      await show(next);
+      expect(contentEl.children.length).toEqual(0);
+      next.next('new');
+      await shown('new');
+
+      expect(contentEl.textContent).not.toContain('old');
+    });
+
+    it('drops lines of the previous stream it had not shown yet', async () => {
+      stream.next('stale');
+      const next = new Subject<string>();
+      await show(next);
+      next.next('new');
+      await shown('new');
+
+      expect(contentEl.textContent).not.toContain('stale');
+    });
+
+    it('keeps the lines when given the same stream again', async () => {
+      stream.next('kept');
+      await shown('kept');
+
+      await show(stream);
+
+      expect(contentEl.textContent).toContain('kept');
+    });
+  });
 
   it('should only allow max rows', async () => {
     expect(contentEl.children.length).toEqual(0);
@@ -97,7 +147,6 @@ describe('LogViewerComponent', () => {
     // Wait for all buffering and processing to complete
     await vi.waitFor(
       () => {
-        fixture.detectChanges();
         expect(contentEl.children.length).toEqual(component.logViewer.maxLogLines);
       },
       { timeout: 3000, interval: 100 }
@@ -154,4 +203,47 @@ describe('LogViewerComponent', () => {
     }
   }, 5000);
 
+});
+
+describe('LogViewerComponent connection status', () => {
+  @Component({
+    standalone: true,
+    selector: 'app-status-host',
+    template: `<app-log-viewer [logStream]="stream" [status]="status"></app-log-viewer>`,
+    imports: [LogViewerComponent]
+  })
+  class StatusHostComponent {
+    stream = new Subject<string>();
+    status = new Subject<number>();
+  }
+
+  let fixture: ComponentFixture<StatusHostComponent>;
+  const statusText = () =>
+    (fixture.nativeElement as HTMLElement).querySelector('[role="status"]')?.textContent?.trim() ?? '';
+
+  beforeEach(async () => {
+    TestBed.configureTestingModule({ providers: [provideZonelessChangeDetection()] });
+    fixture = TestBed.createComponent(StatusHostComponent);
+    await fixture.whenStable();
+    vi.spyOn(console, 'log').mockImplementation(() => undefined);
+    vi.spyOn(console, 'error').mockImplementation(() => undefined);
+  });
+
+  it('shows what the connection is doing and clears the note once connected', async () => {
+    fixture.componentInstance.status.next(0);
+    await fixture.whenStable();
+    expect(statusText()).toBe('Connecting to log stream...');
+
+    fixture.componentInstance.status.next(1);
+    await fixture.whenStable();
+    expect(statusText()).toBe('');
+  });
+
+  it('shows a failure in the error style', async () => {
+    fixture.componentInstance.status.next(-1);
+    await fixture.whenStable();
+    const text = (fixture.nativeElement as HTMLElement).querySelector('.log-viewer__messageText');
+    expect(text?.textContent).toContain('Unable to connect to log stream.');
+    expect(text?.classList).toContain('text-danger');
+  });
 });

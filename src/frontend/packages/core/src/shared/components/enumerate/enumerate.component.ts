@@ -1,17 +1,12 @@
-import { CommonModule } from '@angular/common';
-import { ChangeDetectionStrategy, Component, Input  } from '@angular/core';
-import { Observable } from 'rxjs';
+import { ChangeDetectionStrategy, Component, input } from '@angular/core';
 
 @Component({
   selector: 'app-enumerate',
   templateUrl: './enumerate.component.html',
   standalone: true,
-  imports: [
-    CommonModule,
-  ],
   changeDetection: ChangeDetectionStrategy.OnPush
 })
 export class EnumerateComponent {
-  @Input() collection!: Observable<any[]>;
-  @Input() labelPath!: string;
+  readonly collection = input<any[] | null>();
+  readonly labelPath = input<string>();
 }

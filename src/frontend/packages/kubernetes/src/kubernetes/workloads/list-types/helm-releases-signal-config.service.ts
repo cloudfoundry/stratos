@@ -132,6 +132,23 @@ export class HelmReleasesSignalConfigService {
     return this.helmData.errors();
   }
 
+  // The release load's failures for the list: keyed by the endpoint that
+  // could not be listed (the list's error banner names it), or by
+  // 'Helm releases' when the whole request failed.
+  errorsByEndpoint(): Signal<Map<string, unknown>> {
+    const errors = this.helmData.releaseErrors();
+    return computed(() => new Map(errors().map(e => [e.affected?.[0] ?? 'Helm releases', e] as const)));
+  }
+
+  // The newest failure's reason, shown in the failed-load state.
+  errorDetail(): Signal<string | undefined> {
+    const errors = this.helmData.releaseErrors();
+    return computed(() => {
+      const errs = errors();
+      return errs[errs.length - 1]?.detail;
+    });
+  }
+
   isLoading(): Signal<boolean> {
     return this.helmData.isLoadingReleases();
   }

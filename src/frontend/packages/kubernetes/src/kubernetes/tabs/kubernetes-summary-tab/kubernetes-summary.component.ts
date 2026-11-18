@@ -1,16 +1,13 @@
 import { HttpClient } from '@angular/common/http';
-import {Component, NgZone, OnDestroy, OnInit, computed, inject, ChangeDetectionStrategy, Injector, runInInjectionContext } from '@angular/core';
-import { toSignal, toObservable } from '@angular/core/rxjs-interop';
-import { CommonModule } from '@angular/common';
+import { Component, OnDestroy, OnInit, computed, inject, ChangeDetectionStrategy } from '@angular/core';
+import { toSignal } from '@angular/core/rxjs-interop';
 import { SafeResourceUrl } from '@angular/platform-browser';
 import { Router, RouterModule } from '@angular/router';
-import { interval, Observable, Subscription } from 'rxjs';
-import { map, startWith } from 'rxjs/operators';
+import { interval, Subscription } from 'rxjs';
 
 import { safeUnsubscribe } from '../../../../../core/src/core/utils.service';
 import {
   IChartThresholds,
-  ISimpleUsageChartData,
 } from '../../../../../core/src/shared/components/simple-usage-chart/simple-usage-chart.types';
 import { SimpleUsageChartComponent } from '../../../../../core/src/shared/components/simple-usage-chart/simple-usage-chart.component';
 import { PageSubNavComponent } from '../../../../../core/src/shared/components/page-sub-nav/page-sub-nav.component';
@@ -27,8 +24,13 @@ import { entityCatalog } from '@stratosui/store';
 import { KubePodDataService } from '../../../services/domain-data/kube-pod-data.service';
 import { KubeNodeDataService } from '../../../services/domain-data/kube-node-data.service';
 import { KubeNamespaceDataService } from '../../../services/domain-data/kube-namespace-data.service';
+import { KubeClusterLoadFailures } from '../../../services/domain-data/kube-cluster-load-failures';
 import { KubernetesNode, KubernetesPod } from '../../store/kube.types';
-import { CaaspNodesData, KubernetesEndpointService } from '../../services/kubernetes-endpoint.service';
+import {
+  KubernetesEndpointService,
+  kubeDashboardConfigured,
+  kubeDashboardLabel,
+} from '../../services/kubernetes-endpoint.service';
 
 const cssVar = (n: string) => getComputedStyle(document.documentElement).getPropertyValue(n).trim();
 
@@ -47,7 +49,6 @@ interface IEndpointDetails {
   changeDetection: ChangeDetectionStrategy.OnPush,
   standalone: true,
   imports: [
-    CommonModule,
     RouterModule,
     SimpleUsageChartComponent,
     PageSubNavComponent,
@@ -61,12 +62,6 @@ interface IEndpointDetails {
   ]
 })
 export class KubernetesSummaryTabComponent implements OnInit, OnDestroy {
-  // strict: the count/chart/loading streams below are all assigned in ngOnInit
-  // before the template subscribes to them
-  public podCount$!: Observable<number | null>;
-  public nodeCount$!: Observable<number | null>;
-  public namespaceCount$!: Observable<number | null>;
-
   // Resolve adaptive theme colors once at construction. These feed
   // SimpleUsageChart domains; the component is not rebuilt on a live theme
   // toggle, so the colors reflect the theme active when this view loaded.
@@ -87,42 +82,84 @@ export class KubernetesSummaryTabComponent implements OnInit, OnDestroy {
   private podData = inject(KubePodDataService);
   private nodeData = inject(KubeNodeDataService);
   private namespaceData = inject(KubeNamespaceDataService);
-  private ngZone = inject(NgZone);
+  private failures = inject(KubeClusterLoadFailures);
   private router = inject(Router);
-  private injector = inject(Injector);
 
-  public endpointDetails$: Observable<IEndpointDetails> = this.kubeEndpointService.endpoint$.pipe(
-    map(endpoint => {
-      // strict: this view only renders for a connected kubernetes endpoint,
-      // so its model always carries a cnsi_type
-      const endpointConfig = entityCatalog.getEndpoint(endpoint.entity.cnsi_type!, endpoint.entity.sub_type);
-      const { logoUrl, label } = endpointConfig?.definition ?? {};
-      // const { imagePath, label } = entityCatalog.getEndpoint(endpoint.entity.cnsi_type, endpoint.entity.sub_type);
-
-      // const { imagePath, label } = getEndpointType(endpoint.entity.cnsi_type, endpoint.entity.sub_type);
-      return {
-        imagePath: logoUrl,
-        label,
-        name: endpoint.entity.name,
-      };
-    })
-  );
+  readonly endpointDetails = computed((): IEndpointDetails | null => {
+    const endpoint = this.kubeEndpointService.endpoint();
+    if (!endpoint) {
+      return null;
+    }
+    // strict: this view only renders for a connected kubernetes endpoint,
+    // so its model always carries a cnsi_type
+    const endpointConfig = entityCatalog.getEndpoint(endpoint.cnsi_type!, endpoint.sub_type);
+    const { logoUrl, label } = endpointConfig?.definition ?? {};
+    return {
+      imagePath: logoUrl,
+      label,
+      name: endpoint.name,
+    };
+  });
   source?: SafeResourceUrl;
 
   // strict: assigned in ngOnInit before the template reads them
   dashboardLink!: string;
   kubeTerminalLink!: string;
 
-  public podCapacity$!: Observable<ISimpleUsageChartData>;
-  public diskPressure$!: Observable<ISimpleUsageChartData>;
-  public memoryPressure$!: Observable<ISimpleUsageChartData>;
-  public outOfDisk$!: Observable<ISimpleUsageChartData>;
-  public nodesReady$!: Observable<ISimpleUsageChartData>;
+  // The dashboard status is an HTTP read; the page subscribes to it here.
+  readonly dashboardStatus = toSignal(this.kubeEndpointService.kubeDashboardStatus$, { initialValue: null });
+  readonly dashboardConfigured = computed(() => kubeDashboardConfigured(this.dashboardStatus()));
+  readonly dashboardLabel = computed(() => kubeDashboardLabel(this.dashboardStatus()));
+
+  // Cluster lists from the signal-native data services. The pod/node helpers
+  // are typed against the legacy KubernetesPod/KubernetesNode shapes; the
+  // runtime k8s JSON is identical, so cast at this boundary.
+  private readonly podList = this.podData.podsInCluster(this.kubeEndpointService.baseKube.guid);
+  private readonly nodeList = this.nodeData.nodesInCluster(this.kubeEndpointService.baseKube.guid);
+  private readonly namespaces = this.namespaceData.namespacesForEndpoint(this.kubeEndpointService.baseKube.guid);
+  private readonly pods = computed(() => this.podList() as unknown as KubernetesPod[]);
+  private readonly nodes = computed(() => this.nodeList() as unknown as KubernetesNode[]);
+
+  // A count whose load failed is null: the tile shows "-", not 0.
+  readonly podCount = computed(() => this.failures.pods(this.guid()) ? null : this.pods().length);
+  readonly nodeCount = computed(() => this.failures.nodes(this.guid()) ? null : this.nodes().length);
+  readonly namespaceCount = computed(() => this.failures.namespaces(this.guid()) ? null : this.namespaces().length);
+
+  readonly podCapacity = computed(() => this.kubeEndpointService.getPodCapacity(this.nodes(), this.pods()));
+  readonly diskPressure = computed(() => this.kubeEndpointService.getNodeStatusCount(this.nodes(), 'DiskPressure', {
+    usedLabel: 'Nodes with disk pressure',
+    remainingLabel: 'Nodes with no disk pressure',
+    unknownLabel: 'Nodes with unknown disk pressure',
+    warningText: 'Nodes with unknown disk pressure found'
+  }));
+  readonly memoryPressure = computed(() => this.kubeEndpointService.getNodeStatusCount(this.nodes(), 'MemoryPressure', {
+    usedLabel: 'Nodes with memory pressure',
+    remainingLabel: 'Nodes with no memory pressure',
+    unknownLabel: 'Nodes with unknown memory pressure',
+    warningText: 'Nodes with unknown memory pressure found'
+  }));
+  readonly outOfDisk = computed(() => this.kubeEndpointService.getNodeStatusCount(this.nodes(), 'OutOfDisk', {
+    usedLabel: 'Nodes that are out of disk space',
+    remainingLabel: 'Nodes that have disk space remaining',
+    unknownLabel: 'Nodes with unknown remaining disk space',
+    warningText: 'Nodes with unknown remaining disk space found'
+  }));
   // getNodeStatusCount decorates the chart data with a `supported` flag —
   // NetworkUnavailable is only reported by some K8S versions.
-  public networkUnavailable$!: Observable<ISimpleUsageChartData & { supported?: boolean }>;
-  public kubeNodeVersions$!: Observable<string>;
-  public caaspData$!: Observable<CaaspNodesData | null>;
+  readonly networkUnavailable = computed(() => this.kubeEndpointService.getNodeStatusCount(this.nodes(), 'NetworkUnavailable', {
+    usedLabel: 'Nodes with available networks',
+    remainingLabel: 'Nodes with unavailable networks',
+    unknownLabel: 'Nodes with unknown networks availability',
+    warningText: 'Nodes with unknown networks availability found'
+  }, 'False'));
+  readonly nodesReady = computed(() => this.kubeEndpointService.getNodeStatusCount(this.nodes(), 'Ready', {
+    usedLabel: 'Nodes are ready',
+    remainingLabel: 'Nodes are not ready',
+    unknownLabel: 'Nodes with unknown ready status',
+    warningText: `Nodes with unknown ready status found`
+  }));
+  readonly kubeNodeVersions = computed(() => this.kubeEndpointService.getNodeKubeVersions(this.nodes()) || '-');
+  readonly caaspData = computed(() => this.kubeEndpointService.getCaaspNodesData(this.nodes()));
 
   public pressureChartThresholds: IChartThresholds = {
     danger: 90,
@@ -145,8 +182,17 @@ export class KubernetesSummaryTabComponent implements OnInit, OnDestroy {
 
   private polls: Subscription[] = [];
 
-  // strict: assigned in ngOnInit before the template subscribes
-  public isLoading$!: Observable<boolean>;
+  // The charts and counts are computed straight from the cluster lists,
+  // so the page waits only for the endpoint.
+  readonly isLoading = computed(() => !this.endpointDetails());
+
+  // Why a cluster list failed to load (shown above the charts), and
+  // whether the node list did (its charts are then hidden: they would
+  // chart an empty list). A failed count shows "-", not 0.
+  private readonly guid = computed(() => this.kubeEndpointService.baseKube.guid);
+  readonly failureReason = computed(() => this.failures.any(this.guid()));
+  readonly nodesFailed = computed(() => !!this.failures.nodes(this.guid()));
+  readonly podsFailed = computed(() => !!this.failures.pods(this.guid()));
 
   // Go the Kubernetes Dashboard configuration page
   public configureDashboard() {
@@ -156,106 +202,21 @@ export class KubernetesSummaryTabComponent implements OnInit, OnDestroy {
   ngOnInit() {
     const guid = this.kubeEndpointService.baseKube.guid;
 
-    // Cluster lists now come from the signal-native data services. Bridge
-    // each signal to an Observable for the existing kubeEndpointService
-    // count/capacity/status helpers. The pod/node helpers are typed against
-    // the legacy KubernetesPod/KubernetesNode shapes; the runtime k8s JSON is
-    // identical, so cast the native-shape bridges at this boundary.
-    const pods$ = toObservable(this.podData.podsInCluster(guid), { injector: this.injector }) as unknown as Observable<KubernetesPod[]>;
-    const nodes$ = toObservable(this.nodeData.nodesInCluster(guid), { injector: this.injector }) as unknown as Observable<KubernetesNode[]>;
-    const namespaces$ = toObservable(this.namespaceData.namespacesForEndpoint(guid), { injector: this.injector });
-
     // Prime the caches now, then poll them on the same 10s cadence the old
     // pagination dispatch poll drove.
     this.refreshAll(guid);
     this.poll(guid);
 
-    this.podCount$ = this.kubeEndpointService.getCountObservable(pods$);
-    this.nodeCount$ = this.kubeEndpointService.getCountObservable(nodes$);
-    this.namespaceCount$ = this.kubeEndpointService.getCountObservable(namespaces$);
-
-    this.podCapacity$ = this.kubeEndpointService.getPodCapacity(nodes$, pods$);
-    this.diskPressure$ = this.kubeEndpointService.getNodeStatusCount(nodes$, 'DiskPressure', {
-      usedLabel: 'Nodes with disk pressure',
-      remainingLabel: 'Nodes with no disk pressure',
-      unknownLabel: 'Nodes with unknown disk pressure',
-      warningText: 'Nodes with unknown disk pressure found'
-    });
-    this.memoryPressure$ = this.kubeEndpointService.getNodeStatusCount(nodes$, 'MemoryPressure', {
-      usedLabel: 'Nodes with memory pressure',
-      remainingLabel: 'Nodes with no memory pressure',
-      unknownLabel: 'Nodes with unknown memory pressure',
-      warningText: 'Nodes with unknown memory pressure found'
-    });
-    this.outOfDisk$ = this.kubeEndpointService.getNodeStatusCount(nodes$, 'OutOfDisk', {
-      usedLabel: 'Nodes that are out of disk space',
-      remainingLabel: 'Nodes that have disk space remaining',
-      unknownLabel: 'Nodes with unknown remaining disk space',
-      warningText: 'Nodes with unknown remaining disk space found'
-    });
-    this.networkUnavailable$ = this.kubeEndpointService.getNodeStatusCount(nodes$, 'NetworkUnavailable', {
-      usedLabel: 'Nodes with available networks',
-      remainingLabel: 'Nodes with unavailable networks',
-      unknownLabel: 'Nodes with unknown networks availability',
-      warningText: 'Nodes with unknown networks availability found'
-    }, 'False');
-    this.nodesReady$ = this.kubeEndpointService.getNodeStatusCount(nodes$, 'Ready', {
-      usedLabel: 'Nodes are ready',
-      remainingLabel: 'Nodes are not ready',
-      unknownLabel: 'Nodes with unknown ready status',
-      warningText: `Nodes with unknown ready status found`
-    });
     this.dashboardLink = `/kubernetes/${guid}/dashboard`;
     this.kubeTerminalLink = `/kubernetes/${guid}/terminal`;
-
-    this.kubeNodeVersions$ = this.kubeEndpointService.getNodeKubeVersions(nodes$).pipe(startWith('-'));
-
-    this.caaspData$ = this.kubeEndpointService.getCaaspNodesData(nodes$);
-
-    // Convert all observables to signals within injection context
-    runInInjectionContext(this.injector, () => {
-      const endpointDetailsSignal = toSignal(this.endpointDetails$, { initialValue: null as any });
-      const podCountSignal = toSignal(this.podCount$, { initialValue: null as number | null });
-      const nodeCountSignal = toSignal(this.nodeCount$, { initialValue: null as number | null });
-      const podCapacitySignal = toSignal(this.podCapacity$, { initialValue: null as any });
-      const diskPressureSignal = toSignal(this.diskPressure$, { initialValue: null as any });
-      const memoryPressureSignal = toSignal(this.memoryPressure$, { initialValue: null as any });
-      const outOfDiskSignal = toSignal(this.outOfDisk$, { initialValue: null as any });
-      const nodesReadySignal = toSignal(this.nodesReady$, { initialValue: null as any });
-      const networkUnavailableSignal = toSignal(this.networkUnavailable$, { initialValue: null as any });
-
-      // Compute loading state - false when all are loaded
-      const isLoadingComputed = computed(() => {
-        // Check if all required data is loaded
-        return !(
-          endpointDetailsSignal() !== null &&
-          podCountSignal() !== null &&
-          nodeCountSignal() !== null &&
-          podCapacitySignal() !== null &&
-          diskPressureSignal() !== null &&
-          memoryPressureSignal() !== null &&
-          outOfDiskSignal() !== null &&
-          nodesReadySignal() !== null &&
-          networkUnavailableSignal() !== null
-        );
-      });
-
-      this.isLoading$ = toObservable(isLoadingComputed);
-    });
   }
 
   private poll(guid: string) {
-    this.ngZone.runOutsideAngular(() =>
-      this.polls.push(
-        interval(10000).subscribe(() => {
-          this.ngZone.run(() => this.refreshAll(guid));
-        })
-      )
-    );
+    this.polls.push(interval(10000).subscribe(() => this.refreshAll(guid)));
   }
 
-  // Refresh the three cluster caches. Each data service dedups in-flight
-  // fetches, so overlapping polls don't stack duplicate requests.
+  // Refresh the three cluster caches. Each refresh sends its own request
+  // (none is deduplicated against one already in flight).
   private refreshAll(guid: string) {
     void this.podData.refresh({ kubeGuid: guid });
     void this.nodeData.refresh(guid);

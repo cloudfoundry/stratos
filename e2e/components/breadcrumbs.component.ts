@@ -8,16 +8,18 @@ export class BreadcrumbsComponent {
   private breadcrumbs: Locator;
 
   constructor(private page: Page) {
-    // Breadcrumbs render in the top toolbar (.page-header-breadcrumbs) and/or
-    // the sub-nav bar; app-breadcrumbs still exists for standalone uses
+    // Page-header trail renders inside <app-breadcrumbs> (crumbs are .breadcrumb,
+    // links are <a>); the dashboard sub-nav uses .page-header-sub-nav-breadcrumbs.
+    // Not '.breadcrumbs' — that inner div lives inside app-breadcrumbs and would
+    // double-match every crumb.
     this.breadcrumbs = page.locator(
-      'app-breadcrumbs, .breadcrumbs, .page-header-breadcrumbs, .page-header-sub-nav-breadcrumbs'
+      'app-breadcrumbs, .page-header-breadcrumbs, .page-header-sub-nav-breadcrumbs'
     );
   }
 
   getBreadcrumbs(): Locator {
     return this.breadcrumbs.locator(
-      'a, .breadcrumb-item, .page-header-breadcrumb, .page-header-sub-nav-breadcrumb'
+      'a, .breadcrumb, .breadcrumb-item, .page-header-breadcrumb, .page-header-sub-nav-breadcrumb'
     );
   }
 
@@ -49,6 +51,12 @@ export class BreadcrumbsComponent {
    */
   async getBreadcrumbsData(): Promise<Array<{ label: string; href?: string }>> {
     const locators = this.getBreadcrumbs();
+    // The trail emits only after the app entity + org + space + endpoint have
+    // all loaded (combineLatest in application-tabs-base), which lags the page
+    // shell — especially against a slow CF data path. Wait for the first crumb
+    // before snapshotting so we don't read an empty (not-yet-rendered) trail.
+    // 25s covers the 2-worker shared-CF ceiling (15s tips over under contention).
+    await locators.first().waitFor({ state: 'visible', timeout: 25000 }).catch(() => { /* leave empty; caller asserts */ });
     const count = await locators.count();
     const breadcrumbs: Array<{ label: string; href?: string }> = [];
 

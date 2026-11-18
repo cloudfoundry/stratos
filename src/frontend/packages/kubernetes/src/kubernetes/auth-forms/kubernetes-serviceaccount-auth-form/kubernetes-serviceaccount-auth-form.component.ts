@@ -1,4 +1,4 @@
-import { ChangeDetectionStrategy, Component, Input} from '@angular/core';
+import { ChangeDetectionStrategy, Component, input } from '@angular/core';
 import { FormControl, FormGroup, ReactiveFormsModule } from '@angular/forms';
 
 import { IAuthForm } from '../../../../../store/src/extension-types';
@@ -15,5 +15,6 @@ interface ServiceAccountAuthForm {
   imports: [ReactiveFormsModule]
 })
 export class KubernetesSATokenAuthFormComponent implements IAuthForm {
-  @Input() formGroup!: FormGroup<ServiceAccountAuthForm>; // strict: required @Input (IAuthForm contract), assigned by the auth-form host
+  // Set by the host that creates the form (IAuthForm contract)
+  readonly formGroup = input.required<FormGroup<ServiceAccountAuthForm>>();
 }

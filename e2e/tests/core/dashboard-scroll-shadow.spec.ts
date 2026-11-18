@@ -30,7 +30,7 @@ test.describe('Dashboard Content Scroll Shadow', () => {
    * Dismiss any error banner that may appear after login/navigation
    */
   async function dismissErrorBanner(page: any) {
-    const closeButton = page.locator('button[aria-label="Close"]').first();
+    const closeButton = page.locator('button[aria-label="Close"], .snackbar-close').first();
     if (await closeButton.isVisible({ timeout: 1000 }).catch(() => false)) {
       await closeButton.click().catch(() => {});
     }

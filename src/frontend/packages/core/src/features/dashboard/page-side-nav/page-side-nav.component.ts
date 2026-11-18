@@ -1,10 +1,9 @@
 import { CommonModule } from '@angular/common';
 import { HttpClient } from '@angular/common/http';
-import { ChangeDetectionStrategy, Component, Input, OnInit, inject } from '@angular/core';
-import { toObservable } from '@angular/core/rxjs-interop';
+import { ChangeDetectionStrategy, Component, ElementRef, Injector, Signal, computed, inject, input, linkedSignal, runInInjectionContext, signal, untracked, viewChild } from '@angular/core';
+import { toSignal } from '@angular/core/rxjs-interop';
 import { ActivatedRoute, RouterModule } from '@angular/router';
-import { Observable, of } from 'rxjs';
-import { map } from 'rxjs/operators';
+import { Observable } from 'rxjs';
 import { StratosTabMetadata } from '../../../core/extension/extension-service';
 import { CurrentUserPermissionsService } from '../../../core/permissions/current-user-permissions.service';
 import { DashboardSignalService } from '../../../core/signals/dashboard-signal.service';
@@ -15,8 +14,12 @@ import { CustomIconComponent } from '../../../shared/components/custom-material/
 
 
 export interface IPageSideNavTab extends StratosTabMetadata {
-  hidden$?: Observable<boolean>;
+  // The tab's gate: shown only while it reads false (null = not known yet).
+  // When present, the extension metadata's hidden() is not used.
+  isHidden?: Signal<boolean | null>;
 }
+
+const SHOWN = signal(false).asReadonly();
 
 @Component({
   selector: 'app-page-side-nav',
@@ -28,47 +31,74 @@ export interface IPageSideNavTab extends StratosTabMetadata {
     RouterModule,
     CustomIconComponent
   ],
-  changeDetection: ChangeDetectionStrategy.OnPush
+  changeDetection: ChangeDetectionStrategy.OnPush,
+  host: {
+    '(keydown.escape)': 'close()',
+    '(focusout)': 'onFocusOut($event)',
+  },
 })
-export class PageSideNavComponent implements OnInit {
+export class PageSideNavComponent {
   tabNavService = inject(TabNavService);
   private activatedRoute = inject(ActivatedRoute);
   private cups = inject(CurrentUserPermissionsService);
   private http = inject(HttpClient);
   private dashboardSignals = inject(DashboardSignalService);
+  private injector = inject(Injector);
 
 
-  pTabs: IPageSideNavTab[] = [];
-  @Input() set tabs(tabs: IPageSideNavTab[]) {
-    if (!tabs) {
-      this.pTabs = [];
-      return;
-    }
-    if (this.pTabs && tabs.length === this.pTabs.length) {
-      return;
-    }
-    this.pTabs = tabs.map(tab => ({
-      ...tab,
-      hidden$: tab.hidden$ || (tab.hidden ? tab.hidden(this.activatedRoute, this.cups, this.http) : of(false))
-    }));
-  }
-  get tabs(): IPageSideNavTab[] {
-    return this.pTabs;
-  }
+  readonly tabs = input<IPageSideNavTab[] | null>();
+
+  // The tabs as rendered, each with its gate. A new list of the same
+  // length keeps the tabs already shown, so their gates are not asked again.
+  readonly shownTabs = linkedSignal<IPageSideNavTab[] | null | undefined, IPageSideNavTab[]>({
+    source: this.tabs,
+    computation: (tabs, previous) => {
+      const shown = previous?.value ?? [];
+      if (!tabs) {
+        return [];
+      }
+      if (tabs.length === shown.length) {
+        return shown;
+      }
+      // A tab's hidden() is extension code returning a stream; run it outside
+      // the reactive context so it can neither add dependencies nor fail on a
+      // signal write, and read it as a signal. It runs in this view's
+      // injection context, so it may inject() (for example to watch a
+      // permission signal).
+      return untracked(() => tabs.map(tab => ({
+        ...tab,
+        isHidden: tab.isHidden ?? (tab.hidden
+          ? toSignal(
+            runInInjectionContext(this.injector, () => tab.hidden!(this.activatedRoute, this.cups, this.http)),
+            { initialValue: null, injector: this.injector })
+          : SHOWN),
+      })));
+    },
+  });
 
   // Bound from async-piped streams that may emit null/undefined before the
   // header resolves; interpolation renders those as an empty string.
-  @Input()
-  public header: string | null | undefined;
-  public activeTab$!: Observable<string>;
+  public readonly header = input<string | null>();
+  public readonly activeTab = computed(() => this.tabNavService.currentTabHeader()?.label ?? null);
   public breadcrumbs$!: Observable<IBreadcrumb[]>;
-  public isMobile$: Observable<boolean>;
-  constructor() {
-    this.isMobile$ = toObservable(this.dashboardSignals.isMobile);
+  public readonly isMobile = this.dashboardSignals.isMobile;
+  // The compact dropdown, opened by its button as well as by hover.
+  public readonly open = signal(false);
+  private readonly compactToggle = viewChild.required<ElementRef<HTMLButtonElement>>('compactToggle');
+  private readonly el = inject<ElementRef<HTMLElement>>(ElementRef);
+
+  close() {
+    if (this.open()) {
+      this.open.set(false);
+      this.compactToggle().nativeElement.focus();
+    }
   }
 
-  ngOnInit() {
-    this.activeTab$ = this.tabNavService.getCurrentTabHeaderObservable().pipe(map((item: any) => item ? item.label : null));
+  // Focus leaving the nav closes the list, which would cover the page.
+  onFocusOut(e: FocusEvent) {
+    if (!this.el.nativeElement.contains(e.relatedTarget as Node | null)) {
+      this.open.set(false);
+    }
   }
 
 }

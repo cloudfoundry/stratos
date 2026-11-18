@@ -34,14 +34,15 @@ export class BackupConnectionCellComponent extends TableCellCustom<EndpointModel
   userConnectionWarning!: string;
 
   ngOnInit() {
-    if (!this.row.cnsi_type) {
+    const row = this.row();
+    if (!row.cnsi_type) {
       return;
     }
-    const epEntity = entityCatalog.getEndpoint(this.row.cnsi_type, this.row.sub_type)?.definition;
+    const epEntity = entityCatalog.getEndpoint(row.cnsi_type, row.sub_type)?.definition;
     this.connectable = !epEntity?.unConnectable;
-    if (!this.row.user) {
+    if (!row.user) {
       this.userConnectionWarning = 'User not connected';
-    } else if (this.row.user.guid === SystemSharedUserGuid) {
+    } else if (row.user.guid === SystemSharedUserGuid) {
       this.userConnectionWarning = 'User has shared connection';
     }
   }

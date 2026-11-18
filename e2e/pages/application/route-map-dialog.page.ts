@@ -1,4 +1,4 @@
-import { Page, Locator } from '@playwright/test';
+import { Page, Locator, expect } from '@playwright/test';
 import { BasePage } from '../base.page';
 
 /**
@@ -23,8 +23,13 @@ export class RouteMapDialogPage extends BasePage {
     this.routeList = this.dialog.locator('[data-test="available-routes"] app-signal-list');
     this.domainFilter = this.dialog.locator('select[name="domain"]').first(); // gone in modern UI; guarded no-op
     this.searchInput = this.dialog.locator('[data-test="available-routes"] input[placeholder*="Filter"]').first();
-    this.mapButton = this.dialog.locator('button').filter({ hasText: /create|map|attach/i });
-    this.cancelButton = this.dialog.locator('button').filter({ hasText: /cancel|close/i });
+    // Target the stepper's submit/cancel buttons by their stable ids. A
+    // text regex like /create|map|attach/i is a trap here: the picker's
+    // "Apps Attached" sortable column header is also a <button> and sorts
+    // ahead of #stepper_next in the DOM, so `.first()` grabs the header and
+    // the click sorts the list instead of submitting.
+    this.mapButton = this.dialog.locator('#stepper_next');
+    this.cancelButton = this.dialog.locator('#stepper_cancel');
   }
 
   /**
@@ -86,10 +91,35 @@ export class RouteMapDialogPage extends BasePage {
   }
 
   /**
-   * Click map button
+   * Click map button.
+   *
+   * Two things conspire to swallow this click on the modern add-route page:
+   *
+   * 1. app-loading-page's `leaveLoaderAnimation` (250ms ease-out opacity fade,
+   *    loading-page.component.ts) holds `.loading-page__overlay` in the DOM
+   *    (`ng-animating`) for a quarter-second after loading completes. That
+   *    fixed, full-screen z-index:1050 div still intercepts pointer events
+   *    during the fade, over the button. Loading is already done — it's a
+   *    cosmetic leave-animation only a machine-fast click races into (a real
+   *    user's post-spinner reaction time exceeds 250ms) — so make the overlay
+   *    AND its children click-transparent. `pointer-events`
+   *    is not inherited, so the `*` is required: neutralising only the overlay
+   *    div leaves its spinner/indicator children grabbing the click. A real
+   *    click (not `dispatchEvent`, which the zoneless app ignores) then falls
+   *    through to #stepper_next. Persistent style tag so it holds if the
+   *    overlay reappears.
+   * 2. The stepper's Map/Create button sits below the fold; scroll it to
+   *    centre first so the click lands on it rather than a bottom-edge sliver.
+   *
+   * The button is already gated on isMapEnabled().
    */
   async clickMap(): Promise<void> {
-    await this.mapButton.first().click();
+    await this.page.addStyleTag({
+      content: '.loading-page__overlay, .loading-page__overlay * { pointer-events: none !important; }',
+    });
+    const button = this.mapButton.first();
+    await button.scrollIntoViewIfNeeded();
+    await button.click({ timeout: 30000 });
   }
 
   /**
@@ -105,9 +135,20 @@ export class RouteMapDialogPage extends BasePage {
   }
 
   /**
-   * Check if map button is enabled
+   * Check if the map button is enabled — but wait out transient disabled
+   * frames first. #stepper_next is `[disabled]="busy || blocked || !canGoNext"`
+   * and `blocked` tracks the picker's in-flight route re-drains, which flap
+   * continuously on this page. A bare `.isEnabled()` poll can land on a
+   * disabled frame under CF latency (worse at 2+ workers), making callers
+   * take the "cancel instead of map" branch and leaving the app unmapped.
+   * Wait for it to settle enabled; only report false if it never does.
    */
   async isMapEnabled(): Promise<boolean> {
-    return await this.mapButton.first().isEnabled().catch(() => false);
+    try {
+      await expect(this.mapButton.first()).toBeEnabled({ timeout: 20000 });
+      return true;
+    } catch {
+      return false;
+    }
   }
 }

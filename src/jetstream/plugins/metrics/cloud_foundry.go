@@ -5,6 +5,8 @@ import (
 	"log/slog"
 	"net/http"
 	"net/url"
+	"regexp"
+	"slices"
 	"strings"
 
 	"github.com/labstack/echo/v5"
@@ -24,6 +26,18 @@ var (
 		"firehose_value_metric_rep_capacity_total_memory",
 		"firehose_value_metric_rep_num_cpus",
 	}
+
+	// appQueryAllowList holds the metrics the application pages chart. The
+	// app route adds the application_id selector to them itself.
+	appQueryAllowList = []string{
+		"firehose_container_metric_cpu_percentage",
+		"firehose_container_metric_memory_bytes",
+		"firehose_container_metric_disk_bytes",
+	}
+
+	// cellQuerySelector is the one label selector the cell pages add to an
+	// allow-listed metric: an exact match on a single cell's bosh_job_id.
+	cellQuerySelector = regexp.MustCompile(`^\{bosh_job_id="[A-Za-z0-9_.-]+"\}$`)
 )
 
 // Metrics endpoints - non-admin - for a Cloud Foundry Application
@@ -45,6 +59,11 @@ func (m *MetricsSpecification) getCloudFoundryAppMetrics(c *echo.Context) error 
 	// For an application, we only support the query operation
 	if prometheusOp != "query" && prometheusOp != "query_range" {
 		return errors.New("Only 'query' or 'query_range' is supported for a Cloud Foundry application")
+	}
+
+	// Only a bare allow-listed metric name can be scoped to the application
+	if !slices.Contains(appQueryAllowList, c.Request().URL.Query().Get("query")) {
+		return errors.New("Unsupported prometheus query")
 	}
 
 	// Now make the metrics requests to the appropriate metrics endpoint
@@ -190,9 +209,14 @@ func (m *MetricsSpecification) makePrometheusRequest(c *echo.Context, cnsiList [
 	return m.portalProxy.SendProxiedResponse(c, responses)
 }
 
+// isAllowedCellMetricsQuery accepts only the query shapes the cell pages
+// send: an allow-listed metric name on its own, or followed by a selector
+// on bosh_job_id alone. Anything else (operators, functions, other labels,
+// matchers other than "=", ranges, whitespace) is rejected.
 func isAllowedCellMetricsQuery(query string) bool {
-	for _, allowListQuery := range cellQueryAllowList {
-		if strings.Index(query, allowListQuery) == 0 {
+	for _, metric := range cellQueryAllowList {
+		selector, found := strings.CutPrefix(query, metric)
+		if found && (selector == "" || cellQuerySelector.MatchString(selector)) {
 			return true
 		}
 	}
@@ -202,11 +226,17 @@ func isAllowedCellMetricsQuery(query string) bool {
 // Metrics endpoints - cells - with white list of cell prometheus query values
 func (m *MetricsSpecification) getCloudFoundryCellMetrics(c *echo.Context) error {
 
+	prometheusOp := c.Param("op")
+	if prometheusOp != "query" && prometheusOp != "query_range" {
+		return errors.New("Only 'query' or 'query_range' is supported for Cloud Foundry cell metrics")
+	}
+
 	uri := getEchoURL(c)
 	values := uri.Query()
 	query := values.Get("query")
 
-	// Fail all queries that are not of type 'cell'
+	// Fail all queries that are not an allow-listed cell metric, optionally
+	// selected by bosh_job_id
 	if !isAllowedCellMetricsQuery(query) {
 		return errors.New("Unsupported prometheus query")
 	}

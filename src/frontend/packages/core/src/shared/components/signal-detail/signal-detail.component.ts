@@ -1,8 +1,9 @@
-import { ChangeDetectionStrategy, Component, Input, Signal, inject } from '@angular/core';
+import { ChangeDetectionStrategy, Component, Signal, inject, input } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { RouterModule } from '@angular/router';
 import { TailwindSnackBarService } from '../../services/tailwind-snackbar.service';
 import { AppBusyComponent } from '../busy-indicator/busy-indicator.component';
+import { extractHttpErrorMessage } from '@stratosui/store';
 
 // Page-level action button rendered above a signal-detail surface (Edit /
 // Delete / custom verbs). On list surfaces the equivalent slot lives in the
@@ -77,7 +78,7 @@ export interface SignalDetailConfig {
   host: { class: 'block' }
 })
 export class SignalDetailComponent {
-  @Input({ required: true }) config!: SignalDetailConfig;
+  readonly config = input.required<SignalDetailConfig>();
 
   private snackBar = inject(TailwindSnackBarService);
 
@@ -86,17 +87,17 @@ export class SignalDetailComponent {
   // signals without sprinkling optional-chains through the markup.
 
   breadcrumbs(): readonly SignalDetailBreadcrumb[] {
-    return this.config.breadcrumbs?.() ?? [];
+    return this.config().breadcrumbs?.() ?? [];
   }
 
   status(): SignalDetailStatus | undefined {
-    return this.config.status?.();
+    return this.config().status?.();
   }
 
   // Header actions ------------------------------------------------------
 
   visibleHeaderActions(): readonly SignalDetailHeaderAction[] {
-    const all = this.config.headerActions;
+    const all = this.config().headerActions;
     if (!all || all.length === 0) return [];
     return all.filter(a => (a.visible ? a.visible() : true));
   }
@@ -116,12 +117,12 @@ export class SignalDetailComponent {
       const result = act.invoke();
       if (result && typeof (result as Promise<void>).then === 'function') {
         (result as Promise<void>).catch((err: unknown) => {
-          const msg = err instanceof Error ? err.message : String(err);
+          const msg = extractHttpErrorMessage(err);
           this.snackBar.error(`${act.label} failed: ${msg}`);
         });
       }
     } catch (err: unknown) {
-      const msg = err instanceof Error ? err.message : String(err);
+      const msg = extractHttpErrorMessage(err);
       this.snackBar.error(`${act.label} failed: ${msg}`);
     }
   }
@@ -139,7 +140,7 @@ export class SignalDetailComponent {
   // Tabs ---------------------------------------------------------------
 
   visibleTabs(): readonly SignalDetailTab[] {
-    const all = this.config.tabs?.() ?? [];
+    const all = this.config().tabs?.() ?? [];
     return all.filter(t => (t.hidden ? !t.hidden() : true));
   }
 
@@ -162,17 +163,17 @@ export class SignalDetailComponent {
   // Loading / error ----------------------------------------------------
 
   isLoading(): boolean {
-    return !!this.config.loading?.();
+    return !!this.config().loading?.();
   }
 
   errorMessage(): string {
-    const err = this.config.error?.();
+    const err = this.config().error?.();
     if (err == null) return '';
-    return err instanceof Error ? err.message : String(err);
+    return extractHttpErrorMessage(err);
   }
 
   hasError(): boolean {
-    return this.config.error?.() != null;
+    return this.config().error?.() != null;
   }
 
   // Toolbar visibility ------------------------------------------------

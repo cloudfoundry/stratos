@@ -2,10 +2,6 @@
   "extends": "../../../tsconfig.spec.json",
   "compilerOptions": {
     "outDir": "../../../../out-tsc/spec",
-    "types": [
-      "vitest/globals",
-      "node"
-    ],
     "module": "ESNext",
     "target": "ES2022"
   },

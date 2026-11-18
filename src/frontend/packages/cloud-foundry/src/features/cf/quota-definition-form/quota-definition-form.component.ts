@@ -1,4 +1,4 @@
-import { ChangeDetectionStrategy, Component, Injector, Input, OnDestroy, OnInit, effect, inject, runInInjectionContext, signal } from '@angular/core';
+import { ChangeDetectionStrategy, Component, Injector, OnDestroy, OnInit, effect, inject, runInInjectionContext, signal, input } from '@angular/core';
 import { AbstractControl, ReactiveFormsModule, ValidatorFn, Validators, FormControl, FormGroup } from '@angular/forms';
 import { Subscription } from 'rxjs';
 
@@ -59,7 +59,7 @@ export class QuotaDefinitionFormComponent implements OnInit, OnDestroy {
     appTasksLimit: FormControl<number | string>;
   }>;
 
-  @Input() quota: StOrgQuota | null = null;
+  readonly quota = input<StOrgQuota | null>(null);
 
   private quotaData = inject(QuotaDataService);
   private injector = inject(Injector);
@@ -69,15 +69,15 @@ export class QuotaDefinitionFormComponent implements OnInit, OnDestroy {
     this.cfGuid = activeRouteCfOrgSpace.cfGuid;
     cfOsDebugLog('quotaForm:construct', {
       cfGuid: this.cfGuid,
-      hasQuota: !!this.quota,
+      hasQuota: !!this.quota(),
     });
   }
 
   ngOnInit() {
     cfOsDebugLog('quotaForm:init', {
       cfGuid: this.cfGuid,
-      hasQuota: !!this.quota,
-      quotaName: this.quota?.name ?? null,
+      hasQuota: !!this.quota(),
+      quotaName: this.quota()?.name ?? null,
     });
     this.setupForm();
     this.fetchQuotasDefinitions();
@@ -88,7 +88,8 @@ export class QuotaDefinitionFormComponent implements OnInit, OnDestroy {
   }
 
   setupForm() {
-    const initial: OrgQuotaFormValues | null = this.quota ? orgQuotaToFormValues(this.quota) : null;
+    const quota = this.quota();
+    const initial: OrgQuotaFormValues | null = quota ? orgQuotaToFormValues(quota) : null;
 
     this.formGroup = new FormGroup({
       name: new FormControl(initial?.name ?? '', { nonNullable: true, validators: [Validators.required, this.nameTakenValidator()] }),
@@ -133,7 +134,8 @@ export class QuotaDefinitionFormComponent implements OnInit, OnDestroy {
   }
 
   validateNameTaken = (value: string | null = null) => {
-    if (this.quota && value === this.quota.name) {
+    const quota = this.quota();
+    if (quota && value === quota.name) {
       return true;
     }
     if (this.allQuotas) {

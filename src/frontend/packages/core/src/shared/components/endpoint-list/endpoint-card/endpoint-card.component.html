@@ -1,28 +1,44 @@
-<app-page-header-events class="endpoint-warning" [endpointIds$]="endpointIds$" [simpleErrorMessage]="true">
+<!-- No ids are bound (none have been since 2019), so the banner stays empty. -->
+<app-page-header-events class="endpoint-warning" [endpointIds]="[]" [simpleErrorMessage]="true">
 </app-page-header-events>
 <!-- 'expired' intentionally skips the endpoint-card--disconnected dimming: the
      signal-list renders it as an amber warning pill (needs attention), and
      dimming the card would work against that - it should stay as noticeable as
-     connected. -->
-<app-meta-card class="endpoint-card" [routerLink]="endpointLink" [appDisableRouterLink]="!endpointLink"
-  [ngClass]="{'endpoint-card--no-link': !endpointLink, 'endpoint-card--disconnected': connectionStatus === 'disconnected'}"
-  [favorite]="favorite" [actionMenu]="actionMenu" [status$]="cardStatus$" [statusIcon]="false" [statusBackground]="true">
+     connected.
+     The title link is the keyboard route to the endpoint; the card-wide click
+     is a mouse convenience, so tabindex="-1" keeps RouterLink from adding a
+     second, unlabelled tab stop for the same destination. -->
+@let catalogEntity = endpointCatalogEntity();
+<app-meta-card class="endpoint-card" tabindex="-1" [routerLink]="endpointLink()" [appDisableRouterLink]="!endpointLink()"
+  [ngClass]="{'endpoint-card--no-link': !endpointLink(), 'endpoint-card--disconnected': connectionStatus() === 'disconnected'}"
+  [favorite]="favorite" [actionMenu]="actionMenu()" [status$]="cardStatus$" [statusIcon]="false" [statusBackground]="true">
   <app-meta-card-title>
     <div class="endpoint-card__title">
-      @if (!!endpointCatalogEntity && endpointCatalogEntity.definition.logoUrl) {
+      @if (!!catalogEntity && catalogEntity.definition.logoUrl) {
         <div
           class="endpoint-card__image-wrapper">
           <img class="endpoint-card__image"
-               [src]="endpointCatalogEntity.definition.logoUrl"
-               [alt]="endpointCatalogEntity.definition.label + ' logo'"
+               [src]="catalogEntity.definition.logoUrl"
+               [alt]="catalogEntity.definition.label + ' logo'"
                loading="lazy"
                (error)="onImageError($event)" />
         </div>
+      } @else if (!!catalogEntity && catalogEntity.definition.icon) {
+        <div class="endpoint-card__image-wrapper">
+          <app-custom-icon class="text-[40px] max-md:text-[32px]" aria-hidden="true" [fontSet]="catalogEntity.definition.iconFont">{{ catalogEntity.definition.icon }}</app-custom-icon>
+        </div>
       }
       <div class="endpoint-card__title-text">
-        <app-multiline-title class="endpoint-card__title-link">{{ row.name }}</app-multiline-title>
+        @if (endpointLink()) {
+          <!-- stopPropagation: the card's own routerLink would navigate again -->
+          <a class="endpoint-card__title-link block hover:underline" [routerLink]="endpointLink()" (click)="$event.stopPropagation()">
+            <app-multiline-title [matTooltip]="row().name" matTooltipOnlyWhenTruncated>{{ row().name }}</app-multiline-title>
+          </a>
+        } @else {
+          <app-multiline-title [matTooltip]="row().name" matTooltipOnlyWhenTruncated>{{ row().name }}</app-multiline-title>
+        }
         <div class="endpoint-card__title-subtext">
-          {{!endpointCatalogEntity ? 'Unknown' : endpointCatalogEntity.definition.label}}
+          {{!catalogEntity ? 'Unknown' : catalogEntity.definition.label}}
           <!--
           <ng-container *ngIf="endpointParentType">
           ({{ endpointParentType }})</ng-container>
@@ -34,10 +50,10 @@
   <app-meta-card-item>
     <app-meta-card-key>Status</app-meta-card-key>
     <app-meta-card-value>
-      <app-table-cell-endpoint-status [row]="row"></app-table-cell-endpoint-status>
+      <app-table-cell-endpoint-status [row]="row()"></app-table-cell-endpoint-status>
     </app-meta-card-value>
   </app-meta-card-item>
-  @if (row.system_shared_token) {
+  @if (row().system_shared_token) {
     <app-meta-card-item>
       <app-meta-card-key>Shared Connection</app-meta-card-key>
       <app-meta-card-value>
@@ -50,21 +66,21 @@
     <app-meta-card-key>Address</app-meta-card-key>
     <app-meta-card-value>
       <div class="endpoint-card__address">
-        <div class="endpoint-card__address__value">{{ address }}</div>
-        <app-copy-to-clipboard class="ml-0.5 w-fit inline-flex" [compact]="true" [text]="address"
+        <div class="endpoint-card__address__value">{{ address() }}</div>
+        <app-copy-to-clipboard class="ml-0.5 w-fit inline-flex" [compact]="true" [text]="address()"
         tooltip="Copy to clipboard" [showSuccessText]="false"></app-copy-to-clipboard>
-        @if (isDuplicate$ | async) {
+        @if (isDuplicate()) {
           <span class="material-icons text-warning-shade-600 dark:text-warning-shade-300 ml-1 text-[20px] leading-none"
-            matTooltip="Another endpoint is registered at this URL">warning</span>
+            matTooltip="Another endpoint is registered at this URL" role="img" aria-label="Another endpoint is registered at this URL">warning</span>
         }
       </div>
     </app-meta-card-value>
   </app-meta-card-item>
-  @if (viewCreator$ | async) {
+  @if (viewCreator()) {
     <app-meta-card-item>
       <app-meta-card-key>Creator</app-meta-card-key>
       <app-meta-card-value>
-        <div>{{ row.creator.name }}</div>
+        <div>{{ row().creator.name }}</div>
       </app-meta-card-value>
     </app-meta-card-item>
   }

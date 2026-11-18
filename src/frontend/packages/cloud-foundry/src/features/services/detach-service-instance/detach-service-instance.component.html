@@ -1,5 +1,5 @@
 <app-page-header [breadcrumbs]="breadcrumbs">
-  {{ title() }}
+  <h1>{{ title() }}</h1>
 </app-page-header>
 <div class="detach-service-instance">
   <app-steppers cancel="/services">
@@ -28,7 +28,8 @@
                       'bg-content-3 text-content-1': row.status === 'pending',
                       'bg-info-subtle text-info-strong animate-pulse': row.status === 'busy',
                       'bg-success-subtle text-success-strong': row.status === 'success',
-                      'bg-danger-shade-50 text-danger-shade-700': row.status === 'error'
+                      'bg-[var(--warning-bg)] text-[var(--warning-text)]': row.status === 'unknown',
+                      'bg-[var(--danger-bg)] text-[var(--danger-text)]': row.status === 'error'
                     }"
                     [attr.aria-label]="row.status"
                     [attr.title]="row.errorMessage || row.status">
@@ -37,6 +38,7 @@
                       @case ('busy')    { … }
                       @case ('success') { ✓ }
                       @case ('error')   { ✗ }
+                      @case ('unknown') { ? }
                     }
                   </span>
                 </td>

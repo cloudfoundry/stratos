@@ -6,7 +6,7 @@ import { HttpTestingController, provideHttpClientTesting } from '@angular/common
 import { provideNoopAnimations } from '@angular/platform-browser/animations';
 import { ActivatedRoute } from '@angular/router';
 import { describe, it, expect, beforeEach, afterEach, vi } from 'vitest';
-import { of, firstValueFrom } from 'rxjs';
+import { of } from 'rxjs';
 
 import { TEST_CATALOGUE_ENTITIES, generateStratosEntities, EntityCatalogHelper, EntityCatalogHelpers, EntityCatalogTestModule } from '@stratosui/store';
 import { STORE_TEST_PROVIDERS, testSCFEndpointGuid } from '@stratosui/store/testing';
@@ -111,9 +111,7 @@ describe('InviteUsersCreateComponent', () => {
     } as any);
 
     // Drive the same code path the wizard uses on submit.
-    // strict: onNext's impl ignores the stepper's (index, step) contract
-    // args; call it via its real runtime shape.
-    await firstValueFrom((component.onNext as () => ReturnType<typeof component.onNext>)());
+    await component.onNext();
 
     expect(markStale).toHaveBeenCalledWith(testSCFEndpointGuid);
   });

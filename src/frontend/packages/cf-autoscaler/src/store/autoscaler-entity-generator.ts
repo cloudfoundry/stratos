@@ -6,10 +6,8 @@ import {
   APIResource,
   IFavoriteMetadata
 } from '@stratosui/store';
-import { AppAutoscalerEvent, AppAutoscalerHealth, AppAutoscalerPolicy, AppScalingTrigger } from './app-autoscaler.types';
+import { AppAutoscalerEvent, AppAutoscalerPolicy, AppScalingTrigger } from './app-autoscaler.types';
 import {
-  appAutoscalerCredentialEntityType,
-  appAutoscalerHealthEntityType,
   appAutoscalerInfoEntityType,
   appAutoscalerPolicyEntityType,
   appAutoscalerPolicyTriggerEntityType,
@@ -23,29 +21,31 @@ export function generateASEntities(): StratosBaseCatalogEntity[] {
     type: AUTOSCALER_ENDPOINT_TYPE,
     label: 'Cloud Foundry Autoscaler',
     labelPlural: 'Cloud Foundry Autoscalers',
-    icon: 'cloud_foundry',
+    // The Autoscale tab's icon: with Cloud Foundry's own icon, and sorted
+    // first, the Register tile was picked by mistake for a Cloud Foundry
+    // endpoint.
+    icon: 'meter',
     iconFont: 'stratos-icons',
-    // No logoUrl for virtual endpoints - they don't appear in endpoint listings
-    // and don't need image-based branding. logoUrl is a required string on the
-    // endpoint definition, so use an empty string sentinel; rendering is driven
-    // by icon/iconFont instead.
+    // No image: the tile draws icon/iconFont. logoUrl is a required string,
+    // so an empty string stands for none.
     logoUrl: '',
     authTypes: [],
-    // Autoscaler is a virtual endpoint type - it doesn't appear in the endpoints list
-    // as it's a feature running on CF endpoints, not a separate connectable endpoint
+    // Autoscaler calls carry the user's Cloud Foundry token, so nothing
+    // connects to this type.
     unConnectable: true,
-    // No listDetailsComponent needed for virtual endpoints - omit the property entirely
-    // rather than setting it to null, as Angular TestBed will try to process null values
-    renderPriority: 0,
+    // Registered against the Cloud Foundry it serves, and its broker there.
+    linkedToCf: true,
+    // No listDetailsComponent: omitted rather than null, as Angular TestBed
+    // processes null values.
+    // After Cloud Foundry (1), before the Kubernetes types (3+).
+    renderPriority: 2,
   };
   return [
     generateAutoscalerEndpointEntity(endpointDefinition),
     generatePolicyEntity(endpointDefinition),
     generateInfoEntity(endpointDefinition),
     generatePolicyTriggerEntity(endpointDefinition),
-    generateHealthEntity(endpointDefinition),
     generateScalingEntity(endpointDefinition),
-    generateCredentialEntity(endpointDefinition),
   ];
 }
 
@@ -58,15 +58,6 @@ function generatePolicyEntity(endpointDefinition: StratosEndpointExtensionDefini
   const definition = {
     type: appAutoscalerPolicyEntityType,
     schema: autoscalerEntityFactory(appAutoscalerPolicyEntityType),
-    endpoint: endpointDefinition
-  };
-  return new StratosCatalogEntity<IFavoriteMetadata, APIResource<AppAutoscalerPolicy>>(definition);
-}
-
-function generateCredentialEntity(endpointDefinition: StratosEndpointExtensionDefinition) {
-  const definition = {
-    type: appAutoscalerCredentialEntityType,
-    schema: autoscalerEntityFactory(appAutoscalerCredentialEntityType),
     endpoint: endpointDefinition
   };
   return new StratosCatalogEntity<IFavoriteMetadata, APIResource<AppAutoscalerPolicy>>(definition);
@@ -88,15 +79,6 @@ function generatePolicyTriggerEntity(endpointDefinition: StratosEndpointExtensio
     endpoint: endpointDefinition
   };
   return new StratosCatalogEntity<IFavoriteMetadata, APIResource<AppScalingTrigger>>(definition);
-}
-
-function generateHealthEntity(endpointDefinition: StratosEndpointExtensionDefinition) {
-  const definition = {
-    type: appAutoscalerHealthEntityType,
-    schema: autoscalerEntityFactory(appAutoscalerHealthEntityType),
-    endpoint: endpointDefinition
-  };
-  return new StratosCatalogEntity<IFavoriteMetadata, APIResource<AppAutoscalerHealth>>(definition);
 }
 
 function generateScalingEntity(endpointDefinition: StratosEndpointExtensionDefinition) {

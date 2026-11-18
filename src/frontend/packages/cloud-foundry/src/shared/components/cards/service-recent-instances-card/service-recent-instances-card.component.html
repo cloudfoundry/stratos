@@ -1,7 +1,7 @@
 @let serviceInstances = recentInstances();
 
 <app-card class="recent-instances">
-  <app-card-header class="recent-instances__header">
+  <app-card-header plain class="recent-instances__header">
     <app-card-title>Recently updated service instances</app-card-title>
     @if (serviceInstances === null) {
       <app-stateful-icon [state]="stratosStatus.BUSY"></app-stateful-icon>

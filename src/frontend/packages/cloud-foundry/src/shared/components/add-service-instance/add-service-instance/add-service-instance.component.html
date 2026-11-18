@@ -1,5 +1,5 @@
 <app-page-header>
-  {{ title$ | async }}
+  <h1>{{ title() }}</h1>
 </app-page-header>
 @if (initialisedService(); as inited) {
   <ng-template #contextSummaryTpl>
@@ -29,7 +29,7 @@
           </app-step>
         }
         <app-step title="Service Instance" [signalHandle]="specifyDetailsHandle">
-          <app-specify-details-step [appId]="appId" #specifyDetails [showModeSelection]="!!appId">
+          <app-specify-details-step #specifyDetails [showModeSelection]="!!appId">
           </app-specify-details-step>
         </app-step>
       }
@@ -46,8 +46,8 @@
           </app-step>
         }
         <app-step title="Service Instance" [signalHandle]="supdHandle">
-          <app-specify-user-provided-details [appId]="appId" [showModeSelection]="!!appId" [cfGuid]="(cfGuid$ | async) ?? ''"
-            [spaceGuid]="(spaceGuid$ | async) ?? ''" [serviceInstanceId]="serviceInstanceId" #supd>
+          <app-specify-user-provided-details [appId]="appId" [showModeSelection]="!!appId" [cfGuid]="cfGuid() ?? ''"
+            [spaceGuid]="spaceGuid() ?? ''" [serviceInstanceId]="serviceInstanceId" #supd>
           </app-specify-user-provided-details>
         </app-step>
       }

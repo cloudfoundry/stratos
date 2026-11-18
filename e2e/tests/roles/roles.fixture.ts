@@ -5,6 +5,7 @@ import { test as base } from '../../fixtures/test-base';
 import { CFApiHelper } from '../../helpers/cf-api.helper';
 import { RequestHelper } from '../../helpers/request.helper';
 import { SecretsHelper } from '../../helpers/secrets-helpers';
+import { BASE_URL } from '../../servers';
 
 /**
  * Shared ground for the role suites (e2e/tests/roles/**), which run once per
@@ -209,4 +210,4 @@ export async function grantRole(
 }
 
 /** The console base URL, for hooks that run outside a test's fixtures. */
-export const consoleUrl = (): string => process.env.E2E_BASE_URL || 'https://localhost:5540';
+export const consoleUrl = (): string => BASE_URL;

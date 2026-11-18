@@ -1,7 +1,7 @@
-import { Observable } from 'rxjs';
+import { Signal } from '@angular/core';
 
 export interface TabNavItem {
   link: string;
   label: string;
-  hidden?: Observable<boolean>;
+  hidden?: Signal<boolean>;
 }

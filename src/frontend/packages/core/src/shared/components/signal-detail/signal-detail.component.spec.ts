@@ -2,6 +2,7 @@ import { describe, it, expect, vi } from 'vitest';
 import { TestBed } from '@angular/core/testing';
 import { Component, signal } from '@angular/core';
 import { provideRouter } from '@angular/router';
+import { HttpErrorResponse } from '@angular/common/http';
 import { SignalDetailComponent } from './signal-detail.component';
 import type { SignalDetailConfig } from './signal-detail.component';
 
@@ -189,5 +190,10 @@ describe('SignalDetailComponent', () => {
   it('error message stringifies non-Error values', () => {
     const fixture = setup({ error: signal('plain string err').asReadonly() });
     expect(fixture.nativeElement.querySelector('[data-test="signal-detail-error"]').textContent).toContain('plain string err');
+  });
+
+  it('error message shows the reason an HTTP error carries', () => {
+    const fixture = setup({ error: signal(new HttpErrorResponse({ error: { errors: [{ code: 10008, title: 'CF-UnprocessableEntity', detail: 'Name must be unique' }] }, status: 422, statusText: 'Unprocessable Entity' })).asReadonly() });
+    expect(fixture.nativeElement.querySelector('[data-test="signal-detail-error"]').textContent).toContain('Name must be unique');
   });
 });

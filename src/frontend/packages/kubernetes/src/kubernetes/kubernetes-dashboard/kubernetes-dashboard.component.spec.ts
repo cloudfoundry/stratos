@@ -117,10 +117,10 @@ describe('KubernetesDashboardTabComponent', () => {
   });
 
   it('should set loading state initially', () => {
-    expect(component['isLoadingSignal']()).toBe(true);
+    expect(component.isLoading()).toBe(true);
   });
 
   it('should not have error state initially', () => {
-    expect(component['hasErrorSignal']()).toBe(false);
+    expect(component.hasError()).toBe(false);
   });
 });

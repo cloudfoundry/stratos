@@ -1,6 +1,5 @@
 import { provideZonelessChangeDetection } from '@angular/core';
 import { TestBed } from '@angular/core/testing';
-import { firstValueFrom } from 'rxjs';
 import { beforeEach, describe, expect, it } from 'vitest';
 
 import { IRecentlyVisitedEntity } from '../types/recently-visited.types';
@@ -98,11 +97,5 @@ describe('RecentlyVisitedDataService', () => {
       expect(svc.state()['a']).toBeDefined();
       expect(svc.state()['b']).toBeUndefined();
     });
-  });
-
-  it('exposes the recents map as an observable', async () => {
-    svc.set(entry('org-1__cnsi-1', 'cnsi-1'));
-    const emitted = await firstValueFrom(svc.state$);
-    expect(emitted['org-1__cnsi-1']).toBeDefined();
   });
 });

@@ -75,23 +75,17 @@ describe('AutoscalerInfoDataService', () => {
     expect(svc.isAvailable(ENDPOINT_GUID)()).toBe(false);
   });
 
-  it('canManageCredentials returns true only when build major >= 3', async () => {
-    const p1 = svc.load(ENDPOINT_GUID);
-    httpMock.expectOne(INFO_URL).flush({ name: 'as', build: '2.5.1', support: '', description: '' });
+  // An app's info comes from the autoscaler it is bound to, which can differ
+  // from the Cloud Foundry's default one.
+  it('load() for an app asks for that app\'s autoscaler and keeps it apart', async () => {
+    const p1 = svc.load(ENDPOINT_GUID, 'app-1');
+    const req = httpMock.expectOne(r => r.url === INFO_URL && r.params.get('app') === 'app-1');
+    expect(req.request.headers.get('x-cap-cnsi-list')).toBe(ENDPOINT_GUID);
+    req.flush({ name: 'as', build: '15.3.1', support: '', description: '' });
     await p1;
-    expect(svc.canManageCredentials(ENDPOINT_GUID)()).toBe(false);
 
-    const p2 = svc.load(ENDPOINT_GUID);
-    httpMock.expectOne(INFO_URL).flush({ name: 'as', build: '3.0.0', support: '', description: '' });
-    await p2;
-    expect(svc.canManageCredentials(ENDPOINT_GUID)()).toBe(true);
-  });
-
-  it('canManageCredentials handles missing or malformed build strings', async () => {
-    const p1 = svc.load(ENDPOINT_GUID);
-    httpMock.expectOne(INFO_URL).flush({ name: 'as', build: undefined as unknown as string, support: '', description: '' });
-    await p1;
-    expect(svc.canManageCredentials(ENDPOINT_GUID)()).toBe(false);
+    expect(svc.info(ENDPOINT_GUID, 'app-1')()?.build).toBe('15.3.1');
+    expect(svc.info(ENDPOINT_GUID)()).toBeNull();
   });
 
   it('per-endpoint state is isolated', async () => {

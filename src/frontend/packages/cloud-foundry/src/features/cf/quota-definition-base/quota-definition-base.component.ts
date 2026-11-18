@@ -1,5 +1,5 @@
 import { ActivatedRoute } from '@angular/router';
-import { Signal, computed, effect, inject } from '@angular/core';
+import { Signal, computed, inject } from '@angular/core';
 
 import { IHeaderBreadcrumb } from '../../../../../core/src/shared/components/page-header/page-header.types';
 import { EndpointModel } from '../../../../../store/src/types/endpoint.types';
@@ -54,14 +54,6 @@ export class QuotaDefinitionBaseComponent {
       const endpoint = this.endpoints.all()[this.cfGuid];
       if (!endpoint) return [];
       return this.getBreadcrumbs(endpoint, this.org(), this.space());
-    });
-
-    // Subscriptions are bookkeeping — refcounted-release tied to view destroy.
-    effect((onCleanup) => {
-      onCleanup(() => {
-        if (orgService) orgRegistry.release(this.cfGuid, this.orgGuid);
-        if (spaceService) spaceRegistry.release(this.cfGuid, this.spaceGuid);
-      });
     });
   }
 

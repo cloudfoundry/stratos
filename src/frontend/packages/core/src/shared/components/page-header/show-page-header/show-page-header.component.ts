@@ -1,5 +1,4 @@
 import { Component, inject, ChangeDetectionStrategy } from '@angular/core';
-import { CommonModule } from '@angular/common';
 import { PortalModule } from '@angular/cdk/portal';
 
 import { TabNavService } from '../../../../tab-nav.service';
@@ -10,7 +9,6 @@ import { TabNavService } from '../../../../tab-nav.service';
   changeDetection: ChangeDetectionStrategy.OnPush,
   standalone: true,
   imports: [
-    CommonModule,
     PortalModule
   ]
 })

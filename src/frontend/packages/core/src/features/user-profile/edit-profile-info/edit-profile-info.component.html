@@ -1,7 +1,7 @@
 <app-page-header>
   <h1>Edit User Profile</h1>
   <div class="page-header-right">
-    <button class="btn btn-icon" type="button" routerLink="/user-profile">
+    <button aria-label="Close" class="btn btn-icon" type="button" routerLink="/user-profile">
       <app-custom-icon>clear</app-custom-icon>
     </button>
   </div>
@@ -19,30 +19,30 @@
         <app-form-field>
           <input class="w-full placeholder:!text-transparent focus:outline-none" appInput placeholder="Primary Email Address" formControlName="emailAddress">
         </app-form-field>
-        @if ((canChangePassword | async) === false && needsPasswordForEmailChange()) {
+        @if (!canChangePassword() && needsPasswordForEmailChange()) {
           <p>Current password is required when
           changing email address</p>
         }
-        @if ((canChangePassword | async) && needsPasswordForEmailChange()) {
+        @if (canChangePassword() && needsPasswordForEmailChange()) {
           <p>Current password is required when changing
           email address or password</p>
         }
         @if (needsPasswordForEmailChange()) {
           <app-form-field>
             <input class="w-full placeholder:!text-transparent focus:outline-none" appInput placeholder="Current Password" [type]="!showPassword[1] ? 'password' : 'text'"
-              formControlName="currentPassword" [required]="passwordRequired()">
+              formControlName="currentPassword" [required]="passwordRequired()" autocomplete="current-password">
             <span matSuffix>
               <app-show-hide-button (changed)="showPassword[1] = $event"></app-show-hide-button>
             </span>
           </app-form-field>
         }
-        @if ((canChangePassword | async)) {
+        @if (canChangePassword()) {
           <div class="flex flex-col max-w-full">
             <p>Change Password (Leave blank to keep current password)</p>
             @if (!needsPasswordForEmailChange()) {
               <app-form-field>
                 <input class="w-full placeholder:!text-transparent focus:outline-none" appInput placeholder="Current Password" [type]="!showPassword[2] ? 'password' : 'text'"
-                  formControlName="currentPassword" [required]="passwordRequired()">
+                  formControlName="currentPassword" [required]="passwordRequired()" autocomplete="current-password">
                 <span matSuffix>
                   <app-show-hide-button (changed)="showPassword[2] = $event"></app-show-hide-button>
                 </span>
@@ -50,14 +50,14 @@
             }
             <app-form-field>
               <input class="w-full placeholder:!text-transparent focus:outline-none" appInput placeholder="New Password" [type]="!showPassword[3] ? 'password' : 'text'"
-                formControlName="newPassword">
+                formControlName="newPassword" autocomplete="new-password">
               <span matSuffix>
                 <app-show-hide-button (changed)="showPassword[3] = $event"></app-show-hide-button>
               </span>
             </app-form-field>
             <app-form-field>
               <input class="w-full placeholder:!text-transparent focus:outline-none" appInput placeholder="Confirm New Password" [type]="!showPassword[4] ? 'password' : 'text'"
-                formControlName="confirmPassword">
+                formControlName="confirmPassword" autocomplete="new-password">
               <span matSuffix>
                 <app-show-hide-button (changed)="showPassword[4] = $event"></app-show-hide-button>
               </span>

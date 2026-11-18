@@ -1,5 +1,5 @@
 import { CommonModule } from '@angular/common';
-import { ChangeDetectionStrategy, Component, ElementRef, Input, OnDestroy, OnInit, ViewChild  } from '@angular/core';
+import { ChangeDetectionStrategy, Component, ElementRef, OnDestroy, OnInit, input, viewChild } from '@angular/core';
 
 import { CopyToClipboardComponent } from '../copy-to-clipboard/copy-to-clipboard.component';
 
@@ -15,16 +15,16 @@ import { CopyToClipboardComponent } from '../copy-to-clipboard/copy-to-clipboard
 })
 export class CodeBlockComponent implements OnInit, OnDestroy {
 
-  @Input() hideCopy!: boolean;
-  @Input() codeBlockStyle!: string;
+  readonly hideCopy = input<boolean>();
+  readonly codeBlockStyle = input<string>();
   text = '';
   private observer!: MutationObserver;
 
-  @ViewChild('preBlock', { static: true }) code!: ElementRef;
+  readonly code = viewChild.required<ElementRef>('preBlock');
 
   ngOnInit(): void {
     this.observer = new MutationObserver(() => {
-      this.text = this.code.nativeElement.innerText.trim();
+      this.text = this.code().nativeElement.innerText.trim();
     });
     const config: MutationObserverInit = {
       // attributeFilter: string[];
@@ -35,7 +35,7 @@ export class CodeBlockComponent implements OnInit, OnDestroy {
       childList: true,
       subtree: true,
     };
-    this.observer.observe(this.code.nativeElement, config);
+    this.observer.observe(this.code().nativeElement, config);
   }
 
   ngOnDestroy() {

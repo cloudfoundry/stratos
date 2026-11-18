@@ -2,7 +2,7 @@ import { Injectable, Injector, Signal, WritableSignal, effect, inject, runInInje
 
 import { ListStateStore, SignalListColumn, SignalListCompoundSegment, SignalListRowAction } from '@stratosui/core';
 
-import { AppDetailDataService } from '../../../features/applications/app-detail-data.service';
+import { AppDetailDataService, routeHref } from '../../../features/applications/app-detail-data.service';
 import { ApplicationService } from '../../../features/applications/application.service';
 import { ViewPipeline, SortSpec } from '../../../services/data-sources/view-pipeline';
 import type { StRoute } from '../../../services/endpoint-data/stratos-types';
@@ -133,6 +133,15 @@ export class CfAppRoutesSignalConfigService {
   buildColumns(): SignalListColumn<StRoute>[] {
     const columns: SignalListColumn<StRoute>[] = [
       {
+        // The full route, linked so it can be opened, with a copy button.
+        // TCP routes (port > 0) aren't HTTP, so they stay plain text.
+        header: 'Route', key: 'url',
+        render: (row) => row.url ?? '',
+        externalLink: (row) => row.url && !((row.port ?? 0) > 0) ? routeHref(row.url) : null,
+        copyValue: (row) => !row.url ? null : (row.port ?? 0) > 0 ? row.url : routeHref(row.url),
+        sortField: 'url',
+      },
+      {
         header: 'Host', key: 'host',
         render: (row) => row.host ?? '',
         sortField: 'host',
@@ -261,7 +270,7 @@ export class CfAppRoutesSignalConfigService {
       {
         label: 'Delete', icon: 'delete', danger: true,
         disabled,
-        invoke: () => this.actionsService.deleteRoute(row.guid),
+        invoke: async () => { await this.actionsService.deleteRoute(row.guid); },
       },
     ];
   };

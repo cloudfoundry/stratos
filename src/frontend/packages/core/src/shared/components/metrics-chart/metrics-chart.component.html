@@ -1,8 +1,8 @@
 <app-card class="metrics-chart__card">
   <div class="metrics-chart__outer">
     <div class="metrics-chart__header">
-      @if (title) {
-        <h2 class="metrics-chart__title">{{title}}</h2>
+      @if (title()) {
+        <h2 class="metrics-chart__title">{{title()}}</h2>
       }
       <ng-content select="app-metrics-range-selector"></ng-content>
     </div>
@@ -13,13 +13,16 @@
       <app-progress-bar class="metrics-chart__loading" color="primary" mode="indeterminate">
       </app-progress-bar>
     }
+    @if (!isFetching() && error(); as error) {
+      <div data-test="metrics-chart-error" class="no-content text-danger-shade-700 break-words">Failed to load metrics: {{ error }}</div>
+    }
     @if (!isFetching()) {
       <div class="metrics-chart">
         @if (results(); as results) {
           <div class="metrics-chart">
             @if (results.length) {
               <div class="metrics-chart">
-                @switch (chartConfig?.chartType) {
+                @switch (chartConfig()?.chartType) {
                   @case (chartTypes.LINE) {
                     <canvas baseChart
                       [data]="chartJsData"
@@ -28,15 +31,15 @@
                     </canvas>
                   }
                   @default {
-                    <span> {{ chartConfig?.chartType }} chart type not found </span>
+                    <span> {{ chartConfig()?.chartType }} chart type not found </span>
                   }
                 }
               </div>
             } @else {
               <div class="no-content">No results found
-                @if (!title) {
+                @if (!title()) {
                   <div class="no-content__name">
-                    {{ chartConfig?.yAxisLabel }}
+                    {{ chartConfig()?.yAxisLabel }}
                   </div>
                 }
               </div>

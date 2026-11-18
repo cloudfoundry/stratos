@@ -1,8 +1,9 @@
-import { Component, OnInit, ChangeDetectionStrategy, inject } from '@angular/core';
+import { Component, OnInit, ChangeDetectionStrategy, computed, inject, Signal } from '@angular/core';
+import { toSignal } from '@angular/core/rxjs-interop';
 import { CommonModule } from '@angular/common';
 import { RouterModule } from '@angular/router';
 import { Observable, of as observableOf } from 'rxjs';
-import { take, map, startWith } from 'rxjs/operators';
+import { map } from 'rxjs/operators';
 
 import {
   EndpointsService,
@@ -15,9 +16,12 @@ import {
   environment,
   IPageSideNavTab,
   PageHeaderComponent,
+  PageSubNavComponent,
   LoadingPageComponent
 } from '@stratosui/core';
 import { UserFavoriteEndpoint, UserFavoriteManager } from '@stratosui/store';
+
+import { CfCliMenuComponent } from '../../../shared/components/cli-menu/cf-cli-menu.component';
 import { CfCurrentUserPermissions } from '../../../user-permissions/cf-user-permissions-checkers';
 import { CloudFoundryEndpointService } from '../services/cloud-foundry-endpoint.service';
 
@@ -31,7 +35,9 @@ import { CloudFoundryEndpointService } from '../services/cloud-foundry-endpoint.
     CommonModule,
     RouterModule,
     PageHeaderComponent,
-    LoadingPageComponent
+    PageSubNavComponent,
+    LoadingPageComponent,
+    CfCliMenuComponent,
   ]
 })
 export class CloudFoundryTabsBaseComponent implements OnInit {
@@ -49,37 +55,32 @@ export class CloudFoundryTabsBaseComponent implements OnInit {
 
   isFetching$!: Observable<boolean>;
 
-  public canAddOrg$!: Observable<boolean>;
   public tabsHeader = 'Cloud Foundry';
   public extensionActions: StratosActionMetadata[] = getActionsFromExtensions(StratosActionType.CloudFoundry);
 
-  // null when the endpoint has no cnsi_type/guid (getFavoriteEndpointFromEntity);
-  // the template binds via `| async`, which already yields null.
-  public favorite$: Observable<UserFavoriteEndpoint | null>;
+  // null when the endpoint has no cnsi_type/guid (getFavoriteEndpointFromEntity).
+  public favorite: Signal<UserFavoriteEndpoint | null>;
 
   constructor() {
     const cfEndpointService = this.cfEndpointService;
     const endpointsService = inject(EndpointsService);
     const userFavoriteManager = inject(UserFavoriteManager);
 
-    this.favorite$ = endpointsService.endpoints$.pipe(
-      take(1),
-      map(endpoints => endpoints[this.cfEndpointService.cfGuid]),
-      map(endpoint => userFavoriteManager.getFavoriteEndpointFromEntity(endpoint))
+    this.favorite = computed(() =>
+      userFavoriteManager.getFavoriteEndpointFromEntity(endpointsService.endpoints()[this.cfEndpointService.cfGuid])
     );
 
-    const firehoseHidden$ = this.currentUserPermissionsService
-      .can(CfCurrentUserPermissions.FIREHOSE_VIEW, this.cfEndpointService.cfGuid)
-      .pipe(map(visible => !visible));
+    // Hidden until the roles load (the check reads false until then).
+    const canViewFirehose = this.currentUserPermissionsService
+      .can(CfCurrentUserPermissions.FIREHOSE_VIEW, this.cfEndpointService.cfGuid);
+    const firehoseHidden = computed(() => !canViewFirehose());
 
-    const usersHidden$ = cfEndpointService.usersCount$.pipe(
-      map(count => !count),
-      startWith(true),
-    );
+    const usersHidden = computed(() => !cfEndpointService.usersCount());
 
-    const cellsHidden$ = endpointsService.hasMetrics(cfEndpointService.cfGuid).pipe(
+    // hasMetrics() is a stream; null until it answers.
+    const cellsHidden = toSignal(endpointsService.hasMetrics(cfEndpointService.cfGuid).pipe(
       map(hasMetrics => !hasMetrics)
-    );
+    ), { initialValue: null });
 
     // Default tabs + add any tabs from extensions
     this.tabLinks = [
@@ -92,19 +93,19 @@ export class CloudFoundryTabsBaseComponent implements OnInit {
         link: CloudFoundryTabsBaseComponent.cells,
         label: 'Cells',
         icon: 'select_all',
-        hidden$: cellsHidden$
+        isHidden: cellsHidden
       },
       { link: 'routes', label: 'Routes', icon: 'route', iconFont: 'stratos-icons', },
       {
         link: CloudFoundryTabsBaseComponent.users,
         label: 'Users',
-        hidden$: usersHidden$,
+        isHidden: usersHidden,
         icon: 'people'
       },
       {
         link: CloudFoundryTabsBaseComponent.firehose,
         label: 'Firehose',
-        hidden$: firehoseHidden$,
+        isHidden: firehoseHidden,
         icon: 'featured_play_list'
       },
       { link: 'feature-flags', label: 'Feature Flags', icon: 'flag' },
@@ -119,7 +120,6 @@ export class CloudFoundryTabsBaseComponent implements OnInit {
 
   ngOnInit() {
     this.isFetching$ = observableOf(false);
-    this.canAddOrg$ = this.currentUserPermissionsService.can(CfCurrentUserPermissions.ORGANIZATION_CREATE, this.cfEndpointService.cfGuid);
   }
 
 }

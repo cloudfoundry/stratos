@@ -1,7 +1,7 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { provideZonelessChangeDetection } from '@angular/core';
-import { describe, it, expect, beforeEach, afterEach, beforeAll, afterAll, vi } from 'vitest';
-import { EndpointModel } from '@stratosui/store';
+import { describe, it, expect, beforeEach } from 'vitest';
+import { EndpointLastErrorService, EndpointModel, StratosCatalogEndpointEntity, entityCatalog } from '@stratosui/store';
 import { createBasicStoreModule, CoreTestingModule } from '@test-framework';
 import { CoreModule } from '../../../../core/core.module';
 import { TableCellEndpointStatusComponent } from './table-cell-endpoint-status.component';
@@ -22,39 +22,95 @@ describe('TableCellEndpointStatusComponent', () => {
     }).compileComponents();
   });
 
-  beforeEach(() => {
+  beforeEach(async () => {
     fixture = TestBed.createComponent(TableCellEndpointStatusComponent);
     component = fixture.componentInstance;
-    component.row = {
+    fixture.componentRef.setInput('row', {
       guid: 'test-guid',
       cnsi_type: 'metrics',
       name: 'Test Endpoint'
-    } as EndpointModel;
-    fixture.detectChanges();
+    } as EndpointModel);
+    await fixture.whenStable();
   });
 
   it('should be created', () => {
     expect(component).toBeTruthy();
   });
 
-  it('should render the Expired label and icon for an expired connection', () => {
+  it('should render the Expired label and icon for an expired connection', async () => {
     // setInput (not a bare property write) - zoneless + OnPush only re-renders
     // when the input is set through the framework, which marks the view dirty.
     fixture.componentRef.setInput('row', {
       guid: 'test-guid',
-      // Must be a CONNECTABLE endpoint type - the status branches (incl. the
-      // expired one) render only inside the @if (connectable) block, and
-      // unconnectable types (e.g. metrics) fall through to 'Unknown'.
+      // Must be a connectable endpoint type: the status branches (incl. the
+      // expired one) render only inside the @if (connectable) block.
       cnsi_type: 'cf',
       name: 'Test Endpoint',
       connectionStatus: 'expired',
     } as EndpointModel);
-    fixture.detectChanges();
+    await fixture.whenStable();
 
     const compiled = fixture.nativeElement as HTMLElement;
     expect(compiled.textContent).toContain('Expired');
 
     const icon = compiled.querySelector('app-custom-icon');
     expect(icon?.textContent?.trim()).toBe('endpoints_disconnected');
+    // The word is shown, so the icon is decoration.
+    expect(icon?.getAttribute('aria-hidden')).toBe('true');
+  });
+
+  // Without the word, the icon is the only sign of the status.
+  it('names the status on the icon when the label is hidden', async () => {
+    fixture.componentRef.setInput('config', { showLabel: false });
+    fixture.componentRef.setInput('row', {
+      guid: 'test-guid', cnsi_type: 'cf', name: 'Test Endpoint', connectionStatus: 'expired',
+    } as EndpointModel);
+    await fixture.whenStable();
+
+    const img = (fixture.nativeElement as HTMLElement).querySelector('[role="img"]');
+    expect(img?.getAttribute('aria-label')).toBe('Expired');
+  });
+
+  // A failed connect leaves the endpoint Disconnected; the card says why the
+  // last attempt failed, as the last error.
+  it('tells why the last connect failed on a disconnected endpoint', async () => {
+    TestBed.inject(EndpointLastErrorService).record('test-guid', 'Could not connect to the endpoint (400)');
+    fixture.componentRef.setInput('row', {
+      guid: 'test-guid', cnsi_type: 'cf', name: 'Test Endpoint', connectionStatus: 'disconnected',
+    } as EndpointModel);
+    await fixture.whenStable();
+
+    const text = (fixture.nativeElement as HTMLElement).textContent;
+    expect(text).toContain('Disconnected');
+    expect(text).toContain('The last error was Could not connect to the endpoint (400). Reconnect to get the latest status.');
+  });
+
+  // A type that needs no login shows its sync status (as the list does).
+  it('shows the sync status of a type that needs no login', async () => {
+    entityCatalog.register(new StratosCatalogEndpointEntity({
+      type: 'test-no-login', label: 'No login', labelPlural: 'No login', logoUrl: '', authTypes: [], unConnectable: true,
+    }));
+    const repoFixture = TestBed.createComponent(TableCellEndpointStatusComponent);
+    repoFixture.componentRef.setInput('row', {
+      guid: 'repo-1', cnsi_type: 'test-no-login', name: 'repo', connectionStatus: 'disconnected',
+      endpoint_metadata: { status: 'Pending' },
+    } as EndpointModel);
+    await repoFixture.whenStable();
+    const text = (repoFixture.nativeElement as HTMLElement).textContent;
+    expect(text).toContain('Sync Pending');
+    expect(text).not.toContain('Disconnected');
+  });
+
+  // Same placeholder as the endpoints list when there is no sync status.
+  it('shows the list\'s placeholder when a type that needs no login has no sync status', async () => {
+    entityCatalog.register(new StratosCatalogEndpointEntity({
+      type: 'test-no-login', label: 'No login', labelPlural: 'No login', logoUrl: '', authTypes: [], unConnectable: true,
+    }));
+    const repoFixture = TestBed.createComponent(TableCellEndpointStatusComponent);
+    repoFixture.componentRef.setInput('row', {
+      guid: 'repo-2', cnsi_type: 'test-no-login', name: 'repo', connectionStatus: 'disconnected',
+    } as EndpointModel);
+    await repoFixture.whenStable();
+    expect((repoFixture.nativeElement as HTMLElement).textContent?.trim()).toBe('—');
   });
 });

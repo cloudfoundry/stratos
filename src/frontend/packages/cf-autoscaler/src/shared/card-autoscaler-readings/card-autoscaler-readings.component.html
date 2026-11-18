@@ -1,0 +1,27 @@
+<div class="card flex flex-col h-full">
+  <!-- The times sit on their own line, so a narrow box never splits them from the title -->
+  <div class="card-header">
+    <h3 class="card-title">Latest Readings</h3>
+    @if (taken(); as taken) {
+      <div data-test="readings-taken" class="text-sm text-content-muted tabular-nums whitespace-nowrap">{{ taken }}</div>
+    }
+  </div>
+  <app-scroll-fade class="flex-1">
+    <!-- Like a table cell, a column never shrinks below its widest reading; a narrow box scrolls sideways -->
+    <dl class="p-4 grid grid-cols-[repeat(2,minmax(max-content,1fr))] gap-x-8 text-[13px]">
+      @for (r of readings(); track r.name) {
+        <div class="flex justify-between gap-4 py-0.5 border-b border-content-border">
+          <dt class="text-content-muted whitespace-nowrap">
+            <span aria-hidden="true" class="inline-block size-2 rounded-full mr-1.5 align-middle bg-content-border"
+              [style.background-color]="r.color"></span>{{ r.name }}
+          </dt>
+          <dd class="tabular-nums whitespace-nowrap">
+            @if (r.value !== null) { {{ r.value | number:'1.0-2' }}{{ r.unit }} } @else { – }
+          </dd>
+        </div>
+      } @empty {
+        <div class="col-span-2 text-content-muted">No metrics in the policy.</div>
+      }
+    </dl>
+  </app-scroll-fade>
+</div>

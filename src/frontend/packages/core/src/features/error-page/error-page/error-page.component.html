@@ -1,9 +1,9 @@
-@if (errorDetails$ | async; as errorDetails) {
+@if (errorDetails(); as errorDetails) {
   <app-page-header [hideEndpointErrors]="true">
     <h1>{{ errorDetails.endpoint?.name }} — Errors</h1>
     <div class="page-header-right">
       <span>
-        <button class="btn btn-icon" type="button" title="Close" [routerLink]="back$ | async" [queryParams]="backParams$ | async">
+        <button aria-label="Close" class="btn btn-icon" type="button" title="Close" [routerLink]="back()" [queryParams]="backParams()">
           <app-custom-icon>close</app-custom-icon>
         </button>
       </span>
@@ -16,7 +16,7 @@
           (click)="dismissEndpointErrors(errorDetails.endpoint?.guid)">
           Dismiss all
         </button>
-        <a class="btn btn-icon" [href]="jsonDownloadHref$ | async"
+        <a class="btn btn-icon" [href]="jsonDownloadHref()"
           download="endpoint-errors.json" title="Download endpoint error information"
           aria-label="Download endpoint error information">
           <app-custom-icon>cloud_download</app-custom-icon>
@@ -36,7 +36,7 @@
                 </h3>
                 <span class="text-sm text-content-text mt-1.5 break-words text-balance">{{ error.message }}</span>
                 @if (error.metadata.url) {
-                  <span class="text-xs text-content-muted mt-1 break-all font-mono">{{ error.metadata.url }}</span>
+                  <span class="text-xs text-content-muted mt-1 wrap-anywhere font-mono">@for (part of error.metadata.url | urlParts; track $index) {{{ part }}<wbr>}</span>
                 }
                 @if (error.metadata.errorResponse) {
                   <pre class="text-xs mt-2 p-2 rounded-md overflow-x-auto bg-content-canvas border border-content-border text-content-text">{{ (error.metadata.errorResponse) | json }}</pre>

@@ -1,8 +1,8 @@
-import { ChangeDetectionStrategy, Component, Injector, OnInit, computed, inject } from '@angular/core';
+import { ChangeDetectionStrategy, Component, computed, inject, untracked } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { toObservable } from '@angular/core/rxjs-interop';
 import { DomSanitizer, SafeUrl } from '@angular/platform-browser';
 import { ActivatedRoute, RouterModule } from '@angular/router';
+import { UrlPartsPipe } from '../../../shared/pipes/url-parts.pipe';
 import {
   EndpointModel,
   EndpointsDataService,
@@ -11,8 +11,6 @@ import {
   StratosStatus,
   InternalEventState,
 } from '@stratosui/store';
-import { Observable, combineLatest } from 'rxjs';
-import { take, map } from 'rxjs/operators';
 
 import { eventReturnUrlParam } from '../../event-page/events-page/events-page.component';
 import { PageHeaderComponent } from '../../../shared/components/page-header/page-header.component';
@@ -30,25 +28,57 @@ import { CustomIconComponent } from '../../../shared/components/custom-material/
     PageHeaderComponent,
     CardWrapperComponent,
     CustomIconComponent,
+    UrlPartsPipe,
   ],
   changeDetection: ChangeDetectionStrategy.OnPush
 })
-export class ErrorPageComponent implements OnInit {
+export class ErrorPageComponent {
   private activatedRoute = inject(ActivatedRoute);
   private routingHistory = inject(RoutingHistoryService);
   private errorEvents = inject(EndpointErrorEventsService);
   private sanitizer = inject(DomSanitizer);
   private endpointsData = inject(EndpointsDataService);
-  private injector = inject(Injector);
 
-  public back$: Observable<string>;
-  public backParams$: Observable<object>;
-  // strict: only assigned in ngOnInit when an endpointId route param is present; left
-  // undefined otherwise. The template guards via `@if (errorDetails$ | async; as ...)`
-  // and the async pipe tolerates an undefined source.
-  public errorDetails$?: Observable<{ endpoint: EndpointModel | null; errors: InternalEventState[], }>;
+  // The page before this one, read once at the first render (by then the
+  // navigation here is recorded). Untracked, so later navigations from this
+  // page do not move the Close link.
+  private readonly previousState = computed(() => untracked(this.routingHistory.previousState));
+
+  public readonly back = computed(() => {
+    const previousState = this.previousState();
+    return previousState && previousState.url !== '/login' ? previousState.url.split('?')[0] : '/home';
+  });
+
+  // If we've come from the events page ensure we pass it back its param
+  public readonly backParams = computed(() => {
+    const overrideReturnUrl = this.activatedRoute.snapshot.queryParams[eventReturnUrlParam];
+    return this.back().startsWith('/events') ? { [eventReturnUrlParam]: overrideReturnUrl || null } : {};
+  });
+  private readonly endpointId: string | undefined = this.activatedRoute.snapshot.params.endpointId;
+  private readonly endpoint = this.endpointId ? this.endpointsData.endpointById(this.endpointId) : null;
+  // Per-endpoint error history from the signal-native error bus, filtered to
+  // backend (5xx) errors in the last 30 minutes — preserving the old
+  // InternalEventMonitor.hasErroredOverTimeNoPoll(30) behaviour. The cutoff is
+  // taken when the history changes, not as time passes.
+  private readonly recentErrors = this.endpointId ? this.errorEvents.errorsForEndpoint(this.endpointId) : null;
+  // Null (nothing to show) unless the route names an endpoint.
+  public readonly errorDetails = computed<{ endpoint: EndpointModel | null; errors: InternalEventState[], } | null>(() => {
+    if (!this.endpoint || !this.recentErrors) {
+      return null;
+    }
+    const cutoff = Date.now() - 30 * 60 * 1000;
+    return {
+      endpoint: this.endpoint(),
+      errors: this.recentErrors().filter(e => e.eventCode?.[0] === '5' && (e.timestamp ?? 0) > cutoff),
+    };
+  });
   public icon = StratosStatus.ERROR;
-  public jsonDownloadHref$?: Observable<SafeUrl>;
+  public readonly jsonDownloadHref = computed<SafeUrl | null>(() => {
+    const info = this.errorDetails();
+    return info
+      ? this.sanitizer.bypassSecurityTrustUrl('data:text/json;charset=UTF-8,' + encodeURIComponent(JSON.stringify(info)))
+      : null;
+  });
 
   // The endpoint may not have resolved yet (guid optional on EndpointModel).
   public dismissEndpointErrors(endpointGuid: string | undefined) {
@@ -56,54 +86,5 @@ export class ErrorPageComponent implements OnInit {
       return;
     }
     this.errorEvents.clearEndpoint(endpointGuid);
-  }
-
-  ngOnInit() {
-    const endpointId = this.activatedRoute.snapshot.params.endpointId;
-    if (endpointId) {
-      // W36-B Wave 3: read endpoint via EndpointsDataService signal
-      // bridge instead of legacy EntityMonitor.entity$.
-      const endpoint$ = toObservable(
-        this.endpointsData.endpointById(endpointId),
-        { injector: this.injector },
-      );
-      // Read per-endpoint error history from the signal-native error bus,
-      // filtered to backend (5xx) errors in the last 30 minutes — preserving
-      // the old InternalEventMonitor.hasErroredOverTimeNoPoll(30) behaviour.
-      const errorsSig = this.errorEvents.errorsForEndpoint(endpointId);
-      const errors$ = toObservable(
-        computed(() => {
-          const cutoff = Date.now() - 30 * 60 * 1000;
-          return errorsSig().filter(e => e.eventCode?.[0] === '5' && (e.timestamp ?? 0) > cutoff);
-        }),
-        { injector: this.injector },
-      );
-      this.errorDetails$ = combineLatest([errors$, endpoint$]).pipe(
-        map(([errors, endpoint]: [InternalEventState[], EndpointModel | null]) => ({ endpoint, errors }))
-      );
-      this.jsonDownloadHref$ = this.errorDetails$.pipe(
-        map((info: any) => {
-          const jsonString = JSON.stringify(info);
-          return this.sanitizer.bypassSecurityTrustUrl('data:text/json;charset=UTF-8,' + encodeURIComponent(jsonString));
-        })
-      );
-    }
-  }
-
-  constructor() {
-    this.back$ = this.routingHistory.previousState$.pipe(take(1)).pipe(
-      map((previousState: any) => previousState && previousState.url !== '/login' ? previousState.url.split('?')[0] : '/home')
-    );
-
-    this.backParams$ = this.back$.pipe(
-      map((urlBack: string) => {
-        // If we've come from the events page ensure we pass it back it's param
-        const overrideReturnUrl = this.activatedRoute.snapshot.queryParams[eventReturnUrlParam];
-        return urlBack && urlBack.startsWith('/events') ? {
-          [eventReturnUrlParam]: overrideReturnUrl || null
-        } : {};
-      }),
-      take(1)
-    );
   }
 }

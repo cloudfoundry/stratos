@@ -1,18 +1,27 @@
 import { DatePipe } from '@angular/common';
-import { provideHttpClient } from '@angular/common/http';
+import { HttpClient, provideHttpClient } from '@angular/common/http';
 import { HttpTestingController, provideHttpClientTesting } from '@angular/common/http/testing';
-import { CUSTOM_ELEMENTS_SCHEMA, importProvidersFrom } from '@angular/core';
+import { CUSTOM_ELEMENTS_SCHEMA, importProvidersFrom, Injector, signal } from '@angular/core';
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { provideZonelessChangeDetection } from '@angular/core';
 import { NoopAnimationsModule } from '@angular/platform-browser/animations';
-import { provideRouter } from '@angular/router';
+import { ActivatedRoute, provideRouter } from '@angular/router';
 import { describe, it, expect, beforeEach, afterAll, afterEach } from 'vitest';
 
 import { ApplicationService } from '@stratosui/cloud-foundry';
-import { ApplicationServiceMock } from '@test-framework/cf';
-import { CoreModule, TabNavService } from '@stratosui/core';
+import { ApplicationServiceMock, makeAppDetailDataServiceStub } from '@test-framework/cf';
+import { AppDetailDataService } from '../../../../cloud-foundry/src/features/applications/app-detail-data.service';
+import {
+  CoreModule,
+  CurrentUserPermissionsService,
+  getTabsFromExtensions,
+  StratosTabType,
+  TabNavService,
+} from '@stratosui/core';
+import { EndpointsDataService } from '@stratosui/store';
 import { generateBaseTestStoreModules } from '@test-framework/core-test.helper';
 import { CfAutoscalerTestingModule } from '../../cf-autoscaler-testing.module';
+import { setAutoscalerHelperInjector } from '../../core/autoscaler-helpers/autoscaler-available';
 import { AutoscalerTabExtensionComponent } from './autoscaler-tab-extension.component';
 
 // FWT-959 wave-3 (A-effects-cleanup): the component used to chain
@@ -41,6 +50,7 @@ describe('AutoscalerTabExtensionComponent', () => {
         provideRouter([]),
         DatePipe,
         { provide: ApplicationService, useClass: ApplicationServiceMock },
+        { provide: AppDetailDataService, useValue: makeAppDetailDataServiceStub() },
         TabNavService,
         provideZonelessChangeDetection(),
         provideHttpClient(),
@@ -51,10 +61,10 @@ describe('AutoscalerTabExtensionComponent', () => {
       .compileComponents();
   });
 
-  beforeEach(() => {
+  beforeEach(async () => {
     fixture = TestBed.createComponent(AutoscalerTabExtensionComponent);
     component = fixture.componentInstance;
-    fixture.detectChanges();
+    await fixture.whenStable();
   });
 
   afterEach(() => {
@@ -75,8 +85,161 @@ describe('AutoscalerTabExtensionComponent', () => {
     httpMock.verify();
   });
 
+  // The data services patch their state after an awaited request, a
+  // microtask after the flush.
+  const settle = async () => {
+    await new Promise(resolve => setTimeout(resolve));
+    await fixture.whenStable();
+  };
+
   it('should be created', () => {
     expect(component).toBeTruthy();
+  });
+
+  // The tab shows only to a user who can edit the app, and follows that
+  // permission after the app's org and space are known.
+  it('gates the tab on the app edit permission', async () => {
+    const tab = getTabsFromExtensions(StratosTabType.Application).find(t => t.link === 'autoscale')!;
+    const canEdit = signal(false);
+    const cups = { can: () => canEdit } as unknown as CurrentUserPermissionsService;
+    const route = { snapshot: { params: { endpointId: 'cf1', id: 'app1' } } } as unknown as ActivatedRoute;
+    setAutoscalerHelperInjector(TestBed.inject(Injector));
+    const values: boolean[] = [];
+    const sub = TestBed.runInInjectionContext(() => tab.hidden!(route, cups, TestBed.inject(HttpClient)))
+      .subscribe(v => values.push(v));
+    const httpMock = TestBed.inject(HttpTestingController);
+    httpMock.expectOne('/pp/v1/cf/apps/cf1/app1').flush({ orgGuid: 'o1', spaceGuid: 's1' });
+    httpMock.match(r => r.url.endsWith('/info'))
+      .forEach(req => req.flush({ name: 'as', build: '3.0.0', support: '', description: '' }));
+    await settle();
+    expect(values.at(-1)).toBe(true);
+
+    canEdit.set(true);
+    await settle();
+    expect(values.at(-1)).toBe(false);
+    sub.unsubscribe();
+  });
+
+  // The tab says which autoscaler it talks to, and when the choice is not
+  // clear-cut.
+  describe('which autoscaler', () => {
+    const target = async (body: object) => {
+      TestBed.inject(HttpTestingController)
+        .expectOne(r => r.url.endsWith('/autoscaler/apps/mockAppGuid/target'))
+        .flush({ duplicates: { registered: [], bound: [] }, ...body });
+      await settle();
+    };
+    const text = () => (fixture.nativeElement as HTMLElement).textContent!.replace(/\s+/g, ' ');
+    const ref = (name: string) => ({ guid: name, name, url: `https://${name}.sys.x.com`, personal: false });
+
+    it('names the registered autoscaler', async () => {
+      await target({ source: 'registered', endpoint: ref('lab-autoscaler') });
+      expect(text()).toContain('Autoscaler: lab-autoscaler (https://lab-autoscaler.sys.x.com)');
+    });
+
+    it('shows the guessed address, with a way to register it', async () => {
+      (TestBed.inject(EndpointsDataService) as any)._endpoints.set(new Map([['mockCfGuid', {
+        guid: 'mockCfGuid', name: 'lab', cnsi_type: 'cf', api_endpoint: { Scheme: 'https', Host: 'api.sys.x.com', Path: '' },
+      }]]));
+      await target({ source: 'default' });
+      expect(text()).toContain('Autoscaler: https://autoscaler.sys.x.com (address guessed; not registered)');
+      const link = (fixture.nativeElement as HTMLElement).querySelector('a[href^="/endpoints/new/autoscaler"]');
+      expect(link?.textContent?.trim()).toBe('Register it');
+      const href = new URL(link!.getAttribute('href')!, 'https://console');
+      expect(href.searchParams.get('url')).toBe('https://autoscaler.sys.x.com');
+    });
+
+    it('warns when the autoscaler is registered more than once', async () => {
+      await target({ source: 'registered', endpoint: ref('A'), duplicates: { registered: [ref('A'), ref('B')], bound: [] } });
+      expect(text()).toContain('This autoscaler is registered 2 times: A, B. Using A.');
+    });
+
+    it('warns when the app is bound to more than one autoscaler', async () => {
+      await target({ source: 'registered', endpoint: ref('X'), duplicates: { registered: [], bound: ['X', 'Y'] } });
+      expect(text()).toContain('This app is bound to 2 autoscalers: X, Y. Each can scale it.');
+    });
+  });
+
+  // The policy loads after the tab first renders, so the gauges must follow
+  // it rather than read the policy once.
+  // Latest metrics hold data points ({name, value}). The gauge passed the
+  // points themselves to Chart.js, which crashed on the colour and drew
+  // NaN once real metrics arrived.
+  it('builds the gauge from the latest metric values', () => {
+    const data = component.getGaugeData([{
+      entity: {
+        chartMaxValue: 100,
+        latest: {
+          target: [{ name: 'memoryused', value: 30 }],
+          colorTarget: [{ name: 'memoryused', value: 'rgba(90,167,0,0.6)' }],
+        },
+      },
+    }]);
+    expect(data.datasets[0].data).toEqual([30, 70]);
+    expect(data.datasets[0].backgroundColor[0]).toBe('rgba(90,167,0,0.6)');
+  });
+
+  it('loads the metric gauges once the policy arrives', async () => {
+    const httpMock = TestBed.inject(HttpTestingController);
+    httpMock.match(r => r.url.endsWith('/policy')).forEach(req => req.flush({
+      instance_min_count: 1,
+      instance_max_count: 2,
+      scaling_rules: [{
+        metric_type: 'memoryused',
+        breach_duration_secs: 120,
+        threshold: 80,
+        operator: '>=',
+        cool_down_secs: 60,
+        adjustment: '+1',
+      }],
+    }));
+    await settle();
+
+    expect(Object.keys(component.appAutoscalerAppMetrics())).toEqual(['memoryused']);
+    expect(httpMock.match(r => r.url.endsWith('/metric/memoryused')).length).toBe(1);
+  });
+
+  it('says the app has no policy above its scaling events', async () => {
+    const httpMock = TestBed.inject(HttpTestingController);
+    httpMock.match(r => r.url.endsWith('/policy'))
+      .forEach(req => req.flush('Not Found', { status: 404, statusText: 'Not Found' }));
+    await settle();
+    httpMock.match(r => r.url.endsWith('/event')).forEach(req => req.flush({
+      resources: [{ old_instances: 1, new_instances: 2, reason: 'r', message: 'm', timestamp: 0, error: '' }],
+      total_results: 1,
+      total_pages: 1,
+    }));
+    await settle();
+
+    expect(fixture.nativeElement.textContent)
+      .toContain('This application has no Autoscaler Policy. To create a policy click Create Policy above');
+  });
+
+  // The application action bar owns the page sub-nav, so the tab's own
+  // actions must render in the tab
+  it('offers Create Policy in the tab when the app has no policy', async () => {
+    const httpMock = TestBed.inject(HttpTestingController);
+    httpMock.match(r => r.url.endsWith('/policy'))
+      .forEach(req => req.flush('Not Found', { status: 404, statusText: 'Not Found' }));
+    await settle();
+
+    expect(fixture.nativeElement.querySelector('[data-test="list-sub-nav-add"]')).not.toBeNull();
+  });
+
+  it('shows why the autoscaler refused the app instead of offering a policy', async () => {
+    const httpMock = TestBed.inject(HttpTestingController);
+    httpMock.match(r => r.url.endsWith('/policy')).forEach(req => req.flush(
+      { error: 'The application is not bound to Auto-Scaling service' },
+      { status: 403, statusText: 'Forbidden' },
+    ));
+    await settle();
+
+    const text = fixture.nativeElement.textContent;
+    expect(text).toContain('The application is not bound to Auto-Scaling service');
+    expect(text).not.toContain('no Autoscaler Policy');
+    expect(fixture.nativeElement.querySelector('[data-test="list-sub-nav-add"]')).toBeNull();
+    // The events would be refused for the same reason
+    expect(httpMock.match(r => r.url.endsWith('/event')).length).toBe(0);
   });
 
   afterAll(() => { });

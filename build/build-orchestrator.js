@@ -1,4 +1,4 @@
-#!/usr/bin/env node
+#!/usr/bin/env bun
 /**
  * build-orchestrator.js
  * Coordinates all pre-build tools for Stratos
@@ -7,8 +7,10 @@
  * 1. Extension Generator → _custom-import.module.ts
  * 2. SASS Resolver → processed SCSS (if needed)
  * 3. Asset Copier → dist/assets
- * 4. Index Transformer → inject metadata
- * 5. Signal ready for Angular build
+ * 4. Signal ready for Angular build
+ *
+ * index.html metadata is injected after the build, into the build output,
+ * by the prebuild-application builder (tools/builders/prebuild-application).
  */
 
 import { execFileSync } from 'child_process';
@@ -50,14 +52,6 @@ const tools = [
     required: true,
     description: 'Copies assets to dist directory',
     watchPaths: ['src/**/assets/**/*']
-  },
-  {
-    name: 'Index Transformer',
-    script: './index-transformer.js',
-    args: ['src/frontend/packages/core/src/index.html'],
-    required: false,
-    description: 'Transforms index.html with metadata injection',
-    watchPaths: ['src/index.html', 'package.json']
   }
 ];
 
@@ -124,9 +118,9 @@ async function runTool(tool, context = {}) {
     const projectRoot = path.resolve(__dirname, '..');
     const toolArgs = tool.args ? (Array.isArray(tool.args) ? tool.args : [tool.args]) : [];
 
-    // Node runs .ts tools directly by stripping the types. Pass argv as an
+    // Bun runs .ts tools directly. Pass argv as an
     // array to execFileSync so paths/args are never parsed by a shell.
-    execFileSync('node', [toolPath, ...toolArgs], {
+    execFileSync('bun', [toolPath, ...toolArgs], {
       stdio: 'inherit',
       cwd: projectRoot,
       env: {
@@ -291,7 +285,7 @@ ${colors.bright}Stratos Build Orchestrator${colors.reset}
 Coordinates all pre-build tools in the correct order before Angular build.
 
 ${colors.bright}Usage:${colors.reset}
-  node build-orchestrator.js [options]
+  bun build-orchestrator.js [options]
 
 ${colors.bright}Options:${colors.reset}
   -w, --watch      Watch mode - rerun tools when files change
@@ -302,14 +296,14 @@ ${colors.bright}Tools executed (in order):${colors.reset}
 ${tools.map((t, i) => `  ${i + 1}. ${t.name} ${t.required ? '' : '(optional)'}\n     ${colors.dim}${t.description}${colors.reset}`).join('\n')}
 
 ${colors.bright}Examples:${colors.reset}
-  node build-orchestrator.js                # Run once
-  node build-orchestrator.js --watch        # Watch mode
-  node build-orchestrator.js --verbose      # Verbose output
+  bun build-orchestrator.js                # Run once
+  bun build-orchestrator.js --watch        # Watch mode
+  bun build-orchestrator.js --verbose      # Verbose output
 
 ${colors.bright}Integration:${colors.reset}
   Add to package.json scripts:
-  "prebuild": "node build-tools/build-orchestrator.js"
-  "prebuild:watch": "node build-tools/build-orchestrator.js --watch"
+  "prebuild": "bun build-tools/build-orchestrator.js"
+  "prebuild:watch": "bun build-tools/build-orchestrator.js --watch"
 `);
 }
 

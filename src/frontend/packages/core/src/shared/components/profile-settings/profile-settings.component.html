@@ -1,19 +1,19 @@
 <div class="user-profile__options">
-  @if (canEdit$ | async) {
+  @if (canEdit()) {
     <div class="user-profile__option">
-      @if (show[types.GRAVATAR] && (gravatarEnabled$ | async); as enableGravatar) {
+      @if (show()[types.GRAVATAR] && gravatarEnabled(); as enableGravatar) {
         <div class="user-profile__option-inner">
           <app-slide-toggle [checked]="enableGravatar === 'true'" (change)="updateGravatarEnabled(enableGravatar)">
             <div class="user-profile__option-header">Use Gravatar for user icon</div>
           </app-slide-toggle>
-          <div class="user-profile__option-subtext">Use image from Gravatar for the user profile icon when email
+          <div class="user-profile__option-subtext text-content-muted">Use image from Gravatar for the user profile icon when email
           address is available</div>
         </div>
       }
     </div>
   }
 
-  @if (show[types.SESSION_TIMEOUT] && (timeoutSession$ | async); as timeoutSession) {
+  @if (show()[types.SESSION_TIMEOUT] && timeoutSession(); as timeoutSession) {
     <div class="user-profile__option"
       [ngClass]="{'user-profile__option-warning': timeoutSession === 'false'}">
       <div class="user-profile__option-inner">
@@ -22,20 +22,20 @@
           <div class="user-profile__option-header">Disable session timeout
             @if (timeoutSession === 'false') {
               <app-custom-icon
-                matTooltip="Session timeout is disabled, you are now at a greater security risk." matTooltipPosition="right"
+                matTooltip="Session timeout is disabled, you are now at a greater security risk." ariaLabel="Session timeout is disabled, you are now at a greater security risk." matTooltipPosition="right"
                 class="user-profile__option-warning-icon" inline="true">
                 warning
               </app-custom-icon>
             }
           </div>
         </app-slide-toggle>
-        <div class="user-profile__option-subtext">Disable automatic logout if you are inactive
+        <div class="user-profile__option-subtext text-content-muted">Disable automatic logout if you are inactive
         for a long period of time. Disabling session timeout is considered a security risk.</div>
       </div>
     </div>
   }
 
-  @if (show[types.POLLING] && (pollingEnabled$ | async); as pollingEnabled) {
+  @if (show()[types.POLLING] && pollingEnabled(); as pollingEnabled) {
     <div class="user-profile__option"
       [ngClass]="{'user-profile__option-warning': pollingEnabled === 'false'}">
       <div class="user-profile__option-inner">
@@ -43,21 +43,21 @@
           <div class="user-profile__option-header">Disable polling
             @if (pollingEnabled === 'false') {
               <app-custom-icon #tooltip="matTooltip"
-                matTooltip="Polling is disabled, some pages may not automatically update." matTooltipPosition="right"
+                matTooltip="Polling is disabled, some pages may not automatically update." ariaLabel="Polling is disabled, some pages may not automatically update." matTooltipPosition="right"
                 class="user-profile__option-warning-icon" inline="true">
                 warning
               </app-custom-icon>
             }
           </div>
         </app-slide-toggle>
-        <div class="user-profile__option-subtext">Disable automatically refreshing data throughout the
+        <div class="user-profile__option-subtext text-content-muted">Disable automatically refreshing data throughout the
           application. Disabling
         polling may result in some pages showing out-of-date information.</div>
       </div>
     </div>
   }
 
-  @if (show[types.THEME] && hasMultipleThemes) {
+  @if (show()[types.THEME] && hasMultipleThemes) {
     <div class="user-profile__option">
       <app-card-title class="user-profile__section">Theme</app-card-title>
       <div class="user-profile__option">
@@ -73,7 +73,7 @@
     </div>
   }
 
-  @if (show[types.STORAGE] && (localStorageSize$ | async); as localStorageSize) {
+  @if (show()[types.STORAGE] && localStorageSize(); as localStorageSize) {
     <div class="user-profile__section user-profile__local-storage"
       >
       <app-card-title class="user-profile__section">Reset Preferences</app-card-title>

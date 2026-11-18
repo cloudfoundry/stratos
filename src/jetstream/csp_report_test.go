@@ -12,6 +12,8 @@ import (
 	"testing"
 	"time"
 
+	"github.com/cloudfoundry/stratos/src/jetstream/api"
+	"github.com/cloudfoundry/stratos/src/jetstream/api/env"
 	"github.com/labstack/echo/v5"
 	"github.com/labstack/echo/v5/middleware"
 )
@@ -418,5 +420,22 @@ func TestForwardCSPReportSurvivesAnUnreachableCollector(t *testing.T) {
 	entry := hook.LastEntry()
 	if entry == nil || entry.Level != slog.LevelError {
 		t.Fatalf("a failed forward should be logged as an error, got %v", entry)
+	}
+}
+
+// Git hosts added through CONSOLE_CSP_GIT_HOSTS leave the policy built-in.
+func TestEnrichCSPReportBuiltInWithGitHosts(t *testing.T) {
+	var pc api.PortalConfig
+	loaded, err := loadPortalConfig(pc, env.NewVarSet(env.WithMapLookup(map[string]string{
+		"CONSOLE_CSP_GIT_HOSTS": "https://git.example.com",
+	})))
+	if err != nil {
+		t.Fatalf("Unable to load portal config: %v", err)
+	}
+	p := &portalProxy{}
+	p.Config = loaded
+	enriched := p.enrichCSPReport(cspViolationReport{}, "", "", "", false)
+	if got := enriched["stratos"].(map[string]any)["policy_source"]; got != "built-in" {
+		t.Errorf("the built-in policy plus Git hosts should report as built-in, got %v", got)
 	}
 }

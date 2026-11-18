@@ -3,7 +3,7 @@ import { provideZonelessChangeDetection } from '@angular/core';
 import { describe, it, expect, beforeEach, vi } from 'vitest';
 import { MAT_DIALOG_DATA, TailwindDialogRef } from '@stratosui/core';
 import { NoopAnimationsModule } from '@angular/platform-browser/animations';
-import { provideHttpClient } from '@angular/common/http';
+import { HttpErrorResponse, provideHttpClient } from '@angular/common/http';
 import { provideHttpClientTesting } from '@angular/common/http/testing';
 
 import { RollbackDialogComponent } from './rollback-dialog.component';
@@ -53,7 +53,7 @@ describe('RollbackDialogComponent', () => {
 
     fixture = TestBed.createComponent(RollbackDialogComponent);
     component = fixture.componentInstance;
-    fixture.detectChanges();
+    await fixture.whenStable();
   });
 
   it('should create', () => {
@@ -114,20 +114,27 @@ describe('RollbackDialogComponent', () => {
     expect(dialogRefMock.close).toHaveBeenCalledWith({ ok: true, stateChanged: true });
   });
 
-  it('sets errorMessage and keeps dialog open on FAILED result', async () => {
-    const failedResult: AsyncJobResult<RollbackResult> = {
-      status: 'UNKNOWN',  // FAILED throws StratosJobError; use UNKNOWN to test the status branch
-      state: undefined,
-    };
-    // Simulate a service return that yields a non-COMPLETE, non-throwing result.
-    // Per contract: any status other than COMPLETE (and non-throwing) falls through.
-    // We test the throw path separately (StratosJobError branch).
-    revisionsServiceMock.rollback.mockResolvedValue(failedResult);
+  it('keeps the dialog open and says the result is unknown on UNKNOWN', async () => {
+    // UNKNOWN: the rollback ended but its result could not be determined.
+    // It must not close as if it had worked.
+    revisionsServiceMock.rollback.mockResolvedValue({ status: 'UNKNOWN', state: undefined } as AsyncJobResult<RollbackResult>);
 
     await component.confirm();
 
-    // UNKNOWN closes with ok:true per spec; test FAILED path via thrown StratosJobError
-    expect(dialogRefMock.close).toHaveBeenCalledWith({ ok: true, stateChanged: true });
+    expect(dialogRefMock.close).not.toHaveBeenCalled();
+    expect(component.errorMessage()).toBe(
+      'Roll back to revision #5: the operation ended, but its result could not be determined. '
+      + 'The Revisions tab shows the current state.',
+    );
+  });
+
+  it('closing after an unknown result asks the Revisions tab to re-read', async () => {
+    revisionsServiceMock.rollback.mockResolvedValue({ status: 'UNKNOWN', state: undefined } as AsyncJobResult<RollbackResult>);
+    await component.confirm();
+
+    component.cancel();
+
+    expect(dialogRefMock.close).toHaveBeenCalledWith({ ok: false, stateChanged: true });
   });
 
   it('sets errorMessage and does NOT close dialog when StratosJobError is thrown', async () => {
@@ -147,6 +154,29 @@ describe('RollbackDialogComponent', () => {
     expect(dialogRefMock.close).not.toHaveBeenCalled();
   });
 
+  it('shows the CF detail of a failed job rather than its title', async () => {
+    revisionsServiceMock.rollback.mockRejectedValue(new StratosJobError({
+      id: 'job-124', kind: 'rollback', state: 'FAILED', startedAt: '', updatedAt: '',
+      errors: [{ code: 'cf.v3.10008', message: 'CF-UnprocessableEntity', detail: 'Revision is not deployable' }],
+    }));
+
+    await component.confirm();
+
+    expect(component.errorMessage()).toBe('Revision is not deployable');
+  });
+
+  it('shows the CF detail when the rollback fails on the fast path', async () => {
+    revisionsServiceMock.rollback.mockRejectedValue(new HttpErrorResponse({
+      error: { errors: [{ code: 10008, title: 'CF-UnprocessableEntity', detail: 'Revision is not deployable' }] },
+      status: 422, statusText: 'Unprocessable Entity',
+    }));
+
+    await component.confirm();
+
+    expect(component.errorMessage()).toBe('Revision is not deployable');
+    expect(dialogRefMock.close).not.toHaveBeenCalled();
+  });
+
   it('Cancel button is disabled while inFlight', async () => {
     // Make rollback hang by not resolving
     let resolveRollback!: (v: any) => void;
@@ -155,7 +185,7 @@ describe('RollbackDialogComponent', () => {
     );
 
     const confirmPromise = component.confirm();
-    fixture.detectChanges();
+    await fixture.whenStable();
 
     // While in flight, the cancel button should be disabled
     const cancelBtn: HTMLButtonElement | null = fixture.nativeElement.querySelector('[data-testid="cancel-btn"]');

@@ -1,8 +1,9 @@
-import { ChangeDetectionStrategy, Component, Input, signal } from '@angular/core';
+import { ChangeDetectionStrategy, Component, signal, input } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { CustomTooltipDirective } from '../custom-tooltip/custom-tooltip.directive';
 
 import { CustomIconComponent } from '../custom-material/custom-material.component';
+import { AbbrTextComponent } from '../abbr-text/abbr-text.component';
 
 @Component({
   selector: 'app-metadata-item',
@@ -13,38 +14,41 @@ import { CustomIconComponent } from '../custom-material/custom-material.componen
     CommonModule,
     CustomIconComponent,
     CustomTooltipDirective,
+    AbbrTextComponent,
   ],
   changeDetection: ChangeDetectionStrategy.OnPush
 })
 export class MetadataItemComponent {
 
-  @Input() icon!: string;
+  readonly icon = input<string>();
 
-  @Input() public iconFont?: string;
+  public readonly iconFont = input<string>();
 
-  @Input() public label?: string;
+  public readonly label = input<string>();
 
-  @Input() public tooltip?: string;
+  public readonly tooltip = input<string>();
 
   // Are we editing?
-  @Input() public edit?: boolean;
+  public readonly edit = input<boolean>();
 
   // Does the item have a value to copy to the clipboard? = show the copy glyph
-  @Input() public clipboardValue?: string;
+  public readonly clipboardValue = input<string>();
 
-  // Briefly swaps the copy glyph to a check_circle after a successful write.
-  readonly copied = signal(false);
+  // How the last copy went, for a short while: 'copied' swaps the glyph to
+  // a check_circle; a live region says either outcome.
+  readonly copyState = signal<'idle' | 'copied' | 'failed'>('idle');
 
   copyToClipboard(): void {
-    if (!this.clipboardValue) return;
-    const text = this.clipboardValue;
-    const done = () => {
-      this.copied.set(true);
-      setTimeout(() => this.copied.set(false), 1200);
+    const clipboardValue = this.clipboardValue();
+    if (!clipboardValue) return;
+    const text = clipboardValue;
+    const show = (state: 'copied' | 'failed') => {
+      this.copyState.set(state);
+      setTimeout(() => this.copyState.set('idle'), 1200);
     };
     try {
       if (navigator?.clipboard?.writeText) {
-        navigator.clipboard.writeText(text).then(done, () => done());
+        navigator.clipboard.writeText(text).then(() => show('copied'), () => show('failed'));
         return;
       }
     } catch {
@@ -58,8 +62,9 @@ export class MetadataItemComponent {
     ta.style.left = '-9999px';
     document.body.appendChild(ta);
     ta.select();
-    try { document.execCommand('copy'); } catch { /* ignore */ }
+    let ok = false;
+    try { ok = document.execCommand('copy'); } catch { /* ignore */ }
     document.body.removeChild(ta);
-    done();
+    show(ok ? 'copied' : 'failed');
   }
 }

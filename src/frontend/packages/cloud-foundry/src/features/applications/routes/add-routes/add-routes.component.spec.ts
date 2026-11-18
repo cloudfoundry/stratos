@@ -1,12 +1,15 @@
+import { readFileSync } from 'fs';
+import { join } from 'path';
 import { CUSTOM_ELEMENTS_SCHEMA, computed, provideZonelessChangeDetection, signal, WritableSignal } from '@angular/core';
 import { ComponentFixture, TestBed } from '@angular/core/testing';
-import { provideHttpClient } from '@angular/common/http';
+import { HttpErrorResponse, provideHttpClient } from '@angular/common/http';
 import { HttpTestingController, provideHttpClientTesting } from '@angular/common/http/testing';
 import { provideRouter, Router } from '@angular/router';
 import { provideNoopAnimations } from '@angular/platform-browser/animations';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 
 import { ApplicationServiceMock } from '@test-framework/cf';
+import { extractHttpErrorPieces } from '@stratosui/store';
 
 import { AddRoutesComponent } from './add-routes.component';
 import { ApplicationService } from '../../application.service';
@@ -43,6 +46,8 @@ const makeDataStub = () => {
   return {
     addRoute,
     routes: signal<any[] | null>([]).asReadonly(),
+    domains: signal<any[]>([]).asReadonly(),
+    app: signal<any>(undefined).asReadonly(),
     appDetail: signal<any>(undefined).asReadonly(),
     cnsiGuid: 'mockCfGuid',
     appGuid: 'mockAppGuid',
@@ -327,6 +332,43 @@ describe('AddRoutesComponent', () => {
     await expect(component.runSubmit()).rejects.toThrow(/Quota exceeded/);
   });
 
+  // nginx's own 502 page, as a proxy in front of Stratos sends it. The
+  // stepper shows what extractHttpErrorPieces reads from the rejection.
+  const nginx502 = () => new HttpErrorResponse({
+    error: readFileSync(join(import.meta.dirname, '../../../../../../store/src/testdata/upstream-errors/nginx-502.body'), 'utf8'),
+    status: 502,
+    statusText: 'Bad Gateway',
+  });
+  const headed = (lead: string) => [
+    { text: `${lead}: `, style: 'text' },
+    { text: '502 Bad Gateway', style: 'heading' },
+    { text: '\nnginx/1.28.0', style: 'text' },
+  ];
+
+  it('on an error page from create: keeps its heading after the lead-in', async () => {
+    component.spaceGuid = 'mockSpaceGuid';
+    component.selectedDomain.set({ guid: 'domain-http', supportedProtocols: ['http'] } as any);
+    component.domainFormGroup.patchValue({ domain: component.selectedDomain() });
+    component.addHTTPRoute.patchValue({ host: 'h', path: '' });
+    createAndAttach.mockRejectedValueOnce(nginx502());
+
+    const err = await component.runSubmit().then(() => undefined, (e: unknown) => e);
+
+    expect((err as Error).message).toBe('Failed to add route: 502 Bad Gateway\nnginx/1.28.0');
+    expect(extractHttpErrorPieces(err)).toEqual(headed('Failed to add route'));
+  });
+
+  it('on an error page from attach: keeps its heading after the lead-in', async () => {
+    pickerRoutes.set([makeRoute({ guid: 'pick-1', appGuids: [] })]);
+    pickerSelectedKey.set('pick-1');
+    attachRoute.mockRejectedValueOnce(nginx502());
+
+    const err = await component.runSubmit().then(() => undefined, (e: unknown) => e);
+
+    expect((err as Error).message).toBe('Failed to map route: 502 Bad Gateway\nnginx/1.28.0');
+    expect(extractHttpErrorPieces(err)).toEqual(headed('Failed to map route'));
+  });
+
   it('row selected: runSubmit dispatches attach and skips create', async () => {
     const r1 = makeRoute({ guid: 'pick-1', appGuids: [] });
     const r2 = makeRoute({ guid: 'pick-2', appGuids: [] });
@@ -403,5 +445,29 @@ describe('AddRoutesComponent', () => {
     component.addHTTPRoute.patchValue({ host: 'myhost', path: '' });
     fixture.detectChanges();
     expect(component.hostCollision()).toBeNull();
+  });
+  // app-form-field shows a field's <app-error> text as its error line.
+  describe('field errors', () => {
+    async function type(name: string, value: string): Promise<HTMLInputElement> {
+      const input = (fixture.nativeElement as HTMLElement).querySelector<HTMLInputElement>(`input[formcontrolname="${name}"]`)!;
+      input.value = value;
+      input.dispatchEvent(new Event('input', { bubbles: true }));
+      await fixture.whenStable();
+      return input;
+    }
+
+    /** What app-form-field shows for a field, through the input's aria-errormessage. */
+    function errorFor(input: HTMLInputElement): string | undefined {
+      const id = input.getAttribute('aria-errormessage');
+      return id ? (fixture.nativeElement as HTMLElement).querySelector(`#${id}`)?.textContent?.trim() : undefined;
+    }
+
+    it('says a host with a space is invalid', async () => {
+      expect(errorFor(await type('host', 'my host'))).toBe('Invalid Hostname');
+    });
+
+    it('says a path cannot exceed 128 characters', async () => {
+      expect(errorFor(await type('path', '/' + 'p'.repeat(128)))).toBe('Path cannot exceed 128 characters');
+    });
   });
 });

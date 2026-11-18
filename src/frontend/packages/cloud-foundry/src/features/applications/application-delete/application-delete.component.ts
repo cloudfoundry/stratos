@@ -1,7 +1,5 @@
-import { ChangeDetectionStrategy, Component, EffectRef, Injector, OnDestroy, computed, effect, inject, runInInjectionContext, signal } from '@angular/core';
-import { toObservable } from '@angular/core/rxjs-interop';
+import { ChangeDetectionStrategy, Component, EffectRef, Injector, OnDestroy, Signal, computed, effect, inject, runInInjectionContext, signal } from '@angular/core';
 import { Router } from '@angular/router';
-import { Observable } from 'rxjs';
 
 import {
   LoadingPageComponent,
@@ -75,13 +73,17 @@ export class ApplicationDeleteComponent implements OnDestroy {
   public routesLoaded = signal<boolean>(false);
   public appBindings = signal<StServiceCredentialBinding[]>([]);
   public bindingsLoaded = signal<boolean>(false);
+  // The wizard is created only once both lists are in. Created earlier, it
+  // starts on Confirm (the one step shown while they load) and stays there
+  // when the Routes and Service Instances steps appear in front of it.
+  public relatedLoaded = computed(() => this.routesLoaded() && this.bindingsLoaded());
 
   public selectedRoutes: StRoute[] = [];
   public selectedServiceBindings: StServiceCredentialBinding[] = [];
-  // fetchingApplicationData$ drives the top-level loading spinner. Resolves
-  // once the app's own fetch completes — the routes + bindings fetches run
-  // in parallel and their load flags gate their respective stepper steps.
-  public fetchingApplicationData$!: Observable<boolean>;
+  // fetchingApplicationData drives the top-level loading spinner. Resolves
+  // once the app's own fetch and the routes + bindings fetches, which run in
+  // parallel, have all completed.
+  public fetchingApplicationData!: Signal<boolean>;
 
   public cancelUrl: string;
 
@@ -124,12 +126,9 @@ export class ApplicationDeleteComponent implements OnDestroy {
 
     this.cancelUrl = `/applications/${applicationService.cfGuid}/${applicationService.appGuid}`;
 
-    // Top-level spinner gates on the parent data service's app load. The
-    // wizard's stepper steps gate on routes/bindings load flags below.
-    this.fetchingApplicationData$ = toObservable(
-      computed(() => this.dataService.loading().app),
-      { injector: this.injector },
-    );
+    // Top-level spinner gates on the parent data service's app load and on
+    // the routes/bindings fetches below.
+    this.fetchingApplicationData = computed(() => this.dataService.loading().app || !this.relatedLoaded());
 
     // Redirect to the app wall if the app fetch errors out — covers
     // direct-URL navigation to a deleted/non-existent app.

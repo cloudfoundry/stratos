@@ -1,5 +1,5 @@
 
-import {Component, OnInit, inject, ChangeDetectionStrategy, ChangeDetectorRef } from '@angular/core';
+import {Component, OnInit, inject, ChangeDetectionStrategy, signal } from '@angular/core';
 import { ActivatedRoute, Params } from '@angular/router';
 import { take, finalize, switchMap, tap } from 'rxjs/operators';
 
@@ -30,29 +30,18 @@ import { ChartDetailsReadmeComponent } from './chart-details-readme/chart-detail
 })
 export class ChartDetailsComponent implements OnInit {
   /* This resource will be different, probably ChartVersion */
-  chart!: Chart;
-  loading = false;
-  initing = true;
-  currentVersion!: ChartVersion;
-  iconUrl!: string;
-  titleVersion!: string;
-  chartSubTitle!: string;
+  chart = signal<Chart | undefined>(undefined);
+  // Nothing renders until the chart arrives, so show the spinner from the start
+  loading = signal(true);
+  initing = signal(true);
+  currentVersion = signal<ChartVersion | undefined>(undefined);
+  iconUrl = signal('');
+  titleVersion = '';
+  chartSubTitle = signal('');
 
-  loadingDelay: ReturnType<typeof setTimeout>;
   private route = inject(ActivatedRoute);
   private chartsService = inject(ChartsService);
   private config = inject(ConfigService);
-  private cdr = inject(ChangeDetectorRef);
-
-
-
-  constructor() {
-
-
-    this.loadingDelay = setTimeout(() => this.loading = true, 100);
-
-
-  }
 
   ngOnInit() {
     this.route.params.forEach((params: Params) => {
@@ -60,29 +49,28 @@ export class ChartDetailsComponent implements OnInit {
       const chartName = params.chartName;
 
       if (chartName) {
+        this.loading.set(true);
         this.chartsService.getChart(repo, chartName).pipe(
           take(1),
           switchMap(chart => {
-            clearTimeout(this.loadingDelay);
-            this.chart = chart;
-            this.chartSubTitle = chart.attributes.repo.name;
+            this.chart.set(chart);
+            let subTitle = chart.attributes.repo.name;
             if (getMonocularEndpoint(this.route, chart) !== stratosMonocularEndpointGuid) {
-              this.chartSubTitle = 'Artifact Hub - ' + this.chartSubTitle;
+              subTitle = 'Artifact Hub - ' + subTitle;
             }
-            const version = params.version || this.chart.relationships.latestChartVersion.data.version;
+            this.chartSubTitle.set(subTitle);
+            const version = params.version || chart.relationships.latestChartVersion.data.version;
             return this.chartsService.getVersion(repo, chartName, version).pipe(take(1));
           }),
           tap(chartVersion => {
-            this.currentVersion = chartVersion;
-            this.titleVersion = this.currentVersion.attributes.app_version || '';
+            this.currentVersion.set(chartVersion);
+            this.titleVersion = chartVersion.attributes.app_version || '';
             this.updateMetaTags();
-            this.iconUrl = this.chartsService.getChartIconURL(this.chart, chartVersion);
+            this.iconUrl.set(this.chartsService.getChartIconURL(this.chart()!, chartVersion));
           }),
           finalize(() => {
-            clearTimeout(this.loadingDelay);
-            this.loading = false;
-            this.initing = false;
-            this.cdr.markForCheck();
+            this.loading.set(false);
+            this.initing.set(false);
           })
         ).subscribe();
       }
@@ -96,6 +84,7 @@ export class ChartDetailsComponent implements OnInit {
   updateMetaTags(): void { }
 
   goToRepoUrl(): string {
-    return `/charts/${getMonocularEndpoint(undefined, this.chart)}/${this.chart.attributes.repo.name}`;
+    const chart = this.chart()!;
+    return `/charts/${getMonocularEndpoint(undefined, chart)}/${chart.attributes.repo.name}`;
   }
 }

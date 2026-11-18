@@ -1,5 +1,5 @@
 import { HttpClient } from '@angular/common/http';
-import {Component, Input, inject, ChangeDetectionStrategy } from '@angular/core';
+import { Component, inject, input, linkedSignal, ChangeDetectionStrategy } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { marked } from 'marked';
 import { Observable, of } from 'rxjs';
@@ -16,24 +16,22 @@ import { catchError, map } from 'rxjs/operators';
 })
 export class AnalysisInfoCardComponent {
 
+  private http = inject(HttpClient);
+
   public loading = true;
-  public content$?: Observable<string>;
   private renderer = new marked.Renderer();
   private parser = new marked.Parser();
 
-  public mAanalyzer = {};
+  readonly analyzer = input<any>({});
 
-  @Input() set analyzer(analyzer: any) {
-    if (analyzer && analyzer.descriptionUrl) {
-      this.content$ = this.getDescription(analyzer.descriptionUrl);
-    }
-    this.mAanalyzer = analyzer;
-  }
-
-  get analyzer() {
-    return this.mAanalyzer;
-  }  private http = inject(HttpClient);
-
+  // The analyzer's description as HTML. An analyzer without a description
+  // URL keeps the last description.
+  readonly content$ = linkedSignal<any, Observable<string> | undefined>({
+    source: this.analyzer,
+    computation: (analyzer, previous) => analyzer && analyzer.descriptionUrl
+      ? this.getDescription(analyzer.descriptionUrl)
+      : previous?.value,
+  });
 
 
   constructor() {

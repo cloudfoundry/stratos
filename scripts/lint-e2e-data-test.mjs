@@ -1,4 +1,4 @@
-#!/usr/bin/env node
+#!/usr/bin/env bun
 // Every test hook referenced by an e2e spec must exist in a component
 // template, so a renamed or removed hook turns red on the PR that breaks it
 // instead of leaving the spec silently matching nothing (#5619).

@@ -5,6 +5,7 @@ import {
   naturalCollator,
   detectSortContext,
   NO_SEPARATOR_PATTERN_THRESHOLD,
+  endpointNameCompare,
 } from './natural-sort';
 
 describe('naturalCompare', () => {
@@ -196,5 +197,42 @@ describe('NO_SEPARATOR_PATTERN_THRESHOLD', () => {
   it('is a fraction in [0, 1]', () => {
     expect(NO_SEPARATOR_PATTERN_THRESHOLD).toBeGreaterThanOrEqual(0);
     expect(NO_SEPARATOR_PATTERN_THRESHOLD).toBeLessThanOrEqual(1);
+  });
+});
+
+describe('endpointNameCompare', () => {
+  const names = ['dup4', 'dup2', 'dup 3'];
+
+  it('orders dup2, "dup 3", dup4 ascending whatever the input order', () => {
+    expect([...names].sort(endpointNameCompare(names))).toEqual(['dup2', 'dup 3', 'dup4']);
+  });
+
+  it('reverses the whole order descending', () => {
+    expect([...names].sort(endpointNameCompare(names, 'desc'))).toEqual(['dup4', 'dup 3', 'dup2']);
+  });
+
+  it('keeps plain natural order for names without separators', () => {
+    const plain = ['cf10', 'cf2', 'cf1'];
+    expect([...plain].sort(endpointNameCompare(plain))).toEqual(['cf1', 'cf2', 'cf10']);
+  });
+});
+
+describe('stripSeparators keeps separate numbers apart', () => {
+  const names = ['app-10-1', 'app-2-1', 'app-1-11', 'app-1-2'];
+  const ctx = detectSortContext(names);
+
+  it('flags the collection for stripping', () => {
+    expect(ctx.stripSeparators).toBe(true);
+  });
+
+  it('orders by each number in turn, ascending, whatever the input order', () => {
+    const asc = ['app-1-2', 'app-1-11', 'app-2-1', 'app-10-1'];
+    expect([...names].sort(endpointNameCompare(names))).toEqual(asc);
+    expect([...names].reverse().sort(endpointNameCompare(names))).toEqual(asc);
+  });
+
+  it('reverses the whole order descending', () => {
+    const desc = ['app-10-1', 'app-2-1', 'app-1-11', 'app-1-2'];
+    expect([...names].sort(endpointNameCompare(names, 'desc'))).toEqual(desc);
   });
 });

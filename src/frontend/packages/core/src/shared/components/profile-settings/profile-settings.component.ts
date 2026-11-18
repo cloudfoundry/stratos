@@ -1,10 +1,7 @@
 import { CommonModule } from '@angular/common';
-import { ChangeDetectionStrategy, Component, Input, inject } from '@angular/core';
-import { toObservable } from '@angular/core/rxjs-interop';
+import { ChangeDetectionStrategy, Component, computed, inject, input } from '@angular/core';
 import { CustomSlideToggleComponent } from '../custom-slide-toggle/custom-slide-toggle.component';
 import { CustomTooltipDirective } from '../custom-tooltip/custom-tooltip.directive';
-import { combineLatest, Observable } from 'rxjs';
-import { take, filter, map } from 'rxjs/operators';
 
 import {
   LocalStorageService,
@@ -55,45 +52,37 @@ export class ProfileSettingsComponent {
   private currentUserPermissionsService = inject(CurrentUserPermissionsService);
 
 
-  @Input() show: { [settingName: string]: boolean; } = {
+  readonly show = input<{
+    [settingName: string]: boolean;
+}>({
     [ProfileSettingsTypes.GRAVATAR]: true,
     [ProfileSettingsTypes.SESSION_TIMEOUT]: true,
     [ProfileSettingsTypes.POLLING]: true,
     [ProfileSettingsTypes.THEME]: true,
-    [ProfileSettingsTypes.STORAGE]: true };
+    [ProfileSettingsTypes.STORAGE]: true
+});
 
   hasMultipleThemes = true;
 
-  // sessionData sourced from the signal-native auth projection. Filter
-  // matches the legacy behaviour (gate downstream subscribers until the
-  // first non-null payload arrives).
-  private sessionData$ = toObservable(this.authSignals.sessionData).pipe(
-    filter(sessionData => !!sessionData)
-  );
-
-  public canEdit$: Observable<boolean>;
+  private readonly userProfileService = inject(UserProfileService);
+  private readonly hasEditPermission = this.currentUserPermissionsService.can(StratosCurrentUserPermissions.EDIT_PROFILE);
+  public readonly canEdit = computed(() => !this.userProfileService.isError() && this.hasEditPermission());
 
   public types = ProfileSettingsTypes;
 
-  public timeoutSession$ = toObservable(this.dashboardSignals.timeoutSession).pipe(
-    map(v => v ? 'true' : 'false')
-  );
+  readonly timeoutSession = computed(() => this.dashboardSignals.timeoutSession() ? 'true' : 'false');
 
-  public pollingEnabled$ = toObservable(this.dashboardSignals.pollingEnabled).pipe(
-    map(v => v ? 'true' : 'false')
-  );
+  readonly pollingEnabled = computed(() => this.dashboardSignals.pollingEnabled() ? 'true' : 'false');
 
-  public gravatarEnabled$ = toObservable(this.dashboardSignals.gravatarEnabled).pipe(
-    map(v => v ? 'true' : 'false')
-  );
+  readonly gravatarEnabled = computed(() => this.dashboardSignals.gravatarEnabled() ? 'true' : 'false');
 
-  public allowGravatar$ = toObservable(this.dashboardSignals.gravatarEnabled);
-
-  public localStorageSize$ = this.sessionData$.pipe(
-    // -1 means the size could not be determined (no user session or storage unavailable)
-    map(sessionData => sessionData && sessionData.user ? LocalStorageService.localStorageSize(sessionData) : -1),
-    filter(bytes => bytes !== -1),
-  );
+  // The size of this user's stored settings, null while it cannot be
+  // determined (no user session or storage unavailable).
+  public readonly localStorageSize = computed(() => {
+    const sessionData = this.authSignals.sessionData();
+    const bytes = sessionData?.user ? LocalStorageService.localStorageSize(sessionData) : -1;
+    return bytes === -1 ? null : bytes;
+  });
 
   public updateSessionKeepAlive(timeoutSession: string) {
     const newVal = !(timeoutSession === 'true');
@@ -126,20 +115,11 @@ export class ProfileSettingsComponent {
     this.dashboardData.setGravatarEnabled(gravatarEnabled);
   }
 
-  constructor() {
-    const userProfileService = inject(UserProfileService);
-
-    const canEdit = userProfileService.isError$.pipe(map(e => !e));
-    const hasEditPermissions = this.currentUserPermissionsService.can(StratosCurrentUserPermissions.EDIT_PROFILE);
-    this.canEdit$ = combineLatest([canEdit, hasEditPermissions]).pipe(map(([a, b]) => a && b));
-  }
-
   clearLocalStorage() {
-    this.sessionData$.pipe(take(1)).subscribe(sessionData => {
-      if (sessionData && sessionData.user) {
-        LocalStorageService.clearLocalStorage(sessionData, this.confirmationService);
-      }
-    });
+    const sessionData = this.authSignals.sessionData();
+    if (sessionData?.user) {
+      LocalStorageService.clearLocalStorage(sessionData, this.confirmationService);
+    }
   }
 
   resetTheme() {
@@ -149,28 +129,26 @@ export class ProfileSettingsComponent {
   }
 
   resetListPreferences() {
-    this.sessionData$.pipe(take(1)).subscribe(sessionData => {
-      if (sessionData?.user) {
-        this.confirmAndReset('Reset list and pagination preferences?', () => {
-          LocalStorageService.clearSections(sessionData, [
-            LocalStorageSyncTypes.PAGINATION,
-            LocalStorageSyncTypes.LISTS,
-          ]);
-        });
-      }
-    });
+    const sessionData = this.authSignals.sessionData();
+    if (sessionData?.user) {
+      this.confirmAndReset('Reset list and pagination preferences?', () => {
+        LocalStorageService.clearSections(sessionData, [
+          LocalStorageSyncTypes.PAGINATION,
+          LocalStorageSyncTypes.LISTS,
+        ]);
+      });
+    }
   }
 
   resetDashboard() {
-    this.sessionData$.pipe(take(1)).subscribe(sessionData => {
-      if (sessionData?.user) {
-        this.confirmAndReset('Reset dashboard preferences (sidebar, home layout)?', () => {
-          LocalStorageService.clearSections(sessionData, [
-            LocalStorageSyncTypes.DASHBOARD,
-          ]);
-        });
-      }
-    });
+    const sessionData = this.authSignals.sessionData();
+    if (sessionData?.user) {
+      this.confirmAndReset('Reset dashboard preferences (sidebar, home layout)?', () => {
+        LocalStorageService.clearSections(sessionData, [
+          LocalStorageSyncTypes.DASHBOARD,
+        ]);
+      });
+    }
   }
 
   private confirmAndReset(message: string, action: () => void) {

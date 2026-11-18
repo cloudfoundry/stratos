@@ -1,10 +1,7 @@
-import { AsyncPipe } from '@angular/common';
-import {Component, Input, OnInit, inject, ChangeDetectionStrategy } from '@angular/core';
+import { Component, computed, inject, ChangeDetectionStrategy, input } from '@angular/core';
 import { SidePanelService } from '@stratosui/core';
-import { Observable } from 'rxjs';
-import { map } from 'rxjs/operators';
 
-import { KubernetesAnalysisService, KubernetesAnalysisType } from '../../services/kubernetes.analysis.service';
+import { KubernetesAnalysisService } from '../../services/kubernetes.analysis.service';
 import {
   KubernetesAnalysisInfoComponent,
 } from '../../tabs/kubernetes-analysis-tab/kubernetes-analysis-info/kubernetes-analysis-info.component';
@@ -14,48 +11,30 @@ selector: 'app-analysis-report-runner',
   templateUrl: './analysis-report-runner.component.html',
   changeDetection: ChangeDetectionStrategy.OnPush,
   standalone: true,
-  imports: [
-    AsyncPipe
-  ]
 })
-export class AnalysisReportRunnerComponent implements OnInit {
+export class AnalysisReportRunnerComponent {
 
-  canShow$: Observable<boolean>;
-  // strict: assigned in ngOnInit before the template's async pipe reads it;
-  // namespaceAnalyzers$ on the service can emit null, so the union is honest.
-  analyzers$!: Observable<KubernetesAnalysisType[] | null>;
   menuOpen = false;
-  @Input() kubeId!: string;
-  @Input() namespace!: string;
-  @Input() app!: string;
+  // Every host binds the endpoint the analysis runs against.
+  readonly kubeId = input.required<string>();
+  readonly namespace = input<string>();
+  readonly app = input<string>();
   public analysisService = inject(KubernetesAnalysisService);
   private sidePanelService = inject(SidePanelService);
 
-
-
-  constructor() {
-
-
-    this.canShow$ = this.analysisService.hideAnalysis$.pipe(map(h => !h));
-
-
-  }
+  readonly canShow = computed(() => !this.analysisService.hideAnalysis());
+  // A namespace runs only the namespace-aware analyzers (null while
+  // analysis is off).
+  readonly analyzers = computed(() =>
+    this.namespace() ? this.analysisService.namespaceAnalyzers() : this.analysisService.analyzers());
 
   public runAnalysis(id: string) {
-    this.analysisService.run(id, this.kubeId, this.namespace, this.app);
-  }
-
-  ngOnInit(): void {
-    if (this.namespace) {
-      this.analyzers$ = this.analysisService.namespaceAnalyzers$;
-    } else {
-      this.analyzers$ = this.analysisService.analyzers$;
-    }
+    this.analysisService.run(id, this.kubeId(), this.namespace(), this.app());
   }
 
   showAnalyzersInfo() {
     this.sidePanelService.showModal(KubernetesAnalysisInfoComponent, {
-      analyzers$: this.analysisService.analyzers$
+      analyzers: this.analysisService.analyzers()
     });
   }
 

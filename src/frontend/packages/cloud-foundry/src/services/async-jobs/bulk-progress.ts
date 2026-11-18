@@ -1,22 +1,32 @@
 import { HttpClient } from '@angular/common/http';
 import { WritableSignal } from '@angular/core';
 import { TailwindSnackBarRef, TailwindSnackBarService } from '@stratosui/core';
-import { pollJob } from './write-with-job';
-import { extractHttpErrorMessage } from '../extract-error-message';
+import { jobTrackingLimitMs, pollJob } from './write-with-job';
+import { formatLimit } from './unknown-outcome-message';
+import type { StratosJob } from './async-job.types';
 import type { BulkResult } from '../../shared/signal-list-configs/route/cf-routes-signal-config.service';
+import { extractHttpErrorMessage, leadPieces, stripMarkup } from '@stratosui/store';
 
 export interface BulkTally {
   settled: number;
   deleted: number;
   failed: number;
-  unconfirmed: number;
+  /** Ended with a result that could not be determined. */
+  unknown: number;
   total: number;
+  /** Each failed item, with the reason CF or the broker gave when there is one. */
+  failures: { guid: string; reason?: string }[];
+  /** Each item whose result could not be determined. */
+  unknowns: string[];
+  /** Each item CF was still running when Stratos stopped following it (counted in `unknown` too). */
+  running: string[];
 }
 
 // Settles every item of a BulkResult: fast-path items count immediately;
 // PENDING items with a stratosjobs handoff are polled (bounded concurrency)
-// until terminal. Never rejects — job FAILED counts into `failed`, poll
-// UNKNOWN (404/HA) and PENDING-without-job count into `unconfirmed`.
+// until terminal. Never rejects — job FAILED counts into `failed`; a job
+// the backend no longer knows (poll UNKNOWN) and PENDING-without-job ended
+// with a result nobody can determine and count into `unknown`.
 export async function pollBulkResult(
   http: HttpClient,
   result: BulkResult,
@@ -26,14 +36,24 @@ export async function pollBulkResult(
     concurrency?: number;
   } = {},
 ): Promise<BulkTally> {
-  const tally: BulkTally = { settled: 0, deleted: 0, failed: 0, unconfirmed: 0, total: result.results.length };
-  const pendingJobs: string[] = [];
+  const tally: BulkTally = {
+    settled: 0, deleted: 0, failed: 0, unknown: 0, total: result.results.length, failures: [], unknowns: [], running: [],
+  };
+  const pendingJobs: { guid: string; jobId: string; deadlineAt: number }[] = [];
+  // Each item is followed for the limit from when its job started, not from
+  // when a poller reaches it: items queued behind hung ones would otherwise
+  // wait a limit for a poller and then get a full limit of their own.
+  const receivedAt = Date.now();
+  const deadlineOf = (job: StratosJob): number =>
+    (Date.parse(job.startedAt) || receivedAt) + jobTrackingLimitMs();
+  const fail = (guid: string, reason?: string) => { tally.failed++; tally.failures.push({ guid, reason }); };
+  const unknown = (guid: string) => { tally.unknown++; tally.unknowns.push(guid); };
 
   for (const item of result.results) {
     if (item.state === 'COMPLETE') { tally.deleted++; tally.settled++; }
-    else if (item.state === 'FAILED') { tally.failed++; tally.settled++; }
-    else if (item.job?.id) { pendingJobs.push(item.job.id); }
-    else { tally.unconfirmed++; tally.settled++; }
+    else if (item.state === 'FAILED') { fail(item.guid, item.errors?.[0]?.message && stripMarkup(item.errors[0].message)); tally.settled++; }
+    else if (item.job?.id) { pendingJobs.push({ guid: item.guid, jobId: item.job.id, deadlineAt: deadlineOf(item.job) }); }
+    else { unknown(item.guid); tally.settled++; }
   }
   opts.onProgress?.({ ...tally });
   if (pendingJobs.length === 0) { return tally; }
@@ -43,12 +63,14 @@ export async function pollBulkResult(
   let next = 0;
   const worker = async (): Promise<void> => {
     while (next < pendingJobs.length) {
-      const jobId = pendingJobs[next++];
+      const { guid, jobId, deadlineAt } = pendingJobs[next++];
       try {
-        const res = await pollJob<unknown>(http, jobId, { backoffMs: opts.backoffMs });
-        if (res.status === 'COMPLETE') { tally.deleted++; } else { tally.unconfirmed++; }
-      } catch {
-        tally.failed++; // StratosJobError: the CF job terminally failed
+        const res = await pollJob<unknown>(http, jobId, { backoffMs: opts.backoffMs, deadlineAt });
+        if (res.status === 'COMPLETE') { tally.deleted++; }
+        else if (res.stillRunning) { tally.unknown++; tally.running.push(guid); }
+        else { unknown(guid); }
+      } catch (err: unknown) {
+        fail(guid, extractHttpErrorMessage(err)); // StratosJobError: the CF job terminally failed
       }
       tally.settled++;
       opts.onProgress?.({ ...tally });
@@ -70,6 +92,8 @@ export interface BulkProgressOptions {
   op: () => Promise<BulkResult>;
   refresh?: () => Promise<void>;
   refreshAfterPending?: boolean;
+  /** Display names by guid, to name failed items; a missing one shows the guid. */
+  names?: ReadonlyMap<string, string>;
   backoffMs?: readonly number[];   // test hook, forwarded to pollBulkResult
   /** Number of items requested (known from the caller's selection). When
    *  provided and > 0, the progress snackbar opens BEFORE the POST rather
@@ -78,6 +102,13 @@ export interface BulkProgressOptions {
 }
 
 const plural = (n: number, noun: string): string => `${n} ${noun}${n === 1 ? '' : 's'}`;
+
+// The first few entries, then how many more: a summary that names every one
+// of a large bulk would not fit on screen. The console has them all.
+const SUMMARY_NAMES = 3;
+const listSome = (items: string[]): string =>
+  items.slice(0, SUMMARY_NAMES).join(', ')
+  + (items.length > SUMMARY_NAMES ? ` and ${items.length - SUMMARY_NAMES} more` : '');
 
 // Owns the whole bulk lifecycle. Resolves when the POST phase ends (bulk
 // bar closes, rows already handled by op); settlement (job polling +
@@ -98,7 +129,7 @@ export async function runBulkWithProgress(o: BulkProgressOptions): Promise<void>
     result = await o.op();
   } catch (err: unknown) {
     progressRef?.dismiss();
-    o.snackBar.error(`Bulk ${o.verb} failed: ${extractHttpErrorMessage(err)}`);
+    o.snackBar.error(leadPieces(`Bulk ${o.verb} failed`, err));
     return;
   } finally {
     o.bulkRunning?.set(false);
@@ -131,12 +162,28 @@ async function trackSettlement(
   });
   progressRef?.dismiss();
 
+  const nameOf = (guid: string) => `"${o.names?.get(guid) ?? guid}"`;
+  for (const f of tally.failures) {
+    console.warn(`Bulk ${o.verb}: ${nameOf(f.guid)} (${f.guid}) failed: ${f.reason ?? 'no reason given'}`);
+  }
   const parts = [`${plural(tally.deleted, o.noun)} ${o.doneVerb}`];
-  if (tally.failed > 0) { parts.push(`${tally.failed} failed`); }
-  if (tally.unconfirmed > 0) { parts.push(`${tally.unconfirmed} unconfirmed`); }
-  const message = parts.join(', ');
+  if (tally.failed > 0) {
+    // A reason read from an HTML page has a line per block; this summary
+    // lists every failure on one line.
+    const named = tally.failures.map(f =>
+      f.reason ? `${nameOf(f.guid)} (${f.reason.replaceAll('\n', ' ').replace(/\.$/, '')})` : nameOf(f.guid));
+    parts.push(`${tally.failed} failed: ${listSome(named)}`);
+  }
+  if (tally.unknowns.length > 0) {
+    parts.push(`${plural(tally.unknowns.length, 'result')} could not be determined: ${listSome(tally.unknowns.map(nameOf))}`);
+  }
+  if (tally.running.length > 0) {
+    parts.push(`${tally.running.length} still running in Cloud Foundry after ${formatLimit(jobTrackingLimitMs())}, `
+      + `so Stratos stopped checking: ${listSome(tally.running.map(nameOf))}`);
+  }
+  const message = parts.join('; ');
 
-  const clean = tally.failed === 0 && tally.unconfirmed === 0;
+  const clean = tally.failed === 0 && tally.unknown === 0;
   if (clean) {
     o.snackBar.show(message);  // default 5s auto-dismiss = readable linger
   } else {

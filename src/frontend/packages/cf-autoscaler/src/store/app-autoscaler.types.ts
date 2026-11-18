@@ -28,6 +28,13 @@ export interface AppAutoscalerPolicy {
     recurring_schedule?: AppRecurringSchedule[],
     specific_date?: AppSpecificDate[]
   };
+  // Custom metric options (autoscaler 14.x and later). Kept as loaded, so
+  // a save does not reset them.
+  configuration?: {
+    custom_metrics?: {
+      metric_submission_strategy?: { allow_from: string }
+    }
+  };
 }
 
 export interface AppSpecificDate {
@@ -72,12 +79,6 @@ export interface AppAutoscalerPolicyLocal extends AppAutoscalerPolicy {
   scaling_rules_form: AppScalingRule[];
   scaling_rules_map: {
     [metricName: string]: AppScalingTrigger
-  };
-}
-
-export interface AppAutoscalerHealth {
-  entity: {
-    uptime: number;
   };
 }
 
@@ -175,9 +176,3 @@ export interface AppAutoscaleMetricChart {
   unit?: string;
 }
 
-export interface AppAutoscalerCredential {
-  username: string;
-  password: string;
-  app_id?: string;
-  url?: string;
-}

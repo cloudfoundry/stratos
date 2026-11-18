@@ -1,14 +1,14 @@
-import { provideZonelessChangeDetection } from '@angular/core';
+import { ApplicationRef, provideZonelessChangeDetection } from '@angular/core';
 import { TestBed } from '@angular/core/testing';
 import { provideHttpClient } from '@angular/common/http';
 import { HttpTestingController, provideHttpClientTesting } from '@angular/common/http/testing';
 import { TailwindSnackBarService } from '@stratosui/core';
+import { snackText } from '@test-framework/cf';
 import { describe, expect, it, beforeEach, vi } from 'vitest';
 
 import { firstValueFrom } from 'rxjs';
 
 import { StUser } from '../endpoint-data/stratos-types';
-import { CnsiUsersSnapshotService } from '../endpoint-data/cnsi-users-snapshot.service';
 import { CfUsersPagedDataService } from '../../shared/data-services/cf-users-paged-data.service';
 import { CfRoleChange } from '../../store/types/users-roles.types';
 import { SpaceUserRoleNames } from '../../store/types/cf-user.types';
@@ -169,9 +169,6 @@ describe('CfUsersRolesDataService', () => {
 
   describe('executeChanges user-cache sync (legacy cfUserReducer equivalent)', () => {
     const PAGED_P1 = '/pp/v1/cf/users/cf-1?per_page=500&page=1';
-    // The snapshot drains the same paged endpoint as the paged data
-    // service now (#5805) — one page suffices for these fixtures.
-    const SNAPSHOT = '/pp/v1/cf/users/cf-1?per_page=500&page=1';
     const cachedAlice = (): StUser => ({
       guid: 'u-a', username: 'alice', cnsiGuid: 'cf-1',
       orgRoles: [{ orgGuid: 'org-1', roles: ['auditor'] }],
@@ -186,13 +183,8 @@ describe('CfUsersRolesDataService', () => {
       await p;
     };
 
-    it('patches cached role buckets, marks the cache stale, and refreshes a loaded snapshot', async () => {
+    it('patches cached role buckets, then refreshes the loaded cache', async () => {
       await seedPagedCache();
-      const snapshot = TestBed.inject(CnsiUsersSnapshotService);
-      snapshot.users('cf-1');
-      httpMock.expectOne(SNAPSHOT).flush({ resources: [cachedAlice()], totalResults: 1 });
-      // Let the snapshot's promise chain settle so its in-flight guard clears.
-      await new Promise<void>(resolve => setTimeout(resolve, 0));
 
       svc.setUsers('cf-1', [userA]);
       svc.setChanges([
@@ -204,18 +196,16 @@ describe('CfUsersRolesDataService', () => {
         .flush({ results: [{ index: 0, success: true }, { index: 1, success: true }] });
       await done;
 
-      // Inline patch: mounted lists + cache-first wizard baselines see the change now.
+      // Inline patch: tiles, mounted lists and cache-first wizard baselines
+      // see the change before the refetch lands.
       const alice = paged.usersSignal('cf-1')()[0];
       expect(alice.orgRoles).toEqual([{ orgGuid: 'org-1', roles: ['auditor', 'manager'] }]);
       expect(alice.spaceRoles).toEqual([]);
 
-      // Snapshot was already loaded, so the summary tiles re-fetch.
-      httpMock.expectOne(SNAPSHOT).flush({ resources: [cachedAlice()], totalResults: 1 });
-
-      // Stale flag: the next list visit re-fetches server truth.
-      const reload = firstValueFrom(paged.loadUsers('cf-1'));
+      // The cache was loaded, so it reconciles with server truth now.
       httpMock.expectOne(PAGED_P1).flush({ resources: [cachedAlice()], pagination: { totalResults: 1, totalPages: 1 } });
-      await reload;
+      await TestBed.inject(ApplicationRef).whenStable();
+      expect(paged.lastFetched('cf-1')()).not.toBeNull();
     });
 
     it('inserts a set-by-username user into the cache from the returned role guid (#5883)', async () => {
@@ -296,6 +286,21 @@ describe('CfUsersRolesDataService', () => {
     expect(svc.applyStatus()[CfUsersRolesDataService.changeKey(ok)]).toBe('done');
     expect(svc.applyStatus()[CfUsersRolesDataService.changeKey(bad)]).toBe('error');
     expect(snackBar.error).toHaveBeenCalled();
+  });
+
+  it('says why the whole request failed in Cloud Foundry\'s words', async () => {
+    svc.setUsers('cf-1', [userA]);
+    svc.setChanges([{ userGuid: 'u-a', orgGuid: 'org-1', add: true, role: 'managers' as any, orgName: 'Org 1' }]);
+
+    const done = svc.executeChanges();
+    httpMock.expectOne('/pp/v1/cf/roles/cf-1/changes').flush(
+      { errors: [{ code: 10003, title: 'CF-NotAuthorized', detail: 'You are not authorized to perform the requested action' }] },
+      { status: 403, statusText: 'Forbidden' },
+    );
+    await done;
+
+    expect(snackText(snackBar.error.mock.calls[0][0]))
+      .toBe('Failed to apply role changes: You are not authorized to perform the requested action');
   });
 
   it('changeKey distinguishes add from remove of the same role', () => {

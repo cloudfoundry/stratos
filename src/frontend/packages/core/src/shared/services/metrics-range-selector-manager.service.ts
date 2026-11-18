@@ -1,4 +1,4 @@
-import { ApplicationRef, Injectable, NgZone, inject } from '@angular/core';
+import { ApplicationRef, Injectable, OnDestroy, inject } from '@angular/core';
 import { MetricsRequest, MetricQueryType } from '@stratosui/store';
 import { Subject } from 'rxjs';
 import { isValid, isEqual } from 'date-fns';
@@ -9,9 +9,8 @@ import { ITimeRange } from './metrics-range-selector.types';
 @Injectable({
   providedIn: 'root'
 })
-export class MetricsRangeSelectorManagerService {
+export class MetricsRangeSelectorManagerService implements OnDestroy {
   metricRangeService = inject(MetricsRangeSelectorService);
-  private ngZone = inject(NgZone);
   private appRef = inject(ApplicationRef);
 
 
@@ -85,6 +84,13 @@ export class MetricsRangeSelectorManagerService {
     this.endWindowPoll();
   }
 
+  // Each host provides its own manager, so it is destroyed with the host.
+  // Without this the window poll ticks the whole app every pollInterval
+  // for every visit that did not call destroy().
+  ngOnDestroy() {
+    this.endWindowPoll();
+  }
+
   get selectedTimeRange() {
     return this.selectedTimeRangeValue;
   }
@@ -119,17 +125,15 @@ export class MetricsRangeSelectorManagerService {
 
   private startWindowPoll(timeWindow: ITimeRange) {
     this.endWindowPoll();
-    this.ngZone.runOutsideAngular(() => {
-      this.pollIndex = window.setInterval(
-        () => {
-          if (timeWindow.value != null && this.baseRequest) {
-            this.commitRequest(this.metricRangeService.getNewTimeWindowRequest(this.baseRequest, timeWindow.value));
-            this.ngZone.run(() => this.appRef.tick());
-          }
-        },
-        this.pollInterval
-      );
-    });
+    this.pollIndex = window.setInterval(
+      () => {
+        if (timeWindow.value != null && this.baseRequest) {
+          this.commitRequest(this.metricRangeService.getNewTimeWindowRequest(this.baseRequest, timeWindow.value));
+          this.appRef.tick();
+        }
+      },
+      this.pollInterval
+    );
   }
 
   private endWindowPoll() {

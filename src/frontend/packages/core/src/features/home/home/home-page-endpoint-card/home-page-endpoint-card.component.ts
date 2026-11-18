@@ -1,9 +1,8 @@
 import { CommonModule } from '@angular/common';
-import { ChangeDetectionStrategy, AfterViewInit, Component, ComponentRef, EventEmitter, Input, OnChanges, OnDestroy, OnInit, Output, SimpleChanges, ViewChild, ViewContainerRef, signal, inject } from '@angular/core';
-import { toObservable } from '@angular/core/rxjs-interop';
+import { ChangeDetectionStrategy, AfterViewInit, Component, ComponentRef, OnChanges, OnDestroy, OnInit, SimpleChanges, ViewContainerRef, Signal, computed, effect, signal, inject, output, input, untracked, viewChild } from '@angular/core';
 import { RouterModule } from '@angular/router';
-import { combineLatest, Observable, of, Subscription } from 'rxjs';
-import { take, filter, map, timeout } from 'rxjs/operators';
+import { of, Subscription } from 'rxjs';
+import { take, filter, timeout } from 'rxjs/operators';
 
 import {
   EntityCatalogSchemas,
@@ -11,6 +10,8 @@ import {
 import { EndpointModel, entityCatalog } from '../../../../../../store/src/public-api';
 import { UserFavoriteManager } from '../../../../../../store/src/user-favorite-manager';
 import { EntityFavoriteStarComponent } from '../../../../core/entity-favorite-star/entity-favorite-star.component';
+import { CustomIconComponent } from '../../../../shared/components/custom-material/custom-material.component';
+import { CustomTooltipDirective } from '../../../../shared/components/custom-tooltip/custom-tooltip.directive';
 import { MultilineTitleComponent } from '../../../../shared/components/multiline-title/multiline-title.component';
 import { SidePanelMode, SidePanelService } from '../../../../shared/services/side-panel.service';
 import { TailwindDialogService } from '../../../../shared/services/tailwind-dialog.service';
@@ -19,7 +20,7 @@ import { isEndpointConnected } from '../../../endpoints/endpoint-helpers';
 import { FavoritesSidePanelComponent } from '../favorites-side-panel/favorites-side-panel.component';
 import { FavoritesMetaCardComponent } from '../favorites-meta-card/favorites-meta-card.component';
 import { HomeShortcutsComponent } from '../home-shortcuts/home-shortcuts.component';
-import { UserFavoriteEndpoint } from './../../../../../../store/src/types/user-favorites.types';
+import { IFavoriteMetadata, UserFavorite, UserFavoriteEndpoint } from './../../../../../../store/src/types/user-favorites.types';
 import { HomePageCardLayout, HomePageEndpointCard, LinkMetadata } from './../../home.types';
 import {
   DefaultEndpointHomeComponent } from './../default-endpoint-home-component/default-endpoint-home-component.component';
@@ -44,12 +45,14 @@ enum Status {
   standalone: true,
   imports: [
     AppBusyComponent,
+    CustomTooltipDirective,
     CommonModule,
     RouterModule,
     MultilineTitleComponent,
     EntityFavoriteStarComponent,
     HomeShortcutsComponent,
     FavoritesMetaCardComponent,
+    CustomIconComponent,
   ],
   changeDetection: ChangeDetectionStrategy.OnPush
 })
@@ -61,41 +64,81 @@ export class HomePageEndpointCardComponent implements OnInit, OnChanges, OnDestr
 
 
 
-  @ViewChild('customCard', { read: ViewContainerRef, static: true }) customCard!: ViewContainerRef;
+  readonly customCard = viewChild.required('customCard', { read: ViewContainerRef });
 
-  @Input() endpoint!: EndpointModel;
+  readonly endpoint = input.required<EndpointModel>();
 
-  // strict: assigned by computeEffectiveLayout via the @Input set layout accessor
+  // The grid layout the home page sets, before the columnSpan adjustment.
+  // Null until the parent's persisted layout hydrates. The layout this card
+  // uses, and hands to the card it creates, is `layoutSignal`.
+  readonly layout = input<HomePageCardLayout | null>();
+
+  // strict: assigned by computeEffectiveLayout once a layout is set
   pLayout!: HomePageCardLayout;
 
-  get layout(): HomePageCardLayout {
-    return this.pLayout;
-  }
-
-  // Raw grid layout before columnSpan adjustment
-  // strict: assigned by the @Input set layout accessor; reads are guarded with if (this.rawLayout)
+  // Last non-null value of `layout`
+  // strict: assigned by the layout effect; reads are guarded with if (this.rawLayout)
   private rawLayout!: HomePageCardLayout;
 
-  // Null until the parent's persisted layout hydrates; the guard below skips it.
-  @Input() set layout(value: HomePageCardLayout | null) {
-    if (value) {
-      this.rawLayout = value;
-      this.computeEffectiveLayout();
-    }
-    this.updateLayout();
-  }
+  readonly loaded = output<void>();
 
-  @Output() loaded = new EventEmitter<void>();
-
-  // strict: assigned in ngOnInit before the template subscribes
-  favorites$!: Observable<any>;
+  // strict: assigned in ngOnInit before the template reads it; undefined
+  // until the favorites have loaded
+  favorites!: Signal<UserFavorite<IFavoriteMetadata>[] | undefined>;
 
   private _layout = signal<HomePageCardLayout | null>(null);
   public layoutSignal = this._layout.asReadonly();
-  public layout$: Observable<HomePageCardLayout | null>;
 
-  // strict: assigned in ngOnInit before the template subscribes
-  links$!: Observable<LinkMetadata>;
+  // The favorites and shortcuts to list, once the favorites have loaded and
+  // a layout is set. How many fit depends on the layout.
+  readonly links = computed<LinkMetadata | null>(() => {
+    const layout = this.layoutSignal();
+    const allFavs = this.favorites?.();
+    if (!layout || !allFavs) {
+      return null;
+    }
+    // Get the list of shortcuts for the endpoint for the given endpoint ID
+    const shortcutsFn = this.definition?.homeCard?.shortcuts;
+    // strict: guid is populated on every bound endpoint; '' default keeps the lookup well-formed
+    const allShortcuts = shortcutsFn ? shortcutsFn(this.endpoint().guid ?? '') || [] : [];
+    let favs = allFavs;
+    let shortcuts = allShortcuts;
+    const totalShortcuts = allShortcuts.length;
+
+    // Based on the layout, adjust the numbers returned
+    if (layout.y > 1) {
+      // Compact card view
+      if (favs.length > MAX_FAVS_COMPACT) {
+        favs = favs.slice(0, MAX_FAVS_COMPACT);
+      }
+      if (totalShortcuts > MAX_SHORTCUTS) {
+        shortcuts = allShortcuts.slice(0, MAX_SHORTCUTS);
+      }
+      // We only want to display 5 things
+      if (favs.length + totalShortcuts > MAX_LINKS) {
+        let limit = MAX_LINKS - favs.length;
+        if (limit === 1) {
+          limit = 0;
+        }
+        shortcuts = allShortcuts.slice(0, limit);
+      }
+    }
+    return { favs, shortcuts };
+  });
+
+  // Favorites that do not fit in the card
+  readonly hiddenFavorites = computed(() => {
+    const layout = this.layoutSignal();
+    const favs = this.favorites?.();
+    return layout && favs ? favs.length - (layout.y > 1 ? MAX_FAVS_COMPACT : MAX_FAVS_NORMAL) : 0;
+  });
+
+  // Should we show shortcuts on the side or under the main panel? On the side
+  // unless the card is full view with many favorites to also show.
+  readonly showShortcutsOnSide = computed(() => {
+    const layout = this.layoutSignal();
+    return !layout || layout.y > 1 || (this.favorites?.()?.length ?? 0) < CUTOFF_SHOW_SHORTCUTS_ON_LEFT;
+  });
 
   entity: any;
 
@@ -110,7 +153,6 @@ export class HomePageEndpointCardComponent implements OnInit, OnChanges, OnDestr
   // Status = 0 OK, 1 Loading, 2 Error
   private _status = signal<Status>(Status.OK);
   public statusSignal = this._status.asReadonly();
-  public status$: Observable<Status>;
   // Expose the Status enum so the template can name values instead of magic numbers
   public readonly Status = Status;
 
@@ -120,12 +162,19 @@ export class HomePageEndpointCardComponent implements OnInit, OnChanges, OnDestr
 
   private canLoad = false;
 
-  // Should we show shortcuts on the side or udner the manin panel?
-  showShortcutsOnSide = true;
-  hiddenFavorites = 0;
+  // The endpoint type asks for the whole width.
+  private readonly definitionFullView = signal(false);
 
   // Should the Home Card use the whole width, or do we show the links panel as well?
-  fullView = false;
+  // It does when the type asks, or when nothing can be favorited and there
+  // are no shortcuts, so the right-hand panel would be empty.
+  readonly fullView = computed(() => {
+    if (this.definitionFullView()) {
+      return true;
+    }
+    const links = this.links();
+    return !!links && !this.hasFavEntities && links.shortcuts.length === 0;
+  });
 
   // Favorites/Shortcuts placement: strip below the content (linksBelow) or
   // the classic right-hand sidebar. Per-endpoint via homeCard.linksBelow.
@@ -136,15 +185,24 @@ export class HomePageEndpointCardComponent implements OnInit, OnChanges, OnDestr
   hasFavEntities = false;
 
   constructor() {
-    this.layout$ = toObservable(this._layout);
-    this.status$ = toObservable(this._status);
+    // An effect: a layout change is also pushed into the created card.
+    effect(() => {
+      const value = this.layout();
+      untracked(() => {
+        if (value) {
+          this.rawLayout = value;
+          this.computeEffectiveLayout();
+        }
+        this.updateLayout();
+      });
+    });
   }
 
   // Disconnected (or token-expired) endpoints render a Disconnected panel with
   // a connect affordance instead of loading their home card — no half-loaded
   // or error card (#5588). unConnectable types (git etc.) are always "up".
   get disconnected(): boolean {
-    return !this.definition?.unConnectable && !isEndpointConnected(this.endpoint);
+    return !this.definition?.unConnectable && !isEndpointConnected(this.endpoint());
   }
 
   ngAfterViewInit() {
@@ -166,13 +224,13 @@ export class HomePageEndpointCardComponent implements OnInit, OnChanges, OnDestr
 
   private initCard() {
     // customCard resolves in ngOnInit; the ngOnChanges path can fire earlier
-    if (this.cardCreated || this.disconnected || !this.customCard) {
+    if (this.cardCreated || this.disconnected || !this.customCard()) {
       return;
     }
     this.cardCreated = true;
     // Dynamically load the component for the Home Card for this endopoint
     // strict: cnsi_type is populated on every bound endpoint; '' default keeps the lookup well-formed
-    const endpointEntity = entityCatalog.getEndpoint(this.endpoint.cnsi_type ?? '', this.endpoint.sub_type);
+    const endpointEntity = entityCatalog.getEndpoint(this.endpoint().cnsi_type ?? '', this.endpoint().sub_type);
     if (endpointEntity && endpointEntity.definition.homeCard && endpointEntity.definition.homeCard.component) {
       this.createCard(endpointEntity);
     } else {
@@ -184,11 +242,11 @@ export class HomePageEndpointCardComponent implements OnInit, OnChanges, OnDestr
     // Same invocation contract as the endpoints page list
     this.dialog.open(ConnectEndpointDialogComponent, {
       data: {
-        name: this.endpoint.name,
-        guid: this.endpoint.guid,
-        type: this.endpoint.cnsi_type,
-        subType: this.endpoint.sub_type,
-        ssoAllowed: this.endpoint.sso_allowed,
+        name: this.endpoint().name,
+        guid: this.endpoint().guid,
+        type: this.endpoint().cnsi_type,
+        subType: this.endpoint().sub_type,
+        ssoAllowed: this.endpoint().sso_allowed,
       },
       ...CONNECT_ENDPOINT_DIALOG_OPTIONS,
     });
@@ -196,69 +254,20 @@ export class HomePageEndpointCardComponent implements OnInit, OnChanges, OnDestr
 
   ngOnInit() {
     // strict: cnsi_type/guid are populated on every bound endpoint; '' default keeps the lookups well-formed
-    this.hasFavEntities = this.userFavoriteManager.endpointHasEntitiesThatCanFavorite(this.endpoint.cnsi_type ?? '');
+    this.hasFavEntities = this.userFavoriteManager.endpointHasEntitiesThatCanFavorite(this.endpoint().cnsi_type ?? '');
     // Favorites for this endpoint
-    this.favorites$ = this.userFavoriteManager.getFavoritesForEndpoint(this.endpoint.guid ?? '');
-    this.entity = entityCatalog.getEndpoint(this.endpoint.cnsi_type ?? '', this.endpoint.sub_type);
+    this.favorites = this.userFavoriteManager.favoritesForEndpoint(this.endpoint().guid ?? '');
+    this.entity = entityCatalog.getEndpoint(this.endpoint().cnsi_type ?? '', this.endpoint().sub_type);
     if (this.entity) {
       this.definition = this.entity.definition;
-      this.favorite = this.userFavoriteManager.getFavoriteEndpointFromEntity(this.endpoint);
-      this.fullView = this.definition?.homeCard?.fullView ?? false;
+      this.favorite = this.userFavoriteManager.getFavoriteEndpointFromEntity(this.endpoint());
+      this.definitionFullView.set(this.definition?.homeCard?.fullView ?? false);
       this.linksBelow = this.definition?.homeCard?.linksBelow ?? false;
       this.link = this.favorite ? this.favorite.getLink() : null;
       // Recompute effective layout now that definition is available
       this.computeEffectiveLayout();
       this.updateLayout();
     }
-
-    this.links$ = combineLatest([this.favorites$, this.layout$]).pipe(
-      filter((pair): pair is [any, HomePageCardLayout] => !!pair[1]),
-      map(([favs, layout]) => {
-        // Get the list of shortcuts for the endpoint for the given endpoint ID
-        const shortcutsFn = this.definition?.homeCard?.shortcuts;
-        // strict: guid is populated on every bound endpoint; '' default keeps the lookup well-formed
-        const allShortcuts = shortcutsFn ? shortcutsFn(this.endpoint.guid ?? '') || [] : [];
-        let shortcuts = allShortcuts;
-        const max = (layout.y > 1) ? MAX_FAVS_COMPACT : MAX_FAVS_NORMAL;
-        const totalShortcuts = allShortcuts.length;
-        this.hiddenFavorites = favs.length - max;
-
-        // Based on the layout, adjust the numbers returned
-        if (layout.y > 1) {
-          // Compact card view
-          this.showShortcutsOnSide = true;
-          if (favs.length > max) {
-            favs = favs.slice(0, max);
-          }
-          if (totalShortcuts > MAX_SHORTCUTS) {
-            shortcuts = allShortcuts.slice(0, MAX_SHORTCUTS);
-          }
-          // We only want to display 5 things
-          if (favs.length + totalShortcuts > MAX_LINKS) {
-            let limit = MAX_LINKS - favs.length;
-            if (limit === 1) {
-              limit = 0;
-            }
-            shortcuts = allShortcuts.slice(0, limit);
-          }
-        } else {
-          // Full card view - move the shortcuts into the main left panel if we have more
-          // than a certain number of favorites to also show
-          if (favs.length >= CUTOFF_SHOW_SHORTCUTS_ON_LEFT) {
-            this.showShortcutsOnSide = false;
-          }
-        }
-
-        // If nothing can be favorited and there are no shotrcuts then hide the right-hand side panel
-        if (!this.hasFavEntities && shortcuts.length === 0) {
-          setTimeout(() => this.fullView = true, 0);
-        }
-        return {
-          favs,
-          shortcuts
-        };
-      })
-    );
 
     // Self-trigger load now that @Input endpoint is bound. This used to be
     // driven by the parent's QueryList walk, which raced with input
@@ -287,12 +296,12 @@ export class HomePageEndpointCardComponent implements OnInit, OnChanges, OnDestr
   public updateLayout() {
     this._layout.set(this.pLayout);
     if (this.ref && this.ref.instance) {
-      this.ref.instance.layout = this.pLayout;
+      this.ref.setInput('layout', this.pLayout);
     }
   }
 
   async createCard(endpointEntity: any) {
-    this.customCard.clear();
+    this.customCard().clear();
 
     let component: any;
     if (!endpointEntity) {
@@ -301,9 +310,9 @@ export class HomePageEndpointCardComponent implements OnInit, OnChanges, OnDestr
       component = await endpointEntity.definition.homeCard.component();
     }
 
-    this.ref = this.customCard.createComponent(component);
-    this.ref.instance.endpoint = this.endpoint;
-    this.ref.instance.layout = this.pLayout;
+    this.ref = this.customCard().createComponent(component);
+    this.ref.setInput('endpoint', this.endpoint());
+    this.ref.setInput('layout', this.pLayout);
     this.loadCardIfReady();
   }
 
@@ -328,10 +337,10 @@ export class HomePageEndpointCardComponent implements OnInit, OnChanges, OnDestr
       ).subscribe({
         next: () => {
           this._status.set(Status.OK);
-          this.loaded.next(void 0);
+          this.loaded.emit(void 0);
         },
         error: () => {
-          this.loaded.next(void 0);
+          this.loaded.emit(void 0);
           this._status.set(Status.Error);
           this.sub.unsubscribe();
         }
@@ -341,8 +350,8 @@ export class HomePageEndpointCardComponent implements OnInit, OnChanges, OnDestr
 
   public showFavoritesPanel() {
     this.sidePanelService.showMode(SidePanelMode.Narrow, FavoritesSidePanelComponent, {
-      endpoint: this.endpoint,
-      favorites$: this.favorites$
+      endpoint: this.endpoint(),
+      favorites: this.favorites
     });
   }
 }

@@ -1,5 +1,5 @@
 import { CommonModule } from '@angular/common';
-import { ChangeDetectionStrategy, Component, Input, computed, signal } from '@angular/core';
+import { ChangeDetectionStrategy, Component, computed, input } from '@angular/core';
 
 import {
   AppChip,
@@ -59,18 +59,10 @@ interface SummaryView {
   ],
 })
 export class ServiceSummaryCardComponent {
-  private readonly _offering = signal<StServiceOffering | null>(null);
-
-  @Input()
-  set offering(value: StServiceOffering | null) {
-    this._offering.set(value ?? null);
-  }
-  get offering(): StServiceOffering | null {
-    return this._offering();
-  }
+  readonly offering = input<StServiceOffering | null>();
 
   readonly view = computed<SummaryView>(() => {
-    const o = this._offering();
+    const o = this.offering();
     if (!o) {
       return {
         description: '',

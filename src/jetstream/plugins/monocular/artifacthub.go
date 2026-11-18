@@ -433,7 +433,7 @@ func (m *Monocular) artifactHubGetIcon(c *echo.Context) error {
 }
 
 func sendPlaceHolderIcon(c *echo.Context) error {
-	http.Redirect(c.Response(), c.Request(), "/core/assets/custom/placeholder.png", http.StatusTemporaryRedirect)
+	http.Redirect(c.Response(), c.Request(), "/kubernetes/assets/custom/placeholder.png", http.StatusTemporaryRedirect)
 	return nil
 }
 

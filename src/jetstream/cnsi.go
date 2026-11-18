@@ -1,6 +1,7 @@
 package main
 
 import (
+	"cmp"
 	"crypto/x509"
 	"encoding/json"
 	"errors"
@@ -8,6 +9,8 @@ import (
 	"log/slog"
 	"net/http"
 	"net/url"
+	"regexp"
+	"slices"
 	"strconv"
 	"strings"
 	"time"
@@ -44,6 +47,17 @@ func isSSLRelatedError(err error) (bool, string) {
 	return false, ""
 }
 
+// endpointClient picks the client an endpoint logs in with. No Client ID means
+// the console's own client. So does the console's Client ID without a secret:
+// the secret is never shown, so a copied or browser-filled ID arrives without
+// one, and storing it so makes every connect fail with "Bad credentials".
+func endpointClient(id, secret, consoleID, consoleSecret string) (string, string) {
+	if id == "" || (id == consoleID && secret == "") {
+		return consoleID, consoleSecret
+	}
+	return id, secret
+}
+
 func (p *portalProxy) RegisterEndpoint(c *echo.Context, fetchInfo api.InfoFunc) error {
 	slog.Debug("registerEndpoint")
 
@@ -66,19 +80,14 @@ func (p *portalProxy) RegisterEndpoint(c *echo.Context, fetchInfo api.InfoFunc) 
 		ssoAllowed = false
 	}
 
-	cnsiClientId := params.CNSIClientID
-	cnsiClientSecret := params.CNSIClientSecret
+	cnsiClientId, cnsiClientSecret := endpointClient(params.CNSIClientID, params.CNSIClientSecret,
+		p.GetConfig().CFClient, p.GetConfig().CFClientSecret)
 	subType := params.SubType
 
 	createSystemEndpoint, err := strconv.ParseBool(params.CreateSystemEndpoint)
 	if err != nil {
 		// default to true
 		createSystemEndpoint = true
-	}
-
-	if cnsiClientId == "" {
-		cnsiClientId = p.GetConfig().CFClient
-		cnsiClientSecret = p.GetConfig().CFClientSecret
 	}
 
 	userID, err := p.GetSessionStringValue(c, "user_id")
@@ -134,8 +143,9 @@ func (p *portalProxy) DoRegisterEndpoint(cnsiName string, apiEndpoint string, sk
 		isAdmin = currentCreator.Admin
 	}
 
-	// Multiple registrations of the same URL are permitted — each gets a unique GUID.
-	// A follow-on ticket (FWT-TBD) adds UX warning when a duplicate URL is detected.
+	// Multiple registrations of the same URL are permitted — each gets a
+	// unique GUID. The Register step and the endpoint pages tell the user
+	// when an address is shared.
 	guid := uuid.New().String()
 
 	newCNSI, _, err := fetchInfo(apiEndpoint, skipSSLValidation, caCert)
@@ -209,6 +219,10 @@ func (p *portalProxy) unregisterCluster(c *echo.Context) error {
 	return p.doUnregisterCluster(cnsiGUID)
 }
 
+func (p *portalProxy) UnregisterEndpoint(guid string) error {
+	return p.doUnregisterCluster(guid)
+}
+
 func (p *portalProxy) doUnregisterCluster(cnsiGUID string) error {
 	slog.Debug("doUnregisterCluster", "endpoint", cnsiGUID)
 
@@ -247,7 +261,10 @@ func (p *portalProxy) buildCNSIList(c *echo.Context) ([]*api.CNSIRecord, error) 
 		}
 
 		if p.GetConfig().UserEndpointsEnabled != config.UserEndpointsConfigEnum.AdminOnly {
-			// if endpoint with same url exists as system and user endpoint, hide the system endpoint
+			// The user's own endpoints come first. One of them hides a system
+			// endpoint of the same type at the same address (endpointURLKey,
+			// as connect and login compare); endpoints of other types can
+			// share a URL (Metrics at a Cloud Foundry API address).
 			unfilteredList, err := p.ListAdminEndpoints(userID.(string))
 			if err != nil {
 				return unfilteredList, err
@@ -256,21 +273,17 @@ func (p *portalProxy) buildCNSIList(c *echo.Context) ([]*api.CNSIRecord, error) 
 			filteredList := []*api.CNSIRecord{}
 
 			for _, endpoint := range unfilteredList {
-				duplicateSystemEndpoint := false
-				duplicateEndpointIndex := -1
-
-				for i := 0; i < len(filteredList); i++ {
-					if filteredList[i].APIEndpoint.String() == endpoint.APIEndpoint.String() {
-						duplicateSystemEndpoint = len(filteredList[i].Creator) == 0
-						duplicateEndpointIndex = i
+				hidden := false
+				if len(endpoint.Creator) == 0 {
+					for _, own := range filteredList {
+						if len(own.Creator) != 0 && own.CNSIType == endpoint.CNSIType &&
+							endpointURLKey(own.APIEndpoint) == endpointURLKey(endpoint.APIEndpoint) {
+							hidden = true
+							break
+						}
 					}
 				}
-
-				if duplicateEndpointIndex != -1 && !u.Admin {
-					if duplicateSystemEndpoint {
-						filteredList[duplicateEndpointIndex] = endpoint
-					}
-				} else {
+				if !hidden {
 					filteredList = append(filteredList, endpoint)
 				}
 			}
@@ -328,26 +341,56 @@ func (p *portalProxy) ListAdminEndpoints(userID string) ([]*api.CNSIRecord, erro
 	return cnsiList, nil
 }
 
-// listCNSIByAPIEndpoint - receives a URL as string
+var repeatedSlashes = regexp.MustCompile(`/{2,}`)
+
+var defaultPorts = map[string]string{"https": "443", "http": "80"}
+
+// endpointURLKey is what two endpoint addresses are compared by: scheme
+// and host in lower case, no default port, no repeated or trailing slash,
+// no query or fragment. Stored and displayed addresses keep their form.
+// The frontend's endpointUrlKey applies the same rules.
+func endpointURLKey(u *url.URL) string {
+	scheme := strings.ToLower(u.Scheme)
+	host := strings.ToLower(u.Hostname())
+	if strings.Contains(host, ":") {
+		host = "[" + host + "]"
+	}
+	if port := u.Port(); port != "" && port != defaultPorts[scheme] {
+		host += ":" + port
+	}
+	if u.User != nil {
+		host = u.User.String() + "@" + host
+	}
+	path := strings.TrimRight(repeatedSlashes.ReplaceAllString(u.Path, "/"), "/")
+	return scheme + "://" + host + path
+}
+
+// listCNSIByAPIEndpoint returns every endpoint at the same address as the
+// given URL, compared by endpointURLKey.
 func (p *portalProxy) listCNSIByAPIEndpoint(apiEndpoint string) ([]*api.CNSIRecord, error) {
 	slog.Debug("listCNSIByAPIEndpoint", "apiEndpoint", apiEndpoint)
 
-	var err error
 	cnsiList := []*api.CNSIRecord{}
-
-	cnsiRepo, err := p.GetStoreFactory().EndpointStore()
+	target, err := url.Parse(apiEndpoint)
 	if err != nil {
 		return cnsiList, fmt.Errorf("listCNSIByAPIEndpoint: %s", err)
 	}
+	key := endpointURLKey(target)
 
-	cnsiList, err = cnsiRepo.ListByAPIEndpoint(apiEndpoint, p.Config.EncryptionKeyInBytes)
+	// A console has tens of endpoints at most, so the whole list is read and
+	// filtered here: SQL cannot apply the key the same way on every database.
+	all, err := p.ListEndpoints()
 	if err != nil {
 		return cnsiList, err
 	}
 
-	for _, cnsi := range cnsiList {
+	for _, cnsi := range all {
+		if cnsi.APIEndpoint == nil || endpointURLKey(cnsi.APIEndpoint) != key {
+			continue
+		}
 		// Ensure that trailing slash is removed from the API Endpoint
 		cnsi.APIEndpoint.Path = strings.TrimRight(cnsi.APIEndpoint.Path, "/")
+		cnsiList = append(cnsiList, cnsi)
 	}
 
 	return cnsiList, nil
@@ -434,18 +477,74 @@ func (p *portalProxy) GetCNSIRecord(guid string) (api.CNSIRecord, error) {
 	return rec, nil
 }
 
-func (p *portalProxy) GetAdminCNSIRecordByEndpoint(endpoint string) (api.CNSIRecord, error) {
-	slog.Debug("GetAdminCNSIRecordByEndpoint", "apiEndpoint", endpoint)
-	var rec *api.CNSIRecord
+// GetAdminCNSIRecordByEndpoint finds the admin-registered endpoint of the
+// given type at a URL; endpoints of other types may share the URL.
+func (p *portalProxy) GetAdminCNSIRecordByEndpoint(endpoint string, cnsiType string) (api.CNSIRecord, error) {
+	slog.Debug("GetAdminCNSIRecordByEndpoint", "apiEndpoint", endpoint, "type", cnsiType)
 
 	endpointList, err := p.listCNSIByAPIEndpoint(endpoint)
 	if err != nil {
 		return api.CNSIRecord{}, err
 	}
+	return p.pickAdminCNSIRecord(endpointList, cnsiType)
+}
 
-	// search for endpoint created by an admin
+// GetUserConnectedAdminCNSIRecordByEndpoint is GetAdminCNSIRecordByEndpoint
+// limited to the endpoints the user is connected to (their own live token,
+// not a shared one). Duplicates are allowed, so the user may use one of
+// several at the URL; that one is the user's choice.
+func (p *portalProxy) GetUserConnectedAdminCNSIRecordByEndpoint(endpoint string, cnsiType string, userGUID string) (api.CNSIRecord, error) {
+	slog.Debug("GetUserConnectedAdminCNSIRecordByEndpoint", "apiEndpoint", endpoint, "type", cnsiType, "user", userGUID)
+
+	endpointList, err := p.listCNSIByAPIEndpoint(endpoint)
+	if err != nil {
+		return api.CNSIRecord{}, err
+	}
+	connected, err := p.ListEndpointsByUser(userGUID)
+	if err != nil {
+		return api.CNSIRecord{}, err
+	}
+	isConnected := make(map[string]bool, len(connected))
+	for _, ce := range connected {
+		isConnected[ce.GUID] = true
+	}
+
+	mine := []*api.CNSIRecord{}
+	for _, rec := range endpointList {
+		if isConnected[rec.GUID] {
+			mine = append(mine, rec)
+		}
+	}
+	return p.pickAdminCNSIRecord(mine, cnsiType)
+}
+
+// pickAdminCNSIRecord picks the admin-registered endpoint of the given type,
+// preferring one on the console's client: the login hook links the console's
+// token into it, and only that client can refresh the token. Duplicates are
+// allowed, so several may be on that client; the one with the auto-register
+// name wins. Otherwise the first by name, then GUID, as the database returns
+// them in no set order.
+func (p *portalProxy) pickAdminCNSIRecord(endpointList []*api.CNSIRecord, cnsiType string) (api.CNSIRecord, error) {
+	var rec *api.CNSIRecord
+	consoleClient := p.GetConfig().CFClient
+	autoRegName := p.GetConfig().AutoRegisterName()
+	endpointList = slices.Clone(endpointList)
+	slices.SortFunc(endpointList, func(a, b *api.CNSIRecord) int {
+		return cmp.Or(cmp.Compare(a.Name, b.Name), cmp.Compare(a.GUID, b.GUID))
+	})
 	for _, endpoint := range endpointList {
-		if len(endpoint.Creator) == 0 {
+		if len(endpoint.Creator) != 0 || endpoint.CNSIType != cnsiType {
+			continue
+		}
+		if endpoint.ClientId == consoleClient {
+			if endpoint.Name == autoRegName {
+				rec = endpoint
+				break
+			}
+			if rec == nil || rec.ClientId != consoleClient {
+				rec = endpoint
+			}
+		} else if rec == nil {
 			rec = endpoint
 		}
 	}
@@ -767,10 +866,9 @@ func (p *portalProxy) updateEndpoint(ec *echo.Context) error {
 		updates = true
 	}
 
-	// CA Cert
-	caCert := params.CACert
-	if strings.Compare(endpoint.CACert, caCert) != 0 {
-		endpoint.CACert = caCert
+	// CA Cert - only when sent; an empty value clears it
+	if params.CACert != nil && endpoint.CACert != *params.CACert {
+		endpoint.CACert = *params.CACert
 		updates = true
 	}
 
@@ -813,10 +911,8 @@ func (p *portalProxy) updateEndpoint(ec *echo.Context) error {
 	setClientInfo := params.SetClientInfo
 	isSet, err := strconv.ParseBool(setClientInfo)
 	if err == nil && isSet {
-		clientID := params.ClientID
-		clientSecret := params.ClientSecret
-		endpoint.ClientId = clientID
-		endpoint.ClientSecret = clientSecret
+		endpoint.ClientId, endpoint.ClientSecret = endpointClient(params.ClientID, params.ClientSecret,
+			p.GetConfig().CFClient, p.GetConfig().CFClientSecret)
 		updates = true
 	}
 

@@ -1,5 +1,5 @@
-@if (initialValue$ | async; as initialValue) {
-  <app-checkbox [checked]="initialValue.checked" (change)="valueChanged($event.checked)" color="primary">
+@if (initialValue(); as value) {
+  <app-checkbox [checked]="value.checked" (change)="valueChanged($event.checked)" color="primary">
   </app-checkbox>
 } @else {
   <app-busy class="text-primary" size="1.25rem" context="kube-cert"></app-busy>

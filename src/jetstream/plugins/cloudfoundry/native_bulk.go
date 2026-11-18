@@ -9,6 +9,7 @@ import (
 	"net/http"
 	"sync"
 
+	"github.com/cloudfoundry/stratos/src/jetstream/plugins/stratosjobs"
 	"github.com/fivetwenty-io/capi/v3/pkg/capi"
 	"github.com/labstack/echo/v5"
 )
@@ -131,4 +132,20 @@ func bulkItemErrorsFromCapi(err error) []BulkItemError {
 		return out
 	}
 	return []BulkItemError{{Code: "CF_ERROR", Message: err.Error()}}
+}
+
+// bulkItemErrorsFromJob maps the errors of a job that failed inside the
+// fast-path window onto the same contract: CF's title (the job error's
+// Message) as Code, its detail as Message, or the title when CF gave no
+// detail.
+func bulkItemErrorsFromJob(errs []stratosjobs.StratosError) []BulkItemError {
+	out := make([]BulkItemError, 0, len(errs))
+	for _, e := range errs {
+		msg := e.Message
+		if detail, ok := e.Detail.(string); ok && detail != "" {
+			msg = detail
+		}
+		out = append(out, BulkItemError{Code: e.Message, Message: msg})
+	}
+	return out
 }

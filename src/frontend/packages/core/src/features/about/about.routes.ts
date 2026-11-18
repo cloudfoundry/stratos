@@ -15,6 +15,7 @@ export const ABOUT_ROUTES: Routes = [
   },
   {
     path: 'eula',
+    title: 'EULA',
     component: EulaPageComponent
   },
   {

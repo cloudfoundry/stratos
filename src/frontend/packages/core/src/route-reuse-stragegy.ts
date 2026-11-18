@@ -1,7 +1,6 @@
 import { Injectable } from '@angular/core';
 import { ActivatedRouteSnapshot, DetachedRouteHandle, Params, RouteReuseStrategy } from '@angular/router';
 
-import { AppComponent } from './app.component';
 import { DashboardBaseComponent } from './features/dashboard/dashboard-base/dashboard-base.component';
 
 // Shallow equality of a route node's own params (e.g. { endpointId, id }).
@@ -9,6 +8,14 @@ function paramsEqual(a: Params, b: Params): boolean {
   const ak = Object.keys(a);
   const bk = Object.keys(b);
   return ak.length === bk.length && ak.every((k) => a[k] === b[k]);
+}
+
+// The whole URL a router state stands for: the path of every outlet (with
+// matrix params), the query and the fragment.
+function stateUrl(s: ActivatedRouteSnapshot): string {
+  const tree = (n: ActivatedRouteSnapshot): string =>
+    `${n.outlet}:${n.url.map((u) => u.toString()).join('/')}(${n.children.map(tree).join(',')})`;
+  return tree(s.root) + JSON.stringify(s.root.queryParams) + (s.root.fragment ?? '');
 }
 
 @Injectable()
@@ -20,7 +27,16 @@ export class CustomReuseStrategy extends RouteReuseStrategy {
 
   shouldReuseRoute(future: ActivatedRouteSnapshot, curr: ActivatedRouteSnapshot): boolean {
     const isDashboard = curr.component === DashboardBaseComponent && future.component === DashboardBaseComponent;
-    const isAppComp = curr.component === AppComponent && future.component === AppComponent;
+    // The root is the only node without a route config. Always reuse it, as
+    // Angular's default strategy does: the router's first state after a page
+    // load has a root with no component while the next one carries
+    // AppComponent, and not reusing it rebuilt the whole tree, dashboard
+    // shell included, on the first in-app navigation after every load.
+    const isRoot = curr.routeConfig === null && future.routeConfig === null;
+    // A link to the URL already shown still navigates (the app sets
+    // onSameUrlNavigation: 'reload'). Keep the page then: rebuilding it
+    // takes the focused link out of the page and focus falls to the body.
+    const isSameUrl = stateUrl(curr) === stateUrl(future);
 
     let reuse: boolean;
     if (curr.data.reuseRoute === true) {
@@ -45,6 +61,6 @@ export class CustomReuseStrategy extends RouteReuseStrategy {
         (future.component ?? null) === (future.data.reuseRoute ?? null) &&
         paramsEqual(curr.params, future.params);
     }
-    return isDashboard || isAppComp || reuse;
+    return isDashboard || isRoot || isSameUrl || reuse;
   }
 }

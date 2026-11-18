@@ -1,4 +1,4 @@
-import { ChangeDetectionStrategy, Component, Input  } from '@angular/core';
+import { ChangeDetectionStrategy, Component, computed, input } from '@angular/core';
 
 import { ReactiveFormsModule, FormGroup, FormControl } from '@angular/forms';
 import { AppInputDirective, CustomFormFieldComponent } from '../../../../shared/components/custom-form-field/custom-form-field.component';
@@ -27,21 +27,17 @@ export class CredentialsAuthFormComponent implements IAuthForm {
 
   showPassword = false;
 
-  // Custom labels for the input fields
-  pConfig: any = {
+  private static readonly defaultLabels = {
     usernameLabel: 'Username',
     passwordLabel: 'Password'
   };
 
-  @Input() formGroup!: FormGroup<CredentialsAuthForm>;
+  readonly formGroup = input.required<FormGroup<CredentialsAuthForm>>();
 
-  get config(): any {
-    return this.pConfig;
-  }
+  readonly config = input<any>({});
 
-  @Input() set config(v: any) {
-    if (v) {
-      this.pConfig = v;
-    }
-  }
+  // Labels for the input fields, which an auth type's config may rename. The
+  // connect form passes `{}` for an auth type without a config (Metrics'
+  // username and password), which must not blank the labels.
+  readonly labels = computed(() => ({ ...CredentialsAuthFormComponent.defaultLabels, ...this.config() }));
 }

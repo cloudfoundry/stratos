@@ -215,9 +215,9 @@ The files for the default indicator can be found in the `src/frontend/packages/t
 
 An example of a different loading indicator is included with the ACME sample in `src/frontend/packages/example-theme/loader`.
 
-The customization task will insert the appropriate CSS and HTML files into the main index.html file when it runs.
+Each build inserts the CSS and HTML files into the built `index.html` (`dist/frontend/browser/index.html`); the source file is never changed.
 
-Take a look at the template for the `index.html` file in `src/frontend/packages/core/misc/custom/index.html`. The CSS file is inserted where the marker `/** @@LOADING_CSS@@ **/` is and the HTML file where `<!-- @@LOADING_HTML@@ -->` is.
+Take a look at the source `index.html` in `src/frontend/packages/core/src/index.html`. The CSS file is inserted where the marker `/** @@LOADING_CSS@@ **/` is and the HTML file where `<!-- @@LOADING_HTML@@ -->` is.
 
 ### Login Page
 
@@ -301,7 +301,7 @@ productVersion: 2.0.0
 
 |Property|Description|
 |--|--|
-|title| Official product title, shown in `About` page and other custom places|
+|title| Product title written into the built `index.html` (default `Stratos`): the browser tab title until the app starts, and the title on the page shown when JavaScript is disabled. Once the app starts, the tab shows the company name from `company-config.json` (see [Branding Architecture](../branding-architecture.md)).|
 |productVersion| Use when building `helm` charts|
 
 
@@ -309,7 +309,7 @@ productVersion: 2.0.0
 
 In this example, we will walk through extending the Stratos front-end. A new tab will be added to the Cloud Foundry Application page.
 
-This walk-through assumes that you have installed the Angular CLI globally - this can be done with `npm install -g @angular/cli`.
+This walk-through uses the Angular CLI that comes with the project's dependencies; run it as `bunx ng`.
 
 ### Create a new extensions package
 

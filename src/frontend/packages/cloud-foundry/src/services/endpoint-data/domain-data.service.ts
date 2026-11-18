@@ -10,7 +10,7 @@ import { Observable } from 'rxjs';
 //
 // NOTE: there is currently no domain list/detail management page in the
 // cloud-foundry package (domains are only consumed as the Add Route dropdown,
-// sourced from applicationService.orgDomains$). This service + the share
+// sourced from AppDetailDataService.domains). This service + the share
 // dialog are the entry point a future host surface opens; until that page
 // exists the affordance is unhosted — mirroring the isolation-segment
 // entitle-orgs pattern.

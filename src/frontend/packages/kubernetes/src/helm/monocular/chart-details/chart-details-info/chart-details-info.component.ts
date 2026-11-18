@@ -1,6 +1,6 @@
 
-import { Component, Input, OnInit, inject, ChangeDetectionStrategy, signal } from '@angular/core';
-import { CardWrapperComponent } from '@stratosui/core';
+import { Component, OnInit, effect, inject, ChangeDetectionStrategy, signal, input, untracked } from '@angular/core';
+import { CardWrapperComponent, UrlPartsPipe } from '@stratosui/core';
 import { of } from 'rxjs';
 import { take, catchError,  } from 'rxjs/operators';
 
@@ -19,41 +19,43 @@ import { ChartDetailsVersionsComponent } from '../chart-details-versions/chart-d
   imports: [
     CardWrapperComponent,
     ChartDetailsUsageComponent,
-    ChartDetailsVersionsComponent
+    ChartDetailsVersionsComponent,
+    UrlPartsPipe,
 ]
 })
 export class ChartDetailsInfoComponent implements OnInit {
-  @Input() chart!: Chart;
+  readonly chart = input.required<Chart>();
   // Signals: both arrive from HTTP after the first render, and an OnPush view
   // under zoneless CD only repaints for signal writes.
   readonly versions = signal<ChartVersion[]>([]);
   readonly schema = signal<unknown>(null);
 
-  private pCurrentVersion!: ChartVersion;
-
-  get currentVersion(): ChartVersion {
-    return this.pCurrentVersion;
-  }
-
-  @Input() set currentVersion(version: ChartVersion) {
-    this.pCurrentVersion = version;
-    if (version) {
-      this.getSchema(this.pCurrentVersion, this.chart);
-    }
-  }
+  // Its one host (chart-details) binds it inside @if (currentVersion()).
+  readonly currentVersion = input.required<ChartVersion>();
 
   private chartsService = inject(ChartsService);
 
+  constructor() {
+    // Load the values schema of each version shown. Only a new version loads
+    // it again, so the chart is read untracked.
+    effect(() => {
+      const version = this.currentVersion();
+      if (version) {
+        untracked(() => this.getSchema(version, this.chart()));
+      }
+    });
+  }
+
   ngOnInit() {
-    this.loadVersions(this.chart);
+    this.loadVersions(this.chart());
   }
 
   get sources() {
-    return this.chart.attributes.sources || [];
+    return this.chart().attributes.sources || [];
   }
 
   get maintainers(): Maintainer[] {
-    return this.chart.attributes.maintainers || [];
+    return this.chart().attributes.maintainers || [];
   }
 
   loadVersions(chart: Chart): void {
@@ -67,7 +69,7 @@ export class ChartDetailsInfoComponent implements OnInit {
   maintainerUrl(maintainer: Maintainer): string {
     // Use GitHub URL with maintainer name if this is an upstream Helm repo from
     // github.com/helm/charts (i.e. stable or incubator)
-    if (this.isUpstreamHelmRepo(this.chart.attributes.repo.url)) {
+    if (this.isUpstreamHelmRepo(this.chart().attributes.repo.url)) {
       return `https://github.com/${maintainer.name}`;
     } else {
       return `mailto:${maintainer.email}`;

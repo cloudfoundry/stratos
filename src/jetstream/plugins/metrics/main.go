@@ -107,10 +107,16 @@ func (m *MetricsSpecification) AddAdminGroupRoutes(echoContext *echo.Group) {
 
 // AddSessionGroupRoutes adds the session routes for this plugin to the Echo server
 func (m *MetricsSpecification) AddSessionGroupRoutes(echoContext *echo.Group) {
+	// Served for each Cloud Foundry where the user can see the application;
+	// the query is scoped to that application
 	echoContext.GET("/metrics/cf/app/:appId/:op", m.getCloudFoundryAppMetrics)
 
-	// Note: User needs to be an admin of the given Cloud Foundry to retrieve metrics
+	// No Cloud Foundry permission check: only allow-listed cell metric
+	// queries are accepted
 	echoContext.GET("/metrics/cf/cells/:op", m.getCloudFoundryCellMetrics)
+
+	// Note: User needs to be an admin of the given Cloud Foundry to retrieve
+	// metrics (checked in the handler)
 	echoContext.GET("/metrics/cf/:op", m.getCloudFoundryMetrics)
 }
 
@@ -185,6 +191,12 @@ func (m *MetricsSpecification) Connect(ec *echo.Context, cnsiRecord api.CNSIReco
 	// Error performing the request?
 	if err != nil {
 		slog.Error("error performing the http request", "url", metricsMetadataEndpoint, "response", res, "error", err)
+		// Most request errors (refused, timeout, TLS) come without a
+		// response. Returned as they are, so the connect handler reports
+		// an unreachable endpoint or a TLS failure.
+		if res == nil {
+			return nil, false, fmt.Errorf("unable to fetch the metrics metadata: %w", err)
+		}
 		errMessage := ""
 		if res.StatusCode == http.StatusUnauthorized {
 			errMessage = ": Unauthorized"
@@ -215,14 +227,14 @@ func (m *MetricsSpecification) Connect(ec *echo.Context, cnsiRecord api.CNSIReco
 		response, err := h.Do(req)
 		if err != nil {
 			slog.Error("error fetching /api/v1/status/config", "url", statusEndpoint, "response", response, "error", err)
-			return nil, false, api.LogHTTPError(res, err)
+			return nil, false, api.LogHTTPError(response, err)
 		}
 
 		defer func() { _ = response.Body.Close() }()
 		if response.StatusCode != http.StatusOK {
 			slog.Error("unexpected status fetching /api/v1/status/config",
 				"url", statusEndpoint, "status", response.StatusCode)
-			return nil, false, api.LogHTTPError(res, err)
+			return nil, false, api.LogHTTPError(response, nil)
 		}
 
 		tr.Metadata, _ = m.createMetadata(cnsiRecord.APIEndpoint, h, auth)
@@ -337,10 +349,11 @@ func (m *MetricsSpecification) Info(apiEndpoint string, skipSSLValidation bool, 
 	if err != nil {
 		return newCNSI, nil, err
 	}
+	defer func() { _ = resp.Body.Close() }()
 
 	// Any error code >= 400 that is not 401 means something wrong
 	if resp.StatusCode >= 400 && resp.StatusCode != 401 {
-		return newCNSI, nil, err
+		return newCNSI, nil, fmt.Errorf("metrics endpoint returned %s", resp.Status)
 	}
 
 	newCNSI.TokenEndpoint = apiEndpoint

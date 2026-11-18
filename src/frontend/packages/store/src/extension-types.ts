@@ -1,4 +1,4 @@
-import { Type } from '@angular/core';
+import { InputSignal, Type } from '@angular/core';
 import { UntypedFormGroup } from '@angular/forms';
 import { Schema, schema } from 'normalizr';
 
@@ -21,14 +21,16 @@ export interface EndpointAuthTypeConfig {
 }
 
 /**
- * Interface that an Endpoint Auth Form Component must implement
+ * Interface that an Endpoint Auth Form Component must implement.
+ * Both members are signal inputs: the host that creates the form sets them
+ * with `ComponentRef.setInput()`.
  */
 export interface IAuthForm {
-  formGroup: UntypedFormGroup;
+  formGroup: InputSignal<UntypedFormGroup>;
   /**
    * Generic property for any additional config
    */
-  config?: any;
+  config?: InputSignal<any>;
 }
 
 export interface EndpointAuthValues { [key: string]: string; }

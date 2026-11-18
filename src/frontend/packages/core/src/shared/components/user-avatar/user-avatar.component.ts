@@ -1,4 +1,4 @@
-import { ChangeDetectionStrategy, Component, Input  } from '@angular/core';
+import { ChangeDetectionStrategy, Component, computed, input } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { UserProfileInfo } from '@stratosui/store';
 
@@ -15,46 +15,34 @@ import { MD5 } from './md5';
 })
 export class UserAvatarComponent {
 
-  public initials: string | null = null;
-  public gravatar: string | null = null;
+  readonly size = input('small');
+  readonly color = input('normal');
 
-  private canUseGravatar = false;
-  private userInfo: UserProfileInfo | null = null;
+  readonly allowGravatar = input<boolean | null>();
+  readonly user = input<UserProfileInfo | null>();
 
-  @Input() size = 'small';
-  @Input() color = 'normal';
-
-  @Input()
-  set allowGravatar(allowed: boolean | null) {
-    this.canUseGravatar = !!allowed;
-    this.update();
-  }
-
-  @Input()
-  set user(user: UserProfileInfo | null) {
-    this.userInfo = user;
-    this.update();
-  }
-
-  private update() {
-    this.initials = null;
-    this.gravatar = null;
-    const user = this.userInfo;
-
-    if (user) {
-      if (user.name) {
-        this.initials = user.name.givenName ? user.name.givenName.charAt(0) : '';
-        this.initials += user.name.familyName ? user.name.familyName.charAt(0) : '';
-      }
-
-      if (user.emails && user.emails.length > 0) {
-        const email = user.emails[0].value;
-        if (email.length > 0 && this.canUseGravatar) {
-          const hash = MD5.hash(email.toLocaleLowerCase().trim());
-          this.gravatar = `//gravatar.com/avatar/${hash}?s=64`;
-          this.initials = null;
-        }
-      }
+  // Shown instead of the initials when allowed and the user has an email.
+  readonly gravatar = computed(() => {
+    const emails = this.user()?.emails;
+    const email = emails && emails.length > 0 ? emails[0].value : '';
+    if (email.length === 0 || !this.allowGravatar()) {
+      return null;
     }
+    const hash = MD5.hash(email.toLocaleLowerCase().trim());
+    return `//gravatar.com/avatar/${hash}?s=64`;
+  });
+
+  readonly initials = computed(() => avatarInitials(this.user(), this.allowGravatar()));
+}
+
+/**
+ * The initials the avatar shows, or null when it shows the Gravatar (allowed
+ * and the user has an email) or the user has no name.
+ */
+export function avatarInitials(user: UserProfileInfo | null | undefined, allowGravatar: boolean | null | undefined): string | null {
+  const name = user?.name;
+  if (!name || (allowGravatar && user?.emails?.[0]?.value)) {
+    return null;
   }
+  return (name.givenName ? name.givenName.charAt(0) : '') + (name.familyName ? name.familyName.charAt(0) : '') || null;
 }

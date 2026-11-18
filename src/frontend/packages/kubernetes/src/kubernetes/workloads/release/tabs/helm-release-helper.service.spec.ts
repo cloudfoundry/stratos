@@ -1,14 +1,12 @@
-import { provideZonelessChangeDetection } from '@angular/core';
+import { provideZonelessChangeDetection, signal } from '@angular/core';
 import { TestBed } from '@angular/core/testing';
 import { provideHttpClient } from '@angular/common/http';
 import { HttpTestingController, provideHttpClientTesting } from '@angular/common/http/testing';
-import { firstValueFrom } from 'rxjs';
-import { describe, it, expect, beforeEach } from 'vitest';
+import { describe, it, expect, beforeEach, vi } from 'vitest';
 
-import { CATALOGUE_ENTITIES } from '@stratosui/store';
 import { KubernetesBaseTestModules } from '../../../kubernetes.testing.module';
-import { generateHelmEntities } from '../../../../helm/helm-entity-generator';
 import { KubePodDataService } from '../../../../services/domain-data/kube-pod-data.service';
+import { KubeHelmDataService } from '../../../../services/endpoint-data/kube-helm-data.service';
 import { HelmReleaseDataService } from '../helm-release-data.service';
 import { HelmReleaseGraph, HelmReleaseGuid, HelmReleaseResources } from '../../workload.types';
 import { HelmReleaseHelperService, Version } from './helm-release-helper.service';
@@ -39,43 +37,79 @@ describe('HelmReleaseHelperService', () => {
       releaseData = TestBed.inject(HelmReleaseDataService);
     });
 
-    it('release$ emits the loaded detail with a default icon', async () => {
+    it('release holds the loaded detail with a default icon, undefined before', async () => {
       const helper = TestBed.inject(HelmReleaseHelperService);
+      expect(helper.release()).toBeUndefined();
       httpMock.expectOne(DETAIL_URL).flush({ name: 'rel-x', namespace: 'ns-a', chart: { metadata: { name: 'nginx' } } });
-      const rel: any = await firstValueFrom(helper.release$);
-      expect(rel.name).toBe('rel-x');
-      expect(rel.chart.metadata.icon).toBe('/core/assets/custom/app_placeholder.svg');
+      await vi.waitFor(() => expect(helper.release()?.name).toBe('rel-x'));
+      expect(helper.release()?.chart.metadata.icon).toBe('/kubernetes/assets/custom/app_placeholder.svg');
     });
 
-    it('fetchReleaseHistory loads and emits the revisions array', async () => {
+    it('history() loads the revisions and exposes them as a signal', async () => {
       const helper = TestBed.inject(HelmReleaseHelperService);
       httpMock.expectOne(DETAIL_URL).flush({ name: 'rel-x', namespace: 'ns-a', chart: { metadata: {} } });
-      const history$ = helper.fetchReleaseHistory();
+      const history = helper.history();
+      expect(history()).toBeUndefined();
       httpMock.expectOne(HISTORY_URL).flush({ revisions: [{ revision: 1 }, { revision: 2 }] });
-      const revs: any = await firstValueFrom(history$);
-      expect(revs).toHaveLength(2);
+      await vi.waitFor(() => expect(history()).toHaveLength(2));
     });
 
-    it('fetchReleaseGraph emits graph written via the data service', async () => {
+    it('graph and resources follow what the data service holds', () => {
       const helper = TestBed.inject(HelmReleaseHelperService);
       httpMock.expectOne(DETAIL_URL).flush({ name: 'rel-x', namespace: 'ns-a', chart: { metadata: {} } });
-      const graph$ = helper.fetchReleaseGraph();
+      expect(helper.graph()).toBeUndefined();
+      expect(helper.resources()).toBeUndefined();
+
       releaseData.setGraph(RELEASE_GUID, { endpointId: 'cnsi-1', releaseTitle: 'rel-x', nodes: {}, links: {} } as HelmReleaseGraph);
-      const graph: any = await firstValueFrom(graph$);
-      expect(graph.releaseTitle).toBe('rel-x');
+      releaseData.setResources(RELEASE_GUID, { endpointId: 'cnsi-1', releaseTitle: 'rel-x', kind: 'Resources', data: [] } as HelmReleaseResources);
+
+      expect(helper.graph()?.releaseTitle).toBe('rel-x');
+      expect(helper.resources()?.kind).toBe('Resources');
     });
 
-    it('fetchReleaseResources emits resources written via the data service', async () => {
-      const helper = TestBed.inject(HelmReleaseHelperService);
-      httpMock.expectOne(DETAIL_URL).flush({ name: 'rel-x', namespace: 'ns-a', chart: { metadata: {} } });
-      const res$ = helper.fetchReleaseResources();
-      releaseData.setResources(RELEASE_GUID, { endpointId: 'cnsi-1', releaseTitle: 'rel-x', kind: 'Resources', data: [] } as HelmReleaseResources);
-      const res: any = await firstValueFrom(res$);
-      expect(res.kind).toBe('Resources');
+    describe('upgrade()', () => {
+      const chart = (version: string) => ({
+        attributes: { name: 'nginx', description: 'web server' },
+        relationships: { latestChartVersion: { data: { version } } },
+        monocularEndpointId: 'mono',
+      });
+      const releaseWith = (version: string) => ({
+        name: 'rel-x', namespace: 'ns-a',
+        chart: { metadata: { name: 'nginx', description: 'web server', version } },
+      });
+
+      function setup(charts: unknown[]) {
+        vi.spyOn(TestBed.inject(KubeHelmDataService), 'monocularCharts').mockReturnValue(signal(charts) as never);
+        vi.spyOn(TestBed.inject(KubeHelmDataService), 'loadCharts').mockResolvedValue(undefined as never);
+        return TestBed.inject(HelmReleaseHelperService);
+      }
+
+      it('is null until the release has loaded', () => {
+        const helper = setup([chart('2.0.0')]);
+        const upgrade = helper.upgrade();
+        httpMock.expectOne(DETAIL_URL);
+        expect(upgrade()).toBeNull();
+      });
+
+      it('names the newer chart version once the release has loaded', async () => {
+        const helper = setup([chart('2.0.0')]);
+        const upgrade = helper.upgrade();
+        httpMock.expectOne(DETAIL_URL).flush(releaseWith('1.0.0'));
+        await vi.waitFor(() => expect(upgrade()?.version).toBe('2.0.0'));
+      });
+
+      it('is null when the release is current, unless the latest chart is asked for', async () => {
+        const helper = setup([chart('1.0.0')]);
+        const newer = helper.upgrade();
+        const latest = helper.upgrade(true);
+        httpMock.expectOne(DETAIL_URL).flush(releaseWith('1.0.0'));
+        await vi.waitFor(() => expect(latest()?.version).toBe('1.0.0'));
+        expect(newer()).toBeNull();
+      });
     });
   });
 
-  describe('fetchReleaseChartStats', () => {
+  describe('chartStats', () => {
     beforeEach(async () => {
       TestBed.resetTestingModule();
       await TestBed.configureTestingModule({
@@ -86,25 +120,21 @@ describe('HelmReleaseHelperService', () => {
           provideHttpClientTesting(),
           HelmReleaseHelperService,
           { provide: HelmReleaseGuid, useValue: { guid: 'cnsi-1:ns-a:rel-x' } },
-          {
-            provide: CATALOGUE_ENTITIES,
-            useFactory: () => generateHelmEntities(),
-            multi: true,
-          },
         ],
       }).compileComponents();
     });
 
-    it('builds chart stats from the signal pod workload scope', async () => {
+    it('follows the workload pods as they change', () => {
       const pod = TestBed.inject(KubePodDataService);
-      const helper = TestBed.inject(HelmReleaseHelperService);
-      helper.endpointGuid = 'cnsi-1'; helper.namespace = 'ns-a'; helper.releaseTitle = 'rel-x';
+      const stats = TestBed.inject(HelmReleaseHelperService).chartStats();
+      expect(stats().podsChartData).toEqual([]);
+
       pod.setWorkloadPods('cnsi-1', 'ns-a', 'rel-x', [
         { metadata: { name: 'p1' }, status: { phase: 'Running', containerStatuses: [{ state: { running: {} } }] } } as any,
       ]);
-      const data = await firstValueFrom(helper.fetchReleaseChartStats());
-      expect(data.podsChartData.find(d => d.name === 'Running')?.value).toBe(1);
-      expect(data.containersChartData.find(d => d.name === 'Ready')?.value).toBe(1);
+
+      expect(stats().podsChartData.find(d => d.name === 'Running')?.value).toBe(1);
+      expect(stats().containersChartData.find(d => d.name === 'Ready')?.value).toBe(1);
     });
   });
 

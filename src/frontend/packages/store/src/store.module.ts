@@ -1,4 +1,3 @@
-import { HttpClientModule } from '@angular/common/http';
 import { NgModule, inject } from '@angular/core';
 
 import { EntityCatalogProvidersModule } from './entity-catalog-providers.module';
@@ -8,7 +7,6 @@ import { EndpointDisconnectCleanupService } from './services/endpoint-disconnect
 @NgModule({
   imports: [
     EntityCatalogProvidersModule,
-    HttpClientModule,
   ]
 })
 export class AppStoreModule {

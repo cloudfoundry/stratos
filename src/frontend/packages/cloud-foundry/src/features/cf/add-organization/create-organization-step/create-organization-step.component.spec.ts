@@ -16,6 +16,8 @@ import {
 import { STORE_TEST_PROVIDERS, testSCFEndpointGuid, populateStoreWithTestEndpoint } from '@stratosui/store/testing';
 import { generateTestCfEndpointServiceProvider } from "@test-framework/cloud-foundry-endpoint-service.helper";
 import { generateCFEntities } from '@stratosui/cloud-foundry';
+import { EndpointDataRegistry } from '../../../../services/endpoint-data/endpoint-data.registry';
+import { StOrg } from '../../../../services/endpoint-data/stratos-types';
 import { CreateOrganizationStepComponent } from "./create-organization-step.component";
 
 describe('CreateOrganizationStepComponent', () => {
@@ -55,13 +57,27 @@ describe('CreateOrganizationStepComponent', () => {
     populateStoreWithTestEndpoint();
   });
 
-  beforeEach(() => {
+  beforeEach(async () => {
     fixture = TestBed.createComponent(CreateOrganizationStepComponent);
     component = fixture.componentInstance;
-    fixture.detectChanges();
+    await fixture.whenStable();
   });
 
   it('should create', () => {
     expect(component).toBeTruthy();
+  });
+  // app-form-field shows a field's <app-error> text as its error line.
+  it('says a taken organization name exists', async () => {
+    TestBed.inject(EndpointDataRegistry).acquire(testSCFEndpointGuid).addOrg({ name: 'taken' } as StOrg);
+    const host: HTMLElement = fixture.nativeElement;
+    const input = host.querySelector<HTMLInputElement>('input[formcontrolname="orgName"]')!;
+    input.value = 'taken';
+    input.dispatchEvent(new Event('input', { bubbles: true }));
+    await fixture.whenStable();
+
+    const id = input.getAttribute('aria-errormessage');
+    expect(id && host.querySelector(`#${id}`)?.textContent?.trim()).toBe(
+      'An organization with this name already exists. Please enter a different one.'
+    );
   });
 });

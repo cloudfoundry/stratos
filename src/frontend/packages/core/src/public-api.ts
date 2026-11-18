@@ -14,11 +14,12 @@ export {
   naturalCollator,
   naturalCompare,
   detectSortContext,
+  endpointNameCompare,
   NO_SEPARATOR_PATTERN_THRESHOLD,
 } from './shared/utils/natural-sort';
 export type { NaturalSortContext } from './shared/utils/natural-sort';
-export { GlobalEventService, GlobalEventData, endpointEventKey } from './shared/global-events.service';
-export type { IGlobalEvent, IGlobalEventConfig, GlobalEventTypes } from './shared/global-events.service';
+export { GlobalEventService, endpointEventKey } from './shared/global-events.service';
+export type { IGlobalEvent, GlobalEventTypes } from './shared/global-events.service';
 export { environment } from './environments/environment';
 export { isValidJsonValidator } from './shared/form-validators';
 
@@ -41,6 +42,7 @@ export { ProfileSettingsTypes } from './shared/components/profile-settings/profi
 // Tailwind Material Replacements
 export * from './shared/services/tailwind-material-replacements';
 export * from './shared/services/tailwind-snackbar.service';
+export { ERROR_PIECE_CLASS, ErrorTextComponent } from './shared/components/error-text/error-text.component';
 export * from './shared/services/endpoint-auth-state.service';
 export * from './shared/services/tailwind-dialog.service';
 export * from './shared/services/tailwind-sort.service';
@@ -58,10 +60,10 @@ export { AppProgressBarComponent } from './shared/components/progress-bar/app-pr
 export { InfoCardComponent } from './shared/components/info-card/info-card.component';
 export { PageHeaderComponent } from './shared/components/page-header/page-header.component';
 export { SteppersComponent } from './shared/components/stepper/steppers/steppers.component';
-export { StepComponent, StepOnNextFunction } from './shared/components/stepper/step/step.component';
 export { PageSubNavComponent } from './shared/components/page-sub-nav/page-sub-nav.component';
 export { PageSubNavSectionComponent } from './shared/components/page-sub-nav-section/page-sub-nav-section.component';
 export { ListSubNavComponent, ListSubNavAddAction, ListSubNavAction } from './shared/components/list-sub-nav/list-sub-nav.component';
+export { ScrollFadeComponent } from './shared/components/scroll-fade/scroll-fade.component';
 export { DuplicateUrlBannerComponent } from './shared/components/duplicate-url-banner/duplicate-url-banner.component';
 export { IPageSideNavTab } from './features/dashboard/page-side-nav/page-side-nav.component';
 
@@ -203,6 +205,7 @@ export { PercentagePipe } from './shared/pipes/percentage.pipe';
 export { InfinityPipe } from './core/infinity.pipe';
 export { MbToHumanSizePipe } from './shared/pipes/mb-to-human-size.pipe';
 export { UptimePipe } from './shared/pipes/uptime.pipe';
+export { UrlPartsPipe } from './shared/pipes/url-parts.pipe';
 
 // Directives
 export { BlurDirective } from './shared/components/blur.directive';
@@ -221,18 +224,15 @@ export { UtilsService, safeUnsubscribe } from './core/utils.service';
 export { TabNavService } from './tab-nav.service';
 export { CurrentUserPermissionsService, CUSTOM_USER_PERMISSION_CHECKERS } from './core/permissions/current-user-permissions.service';
 export { PermissionConfig, PermissionConfigLink, IPermissionConfigs, PermissionTypes } from './core/permissions/current-user-permissions.config';
-export { BaseCurrentUserPermissionsChecker, ICurrentUserPermissionsChecker, IPermissionCheckCombiner, IConfigGroup, IConfigGroups } from './core/permissions/current-user-permissions.types';
+export { BaseCurrentUserPermissionsChecker, ICurrentUserPermissionsChecker, PERMISSION_DENIED, IPermissionCheckCombiner, IConfigGroup, IConfigGroups } from './core/permissions/current-user-permissions.types';
 export { StratosCurrentUserPermissions, StratosScopeStrings } from './core/permissions/stratos-user-permissions.checker';
 export { UserProfileService } from './core/user-profile.service';
-export { SessionService } from './shared/services/session.service';
 
 // Signal-native auth/session/endpoints/user/permissions shims (wave-3, consumers flip later)
 export { AuthSignalService } from './core/signals/auth-signal.service';
 export { SessionSignalService } from './core/signals/session-signal.service';
 export { UserSignalService } from './core/signals/user-signal.service';
 export { EndpointsSignalService } from './core/signals/endpoints-signal.service';
-export { PermissionsSignalService } from './core/signals/permissions-signal.service';
-export { CurrentUserRolesSignalService } from './core/signals/current-user-roles-signal.service';
 
 // Helper Classes
 export { arrayHelper } from './core/helper-classes/array.helper';
@@ -286,3 +286,5 @@ export { MetricsParentRangeSelectorComponent } from './shared/components/metrics
 export { MetricsRangeSelectorComponent } from './shared/components/metrics-range-selector/metrics-range-selector.component';
 export { MetricsLineChartConfig, MetricsChartTypes, IMetricsConfig, IMetricsChartConfig } from './shared/components/metrics-chart/metrics-chart.types';
 export { ChartDataTypes, getMetricsChartConfigBuilder, MetricsChartHelpers } from './shared/components/metrics-chart/metrics.component.helpers';
+
+export { BrandedTitleStrategy, endpointTitle, paramTitle, parentTitle, tabTitle, titleOrParent } from './title-strategy';

@@ -84,10 +84,7 @@ func (cf *CloudFoundrySpecification) createServiceBinding(c *echo.Context) error
 
 	if res.Resolved {
 		if res.State == stratosjobs.JobStateFailed {
-			return c.JSON(http.StatusBadGateway, map[string]interface{}{
-				"state":  res.State,
-				"errors": res.Errors,
-			})
+			return stratosjobs.WriteFailed(c, res.Errors)
 		}
 		return c.JSON(http.StatusOK, map[string]interface{}{
 			"state":  res.State,
@@ -161,10 +158,7 @@ func (cf *CloudFoundrySpecification) deleteServiceBinding(c *echo.Context) error
 
 	if res.Resolved {
 		if res.State == stratosjobs.JobStateFailed {
-			return c.JSON(http.StatusBadGateway, map[string]interface{}{
-				"state":  res.State,
-				"errors": res.Errors,
-			})
+			return stratosjobs.WriteFailed(c, res.Errors)
 		}
 		return c.JSON(http.StatusOK, map[string]interface{}{
 			"state":  res.State,

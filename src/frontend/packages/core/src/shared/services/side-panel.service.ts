@@ -24,6 +24,11 @@ export enum SidePanelMode {
   providedIn: 'root'
 })
 export class SidePanelService {
+  // Set on <body> while the panel is open. Full-screen dialog backdrops stop
+  // at the panel edge (theme main.scss) so the panel does not hide their
+  // right-hand controls.
+  static readonly OPEN_CLASS = 'side-panel-open';
+
   private router = inject(Router);
   private document = inject<Document>(DOCUMENT);
 
@@ -83,7 +88,7 @@ export class SidePanelService {
 
   // Re-open the panel with its current contents
   public open() {
-    this._opened.set(true);
+    this.setOpened(true);
     this.document.addEventListener('keydown', this.onKeyDown);
   }
 
@@ -92,7 +97,7 @@ export class SidePanelService {
       throw new Error('SidePanelService: container must be set');
     }
 
-    this._opened.set(false);
+    this.setOpened(false);
     this.document.removeEventListener('keydown', this.onKeyDown);
   }
 
@@ -127,7 +132,12 @@ export class SidePanelService {
     }
 
     this.container.clear();
-    this._opened.set(false);
+    this.setOpened(false);
+  }
+
+  private setOpened(opened: boolean) {
+    this._opened.set(opened);
+    this.document.body.classList.toggle(SidePanelService.OPEN_CLASS, opened);
   }
 
   private setupRouterListener() {

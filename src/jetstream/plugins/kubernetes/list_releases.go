@@ -28,17 +28,12 @@ func (c *KubernetesSpecification) ListReleases(ec *echo.Context) error {
 // List releases for a single endpoint
 func (c *KubernetesSpecification) listReleases(ep *api.ConnectedEndpoint, done chan KubeProxyResponse) {
 
-	response := KubeProxyResponse{
-		Endpoint: ep.GUID,
-		Result:   nil,
-	}
-
 	slog.Debug("listing the Helm releases for an endpoint", "endpoint", ep.GUID, "user", ep.Account)
 
 	config, hc, err := c.GetHelmConfiguration(ep.GUID, ep.Account, "")
 	if err != nil {
 		slog.Error("could not get a Helm configuration to list the releases", "endpoint", ep.GUID, "user", ep.Account, "error", err)
-		done <- response
+		done <- failedKubeProxyResponse(ep.GUID, "Could not get a Helm configuration", err)
 		return
 	}
 
@@ -51,13 +46,10 @@ func (c *KubernetesSpecification) listReleases(ep *api.ConnectedEndpoint, done c
 	res, err := list.Run()
 	if err != nil {
 		slog.Error("could not list the Helm releases", "endpoint", ep.GUID, "user", ep.Account, "error", err)
-
-		done <- response
+		done <- failedKubeProxyResponse(ep.GUID, "Could not list the Helm releases", err)
 		return
 	}
 
 	slog.Debug("listed the Helm releases", "endpoint", ep.GUID, "count", len(res))
-	response.Result = res
-
-	done <- response
+	done <- KubeProxyResponse{Endpoint: ep.GUID, Result: res}
 }

@@ -1,10 +1,14 @@
 package main
 
 import (
+	"context"
+	"crypto/tls"
+	"crypto/x509"
 	"encoding/json"
 	"errors"
 	"fmt"
 	"log/slog"
+	"net"
 	"net/http"
 	"net/url"
 	"strings"
@@ -149,15 +153,19 @@ func (p *portalProxy) DoLoginToCNSI(c *echo.Context, cnsiGUID string, systemShar
 		return nil, echo.NewHTTPError(http.StatusUnauthorized, "Could not find correct session value")
 	}
 
-	// admins are note allowed to connect to user created endpoints
+	var alsoConnected []api.EndpointRef
+
+	// With user endpoints on (enabled or admin_only), a personal endpoint
+	// (one with a creator) can be connected to only by its creator; anyone
+	// else, admins included, is refused.
 	if p.GetConfig().UserEndpointsEnabled != config.UserEndpointsConfigEnum.Disabled {
 
 		if len(cnsiRecord.Creator) != 0 && cnsiRecord.Creator != userID {
 			return nil, echo.NewHTTPError(http.StatusUnauthorized, "Can not connect - users are not allowed to connect to personal endpoints created by other users")
 		}
 
-		// search for system or personal endpoints and check if they are connected
-		// automatically disconnect other endpoint if already connected to same url
+		// The user's other connections at the same URL stay; the response
+		// names them so the user can choose to disconnect them.
 		cnsiList, err := p.listCNSIByAPIEndpoint(cnsiRecord.APIEndpoint.String())
 		if err != nil {
 			return nil, echo.NewHTTPError(
@@ -166,14 +174,11 @@ func (p *portalProxy) DoLoginToCNSI(c *echo.Context, cnsiGUID string, systemShar
 			).Wrap(fmt.Errorf("failed to retrieve list of CNSIs: %v", err))
 		}
 
-		for _, cnsi := range cnsiList {
-			if (cnsi.Creator == userID || len(cnsi.Creator) == 0) && cnsi.GUID != cnsiGUID {
-				_, ok := p.GetCNSITokenRecord(cnsi.GUID, userID)
-				if ok {
-					if clearErr := p.ClearCNSIToken(*cnsi, userID); clearErr != nil {
-						slog.Warn("unable to clear the token for the endpoint", "endpoint", cnsi.GUID, "user", userID, "error", clearErr)
-					}
-				}
+		for _, cnsi := range sameURLAlternatives(cnsiRecord, cnsiList, userID) {
+			// A shared connection belongs to every user, and a cleared one is
+			// not a connection.
+			if tr, ok := p.GetCNSITokenRecord(cnsi.GUID, userID); ok && !tr.SystemShared && !tr.Disconnected {
+				alsoConnected = append(alsoConnected, api.EndpointRef{GUID: cnsi.GUID, Name: cnsi.Name})
 			}
 		}
 	}
@@ -207,13 +212,7 @@ func (p *portalProxy) DoLoginToCNSI(c *echo.Context, cnsiGUID string, systemShar
 		if cnsiRecord.CNSIType == endpointType {
 			tokenRecord, isAdmin, err := endpointPlugin.Connect(c, cnsiRecord, userID)
 			if err != nil {
-				if shadowError, ok := err.(api.ErrHTTPShadow); ok {
-					return nil, shadowError
-				}
-				return nil, api.NewHTTPShadowError(
-					http.StatusBadRequest,
-					"Could not connect to the endpoint",
-					"Could not connect to the endpoint: %s", err)
+				return nil, connectFailure(err)
 			}
 
 			err = p.setCNSITokenRecord(cnsiGUID, userID, *tokenRecord)
@@ -231,17 +230,15 @@ func (p *portalProxy) DoLoginToCNSI(c *echo.Context, cnsiGUID string, systemShar
 				if clearErr := p.ClearCNSIToken(cnsiRecord, userID); clearErr != nil {
 					slog.Warn("unable to clear the token for the endpoint", "endpoint", cnsiGUID, "user", userID, "error", clearErr)
 				}
-				return nil, api.NewHTTPShadowError(
-					http.StatusBadRequest,
-					"Could not connect to the endpoint",
-					"Could not connect to the endpoint: %s", err)
+				return nil, connectFailure(err)
 			}
 
 			resp := &api.LoginRes{
-				Account:     userID,
-				TokenExpiry: tokenRecord.TokenExpiry,
-				APIEndpoint: cnsiRecord.APIEndpoint,
-				Admin:       isAdmin,
+				Account:       userID,
+				TokenExpiry:   tokenRecord.TokenExpiry,
+				APIEndpoint:   cnsiRecord.APIEndpoint,
+				Admin:         isAdmin,
+				AlsoConnected: alsoConnected,
 			}
 
 			cnsiUser, ok := p.GetCNSIUserFromToken(cnsiGUID, tokenRecord)
@@ -270,6 +267,12 @@ func (p *portalProxy) DoLoginToCNSI(c *echo.Context, cnsiGUID string, systemShar
 }
 
 func (p *portalProxy) DoLoginToCNSIwithConsoleUAAtoken(c *echo.Context, theCNSIrecord api.CNSIRecord) error {
+	// A refresh sends the linked token with the endpoint's client, and UAA
+	// refreshes a token only for the client it was issued to.
+	if theCNSIrecord.ClientId != p.GetConfig().CFClient {
+		return fmt.Errorf("endpoint %s uses client %q, not the console's client, so it cannot share the console's token",
+			theCNSIrecord.GUID, theCNSIrecord.ClientId)
+	}
 	userID, err := p.GetSessionStringValue(c, "user_id")
 	if err != nil {
 		return errors.New("could not find correct session value")
@@ -338,17 +341,24 @@ func (p *portalProxy) FetchOAuth2Token(cnsiRecord api.CNSIRecord, c *echo.Contex
 	uaaRes, u, err := p.login(c, cnsiRecord.SkipSSLValidation, cnsiRecord.CACert, cnsiRecord.ClientId, cnsiRecord.ClientSecret, tokenEndpoint)
 
 	if err != nil {
-		if httpError, ok := err.(api.ErrHTTPRequest); ok {
+		// Status 0: UAA did not answer, so there is no UAA error to report.
+		if httpError, ok := err.(api.ErrHTTPRequest); ok && httpError.Status != 0 {
 			// Try and parse the Response into UAA error structure (p.login only handles UAA requests)
 			errMessage := ""
 			authError := &api.UAAErrorResponse{}
 			if err := json.Unmarshal([]byte(httpError.Response), authError); err == nil {
-				errMessage = fmt.Sprintf(": %s", authError.ErrorDescription)
+				errMessage = fmt.Sprintf(": %s", authError.ErrorDescription) + clientRejectedHint(authError, cnsiRecord.ClientId)
 			}
-			return nil, nil, nil, api.NewHTTPShadowError(
+			_, reason, _ := classifyConnectError(err)
+			return nil, nil, nil, api.NewHTTPShadowErrorWithReason(
 				httpError.Status,
+				reason,
 				fmt.Sprintf("Could not connect to the endpoint%s", errMessage),
 				"Could not connect to the endpoint: %s", err)
+		}
+
+		if _, reason, _ := classifyConnectError(err); reason != "" {
+			return nil, nil, nil, connectFailure(err)
 		}
 
 		return nil, nil, nil, api.NewHTTPShadowError(
@@ -423,9 +433,10 @@ func (p *portalProxy) DoAuthFlowRequest(cnsiRequest *api.CNSIRequest, req *http.
 
 // Clear the CNSI token
 func (p *portalProxy) ClearCNSIToken(cnsiRecord api.CNSIRecord, userGUID string) error {
-	// If cnsi is cf AND cf is auto-register only clear the entry
-	p.Config.AutoRegisterCFUrl = strings.TrimRight(p.Config.AutoRegisterCFUrl, "/")
-	if cnsiRecord.CNSIType == "cf" && p.GetConfig().AutoRegisterCFUrl == cnsiRecord.APIEndpoint.String() {
+	// The auto-registered Cloud Foundry keeps a cleared token, so the login
+	// hook does not connect it again. It is found by address the way the
+	// hook finds it (endpointURLKey).
+	if cnsiRecord.CNSIType == "cf" && cnsiRecord.APIEndpoint != nil && p.isAutoRegisterAddress(cnsiRecord.APIEndpoint) {
 		slog.Debug("Setting the token record as disconnected", "endpoint", cnsiRecord.GUID, "user", userGUID)
 
 		tokenRecord := p.InitEndpointTokenRecord(0, "cleared_token", "cleared_token", true)
@@ -440,6 +451,15 @@ func (p *portalProxy) ClearCNSIToken(cnsiRecord api.CNSIRecord, userGUID string)
 	}
 
 	return nil
+}
+
+// isAutoRegisterAddress reports whether u is AUTO_REG_CF_URL's address.
+func (p *portalProxy) isAutoRegisterAddress(u *url.URL) bool {
+	autoReg, err := url.Parse(p.GetConfig().AutoRegisterCFUrl)
+	if err != nil || autoReg.Host == "" {
+		return false
+	}
+	return endpointURLKey(autoReg) == endpointURLKey(u)
 }
 
 func (p *portalProxy) GetCNSIUser(cnsiGUID string, userGUID string) (*api.ConnectedUser, bool) {
@@ -544,4 +564,145 @@ func (p *portalProxy) deleteCNSIToken(cnsiID string, userGUID string) error {
 	}
 
 	return nil
+}
+
+// Reasons a connect failed, sent as "reason" in the error response body
+// so the frontend can tell them apart without reading the message.
+const (
+	// The endpoint answered 401 or 403 to the credentials.
+	connectReasonAuthFailed = "auth_failed"
+	// The endpoint did not answer, or answered with a 5xx.
+	connectReasonUnreachable = "unreachable"
+	// The TLS connection failed, e.g. the certificate is not trusted.
+	connectReasonTLS = "tls"
+)
+
+// connectFailure turns an error from an endpoint plugin's Connect or
+// Validate into the response the user sees. An error the plugin already
+// shaped is kept as it is. Otherwise the status, reason and message come
+// from classifyConnectError, and the full error goes to the log.
+func connectFailure(err error) error {
+	var shadowError api.ErrHTTPShadow
+	if errors.As(err, &shadowError) {
+		return shadowError
+	}
+	status, reason, why := classifyConnectError(err)
+	return api.NewHTTPShadowErrorWithReason(
+		status,
+		reason,
+		"Could not connect to the endpoint: "+why,
+		"Could not connect to the endpoint: %s", err)
+}
+
+// clientRejectedHint says what to check when UAA answers invalid_client. It
+// gives that answer, "Bad credentials", for a wrong user as well as a wrong
+// client, so the message names both. "Unauthorized grant type" is the client's.
+func clientRejectedHint(authError *api.UAAErrorResponse, clientID string) string {
+	switch {
+	case strings.HasPrefix(authError.ErrorDescription, "Unauthorized grant type"):
+		return fmt.Sprintf(`. Client %q cannot log in with a username and password: `+
+			`register the endpoint with "Allow SSO login" ticked, or with Client ID "cf"`, clientID)
+	case authError.Error == "invalid_client":
+		return fmt.Sprintf(`. Check the username and password, and the endpoint's Client ID %q and Client Secret`, clientID)
+	}
+	return ""
+}
+
+// classifyConnectError says why a connect failed: the response status, a
+// connectReason (empty when none applies) and a message for the user.
+//   - An answer from the endpoint (api.ErrHTTPRequest, as built by
+//     api.LogHTTPError) is reported by its status, and its message when it
+//     has one: 401 and 403 keep their status, a 5xx becomes 502, anything
+//     else 400.
+//   - A request that got no answer becomes 502, as a TLS failure or as
+//     unreachable.
+//   - Any other error is the plugin's own message, with 400.
+func classifyConnectError(err error) (int, string, string) {
+	var httpError api.ErrHTTPRequest
+	if errors.As(err, &httpError) {
+		if httpError.Status == 0 {
+			// No response: what failed is the request, in InnerError.
+			if httpError.InnerError == nil {
+				return http.StatusBadGateway, connectReasonUnreachable, "the endpoint did not answer"
+			}
+			return classifyRequestFailure(httpError.InnerError)
+		}
+		answered := fmt.Sprintf("%d %s", httpError.Status, http.StatusText(httpError.Status))
+		if message := answerMessage(httpError.Response); message != "" {
+			answered += ": " + message
+		}
+		switch {
+		case httpError.Status == http.StatusUnauthorized:
+			return httpError.Status, connectReasonAuthFailed, "the endpoint rejected the credentials (" + answered + ")"
+		case httpError.Status == http.StatusForbidden:
+			return httpError.Status, connectReasonAuthFailed, "the endpoint refused access with these credentials (" + answered + ")"
+		case httpError.Status >= 500:
+			return http.StatusBadGateway, connectReasonUnreachable, "the endpoint answered " + answered
+		default:
+			return http.StatusBadRequest, "", "the endpoint answered " + answered
+		}
+	}
+	if isTLSFailure(err) || isUnreachable(err) {
+		return classifyRequestFailure(err)
+	}
+	return http.StatusBadRequest, "", err.Error()
+}
+
+// answerMessage is the "message" of a JSON answer, as Kubernetes (a
+// Status), GitHub and GitLab give with an error status. Empty otherwise.
+func answerMessage(body string) string {
+	var answer struct {
+		Message string `json:"message"`
+	}
+	if json.Unmarshal([]byte(body), &answer) != nil {
+		return ""
+	}
+	return strings.TrimSpace(answer.Message)
+}
+
+// classifyRequestFailure reports a request that got no response.
+func classifyRequestFailure(err error) (int, string, string) {
+	if isTLSFailure(err) {
+		return http.StatusBadGateway, connectReasonTLS, "a TLS connection to the endpoint failed (" + err.Error() + ")"
+	}
+	return http.StatusBadGateway, connectReasonUnreachable, "the endpoint could not be reached (" + err.Error() + ")"
+}
+
+func isTLSFailure(err error) bool {
+	var verification *tls.CertificateVerificationError
+	var unknownAuthority x509.UnknownAuthorityError
+	var hostname x509.HostnameError
+	var invalid x509.CertificateInvalidError
+	var recordHeader tls.RecordHeaderError
+	var alert tls.AlertError
+	return errors.As(err, &verification) ||
+		errors.As(err, &unknownAuthority) ||
+		errors.As(err, &hostname) ||
+		errors.As(err, &invalid) ||
+		errors.As(err, &recordHeader) ||
+		errors.As(err, &alert)
+}
+
+func isUnreachable(err error) bool {
+	var netErr net.Error
+	return errors.As(err, &netErr) || errors.Is(err, context.DeadlineExceeded)
+}
+
+// sameURLAlternatives returns the endpoints at the same URL, of target's
+// type, that the user could also be connected to, where the pair includes
+// a personal endpoint. Two system endpoints at one URL are deliberate
+// (several accounts on one foundation) and are not reported.
+func sameURLAlternatives(target api.CNSIRecord, sameURL []*api.CNSIRecord, userID string) []*api.CNSIRecord {
+	var alternatives []*api.CNSIRecord
+	for _, cnsi := range sameURL {
+		if cnsi.GUID == target.GUID || cnsi.CNSIType != target.CNSIType {
+			continue
+		}
+		usable := cnsi.Creator == userID || len(cnsi.Creator) == 0
+		personalPair := len(target.Creator) != 0 || len(cnsi.Creator) != 0
+		if usable && personalPair {
+			alternatives = append(alternatives, cnsi)
+		}
+	}
+	return alternatives
 }

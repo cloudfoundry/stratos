@@ -1,18 +1,30 @@
 import { describe, it, expect, beforeEach, vi } from 'vitest';
-import { provideZonelessChangeDetection } from '@angular/core';
+import { Component, provideZonelessChangeDetection, signal } from '@angular/core';
 import { TestBed } from '@angular/core/testing';
 import { provideHttpClient } from '@angular/common/http';
 import { provideHttpClientTesting } from '@angular/common/http/testing';
+import { FormsModule } from '@angular/forms';
+import { By } from '@angular/platform-browser';
 
 import { getGitHubAPIURL, GITHUB_API_URL, GitSCMService } from '@stratosui/git';
 import { createBasicStoreModule } from '@test-framework';
+import { CfDeployAppDataService } from '../../../services/domain-data/cf-deploy-app-data.service';
 import { GithubProjectExistsDirective } from './github-project-exists.directive';
+
+@Component({
+  imports: [FormsModule, GithubProjectExistsDirective],
+  template: `<input name="project" [ngModel]="''" [appGithubProjectExists]="context()">`,
+})
+class TestHostComponent {
+  readonly context = signal('');
+}
 
 describe('GithubProjectExistsDirective', () => {
   beforeEach(async () => {
     await TestBed.configureTestingModule({
       imports: [
         createBasicStoreModule(),
+        TestHostComponent,
       ],
       providers: [
         provideZonelessChangeDetection(),
@@ -29,30 +41,34 @@ describe('GithubProjectExistsDirective', () => {
     expect(directive).toBeTruthy();
   });
 
+  // The auth context reaches the directive through a template binding, the
+  // way the deploy wizard sets it, so Angular drives ngOnChanges.
+  async function createHost(context: string) {
+    const fixture = TestBed.createComponent(TestHostComponent);
+    fixture.componentInstance.context.set(context);
+    await fixture.whenStable();
+    const directive = fixture.debugElement.query(By.directive(GithubProjectExistsDirective))
+      .injector.get(GithubProjectExistsDirective);
+    return { fixture, directive };
+  }
+
   // Regression guard: an async validator only re-runs when its own control
   // (the project name) changes. When a PAT is added AFTER the project name is
   // already entered, the token/auth context changes but the project name does
   // not — so without OnChanges re-triggering validation, a stale
   // "does not exist" from the earlier unauthenticated lookup would persist.
-  it('re-triggers validation when the auth context (token) changes', () => {
-    const directive = TestBed.runInInjectionContext(() => new GithubProjectExistsDirective());
-    let reRuns = 0;
-    directive.registerOnValidatorChange(() => reRuns++);
-
+  it('re-triggers validation when the auth context (token) changes', async () => {
     // First change only records the baseline — it must NOT re-run validation
     // or clear cached state (see redeploy-seed guard below).
     // Value shape: `<scm type>,<endpoint guid>,<base api url>,<access token>`.
-    directive.appGithubProjectExists = 'github,,,';
-    directive.ngOnChanges({
-      appGithubProjectExists: { currentValue: 'github,,,', previousValue: undefined, firstChange: true, isFirstChange: () => true },
-    } as any);
+    const { fixture, directive } = await createHost('github,,,');
+    let reRuns = 0;
+    directive.registerOnValidatorChange(() => reRuns++);
     expect(reRuns).toBe(0);
 
     // Token added — auth context changed, so validation must re-run.
-    directive.appGithubProjectExists = 'github,,,ghp_secrettoken';
-    directive.ngOnChanges({
-      appGithubProjectExists: { currentValue: 'github,,,ghp_secrettoken', previousValue: 'github,,,', firstChange: false, isFirstChange: () => false },
-    } as any);
+    fixture.componentInstance.context.set('github,,,ghp_secrettoken');
+    await fixture.whenStable();
     expect(reRuns).toBe(1);
 
     // Same value again — no auth change, so no extra re-run.
@@ -68,32 +84,22 @@ describe('GithubProjectExistsDirective', () => {
   // ngOnChanges must NOT clear that seeded projectExists state, or the
   // repository info card disappears on redeploy (the disabled project input
   // never re-runs its async validator to rebuild it).
-  it('does not clear seeded projectExists state on the first change', () => {
-    const directive = TestBed.runInInjectionContext(() => new GithubProjectExistsDirective());
-    const deployData = (directive as any).deployData as {
-      projectDoesntExist: (n: string) => void;
-      state: () => { projectExists?: { name: string } };
-    };
-    const clearSpy = vi.spyOn(deployData, 'projectDoesntExist');
+  it('does not clear seeded projectExists state on the first change', async () => {
+    const clearSpy = vi.spyOn(TestBed.inject(CfDeployAppDataService), 'projectDoesntExist');
 
-    directive.appGithubProjectExists = 'github,747ed39a-guid,,';
-    directive.ngOnChanges({
-      appGithubProjectExists: { currentValue: 'github,747ed39a-guid,,', previousValue: undefined, firstChange: true, isFirstChange: () => true },
-    } as any);
+    await createHost('github,747ed39a-guid,,');
 
     expect(clearSpy).not.toHaveBeenCalled();
   });
 
-  it('preserves commas in the access token when splitting the auth context', () => {
-    const directive = TestBed.runInInjectionContext(() => new GithubProjectExistsDirective());
-    directive.appGithubProjectExists = 'github,,,tok,en,with,commas';
+  it('preserves commas in the access token when splitting the auth context', async () => {
+    const { directive } = await createHost('github,,,tok,en,with,commas');
     const parsed = (directive as any).getTypeAndEndpointWithAuth();
     expect(parsed).toEqual(['github', '', '', 'tok,en,with,commas']);
   });
 
-  it('parses the base api url (GitLab self-hosted) between the guid and the token', () => {
-    const directive = TestBed.runInInjectionContext(() => new GithubProjectExistsDirective());
-    directive.appGithubProjectExists = 'gitlab,,https://workshop.cloud.gov/api/v4,glpat-xyz';
+  it('parses the base api url (GitLab self-hosted) between the guid and the token', async () => {
+    const { directive } = await createHost('gitlab,,https://workshop.cloud.gov/api/v4,glpat-xyz');
     const parsed = (directive as any).getTypeAndEndpointWithAuth();
     expect(parsed).toEqual(['gitlab', '', 'https://workshop.cloud.gov/api/v4', 'glpat-xyz']);
   });

@@ -1,11 +1,11 @@
-@if (endpoint$ | async; as endpoint) {
+@if (endpoint(); as endpoint) {
   <div class="edit-endpoint">
-    @if (definition$ | async; as definition) {
+    @if (definition(); as definition) {
       <form [formGroup]="editEndpoint" class="stepper-form">
         <h1 class="edit-endpoint__section-title text-base font-medium mb-4 text-[var(--content-text)]">{{definition.label}} Information</h1>
         <app-form-field>
           <input class="w-full placeholder:!text-transparent focus:outline-none" appInput id="name" name="name" formControlName="name" required placeholder="Name"
-            [appUnique]="(existingEndpointNames$ | async) ?? []">
+            [appUnique]="existingEndpointNames()">
           @if (name.errors && name.errors.required) {
             <app-error>Name is required</app-error>
           }
@@ -19,24 +19,29 @@
         <app-checkbox appInput id="skipSSL" name="skipSSL" formControlName="skipSSL">Skip SSL validation for the endpoint
         </app-checkbox>
         <app-checkbox appInput id="useCACert" [checked]="showCACertField()" (change)="toggleCACertField()">Use a CA Certificate for the endpoint</app-checkbox>
-        <div [ngClass]="{'edit-endpoint__shown': showCACertField()}" class="edit-endpoint__advanced" spellcheck=false>
-          <span class="edit-endpoint__cacert-title text-sm font-medium text-[var(--content-text)]">Specify CA Certificate:</span>
-          <textarea rows="10" class="edit-endpoint__cacert input font-mono text-sm bg-[var(--input-bg)] text-[var(--input-text)] border-[var(--input-border)]" appInput formControlName="caCert" name="caCert"></textarea>
+        <p class="text-sm text-content-muted mt-2">
+          Applies to the endpoint address and its login server (UAA).
+        </p>
+        <!-- Collapsed is 0 px tall; inert also takes it out of the tab order and the accessibility tree. -->
+        <div [ngClass]="{'edit-endpoint__shown': showCACertField()}" [attr.inert]="showCACertField() ? null : ''" class="edit-endpoint__advanced" spellcheck=false>
+          <label class="edit-endpoint__cacert-title text-sm font-medium text-[var(--content-text)]" for="ca-cert">Specify CA Certificate:</label>
+          <textarea id="ca-cert" rows="10" class="edit-endpoint__cacert input font-mono text-sm bg-[var(--input-bg)] text-[var(--input-text)] border-[var(--input-border)]" appInput formControlName="caCert" name="caCert"></textarea>
         </div>
+        <app-endpoint-certificates [pem]="certificatePem()" [endpointGuid]="endpointID"></app-endpoint-certificates>
         @if (showAdvancedFields) {
           <div class="edit-endpoint__section">
             <h1 class="edit-endpoint__section-title text-base font-medium mb-4 text-[var(--content-text)]">Advanced Information (Optional)</h1>
             <app-checkbox appInput id="setClientInfo" name="setClientInfo" formControlName="setClientInfo">Update Client ID and Client Secret
             </app-checkbox>
             <app-form-field>
-              <input class="w-full placeholder:!text-transparent focus:outline-none" appInput id="client_id" name="client_id" formControlName="clientID" placeholder="Client ID" required>
+              <input class="w-full placeholder:!text-transparent focus:outline-none" appInput id="client_id" name="client_id" formControlName="clientID" placeholder="Client ID" required autocomplete="off">
               @if (clientID.errors && clientID.errors.required) {
                 <app-error>Client ID is required</app-error>
               }
             </app-form-field>
             <app-form-field>
               <input class="w-full placeholder:!text-transparent focus:outline-none" appInput id="client_secret" name="client_secret" formControlName="clientSecret"
-                placeholder="Client Secret" [type]="!show ? 'password' : 'text'">
+                placeholder="Client Secret" [type]="!show ? 'password' : 'text'" autocomplete="new-password">
               <button class="btn btn-icon" type="button" matSuffix (click)="show = !show" [attr.aria-label]="'Hide Secret'"
                 [attr.aria-pressed]="!show">
                 <app-custom-icon>{{!show ? 'visibility_off' : 'visibility'}}</app-custom-icon>

@@ -11,6 +11,7 @@ package mock_apikeys
 
 import (
 	reflect "reflect"
+	time "time"
 
 	api "github.com/cloudfoundry/stratos/src/jetstream/api"
 	gomock "go.uber.org/mock/gomock"
@@ -41,18 +42,18 @@ func (m *MockRepository) EXPECT() *MockRepositoryMockRecorder {
 }
 
 // AddAPIKey mocks base method.
-func (m *MockRepository) AddAPIKey(userID, comment string) (*api.APIKey, error) {
+func (m *MockRepository) AddAPIKey(userID, comment string, expiresAt *time.Time) (*api.APIKey, error) {
 	m.ctrl.T.Helper()
-	ret := m.ctrl.Call(m, "AddAPIKey", userID, comment)
+	ret := m.ctrl.Call(m, "AddAPIKey", userID, comment, expiresAt)
 	ret0, _ := ret[0].(*api.APIKey)
 	ret1, _ := ret[1].(error)
 	return ret0, ret1
 }
 
 // AddAPIKey indicates an expected call of AddAPIKey.
-func (mr *MockRepositoryMockRecorder) AddAPIKey(userID, comment any) *gomock.Call {
+func (mr *MockRepositoryMockRecorder) AddAPIKey(userID, comment, expiresAt any) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "AddAPIKey", reflect.TypeOf((*MockRepository)(nil).AddAPIKey), userID, comment)
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "AddAPIKey", reflect.TypeOf((*MockRepository)(nil).AddAPIKey), userID, comment, expiresAt)
 }
 
 // DeleteAPIKey mocks base method.
@@ -100,15 +101,15 @@ func (mr *MockRepositoryMockRecorder) ListAPIKeys(userID any) *gomock.Call {
 }
 
 // UpdateAPIKeyLastUsed mocks base method.
-func (m *MockRepository) UpdateAPIKeyLastUsed(keyGUID string) error {
+func (m *MockRepository) UpdateAPIKeyLastUsed(keyGUID string, refused bool) error {
 	m.ctrl.T.Helper()
-	ret := m.ctrl.Call(m, "UpdateAPIKeyLastUsed", keyGUID)
+	ret := m.ctrl.Call(m, "UpdateAPIKeyLastUsed", keyGUID, refused)
 	ret0, _ := ret[0].(error)
 	return ret0
 }
 
 // UpdateAPIKeyLastUsed indicates an expected call of UpdateAPIKeyLastUsed.
-func (mr *MockRepositoryMockRecorder) UpdateAPIKeyLastUsed(keyGUID any) *gomock.Call {
+func (mr *MockRepositoryMockRecorder) UpdateAPIKeyLastUsed(keyGUID, refused any) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "UpdateAPIKeyLastUsed", reflect.TypeOf((*MockRepository)(nil).UpdateAPIKeyLastUsed), keyGUID)
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "UpdateAPIKeyLastUsed", reflect.TypeOf((*MockRepository)(nil).UpdateAPIKeyLastUsed), keyGUID, refused)
 }

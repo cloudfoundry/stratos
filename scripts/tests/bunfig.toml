@@ -1,0 +1,5 @@
+# Config for the node:test suites run by `bun run lint`:
+#   bun test --config=scripts/tests/bunfig.toml tools/eslint-rules/tests scripts/tests
+# The root bunfig.toml keeps a bare `bun test` away from the vitest specs, so
+# these suites name their own config and their directories explicitly.
+[test]

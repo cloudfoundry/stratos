@@ -10,7 +10,7 @@ import {
 import { provideCharts, withDefaultRegisterables } from "ng2-charts";
 import { BrowserModule } from "@angular/platform-browser";
 import { BrowserAnimationsModule } from "@angular/platform-browser/animations";
-import { RouteReuseStrategy } from "@angular/router";
+import { RouteReuseStrategy, TitleStrategy } from "@angular/router";
 import { getGitHubAPIURL, GITHUB_API_URL } from "@stratosui/git";
 import {
   EntityCatalogModule,
@@ -18,7 +18,6 @@ import {
   EntityCatalogHelper,
   EntityCatalogHelpers,
   AppStoreModule,
-  generateStratosEntities,
 } from "@stratosui/store";
 import { StratosThemeModule } from "../../theme/theme.module";
 import { filter, take } from "rxjs/operators";
@@ -32,6 +31,7 @@ import { ExtensionService } from "./core/extension/extension-service";
 import { CurrentUserPermissionsService } from "./core/permissions/current-user-permissions.service";
 import { CustomImportModule } from "./custom-import.module";
 import { DashboardModule } from "./features/dashboard/dashboard.module";
+import { generateCoreStratosEntities } from "./features/metrics/metrics-endpoint";
 import { HomeModule } from "./features/home/home.module";
 import { LoginModule } from "./features/login/login.module";
 import { NoEndpointsNonAdminComponent } from "./features/no-endpoints-non-admin/no-endpoints-non-admin.component";
@@ -39,6 +39,7 @@ import { SetupModule } from "./features/setup/setup.module";
 import { DashboardDataService } from "./core/dashboard-data.service";
 import { LoggedInService } from "./logged-in.service";
 import { CustomReuseStrategy } from "./route-reuse-stragegy";
+import { BrandedTitleStrategy } from "./title-strategy";
 import { GlobalEventService } from "./shared/global-events.service";
 import { SidePanelService } from "./shared/services/side-panel.service";
 import { SharedModule } from "./shared/shared.module";
@@ -58,9 +59,9 @@ import { cfApiInterceptor } from "@stratosui/cloud-foundry";
  * CRITICAL: Module import order must be preserved for correct entity catalog initialization
  *
  * Entity Registration Flow:
- * 1. EntityCatalogModule.forFeature(generateStratosEntities) - MUST BE FIRST
- *    - Registers core Stratos entities (endpoint, systemInfo, userFavorites, etc.)
- *    - These entities are required by all feature modules
+ * 1. EntityCatalogModule.forFeature(generateCoreStratosEntities) - MUST BE FIRST
+ *    - Registers the Stratos entities: today only the Metrics endpoint type,
+ *      with the auth types and card details the store package cannot declare
  *    - Registration is SYNCHRONOUS - completes before component constructors
  *
  * 2. Core infrastructure modules (Store, Router, etc.)
@@ -83,7 +84,7 @@ import { cfApiInterceptor } from "@stratosui/cloud-foundry";
     NoEndpointsNonAdminComponent,
     // Modules
     // CRITICAL: Core Stratos entities MUST register first - required by all feature modules
-    EntityCatalogModule.forFeature(generateStratosEntities),
+    EntityCatalogModule.forFeature(generateCoreStratosEntities),
     RouteModule,
     AppStoreModule,
     BrowserModule,
@@ -109,6 +110,7 @@ import { cfApiInterceptor } from "@stratosui/cloud-foundry";
     SidePanelService,
     { provide: GITHUB_API_URL, useFactory: getGitHubAPIURL },
     { provide: RouteReuseStrategy, useClass: CustomReuseStrategy },
+    { provide: TitleStrategy, useClass: BrandedTitleStrategy },
     CurrentUserPermissionsService,
     provideCharts(withDefaultRegisterables()),
     // HTTP Client with functional interceptors (Angular 20 pattern)
@@ -199,25 +201,6 @@ export class AppModule {
     // inside GlobalEventService from EndpointErrorEventsService (fed by the
     // signal data layer), replacing the ngrx internalEventStateSelector read
     // that used to live here.
-
-    // This should be brought back in in the future
-    // eventService.addEventConfig<IRequestEntityTypeState<EndpointModel>, EndpointModel>(
-    //   {
-    //     selector: (state: AppState) => state.requestData.endpoint,
-    //     eventTriggered: (state: IRequestEntityTypeState<EndpointModel>) => {
-    //       return Object.values(state).reduce((events, endpoint) => {
-    //         if (endpoint.connectionStatus === 'connecting') {
-    //           events.push(new GlobalEventData(true, endpoint));
-    //         }
-    //         return events;
-    //       }, []);
-    //     },
-    //     message: (endpoint: EndpointModel) => `Connecting endpoint ${endpoint.name}`,
-    //     link: '/endpoints',
-    //     key: 'endpoint-connect',
-    //     type: 'process'
-    //   }
-    // );
     ext.init();
     // Init Auth Types and Endpoint Types provided by extensions
     // Once the CF modules become an extension point, these should be moved to a CF specific module

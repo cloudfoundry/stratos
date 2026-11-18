@@ -1,6 +1,7 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest';
 import { HttpClient } from '@angular/common/http';
 import { of } from 'rxjs';
+import { signal } from '@angular/core';
 import { TestBed } from '@angular/core/testing';
 import { GlobalEventService } from '@stratosui/core';
 import { CfServiceOfferingsSignalConfigService } from './cf-service-offerings-signal-config.service';
@@ -46,7 +47,7 @@ function makeHttp(offerings: StServiceOffering[] = []): HttpClient {
 }
 
 function makeStubCfService(): CloudFoundryService {
-  return { connectedCFEndpoints$: of([]) } as unknown as CloudFoundryService;
+  return { connectedCFEndpoints: signal([]) } as unknown as CloudFoundryService;
 }
 
 // Minimal stub of the EndpointDataRegistry surface the signal-config uses

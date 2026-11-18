@@ -37,7 +37,8 @@ type PortalProxy interface {
 
 	// Expose internal portal proxy records to extensions
 	GetCNSIRecord(guid string) (CNSIRecord, error)
-	GetAdminCNSIRecordByEndpoint(endpoint string) (CNSIRecord, error)
+	GetAdminCNSIRecordByEndpoint(endpoint string, cnsiType string) (CNSIRecord, error)
+	GetUserConnectedAdminCNSIRecordByEndpoint(endpoint string, cnsiType string, userGUID string) (CNSIRecord, error)
 	GetCNSITokenRecord(cnsiGUID string, userGUID string) (TokenRecord, bool)
 	GetCNSITokenRecordWithDisconnected(cnsiGUID string, userGUID string) (TokenRecord, bool)
 	GetCNSIUser(cnsiGUID string, userGUID string) (*ConnectedUser, bool)
@@ -46,6 +47,8 @@ type PortalProxy interface {
 	ListEndpointsByUser(userGUID string) ([]*ConnectedEndpoint, error)
 	ListEndpoints() ([]*CNSIRecord, error)
 	UpdateEndpointMetadata(guid string, metadata string) error
+	// UnregisterEndpoint removes an endpoint with its tokens and favorites.
+	UnregisterEndpoint(guid string) error
 
 	// UAA Token
 	GetUAATokenRecord(userGUID string) (TokenRecord, error)

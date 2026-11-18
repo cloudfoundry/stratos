@@ -1,12 +1,23 @@
 import { CommonModule } from '@angular/common';
 import { HttpClient } from '@angular/common/http';
-import { ChangeDetectionStrategy, Component, Injector, OnDestroy, OnInit, Signal, computed, effect, inject, signal } from '@angular/core';
-import { toObservable } from '@angular/core/rxjs-interop';
-import { ActivatedRoute, Router } from '@angular/router';
+import {
+  ChangeDetectionStrategy,
+  Component,
+  Injector,
+  OnDestroy,
+  OnInit,
+  Signal,
+  computed,
+  effect,
+  inject,
+  signal,
+  untracked,
+} from '@angular/core';
+import { ActivatedRoute, Router, RouterLink } from '@angular/router';
 import { BaseChartDirective } from 'ng2-charts';
 
-import { combineLatest, Observable, of } from 'rxjs';
-import { catchError, map, publishReplay, refCount, switchMap, take } from 'rxjs/operators';
+import { of } from 'rxjs';
+import { catchError, map, switchMap } from 'rxjs/operators';
 
 import {
   TailwindSnackBarService,
@@ -17,22 +28,22 @@ import {
   ConfirmationDialogConfig,
   ConfirmationDialogService,
   CustomIconComponent,
+  ListSubNavAction,
+  ListSubNavAddAction,
+  ListSubNavComponent,
   MetadataItemComponent,
   NoContentMessageComponent,
-  PageSubNavComponent,
   PollingIndicatorComponent,
-  TileComponent,
-  TileGridComponent,
-  TileGroupComponent
+  ScrollFadeComponent,
 } from '@stratosui/core';
 import {
-  ApplicationMonitorService,
   ApplicationService,
   getGuids,
   CfCurrentUserPermissions,
   CardAppUsageComponent,
   StApp,
 } from '@stratosui/cloud-foundry';
+import { EndpointsDataService, getFullEndpointApiUrl, observeSignal } from '@stratosui/store';
 import { isAutoscalerEnabled } from '../../core/autoscaler-helpers/autoscaler-available';
 import { buildMetricData } from '../../core/autoscaler-helpers/autoscaler-transform-metric';
 import { AutoscalerConstants } from '../../core/autoscaler-helpers/autoscaler-util';
@@ -40,6 +51,7 @@ import { AutoscalerInfoDataService } from '../../services/domain-data/autoscaler
 import { AutoscalerMetricDataService, AutoscalerMetricQueryParams } from '../../services/domain-data/autoscaler-metric-data.service';
 import { AutoscalerPolicyDataService } from '../../services/domain-data/autoscaler-policy-data.service';
 import { AutoscalerScalingHistoryDataService } from '../../services/domain-data/autoscaler-scaling-history-data.service';
+import { AutoscalerTarget, AutoscalerTargetDataService } from '../../services/domain-data/autoscaler-target-data.service';
 import {
   AppAutoscaleMetricChart,
   AppAutoscalerEvent,
@@ -47,6 +59,7 @@ import {
   AppAutoscalerPolicyLocal,
   AppScalingTrigger } from '../../store/app-autoscaler.types';
 import { CardAutoscalerDefaultComponent } from '../../shared/card-autoscaler-default/card-autoscaler-default.component';
+import { CardAutoscalerReadingsComponent } from '../../shared/card-autoscaler-readings/card-autoscaler-readings.component';
 
 // Re-typed pagination param shape kept locally so the template / handlers
 // don't have to import the legacy AutoscalerPaginationParams from the
@@ -72,6 +85,9 @@ interface AutoscalerTabPaginationParams {
   ) => {
     const endpointGuid = getGuids('cf')(activatedRoute) || window.location.pathname.split('/')[2];
     const appGuid = getGuids()(activatedRoute) || window.location.pathname.split('/')[3];
+    // The side-nav calls this in its injection context; the permission
+    // signal is watched for as long as the tab gate is.
+    const injector = inject(Injector);
 
     // Native app detail returns StApp with spaceGuid + orgGuid stitched
     // server-side (composeStAppWithSpaceOrg). Replaces the legacy
@@ -84,17 +100,19 @@ interface AutoscalerTabPaginationParams {
         if (!orgGuid || !spaceGuid) {
           return of(false);
         }
-        return cups.can(
+        return observeSignal(cups.can(
           CfCurrentUserPermissions.APPLICATION_EDIT,
           endpointGuid,
           orgGuid,
           spaceGuid
-        );
+        ), injector);
       }),
       catchError(() => of(false)),
     );
 
-    const autoscalerEnabled = isAutoscalerEnabled(endpointGuid);
+    // The app's own autoscaler: a registered one need not be at the
+    // Cloud Foundry's default address.
+    const autoscalerEnabled = isAutoscalerEnabled(endpointGuid, appGuid);
 
     return canEditApp$.pipe(
       switchMap(canEditSpace => canEditSpace ? autoscalerEnabled : of(false)),
@@ -105,23 +123,20 @@ interface AutoscalerTabPaginationParams {
 @Component({
   selector: 'app-autoscaler-tab-extension',
   templateUrl: './autoscaler-tab-extension.component.html',
-  providers: [
-    ApplicationMonitorService
-  ],
   standalone: true,
   imports: [
     CommonModule,
     BaseChartDirective,
-    PageSubNavComponent,
-    TileGridComponent,
-    TileGroupComponent,
-    TileComponent,
+    ListSubNavComponent,
     CardAutoscalerDefaultComponent,
+    CardAutoscalerReadingsComponent,
     CardAppUsageComponent,
     CustomIconComponent,
     MetadataItemComponent,
     PollingIndicatorComponent,
-    NoContentMessageComponent
+    NoContentMessageComponent,
+    ScrollFadeComponent,
+    RouterLink,
   ],
   changeDetection: ChangeDetectionStrategy.OnPush
 })
@@ -134,15 +149,11 @@ export class AutoscalerTabExtensionComponent implements OnInit, OnDestroy {
   private policyData = inject(AutoscalerPolicyDataService);
   private metricData = inject(AutoscalerMetricDataService);
   private scalingHistoryData = inject(AutoscalerScalingHistoryDataService);
+  private targetData = inject(AutoscalerTargetDataService);
+  private endpointsData = inject(EndpointsDataService);
   private router = inject(Router);
   private injector = inject(Injector);
 
-
-  // Signal-native replacement for the legacy `canManageCredentials$`
-  // Observable. Bound directly in the template via `canManageCredentials()`.
-  // Source data comes from the per-endpoint cache populated by load()
-  // in ngOnInit.
-  canManageCredentials!: Signal<boolean>;
 
   scalingRuleColumns: string[] = ['metric', 'condition', 'action'];
   specificDateColumns: string[] = ['from', 'to', 'init', 'min', 'max'];
@@ -156,27 +167,85 @@ export class AutoscalerTabExtensionComponent implements OnInit, OnDestroy {
   //   dispatches and the `selectDeletionInfo` chain are gone.
   // - Metric history reads now flow through AutoscalerMetricDataService;
   //   the legacy GetAppAutoscalerAppMetricAction dispatch is gone.
-  // - Templates still bind via `*$ | async`, so the markup is unchanged —
-  //   we bridge the data-service signals into Observables locally.
-  appAutoscalerPolicy$!: Observable<AppAutoscalerPolicyLocal | null>;
-  appAutoscalerPolicySafe$!: Observable<AppAutoscalerPolicyLocal | null>;
-  appAutoscalerScalingHistory$!: Observable<AppAutoscalerEvent[]>;
-  scalingHistoryLoading$!: Observable<boolean>;
-  appAutoscalerAppMetricNames$!: Observable<AppAutoscaleMetricChart[]>;
+  // The template binds the data-service signals directly; the policy loads
+  // after the first render, so everything derived from it is computed.
+  appAutoscalerPolicy!: Signal<AppAutoscalerPolicyLocal | null>;
+  appAutoscalerScalingHistory!: Signal<AppAutoscalerEvent[]>;
+  scalingHistoryLoading!: Signal<boolean>;
 
-  public showNoPolicyMessage$!: Observable<boolean>;
-  public showAutoscalerHistory$!: Observable<boolean>;
+  readonly appAutoscalerAppMetricNames = computed<AppAutoscaleMetricChart[]>(() => {
+    const entity = this.appAutoscalerPolicy();
+    // Null safety: ensure entity and scaling_rules_map exist
+    if (!entity?.scaling_rules_map) {
+      return [];
+    }
+    return Object.keys(entity.scaling_rules_map).map((name) => {
+      const unit = entity.scaling_rules_map[name]?.upper?.[0]?.unit
+        || entity.scaling_rules_map[name]?.lower?.[0]?.unit;
+      return {
+        name,
+        unit };
+    });
+  });
+
+  // Which autoscaler the tab talks to; null until the server says.
+  autoscalerTarget: Signal<AutoscalerTarget | null> = signal(null);
+  // The address the server guesses when no autoscaler is registered for
+  // the app: the Cloud Foundry's, with api. replaced by autoscaler.
+  readonly guessedUrl = computed(() => {
+    const cf = this.endpointsData.endpoints().get(this.applicationService.cfGuid);
+    if (!cf) {
+      return '';
+    }
+    const url = new URL(getFullEndpointApiUrl(cf));
+    url.hostname = url.hostname.startsWith('api.') ? `autoscaler.${url.hostname.slice(4)}` : `autoscaler.${url.hostname}`;
+    return url.origin;
+  });
+  readonly registeredNames = computed(() =>
+    (this.autoscalerTarget()?.duplicates.registered ?? []).map(e => e.name).join(', '));
+  readonly boundNames = computed(() => (this.autoscalerTarget()?.duplicates.bound ?? []).join(', '));
+
+  // True once the policy lookup has found none (or it was detached); false
+  // while it loads, so the notice does not flash before the policy lands.
+  noPolicy!: Signal<boolean>;
+  // Why the policy could not be read, e.g. the app is not bound to the
+  // autoscaler service; shown in place of the no-policy notice
+  policyError!: Signal<string | null>;
+
+  public readonly showAutoscalerHistory = computed(() => {
+    const history = this.appAutoscalerScalingHistory();
+    return !!this.appAutoscalerPolicy() || (!!history && history.length > 0);
+  });
+  public readonly showNoPolicyMessage = computed(() => {
+    const history = this.appAutoscalerScalingHistory();
+    return this.noPolicy() && (!history || history.length === 0);
+  });
+
+  // The sub-nav row the other app tabs use (Routes, Variables): the rule
+  // count on the left, the policy actions on the right.
+  readonly scalingRuleCount = computed(() => this.appAutoscalerPolicy()?.scaling_rules_form?.length ?? 0);
+  readonly policyPending = computed(() => !this.appAutoscalerPolicy() && !this.noPolicy() && !this.policyError());
+  private readonly hasPolicy = computed(() => !!this.appAutoscalerPolicy());
+  readonly policyActions: ListSubNavAction[] = [
+    { label: 'Edit Policy', icon: 'edit', invoke: () => this.updatePolicyPage(), visible: this.hasPolicy },
+    { label: 'Delete Policy', icon: 'delete', variant: 'destructive', invoke: () => this.disableAutoscaler(), visible: this.hasPolicy },
+  ];
+  readonly createPolicyAction: ListSubNavAddAction = {
+    label: 'Create Policy',
+    invoke: () => this.updatePolicyPage(true),
+    visible: computed(() => this.noPolicy()),
+  };
 
   public noPolicyMessageFirstLine = 'This application has no Autoscaler Policy';
   public noPolicyMessageSecondLine = {
-    text: 'To create a policy click the + icon above'
+    text: 'To create a policy click Create Policy above'
   };
 
   private appAutoscalerPolicySnackBarRef!: TailwindSnackBarRef<any>;
   private appAutoscalerScalingHistorySnackBarRef!: TailwindSnackBarRef<any>;
 
   // Signal: written after the first render; an OnPush view under zoneless CD only repaints for signal writes.
-  readonly appAutoscalerAppMetrics = signal<Record<string, Observable<{ entity: AppAutoscalerMetricDataLocal }[]>>>({});
+  readonly appAutoscalerAppMetrics = signal<Record<string, Signal<{ entity: AppAutoscalerMetricDataLocal }[]>>>({});
 
   paramsMetrics: AutoscalerTabPaginationParams = {
     'start-time': ((new Date()).getTime() - 60000).toString() + '000000',
@@ -206,86 +275,42 @@ export class AutoscalerTabExtensionComponent implements OnInit, OnDestroy {
 
     // Trigger autoscaler info fetch via the signal-native data service
     // (replaces the legacy fetchAutoscalerInfo helper + Store/Effects
-    // path). canManageCredentials() reads the cached per-endpoint
-    // signal — its value reflects whether the autoscaler build is
-    // >= 3.x and credential management is exposed.
+    // path).
     const cfGuid = this.applicationService.cfGuid;
     const appGuid = this.applicationService.appGuid;
-    this.autoscalerInfoData.load(cfGuid);
-    this.canManageCredentials = this.autoscalerInfoData.canManageCredentials(cfGuid);
+    this.autoscalerInfoData.load(cfGuid, appGuid);
+    this.autoscalerTarget = this.targetData.target(cfGuid, appGuid);
+    void this.targetData.load(cfGuid, appGuid);
 
-    // Policy fetch via the signal-native data service. The two Observable
-    // wrappers preserve the legacy semantic split:
-    //   appAutoscalerPolicy$     emits null while loading/no-policy and
-    //                            the policy local form when loaded.
-    //   appAutoscalerPolicySafe$ used to wait for entity (waitForEntity$);
-    //                            here we filter out the in-flight state so
-    //                            downstream scaling-rule mapping only fires
-    //                            once we have a settled value. With the
-    //                            data service that's the same observable —
-    //                            it emits null until load() resolves and
-    //                            then the policy.
-    void this.policyData.load(cfGuid, appGuid);
-    const policySig = this.policyData.policy(cfGuid, appGuid);
-    this.appAutoscalerPolicy$ = toObservable(policySig, { injector: this.injector }).pipe(
-      publishReplay(1),
-      refCount(),
-    );
-    this.appAutoscalerPolicySafe$ = this.appAutoscalerPolicy$;
+    // Policy state from the signal-native data service, fetched below. The
+    // policy signal holds null while loading (or with no policy) and the
+    // policy local form once loaded.
+    this.appAutoscalerPolicy = this.policyData.policy(cfGuid, appGuid);
+    this.noPolicy = this.policyData.noPolicy(cfGuid, appGuid);
+    this.policyError = this.policyData.error(cfGuid, appGuid);
 
-    this.loadLatestMetricsUponPolicy();
-
-    this.appAutoscalerAppMetricNames$ = this.appAutoscalerPolicySafe$.pipe(
-      map(entity => {
-        // Null safety: ensure entity and scaling_rules_map exist
-        if (!entity?.scaling_rules_map) {
-          return [];
-        }
-        return Object.keys(entity.scaling_rules_map).map((name) => {
-          const unit = entity.scaling_rules_map[name]?.upper?.[0]?.unit
-            || entity.scaling_rules_map[name]?.lower?.[0]?.unit;
-          return {
-            name,
-            unit };
-        });
-      }),
-    );
+    // The gauges follow the policy: it lands after the first render on a
+    // first visit, and changes when the policy is edited or detached.
+    effect(() => {
+      const policy = this.appAutoscalerPolicy();
+      untracked(() => this.loadLatestMetrics(policy));
+    }, { injector: this.injector });
 
     // Signal-native history wiring. fetchScalingHistory() refreshes
     // paramsHistory.end-time and triggers load(); the data service caches
-    // results per (cnsi, app). The polling indicator binds via
-    // scalingHistoryLoading$.
-    this.appAutoscalerScalingHistory$ = toObservable(
-      this.scalingHistoryData.events(cfGuid, appGuid),
-      { injector: this.injector },
-    ).pipe(publishReplay(1), refCount());
-    this.scalingHistoryLoading$ = toObservable(
-      this.scalingHistoryData.loading(cfGuid, appGuid),
-      { injector: this.injector },
-    ).pipe(publishReplay(1), refCount());
-    this.fetchScalingHistory();
+    // results per (cnsi, app).
+    this.appAutoscalerScalingHistory = this.scalingHistoryData.events(cfGuid, appGuid);
+    this.scalingHistoryLoading = this.scalingHistoryData.loading(cfGuid, appGuid);
+    // The autoscaler refuses the events for the same reasons as the policy
+    void this.policyData.load(cfGuid, appGuid).then(() => {
+      if (!this.policyError()) {
+        this.fetchScalingHistory();
+      }
+    });
     this.initErrorSub();
-
-    this.showAutoscalerHistory$ = combineLatest([
-      this.appAutoscalerPolicy$,
-      this.appAutoscalerScalingHistory$
-    ]).pipe(
-      map(([policy, history]) => !!policy || (!!history && history.length > 0)),
-      publishReplay(1),
-      refCount()
-    );
-
-    this.showNoPolicyMessage$ = combineLatest([
-      this.appAutoscalerPolicy$,
-      this.appAutoscalerScalingHistory$
-    ]).pipe(
-      map(([policy, history]) => !policy && (!history || history.length === 0)),
-      publishReplay(1),
-      refCount()
-    );
   }
 
-  getAppMetric(metricName: string, trigger: AppScalingTrigger, params: AutoscalerTabPaginationParams): Observable<{ entity: AppAutoscalerMetricDataLocal }[]> {
+  getAppMetric(metricName: string, trigger: AppScalingTrigger, params: AutoscalerTabPaginationParams): Signal<{ entity: AppAutoscalerMetricDataLocal }[]> {
     const cfGuid = this.applicationService.cfGuid;
     const appGuid = this.applicationService.appGuid;
     const queryParams: AutoscalerMetricQueryParams = {
@@ -304,7 +329,7 @@ export class AutoscalerTabExtensionComponent implements OnInit, OnDestroy {
     void this.metricData.load(cfGuid, appGuid, metricName, queryParams);
 
     const rawSig = this.metricData.metrics(cfGuid, appGuid, metricName);
-    const localSig = computed<{ entity: AppAutoscalerMetricDataLocal }[]>(() => {
+    return computed<{ entity: AppAutoscalerMetricDataLocal }[]>(() => {
       const resources = rawSig();
       if (!resources || resources.length === 0) {
         // Match the legacy "no metric data" emission so the template's
@@ -322,59 +347,30 @@ export class AutoscalerTabExtensionComponent implements OnInit, OnDestroy {
       );
       return [{ entity: local }];
     });
-
-    return toObservable(localSig, { injector: this.injector }).pipe(
-      publishReplay(1),
-      refCount(),
-    );
   }
 
   loadLatestMetricsUponPolicy() {
-    this.appAutoscalerPolicySafe$.pipe(
-      take(1),
-    ).subscribe(appAutoscalerPolicy => {
-      // Null safety: ensure policy exists before processing
-      if (!appAutoscalerPolicy) {
-        return;
-      }
-      this.paramsMetrics['start-time'] = ((new Date()).getTime() - 60000).toString() + '000000';
-      this.paramsMetrics['end-time'] = (new Date()).getTime().toString() + '000000';
-      if (appAutoscalerPolicy.scaling_rules_map) {
-        this.appAutoscalerAppMetrics.set(Object.keys(appAutoscalerPolicy.scaling_rules_map).reduce((metricMap: Record<string, Observable<{ entity: AppAutoscalerMetricDataLocal }[]>>, metricName: string) => {
-          metricMap[metricName] = this.getAppMetric(metricName, appAutoscalerPolicy.scaling_rules_map[metricName], this.paramsMetrics);
-          return metricMap;
-        }, {}));
-      }
-    });
+    this.loadLatestMetrics(this.appAutoscalerPolicy());
+  }
+
+  private loadLatestMetrics(appAutoscalerPolicy: AppAutoscalerPolicyLocal | null) {
+    // Null safety: ensure policy exists before processing
+    if (!appAutoscalerPolicy) {
+      return;
+    }
+    this.paramsMetrics['start-time'] = ((new Date()).getTime() - 60000).toString() + '000000';
+    this.paramsMetrics['end-time'] = (new Date()).getTime().toString() + '000000';
+    if (appAutoscalerPolicy.scaling_rules_map) {
+      this.appAutoscalerAppMetrics.set(Object.keys(appAutoscalerPolicy.scaling_rules_map).reduce((metricMap: Record<string, Signal<{ entity: AppAutoscalerMetricDataLocal }[]>>, metricName: string) => {
+        metricMap[metricName] = this.getAppMetric(metricName, appAutoscalerPolicy.scaling_rules_map[metricName], this.paramsMetrics);
+        return metricMap;
+      }, {}));
+    }
   }
 
   initErrorSub() {
     const cfGuid = this.applicationService.cfGuid;
     const appGuid = this.applicationService.appGuid;
-
-    // Signal-native policy error surfacing. Replaces the legacy
-    // EntityService.entityMonitor.entityRequest$ subscription. The data
-    // service distinguishes "no policy" (404 → noPolicy=true, error=null)
-    // from real failures (error message), so we only need to surface
-    // real errors here. The "Autoscaler not available" / "plugin not
-    // available" filter from the legacy code is preserved.
-    let lastPolicyError: string | null = null;
-    effect(() => {
-      const errorMessage = this.policyData.error(cfGuid, appGuid)();
-      if (!errorMessage || errorMessage === lastPolicyError) {
-        return;
-      }
-      const isAutoscalerUnavailable = errorMessage.includes('Autoscaler not available') ||
-                                      errorMessage.includes('Autoscaler plugin not available');
-      lastPolicyError = errorMessage;
-      if (isAutoscalerUnavailable) {
-        return;
-      }
-      if (this.appAutoscalerPolicySnackBarRef) {
-        this.appAutoscalerPolicySnackBarRef.dismiss();
-      }
-      this.appAutoscalerPolicySnackBarRef = this.appAutoscalerPolicySnackBar.open(errorMessage, 'Dismiss');
-    }, { injector: this.injector });
 
     // Signal-native scaling-history error surfacing. Effect re-runs whenever
     // the data-service error signal changes; mirrors the legacy
@@ -467,21 +463,12 @@ export class AutoscalerTabExtensionComponent implements OnInit, OnDestroy {
       this.applicationService.cfGuid,
       this.applicationService.appGuid,
       { ...this.paramsHistory },
-    );
+    ).catch(() => undefined);
   }
 
   getMetricUnit(metricType: string, unit?: string) {
     return AutoscalerConstants.getMetricUnit(metricType, unit);
   }
-
-  manageCredentialPage = () => {
-    void this.router.navigate([
-      'autoscaler',
-      this.applicationService.cfGuid,
-      this.applicationService.appGuid,
-      'edit-autoscaler-credential',
-    ]);
-  };
 
   public gaugeOptions = {
     responsive: true,
@@ -505,18 +492,21 @@ export class AutoscalerTabExtensionComponent implements OnInit, OnDestroy {
       return { labels: [], datasets: [] };
     }
 
-    const current = entity.latest.target[0];
+    // target and colorTarget hold data points ({name, value}); the gauge
+    // needs the value and the colour string.
+    const current = Number(entity.latest.target[0].value);
     const max = entity.chartMaxValue;
     const remaining = max - current;
 
     const cssVar = (n: string) => getComputedStyle(document.documentElement).getPropertyValue(n).trim();
+    const color = entity.latest.colorTarget?.[0]?.value;
 
     return {
       labels: ['Current', 'Remaining'],
       datasets: [{
         data: [current, remaining],
         backgroundColor: [
-          entity.latest.colorTarget?.[0] || cssVar('--color-info'), // Fallback color if missing
+          typeof color === 'string' ? color : cssVar('--color-info'),
           cssVar('--content-border')
         ]
       }]

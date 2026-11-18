@@ -122,6 +122,29 @@ describe('AppVariableActionsService', () => {
   });
 
   // -------------------------------------------------------------------------
+  // CF refused the change: patchApp answers 200 with the reasons in _meta
+  // -------------------------------------------------------------------------
+
+  it('rejects with the reason when the PATCH answers 200 with _meta.errors', async () => {
+    const refused = { guid: 'app-1', _meta: { errors: [
+      { code: 'CAPI_ENV_UPDATE_FAILED', title: 'CF-UnprocessableEntity', detail: 'Key must not start with VCAP_', affected: ['VCAP_X'] },
+    ] } };
+    configure(makeHttpStub(() => of(refused)));
+
+    await expect(svc.addVariable('VCAP_X', 'v')).rejects.toThrow('Key must not start with VCAP_');
+    await expect(svc.deleteVariable('VCAP_X')).rejects.toThrow('Key must not start with VCAP_');
+    expect(svc.inFlight()).toBe(false);
+  });
+
+  it('reads an HTML page in the reason as text', async () => {
+    const page = '<html><body><h1>502 Bad Gateway</h1></body></html>';
+    configure(makeHttpStub(() => of({ _meta: { errors: [{ title: 'CF-Bad', detail: page }] } })));
+
+    const err = await svc.addVariable('A', 'b').catch(e => e as Error);
+    expect((err as Error).message).toBe('502 Bad Gateway');
+  });
+
+  // -------------------------------------------------------------------------
   // rename — one PATCH: old key -> null, new key -> value
   // -------------------------------------------------------------------------
 

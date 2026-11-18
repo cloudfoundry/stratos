@@ -86,6 +86,33 @@ describe('HelmReleaseDataService', () => {
     expect(svc.isFetchingDetail(GUID)()).toBe(false);
   });
 
+  it('a failed reload clears the detail loaded before it', async () => {
+    const detail = svc.releaseDetail(GUID);
+    const first = svc.loadReleaseDetail('cnsi-1', 'ns-a', 'rel-x');
+    httpMock.expectOne(DETAIL_URL).flush({ name: 'rel-x', namespace: 'ns-a', chart: { metadata: {} } });
+    await first;
+    expect(detail()?.name).toBe('rel-x');
+
+    const reload = svc.loadReleaseDetail('cnsi-1', 'ns-a', 'rel-x');
+    httpMock.expectOne(DETAIL_URL).flush({ error: { message: 'forbidden' } }, { status: 403, statusText: 'Forbidden' });
+    await reload;
+    expect(detail()).toBeUndefined();
+    expect(svc.isFetchingDetail(GUID)()).toBe(false);
+  });
+
+  it('a failed reload clears the history loaded before it', async () => {
+    const history = svc.history(GUID);
+    const first = svc.loadHistory('cnsi-1', 'ns-a', 'rel-x');
+    httpMock.expectOne(HISTORY_URL).flush({ revisions: [{ revision: 1, status: 'deployed' }] });
+    await first;
+    expect(history()).toHaveLength(1);
+
+    const reload = svc.loadHistory('cnsi-1', 'ns-a', 'rel-x');
+    httpMock.expectOne(HISTORY_URL).flush({ error: { message: 'forbidden' } }, { status: 403, statusText: 'Forbidden' });
+    await reload;
+    expect(history()).toBeUndefined();
+  });
+
   it('returns stable signal identity per guid', () => {
     expect(svc.releaseDetail(GUID)).toBe(svc.releaseDetail(GUID));
     expect(svc.graph(GUID)).toBe(svc.graph(GUID));

@@ -1,6 +1,4 @@
 import { ChangeDetectionStrategy, Component, computed, inject } from '@angular/core';
-import { toObservable } from '@angular/core/rxjs-interop';
-import { map } from 'rxjs/operators';
 
 import {
   CardWrapperComponent,
@@ -119,17 +117,11 @@ export class CardAppUsageComponent {
     return stats.some(s => s.state === 'RUNNING' && !!s.usage);
   });
 
-  /**
-   * `app-card-status` consumes an Observable<StratosStatus>. Bridge the
-   * computed status signal across — keeps the bar reactive without forcing
-   * the colored-bar component to migrate to signals just for this card.
-   */
-  readonly status$ = toObservable(
-    computed<StratosStatus>(() => {
-      if (!this.isRunning()) return StratosStatus.TENTATIVE;
-      return this.statuses().overall;
-    }),
-  ).pipe(map(s => s));
+  /** Feeds the colored-bar component. */
+  readonly status = computed<StratosStatus>(() => {
+    if (!this.isRunning()) return StratosStatus.TENTATIVE;
+    return this.statuses().overall;
+  });
 
   // ---------------------------------------------------------------------------
   // Helpers

@@ -21,14 +21,7 @@ import (
 // API Host Prefix to replace if the custom header is supplied
 const apiPrefix = "api."
 
-const (
-	longRunningTimeoutHeader = "x-cap-long-running"
-	noTokenHeader            = "x-cap-no-token"
-)
-
-// Timeout for long-running requests, after which we will return indicating request it still active
-// to prevent hitting the 2 minute browser timeout
-const longRunningRequestTimeout = 30
+const noTokenHeader = "x-cap-no-token"
 
 type PassthroughErrorStatus struct {
 	StatusCode int    `json:"statusCode"`
@@ -107,7 +100,9 @@ func buildJSONResponse(cnsiList []string, responses map[string]*api.CNSIRequest)
 		var errorResponse []byte
 		switch {
 		case !ok:
-			errorStatus.StatusCode = 500
+			// No response at all: as ProxyRequest reports an endpoint that
+			// did not answer before its timeout.
+			errorStatus.StatusCode = http.StatusGatewayTimeout
 			errorStatus.Status = "Request timed out"
 		case cnsiResponse.Error != nil:
 			errorStatus.StatusCode = 500
@@ -116,7 +111,7 @@ func buildJSONResponse(cnsiList []string, responses map[string]*api.CNSIRequest)
 			response = cnsiResponse.Response
 		}
 		// Check the HTTP Status code to make sure that it is actually a valid response
-		if cnsiResponse.StatusCode >= 400 {
+		if ok && cnsiResponse.StatusCode >= 400 {
 			errorStatus.Status = cnsiResponse.Status
 			errorStatus.StatusCode = cnsiResponse.StatusCode
 			if errorStatus.StatusCode <= 0 {
@@ -233,7 +228,6 @@ func (p *portalProxy) ProxyRequest(c *echo.Context, uri *url.URL) (map[string]*a
 	slog.Debug("ProxyRequest")
 	cnsiList := strings.Split(c.Request().Header.Get("x-cap-cnsi-list"), ",")
 	shouldPassthrough := c.Request().Header.Get("x-cap-passthrough") == "true"
-	longRunning := c.Request().Header.Get(longRunningTimeoutHeader) == "true"
 
 	if err := p.validateCNSIList(cnsiList); err != nil {
 		return nil, echo.NewHTTPError(http.StatusBadRequest, err.Error())
@@ -259,14 +253,6 @@ func (p *portalProxy) ProxyRequest(c *echo.Context, uri *url.URL) (map[string]*a
 		}
 	}
 
-	// Only support one endpoint for long running operation (due to way we do timeout with the response channel)
-	if longRunning {
-		if len(cnsiList) > 1 {
-			err := errors.New("requested long-running proxy to multiple CNSIs. Only single CNSI is supported for long running passthrough")
-			return nil, echo.NewHTTPError(http.StatusBadRequest, err.Error())
-		}
-	}
-
 	// send the request to each CNSI. The channel is buffered to the number of
 	// goroutines so that a doRequest can always send its result and exit, even
 	// after a timeout path below returns without draining every response.
@@ -276,7 +262,6 @@ func (p *portalProxy) ProxyRequest(c *echo.Context, uri *url.URL) (map[string]*a
 		if buildErr != nil {
 			return nil, echo.NewHTTPError(http.StatusBadRequest, buildErr.Error())
 		}
-		cnsiRequest.LongRunning = longRunning
 		// Allow the host part of the API URL to be overridden
 		apiHost := c.Request().Header.Get("x-cap-api-host")
 		// Don't allow any '.' chars in the api name
@@ -298,70 +283,38 @@ func (p *portalProxy) ProxyRequest(c *echo.Context, uri *url.URL) (map[string]*a
 	// Wait for all responses
 	responses := make(map[string]*api.CNSIRequest)
 
-	if !longRunning {
-		// Use an overall timeout to prevent blocking forever if a goroutine hangs
-		// This prevents 504s from the upstream load balancer/gorouter
-		requestTimeout := time.Duration(p.GetConfig().HTTPClientTimeoutInSecs) * time.Second
-		if requestTimeout <= 0 {
-			requestTimeout = 60 * time.Second
-		}
-		deadline := time.After(requestTimeout)
-		for range cnsiList {
-			select {
-			case res := <-done:
-				responses[res.GUID] = res
-			case <-deadline:
-				// Return whatever we have so far rather than blocking
-				slog.Warn("Proxy request timed out waiting for all responses", "received", len(responses), "expected", len(cnsiList))
-				return responses, nil
-			}
-		}
-	} else {
-		// Long running has a timeout
-		for range cnsiList {
-			select {
-			case res := <-done:
-				responses[res.GUID] = res
-			case <-time.After(longRunningRequestTimeout * time.Second):
-				// For all those that have not completed, add a timeout response
-				for _, id := range cnsiList {
-					if _, ok := responses[id]; !ok {
-						// Did not get a response for the endpoint
-						responses[id] = &api.CNSIRequest{
-							GUID:         id,
-							UserGUID:     portalUserGUID,
-							Method:       req.Method,
-							StatusCode:   http.StatusAccepted,
-							Status:       "Long Running Operation still active",
-							Response:     makeLongRunningTimeoutError(),
-							Error:        nil,
-							ResponseGUID: id,
-						}
+	// Use an overall timeout to prevent blocking forever if a goroutine hangs
+	// This prevents 504s from the upstream load balancer/gorouter
+	requestTimeout := time.Duration(p.GetConfig().HTTPClientTimeoutInSecs) * time.Second
+	if requestTimeout <= 0 {
+		requestTimeout = 60 * time.Second
+	}
+	deadline := time.After(requestTimeout)
+	for range cnsiList {
+		select {
+		case res := <-done:
+			responses[res.GUID] = res
+		case <-deadline:
+			// Return whatever we have so far rather than blocking, and a
+			// timeout for each endpoint that has not answered, so the
+			// per-endpoint response reports it (buildJSONResponse turns it
+			// into the usual {error, errorResponse} entry).
+			slog.Warn("Proxy request timed out waiting for all responses", "received", len(responses), "expected", len(cnsiList))
+			for _, cnsi := range cnsiList {
+				if _, ok := responses[cnsi]; !ok {
+					responses[cnsi] = &api.CNSIRequest{
+						GUID:       cnsi,
+						StatusCode: http.StatusGatewayTimeout,
+						Status:     "Request timed out",
+						Error:      errors.New("the endpoint did not answer in time"),
 					}
 				}
-				return responses, nil
 			}
+			return responses, nil
 		}
 	}
 
 	return responses, nil
-}
-
-func makeLongRunningTimeoutError() []byte {
-	description := "Long Running Operation still active"
-	var errorStatus = &PassthroughErrorStatus{
-		StatusCode: http.StatusAccepted,
-		Status:     description,
-	}
-	errorResponse := []byte(fmt.Sprint("{\"longRunningTimeout\": true, \"description\": \"" + description + "\", \"error_code\": \"longRunningTimeout\"}"))
-	passthroughError := &PassthroughError{}
-	passthroughError.Error = errorStatus
-	passthroughError.ErrorResponse = (*json.RawMessage)(&errorResponse)
-	res, e := json.Marshal(passthroughError)
-	if e != nil {
-		slog.Error("makeLongRunningTimeoutError: could not marshal JSON", "error", e)
-	}
-	return res
 }
 
 // TODO: This should be used by the function above
@@ -451,11 +404,13 @@ func (p *portalProxy) SendProxiedResponse(c *echo.Context, responses map[string]
 	}
 
 	if shouldPassthrough {
-		cnsiGUID := cnsiList[0]
-		res, ok := responses[cnsiGUID]
-		if !ok {
-			return echo.NewHTTPError(http.StatusRequestTimeout, "Request timed out")
+		// A passthrough goes to one endpoint (ProxyRequest refuses more).
+		// ProxyRequest reports an endpoint that did not answer in time as a
+		// 504 entry; an empty map can still come from another caller.
+		if len(cnsiList) == 0 {
+			return echo.NewHTTPError(http.StatusGatewayTimeout, "Request timed out")
 		}
+		res := responses[cnsiList[0]]
 
 		// in passthrough mode, set the status code to that of the single response
 		c.Response().WriteHeader(res.StatusCode)
@@ -520,11 +475,6 @@ func (p *portalProxy) doRequest(cnsiRequest *api.CNSIRequest, done chan<- *api.C
 	// Copy original headers through, except custom portal-proxy Headers
 	fwdCNSIStandardHeaders(cnsiRequest, req)
 
-	// If this is a long running request, add a header which we can use at request time to change the timeout
-	if cnsiRequest.LongRunning {
-		req.Header.Set(longRunningTimeoutHeader, "true")
-	}
-
 	// Find the auth provider for the auth type - default ot oauthflow
 	authHandler := p.GetAuthProvider(tokenRec.AuthType)
 	if authHandler.Handler != nil {
@@ -535,7 +485,7 @@ func (p *portalProxy) doRequest(cnsiRequest *api.CNSIRequest, done chan<- *api.C
 
 	if err != nil {
 		cnsiRequest.StatusCode = 500
-		cnsiRequest.Status = "Error proxing request"
+		cnsiRequest.Status = "Error proxying request"
 		cnsiRequest.Response = []byte(err.Error())
 		cnsiRequest.Error = err
 	} else if res.Body != nil {
@@ -596,10 +546,8 @@ func (p *portalProxy) ProxySingleRequest(c *echo.Context) error {
 		return echo.NewHTTPError(http.StatusBadRequest, buildErr.Error())
 	}
 
-	longRunning := c.Request().Header.Get(longRunningTimeoutHeader) == "true"
 	noToken := c.Request().Header.Get(noTokenHeader) == "true"
 
-	cnsiRequest.LongRunning = longRunning
 	if noToken {
 		// Fake a token record with no authentication
 		cnsiRequest.Token = &api.TokenRecord{

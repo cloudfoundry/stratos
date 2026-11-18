@@ -1,6 +1,4 @@
-import { CommonModule } from '@angular/common';
 import {Component, signal, inject, ChangeDetectionStrategy } from '@angular/core';
-import { toObservable } from '@angular/core/rxjs-interop';
 
 import { PageSubNavComponent, NoContentMessageComponent } from '@stratosui/core';
 import { AnalysisReportRunnerComponent } from '../../../../analysis-report-viewer/analysis-report-runner/analysis-report-runner.component';
@@ -18,7 +16,6 @@ import { HelmReleaseHelperService } from '../helm-release-helper.service';
   changeDetection: ChangeDetectionStrategy.OnPush,
   standalone: true,
   imports: [
-    CommonModule,
     PageSubNavComponent,
     NoContentMessageComponent,
     AnalysisReportRunnerComponent,
@@ -28,8 +25,7 @@ import { HelmReleaseHelperService } from '../helm-release-helper.service';
 })
 export class HelmReleaseAnalysisTabComponent {
 
-  private reportSignal = signal<AnalysisReport | null>(null);
-  public report$ = toObservable(this.reportSignal);
+  readonly report = signal<AnalysisReport | null>(null);
 
   path: string;
 
@@ -51,7 +47,7 @@ export class HelmReleaseAnalysisTabComponent {
   public analysisChanged(report: any) {
     if (report.id !== this.currentReport) {
       this.currentReport = report.id;
-      this.analaysisService.getByID(this.helmReleaseHelper.endpointGuid, report.id).subscribe((r: any) => this.reportSignal.set(r));
+      this.analaysisService.getByID(this.helmReleaseHelper.endpointGuid, report.id).subscribe((r: any) => this.report.set(r));
     }
   }
 

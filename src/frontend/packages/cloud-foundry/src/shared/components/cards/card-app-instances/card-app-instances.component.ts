@@ -1,18 +1,17 @@
 import {
   ChangeDetectionStrategy,
+  ChangeDetectorRef,
   Component,
   ElementRef,
-  Input,
   OnDestroy,
-  ViewChild,
   computed,
   inject,
+  input,
+  signal,
+  viewChild
 } from '@angular/core';
-import { toObservable, toSignal } from '@angular/core/rxjs-interop';
 import { FormsModule } from '@angular/forms';
 import { RouterLink } from '@angular/router';
-import { combineLatest } from 'rxjs';
-import { map, switchMap } from 'rxjs/operators';
 
 import {
   AppInputDirective,
@@ -24,10 +23,12 @@ import {
   TailwindSnackBarRef,
   TailwindSnackBarService,
 } from '@stratosui/core';
+import { leadPieces } from '@stratosui/store';
 import { ApplicationService } from '../../../../features/applications/application.service';
 import { AppDetailDataService } from '../../../../features/applications/app-detail-data.service';
 import { CfAppsSignalConfigService } from '../../../signal-list-configs/app/cf-apps-signal-config.service';
 import { CfCurrentUserPermissions } from '../../../../user-permissions/cf-user-permissions-checkers';
+import { unknownHowOf, unknownOutcomeMessage } from '../../../../services/async-jobs/unknown-outcome-message';
 
 const appInstanceScaleToZeroConfirmation = new ConfirmationDialogConfig(
   'Set Instance count to 0',
@@ -71,13 +72,17 @@ export class CardAppInstancesComponent implements OnDestroy {
   private confirmDialog = inject(ConfirmationDialogService);
   private snackBar = inject(TailwindSnackBarService);
   private cups = inject(CurrentUserPermissionsService);
+  private host: ElementRef<HTMLElement> = inject(ElementRef);
+  private cdr = inject(ChangeDetectorRef);
 
   /** Should the card show the scale/edit actions? */
-  @Input() showActions = false;
+  readonly showActions = input(false);
 
-  @Input() busy: any;
+  readonly busy = input<any>();
 
-  @ViewChild('instanceField', { static: true }) instanceField!: ElementRef;
+  // Optional: the field sits in a conditional block of the template.
+  readonly instanceField = viewChild<ElementRef>('instanceField');
+  readonly editButton = viewChild<ElementRef<HTMLButtonElement>>('editButton');
 
   // ---------------------------------------------------------------------------
   // Signal-native reads
@@ -93,30 +98,31 @@ export class CardAppInstancesComponent implements OnDestroy {
   /** Desired instance count off the app entity. */
   readonly desiredCount = computed(() => this.dataService.app()?.entity?.instances ?? 0);
 
-  /** Card status indicator — feeds the colored bar via Observable bridge. */
-  readonly status$ = toObservable(this.dataService.state).pipe(map(s => s?.indicator));
-
-  /** Disable scale buttons while an app-level update is in flight. */
-  readonly isUpdating = computed(() => this.dataService.loading().app);
+  /** Card status indicator: feeds the colored bar. */
+  readonly status = computed(() => this.dataService.state()?.indicator);
 
   /**
-   * Edit-permission gate. Wraps the perm-check Observable into a signal
-   * so the template stays pipe-free. canEdit() is null while the perm
-   * check is pending and resolves to a boolean after it lands.
+   * Turns the buttons off while an app-level update is in flight. They are
+   * aria-disabled and the handlers ignore the press: a press starts the
+   * update, and a disabled button that held focus drops it to the page body.
    */
-  readonly canEdit = toSignal(
-    combineLatest([this.appService.appOrg$, this.appService.appSpace$]).pipe(
-      switchMap(([org, space]) =>
-        this.cups.can(
-          CfCurrentUserPermissions.APPLICATION_EDIT,
-          this.appService.cfGuid,
-          org!.guid,
-          space!.guid,
-        ),
-      ),
-    ),
-    { initialValue: false },
-  );
+  readonly isUpdating = computed(() => this.dataService.loading().app);
+
+  /** Said by the card's status line once a scale is done (WCAG 4.1.3). */
+  readonly scaleStatus = signal('');
+
+  /** Edit-permission gate, built once the org and space are known; false until then. */
+  private readonly editCheck = computed(() => {
+    const org = this.dataService.org();
+    const space = this.dataService.space();
+    return org && space ? this.cups.can(
+      CfCurrentUserPermissions.APPLICATION_EDIT,
+      this.appService.cfGuid,
+      org.guid,
+      space.guid,
+    ) : null;
+  });
+  readonly canEdit = computed(() => this.editCheck()?.() ?? false);
 
   // ---------------------------------------------------------------------------
   // Edit state
@@ -134,25 +140,37 @@ export class CardAppInstancesComponent implements OnDestroy {
   }
 
   scaleUp() {
+    if (this.isUpdating()) return;
     this.setInstanceCount(this.desiredCount() + 1);
   }
 
   scaleDown() {
+    if (this.isUpdating()) return;
     this.setInstanceCount(Math.max(0, this.desiredCount() - 1));
   }
 
   edit() {
+    if (this.isUpdating()) return;
     this.editValue = this.desiredCount();
     this.isEditing = true;
     setTimeout(() => {
       // ngIf-style structural switch may keep the input out of the DOM
       // until the next CD cycle on first edit click; guard the focus.
-      this.instanceField?.nativeElement?.focus();
+      this.instanceField()?.nativeElement?.focus();
     }, 0);
   }
 
   finishEdit(ok: boolean) {
+    if (this.isUpdating()) return;
+    // Cancel and Save go away with the edit, so focus goes to Edit. It is
+    // drawn and focused now, before a scale-to-zero confirmation opens: the
+    // dialog gives focus back, when it closes, to what had it when it opened.
+    const hadFocus = this.host.nativeElement.contains(document.activeElement);
     this.isEditing = false;
+    if (hadFocus) {
+      this.cdr.detectChanges();
+      this.editButton()?.nativeElement.focus();
+    }
     if (ok) {
       this.setInstanceCount(parseInt(this.editValue, 10));
     }
@@ -162,7 +180,10 @@ export class CardAppInstancesComponent implements OnDestroy {
   private setInstanceCount(value: number) {
     const doUpdate = async () => {
       try {
-        await this.apps.scaleApp(this.appService.cfGuid, this.appService.appGuid, { instances: value });
+        const how = unknownHowOf(await this.apps.scaleApp(this.appService.cfGuid, this.appService.appGuid, { instances: value }));
+        if (how) {
+          this.snackBarRef = this.snackBar.error(unknownOutcomeMessage('Update instance count', 'This page', how));
+        }
         // Refresh both signals in parallel so the Status and Instances
         // cards converge as soon as the scale job resolves: the app
         // entity carries the new desired count (denominator), stats
@@ -175,8 +196,11 @@ export class CardAppInstancesComponent implements OnDestroy {
           this.dataService.refresh('app'),
           this.dataService.refresh('stats'),
         ]);
-      } catch (err: any) {
-        this.snackBarRef = this.snackBar.error(`Failed to update instance count: ${err?.message ?? err}`);
+        if (!how) {
+          this.scaleStatus.set(`Desired instances: ${value}`);
+        }
+      } catch (err: unknown) {
+        this.snackBarRef = this.snackBar.error(leadPieces('Failed to update instance count', err));
       }
     };
     if (value === 0) {

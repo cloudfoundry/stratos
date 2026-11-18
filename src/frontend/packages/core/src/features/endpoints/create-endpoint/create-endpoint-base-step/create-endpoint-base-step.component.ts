@@ -1,7 +1,6 @@
 import { ChangeDetectionStrategy, Component, Injector, computed, inject, signal } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { Router } from '@angular/router';
-import { toObservable } from '@angular/core/rxjs-interop';
 import {
   EndpointsDataService,
   entityCatalog,
@@ -60,12 +59,8 @@ export class CreateEndpointBaseStepComponent extends BaseEndpointTileManager {
   constructor() {
     const session = inject(SessionSignalService);
 
-    // Tech-preview flag is sourced from the signal-native session projection;
-    // bridged to Observable<StratosCatalogEndpointEntity[]> for the legacy
-    // BaseEndpointTileManager constructor signature.
-    const types = toObservable(
-      computed(() => entityCatalog.getAllEndpointTypes(session.isTechPreview()))
-    );
+    // Tech-preview flag is sourced from the signal-native session projection.
+    const types = computed(() => entityCatalog.getAllEndpointTypes(session.isTechPreview()));
     super(types, inject(EndpointsDataService), inject(Injector));
   }
 }

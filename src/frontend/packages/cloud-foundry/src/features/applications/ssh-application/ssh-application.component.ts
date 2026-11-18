@@ -1,12 +1,13 @@
 import { CommonModule } from '@angular/common';
-import { Component, OnInit, ViewChild, ChangeDetectionStrategy, inject } from '@angular/core';
+import { Component, OnInit, ChangeDetectionStrategy, computed, inject, signal, viewChild } from '@angular/core';
 import { ActivatedRoute, RouterModule } from '@angular/router';
 import { NEVER, Observable, Subject } from 'rxjs';
 import websocketConnect, { normalClosureMessage } from 'rxjs-websockets';
-import { take, catchError, map, switchMap, tap } from 'rxjs/operators';
+import { catchError, switchMap, tap } from 'rxjs/operators';
 import { CustomTooltipDirective, PageHeaderComponent, IHeaderBreadcrumb } from '@stratosui/core';
 import { SshViewerComponent } from '../../../../../core/src/shared/components/ssh-viewer/ssh-viewer.component';
 import { IApp } from '../../../cf-api.types';
+import { AppDetailDataService } from '../app-detail-data.service';
 import { ApplicationService } from '../application.service';
 
 
@@ -26,6 +27,7 @@ import { ApplicationService } from '../application.service';
 export class SshApplicationComponent implements OnInit {
   private activatedRoute = inject(ActivatedRoute);
   private applicationService = inject(ApplicationService);
+  private detail = inject(AppDetailDataService);
 
 
   public messages!: Observable<string>;
@@ -34,7 +36,8 @@ export class SshApplicationComponent implements OnInit {
 
   public sshInput!: Subject<string>;
 
-  public errorMessage!: string;
+  // Set when the web socket fails, after the first render
+  public readonly errorMessage = signal<string | undefined>(undefined);
 
   public sshRoute!: string;
 
@@ -44,11 +47,15 @@ export class SshApplicationComponent implements OnInit {
 
   public instanceId!: string;
 
-  public breadcrumbs$!: Observable<IHeaderBreadcrumb[]>;
+  // Null until the app entity is known.
+  readonly breadcrumbs = computed((): IHeaderBreadcrumb[] | null => {
+    const app = this.detail.app()?.entity;
+    return app ? this.getBreadcrumbs(app, this.applicationService.cfGuid, this.applicationService.appGuid) : null;
+  });
 
   // strict: populated by Angular's @ViewChild query (static query resolves
   // before ngOnInit).
-  @ViewChild('sshViewer', { static: true }) sshViewer!: SshViewerComponent;
+  readonly sshViewer = viewChild.required<SshViewerComponent>('sshViewer');
 
   private getBreadcrumbs(
     application: IApp,
@@ -89,19 +96,18 @@ export class SshApplicationComponent implements OnInit {
       );
 
       this.messages = connection.pipe(
+        // Each connect attempt starts without the previous attempt's error
+        tap({ subscribe: () => this.errorMessage.set(undefined) }),
         tap(() => this.connectionStatus.next(1)),
         switchMap((getResponse: any): any[] => getResponse(this.sshInput)),
         catchError((e: Error): any[] => {
-          if (e.message !== normalClosureMessage) {
-            this.errorMessage = 'Error connecting to web socket';
+          // `exit` closes an open session without a normal closure; only a
+          // socket that never opened is a connect error.
+          if (e.message !== normalClosureMessage && !this.sshViewer().isConnected()) {
+            this.errorMessage.set('Error connecting to web socket');
           }
           return [];
         }));
-
-      this.breadcrumbs$ = this.applicationService.waitForAppEntity$.pipe(
-        map(app => this.getBreadcrumbs(app.entity.entity, cfGuid, appGuid)),
-        take(1)
-      );
     }
   }
 }

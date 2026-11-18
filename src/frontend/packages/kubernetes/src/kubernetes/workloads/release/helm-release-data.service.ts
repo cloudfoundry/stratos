@@ -2,6 +2,7 @@ import { HttpClient } from '@angular/common/http';
 import { Injectable, Signal, WritableSignal, inject, signal } from '@angular/core';
 import { firstValueFrom } from 'rxjs';
 
+import { KubeEndpointEviction } from '../../../services/endpoint-data/kube-endpoint-eviction';
 import { HelmRelease, HelmReleaseGraph, HelmReleaseResources, HelmReleaseRevision } from '../workload.types';
 
 // Signal-native data surface for the single helm-release detail page.
@@ -25,6 +26,20 @@ export class HelmReleaseDataService {
   private readonly _history = new Map<string, WritableSignal<HelmReleaseRevision[] | undefined>>();
   private readonly _graph = new Map<string, WritableSignal<HelmReleaseGraph | undefined>>();
   private readonly _resources = new Map<string, WritableSignal<HelmReleaseResources | undefined>>();
+
+  constructor() {
+    inject(KubeEndpointEviction).register(kubeGuid => this.evictEndpoint(kubeGuid));
+  }
+
+  // Blank rather than delete, so a page holding these signals keeps a
+  // live identity and sees the reconnect's writes.
+  private evictEndpoint(kubeGuid: string): void {
+    for (const map of [this._detail, this._history, this._graph, this._resources]) {
+      map.forEach((s: WritableSignal<unknown>, key) => {
+        if (key.startsWith(`${kubeGuid}:`)) s.set(undefined);
+      });
+    }
+  }
 
   private guid(endpoint: string, namespace: string, name: string): string {
     return `${endpoint}:${namespace}:${name}`;
@@ -83,7 +98,10 @@ export class HelmReleaseDataService {
       );
       this.sig(this._detail, key, undefined).set(resp);
     } catch {
-      // Leave the detail signal as-is; the page renders the tristate empty.
+      // Blank, not delete (see evictEndpoint): a failed reload, e.g. a 403
+      // after reconnecting with narrower credentials, must not keep showing
+      // the release fetched before. The page renders the tristate empty.
+      this.sig(this._detail, key, undefined).set(undefined);
     } finally {
       loading.set(false);
     }
@@ -99,7 +117,8 @@ export class HelmReleaseDataService {
       );
       this.sig(this._history, key, undefined).set(resp?.revisions ?? []);
     } catch {
-      // Leave history undefined on error.
+      // Blank on error, as for the detail: never keep an earlier history.
+      this.sig(this._history, key, undefined).set(undefined);
     }
   }
 }

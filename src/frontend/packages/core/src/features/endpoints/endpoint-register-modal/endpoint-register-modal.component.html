@@ -1,8 +1,11 @@
 <!-- Modal backdrop with backdrop blur -->
 <div class="fixed inset-0 bg-black/50 backdrop-blur-sm z-50 flex items-center justify-center p-4 animate-fade-in">
 
-  <!-- Modal container -->
-  <div class="relative w-full max-w-5xl mx-auto animate-modal-slide-up">
+  <!-- Modal container. The focus trap moves focus in on open, keeps Tab
+       inside, and gives focus back to the opener on close. -->
+  <div class="relative w-full max-w-5xl mx-auto animate-modal-slide-up"
+    role="dialog" aria-modal="true" aria-labelledby="endpoint-register-title"
+    cdkTrapFocus cdkTrapFocusAutoCapture>
 
     <!-- Modal content. No `transform` class: it would create a containing
          block for the CustomSelect dropdown's position:fixed panel, breaking
@@ -10,38 +13,41 @@
     <div class="rounded-2xl shadow-2xl transition-all duration-300 overflow-visible bg-[var(--card-bg)]">
 
       <!-- Modal header -->
-      <div class="bg-gradient-to-r from-primary to-secondary px-6 py-4 text-white relative overflow-visible rounded-t-2xl">
+      <div class="bg-gradient-to-r from-primary to-secondary px-6 py-4 text-on-primary relative overflow-visible rounded-t-2xl">
         <div class="absolute inset-0 bg-white/10 backdrop-blur-sm"></div>
         <div class="relative flex items-center justify-between">
           <div class="flex items-center space-x-3">
             <div class="w-10 h-10 bg-white/20 rounded-full flex items-center justify-center">
-              <span class="material-icons text-white text-xl">
-                {{ selectedEndpointInfo ? 'arrow_back' : 'add_circle_outline' }}
-              </span>
+              <!-- Decorative: the Back button on the right goes back. -->
+              <span class="material-icons text-white text-xl" aria-hidden="true">add_circle_outline</span>
             </div>
             <div>
-              <h2 class="text-xl font-bold text-white">
-                {{ selectedEndpointInfo ? 'Register ' + selectedEndpointInfo.label + ' Endpoint' : 'Register Endpoint' }}
+              <h2 id="endpoint-register-title" class="text-xl font-bold text-white">
+                {{ selectedEndpointInfo() ? 'Register ' + selectedEndpointInfo()!.label + ' Endpoint' : 'Register Endpoint' }}
               </h2>
               <p class="text-white/90 text-sm">
-                {{ selectedEndpointInfo ? 'Configure your endpoint settings' : 'Select the type of endpoint to register' }}
+                {{ selectedEndpointInfo() ? 'Configure your endpoint settings' : 'Select the type of endpoint to register' }}
               </p>
             </div>
           </div>
           <div class="flex items-center space-x-2">
-            @if (selectedEndpointInfo) {
+            @if (selectedEndpointInfo()) {
               <button
+                type="button"
                 (click)="goBackToSelection()"
+                aria-label="Back"
                 class="w-8 h-8 bg-white/20 hover:bg-white/30 rounded-full flex items-center justify-center transition-all duration-200 hover:scale-110"
                 >
-                <span class="material-icons text-white text-lg">arrow_back</span>
+                <span class="material-icons text-white text-lg" aria-hidden="true">arrow_back</span>
               </button>
             }
             <button
+              type="button"
               (click)="closeModal()"
+              aria-label="Close"
               class="w-8 h-8 bg-white/20 hover:bg-white/30 rounded-full flex items-center justify-center transition-all duration-200 hover:scale-110"
               >
-              <span class="material-icons text-white text-lg">close</span>
+              <span class="material-icons text-white text-lg" aria-hidden="true">close</span>
             </button>
           </div>
         </div>
@@ -51,11 +57,12 @@
       <div class="p-6 max-h-[70vh] overflow-y-auto overflow-x-hidden custom-scrollbar">
 
         <!-- Endpoint type selection -->
-        @if (!selectedEndpointInfo) {
+        @if (!selectedEndpointInfo()) {
           <div>
             <app-tile-selector
-              [options]="(tileSelectorConfig$ | async) ?? []"
+              [options]="tileSelectorConfig()"
               [dynamicSmallerTiles]="6"
+              [scaleIcons]="true"
               (selection)="onTileSelected($event)"
               class="endpoint-tile-selector">
             </app-tile-selector>
@@ -63,7 +70,7 @@
         }
 
         <!-- Endpoint registration form -->
-        @if (selectedEndpointInfo) {
+        @if (selectedEndpointInfo()) {
           <div class="space-y-6">
             <!-- Dynamic component container for the endpoint registration -->
             <div #endpointFormContainer class="">
@@ -77,21 +84,23 @@
       <div class="px-6 py-4 border-t rounded-b-2xl bg-[var(--card-header-bg)] border-[var(--card-border)]">
         <div class="flex items-center justify-between">
           <div class="text-sm text-[var(--content-muted)]">
-            @if (!selectedEndpointInfo) {
+            @if (selectedEndpointInfo(); as selected) {
+              <span>Configure your {{ selected.label }} endpoint</span>
+            } @else {
               <span>Select an endpoint type to continue with registration</span>
             }
-            @if (selectedEndpointInfo) {
-              <span>Configure your {{ selectedEndpointInfo.label }} endpoint</span>
-            }
           </div>
-          <div class="flex space-x-3">
-            <button
-              (click)="closeModal()"
-              class="btn btn-secondary"
-              >
-              Cancel
-            </button>
-          </div>
+          <!-- Once a type is picked, its form's stepper has the Cancel. -->
+          @if (!selectedEndpointInfo()) {
+            <div class="flex space-x-3">
+              <button
+                (click)="closeModal()"
+                class="btn btn-secondary"
+                >
+                Cancel
+              </button>
+            </div>
+          }
         </div>
       </div>
     </div>

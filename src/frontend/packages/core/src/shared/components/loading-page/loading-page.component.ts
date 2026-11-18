@@ -1,7 +1,7 @@
 import { animate, style, transition, trigger } from '@angular/animations';
 import { CommonModule } from '@angular/common';
-import { Component, Input, OnInit, ChangeDetectionStrategy, computed, inject } from '@angular/core';
-import { BehaviorSubject, Observable } from 'rxjs';
+import { Component, ChangeDetectionStrategy, computed, inject, input } from '@angular/core';
+import { isObservable, Observable, of } from 'rxjs';
 
 import { StratosBrandingService } from '../../../../../theme/stratos-branding.service';
 
@@ -30,25 +30,28 @@ selector: 'app-loading-page',
     )
   ]
 })
-export class LoadingPageComponent implements OnInit {
+export class LoadingPageComponent {
   // Caller supplies a loading stream directly. The ngrx EntityMonitor-driven
   // path (entityId/entitySchema → isFetching/isDeleting) was removed: the
   // detail pages that used it now pass their signal-native isLoading, and the
   // delete flow navigates away rather than painting a "deleting" overlay here.
-  @Input()
-  isLoading!: Observable<boolean>;
+  // Left unbound, nothing is loading. Callers with a signal pass its value;
+  // the Observable form stays for the callers still on rxjs pipelines.
+  readonly isLoading = input<boolean | Observable<boolean>>();
 
-  @Input()
-  text = 'Retrieving your data';
+  protected readonly loading$ = computed(() => {
+    const value = this.isLoading();
+    return isObservable(value) ? value : of(!!value);
+  });
 
-  @Input()
-  alert = '';
+  readonly text = input('Retrieving your data');
+
+  readonly alert = input('');
 
   /** Pin an indicator look; omitted → deterministic pick from the pool
    *  keyed on `text`, so a given page keeps one look across visits while
    *  different pages vary. */
-  @Input()
-  variant?: LoadingPageVariant;
+  readonly variant = input<LoadingPageVariant>();
 
   private branding = inject(StratosBrandingService, { optional: true });
 
@@ -57,17 +60,12 @@ export class LoadingPageComponent implements OnInit {
   );
 
   protected resolved(): LoadingPageVariant {
-    if (this.variant) return this.variant;
+    const variant = this.variant();
+    if (variant) return variant;
     let h = 0;
-    for (let i = 0; i < this.text.length; i++) {
-      h = (h * 31 + this.text.charCodeAt(i)) | 0;
+    for (let i = 0; i < this.text().length; i++) {
+      h = (h * 31 + this.text().charCodeAt(i)) | 0;
     }
     return VARIANT_POOL[Math.abs(h) % VARIANT_POOL.length];
-  }
-
-  ngOnInit() {
-    if (!this.isLoading) {
-      this.isLoading = new BehaviorSubject(false);
-    }
   }
 }

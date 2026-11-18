@@ -3,7 +3,7 @@
     <!-- Left column: Cloud Foundry Information -->
     <div class="create-endpoint__info-column">
       <h1 class="create-endpoint__section-title text-[var(--content-text)]">
-        {{ endpoint?.definition?.label }} Information
+        {{ endpoint()?.definition?.label }} Information
       </h1>
       <app-form-field class="block w-full">
         <input
@@ -15,8 +15,8 @@
           class="w-full placeholder:!text-transparent focus:outline-none"
           [appUnique]="
             (registerForm.value.createSystemEndpointField
-              ? $safeNavigationMigration((customEndpoints | async)?.names)
-              : $safeNavigationMigration((existingPersonalEndpoints | async)?.names)) ?? []
+              ? customEndpointsSignal()?.names
+              : existingPersonalEndpointsSignal()?.names) ?? []
           "
         />
         @if (registerForm.controls.nameField.errors?.required) {
@@ -46,25 +46,68 @@
             https://api.example.com)</app-error
           >
         }
-        @if (
-          registerForm.value.urlField &&
-          ((registerForm.value.createSystemEndpointField &&
-            (customEndpoints | async)?.urls?.includes(registerForm.value.urlField)) ||
-            (!registerForm.value.createSystemEndpointField &&
-              (existingPersonalEndpoints | async)?.urls?.includes(registerForm.value.urlField)))
-        ) {
-          <div class="text-warning text-sm mt-1" role="status">
-            An endpoint at this URL is already registered. Registration may still succeed in another scope.
-          </div>
-        }
       </app-form-field>
-      @if (userEndpointsAndIsAdmin | async) {
+      @if (
+        !review() &&
+        registerForm.value.urlField &&
+        ((registerForm.value.createSystemEndpointField &&
+          customEndpointsSignal()?.urls?.includes(urlKey(registerForm.value.urlField))) ||
+          (!registerForm.value.createSystemEndpointField &&
+            existingPersonalEndpointsSignal()?.urls?.includes(urlKey(registerForm.value.urlField))))
+      ) {
+        <div class="text-warning text-sm mt-1" role="status">
+          An endpoint at this address is already registered. You can register it again.
+        </div>
+      }
+      @if (linkedToCf() && urlDomain()) {
+        @if (linkedCfs().length === 0) {
+          <p class="text-warning text-sm mt-1" role="status">
+            No registered Cloud Foundry shares a domain with {{ urlHostName() }}. Register the Cloud Foundry this
+            autoscaler serves first.
+            @if (cfDomains().length) {
+              Registered Cloud Foundry domains: {{ cfDomains().join(', ') }}.
+            }
+          </p>
+        } @else {
+          <div class="flex flex-col gap-1 mt-2">
+            <label for="linked-cf" class="text-sm font-medium text-content-text">Cloud Foundry</label>
+            <select id="linked-cf" class="input" (change)="linkedCf.set($any($event.target).value)">
+              @if (linkedCfs().length > 1) {
+                <option value="" [selected]="!linkedCf()">Choose a Cloud Foundry</option>
+              }
+              @for (cf of linkedCfs(); track cf.guid) {
+                <option [value]="cf.guid" [selected]="cf.guid === linkedCf()">{{ cf.name }}</option>
+              }
+            </select>
+          </div>
+          @if (linkedCf()) {
+            <div class="flex flex-col gap-1 mt-2">
+              <label for="linked-broker" class="text-sm font-medium text-content-text">Service broker</label>
+              <select id="linked-broker" class="input" [attr.aria-describedby]="brokerDescribedBy()" (change)="linkedBroker.set($any($event.target).value)">
+                <option value="" [selected]="!linkedBroker()">Not registered in Cloud Foundry yet</option>
+                @for (broker of brokers(); track broker.guid) {
+                  <option [value]="broker.guid" [selected]="broker.guid === linkedBroker()">{{ broker.name }}</option>
+                }
+              </select>
+              @if (brokerNote()) {
+                <p id="linked-broker-note" role="status" class="text-sm text-content-muted">{{ brokerNote() }}</p>
+              }
+              @if (!linkedBroker()) {
+                <p id="linked-broker-hint" class="text-sm text-content-muted">
+                  Apps will not use this autoscaler until it is registered in Cloud Foundry with a service broker and this endpoint is linked to that broker.
+                </p>
+              }
+            </div>
+          }
+        }
+      }
+      @if (userEndpointsAndIsAdminSignal()) {
         <app-checkbox
           appInput
           name="createSystemEndpoint"
           formControlName="createSystemEndpointField"
           (change)="toggleCreateSystemEndpoint()"
-          [ngClass]="{ hide: fixedUrl, show: !fixedUrl }"
+          [ngClass]="{ hide: fixedUrl(), show: !fixedUrl() }"
           >Create a system endpoint (visible to all users)
         </app-checkbox>
       }
@@ -72,17 +115,26 @@
 
     <!-- Right column: Checkbox options -->
     <div class="create-endpoint__options-column">
-      <h1 class="create-endpoint__section-title text-[var(--content-text)]">Options</h1>
-      <app-checkbox appInput id="skipSSL" name="skipSSL" formControlName="skipSSLField"
-        >Skip SSL validation for the endpoint</app-checkbox
-      >
-      <app-checkbox appInput id="useCACert" (change)="toggleCACertField()"
-        >Use a CA Certificate for the endpoint</app-checkbox
-      >
-      @if (showAdvancedFields) {
-        <app-checkbox appInput id="showAdvanced" (change)="toggleAdvancedOptions()">Show Advanced Options</app-checkbox>
+      @if (showOptions()) {
+        <h1 class="create-endpoint__section-title text-[var(--content-text)]">Options</h1>
       }
-      @if (endpointTypeSupportsSSO) {
+      @if (canEditTls()) {
+        <app-checkbox appInput id="skipSSL" name="skipSSL" formControlName="skipSSLField"
+          >Skip SSL validation for the endpoint</app-checkbox
+        >
+        <app-checkbox appInput id="useCACert" [checked]="showCACertField()" (change)="toggleCACertField()"
+          >Use a CA Certificate for the endpoint</app-checkbox
+        >
+        @if (review()) {
+          <p class="text-sm text-content-muted mt-2">
+            Applies to the endpoint address and its login server (UAA).
+          </p>
+        }
+      }
+      @if (showAdvancedFields() && !review()) {
+        <app-checkbox appInput id="showAdvanced" [checked]="showAdvancedOptions()" (change)="toggleAdvancedOptions()">Show Advanced Options</app-checkbox>
+      }
+      @if (endpointTypeSupportsSSO()) {
         <app-checkbox appInput id="ssoAllowed" name="ssoAllowed" formControlName="ssoAllowedField"
           >Allow SSO login to this endpoint</app-checkbox
         >
@@ -91,11 +143,15 @@
   </div>
 
   <!-- Full-width sections below grid -->
-  <div [ngClass]="{ 'create-endpoint__shown': showCACertField }" class="create-endpoint__advanced" spellcheck="false">
-    <span class="create-endpoint__cacert-title text-sm mb-2 block text-[var(--content-text)]"
-      >Specify CA Certificate:</span
+  @if (canEditTls()) {
+  <!-- Collapsed is 0 px tall; inert also takes it out of the tab order and the accessibility tree. -->
+  <div [ngClass]="{ 'create-endpoint__shown': showCACertField() }" [attr.inert]="showCACertField() ? null : ''"
+    class="create-endpoint__advanced" spellcheck="false">
+    <label class="create-endpoint__cacert-title text-sm mb-2 block text-[var(--content-text)]" for="ca-cert"
+      >Specify CA Certificate:</label
     >
     <textarea
+      id="ca-cert"
       rows="10"
       appInput
       formControlName="caCertField"
@@ -103,9 +159,15 @@
       class="w-full focus:outline-none min-h-[240px] resize-y font-mono text-sm border border-content-border rounded-md p-3 bg-content-bg focus:border-primary focus:ring-1 focus:ring-primary"
     ></textarea>
   </div>
+  }
 
-  <div [ngClass]="{ hide: !showAdvancedFields, show: showAdvancedFields }" class="create-endpoint__section">
-    <div [ngClass]="{ 'create-endpoint__shown': showAdvancedOptions }" class="create-endpoint__advanced">
+  @if (showCertificates()) {
+    <app-endpoint-certificates [pem]="effectivePem()" [endpointGuid]="guid()"></app-endpoint-certificates>
+  }
+
+  <div [ngClass]="{ hide: !showAdvancedFields(), show: showAdvancedFields() }" class="create-endpoint__section">
+    <div [ngClass]="{ 'create-endpoint__shown': showAdvancedOptions() || review() }"
+      [attr.inert]="showAdvancedOptions() || review() ? null : ''" class="create-endpoint__advanced">
       <h1 class="text-[var(--content-text)]">Advanced Options</h1>
       <p class="text-[var(--content-text)]">Client ID and Client Secret do not normally need to be specified.</p>
       <p class="text-[var(--content-text)]">
@@ -120,8 +182,10 @@
           name="client_id"
           formControlName="clientIDField"
           placeholder="Client ID"
+          autocomplete="off"
         />
       </app-form-field>
+      @if (!review()) {
       <app-form-field>
         <input
           class="w-full placeholder:!text-transparent focus:outline-none"
@@ -130,23 +194,25 @@
           name="client_secret"
           formControlName="clientSecretField"
           placeholder="Client Secret"
-          [type]="!show ? 'password' : 'text'"
+          [type]="!show() ? 'password' : 'text'"
+          autocomplete="new-password"
         />
         <button
           class="btn btn-icon"
           type="button"
           matSuffix
-          (click)="show = !show"
+          (click)="show.set(!show())"
           [attr.aria-label]="'Hide Secret'"
-          [attr.aria-pressed]="!show"
+          [attr.aria-pressed]="!show()"
         >
-          <app-custom-icon>{{ !show ? "visibility_off" : "visibility" }}</app-custom-icon>
+          <app-custom-icon>{{ !show() ? "visibility_off" : "visibility" }}</app-custom-icon>
         </button>
       </app-form-field>
+      }
     </div>
   </div>
 
-  <div [ngClass]="{ hide: !endpointTypeSupportsSSO, show: endpointTypeSupportsSSO }" class="create-endpoint__sso">
+  <div [ngClass]="{ hide: !endpointTypeSupportsSSO(), show: endpointTypeSupportsSSO() }" class="create-endpoint__sso">
     @if (!!registerForm.controls.ssoAllowedField.value) {
       <div>
         <p class="text-[var(--content-text)]">
@@ -159,4 +225,13 @@
       </div>
     }
   </div>
+
+  @if (canUnregister()) {
+    <div class="mt-8 pt-4 border-t border-danger-200 flex items-center justify-between gap-4">
+      <p class="text-content-muted">
+        Remove this endpoint for {{ personal() ? "you" : "all users" }}. Connections to it end.
+      </p>
+      <button id="unregister" type="button" class="btn btn-danger" (click)="unregister()">Unregister…</button>
+    </div>
+  }
 </form>

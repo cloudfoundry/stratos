@@ -31,15 +31,21 @@
     font-size: 14px;
     letter-spacing: 0.01em;
     line-height: 18px;
-    outline: 0;
     padding: 10px;
     padding-left: $item-header-padding;
     text-decoration: none;
     &:hover {
       background-color: var(--table-row-hover);
     }
+    // The global :focus-visible outline, drawn inside the item: the item
+    // spans its scrolling list, which cuts off an outline drawn outside.
+    &:focus-visible {
+      outline-offset: -2px;
+    }
     &--active {
-      background-color: color-mix(in srgb, var(--color-primary) 10%, transparent);
+      // 6 %: the primary text stays above 4.5:1 on the tint in both modes
+      // (10 % measured exactly 4.5 in light mode).
+      background-color: color-mix(in srgb, var(--color-primary) 6%, transparent);
       color: var(--color-primary);
       font-weight: 500;
     }
@@ -71,6 +77,9 @@
     margin: 0;
     overflow: auto;
     padding: 0;
+    &--open {
+      display: block;
+    }
   }
   %base-item-header {
     border-bottom: 1px solid var(--content-border);
@@ -91,12 +100,21 @@
   &__items-compact-header {
     @extend %base-item-header;
     align-items: baseline;
+    background: none;
+    border-width: 0 0 1px;
+    border-style: solid;
+    border-color: var(--content-border);
     cursor: pointer;
+    font-family: inherit;
+    font-size: inherit;
+    text-align: left;
+    width: 100%;
     display: flex;
     flex-direction: column;
     justify-content: center;
   }
   &__items-compact-tab-label {
+    display: block;
     font-weight: bold;
   }
   &__items-compact-dropdown {

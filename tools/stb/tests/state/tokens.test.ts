@@ -3,6 +3,7 @@ import {
   rootValues, darkValues, setRootValue, setDarkValue, resetTokens,
   effectiveValue, tokenMetadata, requiredTokens,
 } from '@/state/tokens';
+import tokenMeanings from '@/data/token-meanings.json';
 
 describe('token state', () => {
   beforeEach(() => {
@@ -52,5 +53,13 @@ describe('tokenMetadata', () => {
     const required = requiredTokens();
     expect(required.has('--color-brand-500')).toBe(true);
     expect(required.has('--nav-text-muted')).toBe(false);
+  });
+
+  // Secondary text in the page content (dates, captions, hints) takes this
+  // token, so a theme can raise or lower its contrast in one place.
+  it('offers the muted content text color', () => {
+    expect(effectiveValue('--content-muted', false)).toBe('#64748b');
+    expect(requiredTokens().has('--content-muted')).toBe(false);
+    expect(tokenMeanings['--content-muted'].label).toBe('Muted content text');
   });
 });

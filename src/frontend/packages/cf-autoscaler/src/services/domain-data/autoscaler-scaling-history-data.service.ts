@@ -1,4 +1,4 @@
-import { HttpClient, HttpErrorResponse, HttpHeaders, HttpParams } from '@angular/common/http';
+import { HttpClient, HttpHeaders, HttpParams } from '@angular/common/http';
 import { Injectable, Signal, computed, inject, signal } from '@angular/core';
 import { firstValueFrom } from 'rxjs';
 
@@ -6,6 +6,7 @@ import { environment } from '@stratosui/core';
 
 import { PaginationResponse } from '../../../../cloud-foundry/src/store/types/cf-api.types';
 import { AppAutoscalerEvent } from '../../store/app-autoscaler.types';
+import { autoscalerErrorMessage } from '../../core/autoscaler-helpers/autoscaler-util';
 
 // Per-(endpoint, app) state. Keyed by `${endpointGuid}::${appGuid}` so a
 // single service instance can manage scaling-history reads for multiple apps
@@ -105,7 +106,47 @@ export class AutoscalerScalingHistoryDataService {
         error: null,
       });
     } catch (err) {
-      const message = (err as HttpErrorResponse)?.message ?? String(err);
+      const message = autoscalerErrorMessage(err);
+      this.patch(endpointGuid, appGuid, { loading: false, error: message });
+      throw err;
+    }
+  }
+
+  /**
+   * Every page of the history, newest first, in one list. The autoscaler
+   * returns 50 events per page by default, so a single load() showed only
+   * the newest 50.
+   */
+  async loadAll(endpointGuid: string, appGuid: string): Promise<void> {
+    // simplification: capped at MAX_PAGES (1000 events) so a long history
+    // cannot fire unbounded requests; page on demand if that is too few.
+    const MAX_PAGES = 20;
+    this.patch(endpointGuid, appGuid, { loading: true, error: null });
+    const headers = this.headers(endpointGuid);
+    const events: AppAutoscalerEvent[] = [];
+    try {
+      let totalResults = 0;
+      let totalPages = 1;
+      for (let page = 1; page <= Math.min(totalPages, MAX_PAGES); page++) {
+        const resp = await firstValueFrom(
+          this.http.get<PaginationResponse<AppAutoscalerEvent>>(this.url(appGuid), {
+            headers,
+            params: this.buildParams({ page, 'order-direction': 'desc' }),
+          }),
+        );
+        events.push(...(resp?.resources ?? []));
+        totalResults = resp?.total_results ?? events.length;
+        totalPages = resp?.total_pages ?? 1;
+      }
+      this.patch(endpointGuid, appGuid, {
+        events,
+        totalResults,
+        totalPages: 1,
+        loading: false,
+        error: null,
+      });
+    } catch (err) {
+      const message = autoscalerErrorMessage(err);
       this.patch(endpointGuid, appGuid, { loading: false, error: message });
       throw err;
     }

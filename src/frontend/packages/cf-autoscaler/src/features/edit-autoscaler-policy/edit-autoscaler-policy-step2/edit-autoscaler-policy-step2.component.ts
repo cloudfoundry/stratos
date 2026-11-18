@@ -1,12 +1,12 @@
-import { ChangeDetectionStrategy, ChangeDetectorRef, Component, OnDestroy, OnInit, inject } from '@angular/core';
+import { ChangeDetectionStrategy, Component, inject, signal } from '@angular/core';
 import { AbstractControl, FormBuilder, FormControl, FormGroup, ReactiveFormsModule, ValidationErrors, ValidatorFn, Validators } from '@angular/forms';
 import { TailwindErrorStateMatcher, TailwindShowOnDirtyErrorStateMatcher } from '@stratosui/core';
-import { BehaviorSubject, Observable, Subscription } from 'rxjs';
+import { Observable } from 'rxjs';
 import { map, startWith } from 'rxjs/operators';
 import { CommonModule } from '@angular/common';
 
 import { ApplicationService } from '@stratosui/cloud-foundry';
-import { safeUnsubscribe, TileGridComponent, TileGroupComponent, TileComponent } from '@stratosui/core';
+import { TileGridComponent, TileGroupComponent, TileComponent } from '@stratosui/core';
 import {
   AutoscalerConstants,
   getAdjustmentType,
@@ -19,14 +19,13 @@ import {
   inValidMetricType,
   numberWithFractionOrExceedRange,
 } from '../../../core/autoscaler-helpers/autoscaler-validation';
-import { AppAutoscalerInvalidPolicyError, AppAutoscalerPolicyLocal } from '../../../store/app-autoscaler.types';
+import { AppAutoscalerInvalidPolicyError } from '../../../store/app-autoscaler.types';
 import { EditAutoscalerPolicyDirective } from '../edit-autoscaler-policy-base-step';
 
 interface EditTriggerForm {
   metric_type: FormControl<string>;
   operator: FormControl<string>;
   threshold: FormControl<number>;
-  unit: FormControl<string>;
   adjustment: FormControl<number>;
   breach_duration_secs: FormControl<number>;
   cool_down_secs: FormControl<number>;
@@ -49,34 +48,24 @@ interface EditTriggerForm {
     TileComponent
   ]
 })
-export class EditAutoscalerPolicyStep2Component extends EditAutoscalerPolicyDirective implements OnInit, OnDestroy {
+export class EditAutoscalerPolicyStep2Component extends EditAutoscalerPolicyDirective {
   applicationService = inject(ApplicationService);
   private fb = inject(FormBuilder);
-  private cdr = inject(ChangeDetectorRef);
 
 
   policyAlert = PolicyAlert;
   metricTypes = AutoscalerConstants.MetricTypes;
   filteredMetricTypes$: Observable<string[]>;
-  private metricUnitSubject = new BehaviorSubject(this.metricTypes[0]);
-  metricUnit$: Observable<string>;
   operatorTypes = AutoscalerConstants.UpperOperators.concat(AutoscalerConstants.LowerOperators);
   editTriggerForm: FormGroup<EditTriggerForm>;
-  // appAutoscalerPolicy$: Observable<AppAutoscalerPolicy>;
 
-  public declare currentPolicy: AppAutoscalerPolicyLocal;
   public testing = false;
-  // FWT-959 Part 2: editIndex backed by a BehaviorSubject so the parent
-  // orchestrator can bridge editIndex changes into a signal for its
-  // signal-step handle (valid / disablePrevious). Templates still read
-  // `editIndex` (now via getter), call-sites still write `this.editIndex = N`.
-  readonly editIndex$ = new BehaviorSubject<number>(-1);
-  get editIndex(): number { return this.editIndex$.value; }
-  set editIndex(v: number) { this.editIndex$.next(v); }
+  // Index of the row being edited, -1 when none. The parent reads it to gate
+  // Next and Previous.
+  readonly editIndex = signal(-1);
   protected editMetricType = '';
   protected editScaleType = 'upper';
   protected editAdjustmentType = 'value';
-  private subs: Subscription[] = [];
 
   constructor() {
     super();
@@ -84,7 +73,6 @@ export class EditAutoscalerPolicyStep2Component extends EditAutoscalerPolicyDire
       metric_type: this.fb.control('', { validators: [Validators.required, this.validateTriggerMetricType()], nonNullable: true }),
       operator: this.fb.control('', { validators: [this.validateTriggerOperator()], nonNullable: true }),
       threshold: this.fb.control(0, { validators: [Validators.required, Validators.min(1), this.validateTriggerThreshold()], nonNullable: true }),
-      unit: this.fb.control('', { nonNullable: true }),
       adjustment: this.fb.control(0, { validators: [Validators.required, Validators.min(1), this.validateTriggerAdjustment()], nonNullable: true }),
       breach_duration_secs: this.fb.control(0, { validators: [
         Validators.min(AutoscalerConstants.PolicyDefaultSetting.breach_duration_secs_min),
@@ -96,15 +84,6 @@ export class EditAutoscalerPolicyStep2Component extends EditAutoscalerPolicyDire
       ], nonNullable: true }),
       adjustment_type: this.fb.control('', { validators: [this.validateTriggerAdjustmentType()], nonNullable: true })
     });
-
-    this.metricUnit$ = this.metricUnitSubject.asObservable();
-
-    this.subs.push(this.editTriggerForm.controls.metric_type.valueChanges.pipe(
-      map((value: string) => this.getMetricUnit(value)),
-    ).subscribe((unit: string) => {
-      this.metricUnitSubject.next(unit);
-      this.cdr.markForCheck();
-    }));
 
     this.filteredMetricTypes$ = this.editTriggerForm.controls.metric_type.valueChanges.pipe(
       startWith(''),
@@ -119,14 +98,14 @@ export class EditAutoscalerPolicyStep2Component extends EditAutoscalerPolicyDire
   };
 
   removeTrigger(index: number) {
-    if (this.editIndex === index) {
-      this.editIndex = -1;
+    if (this.editIndex() === index) {
+      this.editIndex.set(-1);
     }
     this.currentPolicy.scaling_rules_form.splice(index, 1);
   }
 
   editTrigger(index: number) {
-    this.editIndex = index;
+    this.editIndex.set(index);
     this.editMetricType = this.currentPolicy.scaling_rules_form[index].metric_type;
     this.editScaleType = getScaleType(this.currentPolicy.scaling_rules_form[index].operator);
     this.editAdjustmentType = getAdjustmentType(this.currentPolicy.scaling_rules_form[index].adjustment);
@@ -134,39 +113,37 @@ export class EditAutoscalerPolicyStep2Component extends EditAutoscalerPolicyDire
       metric_type: this.editMetricType,
       operator: this.currentPolicy.scaling_rules_form[index].operator,
       threshold: this.currentPolicy.scaling_rules_form[index].threshold,
-      unit: this.currentPolicy.scaling_rules_form[index].unit || '',
-      adjustment: Math.abs(Number(this.currentPolicy.scaling_rules_form[index].adjustment)),
+      // A percentage step is stored as e.g. '-20%'; the field holds 20.
+      adjustment: Math.abs(parseInt(this.currentPolicy.scaling_rules_form[index].adjustment, 10)),
       breach_duration_secs: this.currentPolicy.scaling_rules_form[index].breach_duration_secs ?? 0,
       cool_down_secs: this.currentPolicy.scaling_rules_form[index].cool_down_secs ?? 0,
       adjustment_type: this.editAdjustmentType
     });
-    this.metricUnitSubject.next(this.getMetricUnit(this.editMetricType));
   }
 
   finishTrigger() {
     const adjustmentP = this.editTriggerForm.get('adjustment_type')?.value === 'value' ? '' : '%';
     const adjustmentI = this.editTriggerForm.get('adjustment')?.value ?? 0;
     const adjustmentM = this.editScaleType === 'upper' ? `+${adjustmentI}${adjustmentP}` : `-${adjustmentI}${adjustmentP}`;
-    this.currentPolicy.scaling_rules_form[this.editIndex].metric_type = this.editTriggerForm.get('metric_type')?.value ?? '';
-    this.currentPolicy.scaling_rules_form[this.editIndex].operator = this.editTriggerForm.get('operator')?.value ?? '';
-    this.currentPolicy.scaling_rules_form[this.editIndex].threshold = this.editTriggerForm.get('threshold')?.value ?? 0;
-    this.currentPolicy.scaling_rules_form[this.editIndex].unit = this.editTriggerForm.get('unit')?.value ?? '';
-    this.currentPolicy.scaling_rules_form[this.editIndex].adjustment = adjustmentM;
+    this.currentPolicy.scaling_rules_form[this.editIndex()].metric_type = this.editTriggerForm.get('metric_type')?.value ?? '';
+    this.currentPolicy.scaling_rules_form[this.editIndex()].operator = this.editTriggerForm.get('operator')?.value ?? '';
+    this.currentPolicy.scaling_rules_form[this.editIndex()].threshold = this.editTriggerForm.get('threshold')?.value ?? 0;
+    this.currentPolicy.scaling_rules_form[this.editIndex()].adjustment = adjustmentM;
     const breachDuration = this.editTriggerForm.get('breach_duration_secs')?.value ?? 0;
     if (breachDuration) {
-      this.currentPolicy.scaling_rules_form[this.editIndex].breach_duration_secs = breachDuration;
+      this.currentPolicy.scaling_rules_form[this.editIndex()].breach_duration_secs = breachDuration;
     } else {
-      this.currentPolicy.scaling_rules_form[this.editIndex].breach_duration_secs =
+      this.currentPolicy.scaling_rules_form[this.editIndex()].breach_duration_secs =
         AutoscalerConstants.PolicyDefaultSetting.breach_duration_secs_default;
     }
     const coolDown = this.editTriggerForm.get('cool_down_secs')?.value ?? 0;
     if (coolDown) {
-      this.currentPolicy.scaling_rules_form[this.editIndex].cool_down_secs = coolDown;
+      this.currentPolicy.scaling_rules_form[this.editIndex()].cool_down_secs = coolDown;
     } else {
-      this.currentPolicy.scaling_rules_form[this.editIndex].cool_down_secs =
+      this.currentPolicy.scaling_rules_form[this.editIndex()].cool_down_secs =
         AutoscalerConstants.PolicyDefaultSetting.cool_down_secs_default;
     }
-    this.editIndex = -1;
+    this.editIndex.set(-1);
   }
 
   validateTriggerMetricType(): ValidatorFn {
@@ -200,13 +177,12 @@ export class EditAutoscalerPolicyStep2Component extends EditAutoscalerPolicyDire
         return null;
       }
       const errors: AppAutoscalerInvalidPolicyError = {};
-      if (AutoscalerConstants.MetricPercentageTypes.indexOf(this.editMetricType) >= 0) {
-        if (numberWithFractionOrExceedRange(control.value, 1, 100, true)) {
-          errors.alertInvalidPolicyTriggerThreshold100 = { value: control.value };
-        }
+      const limit = AutoscalerConstants.getMetricThresholdMax(this.editMetricType);
+      if (limit !== undefined && numberWithFractionOrExceedRange(control.value, 1, limit, true)) {
+        errors.alertInvalidPolicyTriggerThreshold100 = { value: control.value };
       }
-      const thresholdMin = getThresholdMin(this.currentPolicy.scaling_rules_form, this.editMetricType, this.editScaleType, this.editIndex);
-      const thresholdMax = getThresholdMax(this.currentPolicy.scaling_rules_form, this.editMetricType, this.editScaleType, this.editIndex);
+      const thresholdMin = getThresholdMin(this.currentPolicy.scaling_rules_form, this.editMetricType, this.editScaleType, this.editIndex());
+      const thresholdMax = getThresholdMax(this.currentPolicy.scaling_rules_form, this.editMetricType, this.editScaleType, this.editIndex());
       if (numberWithFractionOrExceedRange(control.value, thresholdMin, thresholdMax, true)) {
         errors.alertInvalidPolicyTriggerThresholdRange = { value: control.value };
       }
@@ -240,9 +216,5 @@ export class EditAutoscalerPolicyStep2Component extends EditAutoscalerPolicyDire
 
   getMetricUnit(metricType: string, unit?: string) {
     return AutoscalerConstants.getMetricUnit(metricType, unit);
-  }
-
-  ngOnDestroy() {
-    safeUnsubscribe(...this.subs);
   }
 }

@@ -1,4 +1,4 @@
-import { ChangeDetectionStrategy, Component, Input, OnInit } from '@angular/core';
+import { ChangeDetectionStrategy, Component, OnInit, input } from '@angular/core';
 
 
 @Component({
@@ -13,9 +13,9 @@ export class DialogErrorComponent implements OnInit {
 
   constructor() { }
 
-  @Input() message!: string;
+  readonly message = input<string>();
 
-  @Input() show!: boolean;
+  readonly show = input<boolean>();
 
   ngOnInit() {
   }

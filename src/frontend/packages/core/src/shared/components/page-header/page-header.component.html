@@ -1,18 +1,18 @@
 <ng-template #pageHeaderTmpl>
   <div class="page-header-outer bg-header-bg text-header-text">
     <div class="page-header-inner">
-      <div class="page-header">
+      <header class="page-header relative z-[2]">
         <div class="page-header-toolbar flex items-center justify-between px-6 py-4">
           <!-- Mobile menu toggle -->
-          @if (isMobile$ | async) {
+          @if (isMobile()) {
             <div class="page-header-nav-toggle-wrapper">
-              @if (!hideSideNavButton) {
+              @if (!hideSideNavButton()) {
                 <button
                   class="p-2 text-header-text hover:bg-white/10 rounded-md transition-colors"
                   matTooltip="Toggle menu"
                   aria-label="Toggle menu"
                   (click)="toggleSidenav()">
-                  <span class="material-icons">menu</span>
+                  <span aria-hidden="true" class="material-icons">menu</span>
                 </button>
               }
             </div>
@@ -21,29 +21,17 @@
           <!-- Left content -->
           <div class="page-header-left flex items-center space-x-4">
             <!-- Breadcrumbs -->
-            @if (breadcrumbDefinitions) {
-              <div class="page-header-breadcrumbs flex items-center space-x-2">
-                @for (breadcrumbDef of breadcrumbDefinitions; track $index) {
-                  @if (breadcrumbDef.routerLink) {
-                    <span class="page-header-breadcrumb text-header-text opacity-80 hover:opacity-100 cursor-pointer"
-                    [routerLink]="breadcrumbDef.routerLink">{{ breadcrumbDef.value }}</span>
-                  }
-                  @if (!breadcrumbDef.routerLink) {
-                    <span class="page-header-breadcrumb text-header-text opacity-60"
-                    >{{ breadcrumbDef.value }}</span>
-                  }
-                  <span class="material-icons text-header-text opacity-50 text-sm">chevron_right</span>
-                }
-              </div>
+            @if (breadcrumbDefinitions(); as definitions) {
+              <app-breadcrumbs [breadcrumbs]="definitions"></app-breadcrumbs>
             }
 
             <!-- Page content -->
             <ng-content></ng-content>
 
             <!-- Favorite star -->
-            @if (pFavorite) {
+            @if (shownFavorite(); as shown) {
               <app-entity-favorite-star class="page-header-favorite"
-                [favorite]="pFavorite">
+                [favorite]="shown">
               </app-entity-favorite-star>
             }
 
@@ -60,7 +48,7 @@
                   (click)="openDocumentation($event, docsUrl)"
                   [matTooltip]="documentationTooltip()"
                   [attr.aria-label]="documentationTooltip()">
-                  <span class="material-icons text-base leading-5 block">menu_book</span>
+                  <span aria-hidden="true" class="material-icons text-base leading-5 block">menu_book</span>
                 </a>
                 <button type="button"
                   class="page-header-documentation-toggle pl-1 pr-1.5 py-1.5 hover:bg-white/10 rounded-r-md transition-colors"
@@ -71,7 +59,7 @@
                     <span class="text-xs leading-5">{{ documentationTargetLabel() }}</span>
                     <!-- Static rotate glyph: signals the word toggles, without a
                          caret's implication that a menu will open. -->
-                    <span class="material-icons text-[13px] leading-5">autorenew</span>
+                    <span aria-hidden="true" class="material-icons text-[13px] leading-5">autorenew</span>
                   </span>
                 </button>
               </div>
@@ -105,26 +93,29 @@
             <app-theme-toggle></app-theme-toggle>
 
             <!-- Copy UAA token button -->
-            @if (!hideMenu && !logoutOnly && !environment.hideUserMenu) {
+            @if (!hideMenu() && !logoutOnly() && !environment.hideUserMenu) {
               <div class="relative">
-                <button class="page-header-menu-button p-2 text-header-text hover:bg-white/10 rounded-md transition-colors"
+                <button id="tokenMenu"
+                  class="page-header-menu-button p-2 text-header-text hover:bg-white/10 rounded-md transition-colors"
                   (click)="toggleTokenMenu()"
                   matTooltip="Copy UAA tokens"
-                  aria-label="Copy UAA tokens">
-                  <span class="material-icons">vpn_key</span>
+                  aria-label="Copy UAA tokens"
+                  aria-controls="tokenMenuPanel"
+                  [attr.aria-expanded]="isTokenMenuOpen()">
+                  <span aria-hidden="true" class="material-icons">vpn_key</span>
                 </button>
-                @if (isTokenMenuOpen) {
-                  <div
+                @if (isTokenMenuOpen()) {
+                  <div id="tokenMenuPanel"
                     class="absolute right-0 top-full mt-2 bg-content-bg rounded-lg shadow-lg border border-content-border z-50">
                     <div class="page-header-token p-4 w-64">
                       <h3 class="page-header-token-title text-lg font-semibold text-content-text mb-3">UAA Tokens</h3>
                       <div class="space-y-2">
                         <button class="w-full text-left px-3 py-2 text-sm text-content-text hover:bg-content-secondary rounded-md transition-colors border border-content-border"
-                          (click)="copyToken(authToken$, 'Auth token'); closeTokenMenu()">
+                          (click)="copyToken(authToken$, 'Auth token'); closeTokenMenu(true)">
                           Copy Auth Token
                         </button>
                         <button class="w-full text-left px-3 py-2 text-sm text-content-text hover:bg-content-secondary rounded-md transition-colors border border-content-border"
-                          (click)="copyToken(refreshToken$, 'Refresh token'); closeTokenMenu()">
+                          (click)="copyToken(refreshToken$, 'Refresh token'); closeTokenMenu(true)">
                           Copy Refresh Token
                         </button>
                       </div>
@@ -139,17 +130,20 @@
             }
 
             <!-- History button -->
-            @if (showHistory) {
+            @if (historyVisible()) {
               <div class="relative">
-                <button class="page-header-menu-button p-2 text-header-text hover:bg-white/10 rounded-md transition-colors"
+                <button id="historyMenu"
+                  class="page-header-menu-button p-2 text-header-text hover:bg-white/10 rounded-md transition-colors"
                   matTooltip="Recent activity"
                   aria-label="Recent activity"
+                  aria-controls="historyMenuPanel"
+                  [attr.aria-expanded]="isHistoryMenuOpen()"
                   (click)="toggleHistoryMenu()">
-                  <span class="material-icons">schedule</span>
+                  <span aria-hidden="true" class="material-icons">schedule</span>
                 </button>
                 <!-- History dropdown menu -->
-                @if (isHistoryMenuOpen) {
-                  <div
+                @if (isHistoryMenuOpen()) {
+                  <div id="historyMenuPanel"
                     class="absolute right-0 top-full mt-2 bg-content-bg rounded-lg shadow-lg border border-content-border z-50">
                     <div class="page-header-history p-4 w-80">
                       <h3 class="page-header-history-title text-lg font-semibold text-content-text mb-4">Recent Activity</h3>
@@ -162,72 +156,76 @@
             }
 
             <!-- Notifications button -->
-            @if (((events$ | async) || []).length > 0) {
-              <button
+            @if (events().length > 0) {
+              @let unread = unreadEventCount();
+              <!-- A link, since it goes to a route; its name carries the badge's count. -->
+              <a
                 routerLink="/events"
                 matTooltip="Notifications"
-                aria-label="Notifications"
-                class="page-header-notification-button relative p-2 text-header-text hover:bg-white/10 rounded-md transition-colors">
-                <span class="material-icons">notifications</span>
-                @if ((unreadEventCount$ | async); as count) {
-                  <span
-                    class="absolute -top-1 -right-1 bg-danger-shade-500 text-white text-xs rounded-full min-w-[1.25rem] h-5 flex items-center justify-center px-1">
-                    {{ count }}
+                [attr.aria-label]="unread ? 'Notifications, ' + unread + ' unread' : 'Notifications'"
+                class="page-header-notification-button relative block p-2 text-header-text hover:bg-white/10 rounded-md transition-colors">
+                <span aria-hidden="true" class="material-icons">notifications</span>
+                @if (unread) {
+                  <span aria-hidden="true"
+                    class="absolute -top-1 -right-1 bg-danger-shade-600 text-white text-xs rounded-full min-w-[1.25rem] h-5 flex items-center justify-center px-1">
+                    {{ unread }}
                   </span>
                 }
-              </button>
+              </a>
             }
 
             <!-- User menu -->
-            @if (!hideMenu && !environment.hideUserMenu) {
+            @if (!hideMenu() && !environment.hideUserMenu) {
               <div class="relative">
                 <button id="userMenu"
                   class="page-header-menu-button page-header-usermenu p-2 hover:bg-white/10 rounded-md transition-colors"
                   matTooltip="User menu"
-                  aria-label="User menu"
+                  [attr.aria-label]="userMenuLabel()"
+                  aria-controls="userMenuPanel"
+                  [attr.aria-expanded]="isUserMenuOpen()"
                   (click)="toggleUserMenu()">
-                  <app-user-avatar color="header" [allowGravatar]="allowGravatar$ | async" [user]="user$ | async">
+                  <app-user-avatar color="header" [allowGravatar]="allowGravatar()" [user]="user()">
                   </app-user-avatar>
                 </button>
                 <!-- User dropdown menu -->
-                @if (isUserMenuOpen) {
-                  <div
+                @if (isUserMenuOpen()) {
+                  <div id="userMenuPanel"
                     class="absolute right-0 top-full mt-2 bg-content-bg rounded-lg shadow-lg border border-content-border z-50">
                     <div class="page-header-menu-inner p-4 w-64">
                       <!-- User info -->
                       <div class="page-header-username flex items-center space-x-3 pb-4 border-b border-content-border mb-4">
-                        <app-user-avatar [allowGravatar]="allowGravatar$ | async" [user]="user$ | async"></app-user-avatar>
+                        <app-user-avatar [allowGravatar]="allowGravatar()" [user]="user()"></app-user-avatar>
                         <div class="page-header-username-text">
-                          <div class="font-medium text-content-text">{{ username$ | async }}</div>
+                          <div class="font-medium text-content-text">{{ username() }}</div>
                         </div>
                       </div>
                       <!-- Menu items -->
-                      @if (!logoutOnly) {
+                      @if (!logoutOnly()) {
                         <div class="space-y-1">
-                          <button class="w-full text-left px-3 py-2 text-sm text-content-text hover:bg-content-secondary rounded-md transition-colors"
+                          <a class="block px-3 py-2 text-sm text-content-text hover:bg-content-secondary rounded-md transition-colors"
                             routerLink="/about"
                             (click)="closeUserMenu()">
                             <span>About</span>
-                          </button>
-                          <button class="w-full text-left px-3 py-2 text-sm text-content-text hover:bg-content-secondary rounded-md transition-colors"
+                          </a>
+                          <a class="block px-3 py-2 text-sm text-content-text hover:bg-content-secondary rounded-md transition-colors"
                             routerLink="/user-profile"
                             (click)="closeUserMenu()">
                             <span>Profile</span>
-                          </button>
-                          @if (canAPIKeys$ | async) {
-                            <button class="w-full text-left px-3 py-2 text-sm text-content-text hover:bg-content-secondary rounded-md transition-colors"
+                          </a>
+                          @if (canAPIKeys()) {
+                            <a class="block px-3 py-2 text-sm text-content-text hover:bg-content-secondary rounded-md transition-colors"
                               routerLink="/api-keys"
                               (click)="closeUserMenu()"
                               >
                               <span>API Keys</span>
-                            </button>
+                            </a>
                           }
-                          @if (canLogout$ | async) {
+                          @if (canLogout()) {
                             <div class="page-header-menu-separator border-t border-content-border my-2"></div>
                           }
                         </div>
                       }
-                      @if (canLogout$ | async) {
+                      @if (canLogout()) {
                         <button class="w-full text-left px-3 py-2 text-sm text-content-text hover:bg-content-secondary rounded-md transition-colors"
                           (click)="logout(); closeUserMenu()"
                           >
@@ -243,13 +241,13 @@
         </div>
 
         <!-- Header events -->
-        @if (!hideEndpointErrors) {
+        @if (!hideEndpointErrors()) {
           <app-page-header-events
-            class="header-events"
-            [endpointIds$]="endpointIds$">
+            class="header-events z-[1]"
+            [endpointIds]="endpointIds()">
           </app-page-header-events>
         }
-      </div>
+      </header>
     </div>
   </div>
 </ng-template>

@@ -1,3 +1,6 @@
 <app-sidepanel-preview [title]="title()">
+  @if (unavailable()) {
+    <p class="markdown-preview__unavailable">Help is not available.</p>
+  }
   <div #markdown class="markdown-preview__content" [innerHtml]="markdownHtml()" appMarkdownContentObserver (innerHtmlRendered)="markdownRendered()"></div>
 </app-sidepanel-preview>

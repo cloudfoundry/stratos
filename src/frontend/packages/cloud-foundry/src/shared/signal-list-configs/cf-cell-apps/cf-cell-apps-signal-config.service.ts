@@ -37,18 +37,20 @@ interface PrometheusVectorResult {
 
 // CPU-percentage metric exposes one vector per running app instance,
 // labelled with application_id + instance_index. Used as the source-of-
-// truth for "which apps are on this cell right now". HEALTHY metrics
-// are cell-level; this one is per-instance and is what the legacy
-// CfCellAppsDataSource queried as well.
+// truth for "which apps are on this cell right now".
+//
+// It is queried on the CF-level route (/pp/v1/metrics/cf), as the list
+// did before the signal rewrite. That route answers only for a CF admin
+// (the backend looks for cloud_controller.admin in the token scopes).
+// The cells route (/pp/v1/metrics/cf/cells) does no permission check
+// and accepts only rep metrics, so it rejects this query.
 const METRIC_CPU = 'firehose_container_metric_cpu_percentage';
-const CELL_METRICS_BASE_URL = '/pp/v1/metrics/cf/cells';
+const CF_METRICS_BASE_URL = '/pp/v1/metrics/cf';
 
-// CF Cell Apps list config — single-CNSI, single-cell, read-only.
-// Drives the Apps tab on the cell-detail page. Replaces
-// CfCellAppsListConfigService + CfCellAppsDataSource (ngrx
-// FetchCFMetricsPaginatedAction + ListDataSource) with a direct
-// metrics fetch + per-app native lookup, mirroring W2's
-// CfCellHealthSignalConfigService.
+// CF Cell Apps list config: single-CNSI, single-cell, read-only.
+// Drives the App Instances tab on the cell-detail page. Fetches the
+// metric above, then looks up each app on /pp/v1/cf/apps/:cnsi/:guid
+// for its name, space and org.
 @Injectable({ providedIn: 'root' })
 export class CfCellAppsSignalConfigService {
   private readonly http = inject(HttpClient);
@@ -79,6 +81,12 @@ export class CfCellAppsSignalConfigService {
   private readonly _isLoading: WritableSignal<boolean> = signal(false);
   readonly isLoading: Signal<boolean> = this._isLoading.asReadonly();
 
+  // Holds the CNSI guid -> error of the last failed metrics request, or
+  // an empty map. The list shows its error state with Retry while this
+  // is non-empty and there are no rows.
+  private readonly _errorsByCnsi: WritableSignal<Map<string, unknown>> = signal(new Map());
+  readonly errorsByCnsi: Signal<Map<string, unknown>> = this._errorsByCnsi.asReadonly();
+
   private readonly _sortExtractors: WritableSignal<Map<string, (row: CfCellAppRow) => unknown>> = signal(new Map());
 
   // Per-cnsi app-detail cache — only used for the eager join during
@@ -94,6 +102,7 @@ export class CfCellAppsSignalConfigService {
     this.state.resetPageOnScopeChange(`${cnsiGuid}:${cellId}`);
     this.cnsiGuid = cnsiGuid;
     this.cellId = cellId;
+    this._errorsByCnsi.set(new Map());
     this.view = new ViewPipeline<CfCellAppRow>(
       this.rows,
       this.filter,
@@ -139,13 +148,14 @@ export class CfCellAppsSignalConfigService {
   private async fetchPlacements(): Promise<{ appGuid: string; instanceIndex: number }[] | null> {
     const req: MetricsRequest = {
       endpointGuid: this.cnsiGuid,
-      url: CELL_METRICS_BASE_URL,
+      url: CF_METRICS_BASE_URL,
       query: new MetricQueryConfig(`${METRIC_CPU}{bosh_job_id="${this.cellId}"}`),
       queryType: MetricQueryType.QUERY,
       windowValue: null,
     };
     try {
       const metrics = await this.metricsDataService.fetch<PrometheusVectorResult>(req);
+      this._errorsByCnsi.set(new Map());
       const result = (metrics?.data?.result ?? []) as PrometheusVectorResult[];
       const out: { appGuid: string; instanceIndex: number }[] = [];
       for (const r of result) {
@@ -156,7 +166,8 @@ export class CfCellAppsSignalConfigService {
         out.push({ appGuid, instanceIndex });
       }
       return out;
-    } catch {
+    } catch (err) {
+      this._errorsByCnsi.set(new Map([[this.cnsiGuid, err]]));
       return null;
     }
   }

@@ -1,6 +1,5 @@
 import { provideZonelessChangeDetection } from '@angular/core';
 import { TestBed } from '@angular/core/testing';
-import { firstValueFrom } from 'rxjs';
 import { beforeEach, describe, expect, it } from 'vitest';
 
 import { SessionUser } from '../types/auth.types';
@@ -72,14 +71,16 @@ describe('CurrentUserRolesDataService', () => {
     expect(svc.state()?.endpoints['metrics']).toBeUndefined();
   });
 
-  it('exposes observable variants reflecting writes', async () => {
+  it('role and scope signals follow the session scopes', () => {
+    const isAdmin = svc.stratosRole('isAdmin');
+    const hasA = svc.stratosHasScope('scope.a' as UserScopeStrings);
+    const hasB = svc.stratosHasScope('scope.b' as UserScopeStrings);
+    expect(isAdmin()).toBe(false);
+    expect(hasA()).toBe(false);
+
     svc.applySessionScopes({ admin: true, scopes: ['scope.a'] } as SessionUser);
-    await expect(firstValueFrom(svc.stratosRole$('isAdmin'))).resolves.toBe(true);
-    await expect(
-      firstValueFrom(svc.stratosHasScope$('scope.a' as UserScopeStrings)),
-    ).resolves.toBe(true);
-    await expect(
-      firstValueFrom(svc.stratosHasScope$('scope.b' as UserScopeStrings)),
-    ).resolves.toBe(false);
+    expect(isAdmin()).toBe(true);
+    expect(hasA()).toBe(true);
+    expect(hasB()).toBe(false);
   });
 });

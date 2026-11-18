@@ -118,12 +118,6 @@ $app-header-height: 56px;
       display: flex;
     }
   }
-  &__container {
-    align-items: center;
-    display: flex;
-    opacity: 0.6;
-    width: 100%;
-  }
   &__breadcrumb {
     font-size: $font-size;
     font-weight: bold;
@@ -148,10 +142,23 @@ $app-header-height: 56px;
   }
   &__breadcrumb-link {
     cursor: pointer;
-    outline: none;
     &:hover {
       opacity: $breadcrumb-hover-opacity;
     }
   }
 
+}
+
+// The skip link shows only while focused; a plain outline, since the
+// Tailwind ring utilities compute to a transparent box-shadow (#4167).
+.skip-link:focus-visible {
+  outline: 2px solid var(--color-primary);
+  outline-offset: 2px;
+}
+
+// main takes a tab stop only on a page that scrolls with nothing focusable
+// in it; then it shows the focus outline, drawn inside since main clips.
+#main-content[tabindex="0"]:focus-visible {
+  outline: 2px solid var(--color-primary);
+  outline-offset: -2px;
 }

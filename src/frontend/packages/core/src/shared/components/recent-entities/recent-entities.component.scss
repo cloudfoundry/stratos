@@ -2,12 +2,14 @@ $spacing: 10px;
 .type-info {
   font-size: 12px;
   line-height: 20px;
-  opacity: 0.6;
 }
 .recent-entity {
   display: flex;
-  outline: 0;
   padding: $spacing;
+  &:focus-visible {
+    outline: 2px solid var(--color-primary);
+    outline-offset: -2px;
+  }
   & + & {
     border-top: 1px solid rgba(0, 0, 0, .08);
   }

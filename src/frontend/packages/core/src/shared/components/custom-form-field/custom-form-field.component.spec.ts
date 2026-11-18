@@ -1,17 +1,25 @@
 import { describe, it, expect, beforeEach } from 'vitest';
-import { TestBed } from '@angular/core/testing';
-import { provideZonelessChangeDetection } from '@angular/core';
-import { CustomFormFieldComponent } from './custom-form-field.component';
+import { ComponentFixture, TestBed } from '@angular/core/testing';
+import { ChangeDetectionStrategy, Component, provideZonelessChangeDetection, signal } from '@angular/core';
+import {
+  AbstractControl,
+  FormControl,
+  ReactiveFormsModule,
+  ValidationErrors,
+  Validators,
+} from '@angular/forms';
+import { AppErrorComponent, AppInputDirective, CustomFormFieldComponent } from './custom-form-field.component';
 
 describe('CustomFormFieldComponent — Tailwind state-class getters (FWT-956)', () => {
   let component: CustomFormFieldComponent;
+  let fixture: ComponentFixture<CustomFormFieldComponent>;
 
   beforeEach(() => {
     TestBed.configureTestingModule({
       providers: [provideZonelessChangeDetection()],
       imports: [CustomFormFieldComponent],
     });
-    const fixture = TestBed.createComponent(CustomFormFieldComponent);
+    fixture = TestBed.createComponent(CustomFormFieldComponent);
     component = fixture.componentInstance;
   });
 
@@ -78,17 +86,17 @@ describe('CustomFormFieldComponent — Tailwind state-class getters (FWT-956)', 
     });
 
     it('color=accent uses accent bg', () => {
-      component.color = 'accent';
+      fixture.componentRef.setInput('color', 'accent');
       expect(component.rippleColorClasses).toContain('bg-accent');
     });
 
     it('color=warn forces danger bg', () => {
-      component.color = 'warn';
+      fixture.componentRef.setInput('color', 'warn');
       expect(component.rippleColorClasses).toContain('bg-danger');
     });
 
     it('invalid forces danger bg even when color=accent', () => {
-      component.color = 'accent';
+      fixture.componentRef.setInput('color', 'accent');
       Object.defineProperty(component, 'isInvalid', { get: () => true, configurable: true });
       expect(component.rippleColorClasses).toContain('bg-danger');
     });
@@ -98,5 +106,128 @@ describe('CustomFormFieldComponent — Tailwind state-class getters (FWT-956)', 
       Object.defineProperty(component, 'isValid', { get: () => true, configurable: true });
       expect(component.rippleColorClasses).toContain('bg-success');
     });
+  });
+});
+
+@Component({
+  template: `
+    <app-form-field>
+      <input appInput [formControl]="name" placeholder="Name" required>
+      @if (name.hasError('taken')) {
+        <app-error>That name is taken</app-error>
+      }
+    </app-form-field>
+  `,
+  imports: [ReactiveFormsModule, CustomFormFieldComponent, AppInputDirective, AppErrorComponent],
+})
+class ProjectedErrorHostComponent {
+  name = new FormControl('', [
+    Validators.required,
+    (c: AbstractControl): ValidationErrors | null => (c.value === 'taken' ? { taken: true } : null),
+  ]);
+}
+
+describe('CustomFormFieldComponent — projected <app-error>', () => {
+  async function setup() {
+    TestBed.configureTestingModule({
+      providers: [provideZonelessChangeDetection()],
+      imports: [ProjectedErrorHostComponent],
+    });
+    const fixture = TestBed.createComponent(ProjectedErrorHostComponent);
+    await fixture.whenStable();
+    const host: HTMLElement = fixture.nativeElement;
+    const input = host.querySelector<HTMLInputElement>('input')!;
+    return { fixture, host, input };
+  }
+
+  function type(input: HTMLInputElement, value: string) {
+    input.value = value;
+    input.dispatchEvent(new Event('input', { bubbles: true }));
+  }
+
+  /** The field's error line, read through the input's aria-errormessage. */
+  function errorFor(host: HTMLElement, input: HTMLInputElement): string | undefined {
+    const id = input.getAttribute('aria-errormessage');
+    return id ? host.querySelector(`#${id}`)?.textContent?.trim() : undefined;
+  }
+
+  it('shows the projected text instead of the stock line', async () => {
+    const { fixture, host, input } = await setup();
+    type(input, 'taken');
+    await fixture.whenStable();
+
+    const line = host.querySelector('.form-field-error');
+    expect(line?.textContent?.trim()).toBe('That name is taken');
+    expect(host.textContent).not.toContain('Invalid value');
+  });
+
+  it('shows the stock line when no projected error is rendered', async () => {
+    const { fixture, host, input } = await setup();
+    type(input, 'x');
+    type(input, '');
+    await fixture.whenStable();
+
+    expect(host.querySelector('app-error')).toBeNull();
+    expect(host.querySelector('.form-field-error')?.textContent?.trim()).toBe('This field is required');
+  });
+
+  it('shows no error while the field shows no errors', async () => {
+    const { fixture, host } = await setup();
+    fixture.componentInstance.name.setValue('taken');
+    await fixture.whenStable();
+
+    expect(host.querySelector('.form-field-error')).toBeNull();
+    expect(host.textContent).not.toContain('That name is taken');
+  });
+
+  it('makes the projected text the accessible error message', async () => {
+    const { fixture, host, input } = await setup();
+    type(input, 'taken');
+    await fixture.whenStable();
+
+    expect(input.getAttribute('aria-invalid')).toBe('true');
+    expect(errorFor(host, input)).toBe('That name is taken');
+  });
+
+  it('goes back to the stock line when the projected error clears', async () => {
+    const { fixture, host, input } = await setup();
+    type(input, 'taken');
+    await fixture.whenStable();
+    type(input, '');
+    await fixture.whenStable();
+
+    expect(errorFor(host, input)).toBe('This field is required');
+  });
+});
+
+// The floating label is the input's placeholder. A form that binds it can
+// set it after the field has read it (the Connect dialog's credentials take
+// their names from the endpoint type), so the label follows later changes.
+@Component({
+  standalone: true,
+  imports: [CustomFormFieldComponent, AppInputDirective],
+  changeDetection: ChangeDetectionStrategy.OnPush,
+  template: `<app-form-field><input appInput [placeholder]="label()"></app-form-field>`,
+})
+class BoundPlaceholderHostComponent {
+  label = signal('');
+}
+
+describe('CustomFormFieldComponent — bound placeholder', () => {
+  it('shows a label set after the field was created', async () => {
+    TestBed.configureTestingModule({
+      imports: [BoundPlaceholderHostComponent],
+      providers: [provideZonelessChangeDetection()],
+    });
+    const fixture = TestBed.createComponent(BoundPlaceholderHostComponent);
+    await fixture.whenStable();
+    const label = () => (fixture.nativeElement as HTMLElement).querySelector('label')?.textContent?.trim();
+    expect(label()).toBeUndefined();
+
+    fixture.componentInstance.label.set('Username');
+    await fixture.whenStable();
+    await new Promise(r => setTimeout(r));
+    await fixture.whenStable();
+    expect(label()).toBe('Username');
   });
 });

@@ -8,7 +8,6 @@ import {
 import { CloudFoundrySharedModule } from '../../../cloud-foundry/src/shared/cf-shared.module';
 import { CoreModule } from '@stratosui/core';
 import { SharedModule } from '@stratosui/core';
-import { EditAutoscalerCredentialComponent } from '../features/edit-autoscaler-credential/edit-autoscaler-credential.component';
 import {
   EditAutoscalerPolicyStep1Component,
 } from '../features/edit-autoscaler-policy/edit-autoscaler-policy-step1/edit-autoscaler-policy-step1.component';
@@ -31,7 +30,6 @@ import {
     SharedModule,
     AutoscalerRoutingModule,
     CloudFoundrySharedModule,
-    EditAutoscalerCredentialComponent,
     EditAutoscalerPolicyStep1Component,
     EditAutoscalerPolicyStep3Component,
     AppAutoscalerComboChartComponent,

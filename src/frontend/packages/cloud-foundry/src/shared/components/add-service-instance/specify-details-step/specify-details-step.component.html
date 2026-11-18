@@ -1,17 +1,17 @@
 <div class="specify-details">
-  @if (!modeService.isEditServiceInstanceMode() && (hasInstances$ | async) && showModeSelection) {
+  @if (!modeService.isEditServiceInstanceMode() && hasInstances() && showModeSelection()) {
     <div>
       <div class="flex flex-col gap-3 mb-4">
         @for (mode of formModes; track mode) {
-          <label class="inline-flex items-center cursor-pointer" [attr.for]="'mode-' + mode.key" [class.opacity-50]="(serviceInstances$ | async)?.length === 0" [class.pointer-events-none]="(serviceInstances$ | async)?.length === 0">
-            <input [attr.id]="'mode-' + mode.key" type="radio" [ngModel]="formMode()" (ngModelChange)="formMode.set($event)" [value]="mode.key" (click)="resetForms(mode.key)" class="w-4 h-4 accent-primary bg-content-bg border-content-border focus:ring-primary focus:ring-2" [disabled]="(serviceInstances$ | async)?.length === 0">
+          <label class="inline-flex items-center cursor-pointer" [attr.for]="'mode-' + mode.key" [class.opacity-50]="serviceInstances()?.length === 0" [class.pointer-events-none]="serviceInstances()?.length === 0">
+            <input [attr.id]="'mode-' + mode.key" type="radio" [ngModel]="formMode()" (ngModelChange)="formMode.set($event)" [value]="mode.key" (click)="resetForms(mode.key)" class="w-4 h-4 accent-primary bg-content-bg border-content-border focus:ring-primary focus:ring-2" [disabled]="serviceInstances()?.length === 0">
             <span class="ml-2 text-sm font-medium text-content-text">{{ mode.label }}</span>
           </label>
         }
       </div>
     </div>
   }
-  @if ((showModeSelection && formMode() === 'create-service-instance') || !showModeSelection) {
+  @if ((showModeSelection() && formMode() === 'create-service-instance') || !showModeSelection()) {
     <form class="stepper-form"
       [formGroup]="createNewInstanceForm">
       <app-form-field>
@@ -27,27 +27,27 @@
           </app-error>
         }
       </app-form-field>
-      <app-form-field class="stepper-form__tags">
-        <app-label>Tags</app-label>
+      <div class="stepper-form__tags mb-4">
+        <label for="service-instance-tags" class="block mb-1 text-sm text-content-muted">Tags</label>
         <div class="flex flex-wrap gap-2 p-2 border border-content-border rounded-md min-h-[42px] bg-content-bg">
-          @for (tag of tags; track tag) {
+          @for (tag of tags(); track tag) {
             <span class="inline-flex items-center px-3 py-1 text-sm font-medium text-content-text bg-content-secondary rounded-full hover:bg-content-border">
               {{tag}}
               @if (tagsRemovable) {
-                <button type="button" (click)="removeTag(tag)" class="ml-2 text-content-muted hover:text-content-text focus:outline-none">
-                  <span class="material-icons text-sm">cancel</span>
+                <button type="button" (click)="removeTag(tag)" [attr.aria-label]="'Remove tag ' + tag" class="ml-2 text-content-muted hover:text-content-text focus:outline-none">
+                  <span aria-hidden="true" class="material-icons text-sm">cancel</span>
                 </button>
               }
             </span>
           }
-          <input type="text"
+          <input id="service-instance-tags" type="text"
             (keydown.enter)="addTagFromInput($event)"
             (keydown.comma)="addTagFromInput($event)"
             (keydown.space)="addTagFromInput($event)"
             class="flex-1 min-w-[120px] outline-none bg-transparent text-sm"
             placeholder="Add tag..." />
         </div>
-      </app-form-field>
+      </div>
       <div class="stepper-form__params">
         <div>Service Parameters</div>
         <app-schema-form [config]="schemaFormConfig()" (dataChange)="setServiceParams($event)"
@@ -55,18 +55,45 @@
       </div>
     </form>
   }
-  @if (showModeSelection && formMode() === 'bind-service-instance') {
+  @if (showModeSelection() && formMode() === 'bind-service-instance') {
     <form class="stepper-form"
       [formGroup]="selectExistingInstanceForm">
       <app-form-field>
         <app-select class="form-control" [required]="true" placeholder="Service Instance" formControlName="serviceInstance" [autoSelectSingleOption]="false">
           <app-option [value]="null">None</app-option>
-          @for (sI of bindableServiceInstances$ | async; track sI.guid) {
+          @for (sI of serviceInstances(); track sI.guid) {
             <app-option [value]="sI.guid">{{ sI.name }}</app-option>
           }
         </app-select>
       </app-form-field>
     </form>
+  }
+
+  @if (slowWrite(); as question) {
+    <div #slowWriteQuestion role="alertdialog" aria-labelledby="slow-write-text" aria-describedby="slow-write-countdown"
+      class="mt-4 p-4 border border-content-border rounded-md bg-content-bg">
+      <p id="slow-write-text" class="text-sm font-medium text-content-text">{{ question.text }}</p>
+      <p id="slow-write-countdown" class="text-sm text-content-muted">
+        Continuing in the background in {{ question.answerIn }} s unless you choose to keep waiting.
+      </p>
+      <div class="flex flex-wrap items-center gap-3 mt-3">
+        <label for="slow-write-seconds" class="text-sm text-content-text">Wait another</label>
+        <input id="slow-write-seconds" type="number" [min]="minWaitS" [max]="maxWaitS" step="1"
+          [value]="waitSeconds()" (input)="waitSeconds.set($any($event.target).valueAsNumber)"
+          aria-describedby="slow-write-range"
+          class="w-24 px-2 py-1 text-sm border border-content-border rounded-md bg-content-bg text-content-text">
+        <span class="text-sm text-content-text">seconds</span>
+        <button type="button" class="btn btn-primary" (click)="keepWaiting()" [disabled]="!waitSecondsValid()">
+          Keep waiting
+        </button>
+        <button type="button" class="btn btn-secondary" (click)="continueInBackground()">
+          Continue in background
+        </button>
+      </div>
+      @if (!waitSecondsValid()) {
+        <app-error id="slow-write-range">Enter {{ minWaitS }} to {{ maxWaitS }} whole seconds.</app-error>
+      }
+    </div>
   }
 
 </div>

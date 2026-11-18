@@ -85,6 +85,13 @@ func (p *portalProxy) wireSizeMiddleware(next echo.HandlerFunc) echo.HandlerFunc
 			return nil
 		}
 
+		// Nothing reached this writer: gzip holds back the status of a response
+		// with no body and sends it after we return. A default 200 sent here
+		// would win, turning a redirect into an empty page.
+		if !bw.statusCaptured && bw.buf.Len() == 0 {
+			return nil
+		}
+
 		ct := c.Response().Header().Get(echo.HeaderContentType)
 		if strings.Contains(ct, "application/json") {
 			m := countJSONBytes(bw.buf.Bytes())

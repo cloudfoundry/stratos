@@ -1,4 +1,4 @@
-import { ChangeDetectionStrategy, Component, Input  } from '@angular/core';
+import { ChangeDetectionStrategy, Component, input } from '@angular/core';
 import { FormGroup } from '@angular/forms';
 import { IAuthForm } from '@stratosui/store';
 
@@ -16,5 +16,5 @@ export type NoneAuthFormValue = Record<string, never>;
   changeDetection: ChangeDetectionStrategy.OnPush
 })
 export class NoneAuthFormComponent implements IAuthForm {
-  @Input() formGroup!: FormGroup<NoneAuthFormValue>;
+  readonly formGroup = input.required<FormGroup<NoneAuthFormValue>>();
 }

@@ -1,6 +1,4 @@
-import { Directive, Input, OnChanges, OnDestroy, SimpleChanges, TemplateRef, ViewContainerRef, inject } from '@angular/core';
-import { combineLatest, Observable, Subscription } from 'rxjs';
-import { map } from 'rxjs/operators';
+import { Directive, TemplateRef, ViewContainerRef, computed, effect, inject, input, untracked } from '@angular/core';
 
 import { PermissionTypes } from '../core/permissions/current-user-permissions.config';
 import { CurrentUserPermissionsService } from '../core/permissions/current-user-permissions.service';
@@ -9,55 +7,36 @@ import { CurrentUserPermissionsService } from '../core/permissions/current-user-
   selector: '[appUserPermission]',
   standalone: true
 })
-export class UserPermissionDirective implements OnChanges, OnDestroy {
+export class UserPermissionDirective {
   private templateRef = inject<TemplateRef<any>>(TemplateRef);
   private viewContainer = inject(ViewContainerRef);
   private currentUserPermissionsService = inject(CurrentUserPermissionsService);
 
   // Accept null/undefined so `*appUserPermission="observable | async"` works —
   // async pipe emits null on first CD before the observable produces a value.
-  @Input()
-  public appUserPermission: PermissionTypes[] | null | undefined;
+  public readonly appUserPermission = input<PermissionTypes[] | null>();
 
-  @Input()
-  public appUserPermissionEndpointGuid!: string;
+  public readonly appUserPermissionEndpointGuid = input<string>();
 
-  private canSub?: Subscription;
+  // Built again only when the inputs change.
+  private readonly checks = computed(() => {
+    const permissions = this.appUserPermission();
+    const endpointGuid = this.appUserPermissionEndpointGuid();
+    return (permissions ?? []).map(permission => this.currentUserPermissionsService.can(permission, endpointGuid));
+  });
 
-  public ngOnChanges(changes: SimpleChanges) {
-    if (changes['appUserPermission'] || changes['appUserPermissionEndpointGuid']) {
-      this.setupPermissionCheck();
-    }
-  }
+  // Shown when any of the permissions passes.
+  private readonly allowed = computed(() => this.checks().some(check => check()));
 
-  public ngOnDestroy() {
-    this.canSub?.unsubscribe();
-  }
-
-  private setupPermissionCheck() {
-    // Tear down the previous permission subscription and any rendered template
-    // before evaluating the new input. Without this, a cold template fragment
-    // lingers when the input transitions from a valid array back to null.
-    this.canSub?.unsubscribe();
-    this.canSub = undefined;
-    this.viewContainer.clear();
-
-    if (!this.appUserPermission || this.appUserPermission.length === 0) {
-      return;
-    }
-
-    const checks: Observable<boolean>[] = this.appUserPermission.map(
-      (permission: PermissionTypes) =>
-        this.currentUserPermissionsService.can(permission, this.appUserPermissionEndpointGuid)
-    );
-
-    this.canSub = combineLatest(checks).pipe(
-      map((results: boolean[]) => results.some(Boolean))
-    ).subscribe(can => {
-      this.viewContainer.clear();
-      if (can) {
-        this.viewContainer.createEmbeddedView(this.templateRef);
-      }
+  constructor() {
+    effect(() => {
+      const allowed = this.allowed();
+      untracked(() => {
+        this.viewContainer.clear();
+        if (allowed) {
+          this.viewContainer.createEmbeddedView(this.templateRef);
+        }
+      });
     });
   }
 }

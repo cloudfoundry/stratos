@@ -15,7 +15,7 @@
             "prebuildScripts": [
               {
                 "name": "Clean symlinks",
-                "script": "node build/clean-symlinks.cjs",
+                "script": "bun build/clean-symlinks.cjs",
                 "phase": 1,
                 "cache": true,
                 "cacheKey": ["src/frontend/packages/**/package.json"],
@@ -24,16 +24,15 @@
               },
               {
                 "name": "Store git metadata",
-                "script": "node build/store-git-metadata.cjs",
+                "script": "bun build/store-git-metadata.cjs",
                 "phase": 1,
-                "cache": true,
-                "cacheKey": [".git/HEAD", ".git/refs/heads/**"],
+                "cache": false,
                 "timeout": 30000,
                 "required": true
               },
               {
                 "name": "Generate custom imports",
-                "script": "node build/extension-generator.mjs",
+                "script": "bun build/extension-generator.mjs",
                 "phase": 2,
                 "cache": true,
                 "cacheKey": ["custom-src/**/*", "src/frontend/packages/core/custom-extensions.json"],
@@ -42,10 +41,10 @@
               },
               {
                 "name": "Prepare backend",
-                "script": "node dist-devkit/src/backend.js",
+                "script": "bun dist-devkit/backend.js",
                 "phase": 2,
                 "cache": true,
-                "cacheKey": ["dist-devkit/src/backend.js", "src/jetstream/**/*.go"],
+                "cacheKey": ["dist-devkit/backend.js", "src/jetstream/**/*.go"],
                 "timeout": 60000,
                 "required": false
               }
@@ -110,6 +109,11 @@
                 "output": "/kubernetes/assets"
               },
               {
+                "glob": "**/*",
+                "input": "src/frontend/packages/git/assets",
+                "output": "/git/assets"
+              },
+              {
                 "glob": "company-config.json",
                 "input": "src/frontend/packages/theme",
                 "output": "/assets"
@@ -153,7 +157,7 @@
               "budgets": [
                 {
                   "type": "anyScript",
-                  "maximumWarning": "2.75mb",
+                  "maximumWarning": "2.85mb",
                   "maximumError": "3mb"
                 }
               ],

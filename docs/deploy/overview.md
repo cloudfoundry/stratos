@@ -48,3 +48,35 @@ This deployment is recommended only for trying out the Console and for developme
 > Some features are marked as 'Tech Preview' and are only available if tech preview features are enabled when deploying. See the [Tech Preview](tech-preview.md) section for more information.
 
 Frontend Packages and Backend Plugins can be removed at build time, see [here](../extensions/disable-packages.md) for more information.
+## Background Operations
+
+A slow operation (a broker that takes minutes, a delete Cloud Foundry runs as
+a job) is followed by the browser after the page that started it hands it
+off. After `ASYNC_JOB_TRACKING_LIMIT_IN_MINS` minutes (default 60) the browser
+stops checking and says so; the operation itself carries on in Cloud Foundry.
+Values under 1 use 1 minute. Values over 360 (6 hours) are used but log a
+warning, since every browser tab follows an operation that long. Values of
+1440 (a day) or more use 360.
+
+| Deployment | How to set it |
+|------------|---------------|
+| Cloud Foundry | `cf set-env console ASYNC_JOB_TRACKING_LIMIT_IN_MINS 120`, then restage |
+| Kubernetes (Helm) | `--set console.ui.jobTrackingLimitMins=120` |
+| Docker, single container | `docker run -e ASYNC_JOB_TRACKING_LIMIT_IN_MINS=120 ...` |
+
+To choose a value from your own foundation's numbers, the backend logs one
+line at Info level for each operation it handed off, when it ends:
+
+```
+level=INFO msg="job ended" kind=cf.service_instance.create outcome=complete seconds=42 rebuilt=false
+```
+
+`outcome` is `complete`, `failed`, `not_found` (Cloud Foundry no longer knows
+the job) or `abandoned`: nobody checked on it for an hour, because the browser
+reached the limit or was closed. For `abandoned`, `seconds` runs to the last
+check, so the operation took at least that long, and the line appears an hour
+after that check. `rebuilt=true` marks an operation another backend instance
+started; its `seconds` start when this instance picked it up. Operations that
+finish within the first 3 seconds are never handed off and are not logged.
+The lines go to standard output with the rest of the backend's log
+(`cf logs`, `kubectl logs`, `docker logs`); set `LOG_TO_JSON=true` for JSON.

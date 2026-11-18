@@ -262,48 +262,89 @@ unnamed_packages() {
       done
 }
 
+# Suggested subcategories: the "- Name" lines between the markers in
+# changelog.d/README.md (kept by sweep). Assembly orders listed names first.
+known_subcategories() {
+  sed -n '/^<!-- subcategories -->$/,/^<!-- \/subcategories -->$/s/^- //p' "${FRAG_DIR}/README.md" 2>/dev/null \
+    | paste -sd '|' -
+}
+
 cmd_assemble() {
   local files
   files=$(fragments_by_landing)
   [ -n "${files}" ] || return 0
   # shellcheck disable=SC2086  # fragment paths contain no whitespace
-  awk -v order="${SECTION_ORDER}" '
+  awk -v order="${SECTION_ORDER}" -v known="$(known_subcategories)" '
     BEGIN {
       norder = split(order, sections, "|")
       for (i = 1; i <= norder; i++) valid[sections[i]] = 1
+      nknown = split(known, knownList, "|")
+      for (i = 1; i <= nknown; i++) isKnown[knownList[i]] = 1
     }
-    FNR == 1 { section = ""; delete pending }
+    FNR == 1 { key = ""; delete pending }
+    # [Section] or [Section: Subcategory]. The subcategory is free-form;
+    # bullets sharing one are grouped under a ### heading in the section.
     /^\[[^]]+\][[:space:]]*$/ {
       s = $0
       sub(/^\[/, "", s); sub(/\][[:space:]]*$/, "", s)
+      sc = ""
+      if (index(s, ":")) {
+        sc = substr(s, index(s, ":") + 1); s = substr(s, 1, index(s, ":") - 1)
+        gsub(/^[[:space:]]+|[[:space:]]+$/, "", sc)
+        gsub(/^[[:space:]]+|[[:space:]]+$/, "", s)
+      }
       if (!(s in valid)) {
         printf "ERROR: %s: unknown section [%s]\n", FILENAME, s > "/dev/stderr"
         err = 1; exit 1
       }
-      section = s
+      if (sc != "" && !((s, sc) in seen)) {
+        seen[s, sc] = 1
+        subs[s, ++nsubs[s]] = sc
+        if (!(sc in isKnown) && !((sc) in noted)) {
+          noted[sc] = 1
+          printf "NOTE: %s: new subcategory [%s: %s]; if it will be used again, add it to the list in changelog.d/README.md\n", FILENAME, s, sc > "/dev/stderr"
+        }
+      }
+      key = s SUBSEP sc
       delete pending
       next
     }
     {
-      if (section == "") {
+      if (key == "") {
         if ($0 ~ /^[[:space:]]*$/) next
         printf "ERROR: %s: content before any [Section] header\n", FILENAME > "/dev/stderr"
         err = 1; exit 1
       }
       # Blank lines buffer lazily so they only land between content lines
-      # of the same section in the same fragment (e.g. before a table),
-      # never at section boundaries or between merged fragments.
-      if ($0 ~ /^[[:space:]]*$/) { pending[section] = pending[section] "\n"; next }
-      buf[section] = buf[section] pending[section] $0 "\n"
-      delete pending[section]
+      # of the same group in the same fragment (e.g. before a table),
+      # never at group boundaries or between merged fragments.
+      if ($0 ~ /^[[:space:]]*$/) { pending[key] = pending[key] "\n"; next }
+      buf[key] = buf[key] pending[key] $0 "\n"
+      delete pending[key]
+    }
+    function trimmed(b) {
+      sub(/^\n+/, "", b)
+      sub(/\n+$/, "\n", b)
+      return (b ~ /[^[:space:]]/) ? b : ""
     }
     END {
       if (err) exit 1
       for (i = 1; i <= norder; i++) {
-        s = sections[i]; b = buf[s]
-        sub(/^\n+/, "", b)
-        sub(/\n+$/, "\n", b)
-        if (b !~ /[^[:space:]]/) continue
+        s = sections[i]
+        # Plain bullets first, then listed subcategories in list order,
+        # then unlisted ones in the order they landed.
+        body = trimmed(buf[s, ""])
+        for (k = 1; k <= nknown; k++) {
+          b = trimmed(buf[s, knownList[k]])
+          if (b != "") body = body (body != "" ? "\n" : "") "### " knownList[k] "\n\n" b
+        }
+        for (k = 1; k <= nsubs[s]; k++) {
+          sc = subs[s, k]
+          if (sc in isKnown) continue
+          b = trimmed(buf[s, sc])
+          if (b != "") body = body (body != "" ? "\n" : "") "### " sc "\n\n" b
+        }
+        if (body == "") continue
         if (out) printf "\n"
         # [Section] is the authoring syntax, not the output. Emitted as a
         # bracketed literal it renders as plain text wherever these notes
@@ -311,7 +352,7 @@ cmd_assemble() {
         # had no headings at all. BugFixes is an identifier and gets a
         # display name; the rest already read as titles.
         label = (s == "BugFixes") ? "Bug Fixes" : s
-        printf "## %s\n\n%s", label, b
+        printf "## %s\n\n%s", label, body
         out = 1
       }
     }

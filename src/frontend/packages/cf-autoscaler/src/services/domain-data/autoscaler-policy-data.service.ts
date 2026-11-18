@@ -9,6 +9,7 @@ import {
   autoscalerTransformMapToArray,
 } from '../../core/autoscaler-helpers/autoscaler-transform-policy';
 import { AppAutoscalerPolicy, AppAutoscalerPolicyLocal } from '../../store/app-autoscaler.types';
+import { autoscalerErrorMessage } from '../../core/autoscaler-helpers/autoscaler-util';
 
 interface PolicyState {
   policy: AppAutoscalerPolicyLocal | null;
@@ -101,7 +102,7 @@ export class AutoscalerPolicyDataService {
         this.patch(endpointGuid, appGuid, { policy: null, loading: false, error: null, noPolicy: true });
         return;
       }
-      const message = (err as HttpErrorResponse)?.message ?? String(err);
+      const message = autoscalerErrorMessage(err);
       this.patch(endpointGuid, appGuid, { policy: null, loading: false, error: message, noPolicy: false });
     }
   }
@@ -117,7 +118,7 @@ export class AutoscalerPolicyDataService {
       const next = autoscalerTransformArrayToMap(wire);
       this.patch(endpointGuid, appGuid, { policy: next, loading: false, error: null, noPolicy: false });
     } catch (err) {
-      const message = (err as HttpErrorResponse)?.message ?? String(err);
+      const message = autoscalerErrorMessage(err);
       this.patch(endpointGuid, appGuid, { loading: false, error: message });
       throw err;
     }
@@ -128,17 +129,15 @@ export class AutoscalerPolicyDataService {
     const headers = this.headers(endpointGuid);
     try {
       await firstValueFrom(this.http.delete(this.url(appGuid), { headers }));
-      this.patch(endpointGuid, appGuid, {
-        policy: null,
-        deleting: false,
-        deletionError: null,
-        noPolicy: true,
-      });
     } catch (err) {
-      const message = (err as HttpErrorResponse)?.message ?? String(err);
+      const message = autoscalerErrorMessage(err);
       this.patch(endpointGuid, appGuid, { deleting: false, deletionError: message });
       throw err;
     }
+    this.patch(endpointGuid, appGuid, { deleting: false, deletionError: null });
+    // The autoscaler applies the service instance's default policy, if it
+    // has one, in place of the detached one; load what is now in force.
+    await this.load(endpointGuid, appGuid);
   }
 
   private url(appGuid: string): string {

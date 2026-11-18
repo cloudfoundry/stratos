@@ -1,4 +1,4 @@
-#!/usr/bin/env node
+#!/usr/bin/env bun
 // Became-clean enforcement for the e2e guard ratchet (#5619). The legacy
 // list in tools/eslint-rules/e2e-legacy-files.mjs turns the drift guards
 // off for files that predate them; nothing else fails when a listed file

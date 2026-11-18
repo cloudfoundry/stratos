@@ -32,16 +32,13 @@ describe('LoadingPageComponent', () => {
       element = fixture.nativeElement;
 
       loadingSubject = new BehaviorSubject<boolean>(true);
-      component.isLoading = loadingSubject.asObservable();
-      component.ngOnInit();
+      fixture.componentRef.setInput('isLoading', loadingSubject.asObservable());
 
-      fixture.detectChanges();
       await fixture.whenStable();
-      fixture.detectChanges();
     });
 
     it('should show default message', () => {
-      expect(element.textContent).toContain(component.text);
+      expect(element.textContent).toContain(component.text());
     });
 
     it('should show a loading indicator until is done', () => {
@@ -55,13 +52,23 @@ describe('LoadingPageComponent', () => {
 
       loadingSubject.next(false);
 
-      fixture.detectChanges();
       await fixture.whenStable();
-      fixture.detectChanges();
 
       indicator = element.querySelector('[data-test="loading-page-indicator"]');
       expect(indicator).toBeFalsy();
     });
+  });
+
+  it('shows and hides the indicator from a plain boolean', async () => {
+    fixture = TestBed.createComponent(LoadingPageComponent);
+    element = fixture.nativeElement;
+    fixture.componentRef.setInput('isLoading', true);
+    await fixture.whenStable();
+    expect(element.querySelector('[data-test="loading-page-indicator"]')).toBeTruthy();
+
+    fixture.componentRef.setInput('isLoading', false);
+    await fixture.whenStable();
+    expect(element.querySelector('[data-test="loading-page-indicator"]')).toBeFalsy();
   });
 
   it('should be created', () => {

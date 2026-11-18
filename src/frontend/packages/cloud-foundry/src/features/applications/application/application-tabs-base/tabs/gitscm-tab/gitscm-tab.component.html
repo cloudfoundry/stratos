@@ -1,6 +1,6 @@
-<app-loading-page [isLoading]="isLoading$" text="Retrieving Git Details">
+<app-loading-page [isLoading]="isLoading()" text="Retrieving Git Details">
   <div>
-    @if (hasRepo$ | async; as hasRepo) {
+    @if (hasRepo()) {
       <app-tile-grid>
         <app-tile-group class="tile-group-3-cols">
           @if (data.stratosProject(); as stratosProject) {
@@ -12,13 +12,13 @@
                 <div class="card-body">
                   <div>
                     <app-metadata-item label="Repository">
-                      <a href="{{ (gitSCMRepo$ | async)?.html_url }}" target="_blank">{{
+                      <a href="{{ gitSCMRepo()?.html_url }}" target="_blank">{{
                         stratosProject.deploySource.project
                       }}</a>
                     </app-metadata-item>
                     <app-metadata-item label="Branch">
                       <a
-                        href="{{ (gitSCMRepo$ | async)?.html_url }}/tree/{{ stratosProject.deploySource.branch }}"
+                        href="{{ gitSCMRepo()?.html_url }}/tree/{{ stratosProject.deploySource.branch }}"
                         target="_blank"
                       >
                         {{ stratosProject.deploySource.branch }}
@@ -27,15 +27,15 @@
                     <div>
                       <div>
                         <app-metadata-item label="Commit">
-                          <a href="{{ (commit$ | async)?.html_url }}" target="_blank">{{
+                          <a href="{{ commit()?.html_url }}" target="_blank">{{
                             (stratosProject.deploySource.commit ?? "") | limitTo: 8
                           }}</a>
                         </app-metadata-item>
                       </div>
-                      @if ((isHead$ | async) === false) {
+                      @if (isHead() === false) {
                         <div class="flex flex-row">
                           <div>
-                            <span class="material-icons text-warning">warning</span>
+                            <span aria-hidden="true" class="material-icons text-warning">warning</span>
                           </div>
                           <div class="pl-6">
                             The
@@ -53,14 +53,16 @@
               </div>
             </app-tile>
           }
-          @if (gitSCMRepo$ | async; as gitSCMRepo) {
+          @if (gitSCMRepo(); as gitSCMRepo) {
             <app-tile>
               <div class="card">
                 <div class="card-header flex items-center justify-between">
                   <h3 class="text-lg font-semibold">Repository Details</h3>
                   <div>
                     <img
+                      #ownerAvatar
                       src="{{ gitSCMRepo.owner.avatar_url }}"
+                      (error)="ownerAvatar.hidden = true"
                       alt="Repository owner avatar"
                       class="h-12 w-12 rounded-full"
                     />
@@ -77,6 +79,8 @@
                           <span
                             class="material-icons text-[18px] h-[18px] leading-[18px] ml-[5px] mr-0 w-[18px]"
                             title="Private Repo"
+                            role="img"
+                            aria-label="Private repository"
                           >
                             lock</span
                           >
@@ -103,14 +107,16 @@
               </div>
             </app-tile>
           }
-          @if (commit$ | async; as commitInfo) {
+          @if (commit(); as commitInfo) {
             <app-tile>
               <div class="card">
                 <div class="card-header flex items-center justify-between">
                   <h3 class="text-lg font-semibold">Commit Details</h3>
                   <div>
                     <img
+                      #authorAvatar
                       src="{{ commitInfo.author?.avatar_url }}"
+                      (error)="authorAvatar.hidden = true"
                       alt="Commit author avatar"
                       class="h-12 w-12 rounded-full"
                     />
@@ -151,10 +157,10 @@
         }
       </app-tile-grid>
     }
-    @if ((hasRepo$ | async) === false) {
+    @if (hasRepo() === false) {
       <app-no-content-message
-        [iconFont]="$safeNavigationMigration((icon$ | async)?.fontName)"
-        [icon]="$safeNavigationMigration((icon$ | async)?.iconName)"
+        [iconFont]="icon()?.fontName"
+        [icon]="icon()?.iconName"
         [firstLine]="noContentFirstLine"
         [secondLine]="noContentSecondLine"
         [otherLines]="noContentOtherLines"

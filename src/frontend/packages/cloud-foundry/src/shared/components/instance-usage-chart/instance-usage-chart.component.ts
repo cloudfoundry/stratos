@@ -1,4 +1,4 @@
-import { ChangeDetectionStrategy, Component, computed, input, output, signal } from '@angular/core';
+import { ChangeDetectionStrategy, Component, Signal, computed, input, output, signal } from '@angular/core';
 import { ChartConfiguration, Plugin } from 'chart.js';
 import { BaseChartDirective } from 'ng2-charts';
 
@@ -154,7 +154,9 @@ export class InstanceUsageChartComponent {
     return { labels: Array.from({ length: maxLen }, (_, i) => `${i}`), datasets };
   });
 
-  readonly options = computed<ChartConfiguration<'line'>['options']>(() => {
+  // Declared, not inferred: the inferred type names a chart.js internal
+  // (_DeepPartialObject) that library declarations cannot reference (TS2883).
+  readonly options: Signal<ChartConfiguration<'line'>['options']> = computed(() => {
     const metric = this.metric();
     const unit = this.unitLabel();
     // CPU is a 0..1 fraction — render the axis as a percentage. Mem/disk are raw

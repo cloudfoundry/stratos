@@ -1,12 +1,13 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
-import { provideZonelessChangeDetection } from '@angular/core';
+import { provideZonelessChangeDetection, signal } from '@angular/core';
+import { NEVER, Subscription } from 'rxjs';
 import { ActivatedRoute } from '@angular/router';
 import { describe, it, expect, beforeEach, afterEach, beforeAll, afterAll, vi } from 'vitest';
 
 import { BaseTestModules } from '../../../../../../core/test-framework/core-test.helper';
 import { KubernetesNodeMetricStatsCardComponent } from './kubernetes-node-metric-stats-card.component';
 import { KubernetesNodeSimpleMetricComponent } from '../kubernetes-node-simple-metric/kubernetes-node-simple-metric.component';
-import { KubernetesNodeService } from '../../../services/kubernetes-node.service';
+import { KubeNodeMetric, KubernetesNodeService } from '../../../services/kubernetes-node.service';
 import { BaseKubeGuid } from '../../../kubernetes-page.types';
 import { KubernetesEndpointService } from '../../../services/kubernetes-endpoint.service';
 import { KubernetesTestingModule } from '../../../kubernetes.testing.module';
@@ -43,10 +44,11 @@ describe('KubernetesNodeMetricStatsCardComponent', () => {
     }).compileComponents();
   });
 
-  beforeEach(() => {
+  beforeEach(async () => {
     fixture = TestBed.createComponent(KubernetesNodeMetricStatsCardComponent);
     component = fixture.componentInstance;
-    fixture.detectChanges();
+    fixture.componentRef.setInput('metric', KubeNodeMetric.MEMORY);
+    await fixture.whenStable();
   });
 
   afterEach(() => {
@@ -58,5 +60,18 @@ describe('KubernetesNodeMetricStatsCardComponent', () => {
 
   it('should create', () => {
     expect(component).toBeTruthy();
+  });
+
+  it('shows why the metric failed to load instead of blank values', async () => {
+    fixture.destroy();
+    const error = signal<string | null>('Error proxying request: dial tcp: i/o timeout (500)');
+    TestBed.inject(KubernetesNodeService).setupMetricObservable = () =>
+      ({ entity$: NEVER, pollerSub: new Subscription(), error });
+    fixture = TestBed.createComponent(KubernetesNodeMetricStatsCardComponent);
+    fixture.componentRef.setInput('metric', 'container_memory_usage_bytes' as any);
+    await fixture.whenStable();
+
+    expect((fixture.nativeElement as HTMLElement).querySelector('[data-test="node-metric-error"]')?.textContent)
+      .toContain('Failed to load: Error proxying request: dial tcp: i/o timeout (500)');
   });
 });

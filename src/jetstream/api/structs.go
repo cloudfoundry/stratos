@@ -2,6 +2,7 @@ package api
 
 import (
 	"fmt"
+	"log/slog"
 	"net/http"
 	"net/url"
 	"reflect"
@@ -112,6 +113,16 @@ type CNSIRecord struct {
 	CACert                 string   `json:"ca_cert"`
 }
 
+// LogValue keeps the client secret out of logs that print a whole record.
+func (c CNSIRecord) LogValue() slog.Value {
+	type record CNSIRecord // no LogValue, so slog prints its fields
+	r := record(c)
+	if r.ClientSecret != "" {
+		r.ClientSecret = "[REDACTED]"
+	}
+	return slog.AnyValue(r)
+}
+
 // ConnectedEndpoint
 type ConnectedEndpoint struct {
 	GUID                   string   `json:"guid"`
@@ -214,6 +225,14 @@ type LoginRes struct {
 	APIEndpoint *url.URL       `json:"api_endpoint"`
 	Admin       bool           `json:"admin"`
 	User        *ConnectedUser `json:"user"`
+	// The user's other connections at the same address, when the pair
+	// includes a personal endpoint; theirs to keep or disconnect.
+	AlsoConnected []EndpointRef `json:"also_connected,omitempty"`
+}
+
+type EndpointRef struct {
+	GUID string `json:"guid"`
+	Name string `json:"name"`
 }
 
 type LocalLoginRes struct {
@@ -303,6 +322,7 @@ type Info struct {
 		UserEndpointsEnabled       string `json:"userEndpointsEnabled"`
 		EndpointCardConcurrency    int    `json:"endpointCardConcurrency"`
 		EndpointRequestConcurrency int    `json:"endpointRequestConcurrency"`
+		JobTrackingLimitMins       int    `json:"jobTrackingLimitMins"`
 	} `json:"config"`
 }
 
@@ -421,7 +441,6 @@ type CNSIRequest struct {
 	StatusCode   int          `json:"statusCode"`
 	Status       string       `json:"status"`
 	PassThrough  bool         `json:"-"`
-	LongRunning  bool         `json:"-"`
 	Response     []byte       `json:"-"`
 	Error        error        `json:"-"`
 	ResponseGUID string       `json:"-"`
@@ -429,58 +448,59 @@ type CNSIRequest struct {
 }
 
 type PortalConfig struct {
-	HTTPClientTimeoutInSecs            int64    `configName:"HTTP_CLIENT_TIMEOUT_IN_SECS"`
-	HTTPClientTimeoutMutatingInSecs    int64    `configName:"HTTP_CLIENT_TIMEOUT_MUTATING_IN_SECS"`
-	HTTPClientTimeoutLongRunningInSecs int64    `configName:"HTTP_CLIENT_TIMEOUT_LONGRUNNING_IN_SECS"`
-	HTTPConnectionTimeoutInSecs        int64    `configName:"HTTP_CONNECTION_TIMEOUT_IN_SECS"`
-	TLSAddress                         string   `configName:"CONSOLE_PROXY_TLS_ADDRESS"`
-	TLSCert                            string   `configName:"CONSOLE_PROXY_CERT"`
-	TLSCertKey                         string   `configName:"CONSOLE_PROXY_CERT_KEY"`
-	TLSCertPath                        string   `configName:"CONSOLE_PROXY_CERT_PATH"`
-	TLSCertKeyPath                     string   `configName:"CONSOLE_PROXY_CERT_KEY_PATH"`
-	CFClient                           string   `configName:"CF_CLIENT"`
-	CFClientSecret                     string   `configName:"CF_CLIENT_SECRET"`
-	AllowedOrigins                     []string `configName:"ALLOWED_ORIGINS"`
-	CSPPolicy                          string   `configName:"CONSOLE_CSP"`
-	CSPReportOnlyPolicy                string   `configName:"CONSOLE_CSP_REPORT_ONLY"`
-	CSPReportCollector                 string   `configName:"CONSOLE_CSP_REPORT_COLLECTOR"`
-	HSTSPolicy                         string   `configName:"CONSOLE_HSTS"`
-	SessionStoreSecret                 string   `configName:"SESSION_STORE_SECRET"`
-	EncryptionKeyVolume                string   `configName:"ENCRYPTION_KEY_VOLUME"`
-	EncryptionKeyFilename              string   `configName:"ENCRYPTION_KEY_FILENAME"`
-	EncryptionKey                      string   `configName:"ENCRYPTION_KEY"`
-	AutoRegisterCFUrl                  string   `configName:"AUTO_REG_CF_URL"`
-	AutoRegisterCFName                 string   `configName:"AUTO_REG_CF_NAME"`
-	AutoRegisterCFCACert               string   `configName:"AUTO_REG_CF_CA_CERT"`
-	AutoRegisterCFCACertPath           string   `configName:"AUTO_REG_CF_CA_CERT_PATH"`
-	SSOLogin                           bool     `configName:"SSO_LOGIN"`
-	SSOOptions                         string   `configName:"SSO_OPTIONS"`
-	SSOAllowList                       string   `configName:"SSO_ALLOWLIST,SSO_WHITELIST"`
-	AuthEndpointType                   string   `configName:"AUTH_ENDPOINT_TYPE"`
-	CookieDomain                       string   `configName:"COOKIE_DOMAIN"`
-	LogLevel                           string   `configName:"LOG_LEVEL"`
-	UIListMaxSize                      int64    `configName:"UI_LIST_MAX_SIZE"`
-	UIListAllowLoadMaxed               bool     `configName:"UI_LIST_ALLOW_LOAD_MAXED"`
-	AutoRefreshCNSITokens              bool     `configName:"AUTOREFRESH_CNSI_TOKENS"`
-	CFAdminIdentifier                  string
-	CloudFoundryInfo                   *CFInfo
-	HTTPS                              bool
-	EncryptionKeyInBytes               []byte
-	ConsoleVersion                     string
-	IsCloudFoundry                     bool
-	LoginHooks                         []LoginHook
-	SessionStore                       SessionStorer
-	ConsoleConfig                      *ConsoleConfig
-	PluginConfig                       map[string]string
-	DatabaseProviderName               string
-	EnableTechPreview                  bool `configName:"ENABLE_TECH_PREVIEW"`
-	CanMigrateDatabaseSchema           bool
-	APIKeysEnabled                     api.APIKeysConfigValue       `configName:"API_KEYS_ENABLED"`
-	HomeViewShowFavoritesOnly          bool                         `configName:"HOME_VIEW_SHOW_FAVORITES_ONLY"`
-	HideNavLogout                      bool                         `configName:"HIDE_NAV_LOGOUT"`
-	EndpointCardConcurrency            int                          `configName:"ENDPOINT_CARD_CONCURRENCY"`
-	EndpointRequestConcurrency         int                          `configName:"ENDPOINT_REQUEST_CONCURRENCY"`
-	UserEndpointsEnabled               api.UserEndpointsConfigValue `configName:"USER_ENDPOINTS_ENABLED"`
+	HTTPClientTimeoutInSecs         int64    `configName:"HTTP_CLIENT_TIMEOUT_IN_SECS"`
+	HTTPClientTimeoutMutatingInSecs int64    `configName:"HTTP_CLIENT_TIMEOUT_MUTATING_IN_SECS"`
+	HTTPConnectionTimeoutInSecs     int64    `configName:"HTTP_CONNECTION_TIMEOUT_IN_SECS"`
+	TLSAddress                      string   `configName:"CONSOLE_PROXY_TLS_ADDRESS"`
+	TLSCert                         string   `configName:"CONSOLE_PROXY_CERT"`
+	TLSCertKey                      string   `configName:"CONSOLE_PROXY_CERT_KEY"`
+	TLSCertPath                     string   `configName:"CONSOLE_PROXY_CERT_PATH"`
+	TLSCertKeyPath                  string   `configName:"CONSOLE_PROXY_CERT_KEY_PATH"`
+	CFClient                        string   `configName:"CF_CLIENT"`
+	CFClientSecret                  string   `configName:"CF_CLIENT_SECRET"`
+	AllowedOrigins                  []string `configName:"ALLOWED_ORIGINS"`
+	CSPPolicy                       string   `configName:"CONSOLE_CSP"`
+	CSPGitHosts                     []string `configName:"CONSOLE_CSP_GIT_HOSTS"`
+	CSPReportOnlyPolicy             string   `configName:"CONSOLE_CSP_REPORT_ONLY"`
+	CSPReportCollector              string   `configName:"CONSOLE_CSP_REPORT_COLLECTOR"`
+	HSTSPolicy                      string   `configName:"CONSOLE_HSTS"`
+	SessionStoreSecret              string   `configName:"SESSION_STORE_SECRET"`
+	EncryptionKeyVolume             string   `configName:"ENCRYPTION_KEY_VOLUME"`
+	EncryptionKeyFilename           string   `configName:"ENCRYPTION_KEY_FILENAME"`
+	EncryptionKey                   string   `configName:"ENCRYPTION_KEY"`
+	AutoRegisterCFUrl               string   `configName:"AUTO_REG_CF_URL"`
+	AutoRegisterCFName              string   `configName:"AUTO_REG_CF_NAME"`
+	AutoRegisterCFCACert            string   `configName:"AUTO_REG_CF_CA_CERT"`
+	AutoRegisterCFCACertPath        string   `configName:"AUTO_REG_CF_CA_CERT_PATH"`
+	SSOLogin                        bool     `configName:"SSO_LOGIN"`
+	SSOOptions                      string   `configName:"SSO_OPTIONS"`
+	SSOAllowList                    string   `configName:"SSO_ALLOWLIST,SSO_WHITELIST"`
+	AuthEndpointType                string   `configName:"AUTH_ENDPOINT_TYPE"`
+	CookieDomain                    string   `configName:"COOKIE_DOMAIN"`
+	LogLevel                        string   `configName:"LOG_LEVEL"`
+	UIListMaxSize                   int64    `configName:"UI_LIST_MAX_SIZE"`
+	UIListAllowLoadMaxed            bool     `configName:"UI_LIST_ALLOW_LOAD_MAXED"`
+	AutoRefreshCNSITokens           bool     `configName:"AUTOREFRESH_CNSI_TOKENS"`
+	CFAdminIdentifier               string
+	CloudFoundryInfo                *CFInfo
+	HTTPS                           bool
+	EncryptionKeyInBytes            []byte
+	ConsoleVersion                  string
+	IsCloudFoundry                  bool
+	LoginHooks                      []LoginHook
+	SessionStore                    SessionStorer
+	ConsoleConfig                   *ConsoleConfig
+	PluginConfig                    map[string]string
+	DatabaseProviderName            string
+	EnableTechPreview               bool `configName:"ENABLE_TECH_PREVIEW"`
+	CanMigrateDatabaseSchema        bool
+	APIKeysEnabled                  api.APIKeysConfigValue       `configName:"API_KEYS_ENABLED"`
+	HomeViewShowFavoritesOnly       bool                         `configName:"HOME_VIEW_SHOW_FAVORITES_ONLY"`
+	HideNavLogout                   bool                         `configName:"HIDE_NAV_LOGOUT"`
+	EndpointCardConcurrency         int                          `configName:"ENDPOINT_CARD_CONCURRENCY"`
+	EndpointRequestConcurrency      int                          `configName:"ENDPOINT_REQUEST_CONCURRENCY"`
+	AsyncJobTrackingLimitMins       int                          `configName:"ASYNC_JOB_TRACKING_LIMIT_IN_MINS"`
+	UserEndpointsEnabled            api.UserEndpointsConfigValue `configName:"USER_ENDPOINTS_ENABLED"`
 	// DiagnosticsEnabled gates the admin-only /pp/v1/admin/diagnostics endpoint.
 	// Off by default in production; opt-in per deployment (dev, staging) via the
 	// DIAGNOSTICS_ENABLED env var. FWT-934.
@@ -494,6 +514,15 @@ type PortalConfig struct {
 // SetCanPerformMigrations updates the state that records if we can perform Database migrations
 func (c *PortalConfig) SetCanPerformMigrations(value bool) {
 	c.CanMigrateDatabaseSchema = c.CanMigrateDatabaseSchema && value
+}
+
+// AutoRegisterName is the name the login hook gives the endpoint it
+// registers at AUTO_REG_CF_URL: AUTO_REG_CF_NAME, or "Cloud Foundry".
+func (c *PortalConfig) AutoRegisterName() string {
+	if c.AutoRegisterCFName == "" {
+		return "Cloud Foundry"
+	}
+	return c.AutoRegisterCFName
 }
 
 type LoginToCNSIParams struct {
@@ -530,7 +559,9 @@ type UpdateEndpointParams struct {
 	ClientID      string `json:"clientID" form:"clientID" query:"clientID"`
 	ClientSecret  string `json:"clientSecret" form:"clientSecret" query:"clientSecret"`
 	AllowSSO      string `json:"allowSSO" form:"allowSSO" query:"allowSSO"`
-	CACert        string `json:"ca_cert" form:"ca_cert" query:"ca_cert"`
+	// CACert is a pointer so an absent ca_cert (leave the stored CA alone)
+	// differs from an empty one (clear it).
+	CACert *string `json:"ca_cert" form:"ca_cert" query:"ca_cert"`
 }
 
 // BindOnce -- allows to call *echo.Context.Bind() multiple times on the same request

@@ -1,5 +1,5 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
-import { provideZonelessChangeDetection, ChangeDetectorRef } from '@angular/core';
+import { provideZonelessChangeDetection } from '@angular/core';
 import { provideRouter } from '@angular/router';
 import { provideHttpClient } from '@angular/common/http';
 import { provideHttpClientTesting } from '@angular/common/http/testing';
@@ -62,7 +62,7 @@ describe('CfServiceCardComponent', () => {
 
     fixture = TestBed.createComponent(CfServiceCardComponent);
     component = fixture.componentInstance;
-    component.row = makeOffering();
+    fixture.componentRef.setInput('row', makeOffering());
     fixture.detectChanges();
   });
 
@@ -77,8 +77,7 @@ describe('CfServiceCardComponent', () => {
   });
 
   it('active field should be false/NO', () => {
-    component.row = makeOffering({ available: false });
-    fixture.componentRef.injector.get(ChangeDetectorRef).markForCheck();
+    fixture.componentRef.setInput('row', makeOffering({ available: false }));
     fixture.detectChanges();
 
     const activeStatus = fixture.nativeElement.querySelector('app-table-cell-service-active').textContent;
@@ -93,8 +92,7 @@ describe('CfServiceCardComponent', () => {
   });
 
   it('bindable field should be false/NO', () => {
-    component.row = makeOffering({ bindable: false });
-    fixture.componentRef.injector.get(ChangeDetectorRef).markForCheck();
+    fixture.componentRef.setInput('row', makeOffering({ bindable: false }));
     fixture.detectChanges();
 
     const bindableStatus = fixture.nativeElement.querySelector('app-table-cell-service-bindable').textContent;

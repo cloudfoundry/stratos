@@ -1,6 +1,6 @@
-import { ChangeDetectionStrategy, Component, Injector, OnDestroy, inject, signal } from '@angular/core';
+import { ChangeDetectionStrategy, Component, computed, effect, Signal, OnDestroy, inject, signal, untracked } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { toObservable, toSignal } from '@angular/core/rxjs-interop';
+import { toSignal } from '@angular/core/rxjs-interop';
 import { ReactiveFormsModule, FormControl, FormGroup, Validators } from '@angular/forms';
 import { ActivatedRoute, Router } from '@angular/router';
 import { AppErrorComponent, AppInputDirective, CustomFormFieldComponent } from '../../../../shared/components/custom-form-field/custom-form-field.component';
@@ -14,19 +14,15 @@ import {
   IStratosEndpointDefinition,
   entityCatalog,
   ActionState } from '@stratosui/store';
-import { Observable, Subscription, firstValueFrom, from } from 'rxjs';
-import { take, filter, map, switchMap } from 'rxjs/operators';
+import { Observable, Subscription } from 'rxjs';
+import { map } from 'rxjs/operators';
 
-import { StepOnNextFunction, StepComponent, StepOnNextResult, SignalStepHandle } from '../../../../shared/components/stepper/step/step.component';
+import { StepOnNextResult, SignalStepHandle } from '../../../../shared/components/stepper/step/step.component';
+import { EndpointCertificatesComponent } from '../../certificates/endpoint-certificates.component';
 import { getSSOClientRedirectURI } from '../../endpoint-helpers';
 import { getIdFromRoute, safeUnsubscribe } from './../../../../core/utils.service';
-import { IStepperStep } from './../../../../shared/components/stepper/step/step.component';
 import { UniqueDirective } from '../../../../shared/components/unique.directive';
 import { ProductNameComponent } from '../../../../shared/components/product-name.ccomponent';
-
-interface EndpointModelMap {
-  [id: string]: EndpointModel;
-}
 
 interface EditEndpointForm {
   name: FormControl<string>;
@@ -54,11 +50,12 @@ interface EditEndpointForm {
     CustomCheckboxComponent,
     CustomIconComponent,
     UniqueDirective,
-    ProductNameComponent
+    ProductNameComponent,
+    EndpointCertificatesComponent
   ],
   changeDetection: ChangeDetectionStrategy.OnPush
 })
-export class EditEndpointStepComponent implements OnDestroy, IStepperStep {
+export class EditEndpointStepComponent implements OnDestroy {
 
   endpointID: string;
   editEndpoint: FormGroup<EditEndpointForm>;
@@ -66,23 +63,24 @@ export class EditEndpointStepComponent implements OnDestroy, IStepperStep {
   clientRedirectURI: string;
   endpointTypeSupportsSSO = false;
   validate: Observable<boolean>;
-  existingEndpoints: Observable<EndpointModelMap>;
-  endpoint$: Observable<EndpointModel | undefined>;
-  definition$: Observable<IStratosEndpointDefinition<EntityCatalogSchemas>>;
-  existingEndpointNames$: Observable<string[]>;
+  readonly endpoint: Signal<EndpointModel | null>;
+  readonly definition: Signal<IStratosEndpointDefinition<EntityCatalogSchemas> | undefined>;
+  readonly existingEndpointNames: Signal<string[]>;
   formChangeSub: Subscription;
   setClientInfo = false;
   show = false;
   // Signal: written after the first render; an OnPush view under zoneless CD only repaints for signal writes.
   readonly showCACertField = signal(false);
   lastSkipSSLValue = false;
+  // The cards follow the CA box; an empty pem (CA off) shows none.
+  readonly caCertValue: Signal<string>;
+  readonly certificatePem = computed(() => (this.showCACertField() ? this.caCertValue() : ''));
 
   // Signal-handle exposed to the parent stepper template (FWT-957)
   signalHandle: SignalStepHandle;
 
   private router = inject(Router);
   private endpointsData = inject(EndpointsDataService);
-  private injector = inject(Injector);
 
   constructor() {
     const activatedRoute = inject(ActivatedRoute);
@@ -97,6 +95,7 @@ export class EditEndpointStepComponent implements OnDestroy, IStepperStep {
       allowSSO: new FormControl(false, { nonNullable: true }),
       caCert: new FormControl('', { nonNullable: true }) });
 
+    this.caCertValue = toSignal(this.editEndpoint.controls.caCert.valueChanges, { initialValue: '' });
     this.clientRedirectURI = getSSOClientRedirectURI();
 
     this.validate = this.editEndpoint.statusChanges.pipe(map(() => this.editEndpoint.valid));
@@ -105,7 +104,7 @@ export class EditEndpointStepComponent implements OnDestroy, IStepperStep {
     this.signalHandle = {
       valid: validSignal,
       submit: async () => {
-        const result = await firstValueFrom(this.onNext(0, undefined as unknown as StepComponent));
+        const result = await this.onNext();
         if (!result.success) {
           throw new Error(result.message || 'Failed to update endpoint');
         }
@@ -117,59 +116,25 @@ export class EditEndpointStepComponent implements OnDestroy, IStepperStep {
 
     this.endpointID = getIdFromRoute(activatedRoute, 'id');
 
-    // W36-B Wave 3: source the existing-endpoints map from the
-    // signal-native EndpointsDataService instead of the legacy
-    // pagination monitor's currentPage$. The service's `endpointsList`
-    // is computed off the same underlying state, so callers see the
-    // same set of records.
-    this.existingEndpoints = toObservable(this.endpointsData.endpointsList, { injector: this.injector }).pipe(
-      map(endpoints => endpoints.reduce((res: EndpointModelMap, endpoint) => {
-        if (endpoint.guid) {
-          res[endpoint.guid] = endpoint;
-        }
-        return res;
-      }, {} as EndpointModelMap))
-    );
+    this.endpoint = this.endpointsData.endpointById(this.endpointID);
+    // An endpoint type with no registered entity has no definition.
+    this.definition = computed(() => {
+      const endpoint = this.endpoint();
+      return endpoint?.cnsi_type ? entityCatalog.getEndpoint(endpoint.cnsi_type, endpoint.sub_type)?.definition : undefined;
+    });
+    this.existingEndpointNames = computed(() => this.endpointsData.endpointsList()
+      .filter(ep => ep.guid !== this.endpointID)
+      .map(ep => ep.name));
 
-    this.existingEndpointNames$ = this.existingEndpoints.pipe(
-      map(endpoints => Object.values(endpoints).filter((ep: EndpointModel) => ep.guid !== this.endpointID)),
-      map((endpoints: EndpointModel[]) => endpoints.map(ep => ep.name))
-    );
-
-    this.endpoint$ = this.existingEndpoints.pipe(
-      map(endpoints => Object.values(endpoints).find((e: EndpointModel) => e.guid === this.endpointID))
-    );
-
-    this.definition$ = this.endpoint$.pipe(
-      filter((entity): entity is EndpointModel => !!entity && !!entity.cnsi_type),
-      // strict: the filter above guarantees cnsi_type is set on every emission.
-      map(entity => entityCatalog.getEndpoint(entity.cnsi_type!, entity.sub_type)),
-      // An endpoint type with no registered entity yields no catalog entry —
-      // drop the emission rather than throwing and tearing down the stream.
-      filter(entity => !!entity),
-      map(d => d.definition)
-    );
-
-    // Fill the form in with the endpoint data
-    this.endpoint$.pipe(
-      filter((ep): ep is EndpointModel => !!ep),
-      take(1)
-    ).subscribe(endpoint => {
-      this.setAdvancedFields(endpoint);
-      this.lastSkipSSLValue = endpoint.skip_ssl_validation ?? false;
-      this.showCACertField.set(!!endpoint.caCert);
-      this.updateSSLFieldCheckbox();
-      this.editEndpoint.setValue({
-        name: endpoint.name,
-        url: getFullEndpointApiUrl(endpoint),
-        skipSSL: endpoint.skip_ssl_validation ?? false,
-        setClientInfo: false,
-        clientID: endpoint.client_id ?? '',
-        clientSecret: '',
-        allowSSO: endpoint.sso_allowed,
-        caCert: endpoint.caCert || '' });
-      this.editEndpoint.controls.url.disable();
-      this.updateControls();
+    // Fill the form in with the endpoint data, once it is known
+    let filled = false;
+    effect(() => {
+      const endpoint = this.endpoint();
+      if (filled || !endpoint) {
+        return;
+      }
+      filled = true;
+      untracked(() => this.fillForm(endpoint));
     });
 
     this.formChangeSub = this.editEndpoint.valueChanges.subscribe(values => {
@@ -197,38 +162,47 @@ export class EditEndpointStepComponent implements OnDestroy, IStepperStep {
     }
   }
 
-  onNext: StepOnNextFunction = (_index: number, _step: StepComponent): Observable<StepOnNextResult> => {
-    return this.endpoint$.pipe(
-      filter((endpoint): endpoint is EndpointModel => !!endpoint),
-      take(1),
-      switchMap(endpoint => {
-        const caCert = this.showCACertField() ? this.editEndpoint.value.caCert : undefined;
-        const skipSSL = this.showCACertField() ? false : this.editEndpoint.value.skipSSL ?? false;
-        // W36-B Wave 3: dispatch the update via EndpointsDataService.
-        // The service returns Promise<ActionState> with the resolved
-        // final state — the previous pairwise+busy-edge dance over the
-        // legacy ngrx update Observable collapses to a single await.
-        return from(this.endpointsData.update(this.endpointID, {
-          endpointType: endpoint.cnsi_type ?? '',
-          name: this.editEndpoint.value.name ?? '',
-          skipSSL,
-          setClientInfo: this.editEndpoint.value.setClientInfo ?? false,
-          clientID: this.editEndpoint.value.clientID ?? '',
-          clientSecret: this.editEndpoint.value.clientSecret ?? '',
-          allowSSO: this.editEndpoint.value.allowSSO ?? false,
-          caCert,
-        })).pipe(
-          map((o: ActionState): StepOnNextResult => {
-            return {
-              success: !o.error,
-              message: o.message,
-              redirect: !o.error
-            };
-          })
-        );
-      })
-    );
-  };
+  private fillForm(endpoint: EndpointModel) {
+    this.setAdvancedFields(endpoint);
+    this.lastSkipSSLValue = endpoint.skip_ssl_validation ?? false;
+    this.showCACertField.set(!!endpoint.ca_cert);
+    this.updateSSLFieldCheckbox();
+    this.editEndpoint.setValue({
+      name: endpoint.name,
+      url: getFullEndpointApiUrl(endpoint),
+      skipSSL: endpoint.skip_ssl_validation ?? false,
+      setClientInfo: false,
+      clientID: endpoint.client_id ?? '',
+      clientSecret: '',
+      allowSSO: endpoint.sso_allowed,
+      caCert: endpoint.ca_cert || '' });
+    this.editEndpoint.controls.url.disable();
+    this.updateControls();
+  }
+
+  async onNext(): Promise<StepOnNextResult> {
+    const endpoint = this.endpoint();
+    if (!endpoint) {
+      return { success: false, message: 'The endpoint is not loaded', redirect: false };
+    }
+    const caCert = this.showCACertField() ? this.editEndpoint.value.caCert : undefined;
+    const skipSSL = this.showCACertField() ? false : this.editEndpoint.value.skipSSL ?? false;
+    const state: ActionState = await this.endpointsData.update(this.endpointID, {
+      endpointType: endpoint.cnsi_type ?? '',
+      name: this.editEndpoint.value.name ?? '',
+      skipSSL,
+      setClientInfo: this.editEndpoint.value.setClientInfo ?? false,
+      clientID: this.editEndpoint.value.clientID ?? '',
+      clientSecret: this.editEndpoint.value.clientSecret ?? '',
+      allowSSO: this.editEndpoint.value.allowSSO ?? false,
+      caCert,
+    });
+    return {
+      success: !state.error,
+      message: state.message,
+      redirect: !state.error
+    };
+  }
 
   ngOnDestroy(): void {
     safeUnsubscribe(this.formChangeSub);

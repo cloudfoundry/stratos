@@ -1,9 +1,6 @@
 import { CommonModule, DatePipe } from '@angular/common';
-import { Component, OnInit, ChangeDetectionStrategy, Signal, inject, signal, WritableSignal } from '@angular/core';
-import { toSignal } from '@angular/core/rxjs-interop';
+import { DestroyRef, Component, OnInit, ChangeDetectionStrategy, Signal, computed, inject, signal, WritableSignal } from '@angular/core';
 import { Router, RouterModule } from '@angular/router';
-import { Observable, firstValueFrom } from 'rxjs';
-import { filter, map, take } from 'rxjs/operators';
 
 import {
   ConfirmationDialogService,
@@ -32,6 +29,7 @@ import { boundAppSegments, renderBoundApps } from '../../../shared/signal-list-c
 import { renderServiceKeyCount, serviceKeysLink } from '../../../shared/signal-list-configs/service-keys-count-cell';
 import { dashboardLink, renderDashboard } from '../../../shared/signal-list-configs/dashboard-link-cell';
 import { buildServiceInstanceRowActions } from '../../../shared/signal-list-configs/service-instance/service-instance-row-actions';
+import { lastOperationColumn, lastOperationLabel } from '../../../shared/signal-list-configs/service-instance/service-instance-columns';
 import type { StServiceInstance } from '../../../services/endpoint-data/stratos-types';
 import { AppAreaLoaderComponent } from '@stratosui/core';
 
@@ -67,40 +65,25 @@ import { AppAreaLoaderComponent } from '@stratosui/core';
 export class ServicesWallComponent implements OnInit {
   cloudFoundryService = inject(CloudFoundryService);
   private instancesConfig = inject(CfServiceInstancesSignalConfigService);
+  private readonly destroyRef = inject(DestroyRef);
   private userFavoriteManager = inject(UserFavoriteManager);
   private confirmDialog = inject(ConfirmationDialogService);
   private snackBar = inject(TailwindSnackBarService);
   private router = inject(Router);
 
-  public cfIds$: Observable<string[]>;
-  public haveConnectedCf$: Observable<boolean>;
+  // Connected CF endpoint ids, for the page header's endpoint errors.
+  public readonly cfIds = computed(() => this.cloudFoundryService.cfEndpoints()
+    .filter(endpoint => endpoint.connectionStatus === 'connected')
+    .map(endpoint => endpoint.guid)
+    .filter((guid): guid is string => !!guid));
 
   // Row keys ({cnsiGuid}:{siGuid}) for service instances the user has
   // favorited. Either entity type qualifies — the legacy 481 UI used
   // separate favorite entityTypes for managed (`serviceInstance`) and
   // user-provided (`userProvidedServiceInstance`); we OR them so existing
   // favorites of either kind light up here.
-  private readonly favoriteInstanceRowKeys: Signal<ReadonlySet<string>> = toSignal(
-    this.userFavoriteManager.getAllFavorites().pipe(
-      map(([groups, entities]) => {
-        const out = new Set<string>();
-        if (!groups || !entities) return out;
-        for (const epFavGuid in groups) {
-          const g = groups[epFavGuid];
-          if (!g?.entitiesIds) continue;
-          for (const favId of g.entitiesIds) {
-            const fav = entities[favId];
-            if (!fav || fav.endpointType !== 'cf') continue;
-            if (fav.entityType === serviceInstancesEntityType
-              || fav.entityType === userProvidedServiceInstanceEntityType) {
-              out.add(`${fav.endpointId}:${fav.entityId}`);
-            }
-          }
-        }
-        return out;
-      }),
-    ),
-    { initialValue: new Set<string>() },
+  private readonly favoriteInstanceRowKeys: Signal<ReadonlySet<string>> = computed(() =>
+    this.userFavoriteManager.entityFavoriteKeys('cf', [serviceInstancesEntityType, userProvidedServiceInstanceEntityType]),
   );
 
   private toggleInstanceFavorite(si: StServiceInstance): void {
@@ -126,25 +109,10 @@ export class ServicesWallComponent implements OnInit {
   };
 
   constructor() {
-    this.cfIds$ = this.cloudFoundryService.cFEndpoints$.pipe(
-      map(endpoints => endpoints
-        .filter(endpoint => endpoint.connectionStatus === 'connected')
-        .map(endpoint => endpoint.guid)
-        .filter((guid): guid is string => !!guid),
-      ),
-    );
-    this.haveConnectedCf$ = this.cloudFoundryService.connectedCFEndpoints$.pipe(
-      map(endpoints => !!endpoints && endpoints.length > 0),
-    );
   }
 
-  async ngOnInit(): Promise<void> {
-    const connected = await firstValueFrom(
-      this.cloudFoundryService.connectedCFEndpoints$.pipe(
-        filter(endpoints => !!endpoints),
-        take(1),
-      ),
-    );
+  ngOnInit(): void {
+    const connected = this.cloudFoundryService.connectedCFEndpoints();
     const cnsiGuids = (connected ?? []).map(ep => ep.guid).filter((guid): guid is string => !!guid);
     this.instancesConfig.initialize(cnsiGuids);
     // Bind the L5 sub-nav count — view exists only after initialize().
@@ -189,17 +157,6 @@ export class ServicesWallComponent implements OnInit {
     const typeColor = (si: StServiceInstance): SignalListPillColor =>
       si.type === 'user-provided' ? 'warning' : 'neutral';
 
-    const renderLastOp = (si: StServiceInstance): string =>
-      si.lastOperation.state ?? '';
-
-    const lastOpColor = (si: StServiceInstance): SignalListPillColor => {
-      const state = (si.lastOperation.state ?? '').toLowerCase();
-      if (state === 'succeeded') return 'success';
-      if (state === 'in progress') return 'warning';
-      if (state === 'failed') return 'danger';
-      return 'neutral';
-    };
-
     const renderCreated = (si: StServiceInstance): string =>
       ServicesWallComponent.formatDate(si.createdAt);
 
@@ -229,13 +186,7 @@ export class ServicesWallComponent implements OnInit {
           render: renderService,
           widthHint: '12rem',
         },
-        {
-          header: 'Last Operation', key: 'lastOp', sortField: renderLastOp,
-          kind: 'pill',
-          pillColor: lastOpColor,
-          render: renderLastOp,
-          widthHint: '10rem',
-        },
+        lastOperationColumn(),
         {
           header: 'Dashboard', key: 'dashboard', kind: 'link',
           render: renderDashboard,
@@ -320,7 +271,7 @@ export class ServicesWallComponent implements OnInit {
     });
 
     this.instancesConfig.registerSortExtractor('service', renderService);
-    this.instancesConfig.registerSortExtractor('lastOp', renderLastOp);
+    this.instancesConfig.registerSortExtractor('lastOp', lastOperationLabel);
     this.instancesConfig.registerSortExtractor('tags', renderTags);
     this.instancesConfig.registerSortExtractor('type', renderType);
     this.instancesConfig.registerSortExtractor('cf', renderCf);
@@ -330,6 +281,7 @@ export class ServicesWallComponent implements OnInit {
 
     if (cnsiGuids.length > 0) {
       void this.instancesConfig.loadAll().then(() => this.instancesConfig.ensureServiceKeyCounts());
+      this.instancesConfig.startProgressPolling(this.destroyRef);
     }
   }
 

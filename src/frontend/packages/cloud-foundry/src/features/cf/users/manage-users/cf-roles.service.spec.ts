@@ -17,7 +17,9 @@ import {
 import { createBasicStoreModule, STORE_TEST_PROVIDERS } from '@stratosui/store/testing';
 import { generateTestCfEndpointServiceProvider } from '@test-framework/cloud-foundry-endpoint-service.helper';
 
+import { CfUsersRolesDataService } from '../../../../services/domain-data/cf-users-roles-data.service';
 import { StUser } from '../../../../services/endpoint-data/stratos-types';
+import { CfUserRolesSelected } from '../../../../store/types/users-roles.types';
 import { generateCFEntities } from '../../../../cf-entity-generator';
 import { CfRolesService } from './cf-roles.service';
 
@@ -105,6 +107,94 @@ describe('CfRolesService', () => {
     const req = httpMock.expectOne('/pp/v1/cf/orgs/cf-2?per_page=500');
     expect(req.request.method).toBe('GET');
     req.flush({ resources: [], totalResults: 0 });
+  });
+
+  it('fetchOrgs emits an empty list when the endpoint has no orgs', async () => {
+    const service = TestBed.inject(CfRolesService);
+    const result = firstValueFrom(service.fetchOrgs('cf-empty'));
+
+    httpMock.expectOne('/pp/v1/cf/orgs/cf-empty?per_page=500')
+      .flush({ resources: [], totalResults: 0 });
+
+    // combineLatest([]) completes without a value; firstValueFrom would reject.
+    expect(await result).toEqual([]);
+  });
+
+  it('fetchOrgs reports a server error to the caller', async () => {
+    const service = TestBed.inject(CfRolesService);
+    const result = firstValueFrom(service.fetchOrgs('cf-5xx'));
+
+    httpMock.expectOne('/pp/v1/cf/orgs/cf-5xx?per_page=500')
+      .flush('boom', { status: 502, statusText: 'Bad Gateway' });
+
+    await expect(result).rejects.toMatchObject({ status: 502 });
+  });
+
+  it('fetchOrgs fetches again after a failure instead of replaying it', async () => {
+    const service = TestBed.inject(CfRolesService);
+    const failed = firstValueFrom(service.fetchOrgs('cf-retry')).catch(() => 'failed');
+    httpMock.expectOne('/pp/v1/cf/orgs/cf-retry?per_page=500')
+      .flush('boom', { status: 500, statusText: 'Server Error' });
+    await failed;
+
+    const retried = firstValueFrom(service.fetchOrgs('cf-retry'));
+    httpMock.expectOne('/pp/v1/cf/orgs/cf-retry?per_page=500')
+      .flush({ resources: [], totalResults: 0 });
+    expect(await retried).toEqual([]);
+
+    // A success stays cached: the next caller gets it without a request.
+    const cached = firstValueFrom(service.fetchOrgs('cf-retry'));
+    httpMock.expectNone('/pp/v1/cf/orgs/cf-retry?per_page=500');
+    expect(await cached).toEqual([]);
+  });
+
+  it('populateRoles fetches org names again after a failure instead of caching it', async () => {
+    const service = TestBed.inject(CfRolesService);
+    const user = stUser({ guid: 'user-1', orgRoles: [{ orgGuid: 'org-1', roles: ['manager'] }] });
+
+    // The failure still lets the roles resolve (without the org name).
+    const first = firstValueFrom(service.populateRoles('cf-names', [user]).pipe(take(1)));
+    httpMock.expectOne('/pp/v1/cf/orgs/cf-names?per_page=500&page=1')
+      .flush('boom', { status: 500, statusText: 'Server Error' });
+    expect((await first)['user-1']['org-1'].permissions.managers).toBe(true);
+
+    const second = firstValueFrom(service.populateRoles('cf-names', [user]).pipe(take(1)));
+    httpMock.expectOne('/pp/v1/cf/orgs/cf-names?per_page=500&page=1')
+      .flush({ resources: [{ guid: 'org-1', name: 'My Org', cnsiGuid: 'cf-names' }], totalResults: 1 });
+    expect((await second)['user-1']['org-1'].name).toBe('My Org');
+  });
+
+  it('existingRoles$ does not replay the previous dialog\'s roles to the next one', () => {
+    const service = TestBed.inject(CfRolesService);
+    const rolesData = TestBed.inject(CfUsersRolesDataService);
+    const alice = stUser({ guid: 'alice', orgRoles: [{ orgGuid: 'org-1', roles: ['manager'] }] });
+    const bob = stUser({ guid: 'bob', username: 'bob' });
+
+    // First dialog: alice's roles resolve.
+    rolesData.setUsers('cf-1', [alice]);
+    const first: CfUserRolesSelected[] = [];
+    const sub1 = service.existingRoles$.subscribe(r => first.push(r));
+    TestBed.tick();
+    httpMock.expectOne('/pp/v1/cf/orgs/cf-1?per_page=500&page=1')
+      .flush({ resources: [{ guid: 'org-1', name: 'My Org', cnsiGuid: 'cf-1' }], totalResults: 1 });
+    expect(first.at(-1)).toHaveProperty('alice');
+    sub1.unsubscribe();
+
+    // Next dialog, for bob: nothing about alice may reach it, and loading
+    // must not clear before bob's roles are known.
+    rolesData.setUsers('cf-1', [bob]);
+    const second: CfUserRolesSelected[] = [];
+    const loading: boolean[] = [];
+    const sub2 = service.existingRoles$.subscribe(r => second.push(r));
+    const sub3 = service.loading$.subscribe(l => loading.push(l));
+    expect(loading).toEqual([true]);
+    TestBed.tick();
+
+    expect(second.length).toBeGreaterThan(0);
+    expect(second.some(r => 'alice' in r)).toBe(false);
+    expect(second.at(-1)).toHaveProperty('bob');
+    sub2.unsubscribe();
+    sub3.unsubscribe();
   });
 
   it('fetchOrg degrades to error envelope on HTTP failure', async () => {

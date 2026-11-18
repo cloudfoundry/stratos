@@ -1,7 +1,7 @@
 <b class="block mb-4">Please select a unique name for your application</b>
 <form novalidate [formGroup]="form" class="flex flex-col gap-6">
   <div>
-    <app-form-field class="relative">
+    <app-form-field>
       <input class="w-full placeholder:!text-transparent focus:outline-none" required appInput placeholder="Application Name" formControlName="appName" autocomplete="off" [appApplicationNameUnique]="appNameChecking">
       @if (form.controls.appName.hasError('appNameTaken')) {
         <app-error>
@@ -9,9 +9,9 @@
         </app-error>
       }
       @if (!form.controls.appName.hasError('required')) {
-        <div class="absolute right-2 top-1/2 -translate-y-1/2">
+        <span matSuffix>
           <app-stateful-icon [state]="appNameChecking.status"></app-stateful-icon>
-        </div>
+        </span>
       }
     </app-form-field>
   </div>

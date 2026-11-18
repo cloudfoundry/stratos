@@ -1,10 +1,10 @@
 import { CommonModule } from '@angular/common';
-import {Component, OnDestroy, signal, computed, inject, ChangeDetectionStrategy, Injector, runInInjectionContext } from '@angular/core';
+import { Component, OnDestroy, signal, computed, inject, ChangeDetectionStrategy, Signal } from '@angular/core';
 import { Router, RouterModule } from '@angular/router';
-import { toObservable, toSignal } from '@angular/core/rxjs-interop';
+import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { ConfirmationDialogConfig, ConfirmationDialogService, EndpointsSignalService, SidePanelService, naturalCompare } from '@stratosui/core';
-import { Observable, of } from 'rxjs';
-import { distinctUntilChanged, map } from 'rxjs/operators';
+import { EMPTY, of, Subject } from 'rxjs';
+import { catchError, switchMap } from 'rxjs/operators';
 
 import { KubeHelmDataService } from '../../../../../services/endpoint-data/kube-helm-data.service';
 
@@ -23,7 +23,7 @@ import { AnalysisReportRunnerComponent } from '../../../../analysis-report-viewe
 import { AnalysisReportSelectorComponent } from '../../../../analysis-report-viewer/analysis-report-selector/analysis-report-selector.component';
 import { WorkloadLiveReloadComponent } from '../../workload-live-reload/workload-live-reload.component';
 
-import { TailwindSnackBarService } from '@stratosui/core';
+import { TailwindSnackBarRef, TailwindSnackBarService } from '@stratosui/core';
 import {
   ResourceAlertPreviewComponent } from '../../../../analysis-report-viewer/resource-alert-preview/resource-alert-preview.component';
 import { KubernetesAnalysisService } from '../../../../services/kubernetes.analysis.service';
@@ -61,16 +61,9 @@ export class HelmReleaseSummaryTabComponent implements OnDestroy {
   deleteReleaseConfirmation: ConfirmationDialogConfig;
 
   private busyDeleting = signal<boolean>(false);
-  // strict: the following observables are assigned in the constructor inside
-  // runInInjectionContext, which TS can't see through the closure.
-  public isBusy$!: Observable<boolean>;
-  public hasResources$!: Observable<boolean>;
-  public hasAllResources$!: Observable<boolean>;
+  public readonly isBusy: Signal<boolean>;
   private readonly DEFAULT_LOADING_MESSAGE = 'Retrieving Release Details';
-  public loadingMessage = this.DEFAULT_LOADING_MESSAGE;
-
-  public podsChartData: any[] = [];
-  public containersChartData: any[] = [];
+  public readonly loadingMessage = computed(() => this.busyDeleting() ? 'Deleting Release' : this.DEFAULT_LOADING_MESSAGE);
 
   // Resolve adaptive theme colors once at construction. These feed the ring
   // chart domains; the component is not rebuilt on a live theme toggle, so the
@@ -78,12 +71,7 @@ export class HelmReleaseSummaryTabComponent implements OnDestroy {
   private successChartColor = cssVar('--color-success');
   private completedChartColour = cssVar('--color-info');
 
-  public path!: string; // strict: assigned in the constructor inside runInInjectionContext
-
-  public hasUpgrade$!: Observable<string>; // strict: assigned in the constructor inside runInInjectionContext
-
-  // Can we upgrade? Yes as long as the Helm Chart can be found
-  public canUpgrade$!: Observable<boolean>; // strict: assigned in the constructor inside runInInjectionContext
+  public readonly path: string;
 
   public podChartColors = [
     {
@@ -111,119 +99,39 @@ export class HelmReleaseSummaryTabComponent implements OnDestroy {
   // Yellow: #FFC107
 
   private deleted = false;
-  // strict: assigned in the constructor inside runInInjectionContext.
-  public chartData$!: Observable<HelmReleaseChartData>;
-  public resources$!: Observable<any[]>;
-
-  // Cached analysis report
-  private analysisReport: any;
-
-  private analysisReportId = signal<string | null>(null);
-  private analysisReportUpdated$ = toObservable(this.analysisReportId).pipe(distinctUntilChanged());
+  // The last "Failed to delete release" message, stale once a retry deletes
+  // the release.
+  private deleteFailedSnackBar?: TailwindSnackBarRef<unknown>;
+  // The analysis report whose alerts are shown on the resource cards; null for none
+  private readonly analysisReport = signal<any>(null);
+  private readonly analysisPick = new Subject<string | null>();
   public helmReleaseHelper = inject(HelmReleaseHelperService);
+  private readonly newerChart = this.helmReleaseHelper.upgrade();
+  private readonly latestChart = this.helmReleaseHelper.upgrade(true);
   private router = inject(Router);
   private endpointsSignals = inject(EndpointsSignalService);
   private confirmDialog = inject(ConfirmationDialogService);
   private snackbarService = inject(TailwindSnackBarService);
   public analyzerService = inject(KubernetesAnalysisService);
   private previewPanel = inject(SidePanelService);
-  private injector = inject(Injector);
   private helmDataService = inject(KubeHelmDataService);
 
 
   constructor() {
-    // Convert signals within injection context
-    runInInjectionContext(this.injector, () => {
-      // Convert isFetching$ to signal for computed
-      const isFetchingSignal = toSignal(
-        this.helmReleaseHelper.isFetching$,
-        { initialValue: true }
-      );
+    // Only the report picked last is kept: choosing another one cancels the
+    // request still in flight, so a slow answer cannot replace a newer pick.
+    this.analysisPick.pipe(
+      switchMap(id => id === null ? of(null) : this.analyzerService.getByID(this.helmReleaseHelper.endpointGuid, id).pipe(
+        catchError(() => EMPTY)
+      )),
+      takeUntilDestroyed()
+    ).subscribe(results => this.analysisReport.set(results));
 
-      // Use computed for isBusy
-      const isBusyComputed = computed(() =>
-        isFetchingSignal() || this.busyDeleting()
-      );
+    this.isBusy = computed(() =>
+      this.helmReleaseHelper.isFetching() || this.busyDeleting()
+    );
 
-      // Provide as Observable for backward compatibility with template
-      this.isBusy$ = toObservable(isBusyComputed);
-
-      this.path = `${this.helmReleaseHelper.namespace}/${this.helmReleaseHelper.releaseTitle}`;
-
-      this.chartData$ = this.helmReleaseHelper.fetchReleaseChartStats().pipe(
-        distinctUntilChanged(),
-        map((chartData: any) => ({
-          ...chartData,
-          containersChartData: chartData.containersChartData.sort((a: any, b: any) => naturalCompare(a.name, b.name)),
-          podsChartData: chartData.podsChartData.sort((a: any, b: any) => naturalCompare(a.name, b.name))
-        })
-        )
-      );
-
-      this.hasUpgrade$ = this.helmReleaseHelper.hasUpgrade().pipe(map((v: any) => v ? v.version : null));
-
-      // Can upgrade if the Chart is available
-      this.canUpgrade$ = this.helmReleaseHelper.hasUpgrade(true).pipe(map((v: any) => !!v));
-
-      // Convert release graph to signal
-      const releaseGraphSignal = toSignal(
-        this.helmReleaseHelper.fetchReleaseGraph(),
-        { initialValue: { nodes: {} } as any }
-      );
-
-      // Compute resources based on graph and analysis report
-      const resourcesComputed = computed(() => {
-        const graph = releaseGraphSignal();
-        const _ = this.analysisReportId(); // Dependency on analysis report changes
-
-        const resources: Record<string, any> = {};
-        // Collect the resources
-        if (graph && graph.nodes) {
-          Object.values(graph.nodes).forEach((node: any) => {
-            if (!resources[node.data.kind]) {
-              resources[node.data.kind] = {
-                kind: node.data.kind,
-                label: `${node.data.kind}s`,
-                count: 0,
-                statuses: [],
-                icon: getIcon(node.data.kind)
-              };
-            }
-            resources[node.data.kind].count++;
-            resources[node.data.kind].statuses.push(node.data.status);
-          });
-        }
-        this.applyAnalysis(resources, this.analysisReport);
-        return Object.values(resources).sort((a: any, b: any) => naturalCompare(a.kind, b.kind));
-      });
-
-      this.resources$ = toObservable(resourcesComputed);
-
-
-      // Convert chart data to signal
-      const chartDataSignal = toSignal(
-        this.chartData$,
-        { initialValue: null as any }
-      );
-
-      // Compute hasResources
-      const hasResourcesComputed = computed(() => {
-        const chartData = chartDataSignal();
-        const resources = resourcesComputed();
-        return !!chartData && !!resources;
-      });
-
-      this.hasResources$ = toObservable(hasResourcesComputed);
-
-      // Compute hasAllResources
-      const hasAllResourcesComputed = computed(() => {
-        const resources = resourcesComputed();
-        const hasSome = hasResourcesComputed();
-        return hasSome && resources && resources.length > 0;
-      });
-
-      this.hasAllResources$ = toObservable(hasAllResourcesComputed);
-    });
+    this.path = `${this.helmReleaseHelper.namespace}/${this.helmReleaseHelper.releaseTitle}`;
 
     this.deleteReleaseConfirmation = new ConfirmationDialogConfig(
       `Delete Workload`,
@@ -236,26 +144,64 @@ export class HelmReleaseSummaryTabComponent implements OnDestroy {
 
   }
 
+  // The newer chart version the release can be upgraded to, if any
+  public readonly hasUpgrade = computed(() => this.newerChart()?.version ?? null);
+
+  // Can we upgrade? Yes as long as the Helm Chart can be found
+  public readonly canUpgrade = computed(() => !!this.latestChart());
+
+  public readonly clusterName = computed(() =>
+    // Empty until the endpoint has hydrated.
+    this.endpointsSignals.endpoints()[this.helmReleaseHelper.endpointGuid]?.name ?? ''
+  );
+
+  private readonly chartStats = this.helmReleaseHelper.chartStats();
+
+  // Pod and container counts, sorted for the ring charts
+  public readonly chartData = computed<HelmReleaseChartData>(() => {
+    const stats = this.chartStats();
+    return {
+      ...stats,
+      containersChartData: [...stats.containersChartData].sort((a, b) => naturalCompare(a.name, b.name)),
+      podsChartData: [...stats.podsChartData].sort((a, b) => naturalCompare(a.name, b.name))
+    };
+  });
+
+  // The release's resources by kind, with the chosen report's alerts
+  public readonly resources = computed(() => {
+    const graph = this.helmReleaseHelper.graph();
+    const resources: Record<string, any> = {};
+    // Collect the resources
+    Object.values(graph?.nodes ?? {}).forEach((node: any) => {
+      if (!resources[node.data.kind]) {
+        resources[node.data.kind] = {
+          kind: node.data.kind,
+          label: `${node.data.kind}s`,
+          count: 0,
+          statuses: [],
+          icon: getIcon(node.data.kind)
+        };
+      }
+      resources[node.data.kind].count++;
+      resources[node.data.kind].statuses.push(node.data.status);
+    });
+    this.applyAnalysis(resources, this.analysisReport());
+    return Object.values(resources).sort((a: any, b: any) => naturalCompare(a.kind, b.kind));
+  });
+
+  public readonly hasResources = computed(() => !!this.chartData() && !!this.resources());
+
+  public readonly hasAllResources = computed(() => this.hasResources() && this.resources().length > 0);
+
   public analysisChanged(report: any) {
-    if (report === null) {
-      // No report selected
-      this.analysisReport = null;
-      this.analysisReportId.set(null);
-    } else {
-      this.analyzerService.getByID(this.helmReleaseHelper.endpointGuid, report.id).subscribe((results: any) => {
-        this.analysisReport = results;
-        this.analysisReportId.set(report.id);
-      });
-    }
+    this.analysisPick.next(report === null ? null : report.id);
   }
 
   private startDelete() {
-    this.loadingMessage = 'Deleting Release';
     this.busyDeleting.set(true);
   }
 
   private endDelete() {
-    this.loadingMessage = this.DEFAULT_LOADING_MESSAGE;
     this.busyDeleting.set(false);
   }
 
@@ -279,15 +225,18 @@ export class HelmReleaseSummaryTabComponent implements OnDestroy {
         this.router.navigate(['./workloads']);
       }).catch((err: Error) => {
         this.endDelete();
-        this.snackbarService.show('Failed to delete release', 'Close');
+        this.deleteFailedSnackBar = this.snackbarService.show('Failed to delete release', 'Close');
         console.error('Failed to delete release: ', err);
       });
     });
   }
 
   ngOnDestroy() {
+    // Only this tab's own message: hide() would also dismiss other features'
+    // messages.
     if (this.deleted) {
-      this.snackbarService.hide();
+      this.deleteFailedSnackBar?.dismiss();
+      this.deleteFailedSnackBar = undefined;
     }
   }
 
@@ -305,15 +254,6 @@ export class HelmReleaseSummaryTabComponent implements OnDestroy {
       `/kubernetes`,
       this.helmReleaseHelper.endpointGuid,
     ];
-  }
-
-  public getClusterName(): Observable<string> {
-    // Read the endpoint name from EndpointsSignalService instead of the
-    // legacy `endpointsEntityRequestDataSelector`. Returns an empty string
-    // if the endpoint hasn't hydrated yet — matches legacy `filter(!!e)`
-    // behaviour by emitting a synchronous value the template can render.
-    const endpoint = this.endpointsSignals.endpoints()[this.helmReleaseHelper.endpointGuid];
-    return of(endpoint?.name ?? '');
   }
 
   private applyAnalysis(resources: any, report: any) {

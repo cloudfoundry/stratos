@@ -5,8 +5,8 @@ import { ActivatedRoute } from '@angular/router';
 import { firstValueFrom } from 'rxjs';
 
 import { DialogErrorComponent, IHeaderBreadcrumb, ListSubNavAddAction, ListSubNavComponent, PageHeaderComponent } from '@stratosui/core';
+import { unknownHow, unknownOutcomeMessage } from '../../../services/async-jobs/unknown-outcome-message';
 import { writeWithJob } from '../../../services/async-jobs/write-with-job';
-import { StratosJobError } from '../../../services/async-jobs/async-job.types';
 import {
   RawServiceKey, ServiceCatalogDataService, ServiceKeyView, SignalSource, toServiceKeyView,
 } from '../../../services/endpoint-data/service-catalog-data.service';
@@ -14,7 +14,7 @@ import { StServiceInstance } from '../../../services/endpoint-data/stratos-types
 import { CfEndpointsDataService } from '../../../services/domain-data/cf-endpoints-data.service';
 import { CredentialField, MaskedCredentialsComponent, toCredentialFields } from '../../../shared/components/masked-credentials/masked-credentials.component';
 import { AppBusyComponent } from '@stratosui/core';
-import { httpErrorResponseToSafeString } from '@stratosui/store';
+import { httpErrorResponseToSafeString, extractHttpErrorMessage } from '@stratosui/store';
 
 type RowStatus = 'idle' | 'busy' | 'error';
 
@@ -214,7 +214,8 @@ export class ServiceKeysComponent {
       );
       this.credsByGuid.update(prev => ({ ...prev, [guid]: details?.credentials ?? {} }));
     } catch (err: unknown) {
-      this.credsErrorByGuid.update(prev => ({ ...prev, [guid]: this.messageOf(err) }));
+      // A read, not a write: name the HTTP status with the reason.
+      this.credsErrorByGuid.update(prev => ({ ...prev, [guid]: httpErrorResponseToSafeString(err) || 'unknown error' }));
     } finally {
       this.credsLoadingByGuid.update(prev => ({ ...prev, [guid]: false }));
     }
@@ -252,6 +253,12 @@ export class ServiceKeysComponent {
       );
       this.newKeyName.set('');
       this.isAdding.set(false);
+      if (r.status === 'UNKNOWN') {
+        // Ended, result unknown: the re-read list shows whether it exists.
+        this.errorMessage.set(unknownOutcomeMessage(`Create key "${name}"`, 'The Service Keys list', unknownHow(r)));
+        this.reload();
+        return;
+      }
       // A sync broker answers with the key itself; an async one resolves to
       // the CF job, which has no key fields, so the list is re-read instead.
       if (r.state?.type === 'key' && r.state.guid) {
@@ -260,7 +267,7 @@ export class ServiceKeysComponent {
         this.reload();
       }
     } catch (err: unknown) {
-      this.errorMessage.set(`Failed to create key: ${this.messageOf(err)}`);
+      this.errorMessage.set(`Failed to create key: ${extractHttpErrorMessage(err)}`);
     } finally {
       this.creating.set(false);
     }
@@ -276,15 +283,22 @@ export class ServiceKeysComponent {
       return;
     }
     this.setStatus(guid, 'busy');
+    const name = this.keys().find(k => k.guid === guid)?.name ?? guid;
     try {
-      await writeWithJob(
+      const r = await writeWithJob(
         this.http,
         this.http.delete(`/pp/v1/cf/service_keys/${this.cfGuid}/${guid}`, { observe: 'response' as const }),
       );
+      if (r.status === 'UNKNOWN') {
+        // Ended, result unknown: free the row; the re-read list shows
+        // whether the key is still there.
+        this.setStatus(guid, 'idle');
+        this.errorMessage.set(unknownOutcomeMessage(`Delete key "${name}"`, 'The Service Keys list', unknownHow(r)));
+      }
       this.reload();
     } catch (err: unknown) {
       this.setStatus(guid, 'error');
-      this.errorMessage.set(`Failed to delete key: ${this.messageOf(err)}`);
+      this.errorMessage.set(`Failed to delete key: ${extractHttpErrorMessage(err)}`);
     }
   }
 
@@ -292,11 +306,4 @@ export class ServiceKeysComponent {
     this.statusByGuid.update(prev => ({ ...prev, [guid]: status }));
   }
 
-  private messageOf(err: unknown): string {
-    if (err instanceof StratosJobError || err instanceof Error) {
-      return err.message;
-    }
-    // HttpErrorResponse is not an Error: report its body and status.
-    return httpErrorResponseToSafeString(err) || 'unknown error';
-  }
 }

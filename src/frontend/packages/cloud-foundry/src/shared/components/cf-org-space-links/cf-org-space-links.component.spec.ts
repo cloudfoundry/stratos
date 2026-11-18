@@ -1,4 +1,4 @@
-import { CUSTOM_ELEMENTS_SCHEMA } from '@angular/core';
+import { CUSTOM_ELEMENTS_SCHEMA, signal } from '@angular/core';
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { provideZonelessChangeDetection } from '@angular/core';
 import { provideRouter } from '@angular/router';
@@ -8,12 +8,12 @@ import { of } from 'rxjs';
 import { CfOrgSpaceLinksComponent } from "./cf-org-space-links.component";
 import { CfOrgSpaceLabelService } from '../../services/cf-org-space-label.service';
 
-// The component only reads the name/URL getters and multipleConnectedEndpoints$
+// The component only reads the name/URL getters and multipleConnectedEndpoints
 // off its injected label service; the test double implements exactly that
 // surface. Pick the consumed members so the mock stays faithful to the type.
 type CfOrgSpaceLabelServiceMock = Pick<
   CfOrgSpaceLabelService,
-  'getCfName' | 'getCfURL' | 'getOrgName' | 'getOrgURL' | 'getSpaceName' | 'getSpaceURL' | 'multipleConnectedEndpoints$'
+  'getCfName' | 'getCfURL' | 'getOrgName' | 'getOrgURL' | 'getSpaceName' | 'getSpaceURL' | 'multipleConnectedEndpoints'
 >;
 
 describe('CfOrgSpaceLinksComponent', () => {
@@ -34,7 +34,7 @@ describe('CfOrgSpaceLinksComponent', () => {
     });
   });
 
-  beforeEach(() => {
+  beforeEach(async () => {
     service = {
       getCfName: vi.fn().mockReturnValue(of('CfName')),
       getCfURL: vi.fn().mockReturnValue(['/cf/path']),
@@ -42,14 +42,14 @@ describe('CfOrgSpaceLinksComponent', () => {
       getOrgURL: vi.fn().mockReturnValue(['/org/path']),
       getSpaceName: vi.fn().mockReturnValue(of('SpaceName')),
       getSpaceURL: vi.fn().mockReturnValue(['/space/path']),
-      multipleConnectedEndpoints$: of(false)
+      multipleConnectedEndpoints: signal(false)
     };
     fixture = TestBed.createComponent(CfOrgSpaceLinksComponent);
     component = fixture.componentInstance;
     // strict: assign the consumed-surface test double; the component only
     // touches the members CfOrgSpaceLabelServiceMock implements.
-    component.service = service as CfOrgSpaceLabelService;
-    fixture.detectChanges();
+    fixture.componentRef.setInput('service', service as CfOrgSpaceLabelService);
+    await fixture.whenStable();
   });
 
   it('should create', () => {
@@ -62,8 +62,8 @@ describe('CfOrgSpaceLinksComponent', () => {
   });
 
   describe('with multiple endpoints', () => {
-    beforeEach(() => {
-      // Create a new service instance with multipleConnectedEndpoints$ set to true
+    beforeEach(async () => {
+      // Create a new service instance with multipleConnectedEndpoints set to true
       service = {
         getCfName: vi.fn().mockReturnValue(of('CfName')),
         getCfURL: vi.fn().mockReturnValue(['/cf/path']),
@@ -71,15 +71,15 @@ describe('CfOrgSpaceLinksComponent', () => {
         getOrgURL: vi.fn().mockReturnValue(['/org/path']),
         getSpaceName: vi.fn().mockReturnValue(of('SpaceName')),
         getSpaceURL: vi.fn().mockReturnValue(['/space/path']),
-        multipleConnectedEndpoints$: of(true)
+        multipleConnectedEndpoints: signal(true)
       };
       // Recreate the component with the new service
       fixture = TestBed.createComponent(CfOrgSpaceLinksComponent);
       component = fixture.componentInstance;
       // strict: assign the consumed-surface test double; the component only
     // touches the members CfOrgSpaceLabelServiceMock implements.
-    component.service = service as CfOrgSpaceLabelService;
-      fixture.detectChanges();
+    fixture.componentRef.setInput('service', service as CfOrgSpaceLabelService);
+      await fixture.whenStable();
     });
 
     it('should render cf if multiple', () => {

@@ -1,8 +1,5 @@
-import { CommonModule } from '@angular/common';
-import {Component, OnInit, inject, ChangeDetectionStrategy } from '@angular/core';
+import { Component, Signal, computed, inject, ChangeDetectionStrategy } from '@angular/core';
 import { ActivatedRoute, RouterOutlet } from '@angular/router';
-import { Observable } from 'rxjs';
-import { take, map, startWith } from 'rxjs/operators';
 
 import { PageHeaderComponent } from '@stratosui/core';
 import { LoadingPageComponent } from '@stratosui/core';
@@ -24,7 +21,6 @@ import { kubeEntityCatalog } from './../kubernetes-entity-generator';
   changeDetection: ChangeDetectionStrategy.OnPush,
   standalone: true,
   imports: [
-    CommonModule,
     RouterOutlet,
     PageHeaderComponent,
     LoadingPageComponent,
@@ -46,17 +42,21 @@ import { kubeEntityCatalog } from './../kubernetes-entity-generator';
     KubernetesAnalysisService,
   ]
 })
-export class KubernetesTabBaseComponent implements OnInit {
+export class KubernetesTabBaseComponent {
 
-  tabLinks: Array<{ link: string; label: string; icon?: string; iconFont?: string; hidden$?: Observable<boolean> }> = [];
+  tabLinks: Array<{ link: string; label: string; icon?: string; iconFont?: string; isHidden?: Signal<boolean> }> = [];
 
-  // strict: assigned in ngOnInit before the template binds these streams
-  public isFetching$!: Observable<boolean>;
-  public favorite$!: Observable<UserFavoriteEndpoint | null>;
-  public endpointIds$!: Observable<string[]>;  public kubeEndpointService = inject(KubernetesEndpointService);
+  public kubeEndpointService = inject(KubernetesEndpointService);
   public userFavoriteManager = inject(UserFavoriteManager);
   public analysisService = inject(KubernetesAnalysisService);
-  private route = inject(ActivatedRoute);
+
+  readonly isFetching = computed(() => !this.kubeEndpointService.endpoint());
+  readonly favorite = computed((): UserFavoriteEndpoint | null => {
+    const endpoint = this.kubeEndpointService.endpoint();
+    return endpoint ? this.userFavoriteManager.getFavoriteEndpointFromEntity(endpoint) : null;
+  });
+  // The route's endpoint, for the page header's endpoint errors.
+  readonly endpointIds: string[] = [this.kubeEndpointService.baseKube.guid];
 
 
 
@@ -65,7 +65,7 @@ export class KubernetesTabBaseComponent implements OnInit {
 
     this.tabLinks = [
       { link: 'summary', label: 'Summary', icon: 'kubernetes', iconFont: 'stratos-icons' },
-      { link: 'analysis', label: 'Analysis', icon: 'assignment', hidden$: this.analysisService.hideAnalysis$ },
+      { link: 'analysis', label: 'Analysis', icon: 'assignment', isHidden: this.analysisService.hideAnalysis },
       { link: '-', label: 'Cluster' },
       { link: 'nodes', label: 'Nodes', icon: 'node', iconFont: 'stratos-icons' },
       ...this.getTabsFromEntityConfig(false),
@@ -97,19 +97,5 @@ export class KubernetesTabBaseComponent implements OnInit {
 
     tabsFromRouterConfig.sort((a: { label: string }, b: { label: string }) => naturalCompare(a.label, b.label));
     return tabsFromRouterConfig;
-  }
-
-  ngOnInit() {
-    this.isFetching$ = this.kubeEndpointService.endpoint$.pipe(
-      map((endpoint: any) => !endpoint),
-      startWith(true)
-    );
-    this.favorite$ = this.kubeEndpointService.endpoint$.pipe(
-      take(1),
-      map((endpoint: any) => this.userFavoriteManager.getFavoriteEndpointFromEntity(endpoint.entity))
-    );
-    this.endpointIds$ = this.kubeEndpointService.endpoint$.pipe(
-      map((endpoint: any) => [endpoint.entity.guid])
-    );
   }
 }

@@ -1,5 +1,5 @@
 import { CommonModule } from '@angular/common';
-import { Component, Input, signal } from '@angular/core';
+import { Component, signal, input } from '@angular/core';
 import { ClickStopPropagationDirective } from '../../../core/click-stop-propagation.directive';
 
 @Component({
@@ -13,12 +13,12 @@ export class CopyToClipboardComponent {
    * Required hover text (tooltip) for the copy action.
    * Use **"Copy to clipboard"** unless there is a strong reason not to.
    */
-  @Input({ required: true }) tooltip!: string;
-  @Input() showSuccessText = true;
-  @Input() text = '';
+  readonly tooltip = input.required<string>();
+  readonly showSuccessText = input(true);
+  readonly text = input('');
 
   // Show smaller icon
-  @Input() compact = false;
+  readonly compact = input(false);
 
   private defaultCopyState = 'not yet' as const;
   readonly didUserPressCopy = signal<'not yet' | 'yes and succeeded' | 'yes but failed' | 'yes and saw succeeded'>(this.defaultCopyState);

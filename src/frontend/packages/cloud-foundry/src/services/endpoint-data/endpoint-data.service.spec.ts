@@ -703,6 +703,99 @@ describe('EndpointDataService', () => {
       expect(service.appCount()).toBe(0);
     });
 
+    describe('recentApps follows the app mutators (#6021)', () => {
+      const older = { guid: 'app-old', name: 'old', state: 'STARTED', updatedAt: '2026-01-01T00:00:00Z' } as any;
+      const newer = { guid: 'app-new', name: 'new', state: 'STARTED', updatedAt: '2026-02-01T00:00:00Z' } as any;
+
+      // Warm recentApps the way the home card does: load()'s ?return=recent
+      // call, newest first.
+      async function warmRecent(apps: any[]): Promise<void> {
+        service.load().subscribe();
+        httpMock.expectOne(ORGS_URL).flush({ resources: [], totalResults: 0 });
+        httpMock.expectOne(APPS_URL).flush({ resources: apps, totalResults: apps.length });
+        httpMock.expectOne(ROUTES_URL).flush({ totalResults: 0 });
+        await Promise.resolve();
+      }
+
+      it('updateApp patches the recent entry and moves it to the top', async () => {
+        await warmRecent([newer, older]);
+        service.updateApp('app-old', { state: 'STOPPED', updatedAt: '2026-03-01T00:00:00Z' });
+        expect(service.recentApps().map(a => `${a.guid}:${a.state}`))
+          .toEqual(['app-old:STOPPED', 'app-new:STARTED']);
+      });
+
+      it('removeApp drops the app from recentApps', async () => {
+        await warmRecent([newer, older]);
+        service.removeApp('app-new');
+        expect(service.recentApps().map(a => a.guid)).toEqual(['app-old']);
+      });
+
+      it('addApp puts the new app at the top of recentApps', async () => {
+        await warmRecent([older]);
+        service.addApp(newer);
+        expect(service.recentApps().map(a => a.guid)).toEqual(['app-new', 'app-old']);
+      });
+
+      it('recentApps stays capped at the ten the backend returns', async () => {
+        const ten = Array.from({ length: 10 }, (_, i) =>
+          ({ guid: `app-${i}`, name: `${i}`, state: 'STARTED', updatedAt: `2026-01-${String(20 - i).padStart(2, '0')}T00:00:00Z` }));
+        await warmRecent(ten);
+        service.addApp(newer);
+        expect(service.recentApps()).toHaveLength(10);
+        expect(service.recentApps()[0].guid).toBe('app-new');
+        expect(service.recentApps().some(a => a.guid === 'app-9')).toBe(false);
+      });
+
+      it('updateApp of an app only in the full list joins recentApps', async () => {
+        await warmRecent([newer]);
+        service.refreshApps().subscribe();
+        httpMock.expectOne(APPS_FULL_URL).flush({ resources: [newer, older], pagination: { totalResults: 2, totalPages: 1 } });
+        await Promise.resolve();
+        service.updateApp('app-old', { updatedAt: '2026-03-01T00:00:00Z' });
+        expect(service.recentApps().map(a => a.guid)).toEqual(['app-old', 'app-new']);
+      });
+
+      it('updateApp of an app outside the recent list leaves the list alone', async () => {
+        await warmRecent([newer]);
+        service.updateApp('app-unknown', { state: 'STOPPED' });
+        expect(service.recentApps().map(a => a.guid)).toEqual(['app-new']);
+      });
+
+      // The full drain is the newer truth: app-old was deleted, app-new was
+      // renamed and stopped, app-newest was created elsewhere.
+      const newest = { guid: 'app-newest', name: 'newest', state: 'STARTED', updatedAt: '2026-04-01T00:00:00Z' } as any;
+      const changed = [{ ...newer, name: 'renamed', state: 'STOPPED' }, newest];
+      const recentOf = () => service.recentApps().map(a => `${a.guid}:${a.name}:${a.state}`);
+
+      it('refreshApps rebuilds recentApps from the new app list', async () => {
+        await warmRecent([newer, older]);
+        service.refreshApps().subscribe();
+        httpMock.expectOne(APPS_FULL_URL).flush({ resources: changed, pagination: { totalResults: 2, totalPages: 1 } });
+        await Promise.resolve();
+        expect(recentOf()).toEqual(['app-newest:newest:STARTED', 'app-new:renamed:STOPPED']);
+      });
+
+      it('loadApps rebuilds recentApps from the new app list', async () => {
+        await warmRecent([newer, older]);
+        service.loadApps().subscribe();
+        httpMock.expectOne(APPS_FULL_URL).flush({ resources: changed, pagination: { totalResults: 2, totalPages: 1 } });
+        await Promise.resolve();
+        expect(recentOf()).toEqual(['app-newest:newest:STARTED', 'app-new:renamed:STOPPED']);
+      });
+
+      it('removeApp refills recentApps from the full list', async () => {
+        const eleven = Array.from({ length: 11 }, (_, i) =>
+          ({ guid: `app-${i}`, name: `${i}`, state: 'STARTED', updatedAt: `2026-01-${String(20 - i).padStart(2, '0')}T00:00:00Z` }));
+        await warmRecent(eleven.slice(0, 10));
+        service.refreshApps().subscribe();
+        httpMock.expectOne(APPS_FULL_URL).flush({ resources: eleven, pagination: { totalResults: 11, totalPages: 1 } });
+        await Promise.resolve();
+        service.removeApp('app-0');
+        expect(service.recentApps().map(a => a.guid))
+          .toEqual(eleven.slice(1).map(a => a.guid));
+      });
+    });
+
     it('removeServiceInstance / addServiceInstance / updateServiceInstance work + count tracked', () => {
       service.addServiceInstance(siA);
       expect(service.serviceInstances()).toHaveLength(1);

@@ -68,31 +68,40 @@ func TestIdentityProviders_ListsOrigins(t *testing.T) {
 	assert.True(t, providers[1].Active)
 }
 
-// TestIdentityProviders_403PassedThrough verifies that a 403 from UAA is
-// propagated as HTTP 403 — the frontend degrades to a free-text origin field
-// when it sees a 403.
-func TestIdentityProviders_403PassedThrough(t *testing.T) {
+// idpNoTokenProxy is a mockNativeCFProxy whose user has no stored token.
+type idpNoTokenProxy struct{ mockNativeCFProxy }
+
+func (idpNoTokenProxy) GetCNSITokenRecord(_, _ string) (api.TokenRecord, bool) {
+	return api.TokenRecord{}, false
+}
+
+// callIdentityProviders runs the handler against a fake UAA that answers
+// /identity-providers with the given status and body.
+func callIdentityProviders(t *testing.T, status int, body string, noToken bool) (*httptest.ResponseRecorder, error) {
+	t.Helper()
 	ts := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		w.Header().Set("Content-Type", "application/json")
 		if r.URL.Path == "/identity-providers" {
-			w.WriteHeader(http.StatusForbidden)
-			_, _ = w.Write([]byte(`{"error":"access_denied","error_description":"Insufficient scope"}`))
+			w.WriteHeader(status)
+			_, _ = w.Write([]byte(body))
 			return
 		}
 		http.NotFound(w, r)
 	}))
-	defer ts.Close()
+	t.Cleanup(ts.Close)
 
-	plugin := &CloudFoundrySpecification{
-		testProxy: &mockNativeCFProxy{
-			userID: "user-1",
-			cnsiRecord: api.CNSIRecord{
-				GUID:                  "cnsi-1",
-				APIEndpoint:           mustParseURL(ts.URL),
-				AuthorizationEndpoint: ts.URL,
-			},
-			tokenRecord: api.TokenRecord{AuthToken: "test-token"},
+	base := mockNativeCFProxy{
+		userID: "user-1",
+		cnsiRecord: api.CNSIRecord{
+			GUID:                  "cnsi-1",
+			APIEndpoint:           mustParseURL(ts.URL),
+			AuthorizationEndpoint: ts.URL,
 		},
+		tokenRecord: api.TokenRecord{AuthToken: "test-token"},
+	}
+	plugin := &CloudFoundrySpecification{testProxy: &base}
+	if noToken {
+		plugin.testProxy = &idpNoTokenProxy{base}
 	}
 
 	e := echo.New()
@@ -100,8 +109,33 @@ func TestIdentityProviders_403PassedThrough(t *testing.T) {
 	rec := httptest.NewRecorder()
 	ctx := e.NewContext(req, rec)
 	ctx.SetPathValues(echo.PathValues{{Name: "cnsiGuid", Value: "cnsi-1"}})
+	return rec, plugin.getIdentityProviders(ctx)
+}
 
-	err := plugin.getIdentityProviders(ctx)
+// TestIdentityProviders_UAA403AnswersEmptyList verifies that a UAA 403 (the
+// user may not list providers) is answered with HTTP 200 and an empty list,
+// so the browser logs no failed request.
+func TestIdentityProviders_UAA403AnswersEmptyList(t *testing.T) {
+	rec, err := callIdentityProviders(t, http.StatusForbidden,
+		`{"error":"access_denied","error_description":"Insufficient scope"}`, false)
+	require.NoError(t, err)
+	assert.Equal(t, http.StatusOK, rec.Code)
+	assert.JSONEq(t, "[]", rec.Body.String())
+}
+
+// TestIdentityProviders_UAAFailureIs502 verifies other UAA failures stay errors.
+func TestIdentityProviders_UAAFailureIs502(t *testing.T) {
+	_, err := callIdentityProviders(t, http.StatusInternalServerError, "boom", false)
+	require.Error(t, err)
+	httpErr, ok := err.(*echo.HTTPError)
+	require.True(t, ok, "handler must return an echo.HTTPError")
+	assert.Equal(t, http.StatusBadGateway, httpErr.Code)
+}
+
+// TestIdentityProviders_NoTokenIs403 verifies a user who is not connected to
+// the endpoint still gets an error.
+func TestIdentityProviders_NoTokenIs403(t *testing.T) {
+	_, err := callIdentityProviders(t, http.StatusOK, "[]", true)
 	require.Error(t, err)
 	httpErr, ok := err.(*echo.HTTPError)
 	require.True(t, ok, "handler must return an echo.HTTPError")

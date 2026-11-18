@@ -1,7 +1,5 @@
 import { HttpClient } from '@angular/common/http';
 import { Injectable, Signal, computed, inject, signal } from '@angular/core';
-import { toObservable } from '@angular/core/rxjs-interop';
-import { Observable, distinctUntilChanged, map } from 'rxjs';
 
 import { proxyAPIVersion } from '../jetstream';
 import { getDefaultFavoriteGroup, IUserFavoriteGroup, IUserFavoritesGroups } from '../types/favorite-groups.types';
@@ -24,8 +22,8 @@ type Favorite = UserFavorite<IFavoriteMetadata>;
  * favorites-island W3). HTTP is lifted verbatim from the former effect against
  * `/pp/${proxyAPIVersion}/favorites`.
  *
- * `UserFavoriteManager` is the public facade for ~20 consumers and delegates
- * to this service; its method signatures stay byte-identical.
+ * `UserFavoriteManager` is the public facade for its consumers and delegates
+ * to this service.
  */
 @Injectable({ providedIn: 'root' })
 export class UserFavoritesDataService {
@@ -52,12 +50,6 @@ export class UserFavoritesDataService {
     () => this.buildGroups(Array.from(this._favorites().values())),
   );
 
-  // ---- observable surface (legacy rxjs consumers via the manager) ---------
-  readonly favorites$: Observable<Map<string, Favorite>> = toObservable(this._favorites);
-  readonly groups$: Observable<IUserFavoritesGroups> = toObservable(this.groups);
-  readonly fetching$: Observable<boolean> = toObservable(this._fetching);
-  readonly error$: Observable<boolean> = toObservable(this._error);
-
   // ---- reads --------------------------------------------------------------
 
   /**
@@ -68,13 +60,6 @@ export class UserFavoritesDataService {
    */
   isFavorite(favorite: Favorite): Signal<boolean> {
     return computed(() => (favorite ? this._favorites().has(favorite.guid) : false));
-  }
-
-  isFavorite$(favorite: Favorite): Observable<boolean> {
-    return this.favorites$.pipe(
-      map(favs => (favorite ? favs.has(favorite.guid) : false)),
-      distinctUntilChanged(),
-    );
   }
 
   // ---- writes -------------------------------------------------------------
@@ -94,7 +79,8 @@ export class UserFavoritesDataService {
         this._favorites.set(next);
         this._fetching.set(false);
       },
-      error: () => {
+      error: error => {
+        console.error('User favorites: could not fetch favorites', error);
         this._fetching.set(false);
         this._error.set(true);
       },

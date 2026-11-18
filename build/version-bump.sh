@@ -12,7 +12,7 @@ PACKAGE_JSON="${PACKAGE_JSON:-${ROOT_DIR}/package.json}"
 build_metadata() {
   local date_stamp sha_stamp
   date_stamp=$(date -u +%Y%m%d)
-  sha_stamp=$(git rev-parse --short HEAD 2>/dev/null || echo "unknown")
+  sha_stamp=$(git -C "${ROOT_DIR}" rev-parse --short HEAD 2>/dev/null || echo "unknown")
   echo "+build.${date_stamp}.${sha_stamp}"
 }
 
@@ -90,7 +90,7 @@ commit_version() {
   local version_file
   version_file="$(dirname "${PACKAGE_JSON}")/src/jetstream/VERSION"
   if [ -d "$(dirname "${version_file}")" ]; then
-    echo "${new_version#v}" > "${version_file}"
+    echo "${new_version}" > "${version_file}"
   fi
 
   echo "Version updated: ${current_version} → ${new_version}"
@@ -159,6 +159,7 @@ case "${1:-}" in
     esac
     ;;
   set)
+    validate_version "${2:-}"
     commit_version "${2:-}"
     ;;
   show)

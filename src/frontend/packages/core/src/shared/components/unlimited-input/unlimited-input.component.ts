@@ -1,9 +1,9 @@
 import {
   Component,
-  Input,
   OnInit,
   inject,
   ChangeDetectionStrategy,
+  input
 } from "@angular/core";
 import {
   AbstractControl,
@@ -44,13 +44,14 @@ import { CF_QUOTA_UNLIMITED } from "../../../core/cf-quota.types";
 export class UnlimitedInputComponent implements OnInit {
   public ctrlContainer = inject(FormGroupDirective);
 
-  @Input() name!: string;
-  @Input() value: any;
-  @Input() required!: boolean;
-  @Input() type!: string;
-  @Input() placeholder!: string;
-  @Input() suffix!: string;
-  @Input() prefix!: string;
+  // The form control to drive; every host names one.
+  readonly name = input.required<string>();
+  readonly value = input<any>();
+  readonly required = input(false);
+  readonly type = input<string>();
+  readonly placeholder = input('');
+  readonly suffix = input<string>();
+  readonly prefix = input<string>();
 
   unlimited = false;
   formControl!: AbstractControl;
@@ -77,7 +78,7 @@ export class UnlimitedInputComponent implements OnInit {
   }
 
   ngOnInit() {
-    this.formControl = this.ctrlContainer.form.get(this.name)!;
+    this.formControl = this.ctrlContainer.form.get(this.name())!;
     this.formControl.setValidators(Validators.min(0));
 
     if (this.formControl.value) {

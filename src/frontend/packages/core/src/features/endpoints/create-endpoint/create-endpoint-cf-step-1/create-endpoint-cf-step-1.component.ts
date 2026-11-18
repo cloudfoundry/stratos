@@ -1,5 +1,7 @@
 import { CommonModule } from '@angular/common';
-import { ChangeDetectionStrategy, AfterContentInit, Component, Injector, Input, inject } from '@angular/core';
+import { HttpClient } from '@angular/common/http';
+import { ChangeDetectionStrategy, AfterContentInit, Component, DestroyRef, Injector, computed, effect, inject, input, linkedSignal, output, signal, untracked } from '@angular/core';
+import { takeUntilDestroyed, toObservable, toSignal } from '@angular/core/rxjs-interop';
 import { ReactiveFormsModule, Validators, FormBuilder, FormControl, FormGroup } from '@angular/forms';
 import { cfEndpointUrlValidator, normalizeUrl } from '../../../../shared/validators';
 import { CustomCheckboxComponent } from '../../../../shared/components/custom-checkbox/custom-checkbox.component';
@@ -7,17 +9,17 @@ import { AppInputDirective, CustomFormFieldComponent, AppErrorComponent } from '
 import { CustomIconComponent } from '../../../../shared/components/custom-material/custom-material.component';
 import { ActivatedRoute } from '@angular/router';
 import {
+  EndpointModel,
   EndpointsDataService,
   StratosCatalogEndpointEntity,
   entityCatalog,
+  getFullEndpointApiUrl,
 } from '@stratosui/store';
-import { from, Observable } from 'rxjs';
-import { map, startWith } from 'rxjs/operators';
+import { combineLatest, EMPTY, Observable, of } from 'rxjs';
+import { catchError, expand, map, reduce, startWith, switchMap, tap } from 'rxjs/operators';
 
-import { EndpointsSignalService } from '../../../../core/signals/endpoints-signal.service';
 import { getIdFromRoute } from '../../../../core/utils.service';
-import { IStepperStep, StepOnNextFunction, StepOnNextResult } from '../../../../shared/components/stepper/step/step.component';
-import { SessionService } from '../../../../shared/services/session.service';
+import { StepOnNextResult } from '../../../../shared/components/stepper/step/step.component';
 import { CurrentUserPermissionsService } from '../../../../core/permissions/current-user-permissions.service';
 import { UserProfileService } from '../../../../core/user-profile.service';
 import { TailwindSnackBarService } from '../../../../shared/services/tailwind-snackbar.service';
@@ -27,6 +29,48 @@ import { getSSOClientRedirectURI } from '../../endpoint-helpers';
 import { CreateEndpointHelperComponent } from '../create-endpoint-helper';
 import { UniqueDirective } from '../../../../shared/components/unique.directive';
 import { ProductNameComponent } from '../../../../shared/components/product-name.ccomponent';
+import { ConfirmationDialogService } from '../../../../shared/components/confirmation-dialog.service';
+import { EndpointCertificatesComponent } from '../../certificates/endpoint-certificates.component';
+import { EndpointPermissionsService } from '../../endpoint-permissions.service';
+import { confirmAndUnregister, isPersonalEndpoint, linkedAutoscalerNames } from '../../unregister-endpoint/unregister-endpoint';
+import { endpointNameCompare } from '../../../../shared/utils/natural-sort';
+
+// What the step knows about the endpoint it registered or is reviewing.
+interface RegisteredEndpoint {
+  guid: string;
+  name: string;
+  type: string;
+  subType: string;
+  ssoAllowed: boolean;
+  personal: boolean;
+  // The TLS settings as the server holds them.
+  skipSSL: boolean;
+  caCert: string;
+}
+
+// A service broker a linked endpoint can be tied to.
+interface BrokerChoice {
+  guid: string;
+  name: string;
+  url: string;
+}
+
+function urlHost(url: string): string {
+  try {
+    return new URL(url.includes('://') ? url : `https://${url}`).hostname.toLowerCase();
+  } catch {
+    return '';
+  }
+}
+
+/** The domain an address sits on: its host without the first label, port ignored. */
+export function cfDomain(url: string): string {
+  const host = urlHost(url.trim());
+  const dot = host.indexOf('.');
+  return dot > 0 ? host.slice(dot + 1) : '';
+}
+
+const firstLabel = (url: string) => urlHost(url.trim()).split('.')[0];
 
 interface CreateEndpointForm {
   nameField: FormControl<string>;
@@ -53,34 +97,52 @@ interface CreateEndpointForm {
     CustomCheckboxComponent,
     CustomIconComponent,
     UniqueDirective,
-    ProductNameComponent
+    ProductNameComponent,
+    EndpointCertificatesComponent,
   ],
   changeDetection: ChangeDetectionStrategy.OnPush
 })
-export class CreateEndpointCfStep1Component extends CreateEndpointHelperComponent implements IStepperStep, AfterContentInit {
+export class CreateEndpointCfStep1Component extends CreateEndpointHelperComponent implements AfterContentInit {
   private fb = inject(FormBuilder);
   private snackBarService = inject(TailwindSnackBarService);
   private endpointsSignalConfig = inject(EndpointsSignalConfigService);
-  private endpointsSignals = inject(EndpointsSignalService);
+  private endpointsData = inject(EndpointsDataService);
+  private permissions = inject(EndpointPermissionsService);
+  private confirmDialog = inject(ConfirmationDialogService);
+  private hostInjector = inject(Injector);
+  private http = inject(HttpClient);
+
+  // Set: the step shows this endpoint instead of registering one.
+  readonly reviewEndpoint = input<EndpointModel | null>(null);
+  // The endpoint was unregistered from this step.
+  readonly unregistered = output<void>();
+
+  // The endpoint exists: the step shows it (name and address locked) rather
+  // than registering. True after a successful registration or with reviewEndpoint.
+  readonly review = signal(false);
+  private readonly registered = signal<RegisteredEndpoint | null>(null);
+  private readonly managerOfEndpoint = signal(true);
+  // A Git host takes no CA certificate, so it has no TLS to review.
+  private readonly noTls = computed(() => this.registered()?.type === 'git');
+  // TLS controls: always before registering; afterwards only for those who may save them.
+  readonly canEditTls = computed(() => !this.noTls() && (!this.review() || this.managerOfEndpoint()));
+  readonly showCertificates = computed(() => this.review() && !this.noTls());
+  readonly canUnregister = computed(() => this.review() && this.managerOfEndpoint());
+  readonly personal = computed(() => this.registered()?.personal ?? false);
+  readonly guid = computed(() => this.registered()?.guid ?? null);
+  // The CA the endpoint holds after the last save; the Connect step badges it.
+  readonly registeredCaCert = computed(() => this.registered()?.caCert ?? '');
+  private readonly caCertValue = signal('');
+  // The PEM the endpoint will have after Next: empty while the CA box is off.
+  readonly effectivePem = computed(() => (this.showCACertField() ? this.caCertValue() : ''));
 
 
   registerForm: FormGroup<CreateEndpointForm>;
 
-  @Input() finalStep = false;
-  private pFixedUrl!: string;
-  @Input()
-  get fixedUrl(): string {
-    return this.pFixedUrl;
-  }
-  set fixedUrl(url: string) {
-    this.pFixedUrl = url;
-    this.registerForm.controls.urlField.setValue(this.pFixedUrl);
-    if (this.pFixedUrl) {
-      this.registerForm.controls.urlField.disable();
-    } else {
-      this.registerForm.controls.urlField.enable();
-    }
-  }
+  readonly finalStep = input(false);
+  // An address the host fixes: filled in and locked by the effect in the
+  // constructor.
+  readonly fixedUrl = input<string>();
 
   // strict: assigned in ngAfterContentInit before any template/consumer read.
   validate!: Observable<boolean>;
@@ -88,25 +150,102 @@ export class CreateEndpointCfStep1Component extends CreateEndpointHelperComponen
   // strict: assigned in the constructor via setUrlValidation().
   urlValidation!: string;
 
-  showAdvancedFields = false;
+  readonly showAdvancedFields = signal(false);
   clientRedirectURI!: string;
 
-  endpointTypeSupportsSSO = false;
-  endpoint?: StratosCatalogEndpointEntity;
-  show = false;
+  readonly endpointTypeSupportsSSO = signal(false);
+  readonly endpoint = signal<StratosCatalogEndpointEntity | undefined>(undefined);
+  readonly show = signal(false);
 
-  showCACertField = false;
-  showAdvancedOptions = false;
+  readonly showCACertField = signal(false);
+  // The Options column has something to show: TLS, Advanced Options or SSO.
+  readonly showOptions = computed(() =>
+    this.canEditTls() || (this.showAdvancedFields() && !this.review()) || this.endpointTypeSupportsSSO());
+  readonly showAdvancedOptions = signal(false);
   lastSkipSSLValue = false;
+
+  // A type linked to a Cloud Foundry (an autoscaler) is registered against a
+  // Cloud Foundry endpoint on the address's domain, and its broker there.
+  private readonly urlValue = signal('');
+  readonly linkedToCf = computed(() => !!this.endpoint()?.definition?.linkedToCf && !this.review());
+  readonly urlDomain = computed(() => cfDomain(this.urlValue()));
+  // The host as typed, and the domains the registered Cloud Foundry endpoints sit on.
+  readonly urlHostName = computed(() => urlHost(this.urlValue().trim()));
+  readonly cfDomains = computed(() => [...new Set(
+    [...this.endpointsData.endpoints().values()]
+      .filter(e => e.cnsi_type === 'cf')
+      .map(e => cfDomain(getFullEndpointApiUrl(e)))
+      .filter(domain => !!domain),
+  )].sort());
+  readonly linkedCfs = computed(() => {
+    const domain = this.urlDomain();
+    if (!this.linkedToCf() || !domain) {
+      return [];
+    }
+    const cfs = [...this.endpointsData.endpoints().values()]
+      .filter(e => e.cnsi_type === 'cf' && cfDomain(getFullEndpointApiUrl(e)) === domain);
+    const compare = endpointNameCompare(cfs.map(e => e.name));
+    return cfs.sort((a, b) => compare(a.name, b.name));
+  });
+  // The only Cloud Foundry on the domain is picked; a choice stays while listed.
+  readonly linkedCf = linkedSignal<EndpointModel[], string>({
+    source: this.linkedCfs,
+    computation: (list, previous) =>
+      list.some(e => e.guid === previous?.value) ? previous!.value : (list.length === 1 ? list[0].guid ?? '' : ''),
+  });
+  // The Cloud Foundry chosen, and whether it is known to be disconnected.
+  private readonly chosenCf = computed(() => this.linkedCfs().find(e => e.guid === this.linkedCf()));
+  readonly chosenCfName = computed(() => this.chosenCf()?.name ?? '');
+  readonly cfDisconnected = computed(() => this.chosenCf()?.connectionStatus === 'disconnected');
+  // The Cloud Foundry answered the broker request with an error (not an admin).
+  private readonly brokersRefused = signal(false);
+  // Why the list is empty: shown beside the select, which it describes.
+  readonly brokerNote = computed(() => {
+    if (this.cfDisconnected()) {
+      return `Connect to ${this.chosenCfName()} to choose its service broker. You can link one later.`;
+    }
+    return this.brokersRefused() ? 'Only a Cloud Foundry admin can list service brokers.' : '';
+  });
+  // Brokers the user can read; none (not an admin, or not connected) leaves
+  // only "not registered yet". A Cloud Foundry known to be disconnected is not asked.
+  readonly brokers = toSignal(toObservable(computed(() => this.cfDisconnected() ? '' : this.linkedCf())).pipe(
+    tap(() => this.brokersRefused.set(false)),
+    switchMap(guid => !guid ? of([] as BrokerChoice[]) :
+      this.brokerPage(guid, 1).pipe(
+        expand(res => res.page < res.totalPages ? this.brokerPage(guid, res.page + 1) : EMPTY),
+        reduce((all, res) => all.concat(res.resources), [] as BrokerChoice[]),
+        catchError(() => {
+          this.brokersRefused.set(true);
+          return of([] as BrokerChoice[]);
+        }),
+      )),
+  ), { initialValue: [] as BrokerChoice[] });
+  // One page of the Cloud Foundry's brokers, 100 at a time like the other lists.
+  private brokerPage(guid: string, page: number) {
+    return this.http.get<{ resources?: BrokerChoice[]; pagination?: { totalPages?: number } }>(
+      `/pp/v1/cf/service_brokers/${guid}?return=base&per_page=100&page=${page}`).pipe(
+      map(res => ({ resources: res.resources ?? [], page, totalPages: res.pagination?.totalPages ?? 1 })),
+    );
+  }
+  // The broker named after the address (autoscaler → autoscalerservicebroker,
+  // the upstream and Genesis kit naming) is picked when listed.
+  readonly linkedBroker = linkedSignal<{ list: BrokerChoice[]; url: string }, string>({
+    source: computed(() => ({ list: this.brokers(), url: this.urlValue() })),
+    computation: ({ list, url }) => list.find(b => firstLabel(b.url) === `${firstLabel(url)}servicebroker`)?.guid ?? '',
+  });
+  // The notes the broker select is described by.
+  readonly brokerDescribedBy = computed(() =>
+    [this.brokerNote() ? 'linked-broker-note' : '', this.linkedBroker() ? '' : 'linked-broker-hint']
+      .filter(id => id).join(' ') || null);
+  // Registering waits for a Cloud Foundry to link to.
+  private readonly linkedCfMissing = computed(() => this.linkedToCf() && !this.linkedCf());
 
   constructor() {
     const activatedRoute = inject(ActivatedRoute);
-    const sessionService = inject(SessionService);
     const currentUserPermissionsService = inject(CurrentUserPermissionsService);
     const userProfileService = inject(UserProfileService);
 
     super(
-      sessionService,
       currentUserPermissionsService,
       userProfileService,
       inject(EndpointsDataService),
@@ -127,14 +266,168 @@ export class CreateEndpointCfStep1Component extends CreateEndpointHelperComponen
 
     const epType = getIdFromRoute(activatedRoute, 'type');
     const epSubType = getIdFromRoute(activatedRoute, 'subtype');
-    this.endpoint = entityCatalog.getEndpoint(epType, epSubType);
-    this.setUrlValidation(this.endpoint);
+    this.useEndpointType(entityCatalog.getEndpoint(epType, epSubType));
 
     // Client Redirect URI for SSO
     this.clientRedirectURI = getSSOClientRedirectURI();
+
+    const destroyRef = inject(DestroyRef);
+    this.registerForm.controls.caCertField.valueChanges
+      .pipe(takeUntilDestroyed(destroyRef))
+      .subscribe(value => this.caCertValue.set(value));
+    this.registerForm.controls.urlField.valueChanges
+      .pipe(takeUntilDestroyed(destroyRef))
+      .subscribe(value => this.urlValue.set(value ?? ''));
+    // A page that knows the address can link here with it.
+    const linkedUrl = activatedRoute.snapshot.queryParams['url'];
+    if (linkedUrl) {
+      this.registerForm.controls.urlField.setValue(linkedUrl);
+    }
+
+    // Ahead of the review effect, as the address was set ahead of it before.
+    effect(() => {
+      const url = this.fixedUrl();
+      if (url === undefined) {
+        return;
+      }
+      untracked(() => {
+        const urlField = this.registerForm.controls.urlField;
+        urlField.setValue(url);
+        if (url) {
+          urlField.disable();
+        } else {
+          urlField.enable();
+        }
+      });
+    });
+
+    effect(() => {
+      const ep = this.reviewEndpoint();
+      // A refreshed copy of the same endpoint must not reset edits in progress.
+      if (ep && ep.guid !== untracked(() => this.registered()?.guid)) {
+        untracked(() => this.reviewExisting(ep));
+      }
+    });
   }
 
-  onNext: StepOnNextFunction = () => from(this.runRegistration());
+  private useEndpointType(endpoint?: StratosCatalogEndpointEntity) {
+    this.endpoint.set(endpoint);
+    this.setUrlValidation(endpoint);
+  }
+
+  async onNext(): Promise<StepOnNextResult> {
+    return this.review() ? this.saveReview() : this.runRegistration();
+  }
+
+  // Fill the form from an endpoint that already exists and lock it.
+  private reviewExisting(ep: EndpointModel) {
+    this.useEndpointType(entityCatalog.getEndpoint(ep.cnsi_type ?? '', ep.sub_type));
+    const form = this.registerForm.controls;
+    const caCert = ep.ca_cert ?? '';
+    // Start clean: a previous fill may have left the TLS controls disabled.
+    form.skipSSLField.enable();
+    this.showCACertField.set(false);
+    form.nameField.setValue(ep.name);
+    form.clientIDField.setValue(ep.client_id ?? '');
+    form.createSystemEndpointField.setValue(!(!!ep.creator && !ep.creator.system));
+    form.urlField.setValue(getFullEndpointApiUrl(ep));
+    form.ssoAllowedField.setValue(!!ep.sso_allowed);
+    form.skipSSLField.setValue(!!ep.skip_ssl_validation);
+    form.caCertField.setValue(caCert);
+    this.lastSkipSSLValue = !!ep.skip_ssl_validation;
+    if (caCert.trim()) {
+      this.toggleCACertField();
+    }
+    this.registered.set({
+      guid: ep.guid ?? '',
+      name: ep.name,
+      type: ep.cnsi_type ?? '',
+      subType: ep.sub_type ?? '',
+      ssoAllowed: !!ep.sso_allowed,
+      personal: !!ep.creator && !ep.creator.system,
+      skipSSL: !!ep.skip_ssl_validation,
+      caCert,
+    });
+    this.managerOfEndpoint.set(this.permissions.canManage(ep));
+    this.lock();
+  }
+
+  // Name, address and the other registration fields cannot change once registered; TLS can.
+  private lock() {
+    const form = this.registerForm.controls;
+    [form.nameField, form.urlField, form.ssoAllowedField, form.clientIDField, form.clientSecretField,
+      form.createSystemEndpointField].forEach(control => control.disable());
+    this.review.set(true);
+  }
+
+  private unlock() {
+    const form = this.registerForm.controls;
+    [form.nameField, form.ssoAllowedField, form.clientIDField, form.clientSecretField,
+      form.createSystemEndpointField].forEach(control => control.enable());
+    if (!this.fixedUrl()) {
+      form.urlField.enable();
+    }
+    this.review.set(false);
+  }
+
+  // Review's Next: save TLS only when it differs from what the endpoint has.
+  // updateEndpoint (jetstream) drops the stored CA when ca_cert is left out,
+  // so every save sends the CA field as it stands.
+  private async saveReview(): Promise<StepOnNextResult> {
+    const reg = this.registered();
+    if (!reg) {
+      return { success: false, redirect: false, message: 'Unknown endpoint' };
+    }
+    const data: ConnectEndpointConfig = {
+      guid: reg.guid,
+      name: reg.name,
+      type: reg.type,
+      subType: reg.subType,
+      ssoAllowed: reg.ssoAllowed,
+    };
+    if (!this.canEditTls()) {
+      return { success: true, redirect: false, message: '', data };
+    }
+    const caOn = this.showCACertField();
+    const caCert = caOn ? (this.registerForm.getRawValue().caCertField ?? '') : '';
+    const skipSSL = caOn && caCert.trim().length > 0 ? false : (this.registerForm.getRawValue().skipSSLField ?? false);
+    if (skipSSL === reg.skipSSL && caCert.trim() === reg.caCert.trim()) {
+      return { success: true, redirect: false, message: '', data };
+    }
+    const result = await this.endpointsData.update(reg.guid, {
+      endpointType: reg.type,
+      name: reg.name,
+      skipSSL,
+      setClientInfo: false,
+      allowSSO: reg.ssoAllowed,
+      caCert,
+    });
+    if (result.error) {
+      return { success: false, redirect: false, message: result.message, data };
+    }
+    this.registered.set({ ...reg, skipSSL, caCert });
+    return { success: true, redirect: false, message: '', data };
+  }
+
+  /** Unregister from the step; the Register flow reopens unlocked and filled in. */
+  async unregister(): Promise<void> {
+    const reg = this.registered();
+    if (!reg) {
+      return;
+    }
+    const gone = await confirmAndUnregister(this.confirmDialog, this.endpointsSignalConfig, this.snackBarService, {
+      ...reg,
+      autoscalers: reg.type === 'cf' ? linkedAutoscalerNames(reg.guid, this.endpointsData.endpoints().values()) : [],
+    });
+    if (!gone) {
+      return;
+    }
+    this.registered.set(null);
+    if (!this.reviewEndpoint()) {
+      this.unlock();
+    }
+    this.unregistered.emit();
+  }
 
   // Perform the endpoint registration via the signal-config service. Returns
   // a step-shaped result the stepper's onNext can act on directly. The
@@ -142,12 +435,13 @@ export class CreateEndpointCfStep1Component extends CreateEndpointHelperComponen
   // resolves once the busy edge transitions, so we no longer need pairwise/
   // filter/map gymnastics here.
   private async runRegistration(): Promise<StepOnNextResult> {
-    if (!this.endpoint) {
+    const endpoint = this.endpoint();
+    if (!endpoint) {
       // Route named an endpoint type with no registered entity — nothing to
       // register against, so fail the step rather than throwing.
       return { success: false, redirect: false, message: 'Unknown endpoint type' };
     }
-    const { subType, type } = this.endpoint.getTypeAndSubtype();
+    const { subType, type } = endpoint.getTypeAndSubtype();
 
     // SSL settings — when a CA cert is provided we trust it as the override
     // (skip-ssl is mutually exclusive with cert pinning). When the CA-cert
@@ -155,7 +449,8 @@ export class CreateEndpointCfStep1Component extends CreateEndpointHelperComponen
     // endpoints (k3d / kind / minikube) still work via skipSslValidation.
     let sslAllow = this.registerForm.value.skipSSLField ?? false;
     const caCert = (this.registerForm.value.caCertField ?? '').trim();
-    if (this.showCACertField && caCert.length > 0) {
+    const showCA = this.showCACertField();
+    if (showCA && caCert.length > 0) {
       sslAllow = false;
     }
 
@@ -173,7 +468,9 @@ export class CreateEndpointCfStep1Component extends CreateEndpointHelperComponen
       clientSecret: this.registerForm.value.clientSecretField,
       ssoAllowed: this.registerForm.value.ssoAllowedField,
       createSystemEndpoint: this.registerForm.value.createSystemEndpointField,
-      caCert: this.registerForm.value.caCertField,
+      // A PEM left in the box after the CA box was turned off is not sent.
+      caCert: showCA ? this.registerForm.value.caCertField : '',
+      ...this.linkFields(),
     });
 
     const data: ConnectEndpointConfig = {
@@ -184,38 +481,56 @@ export class CreateEndpointCfStep1Component extends CreateEndpointHelperComponen
       ssoAllowed: this.registerForm.value.ssoAllowedField ? !!this.registerForm.value.ssoAllowedField : false
     };
     if (!result.error) {
-      this.snackBarService.show(`Successfully registered '${name}'`);
-      // Warn if another endpoint is already registered with the same URL.
-      // Multiple registrations are permitted (different users/operators may each need their own),
-      // but the user should know about existing registrations.
-      const urlHost = new URL(url).host;
-      // Delay past the endpoints-page subscription that calls snackBarService.hide()
-      // when endpoint connectivity state updates after registration completes.
-      setTimeout(() => {
-        const entities = this.endpointsSignals.endpoints();
-        const dupes = Object.values(entities).filter(e =>
-          e.api_endpoint?.Host === urlHost && e.guid !== result.guid
-        );
-        if (dupes.length > 0) {
-          const names = dupes.map(e => e.name).join(', ');
-          this.snackBarService.show(`Note: '${url}' is also registered as: ${names}`, 'Dismiss');
-        }
-      }, 1500);
+      this.registered.set({
+        ...data,
+        personal: this.isPersonal(data.guid),
+        skipSSL: sslAllow,
+        caCert: showCA ? (this.registerForm.value.caCertField ?? '') : '',
+      });
+      const created = this.endpointsData.endpoints().get(data.guid);
+      this.managerOfEndpoint.set(created ? this.permissions.canManage(created) : true);
+      this.lock();
+      // 7 s: it shows while the dialog moves to its Connect step.
+      this.snackBarService.show(`Successfully registered '${name}'`, undefined, 7000);
+      // Another endpoint at the same URL is not warned about here: the
+      // endpoints page's banner says so above Total Endpoints.
     }
     const success = !result.error;
     return {
       success,
-      redirect: success && this.finalStep,
+      redirect: success && this.finalStep(),
       message: success ? '' : result.message,
       data
     };
   }
 
-  ngAfterContentInit() {
-    this.validate = this.registerForm.statusChanges.pipe(
-      startWith(this.registerForm.status),
-      map(() => this.registerForm.valid)
+  private linkFields() {
+    if (!this.linkedToCf()) {
+      return {};
+    }
+    const broker = this.brokers().find(b => b.guid === this.linkedBroker());
+    return {
+      cfGuid: this.linkedCf(),
+      ...(broker ? { brokerGuid: broker.guid, brokerName: broker.name } : {}),
+    };
+  }
+
+  // Personal = created by a user, not the system.
+  private isPersonal(guid: string): boolean {
+    return isPersonalEndpoint(
+      this.endpointsData.endpoints().get(guid),
+      this.userEndpointsAndIsAdminSignal(),
+      !!this.registerForm.value.createSystemEndpointField,
     );
+  }
+
+  ngAfterContentInit() {
+    // In review the locked fields leave the form with nothing to validate.
+    this.validate = combineLatest([
+      this.registerForm.statusChanges.pipe(startWith(this.registerForm.status)),
+      toObservable(this.review, { injector: this.hostInjector }),
+      toObservable(this.linkedCfMissing, { injector: this.hostInjector }),
+    ]).pipe(map(([, review, linkMissing]) => review || (this.registerForm.valid && !linkMissing)));
   }
 
   setUrlValidation(endpoint?: StratosCatalogEndpointEntity) {
@@ -225,20 +540,20 @@ export class CreateEndpointCfStep1Component extends CreateEndpointHelperComponen
 
   // Only show the Client ID and Client Secret fields if the endpoint type is Cloud Foundry
   setAdvancedFields(endpoint?: StratosCatalogEndpointEntity) {
-    this.showAdvancedFields = endpoint?.definition?.type === 'cf';
+    this.showAdvancedFields.set(endpoint?.definition?.type === 'cf');
 
     // Only allow SSL if the endpoint type is Cloud Foundry
-    this.endpointTypeSupportsSSO = endpoint?.definition?.type === 'cf';
+    this.endpointTypeSupportsSSO.set(endpoint?.definition?.type === 'cf');
   }
 
   toggleAdvancedOptions() {
-    this.showAdvancedOptions = !this.showAdvancedOptions;
+    this.showAdvancedOptions.update(v => !v);
   }
 
   toggleCACertField() {
-    this.showCACertField = !this.showCACertField;
-    if (this.showCACertField) {
-      this.lastSkipSSLValue = this.registerForm.value.skipSSLField ?? false;
+    this.showCACertField.update(v => !v);
+    if (this.showCACertField()) {
+      this.lastSkipSSLValue = this.registerForm.getRawValue().skipSSLField ?? false;
       this.registerForm.controls.skipSSLField.setValue(false);
       this.registerForm.controls.skipSSLField.disable();
     } else {

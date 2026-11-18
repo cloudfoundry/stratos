@@ -29,4 +29,15 @@ describe('CardProgressOverlayComponent', () => {
   it('should create', () => {
     expect(component).toBeTruthy();
   });
+
+  it('shows and hides the overlay from a plain boolean', async () => {
+    const element: HTMLElement = fixture.nativeElement;
+    fixture.componentRef.setInput('busy', true);
+    await fixture.whenStable();
+    expect(element.querySelector('.card-progress-overlay')).toBeTruthy();
+
+    fixture.componentRef.setInput('busy', false);
+    await fixture.whenStable();
+    expect(element.querySelector('.card-progress-overlay')).toBeFalsy();
+  });
 });

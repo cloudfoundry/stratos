@@ -1,4 +1,4 @@
-import { ChangeDetectionStrategy, Component, Input, OnInit} from '@angular/core';
+import { ChangeDetectionStrategy, Component, OnInit, input } from '@angular/core';
 import { CustomCardComponent, CustomCardHeaderComponent, CustomCardContentComponent } from '../../../../../../core/src/shared/components/custom-card/custom-card.component';
 import { CardWrapperComponent } from '../../../../../../core/src/shared/components/cards/card/card.component';
 
@@ -27,24 +27,13 @@ const KUBE_METRICS_BASE_URL = '/pp/v1/metrics/kubernetes';
 })
 export class KubernetesNodeMetricsChartComponent implements OnInit {
 
-  // strict: required @Input, set by Angular before ngOnInit/template render
-  @Input()
-  private nodeName!: string;
-  // strict: required @Input, set by Angular before ngOnInit/template render
-  @Input()
-  private endpointGuid!: string;
-  // strict: required @Input, set by Angular before ngOnInit/template render
-  @Input()
-  private yAxisLabel!: string;
-  // strict: required @Input, set by Angular before ngOnInit/template render
-  @Input()
-  private metricName!: string;
-  // strict: required @Input, set by Angular before ngOnInit/template render
-  @Input()
-  private seriesTranslation!: string;
-  // strict: required @Input, set by Angular before ngOnInit/template render
-  @Input()
-  public title!: string;
+  // Signal inputs cannot be private. All but `title` are read once, in ngOnInit.
+  readonly nodeName = input.required<string>();
+  readonly endpointGuid = input.required<string>();
+  readonly yAxisLabel = input.required<string>();
+  readonly metricName = input.required<string>();
+  readonly seriesTranslation = input.required<string>();
+  readonly title = input.required<string>();
 
   // strict: assigned in ngOnInit before the template reads them
   public instanceChartConfig!: MetricsLineChartConfig;
@@ -53,11 +42,11 @@ export class KubernetesNodeMetricsChartComponent implements OnInit {
   constructor() { }
 
   ngOnInit() {
-    this.instanceChartConfig = MetricsChartHelpers.buildChartConfig(this.yAxisLabel);
-    const queryString = `${this.metricName}{instance="${this.nodeName}"}[1h]&time=${(new Date()).getTime() / 1000}`;
+    this.instanceChartConfig = MetricsChartHelpers.buildChartConfig(this.yAxisLabel());
+    const queryString = `${this.metricName()}{instance="${this.nodeName()}"}[1h]&time=${(new Date()).getTime() / 1000}`;
     const request: MetricsRequest = {
-      endpointGuid: this.endpointGuid,
-      url: `${KUBE_METRICS_BASE_URL}/${this.nodeName}`,
+      endpointGuid: this.endpointGuid(),
+      url: `${KUBE_METRICS_BASE_URL}/${this.nodeName()}`,
       query: new MetricQueryConfig(queryString),
       queryType: MetricQueryType.QUERY,
       windowValue: null,
@@ -72,7 +61,7 @@ export class KubernetesNodeMetricsChartComponent implements OnInit {
   }
 
   private getmapSeriesItemValue() {
-    switch (this.seriesTranslation) {
+    switch (this.seriesTranslation()) {
       case 'mb':
         return (bytes: number) => bytes / 1000000;
       default:

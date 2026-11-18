@@ -1,5 +1,4 @@
-import { ApplicationRef, inject, Injectable } from '@angular/core';
-import { toObservable } from '@angular/core/rxjs-interop';
+import { ApplicationRef, computed, inject, Injectable, Signal } from '@angular/core';
 import { ActivatedRouteSnapshot, CanActivateFn, Router, RouterStateSnapshot } from '@angular/router';
 import {
   EndpointsDataService,
@@ -12,10 +11,10 @@ import {
   EndpointModel } from '@stratosui/store';
 import { EndpointStatusState } from './signals/endpoint-status-signal.service';
 import { combineLatest as observableCombineLatest, Observable, of } from 'rxjs';
-import { catchError, filter, map, take, withLatestFrom } from 'rxjs/operators';
+import { catchError, filter, map, take } from 'rxjs/operators';
 
-import { endpointHasMetricsByAvailable } from '../features/endpoints/endpoint-helpers';
-import { SessionService } from '../shared/services/session.service';
+import { endpointHasMetrics } from '../features/endpoints/endpoint-helpers';
+import { SessionSignalService } from './signals/session-signal.service';
 import { EndpointHealthChecks } from './endpoints-health-checks';
 import { AuthSignalService } from './signals/auth-signal.service';
 import { EndpointStatusSignalService } from './signals/endpoint-status-signal.service';
@@ -30,15 +29,14 @@ export class EndpointsService {
   private endpointsSignals = inject(EndpointsSignalService);
   private userService = inject(UserService);
   private endpointHealthChecks = inject(EndpointHealthChecks);
-  private sessionService = inject(SessionService);
   private appRef = inject(ApplicationRef);
 
-
-  endpoints$: Observable<IRequestEntityTypeState<EndpointModel>>;
-  haveRegistered$: Observable<boolean>;
-  haveConnected$: Observable<boolean>;
-  disablePersistenceFeatures$: Observable<boolean>;
-  connectedEndpoints$: Observable<EndpointModel[]>;
+  // Signal reads of the endpoint projections.
+  readonly endpoints = this.endpointsSignals.endpoints;
+  readonly haveRegistered = this.endpointsSignals.haveRegistered;
+  readonly haveConnected = this.endpointsSignals.haveConnected;
+  readonly connectedEndpoints = this.endpointsSignals.connectedEndpoints;
+  readonly disablePersistenceFeatures = this.endpointsSignals.disablePersistenceFeatures;
 
   static getLinkForEndpoint(endpoint: EndpointModel): string {
     if (!endpoint || !endpoint.cnsi_type || !endpoint.guid) {
@@ -96,41 +94,6 @@ export class EndpointsService {
     ).subscribe(() => {
       this.validateEntityCatalog();
     });
-
-    // Observables sourced from the signal-native projection. The signal
-    // service already encapsulates the entity-catalog defensive filtering
-    // for the connected/registered/persistence projections, so we just
-    // adapt to Observable shape here for legacy callers.
-    this.endpoints$ = toObservable(this.endpointsSignals.endpoints).pipe(
-      catchError((error): Observable<IRequestEntityTypeState<EndpointModel>> => {
-        console.error('Error reading endpoints:', error);
-        return of({} as IRequestEntityTypeState<EndpointModel>);
-      })
-    );
-    this.haveRegistered$ = toObservable(this.endpointsSignals.haveRegistered).pipe(
-      catchError((error): Observable<boolean> => {
-        console.error('Error checking registered endpoints:', error);
-        return of(false);
-      })
-    );
-    this.connectedEndpoints$ = toObservable(this.endpointsSignals.connectedEndpoints).pipe(
-      catchError((error): Observable<EndpointModel[]> => {
-        console.error('Error getting connected endpoints:', error);
-        return of([]);
-      })
-    );
-    this.haveConnected$ = toObservable(this.endpointsSignals.haveConnected).pipe(
-      catchError((error): Observable<boolean> => {
-        console.error('Error checking connected endpoints:', error);
-        return of(false);
-      })
-    );
-    this.disablePersistenceFeatures$ = toObservable(this.endpointsSignals.disablePersistenceFeatures).pipe(
-      catchError((error): Observable<boolean> => {
-        console.error('Error checking persistence features:', error);
-        return of(false);
-      })
-    );
   }
 
   /**
@@ -167,86 +130,74 @@ export class EndpointsService {
     this.endpointHealthChecks.checkEndpoint(endpoint);
   }
 
+  // Reads the signal: a toObservable copy replays what its effect
+  // last pushed, which lags a just-reloaded list until the next change
+  // detection, so a check right after a reload saw the old connections.
   public checkAllEndpoints() {
-    this.endpoints$.pipe(
-      take(1),
-      catchError((error): Observable<IRequestEntityTypeState<EndpointModel>> => {
-        console.error('Error checking all endpoints:', error);
-        return of({} as IRequestEntityTypeState<EndpointModel>);
-      })
-    ).subscribe(endpoints => Object.keys(endpoints).forEach(guid => this.checkEndpoint(endpoints[guid])));
+    const endpoints = this.endpointsSignals.endpoints();
+    Object.keys(endpoints).forEach(guid => this.checkEndpoint(endpoints[guid]));
   }
 
 
   hasMetrics(endpointId: string): Observable<boolean> {
-    return endpointHasMetricsByAvailable(this.endpointsService, endpointId);
+    return endpointHasMetrics(endpointId, this.endpointsService);
   }
 
-  doesNotHaveConnectedEndpointType(type: string): Observable<boolean> {
-    return this.connectedEndpointsOfTypes(type).pipe(
-      map(eps => eps.length === 0),
-      catchError((error): Observable<boolean> => {
-        console.error(`Error checking for endpoints of type ${type}:`, error);
-        return of(true);
-      })
-    );
+  // True while no endpoint of the type is connected (or unconnectable).
+  noConnectedEndpointOfType(type: string): Signal<boolean> {
+    return computed(() => connectedOfType(this.endpointsSignals.endpoints(), type).length === 0);
   }
 
-  hasConnectedEndpointType(type: string): Observable<boolean> {
-    return this.connectedEndpointsOfTypes(type).pipe(
-      map(eps => eps.length > 0),
-      catchError((error): Observable<boolean> => {
-        console.error(`Error checking for endpoints of type ${type}:`, error);
-        return of(false);
-      })
-    );
-  }
-
-  connectedEndpointsOfTypes(type: string): Observable<EndpointModel[]> {
-    return this.endpoints$.pipe(
-      map(ep => {
-        return Object.values(ep)
-          .filter(endpoint => {
-            if (endpoint.cnsi_type !== type) {
-              return false;
-            }
-            try {
-              // Defensive: Entity catalog lookup may return null if endpoint type not registered yet
-              const epType = entityCatalog.getEndpoint(endpoint.cnsi_type, endpoint.sub_type);
-              if (!epType) {
-                console.warn(
-                  `Endpoint catalog entity not found for type: ${endpoint.cnsi_type}${endpoint.sub_type ? ', subtype: ' + endpoint.sub_type : ''}. ` +
-                  `Excluding from results until type is registered.`
-                );
-                return false;
-              }
-
-              // Defensive: Verify definition exists before accessing properties
-              if (!epType.definition) {
-                console.warn(
-                  `Endpoint definition missing for type: ${endpoint.cnsi_type}. ` +
-                  `This may indicate an incomplete entity registration.`
-                );
-                return false;
-              }
-
-              return epType.definition.unConnectable || endpoint.connectionStatus === 'connected';
-            } catch (error) {
-              const message = error instanceof Error ? error.message : String(error);
-              console.warn(
-                `Error checking endpoint type ${endpoint.cnsi_type}: ${message}. ` +
-                `Excluding from results.`
-              );
-              return false;
-            }
-          });
-      }),
-      catchError((error): Observable<EndpointModel[]> => {
+  connectedEndpointsOfTypes(type: string): Signal<EndpointModel[]> {
+    return computed(() => {
+      try {
+        return connectedOfType(this.endpointsSignals.endpoints(), type);
+      } catch (error) {
         console.error(`Error getting connected endpoints of type ${type}:`, error);
-        return of([]);
-      })
-    );
+        return [];
+      }
+    });
   }
+}
+
+// The endpoints of a type that are connected, or that never need connecting.
+// Types missing from the entity catalog are left out.
+function connectedOfType(endpoints: IRequestEntityTypeState<EndpointModel>, type: string): EndpointModel[] {
+  return Object.values(endpoints)
+    .filter(endpoint => {
+      if (endpoint.cnsi_type !== type) {
+        return false;
+      }
+      try {
+        // Defensive: Entity catalog lookup may return null if endpoint type not registered yet
+        const epType = entityCatalog.getEndpoint(endpoint.cnsi_type, endpoint.sub_type);
+        if (!epType) {
+          console.warn(
+            `Endpoint catalog entity not found for type: ${endpoint.cnsi_type}${endpoint.sub_type ? ', subtype: ' + endpoint.sub_type : ''}. ` +
+            `Excluding from results until type is registered.`
+          );
+          return false;
+        }
+
+        // Defensive: Verify definition exists before accessing properties
+        if (!epType.definition) {
+          console.warn(
+            `Endpoint definition missing for type: ${endpoint.cnsi_type}. ` +
+            `This may indicate an incomplete entity registration.`
+          );
+          return false;
+        }
+
+        return epType.definition.unConnectable || endpoint.connectionStatus === 'connected';
+      } catch (error) {
+        const message = error instanceof Error ? error.message : String(error);
+        console.warn(
+          `Error checking endpoint type ${endpoint.cnsi_type}: ${message}. ` +
+          `Excluding from results.`
+        );
+        return false;
+      }
+    });
 }
 
 // Functional guard for endpoints check
@@ -257,38 +208,34 @@ export const endpointsGuard: CanActivateFn = (
   const router = inject(Router);
   const endpointsService = inject(EndpointsService);
   const userService = inject(UserService);
-  const sessionService = inject(SessionService);
+  const sessionSignals = inject(SessionSignalService);
   const authSignals = inject(AuthSignalService);
   const endpointStatusSignals = inject(EndpointStatusSignalService);
 
   // Reroute user to endpoint/no endpoint screens if there are no connected or registered endpoints.
-  // Auth + endpoint loading state both sourced from signal services.
-  const guardLogic$ = observableCombineLatest(
-    toObservable(authSignals.auth),
-    toObservable(endpointStatusSignals.status)
-  ).pipe(
+  // Auth + endpoint loading state both sourced from signal services, via
+  // observables built once there (toObservable() here leaked per run).
+  const guardLogic$ = observableCombineLatest([
+    authSignals.auth$,
+    endpointStatusSignals.status$
+  ]).pipe(
     filter(([state, endpointState]) => {
       // Only proceed when logged in and endpoints are done loading
       return !!state && state.loggedIn && !endpointState.loading;
     }),
-    withLatestFrom(
-      endpointsService.haveRegistered$,
-      endpointsService.haveConnected$,
-      userService.isAdmin$,
-      userService.isEndpointAdmin$,
-      sessionService.userEndpointsEnabled(),
-      endpointsService.disablePersistenceFeatures$
-    ),
-    map(([state, haveRegistered, haveConnected, isAdmin, isEndpointAdmin, userEndpointsEnabled, disablePersistenceFeatures]
-      : [[any, EndpointStatusState], boolean, boolean, boolean, boolean, boolean, boolean]) => {
-      const [authState] = state;
+    map(([authState]: [any, EndpointStatusState]) => {
+      const haveRegistered = endpointsService.haveRegistered();
+      const haveConnected = endpointsService.haveConnected();
+      const isAdmin = userService.isAdmin();
+      const isEndpointAdmin = userService.isEndpointAdmin();
+      const disablePersistenceFeatures = endpointsService.disablePersistenceFeatures();
 
       if (authState.sessionData.valid) {
         // Redirect to endpoints if there's no connected endpoints
         let redirect: string | undefined;
         if (!disablePersistenceFeatures) {
           if (!haveRegistered) {
-            redirect = isAdmin || (userEndpointsEnabled && isEndpointAdmin) ? '/endpoints' : '/noendpoints';
+            redirect = isAdmin || (sessionSignals.userEndpointsEnabled() && isEndpointAdmin) ? '/endpoints' : '/noendpoints';
           } else if (!haveConnected) {
             redirect = '/endpoints';
           }

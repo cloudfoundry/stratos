@@ -1,6 +1,6 @@
 import { CommonModule } from '@angular/common';
 import { HttpClient } from '@angular/common/http';
-import {AfterViewInit, Component, ElementRef, Input, OnDestroy, OnInit, Renderer2, ViewChild, signal, inject, ChangeDetectionStrategy } from '@angular/core';
+import { AfterViewInit, Component, ElementRef, OnDestroy, OnInit, Renderer2, effect, input, signal, inject, untracked, ChangeDetectionStrategy, viewChild } from '@angular/core';
 import { toObservable } from '@angular/core/rxjs-interop';
 import { FormsModule } from '@angular/forms';
 import * as yaml from 'js-yaml';
@@ -53,13 +53,21 @@ enum EditorMode {
 })
 export class ChartValuesEditorComponent implements OnInit, OnDestroy, AfterViewInit {
 
-  @Input() set config(config: ChartValuesConfig | undefined) {
-    if (config) {
-      this.schemaUrl = config.schemaUrl;
-      this.valuesUrl = config.valuesUrl;
-      this.releaseValues = config.releaseValues;
-      this.init();
-    }
+  readonly config = input<ChartValuesConfig>();
+
+  constructor() {
+    // Start loading the chart's schema and values for each config given.
+    effect(() => {
+      const config = this.config();
+      if (config) {
+        untracked(() => {
+          this.schemaUrl = config.schemaUrl;
+          this.valuesUrl = config.valuesUrl;
+          this.releaseValues = config.releaseValues;
+          this.init();
+        });
+      }
+    });
   }
 
   schemaUrl: string | null = null;
@@ -70,18 +78,18 @@ export class ChartValuesEditorComponent implements OnInit, OnDestroy, AfterViewI
   public model: any;
 
   // Editor mode - either 'editor' for the Monaco Code Editor or 'form' for the JSON Schema Form editor
-  public mode: EditorMode = EditorMode.CodeEditor;
+  public readonly mode = signal<EditorMode>(EditorMode.CodeEditor);
 
   // Menu state
   public menuOpen = false;
 
   // Content shown in the code editor
-  public code = '';
+  public readonly code = signal('');
 
   // JSON Schema
-  public schema: any;
+  public readonly schema = signal<any>(undefined);
 
-  public hasSchema = false;
+  public readonly hasSchema = signal(false);
 
   // Data shown in the form on load
   public initialFormData = {};
@@ -105,21 +113,22 @@ export class ChartValuesEditorComponent implements OnInit, OnDestroy, AfterViewI
     automaticLayout: false, // We will resize the editor to fit the available space
     contextmenu: false, // Turn off the right-click context menu
     tabSize: 2,
+    ariaLabel: 'Values (YAML)',
   };
 
   // Monaco editor
   public editor: MonacoEditorComponent | undefined;
 
   // Observable - are we still loading resources? Assigned in init() once a
-  // config is provided via the @Input setter.
+  // config is provided via the `config` input.
   public loading$!: Observable<boolean>;
 
-  public initing = true;
+  public readonly initing = signal(true);
 
   // Signal for tracking if the Monaco editor has loaded
   private monacoLoaded = signal<boolean>(false);
   // Built here, in a field initializer, because init() runs from the `config`
-  // input setter - outside any injection context - where toObservable() throws.
+  // effect - outside any injection context - where toObservable() throws.
   private readonly monacoLoaded$ = toObservable(this.monacoLoaded);
 
   private resizeSub?: Subscription;
@@ -128,9 +137,9 @@ export class ChartValuesEditorComponent implements OnInit, OnDestroy, AfterViewI
   private codeOnEnter!: string;
 
   // Reference to the editor, so we can adjust its size to fit
-  @ViewChild('monacoEditor', { read: ElementRef, static: false }) monacoEditor!: ElementRef; // strict: @ViewChild populated by Angular after view init
+  readonly monacoEditor = viewChild.required('monacoEditor', { read: ElementRef }); // strict: @ViewChild populated by Angular after view init
 
-  @ViewChild('schemaForm', { static: false }) schemaForm: any;
+  readonly schemaForm = viewChild<any>('schemaForm');
 
   // Confirmation dialog - copy values
   overwriteValuesConfirmation = new ConfirmationDialogConfig(
@@ -180,10 +189,10 @@ export class ChartValuesEditorComponent implements OnInit, OnDestroy, AfterViewI
     );
 
     // We need the schame, value sand the monaco editor to be all loaded before we're ready
-    this.loading$ = combineLatest(schema$, values$, this.monacoLoaded$).pipe(
+    this.loading$ = combineLatest([schema$, values$, this.monacoLoaded$]).pipe(
       filter(([schema, values, loaded]: [any, any, boolean]) => schema !== undefined && values !== undefined && loaded),
       tap(([schema, values, _loaded]: [any, any, boolean]) => {
-        this.schema = schema;
+        this.schema.set(schema);
         if (values !== null) {
           this.chartValuesYaml = values;
           this.chartValues = yaml.load(values, { json: true });
@@ -192,17 +201,17 @@ export class ChartValuesEditorComponent implements OnInit, OnDestroy, AfterViewI
         }
         // Default to form if there is a schema
         if (schema !== null) {
-          this.hasSchema = true;
-          this.mode = EditorMode.JSonSchemaForm;
+          this.hasSchema.set(true);
+          this.mode.set(EditorMode.JSonSchemaForm);
           // Register schema with the Monaco editor
-          this.registerSchema(this.schema);
+          this.registerSchema(this.schema());
         } else {
           // No Schema, so register an auto-generated schema from the Chart's values
           this.registerSchema(generateJsonSchemaFromObject('Generated Schema', this.chartValues));
 
           // Inherit the previous values if available (upgrade)
           if (this.releaseValues) {
-            this.code = yaml.dump(this.releaseValues);
+            this.code.set(yaml.dump(this.releaseValues));
           }
         }
         this.updateModel();
@@ -211,7 +220,7 @@ export class ChartValuesEditorComponent implements OnInit, OnDestroy, AfterViewI
       startWith(true)
     );
 
-    this.initing = false;
+    this.initing.set(false);
   }
 
   ngAfterViewInit(): void {
@@ -244,16 +253,16 @@ export class ChartValuesEditorComponent implements OnInit, OnDestroy, AfterViewI
 
   // The edit mode has changed (form or editor)
   editModeChanged(mode: any) {
-    this.mode = mode.value;
+    this.mode.set(mode.value);
 
-    if (this.mode === EditorMode.CodeEditor) {
+    if (this.mode() === EditorMode.CodeEditor) {
       // Form -> Editor
       // Only copy if there is not an error - otherwise keep the invalid yaml from the editor that needs fixing
       if (!this.yamlError) {
-        const codeYaml = yaml.load(this.code || '{}', { json: true }) as any;
+        const codeYaml = yaml.load(this.code() || '{}', { json: true }) as any;
         const data = mergeObjects(codeYaml as Record<string, unknown>, this.formData);
-        this.code = this.getDiff(data);
-        this.codeOnEnter = this.code;
+        this.code.set(this.getDiff(data));
+        this.codeOnEnter = this.code();
       }
 
       // Need to resize the editor, as it will be freshly shown
@@ -262,13 +271,13 @@ export class ChartValuesEditorComponent implements OnInit, OnDestroy, AfterViewI
       // Editor -> Form
       // Try and parse the YAML - if we can't this is an error, so we can't edit this back in the form
       try {
-        if (this.codeOnEnter === this.code) {
+        if (this.codeOnEnter === this.code()) {
           // Code did not change
           return;
         }
 
         // Parse as json
-        const json = yaml.load(this.code || '{}', { json: true });
+        const json = yaml.load(this.code() || '{}', { json: true });
         // Must be an object, otherwise it was not valid
         if (typeof (json) !== 'object') {
           throw new Error('Invalid YAML');
@@ -335,8 +344,9 @@ export class ChartValuesEditorComponent implements OnInit, OnDestroy, AfterViewI
     h = h - TOOLBAR_HEIGHT;
 
     // Set the Monaco editor to the same size as the container
-    this.renderer.setStyle(this.monacoEditor.nativeElement, 'width', `${w}px`);
-    this.renderer.setStyle(this.monacoEditor.nativeElement, 'height', `${h}px`);
+    const monacoEditor = this.monacoEditor();
+    this.renderer.setStyle(monacoEditor.nativeElement, 'width', `${w}px`);
+    this.renderer.setStyle(monacoEditor.nativeElement, 'height', `${h}px`);
 
     // Ask Monaco to layout again with its new size
     this.editor.layout();
@@ -376,11 +386,11 @@ export class ChartValuesEditorComponent implements OnInit, OnDestroy, AfterViewI
 
   public getValues(): object {
     // Always diff the form with the Chart Values to get only the changes that the user has made
-    return (this.mode === EditorMode.JSonSchemaForm) ? diffObjects(this.formData, this.chartValues) : yaml.load(this.code) as object;
+    return (this.mode() === EditorMode.JSonSchemaForm) ? diffObjects(this.formData, this.chartValues) : yaml.load(this.code()) as object;
   }
 
   public copyValues() {
-    const confirm = this.mode === EditorMode.JSonSchemaForm || this.mode === EditorMode.CodeEditor && this.code.length > 0;
+    const confirm = this.mode() === EditorMode.JSonSchemaForm || this.mode() === EditorMode.CodeEditor && this.code().length > 0;
     if (confirm) {
       this.confirmDialog.open(this.overwriteValuesConfirmation, () => {
         this.doCopyValues();
@@ -392,16 +402,16 @@ export class ChartValuesEditorComponent implements OnInit, OnDestroy, AfterViewI
 
   // Copy the chart values into either the form or the code editor, depending on the current mode
   private doCopyValues() {
-    if (this.mode === EditorMode.JSonSchemaForm) {
+    if (this.mode() === EditorMode.JSonSchemaForm) {
       this.initialFormData = this.chartValues;
     } else {
       // Use the raw Yaml, so we keep comments and formatting
-      this.code = this.chartValuesYaml;
+      this.code.set(this.chartValuesYaml);
     }
   }
 
   public copyReleaseValues() {
-    const confirm = this.mode === EditorMode.JSonSchemaForm || this.mode === EditorMode.CodeEditor && this.code.length > 0;
+    const confirm = this.mode() === EditorMode.JSonSchemaForm || this.mode() === EditorMode.CodeEditor && this.code().length > 0;
     if (confirm) {
       this.confirmDialog.open(this.overwriteReleaseValuesConfirmation, () => {
         this.doCopyReleaseValues();
@@ -413,12 +423,12 @@ export class ChartValuesEditorComponent implements OnInit, OnDestroy, AfterViewI
 
   // Copy the release values into either the form or the code editor, depending on the current mode
   private doCopyReleaseValues() {
-    if (this.mode === EditorMode.JSonSchemaForm) {
+    if (this.mode() === EditorMode.JSonSchemaForm) {
       if (this.releaseValues !== undefined) {
         this.initialFormData = this.releaseValues;
       }
     } else {
-      this.code = yaml.dump(this.releaseValues);
+      this.code.set(yaml.dump(this.releaseValues));
     }
   }
 
@@ -426,7 +436,7 @@ export class ChartValuesEditorComponent implements OnInit, OnDestroy, AfterViewI
   clearFormValues() {
     this.confirmDialog.open(this.clearValuesConfirmation, () => {
       this.initialFormData = {};
-      this.code = '';
+      this.code.set('');
       this.codeOnEnter = '';
     });
   }
@@ -434,8 +444,8 @@ export class ChartValuesEditorComponent implements OnInit, OnDestroy, AfterViewI
   // Update the code editor to only show the YAML that contains the differences with the values.yaml
   diff() {
     this.confirmDialog.open(this.overwriteDiffValuesConfirmation, () => {
-      const userValues = yaml.load(this.code, { json: true });
-      this.code = this.getDiff(userValues);
+      const userValues = yaml.load(this.code(), { json: true });
+      this.code.set(this.getDiff(userValues));
     });
   }
 

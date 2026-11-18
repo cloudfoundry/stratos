@@ -1,11 +1,14 @@
 import { AsyncPipe, DecimalPipe } from "@angular/common";
 import {
   Component,
-  Input,
   OnDestroy,
   OnInit,
   inject,
   ChangeDetectionStrategy,
+  Signal,
+  computed,
+  input,
+  signal,
 } from "@angular/core";
 import { Observable, Subscription } from "rxjs";
 
@@ -32,37 +35,38 @@ import { KubernetesNodeSimpleMetricComponent } from "../kubernetes-node-simple-m
 export class KubernetesNodeMetricStatsCardComponent
   implements OnInit, OnDestroy
 {
-  @Input()
-  title = "Memory";
+  readonly title = input("Memory");
 
-  @Input()
-  metric!: KubeNodeMetric;
+  // Both hosts bind it: it selects the metric to poll.
+  readonly metric = input.required<KubeNodeMetric>();
 
-  @Input()
-  period = "Hour";
+  readonly period = input("Hour");
 
-  @Input()
-  unit?: string;
+  readonly unit = input<string>();
 
   max$!: Observable<number>;
   mean$!: Observable<number>;
+  // Why either statistic failed to load, shown in place of the values.
+  private readonly statErrors = signal<Signal<string | null>[]>([]);
+  readonly errorText = computed(() => this.statErrors().map(e => e()).find(e => !!e) ?? null);
   subscriptions: Subscription[] = [];
   public kubeNodeService = inject(KubernetesNodeService);
 
   ngOnInit() {
     const maxMetric = this.kubeNodeService.setupMetricObservable(
-      this.metric,
+      this.metric(),
       MetricStatistic.MAXIMUM,
     );
     this.subscriptions.push(maxMetric.pollerSub);
     this.max$ = maxMetric.entity$;
 
     const meanMetric = this.kubeNodeService.setupMetricObservable(
-      this.metric,
+      this.metric(),
       MetricStatistic.AVERAGE,
     );
     this.subscriptions.push(meanMetric.pollerSub);
     this.mean$ = meanMetric.entity$;
+    this.statErrors.set([maxMetric.error, meanMetric.error]);
   }
 
   ngOnDestroy() {

@@ -22,7 +22,7 @@
             </label>
             <div class="form-field">
               <label class="form-label" for="clientId">Client ID</label>
-              <input id="clientId" class="input" formControlName="clientId" placeholder="Client ID">
+              <input id="clientId" class="input" formControlName="clientId" placeholder="Client ID" autocomplete="off">
             </div>
             <div class="form-field">
               <label class="form-label" for="clientSecret">Client Secret</label>
@@ -32,7 +32,8 @@
                   class="input pr-10"
                   formControlName="clientSecret"
                   placeholder="Client Secret"
-                  [type]="!show ? 'password' : 'text'">
+                  [type]="!show ? 'password' : 'text'"
+                  autocomplete="new-password">
                 <div class="absolute inset-y-0 right-0 flex items-center pr-3">
                   <app-show-hide-button (changed)="show = $event"></app-show-hide-button>
                 </div>
@@ -87,15 +88,16 @@
     </div>
   </app-step>
   <app-step title="Admin Scope" [signalHandle]="uaaScopeStepHandle">
-    <app-loading-page [isLoading]="applyingSetup$" alert="Saving configuration"
+    <app-loading-page [isLoading]="applyingSetup()" alert="Saving configuration"
       text="Please wait - this will take a few moments">
       <div class="space-y-4">
         <p class="text-content-text">Please select the UAA scope to use to identify users as <app-product-name></app-product-name> Administrators:</p>
         <form class="space-y-4 min-w-[400px] w-full">
           <div class="form-field">
             <label class="form-label" for="uaaScope">UAA Scope</label>
-            <select id="uaaScope" class="input" [(ngModel)]="selectedScope" name="UAAScope">
-              @for (scope of uaaScopes; track scope) {
+            <select id="uaaScope" class="input" [ngModel]="selectedScope()" (ngModelChange)="selectedScope.set($event)" name="UAAScope">
+              <option value="" disabled>Select a scope</option>
+              @for (scope of uaaScopes(); track scope) {
                 <option [value]="scope">
                   {{ scope }}
                 </option>

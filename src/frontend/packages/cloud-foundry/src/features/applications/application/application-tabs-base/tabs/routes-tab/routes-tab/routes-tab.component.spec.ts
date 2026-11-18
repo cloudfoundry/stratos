@@ -9,11 +9,10 @@ import {
   signal,
 } from '@angular/core';
 import { provideRouter } from '@angular/router';
-import { of } from 'rxjs';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 
 import { ApplicationService, CloudFoundryService } from '@stratosui/cloud-foundry';
-import { ApplicationServiceMock } from '@test-framework/cf';
+import { ApplicationServiceMock, cfRequestFailure, snackText } from '@test-framework/cf';
 import {
   ConfirmationDialogConfig,
   ConfirmationDialogService,
@@ -35,6 +34,7 @@ describe('RoutesTabComponent', () => {
   let unmapRoute: ReturnType<typeof vi.fn>;
   let deleteRoute: ReturnType<typeof vi.fn>;
   let confirmOpen: ReturnType<typeof vi.fn>;
+  let snackError: ReturnType<typeof vi.fn>;
 
   /** Minimal AppDetailDataService stub. */
   const makeDataStub = () => {
@@ -50,7 +50,7 @@ describe('RoutesTabComponent', () => {
 
   const makeRouteActionsStub = () => {
     unmapRoute = vi.fn(async () => undefined);
-    deleteRoute = vi.fn(async () => undefined);
+    deleteRoute = vi.fn(async () => 'deleted');
     return {
       transitioningRouteGuid: signal<string | null>(null).asReadonly(),
       inFlight: signal(false).asReadonly(),
@@ -106,9 +106,10 @@ describe('RoutesTabComponent', () => {
     return { open: confirmOpen };
   };
 
-  const makeSnackStub = () => ({
-    open: vi.fn(),
-  });
+  const makeSnackStub = () => {
+    snackError = vi.fn();
+    return { open: vi.fn(), error: snackError };
+  };
 
   beforeEach(async () => {
     await TestBed.configureTestingModule({
@@ -119,7 +120,7 @@ describe('RoutesTabComponent', () => {
         provideZonelessChangeDetection(),
         provideRouter([]),
         { provide: ApplicationService, useClass: ApplicationServiceMock },
-        { provide: CloudFoundryService, useValue: { cFEndpoints$: of([]), connectedCFEndpoints$: of([]) } },
+        { provide: CloudFoundryService, useValue: { cfEndpoints: signal([]) } },
         { provide: AppDetailDataService, useFactory: makeDataStub },
         { provide: ConfirmationDialogService, useFactory: makeConfirmStub },
         { provide: TailwindSnackBarService, useFactory: makeSnackStub },
@@ -162,17 +163,17 @@ describe('RoutesTabComponent', () => {
     expect(component).toBeTruthy();
   });
 
-  it('renders without throwing', () => {
-    expect(() => fixture.detectChanges()).not.toThrow();
+  it('renders without throwing', async () => {
+    await expect(fixture.whenStable()).resolves.toBeDefined();
   });
 
-  it('triggers an initial routes fetch on init', () => {
-    fixture.detectChanges();
+  it('triggers an initial routes fetch on init', async () => {
+    await fixture.whenStable();
     expect(refreshScope).toHaveBeenCalledWith('routes');
   });
 
-  it('builds a signal-list config from the wave-2 service', () => {
-    fixture.detectChanges();
+  it('builds a signal-list config from the wave-2 service', async () => {
+    await fixture.whenStable();
     expect(component.listConfig).toBeTruthy();
     expect(component.listConfig.pagedItems).toBeTruthy();
     // Actions column carries the tab's confirm-wrapped factory, not the
@@ -183,7 +184,7 @@ describe('RoutesTabComponent', () => {
   });
 
   it('opens a confirm dialog before unmapping, evicts row on confirm', async () => {
-    fixture.detectChanges();
+    await fixture.whenStable();
     const actionsCol = component.listConfig.columns.find(c => c.key === 'actions');
     const rowActions = actionsCol!.actions!({ guid: 'r1', url: 'foo.example.com' } as any);
     const unmap = rowActions.find(a => a.label === 'Unmap');
@@ -204,7 +205,7 @@ describe('RoutesTabComponent', () => {
   });
 
   it('opens a confirm dialog before deleting, evicts row on confirm', async () => {
-    fixture.detectChanges();
+    await fixture.whenStable();
     const actionsCol = component.listConfig.columns.find(c => c.key === 'actions');
     const rowActions = actionsCol!.actions!({ guid: 'r2', url: 'bar.example.com' } as any);
     const del = rowActions.find(a => a.label === 'Delete');
@@ -222,5 +223,49 @@ describe('RoutesTabComponent', () => {
     await onConfirm();
     expect(deleteRoute).toHaveBeenCalledWith('r2');
     expect(removeRoute).toHaveBeenCalledWith('r2');
+  });
+
+  const said = (): string => snackText(snackError.mock.calls[0][0]);
+
+  it('says why an unmap failed in Cloud Foundry\'s words', async () => {
+    unmapRoute.mockRejectedValueOnce(cfRequestFailure());
+    await fixture.whenStable();
+    const actionsCol = component.listConfig.columns.find(c => c.key === 'actions');
+    actionsCol!.actions!({ guid: 'r1', url: 'foo.example.com' } as any).find(a => a.label === 'Unmap')!
+      .invoke({ guid: 'r1', url: 'foo.example.com' } as any);
+    await confirmOpen.mock.calls[0][1]();
+
+    expect(removeRoute).not.toHaveBeenCalled();
+    expect(said()).toBe('Unmap failed: The route is shared with another space.');
+  });
+
+  it('says why a delete failed in Cloud Foundry\'s words', async () => {
+    deleteRoute.mockRejectedValueOnce(cfRequestFailure());
+    await fixture.whenStable();
+    const actionsCol = component.listConfig.columns.find(c => c.key === 'actions');
+    actionsCol!.actions!({ guid: 'r2', url: 'bar.example.com' } as any).find(a => a.label === 'Delete')!
+      .invoke({ guid: 'r2', url: 'bar.example.com' } as any);
+    await confirmOpen.mock.calls[0][1]();
+
+    expect(removeRoute).not.toHaveBeenCalled();
+    expect(said()).toBe('Delete failed: The route is shared with another space.');
+  });
+
+  it('keeps the row, re-reads routes and says so when a delete ends with an unknown result', async () => {
+    deleteRoute.mockResolvedValueOnce('unknown');
+    await fixture.whenStable();
+    const actionsCol = component.listConfig.columns.find(c => c.key === 'actions');
+    const del = actionsCol!.actions!({ guid: 'r3', url: 'baz.example.com' } as any).find(a => a.label === 'Delete');
+    del!.invoke({ guid: 'r3', url: 'baz.example.com' } as any);
+    const [, onConfirm] = confirmOpen.mock.calls[0];
+    refreshScope.mockClear();
+    await onConfirm();
+
+    expect(removeRoute).not.toHaveBeenCalled();
+    expect(refreshScope).toHaveBeenCalledWith('routes');
+    expect(snackError).toHaveBeenCalledWith(
+      'Delete "baz.example.com": the operation ended, but its result could not be determined. '
+      + 'The Routes tab shows the current state.',
+    );
   });
 });

@@ -1,13 +1,39 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { provideZonelessChangeDetection } from '@angular/core';
 import { ActivatedRoute } from '@angular/router';
+import { firstValueFrom } from 'rxjs';
 import { describe, it, expect, beforeEach, afterEach, beforeAll, afterAll, vi } from 'vitest';
+import { of } from 'rxjs';
 
 import { entityCatalog } from '@stratosui/store';
+import {
+  TailwindSnackBarRef,
+  TailwindSnackBarService,
+} from '../../../../../core/src/shared/services/tailwind-snackbar.service';
 import { KubernetesBaseTestModules } from '../../kubernetes.testing.module';
 import { kubeEntityCatalog } from '../../kubernetes-entity-generator';
 import { KubeConfigHelper } from '../kube-config.helper';
 import { KubeConfigSelectionComponent } from './kube-config-selection.component';
+
+const KUBE_CONFIG = `
+apiVersion: v1
+kind: Config
+current-context: c1
+clusters:
+- name: c1
+  cluster:
+    server: https://1.2.3.4:6443
+contexts:
+- name: c1
+  context:
+    cluster: c1
+    user: u1
+users:
+- name: u1
+  user:
+    client-certificate-data: Y2VydA==
+    client-key-data: a2V5
+`;
 
 describe('KubeConfigSelectionComponent', () => {
   let component: KubeConfigSelectionComponent;
@@ -43,13 +69,60 @@ describe('KubeConfigSelectionComponent', () => {
     entityCatalog.register(kubeEntityCatalog.endpoint);
   });
 
-  beforeEach(() => {
+  beforeEach(async () => {
     fixture = TestBed.createComponent(KubeConfigSelectionComponent);
     component = fixture.componentInstance;
-    fixture.detectChanges();
+    await fixture.whenStable();
+  });
+
+  // The cluster list appears once a kube config has been parsed, and the step
+  // is valid only while the selected clusters are importable.
+  it('shows the list and becomes valid once a kube config is parsed', async () => {
+    const list = () => (fixture.nativeElement as HTMLElement).querySelector('app-signal-list');
+    expect(list()).toBeNull();
+    expect(component.valid()).toBe(false);
+
+    await firstValueFrom(TestBed.inject(KubeConfigHelper).parse(KUBE_CONFIG));
+    await fixture.whenStable();
+
+    expect(list()).not.toBeNull();
+    expect(component.valid()).toBe(true);
+  });
+
+  // The cell's edit box replaces the name text; it takes the column's name.
+  it('names the inline cluster name box', async () => {
+    const helper = TestBed.inject(KubeConfigHelper);
+    await firstValueFrom(helper.parse(KUBE_CONFIG));
+    await fixture.whenStable();
+    const [cluster] = helper.clusters()!;
+    component.startEdit(cluster);
+    await fixture.whenStable();
+    const box = (fixture.nativeElement as HTMLElement).querySelector('[data-test="row"] input:not([type])');
+    expect(box).toBeTruthy();
+    expect(box!.getAttribute('aria-label')).toBe('Name');
   });
 
   it('should create', () => {
     expect(component).toBeTruthy();
+  });
+
+  // A new parse clears only this step's own "Failed to load Kube Config"
+  // message; hide() would also dismiss other features' messages.
+  it('clears only its own parse error when parsing again', async () => {
+    const snackbar = TestBed.inject(TailwindSnackBarService);
+    const firstRef = { dismiss: vi.fn(), afterDismissed: () => of(null) };
+    const show = vi.spyOn(snackbar, 'show').mockReturnValue(firstRef as unknown as TailwindSnackBarRef<unknown>);
+    const hide = vi.spyOn(snackbar, 'hide');
+    vi.spyOn(TestBed.inject(KubeConfigHelper), 'parse').mockReturnValue(of('bad yaml'));
+
+    component.clustersParse('first');
+    await fixture.whenStable();
+    expect(show).toHaveBeenCalledWith('Failed to load Kube Config: bad yaml', 'Close');
+    expect(firstRef.dismiss).not.toHaveBeenCalled();
+
+    component.clustersParse('second');
+    await fixture.whenStable();
+    expect(firstRef.dismiss).toHaveBeenCalledTimes(1);
+    expect(hide).not.toHaveBeenCalled();
   });
 });

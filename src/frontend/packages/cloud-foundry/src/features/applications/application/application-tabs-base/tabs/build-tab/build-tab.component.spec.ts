@@ -1,8 +1,11 @@
-import { HttpClientTestingModule } from '@angular/common/http/testing';
+import { HttpRequest } from '@angular/common/http';
+import { HttpClientTestingModule, HttpTestingController } from '@angular/common/http/testing';
 import { ComponentFixture, TestBed } from '@angular/core/testing';
-import { provideZonelessChangeDetection, signal } from '@angular/core';
+import { provideZonelessChangeDetection, signal, WritableSignal } from '@angular/core';
 import { By } from '@angular/platform-browser';
 import { ActivatedRoute } from '@angular/router';
+import { CurrentUserPermissionsService } from '@stratosui/core';
+import { getGitHubAPIURL, GITHUB_API_URL, GitDataService } from '@stratosui/git';
 import { describe, it, expect, beforeEach, afterEach, beforeAll, afterAll, vi } from 'vitest';
 
 import { generateTestApplicationServiceProvider, generateCfStoreModules, ApplicationStateService, ApplicationEnvVarsHelper } from '@test-framework/cf';
@@ -13,29 +16,42 @@ import { AppDetailDataService } from '../../../../app-detail-data.service';
 import { BuildTabComponent } from './build-tab.component';
 import { ViewBuildpackComponent } from "./view-buildpack/view-buildpack.component";
 
-function makeDataServiceStub() {
+// Signals a test drives; anything left out keeps the default below.
+interface DataSignals {
+  stratosProject?: WritableSignal<unknown>;
+  app?: WritableSignal<unknown>;
+  space?: WritableSignal<unknown>;
+  labels?: Record<string, string>;
+}
+
+function makeDataServiceStub({
+  stratosProject = signal(null),
+  app = signal({ entity: { instances: 1 } }),
+  space = signal(undefined),
+  labels = {},
+}: DataSignals = {}) {
   return {
     // Minimal app-detail so the Summary template's `@if (data.appDetail())`
     // block renders (the scale card + accordion both live inside it).
     appDetail: signal({
-      app: { guid: 'app-1', state: 'STARTED', createdAt: null, routes: [] },
+      app: { guid: 'app-1', state: 'STARTED', createdAt: null, routes: [], labels, spaceGuid: 'sp-1', cnsiGuid: 'cnsi-1' },
       pkg: null,
       process: null,
       droplet: null,
       build: null,
     }).asReadonly(),
-    app: signal({ entity: { instances: 1 } }).asReadonly(),
+    app: app.asReadonly(),
     summary: signal(undefined).asReadonly(),
     stats: signal([]).asReadonly(),
     envVars: signal(undefined).asReadonly(),
-    space: signal(undefined).asReadonly(),
+    space: space.asReadonly(),
     org: signal(undefined).asReadonly(),
     domains: signal([]).asReadonly(),
     loading: signal({ app: false, stats: false, envVars: false, space: false, org: false, domains: false }).asReadonly(),
     errors: signal({ app: null, stats: null, envVars: null, space: null, org: null, domains: null }).asReadonly(),
     running: signal(false).asReadonly(),
     url: signal(null).asReadonly(),
-    stratosProject: signal(null).asReadonly(),
+    stratosProject: stratosProject.asReadonly(),
     state: signal({ status: 'UNKNOWN' }).asReadonly(),
     fetching: signal(false).asReadonly(),
     lastPolledAt: signal(null).asReadonly(),
@@ -60,8 +76,7 @@ describe('BuildTabComponent', () => {
   const appId = '4e4858c4-24ab-4caf-87a8-7703d1da58a0';
   const cfId = testSCFEndpointGuid;
 
-  beforeEach(async () => {
-    await TestBed.configureTestingModule({
+  const configure = (signals: DataSignals = {}) => TestBed.configureTestingModule({
       imports: [
         BuildTabComponent,
         ViewBuildpackComponent,
@@ -80,7 +95,8 @@ describe('BuildTabComponent', () => {
           provide: AppApplicationActionsService,
           useValue: { inFlight: signal(false).asReadonly() },
         },
-        { provide: AppDetailDataService, useFactory: makeDataServiceStub },
+        { provide: AppDetailDataService, useFactory: () => makeDataServiceStub(signals) },
+        { provide: GITHUB_API_URL, useFactory: getGitHubAPIURL },
         {
           provide: ActivatedRoute,
           useValue: {
@@ -94,28 +110,192 @@ describe('BuildTabComponent', () => {
       ]
     }).compileComponents();
 
-    fixture = TestBed.createComponent(BuildTabComponent);
-    component = fixture.componentInstance;
-    fixture.detectChanges();
-  });
-
   afterEach(() => {
     fixture?.destroy();
   });
 
-  it('should be created', () => {
-    expect(component).toBeTruthy();
+  describe('without a deployed project', () => {
+    beforeEach(async () => {
+      await configure();
+      fixture = TestBed.createComponent(BuildTabComponent);
+      component = fixture.componentInstance;
+      await fixture.whenStable();
+    });
+
+    it('should be created', () => {
+      expect(component).toBeTruthy();
+    });
+
+    // A card was read part by part, with no name for the whole: a screen
+    // reader user did not hear where "Application Info" began or ended. Each
+    // card with a heading is a group named by its heading.
+    it('names each card with a heading as a group', () => {
+      const cards = Array.from(fixture.nativeElement.querySelectorAll('.card')) as HTMLElement[];
+      const titled = cards.filter(c => c.querySelector(':scope > .card-header h3'));
+      expect(titled.length).toBeGreaterThan(0);
+      for (const card of titled) {
+        const h3 = card.querySelector(':scope > .card-header h3') as HTMLElement;
+        expect(card.getAttribute('role'), h3.textContent!).toBe('group');
+        expect(h3.id, h3.textContent!).not.toBe('');
+        expect(card.getAttribute('aria-labelledby')).toBe(h3.id);
+      }
+    });
+
+    it('renders the instances accordion', () => {
+      expect(fixture.nativeElement.querySelector('app-instances-accordion')).toBeTruthy();
+    });
+
+    it('shows an empty labels placeholder', () => {
+      const item = Array.from(fixture.nativeElement.querySelectorAll('app-metadata-item'))
+        .find((el: any) => el.getAttribute('label') === 'Labels') as HTMLElement;
+      expect(item.textContent).toContain('—');
+    });
+
+    it('renders the scale card with actions enabled', () => {
+      const card = fixture.debugElement.query(By.directive(CardAppInstancesComponent));
+      expect(card).toBeTruthy();
+      expect(card.componentInstance.showActions()).toBe(true);
+    });
   });
 
-  it('renders the instances accordion', () => {
-    fixture.detectChanges();
-    expect(fixture.nativeElement.querySelector('app-instances-accordion')).toBeTruthy();
+  it('shows application label keys and values', async () => {
+    await configure({ labels: { 'example.com/team': 'platform', empty: '' } });
+    fixture = TestBed.createComponent(BuildTabComponent);
+    await fixture.whenStable();
+    const item = Array.from(fixture.nativeElement.querySelectorAll('app-metadata-item'))
+      .find((el: any) => el.getAttribute('label') === 'Labels') as HTMLElement;
+    expect(item.textContent).toContain('example.com/team=platform');
+    expect(item.textContent).toContain('empty=');
   });
 
-  it('renders the scale card with actions enabled', () => {
-    fixture.detectChanges();
-    const card = fixture.debugElement.query(By.directive(CardAppInstancesComponent));
-    expect(card).toBeTruthy();
-    expect(card.componentInstance.showActions).toBe(true);
+  // The repository links bind gitRepo$ with the async pipe, so a failed
+  // lookup must end the stream rather than throw into the template.
+  describe('with a git deployed project', () => {
+    const project = {
+      deploySource: { type: 'gitscm', scm: 'github', project: 'org/missing', branch: 'main', commit: 'abc', endpointGuid: '' },
+    };
+
+    beforeEach(async () => {
+      await configure({ stratosProject: signal(project) });
+      fixture = TestBed.createComponent(BuildTabComponent);
+      component = fixture.componentInstance;
+      await fixture.whenStable();
+    });
+
+    it('ends gitRepo$ without an error when the repository lookup fails', async () => {
+      const events: string[] = [];
+      component.gitRepo$.subscribe({
+        next: () => events.push('next'),
+        error: () => events.push('error'),
+        complete: () => events.push('complete'),
+      });
+      await fixture.whenStable();
+      TestBed.inject(HttpTestingController)
+        .expectOne('https://api.github.com/repos/org/missing')
+        .flush('nope', { status: 404, statusText: 'Not Found' });
+      await fixture.whenStable();
+
+      expect(events).not.toContain('error');
+      expect(events).not.toContain('next');
+    });
+  });
+
+  // App and env var refreshes hand the tab an equal deploy source again. The
+  // git lookups depend only on that source, so a failed lookup is not
+  // retried on every refresh.
+  describe('when the space does not allow env var reads', () => {
+    let canSee: WritableSignal<boolean>;
+
+    beforeEach(async () => {
+      canSee = signal(false);
+      await configure({
+        stratosProject: signal({ deploySource: { type: 'docker', dockerImage: 'img' } }),
+        app: signal({ entity: { instances: 1, docker_image: 'img' } }),
+        space: signal({ guid: 'space-1' }),
+      });
+      vi.spyOn(TestBed.inject(CurrentUserPermissionsService), 'can').mockReturnValue(canSee);
+      fixture = TestBed.createComponent(BuildTabComponent);
+      component = fixture.componentInstance;
+      await fixture.whenStable();
+    });
+
+    it('shows the deploy source as not available until the permission holds', async () => {
+      const seen: ({ type?: string } | null)[] = [];
+      const sub = component.deploySource$.subscribe(v => seen.push(v));
+      await fixture.whenStable();
+      expect(seen.at(-1)?.type).toBe('not-available');
+      canSee.set(true);
+      await fixture.whenStable();
+      expect(seen.at(-1)?.type).toBe('docker');
+      sub.unsubscribe();
+    });
+  });
+
+  describe('when the app refreshes after a failed git lookup', () => {
+    const source = { type: 'gitscm', scm: 'github', project: 'org/missing', branch: 'main', commit: 'abc', endpointGuid: '' };
+    const repoUrl = 'https://api.github.com/repos/org/missing';
+    const commitUrl = 'https://api.github.com/repos/org/missing/commits/abc';
+    const isRepo = (req: HttpRequest<unknown>) => req.urlWithParams === repoUrl;
+    const isCommit = (req: HttpRequest<unknown>) => req.urlWithParams === commitUrl;
+    const notFound = { status: 404, statusText: 'Not Found' };
+    let stratosProject: WritableSignal<unknown>;
+    let app: WritableSignal<unknown>;
+
+    beforeEach(async () => {
+      stratosProject = signal({ deploySource: { ...source } });
+      app = signal({ entity: { instances: 1 } });
+      // The deploy source shows once the space allows env var reads.
+      await configure({ stratosProject, app, space: signal({ guid: 'space-1' }) });
+      vi.spyOn(TestBed.inject(CurrentUserPermissionsService), 'can').mockReturnValue(signal(true));
+      fixture = TestBed.createComponent(BuildTabComponent);
+      component = fixture.componentInstance;
+      await fixture.whenStable();
+    });
+
+    it('looks the repository and the commit up once while the source stays the same', async () => {
+      const httpMock = TestBed.inject(HttpTestingController);
+      const subs = [
+        component.gitRepo$.subscribe({ error: () => undefined }),
+        component.deploySource$.subscribe(),
+      ];
+      await fixture.whenStable();
+      const repoRequests = httpMock.match(isRepo);
+      const commitRequests = httpMock.match(isCommit);
+      expect(repoRequests.length).toBe(1);
+      expect(commitRequests.length).toBe(1);
+      repoRequests.forEach(r => r.flush('nope', notFound));
+      commitRequests.forEach(r => r.flush('nope', notFound));
+      await fixture.whenStable();
+
+      for (let i = 0; i < 3; i++) {
+        stratosProject.set({ deploySource: { ...source } });
+        app.set({ entity: { instances: 1 } });
+        await fixture.whenStable();
+      }
+
+      expect(httpMock.match(isRepo).length).toBe(0);
+      expect(httpMock.match(isCommit).length).toBe(0);
+      subs.forEach(sub => sub.unsubscribe());
+    });
+  });
+
+  // The repository and branch links both read the repository lookup.
+  describe('with a git deployed project on show', () => {
+    const source = { type: 'gitscm', scm: 'github', project: 'org/repo', branch: 'main', commit: 'abc', endpointGuid: '' };
+
+    it('looks the repository up once for all its links', async () => {
+      await configure({
+        stratosProject: signal({ deploySource: { ...source } }),
+        app: signal({ entity: { instances: 1 } }),
+        space: signal({ guid: 'space-1' }),
+      });
+      vi.spyOn(TestBed.inject(CurrentUserPermissionsService), 'can').mockReturnValue(signal(true));
+      const getRepository = vi.spyOn(TestBed.inject(GitDataService), 'getRepository');
+      fixture = TestBed.createComponent(BuildTabComponent);
+      await fixture.whenStable();
+
+      expect(fixture.nativeElement.textContent).toContain('org/repo');
+      expect(getRepository).toHaveBeenCalledTimes(1);
+    });
   });
 });

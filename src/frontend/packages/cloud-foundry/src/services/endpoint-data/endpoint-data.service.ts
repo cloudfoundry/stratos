@@ -1,6 +1,6 @@
 import { HttpClient } from '@angular/common/http';
 import { signal, Signal } from '@angular/core';
-import { EMPTY, firstValueFrom, merge, Observable, of, ReplaySubject } from 'rxjs';
+import { EMPTY, firstValueFrom, merge, Observable, of } from 'rxjs';
 import { catchError, finalize, map, shareReplay, tap, timeout } from 'rxjs/operators';
 import { cascadeFor, CascadeKey, EntityKind } from '../data-sources/cascade-registry';
 import { StratosDiagnostics } from '../diagnostics/stratos-diagnostics.service';
@@ -18,6 +18,16 @@ import {
   StServicePlan,
   StSpace,
 } from './stratos-types';
+import { extractHttpErrorMessage } from '@stratosui/store';
+
+// Matches the per_page of the backend's ?return=recent apps call.
+const RECENT_APPS_COUNT = 10;
+
+// Mirrors the backend's ?return=recent: newest updatedAt first, capped.
+function newestApps(apps: StApp[]): StApp[] {
+  const updated = (a: StApp) => Date.parse(a.updatedAt) || 0;
+  return [...apps].sort((a, b) => updated(b) - updated(a)).slice(0, RECENT_APPS_COUNT);
+}
 
 export class EndpointDataService {
   // Counts + recent apps populated by load() (home card fast path).
@@ -146,11 +156,11 @@ export class EndpointDataService {
   readonly serviceBrokersStale: Signal<boolean> = this._serviceBrokersStale.asReadonly();
   readonly serviceCredentialBindingsStale: Signal<boolean> = this._serviceCredentialBindingsStale.asReadonly();
 
-  // ReplaySubject(1) — late subscribers (e.g. the home card's async pipe
-  // subscribing after the HTTP has already completed) immediately receive the
-  // last emission so they don't hang forever on a stream that already fired.
-  readonly loaded$ = new ReplaySubject<void>(1);
-  readonly detailsLoaded$ = new ReplaySubject<void>(1);
+  // True once the first load() has settled, whether it succeeded or failed.
+  // lastFetched is only stamped on success, so it can't say "settled" for a
+  // consumer that must stop waiting after a failure.
+  private readonly _loaded = signal(false);
+  readonly loaded: Signal<boolean> = this._loaded.asReadonly();
 
   // In-flight dedup. Concurrent callers before the first HTTP completes share
   // the same Observable instead of each firing their own fan-out — without
@@ -171,8 +181,8 @@ export class EndpointDataService {
   ) {}
 
   // load() populates counts + the 10 most-recent apps via fast per_page=1/10
-  // backend calls. Fires loadDetails() in the background on completion so
-  // the full orgs/apps/spaces arrays are populated for detail views.
+  // backend calls. It does not load the full orgs/apps/spaces arrays;
+  // detail views call loadDetails() (or a loadX()) for those.
   load(): Observable<void> {
     this.diagnostics?.emitCounter('service-call-count', { service: 'EndpointDataService', method: 'load' });
     // Warm-cache short-circuit: signals already populated, no network needed.
@@ -235,7 +245,7 @@ export class EndpointDataService {
         // apps populate service signals for the home card directly; the NGRX
         // pagination store only needs the full lists, which loadDetails()
         // dispatches via shim.write() in its own finalize().
-        this.loaded$.next();
+        this._loaded.set(true);
         this._inFlightLoad = null;
       }),
       shareReplay({ bufferSize: 1, refCount: false }),
@@ -283,7 +293,6 @@ export class EndpointDataService {
         this._isLoadingDetails.set(false);
         this._detailsLastFetched.set(new Date());
         this.shim.write(this.guid, this.currentData());
-        this.detailsLoaded$.next();
         this._inFlightLoadDetails = null;
       }),
       shareReplay({ bufferSize: 1, refCount: false }),
@@ -347,6 +356,8 @@ export class EndpointDataService {
       // Stamp on success only — see loadOrgs.
       tap(resp => {
         this._apps.set(resp.resources);
+        // The full list is newer than the recent list load() fetched.
+        this._recentApps.set(newestApps(resp.resources));
         this._appCount.set(resp.totalResults);
         this._appsLastFetched.set(new Date());
         this._appsStale.set(false);
@@ -450,8 +461,15 @@ export class EndpointDataService {
       (s as { guid?: string }).guid === guid ? { ...s, ...patch } : s));
   }
 
+  // The app mutators keep recentApps in step with apps, so the home card's
+  // recent list shows a create/update/delete without another load().
   removeApp(guid: string): void {
     this._apps.update(curr => curr.filter(a => (a as { guid?: string }).guid !== guid));
+    // Refill from the full list (when loaded) so the next most recent app
+    // takes the freed slot; entries already shown keep their own record.
+    const recent = this._recentApps().filter(a => a.guid !== guid);
+    const shown = new Set(recent.map(a => a.guid));
+    this._recentApps.set(newestApps([...recent, ...this._apps().filter(a => !shown.has(a.guid))]));
     this._appCount.update(n => Math.max(0, n - 1));
   }
   addApp(app: StApp): void {
@@ -460,11 +478,23 @@ export class EndpointDataService {
       if (idx >= 0) { const next = [...curr]; next[idx] = app; return next; }
       return [...curr, app];
     });
+    this.upsertRecentApp(app);
     this._appCount.update(n => n + 1);
   }
   updateApp(guid: string, patch: Partial<StApp>): void {
     this._apps.update(curr => curr.map(a =>
       (a as { guid?: string }).guid === guid ? { ...a, ...patch } : a));
+    // An update bumps updatedAt, so an app outside the recent list can join
+    // it — but only when the full list holds the whole record to add.
+    const recent = this._recentApps().find(a => a.guid === guid);
+    const app = recent ? { ...recent, ...patch } : this._apps().find(a => a.guid === guid);
+    if (app) {
+      this.upsertRecentApp(app);
+    }
+  }
+
+  private upsertRecentApp(app: StApp): void {
+    this._recentApps.update(curr => newestApps([app, ...curr.filter(a => a.guid !== app.guid)]));
   }
 
   removeServiceInstance(guid: string): void {
@@ -540,6 +570,8 @@ export class EndpointDataService {
       // Stamp on success only — see loadOrgs.
       tap(resp => {
         this._apps.set(resp.resources);
+        // The full list is newer than the recent list load() fetched.
+        this._recentApps.set(newestApps(resp.resources));
         this._appCount.set(resp.totalResults);
         this._appsLastFetched.set(new Date());
         this._appsStale.set(false);
@@ -587,7 +619,6 @@ export class EndpointDataService {
         this._isLoadingDetails.set(false);
         this._detailsLastFetched.set(new Date());
         this.shim.write(this.guid, this.currentData());
-        this.detailsLoaded$.next();
       }),
       shareReplay({ bufferSize: 1, refCount: false }),
     ) as Observable<void>;
@@ -785,7 +816,7 @@ export class EndpointDataService {
     this._errors.update(errors => [...errors, {
       resource,
       severity: 'error' as const,
-      message: err instanceof Error ? err.message : String(err),
+      message: extractHttpErrorMessage(err),
       recoverable: true,
       detail: err,
     }]);

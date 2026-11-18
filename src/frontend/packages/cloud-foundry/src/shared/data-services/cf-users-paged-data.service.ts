@@ -1,7 +1,7 @@
-import { Injectable, Signal, WritableSignal, inject, signal } from '@angular/core';
+import { Injectable, Signal, WritableSignal, computed, inject, signal } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { Observable, of } from 'rxjs';
-import { catchError, finalize, map, shareReplay, tap } from 'rxjs/operators';
+import { catchError, concatMap, finalize, map, shareReplay } from 'rxjs/operators';
 import { drainCfPages } from '../../services/endpoint-data/drain-pages';
 import { StUser, StUserOrgRole, StUserSpaceRole } from '../../services/endpoint-data/stratos-types';
 
@@ -11,6 +11,10 @@ interface CfUsersCnsiState {
   isLoading: WritableSignal<boolean>;
   lastFetched: WritableSignal<Date | null>;
   stale: WritableSignal<boolean>;
+  // Bumped by markStale. A drain started before the latest bump predates a
+  // mutation: its rows are pre-change and must not mark the cache fresh.
+  staleGen: number;
+  inFlightGen: number;
   inFlight: Observable<void> | null;
 }
 
@@ -37,6 +41,8 @@ export class CfUsersPagedDataService {
         isLoading: signal(false),
         lastFetched: signal<Date | null>(null),
         stale: signal(false),
+        staleGen: 0,
+        inFlightGen: 0,
         inFlight: null,
       };
       this.states.set(cnsi, s);
@@ -49,7 +55,32 @@ export class CfUsersPagedDataService {
   isLoading(cnsi: string): Signal<boolean> { return this.ensure(cnsi).isLoading.asReadonly(); }
   lastFetched(cnsi: string): Signal<Date | null> { return this.ensure(cnsi).lastFetched.asReadonly(); }
 
-  markStale(cnsi: string): void { this.ensure(cnsi).stale.set(true); }
+  markStale(cnsi: string): void {
+    const s = this.ensure(cnsi);
+    s.staleGen++;
+    s.stale.set(true);
+  }
+
+  // Lazy read for summary tiles (user counts, "your role"): the first read
+  // starts the drain, and the signal stays null until it settles so tiles
+  // show a dash instead of a flickering 0. A failed drain settles to the
+  // empty list (tiles read 0 / None); errorsByCnsi still carries the error.
+  users(cnsi: string): Signal<StUser[] | null> {
+    const s = this.ensure(cnsi);
+    this.loadUsers(cnsi).subscribe();
+    return computed(() => (s.lastFetched() !== null || this._errorsByCnsi().has(cnsi) ? s.allUsers() : null));
+  }
+
+  // Re-fetch only a CF whose users were already loaded. Mutation flows call
+  // this so mounted tiles and lists reconcile with server truth, without
+  // starting the users+roles join where nothing has read it.
+  refreshIfLoaded(cnsi: string): void {
+    const s = this.states.get(cnsi);
+    // A drain still in flight (first load) counts: it may predate the mutation.
+    if (s?.lastFetched() || s?.inFlight) {
+      this.refresh(cnsi).subscribe();
+    }
+  }
 
   // Insert a user the cache has never seen (a set-by-username add: the
   // real guid only arrives in the role-change response). Mounted lists
@@ -80,27 +111,37 @@ export class CfUsersPagedDataService {
     if (!s.stale() && s.lastFetched() !== null && s.allUsers().length > 0) {
       return of(undefined);
     }
-    if (s.inFlight) { return s.inFlight; }
+    // Join a drain only if it started after the latest markStale.
+    if (s.inFlight && s.inFlightGen === s.staleGen) { return s.inFlight; }
+    const gen = s.staleGen;
     s.isLoading.set(true);
-    s.inFlight = drainCfPages<StUser>(this.http, `/pp/v1/cf/users/${cnsi}`).pipe(
-      // Freshness stamp + stale-clear on the success path only — a failed
-      // drain leaves the cache cold so the next read retries instead of
-      // serving the failure as fresh.
-      tap(resp => {
+    const drain: Observable<void> = drainCfPages<StUser>(this.http, `/pp/v1/cf/users/${cnsi}`).pipe(
+      // A drain that predates a mutation is dropped (its rows are pre-change
+      // and would overwrite the inline role patches); callers wait for a
+      // new drain (or the one already started) instead.
+      concatMap(resp => {
+        if (gen !== s.staleGen) { return this.loadUsers(cnsi); }
+        // Freshness stamp + stale-clear on the success path only — a failed
+        // drain leaves the cache cold so the next read retries instead of
+        // serving the failure as fresh.
         s.allUsers.set(resp.resources);
         s.count.set(resp.totalResults);
         s.lastFetched.set(new Date());
         s.stale.set(false);
         this.clearError(cnsi);
+        return of(undefined as void);
       }),
-      map(() => undefined as void),
       catchError(err => { this.setError(cnsi, err); return of(undefined as void); }),
       finalize(() => {
-        s.isLoading.set(false);
-        s.inFlight = null;
+        if (s.inFlight === drain) {
+          s.isLoading.set(false);
+          s.inFlight = null;
+        }
       }),
       shareReplay({ bufferSize: 1, refCount: false }),
     );
+    s.inFlight = drain;
+    s.inFlightGen = gen;
     return s.inFlight;
   }
 

@@ -1,3 +1,5 @@
+import { readFileSync } from 'fs';
+import { join } from 'path';
 import { provideZonelessChangeDetection, signal } from '@angular/core';
 import { provideHttpClient } from '@angular/common/http';
 import { HttpTestingController, provideHttpClientTesting } from '@angular/common/http/testing';
@@ -5,6 +7,9 @@ import { ActivatedRoute, provideRouter } from '@angular/router';
 import { provideNoopAnimations } from '@angular/platform-browser/animations';
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { describe, it, expect, beforeEach } from 'vitest';
+
+import { StepComponent } from '@stratosui/core';
+import { extractHttpErrorMessage } from '@stratosui/store';
 
 import { RouteServiceComponent } from './route-service.component';
 import { ServiceCatalogDataService } from '../../../services/endpoint-data/service-catalog-data.service';
@@ -22,6 +27,15 @@ describe('RouteServiceComponent — bind patches the binding from the response',
   let fixture: ComponentFixture<RouteServiceComponent>;
   let http: HttpTestingController;
   let bindingFetches: number;
+
+  // Runs the bind step's submit action; throws when the step has none.
+  const submitBindStep = () => {
+    const submit = component.bindStepHandle.submit;
+    if (!submit) {
+      throw new Error('the bind step has no submit action');
+    }
+    return submit();
+  };
 
   beforeEach(async () => {
     bindingFetches = 0;
@@ -49,12 +63,12 @@ describe('RouteServiceComponent — bind patches the binding from the response',
     fixture = TestBed.createComponent(RouteServiceComponent);
     component = fixture.componentInstance;
     http = TestBed.inject(HttpTestingController);
-    fixture.detectChanges();
+    await fixture.whenStable();
   });
 
   it('shows the created binding from a 201 body without refetching', async () => {
     component.selectedSiGuid.set('si-1');
-    const done = component.bindStepHandle.submit();
+    const done = submitBindStep();
     http.expectOne(r => r.method === 'POST' && r.url === '/pp/v1/cf/service_route_bindings/cf-1').flush(
       {
         guid: 'b-1', route_service_url: 'https://logger.example', last_operation: { state: 'succeeded' },
@@ -73,13 +87,138 @@ describe('RouteServiceComponent — bind patches the binding from the response',
 
   it('falls back to a refetch when the response is a completed job rather than the binding', async () => {
     component.selectedSiGuid.set('si-1');
-    const done = component.bindStepHandle.submit();
+    const done = submitBindStep();
     http.expectOne(r => r.method === 'POST' && r.url === '/pp/v1/cf/service_route_bindings/cf-1').flush(
       { state: 'COMPLETE', result: { guid: 'job-9', operation: 'service_route_binding.create', state: 'COMPLETE' } },
       { status: 200, statusText: 'OK' },
     );
     await done;
 
+    expect(component.binding()).toBeNull();
+    expect(bindingFetches).toBe(2);
+  });
+
+  it('shows the broker detail when the bind fails on the fast path', async () => {
+    component.selectedSiGuid.set('si-1');
+    const done = submitBindStep();
+    http.expectOne(r => r.method === 'POST' && r.url === '/pp/v1/cf/service_route_bindings/cf-1').flush(
+      { state: 'FAILED', errors: [{ code: 'cf.v3.10009', message: 'CF-UnableToPerform', detail: 'bind could not be completed: route services disabled' }] },
+      { status: 502, statusText: 'Bad Gateway' },
+    );
+    // The stepper reads the rejection as extractHttpErrorMessage does.
+    await expect(done.catch(extractHttpErrorMessage)).resolves.toBe('bind could not be completed: route services disabled');
+
+    expect(component.errorMessage()).toBe('Failed to bind service: bind could not be completed: route services disabled');
+  });
+
+  // nginx's own 502 page, as a proxy in front of Stratos sends it.
+  it('gives the stepper an error page\'s heading when the bind fails', async () => {
+    const page = readFileSync(join(import.meta.dirname, '../../../../../store/src/testdata/upstream-errors/nginx-502.body'), 'utf8');
+    component.selectedSiGuid.set('si-1');
+    const stepRef = TestBed.createComponent(StepComponent).componentRef;
+    stepRef.setInput('signalHandle', component.bindStepHandle);
+    const step = stepRef.instance;
+    const done = step.invokeNext();
+    http.expectOne(r => r.method === 'POST' && r.url === '/pp/v1/cf/service_route_bindings/cf-1')
+      .flush(page, { status: 502, statusText: 'Bad Gateway' });
+
+    const result = await done;
+
+    expect(result.message).toBe('502 Bad Gateway\nnginx/1.28.0');
+    expect(result.messagePieces).toEqual([
+      { text: '502 Bad Gateway', style: 'heading' },
+      { text: '\nnginx/1.28.0', style: 'text' },
+    ]);
+    expect(component.errorMessage()).toBe('Failed to bind service: 502 Bad Gateway\nnginx/1.28.0');
+  });
+
+  // A write that ended with an unknown result (here: a 202 without a job id)
+  // is reported as such and the binding re-read, never shown as bound.
+  it('says a bind ended with an unknown result and re-reads the binding', async () => {
+    component.selectedSiGuid.set('si-1');
+    const done = submitBindStep();
+    http.expectOne(r => r.method === 'POST' && r.url === '/pp/v1/cf/service_route_bindings/cf-1').flush(null, { status: 202, statusText: 'Accepted' });
+    const message = 'Bind "logger": the operation ended, but its result could not be determined. This page shows the current state.';
+    await expect(done).resolves.toEqual({ success: false, message });
+
+    expect(component.errorMessage()).toBe(message);
+    expect(component.binding()).toBeNull();
+    expect(bindingFetches).toBe(2);
+  });
+
+  it('says an unbind ended with an unknown result and re-reads the binding', async () => {
+    component.selectedSiGuid.set('si-1');
+    const bound = submitBindStep();
+    http.expectOne(r => r.method === 'POST' && r.url === '/pp/v1/cf/service_route_bindings/cf-1').flush(
+      {
+        guid: 'b-1', route_service_url: 'https://logger.example', last_operation: { state: 'succeeded' },
+        relationships: { route: { data: { guid: 'r-1' } }, service_instance: { data: { guid: 'si-1' } } },
+      },
+      { status: 201, statusText: 'Created' },
+    );
+    await bound;
+
+    const done = component.unbind();
+    http.expectOne(r => r.method === 'DELETE' && r.url === '/pp/v1/cf/service_route_bindings/cf-1/b-1').flush(null, { status: 202, statusText: 'Accepted' });
+    await done;
+
+    expect(component.errorMessage()).toBe(
+      'Unbind "logger": the operation ended, but its result could not be determined. This page shows the current state.',
+    );
+    expect(bindingFetches).toBe(2);
+  });
+
+  it('does not bind after the unbind leg of a rebind ends with an unknown result', async () => {
+    component.selectedSiGuid.set('si-1');
+    const bound = submitBindStep();
+    http.expectOne(r => r.method === 'POST' && r.url === '/pp/v1/cf/service_route_bindings/cf-1').flush(
+      {
+        guid: 'b-1', route_service_url: 'https://logger.example', last_operation: { state: 'succeeded' },
+        relationships: { route: { data: { guid: 'r-1' } }, service_instance: { data: { guid: 'si-1' } } },
+      },
+      { status: 201, statusText: 'Created' },
+    );
+    await bound;
+
+    component.startRebind();
+    component.selectedSiGuid.set('si-1');
+    const done = submitBindStep();
+    http.expectOne(r => r.method === 'DELETE' && r.url === '/pp/v1/cf/service_route_bindings/cf-1/b-1').flush(null, { status: 202, statusText: 'Accepted' });
+    const out = await done;
+
+    expect(out).toMatchObject({ success: false });
+    http.expectNone(r => r.method === 'POST');
+    expect(component.errorMessage()).toBe(
+      'Unbind "logger": the operation ended, but its result could not be determined. This page shows the current state.',
+    );
+    expect(component.rebinding()).toBe(false);
+  });
+  it('re-reads the binding when a rebind unbinds but the new bind fails', async () => {
+    component.selectedSiGuid.set('si-1');
+    const bound = submitBindStep();
+    http.expectOne(r => r.method === 'POST' && r.url === '/pp/v1/cf/service_route_bindings/cf-1').flush(
+      {
+        guid: 'b-1', route_service_url: 'https://logger.example', last_operation: { state: 'succeeded' },
+        relationships: { route: { data: { guid: 'r-1' } }, service_instance: { data: { guid: 'si-1' } } },
+      },
+      { status: 201, statusText: 'Created' },
+    );
+    await bound;
+    expect(bindingFetches).toBe(1);
+
+    component.startRebind();
+    component.selectedSiGuid.set('si-1');
+    const done = submitBindStep();
+    http.expectOne(r => r.method === 'DELETE' && r.url === '/pp/v1/cf/service_route_bindings/cf-1/b-1')
+      .flush({ state: 'COMPLETE' }, { status: 200, statusText: 'OK' });
+    await fixture.whenStable();
+    http.expectOne(r => r.method === 'POST' && r.url === '/pp/v1/cf/service_route_bindings/cf-1').flush(
+      { errors: [{ code: 10008, title: 'CF-UnprocessableEntity', detail: 'broker rejected the bind' }] },
+      { status: 422, statusText: 'Unprocessable Entity' },
+    );
+    await expect(done).rejects.toBeDefined();
+
+    // The old binding is gone in CF: the page must not keep showing it.
     expect(component.binding()).toBeNull();
     expect(bindingFetches).toBe(2);
   });

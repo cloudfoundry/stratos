@@ -1,7 +1,9 @@
 import { DestroyRef, Injectable, inject, signal } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
+import { firstValueFrom } from 'rxjs';
 import { StratosTheme, defaultTheme, darkTheme } from './theme.config';
 import { CompanyConfig } from './company-config.interface';
+import { deriveDarkHex, luminance } from './derive-dark';
 import { BUILD_INFO } from '../core/src/environments/build-info';
 
 export type ThemeMode = 'light' | 'dark' | 'system';
@@ -24,13 +26,13 @@ const defaultCompanyConfig: CompanyConfig = {
     loginBackground: '/core/assets/login-bg.webp',
   },
   theme: {
-    primary: '#3b82f6',
-    secondary: '#60a5fa',
-    accent: '#60a5fa',
+    primary: '#1e40af',
+    secondary: '#1e40af',
+    accent: '#1e40af',
     success: '#22c55e',
     warning: '#f59e0b',
     danger: '#ef4444',
-    info: '#3b82f6',
+    info: '#1e40af',
   },
   navigation: {
     background: '#1e293b',
@@ -66,6 +68,21 @@ const defaultCompanyConfig: CompanyConfig = {
     viewMode: 'cards',
   },
 };
+
+// Text drawn on a status color (#4166): white or the dark-theme navy,
+// whichever reads better on it. Null for a color that is not #rgb or
+// #rrggbb, which leaves the stylesheet default in place.
+const TEXT_LIGHT = '#ffffff';
+const TEXT_DARK = '#0f172a';
+export function textOn(color: string): string | null {
+  const bg = luminance(color);
+  if (bg === null) {
+    return null;
+  }
+  const onWhite = 1.05 / (bg + 0.05);
+  const onDark = (bg + 0.05) / (luminance(TEXT_DARK)! + 0.05);
+  return onWhite >= onDark ? TEXT_LIGHT : TEXT_DARK;
+}
 
 @Injectable({
   providedIn: 'root'
@@ -195,9 +212,10 @@ export class StratosBrandingService {
   private async loadCompanyConfig() {
     try {
       // Try to load from company-config.json first
-      const config = await this.http.get<CompanyConfig>('/assets/company-config.json').toPromise();
+      const config = await firstValueFrom(this.http.get<CompanyConfig>('/assets/company-config.json'));
       if (config) {
         this.setCompanyConfig(config);
+        console.info('[StratosBrandingService] Company config loaded from /assets/company-config.json');
         return;
       }
     } catch (_error) {
@@ -206,9 +224,10 @@ export class StratosBrandingService {
 
     try {
       // Try to load from environment-specific config
-      const envConfig = await this.http.get<CompanyConfig>('/assets/config/company.json').toPromise();
+      const envConfig = await firstValueFrom(this.http.get<CompanyConfig>('/assets/config/company.json'));
       if (envConfig) {
         this.setCompanyConfig(envConfig);
+        console.info('[StratosBrandingService] Company config loaded from /assets/config/company.json');
         return;
       }
     } catch (_error) {
@@ -218,6 +237,7 @@ export class StratosBrandingService {
     // Fallback to default
     this._config.set(defaultCompanyConfig);
     this.applyConfigToTheme(defaultCompanyConfig);
+    console.info('[StratosBrandingService] Company config: using the built-in defaults');
   }
 
   setCompanyConfig(config: Partial<CompanyConfig>) {
@@ -309,7 +329,7 @@ export class StratosBrandingService {
   }
 
   private applyTheme(theme: StratosTheme) {
-    console.log('[StratosBrandingService] Applying theme:', theme);
+    this.debugLog('Applying theme:', theme);
     const root = document.documentElement;
 
     // Apply brand colors
@@ -320,6 +340,14 @@ export class StratosBrandingService {
     root.style.setProperty('--color-warning', theme.colors.warning);
     root.style.setProperty('--color-danger', theme.colors.danger);
     root.style.setProperty('--color-info', theme.colors.info);
+    for (const status of ['success', 'warning', 'danger'] as const) {
+      const text = textOn(theme.colors[status]);
+      if (text) {
+        root.style.setProperty(`--color-on-${status}`, text);
+      } else {
+        root.style.removeProperty(`--color-on-${status}`);
+      }
+    }
 
     // Apply navigation variables
     root.style.setProperty('--nav-bg', theme.navigation.background);
@@ -334,7 +362,7 @@ export class StratosBrandingService {
     root.style.setProperty('--app-bg', theme.layout.background);
     root.style.setProperty('--body-bg', theme.layout.bodyBackground || theme.layout.background);
     root.style.setProperty('--app-text', theme.layout.text);
-    root.style.setProperty('--text-muted', theme.layout.textMuted || '#64748b');
+    root.style.setProperty('--text-muted', theme.layout.textMuted || '#475569');
     root.style.setProperty('--header-bg', theme.layout.headerBackground);
     root.style.setProperty('--header-text', theme.layout.headerText);
     root.style.setProperty('--header-border', theme.layout.headerBorder || '#e2e8f0');
@@ -342,7 +370,7 @@ export class StratosBrandingService {
     root.style.setProperty('--content-secondary', theme.layout.contentSecondary || '#f8fafc');
     root.style.setProperty('--content-border', theme.layout.contentBorder || '#e2e8f0');
     root.style.setProperty('--content-text', theme.layout.text);
-    root.style.setProperty('--content-muted', theme.layout.textMuted || '#64748b');
+    root.style.setProperty('--content-muted', theme.layout.textMuted || '#475569');
 
     // Apply branding variables
     root.style.setProperty('--logo-bg', theme.branding.logo);
@@ -363,19 +391,18 @@ export class StratosBrandingService {
     root.style.setProperty('--table-row-hover', isDark ? '#334155' : '#f9fafb');
     root.style.setProperty('--table-border', isDark ? '#334155' : '#e5e7eb');
     root.style.setProperty('--input-bg', isDark ? '#1e293b' : '#ffffff');
-    root.style.setProperty('--input-border', isDark ? '#475569' : '#d1d5db');
+    root.style.setProperty('--input-border', isDark ? '#94a3b8' : '#64748b');
     root.style.setProperty('--input-text', isDark ? '#f1f5f9' : '#1e293b');
-    root.style.setProperty('--input-placeholder', isDark ? '#64748b' : '#9ca3af');
+    root.style.setProperty('--input-placeholder', isDark ? '#94a3b8' : '#64748b');
     root.style.setProperty('--input-disabled-bg', isDark ? '#0f172a' : '#f3f4f6');
     root.style.setProperty('--shadow-sm', isDark ? '0 1px 2px 0 rgba(0,0,0,0.3)' : '0 1px 2px 0 rgba(0,0,0,0.05)');
     root.style.setProperty('--shadow-md', isDark ? '0 4px 6px -1px rgba(0,0,0,0.4)' : '0 4px 6px -1px rgba(0,0,0,0.1)');
     root.style.setProperty('--shadow-lg', isDark ? '0 10px 15px -3px rgba(0,0,0,0.5)' : '0 10px 15px -3px rgba(0,0,0,0.1)');
   }
 
+  // The document title is the router's: BrandedTitleStrategy (core) composes
+  // the page title with the brand and follows theme() changes.
   private updateBranding(theme: StratosTheme) {
-    // Update page title
-    document.title = theme.branding.displayName || theme.branding.companyName;
-
     // Update favicon - use logo if no specific favicon is provided
     const faviconUrl = theme.branding.favicon || theme.branding.logo;
     const favicon = document.querySelector('link[rel="icon"]') as HTMLLinkElement;
@@ -395,7 +422,7 @@ export class StratosBrandingService {
   // =========================================================================
 
   setThemeMode(mode: ThemeMode) {
-    console.log('[StratosBrandingService] Setting theme mode to:', mode);
+    this.debugLog('Setting theme mode to:', mode);
     this._themeMode.set(mode);
     this.saveThemeModeToStorage(mode);
     this.applyThemeMode(mode);
@@ -430,6 +457,7 @@ export class StratosBrandingService {
     // Merge custom branding/login overrides (these persist across mode switches)
     const theme: StratosTheme = {
       ...baseTheme,
+      colors: { ...baseTheme.colors, ...this.configuredColors('theme') },
       branding: this._customBranding
         ? { ...baseTheme.branding, ...this._customBranding }
         : baseTheme.branding,
@@ -437,9 +465,52 @@ export class StratosBrandingService {
         ? { ...baseTheme.login, ...this._customLogin }
         : baseTheme.login,
     };
+    // The config has one set of navigation and layout colors and no dark
+    // variants, so they apply in light mode only; the brand colors above
+    // apply in both.
+    if (!isDark) {
+      theme.navigation = { ...baseTheme.navigation, ...this.configuredColors('navigation') };
+      theme.layout = { ...baseTheme.layout, ...this.configuredColors('layout') };
+    }
 
     this._theme.set(theme);
     this.applyTheme(theme);
+    this.applyDarkBrandColors(isDark);
+  }
+
+  // In dark mode the .dark-theme block of main.scss redeclares the brand
+  // colors on body, which beats the inline values on the root. A color the
+  // operator configured gets its derived dark value inline on body instead;
+  // light mode, and any color not configured, leave body bare. --color-on-primary
+  // is not touched: primary has no on-color handling here today.
+  private applyDarkBrandColors(isDark: boolean) {
+    const configured = isDark ? this.configuredColors('theme') : {};
+    for (const key of ['primary', 'secondary', 'accent', 'success', 'warning', 'danger', 'info']) {
+      const dark = configured[key] ? deriveDarkHex(configured[key]) : null;
+      if (dark) {
+        document.body.style.setProperty(`--color-${key}`, dark);
+      } else {
+        document.body.style.removeProperty(`--color-${key}`);
+      }
+    }
+  }
+
+  // The colors of one config section that the operator set: those that differ
+  // from the default config, whose values are the light theme's.
+  private configuredColors(section: 'theme' | 'navigation' | 'layout'): Record<string, string> {
+    const configured: Record<string, string | undefined> = this._config()[section] ?? {};
+    const defaults: Record<string, string | undefined> = defaultCompanyConfig[section];
+    return Object.fromEntries(
+      Object.entries(configured).filter(([key, value]) => value && value !== defaults[key])
+    ) as Record<string, string>;
+  }
+
+  // Theme and mode changes are logged only when the config's debug.logThemeChanges
+  // is set, so an operator can follow their colors without a dev build.
+  private debugLog(message: string, detail: unknown) {
+    if (this._config().debug?.logThemeChanges) {
+      console.log(`[StratosBrandingService] ${message}`, detail);
+    }
   }
 
   private resolveThemeMode(mode: ThemeMode): boolean {
@@ -454,7 +525,7 @@ export class StratosBrandingService {
   }
 
   private onSystemThemeChange(event: MediaQueryListEvent) {
-    console.log('[StratosBrandingService] System theme changed to:', event.matches ? 'dark' : 'light');
+    this.debugLog('System theme changed to:', event.matches ? 'dark' : 'light');
     // Only update if current mode is 'system'
     if (this._themeMode() === 'system') {
       this.applyThemeMode('system');

@@ -1,17 +1,18 @@
-<app-steppers [cancel]="'/endpoints'">
+<app-steppers #steppers [cancel]="'/endpoints'" [cancelAction]="cancelAction">
   <app-step title="Register" [signalHandle]="registerStepHandle">
     <div class="p-6">
-      <h3 class="text-xl font-semibold mb-4">Select the type of {{ gitTypes[epSubType].label }} to register</h3>
-      @if (autoSelectNote) {
+      <h3 id="git-type-heading" class="text-xl font-semibold mb-4">Select the type of {{ gitTypes[epSubType].label }} to register</h3>
+      @if (autoSelectNote(); as note) {
         <div
           class="mb-4 px-3 py-2 text-sm rounded border border-content-border bg-content-secondary text-content-muted"
         >
-          {{ autoSelectNote }}
+          {{ note }}
         </div>
       }
-      @if (registerForm) {
+      @if (formReady()) {
         <form class="space-y-4" [formGroup]="registerForm">
-          <div class="space-y-3">
+          <!-- One named group, so arrow keys move between the types. -->
+          <div class="space-y-3" role="radiogroup" aria-labelledby="git-type-heading">
             @for (gitTypeEntry of gitTypes[epSubType].types | keyvalue; track gitTypeEntry) {
               <div class="block">
                 <label
@@ -24,6 +25,7 @@
                   <input
                     [attr.id]="'gitType-' + gitTypeEntry.key"
                     type="radio"
+                    name="selectedType"
                     formControlName="selectedType"
                     [value]="gitTypeEntry.key"
                     class="mt-1 text-brand-600 focus:ring-brand-500 border-content-border"
@@ -46,7 +48,7 @@
               </div>
             }
           </div>
-          @if (showEndpointFields) {
+          @if (showEndpointFields()) {
             <div class="space-y-4 mt-6">
               <div class="form-group">
                 <label for="name" class="label">Name</label>
@@ -58,8 +60,8 @@
                   class="input"
                   [appUnique]="
                     registerForm.value.createSystemEndpointField
-                      ? ($safeNavigationMigration((customEndpoints | async)?.names) ?? [])
-                      : ($safeNavigationMigration((existingPersonalEndpoints | async)?.names) ?? [])
+                      ? (customEndpointsSignal()?.names ?? [])
+                      : (existingPersonalEndpointsSignal()?.names ?? [])
                   "
                 />
                 @if (registerForm.controls.nameField.errors?.required) {
@@ -81,9 +83,10 @@
                   class="input"
                   [appUnique]="
                     registerForm.value.createSystemEndpointField
-                      ? ($safeNavigationMigration((customEndpoints | async)?.urls) ?? [])
-                      : ($safeNavigationMigration((existingPersonalEndpoints | async)?.urls) ?? [])
+                      ? (customEndpointsSignal()?.urls ?? [])
+                      : (existingPersonalEndpointsSignal()?.urls ?? [])
                   "
+                  [appUniqueKey]="urlKey"
                 />
                 @if (registerForm.controls.urlField.errors?.required) {
                   <div class="text-danger text-sm mt-1">URL is required</div>
@@ -98,7 +101,7 @@
                 }
               </div>
               <div class="space-y-3">
-                @if (userEndpointsAndIsAdmin | async) {
+                @if (userEndpointsAndIsAdminSignal()) {
                   <label class="checkbox-label" for="git-create-system-endpoint">
                     <input
                       id="git-create-system-endpoint"
@@ -126,9 +129,18 @@
           }
         </form>
       }
+      @if (registered(); as reg) {
+        <div class="mt-8 pt-4 border-t border-danger-200 flex items-center justify-between gap-4">
+          <p class="text-content-muted">
+            Remove this endpoint for {{ reg.personal ? "you" : "all users" }}. Connections to it end.
+          </p>
+          <button id="unregister" type="button" class="btn btn-danger" (click)="unregister()">Unregister…</button>
+        </div>
+      }
     </div>
   </app-step>
   <app-step title="Connect (Optional)" [signalHandle]="connectStepHandle">
-    <app-create-endpoint-connect #connect></app-create-endpoint-connect>
+    <app-create-endpoint-connect #connect [endpointAddress]="registered()?.address ?? ''"
+      (review)="steppers.goTo(0)"></app-create-endpoint-connect>
   </app-step>
 </app-steppers>

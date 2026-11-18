@@ -1,9 +1,11 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { provideZonelessChangeDetection } from '@angular/core';
-import { describe, it, expect, beforeEach, afterEach, beforeAll, afterAll, vi } from 'vitest';
-import { EntityCatalogHelper, EntityCatalogHelpers } from '@stratosui/store';
+import { defer, of } from 'rxjs';
+import { describe, it, expect, beforeEach, vi, type Mock } from 'vitest';
+import { CurrentUserRolesDataService, EntityCatalogHelper, EntityCatalogHelpers } from '@stratosui/store';
 import { BaseTestModules, STORE_TEST_PROVIDERS } from '@test-framework/core-test.helper';
 import { ConnectEndpointComponent } from './connect-endpoint.component';
+import { ConnectEndpointData, ConnectEndpointService } from '../connect.service';
 
 describe('ConnectEndpointComponent', () => {
   let component: ConnectEndpointComponent;
@@ -29,13 +31,156 @@ describe('ConnectEndpointComponent', () => {
     TestBed.compileComponents();
   });
 
-  beforeEach(() => {
+  beforeEach(async () => {
     fixture = TestBed.createComponent(ConnectEndpointComponent);
     component = fixture.componentInstance;
-    fixture.detectChanges();
+    await fixture.whenStable();
   });
 
   it('should create', () => {
     expect(component).toBeTruthy();
+  });
+
+  it('offers a username and password or no login for Metrics', async () => {
+    fixture.componentRef.setInput('connectService', {
+      config: { name: 'metrics', guid: 'metrics-guid', type: 'metrics', subType: '', ssoAllowed: false },
+      setData: () => undefined,
+    } as unknown as ConnectEndpointService);
+    await fixture.whenStable();
+    expect(component.authTypesForEndpoint.map(a => a.value)).toEqual(['creds', 'none']);
+  });
+
+  // Metrics' username and password auth type gives no field labels of its
+  // own; the fields still need a visible label and an accessible name.
+  it('labels the username and password fields of an auth type without labels', async () => {
+    fixture.componentRef.setInput('connectService', {
+      config: { name: 'metrics', guid: 'metrics-guid', type: 'metrics', subType: '', ssoAllowed: false },
+      setData: () => undefined,
+    } as unknown as ConnectEndpointService);
+    await fixture.whenStable();
+    const el: HTMLElement = fixture.nativeElement;
+    const inputs = Array.from(el.querySelectorAll<HTMLInputElement>('app-credentials-auth-form input'));
+    expect(inputs.map(i => i.placeholder)).toEqual(['Username', 'Password']);
+    const labels = Array.from(el.querySelectorAll('app-credentials-auth-form label'));
+    expect(labels.map(l => l.textContent?.replaceAll('*', '').trim())).toEqual(['Username', 'Password']);
+    expect(labels.map(l => l.getAttribute('for'))).toEqual(inputs.map(i => i.id));
+  });
+
+  // The credentials are the endpoint's, not the console login the browser
+  // saved for this site, so the browser must not fill that in.
+  it('keeps the browser from filling in the console login', async () => {
+    fixture.componentRef.setInput('connectService', {
+      config: { name: 'metrics', guid: 'metrics-guid', type: 'metrics', subType: '', ssoAllowed: false },
+      setData: () => undefined,
+    } as unknown as ConnectEndpointService);
+    await fixture.whenStable();
+    const inputs = Array.from(fixture.nativeElement.querySelectorAll('app-credentials-auth-form input')) as HTMLInputElement[];
+    expect(inputs.map(i => i.getAttribute('autocomplete'))).toEqual(['off', 'new-password']);
+  });
+
+  // jetstream refuses a shared connect from anyone but a Stratos admin
+  // (authcnsi.go DoLoginToCNSI), so only an admin is offered it.
+  describe('sharing the connection', () => {
+    const open = async (admin: boolean) => {
+      TestBed.inject(CurrentUserRolesDataService).applySessionScopes({ admin, guid: 'me-guid', name: 'me', scopes: [] });
+      fixture.componentRef.setInput('connectService', {
+        config: { name: 'metrics', guid: 'metrics-guid', type: 'metrics', subType: '', ssoAllowed: false },
+        setData: () => undefined,
+      } as unknown as ConnectEndpointService);
+      await fixture.whenStable();
+    };
+
+    it('is offered to a Stratos admin for a type that shares tokens', async () => {
+      await open(true);
+      expect(fixture.nativeElement.textContent).toContain('Share this endpoint connection');
+    });
+
+    it('is not offered to other users', async () => {
+      await open(false);
+      expect(fixture.nativeElement.textContent).not.toContain('Share this endpoint connection');
+    });
+  });
+
+  it('locks the form while disabled, and unlocks it again', async () => {
+    fixture.componentRef.setInput('connectService', {
+      config: { name: 'metrics', guid: 'metrics-guid', type: 'metrics', subType: '', ssoAllowed: false },
+      setData: () => undefined,
+    } as unknown as ConnectEndpointService);
+    fixture.componentRef.setInput('disabled', true);
+    await fixture.whenStable();
+    expect(component.endpointForm.disabled).toBe(true);
+
+    fixture.componentRef.setInput('disabled', false);
+    await fixture.whenStable();
+    expect(component.endpointForm.enabled).toBe(true);
+  });
+
+  // A new service for the same endpoint must not rebuild the form.
+  it('keeps what was typed when handed a new service for the same endpoint', async () => {
+    const service = (setData: (data: ConnectEndpointData) => void) => ({
+      config: { name: 'metrics', guid: 'metrics-guid', type: 'metrics', subType: '', ssoAllowed: false },
+      setData,
+    } as unknown as ConnectEndpointService);
+    fixture.componentRef.setInput('connectService', service(() => undefined));
+    await fixture.whenStable();
+    const form = component.endpointForm;
+    form.get('authValues')?.patchValue({ username: 'u', password: 'p' });
+
+    let sent: ConnectEndpointData | undefined;
+    fixture.componentRef.setInput('connectService', service(data => { sent = data; }));
+    await fixture.whenStable();
+    expect(component.endpointForm).toBe(form);
+    expect(sent?.authVal).toMatchObject({ username: 'u', password: 'p' });
+  });
+
+  // TLS options are set on Register; the credentials form carries none.
+  it('offers no TLS options, even to a user who may edit the endpoint', async () => {
+    TestBed.inject(CurrentUserRolesDataService).applySessionScopes({ admin: true, guid: 'me-guid', name: 'me', scopes: [] });
+    let sent: ConnectEndpointData | undefined;
+    fixture.componentRef.setInput('connectService', {
+      config: { name: 'metrics', guid: 'metrics-guid', type: 'metrics', subType: '', ssoAllowed: false },
+      setData: (data: ConnectEndpointData) => { sent = data; },
+    } as unknown as ConnectEndpointService);
+    await fixture.whenStable();
+    expect(fixture.nativeElement.textContent).not.toContain('Skip SSL validation');
+    expect(fixture.nativeElement.querySelector('textarea')).toBeNull();
+    expect(sent).toBeDefined();
+    expect('tls' in sent!).toBe(false);
+  });
+
+  // Enter in a filled-in form tells the host, which connects the way its
+  // Connect button does; the form never connects on its own.
+  describe('on Enter', () => {
+    let connected: Mock<() => void>;
+    let submitted: Mock<() => void>;
+
+    beforeEach(async () => {
+      connected = vi.fn<() => void>();
+      submitted = vi.fn<() => void>();
+      component.submitted.subscribe(submitted);
+      fixture.componentRef.setInput('connectService', {
+        config: { name: 'metrics', guid: 'metrics-guid', type: 'metrics', subType: '', ssoAllowed: false },
+        setData: () => undefined,
+        submit: () => defer(() => { connected(); return of({ success: true, errorMessage: '' }); }),
+      } as unknown as ConnectEndpointService);
+      await fixture.whenStable();
+    });
+
+    const enter = async () => {
+      fixture.nativeElement.querySelector('form').dispatchEvent(new Event('submit'));
+      await fixture.whenStable();
+    };
+
+    it('says the form was submitted', async () => {
+      component.endpointForm.get('authValues')?.patchValue({ username: 'u', password: 'p' });
+      await enter();
+      expect(submitted).toHaveBeenCalledTimes(1);
+      expect(connected).not.toHaveBeenCalled();
+    });
+
+    it('says nothing while the form is incomplete', async () => {
+      await enter();
+      expect(submitted).not.toHaveBeenCalled();
+    });
   });
 });

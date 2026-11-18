@@ -1,13 +1,10 @@
 import { CommonModule } from '@angular/common';
-import { ChangeDetectionStrategy, AfterViewInit, Component, ComponentRef, NgZone, OnDestroy, OnInit, ViewChild, ViewContainerRef, inject, signal } from '@angular/core';
-import { toObservable } from '@angular/core/rxjs-interop';
+import { ChangeDetectionStrategy, Component, OnDestroy, OnInit, computed, effect, inject, signal, untracked } from '@angular/core';
 import { CustomTooltipDirective } from '../../../shared/components/custom-tooltip/custom-tooltip.directive';
 import { Router, RouterModule } from '@angular/router';
 import {
   EndpointsDataService,
 } from '@stratosui/store';
-import { combineLatest, Observable, of, Subscription } from 'rxjs';
-import { take, delay, filter, map, switchMap, tap } from 'rxjs/operators';
 
 import { CustomizationService, CustomizationsMetadata } from '../../../core/customizations.types';
 import { EndpointsService } from '../../../core/endpoints.service';
@@ -20,11 +17,11 @@ import {
   StratosActionType } from '../../../core/extension/extension-service';
 import { CurrentUserPermissionsService } from '../../../core/permissions/current-user-permissions.service';
 import { StratosCurrentUserPermissions } from '../../../core/permissions/stratos-user-permissions.checker';
-import { safeUnsubscribe } from '../../../core/utils.service';
 import { PageHeaderComponent } from '../../../shared/components/page-header/page-header.component';
 import { EndpointsMissingComponent } from '../../../shared/components/endpoints-missing/endpoints-missing.component';
-import { TailwindSnackBarService } from '../../../shared/services/tailwind-snackbar.service';
-import { SessionService } from '../../../shared/services/session.service';
+import { ListSubNavComponent } from '../../../shared/components/list-sub-nav/list-sub-nav.component';
+import { TailwindSnackBarRef, TailwindSnackBarService } from '../../../shared/services/tailwind-snackbar.service';
+import { SessionSignalService } from '../../../core/signals/session-signal.service';
 import { EndpointModalService } from '../endpoint-register-modal/endpoint-modal.service';
 import { EndpointRegisterModalComponent } from '../endpoint-register-modal/endpoint-register-modal.component';
 import { EndpointsSignalListComponent } from './endpoints-signal-list.component';
@@ -44,29 +41,34 @@ import { AppAreaLoaderComponent } from '../../../shared/components/area-loader/a
     PageHeaderComponent,
     EndpointsSignalListComponent,
     EndpointsMissingComponent,
-    EndpointRegisterModalComponent
+    EndpointRegisterModalComponent,
+    ListSubNavComponent
   ]
 })
-export class EndpointsPageComponent implements AfterViewInit, OnDestroy, OnInit {
+export class EndpointsPageComponent implements OnDestroy, OnInit {
   endpointsService = inject(EndpointsService);
   router = inject(Router);
   private endpointsData = inject(EndpointsDataService);
   private authSignal = inject(AuthSignalService);
-  private ngZone = inject(NgZone);
   private snackBarService = inject(TailwindSnackBarService);
-  sessionService = inject(SessionService);
   private endpointModalService = inject(EndpointModalService);
   private dashboardSignals = inject(DashboardSignalService);
   private endpointStatusSignals = inject(EndpointStatusSignalService);
-  // Bridge dashboard signal → observable in injection context (field init).
-  private dashboardState$ = toObservable(this.dashboardSignals.dashboard);
+  private currentUserPermissionsService = inject(CurrentUserPermissionsService);
 
   // Signal-backed permission flag. The directive-based approach (*appUserPermission
   // + async pipe) was sensitive to CD timing under zoneless Angular 21 — the
   // button would disappear after a modal open/close cycle. A signal reads cleanly
   // in the template with @if and always reflects the latest permission result,
   // regardless of surrounding component state churn.
-  public canRegisterEndpoint = signal<boolean>(false);
+  //
+  // Allowed when ANY of the permissions that allow endpoint registration
+  // passes — matching the previous directive-based behavior.
+  private readonly canEditAdminEndpoint = this.currentUserPermissionsService.can(StratosCurrentUserPermissions.EDIT_ADMIN_ENDPOINT);
+  private readonly canEditEndpoint = this.currentUserPermissionsService.can(StratosCurrentUserPermissions.EDIT_ENDPOINT);
+  private readonly userEndpointsEnabled = inject(SessionSignalService).userEndpointsEnabled;
+  public readonly canRegisterEndpoint = computed(() =>
+    this.canEditAdminEndpoint() || (this.userEndpointsEnabled() && this.canEditEndpoint()));
   private healthCheckTimeout!: number;
 
   /**
@@ -84,99 +86,78 @@ export class EndpointsPageComponent implements AfterViewInit, OnDestroy, OnInit 
     invoke: () => this.openRegisterModal(),
   };
 
-  public canBackupRestore$: Observable<boolean>;
-  public showRegisterModal = false;
-  public isInitialised$: Observable<boolean>;
+  /** Count for the sub-nav shown when no endpoints are registered. */
+  public readonly noEndpoints = signal(0);
 
-  @ViewChild('customNoEndpointsContainer', { read: ViewContainerRef, static: true }) customNoEndpointsContainer!: ViewContainerRef;
-  customContentComponentRef!: ComponentRef<any>;
+  // Is the backup/restore plugin available on the backend, and may the user
+  // use it?
+  public readonly canBackupRestore = computed(() =>
+    !!this.authSignal.sessionData()?.plugins?.backup && this.canEditAdminEndpoint());
+  public readonly showRegisterModal = signal(false);
+  public readonly initialised = this.endpointStatusSignals.initialised;
 
   private snackBarText = {
     message: `There are no connected endpoints, connect with your personal credentials to get started.`,
     action: 'Got it'
   };
+  private noConnectedSnackBar?: TailwindSnackBarRef<unknown>;
 
   public customizations: CustomizationsMetadata;
 
   constructor() {
     const endpointsService = this.endpointsService;
     const cs = inject(CustomizationService);
-    const currentUserPermissionsService = inject(CurrentUserPermissionsService);
 
     this.customizations = cs.get();
 
-    // Redirect to /applications if not enabled.
-    // Defensive: Use catchError to prevent subscription errors from breaking initialization
-    endpointsService.disablePersistenceFeatures$.pipe(
-      filter(off => off !== undefined && off !== null),
-      map(off => {
-        if (off) {
-          // User should only get here if url is manually entered
-          this.router.navigate(['applications'], { replaceUrl: true });
-        }
-      }),
-      take(1)
-    ).subscribe({
-      error: (err) => console.error('Error checking persistence features:', err)
+    // Redirect to /applications if not enabled, checked once on entry.
+    let persistenceChecked = false;
+    effect(() => {
+      const off = endpointsService.disablePersistenceFeatures();
+      if (persistenceChecked) {
+        return;
+      }
+      persistenceChecked = true;
+      if (off) {
+        // User should only get here if url is manually entered
+        untracked(() => this.router.navigate(['applications'], { replaceUrl: true }));
+      }
     });
 
-    // Resolve the set of permissions that would allow endpoint registration,
-    // run each through the permission service, and fold into a single boolean.
-    // Allowed when ANY of the permission checks passes — matching the previous
-    // directive-based behavior.
-    this.sessionService.userEndpointsEnabled().pipe(
-      filter(enabled => enabled !== undefined && enabled !== null),
-      switchMap(enabled => {
-        const perms = enabled
-          ? [StratosCurrentUserPermissions.EDIT_ADMIN_ENDPOINT, StratosCurrentUserPermissions.EDIT_ENDPOINT]
-          : [StratosCurrentUserPermissions.EDIT_ADMIN_ENDPOINT];
-        return combineLatest(perms.map(p => currentUserPermissionsService.can(p)));
-      }),
-      map(results => results.some(Boolean))
-    ).subscribe({
-      next: can => this.canRegisterEndpoint.set(can),
-      error: (err) => console.error('Error resolving register-endpoint permission:', err)
+    // Tell the user when endpoints are registered but none are connected.
+    effect(() => {
+      const show = endpointsService.haveRegistered() && !endpointsService.haveConnected();
+      untracked(() => this.showSnackBar(show));
     });
-
-    // Is the backup/restore plugin available on the backend?
-    // Defensive: Add catchError to handle session data access issues
-    this.canBackupRestore$ = toObservable(this.authSignal.sessionData).pipe(
-      filter(sessionData => !!sessionData),
-      take(1),
-      map(sessionData => sessionData?.plugins?.backup || false),
-      switchMap(enabled => enabled ? currentUserPermissionsService.can(StratosCurrentUserPermissions.EDIT_ADMIN_ENDPOINT) : of(false))
-    );
-
-    // Create an observable to track when endpoints are loaded and ready
-    // Defensive: Add null checks and error handling
-    this.isInitialised$ = toObservable(this.endpointStatusSignals.initialised).pipe(
-      delay(500) // Delay to ensure proper loading sequence
-    );
   }
-
-  subs: Subscription[] = [];
 
   public extensionActions: StratosActionMetadata[] = getActionsFromExtensions(StratosActionType.Endpoints);
 
   private startEndpointHealthCheckPulse() {
-    this.ngZone.runOutsideAngular(() => {
-      this.healthCheckTimeout = window.setInterval(() => {
-        this.ngZone.run(() => {
-          this.endpointsService.checkAllEndpoints();
-        });
-      }, 30000);
-    });
+    // Re-read the list first: checks run only on endpoints listed as
+    // connected, and a connection dropped on the server (another tab, an
+    // admin, a refused refresh) otherwise stays Connected here and is
+    // checked, and refused, every tick.
+    this.healthCheckTimeout = window.setInterval(() => {
+      this.endpointsData.getAll(false)
+        .catch(err => console.error('Failed to refresh endpoints for the health check:', err))
+        .finally(() => this.endpointsService.checkAllEndpoints());
+    }, 30000);
   }
 
   private stopEndpointHealthCheckPulse() {
     clearInterval(this.healthCheckTimeout);
   }
 
+  // Only this page's own message: hide() would also dismiss others, such as
+  // the Register form's "Successfully registered", which arrives just
+  // before the endpoints update.
   private showSnackBar(show: boolean) {
     if (show) {
-      this.snackBarService.show(this.snackBarText.message, this.snackBarText.action, 20000);
+      this.noConnectedSnackBar = this.snackBarService.show(this.snackBarText.message, this.snackBarText.action, 20000);
     } else {
-      this.snackBarService.hide();
+      this.noConnectedSnackBar?.dismiss();
+      this.noConnectedSnackBar = undefined;
     }
   }
 
@@ -194,29 +175,6 @@ export class EndpointsPageComponent implements AfterViewInit, OnDestroy, OnInit 
       console.error('Failed to load endpoints via EndpointsDataService:', err);
     });
 
-    // Subscribe to haveRegistered$ to handle custom no-endpoints component
-    // Defensive: Add error handling to prevent subscription failures from breaking the page
-    this.subs.push(
-      this.endpointsService.haveRegistered$.pipe(
-        filter(haveRegistered => haveRegistered !== undefined && haveRegistered !== null)
-      ).subscribe({
-        next: (haveRegistered) => {
-          // Use custom component if specified and no endpoints are registered
-          if (this.customNoEndpointsContainer) {
-            this.customNoEndpointsContainer.clear();
-          }
-          if (!haveRegistered && this.customizations.noEndpointsComponent) {
-            try {
-              this.customContentComponentRef = this.customNoEndpointsContainer.createComponent(this.customizations.noEndpointsComponent);
-            } catch (error) {
-              console.error('Error creating custom no-endpoints component:', error);
-            }
-          }
-        },
-        error: (err) => console.error('Error subscribing to haveRegistered$:', err)
-      })
-    );
-
     // Trigger endpoint health checks
     // Defensive: Wrap in try-catch to prevent errors from breaking initialization
     try {
@@ -225,41 +183,12 @@ export class EndpointsPageComponent implements AfterViewInit, OnDestroy, OnInit 
       console.error('Error checking endpoints:', error);
     }
 
-    // Subscribe to dashboard state to enable polling if configured
-    // Defensive: Add error handling and ensure subscription cleanup
-    this.subs.push(
-      this.dashboardState$.pipe(
-        filter(dashboard => !!dashboard),
-        take(1)
-      ).subscribe({
-        next: (dashboard) => {
-          if (dashboard.pollingEnabled) {
-            this.startEndpointHealthCheckPulse();
-          }
-        },
-        error: (err) => console.error('Error subscribing to dashboard state:', err)
-      })
-    );
+    // Poll the endpoints' health when the dashboard preference says so.
+    if (this.dashboardSignals.pollingEnabled()) {
+      this.startEndpointHealthCheckPulse();
+    }
   }
 
-  ngAfterViewInit() {
-    // Subscribe to endpoint registration state to show snackbar when endpoints exist but aren't connected
-    // Defensive: Add error handling and ensure proper cleanup
-    this.subs.push(
-      combineLatest([
-        this.endpointsService.haveRegistered$.pipe(filter(val => val !== undefined && val !== null)),
-        this.endpointsService.haveConnected$.pipe(filter(val => val !== undefined && val !== null))
-      ]).pipe(
-        delay(1),
-        tap(([hasRegistered, hasConnected]) => {
-          // Show snackbar if endpoints are registered but none are connected
-          this.showSnackBar(hasRegistered && !hasConnected);
-        })
-      ).subscribe({
-        error: (err) => console.error('Error subscribing to endpoint state:', err)
-      })
-    );
-  }
 
   ngOnDestroy() {
     // Defensive: Ensure all cleanup operations complete even if one fails
@@ -270,34 +199,26 @@ export class EndpointsPageComponent implements AfterViewInit, OnDestroy, OnInit 
     }
 
     try {
-      safeUnsubscribe(...this.subs);
-    } catch (error) {
-      console.error('Error unsubscribing:', error);
-    }
-
-    try {
-      if (this.customContentComponentRef) {
-        this.customContentComponentRef.destroy();
-      }
-    } catch (error) {
-      console.error('Error destroying custom component:', error);
-    }
-
-    try {
       this.showSnackBar(false);
     } catch (error) {
       console.error('Error hiding snackbar:', error);
+    }
+
+    // Leaving with the Register dialog open (e.g. through the side nav)
+    // must still release the page scroll the dialog locked.
+    if (this.showRegisterModal()) {
+      this.closeRegisterModal();
     }
   }
 
   // Modal methods
   openRegisterModal() {
-    this.showRegisterModal = true;
+    this.showRegisterModal.set(true);
     this.endpointModalService.openModal();
   }
 
   closeRegisterModal() {
-    this.showRegisterModal = false;
+    this.showRegisterModal.set(false);
     this.endpointModalService.closeModal();
   }
 
@@ -317,8 +238,8 @@ export class EndpointsPageComponent implements AfterViewInit, OnDestroy, OnInit 
       console.error('Error checking endpoints after registration:', error);
     }
 
-    // Show success message
-    this.snackBarService.show('Endpoint registered successfully!', 'OK', 5000);
+    // No message here: the registration form said "Successfully registered
+    // '<name>'" when the endpoint was registered.
 
     // Close the modal
     this.closeRegisterModal();

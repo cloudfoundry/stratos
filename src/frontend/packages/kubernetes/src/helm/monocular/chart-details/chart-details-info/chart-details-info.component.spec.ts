@@ -45,7 +45,7 @@ describe('Component: ChartDetailsInfo', () => {
     const version: any = { attributes: { version: '1.0.0', urls: [] }, relationships: { chart: { data: { name: 'c', repo: { name: 'r' } } } } };
     fixture.componentRef.setInput('chart', chart);
     fixture.componentRef.setInput('currentVersion', version);
-    fixture.detectChanges();
+    await fixture.whenStable();
 
     versions$.next([version]);
     schema$.next({ type: 'object' });

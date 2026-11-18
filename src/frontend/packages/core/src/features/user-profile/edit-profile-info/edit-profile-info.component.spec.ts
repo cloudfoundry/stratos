@@ -1,6 +1,6 @@
 import { CommonModule } from '@angular/common';
 import { ComponentFixture, TestBed } from '@angular/core/testing';
-import { provideZonelessChangeDetection } from '@angular/core';
+import { provideZonelessChangeDetection, signal } from '@angular/core';
 import { describe, it, expect, beforeEach, afterEach, beforeAll, afterAll, vi } from 'vitest';
 import { NoopAnimationsModule } from '@angular/platform-browser/animations';
 import { RouterTestingModule } from '@angular/router/testing';
@@ -21,7 +21,7 @@ describe('EditProfileInfoComponent', () => {
 
   // Mock UserProfileService to avoid entity catalog issues
   const mockUserProfileService = {
-    userProfile$: of({
+    userProfile: signal({
       id: 'test-user',
       name: {
         familyName: 'User',
@@ -44,8 +44,8 @@ describe('EditProfileInfoComponent', () => {
       zoneId: '',
       origin: ''
     }),
-    isFetching$: of(false),
-    isError$: of(false),
+    isError: signal(false),
+    loadUserProfile: vi.fn(),
     fetchUserProfile: vi.fn(),
     getPrimaryEmailAddress: vi.fn().mockReturnValue('test@test.com'),
     setPrimaryEmailAddress: vi.fn(),
@@ -84,5 +84,26 @@ describe('EditProfileInfoComponent', () => {
 
   it('should create', () => {
     expect(component).toBeTruthy();
+  });
+
+  it('fills the form from the loaded profile', async () => {
+    await fixture.whenStable();
+    expect(mockUserProfileService.loadUserProfile).toHaveBeenCalled();
+    expect(component.editProfileForm.value.givenName).toBe('Test');
+    expect(component.editProfileForm.value.emailAddress).toBe('test@test.com');
+  });
+
+  // The Change Password fields show only to a user with 'password.write'.
+  it('offers Change Password only with the password permission', async () => {
+    const canChange = signal(false);
+    vi.spyOn(TestBed.inject(CurrentUserPermissionsService), 'can').mockReturnValue(canChange);
+    const page = TestBed.createComponent(EditProfileInfoComponent);
+    await page.whenStable();
+    const text = () => (page.nativeElement as HTMLElement).textContent ?? '';
+    expect(text()).not.toContain('Change Password');
+
+    canChange.set(true);
+    await page.whenStable();
+    expect(text()).toContain('Change Password');
   });
 });

@@ -9,8 +9,6 @@ import {
 } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
-import { toObservable } from '@angular/core/rxjs-interop';
-import { Observable } from 'rxjs';
 
 import {
   MAT_DIALOG_DATA,
@@ -24,10 +22,9 @@ import {
 import { CfIdentityProvidersService } from '../../../../shared/data-services/cf-identity-providers.service';
 import { CfUsersRolesDataService } from '../../../../services/domain-data/cf-users-roles-data.service';
 import { UserInviteService } from '../../user-invites/user-invite.service';
-import { TailwindSnackBarService } from '@stratosui/core';
+import { AppInputDirective, CustomFormFieldComponent, CustomOptionComponent, CustomSelectComponent, TailwindSnackBarService } from '@stratosui/core';
 import { EndpointsDataService } from '@stratosui/store';
 import { CfUsersPagedDataService } from '../../../../shared/data-services/cf-users-paged-data.service';
-import { CnsiUsersSnapshotService } from '../../../../services/endpoint-data/cnsi-users-snapshot.service';
 import { CfRoleChange } from '../../../../store/types/users-roles.types';
 import { StUser } from '../../../../services/endpoint-data/stratos-types';
 import { RoleAssignmentComponent } from '../../../../shared/components/role-assignment/role-assignment.component';
@@ -62,6 +59,10 @@ export interface AddUserDialogData {
   imports: [
     CommonModule,
     FormsModule,
+    AppInputDirective,
+    CustomFormFieldComponent,
+    CustomOptionComponent,
+    CustomSelectComponent,
     StackedInputActionsComponent,
     RoleAssignmentComponent,
   ],
@@ -95,7 +96,6 @@ export class AddUserDialogComponent {
   private invite = inject(UserInviteService);
   private snackBar = inject(TailwindSnackBarService);
   private paged = inject(CfUsersPagedDataService);
-  private snapshot = inject(CnsiUsersSnapshotService);
 
   // ── Writable signals (field initializers — no `(this as {...})` casts) ────
 
@@ -156,7 +156,6 @@ export class AddUserDialogComponent {
   });
 
   protected stateIn: WritableSignal<StackedInputActionsState[]> = signal<StackedInputActionsState[]>([]);
-  protected stateIn$: Observable<StackedInputActionsState[]> = toObservable(this.stateIn);
 
   // ── Constructor ───────────────────────────────────────────────────────────
 
@@ -212,7 +211,6 @@ export class AddUserDialogComponent {
       invite: this.invite,
       snackBar: this.snackBar,
       paged: this.paged,
-      snapshot: this.snapshot,
       cfGuid: this.data.cfGuid,
     };
   }

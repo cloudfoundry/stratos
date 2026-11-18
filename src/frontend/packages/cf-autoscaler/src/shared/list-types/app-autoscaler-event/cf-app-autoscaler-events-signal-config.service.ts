@@ -101,7 +101,7 @@ export class CfAppAutoscalerEventsSignalConfigService {
   async loadAll(): Promise<void> {
     if (!this.cnsiGuid || !this.appGuid) return;
     try {
-      await this.historyData.load(this.cnsiGuid, this.appGuid);
+      await this.historyData.loadAll(this.cnsiGuid, this.appGuid);
     } catch {
       // load() rethrows after recording the failure in its own error()
       // signal (which the page renders). Swallow here so the fire-and-

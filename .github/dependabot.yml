@@ -23,12 +23,21 @@ updates:
         patterns:
           - "@angular*"
           - "@schematics/*"
+          # "@angular*" misses the unscoped meta package. Left at 22.5.0
+          # while its plugins went to 22.6.0 (#6011), it loaded its own
+          # template parser and broke label-has-associated-control.
+          - "angular-eslint"
       # Vitest 5 peers @vitest/coverage-v8 and @vitest/ui at exactly its
       # own version, so a vitest-only PR (5963) leaves them mismatched.
       vitest:
         patterns:
           - "vitest"
           - "@vitest/*"
+      # The Analog plugin and its vitest integration release in lockstep;
+      # #6059 moved the plugin alone and left vitest-angular a minor behind.
+      analog:
+        patterns:
+          - "@analogjs/*"
     ignore:
       # TypeScript majors are pinned by Angular's supported range; they move
       # with the framework upgrade, not on their own.

@@ -1,6 +1,7 @@
 import { CommonModule } from '@angular/common';
 import { NgModule } from '@angular/core';
 import { RouterModule, Routes } from '@angular/router';
+import { endpointTitle } from './title-strategy';
 
 import { apiKeyAuthGuard } from './core/apiKey-auth-guard.service';
 import { authGuard } from './core/auth-guard.service';
@@ -63,6 +64,7 @@ const appRoutes: Routes = [
     children: [
       {
         path: 'home',
+        title: 'Home',
         component: HomePageComponent,
         data: {
           stratosNavigation: {
@@ -75,6 +77,7 @@ const appRoutes: Routes = [
       },
       {
         path: 'endpoints',
+        title: 'Endpoints',
         data: {
           stratosNavigation: {
             label: 'Endpoints',
@@ -93,16 +96,18 @@ const appRoutes: Routes = [
           loadChildren: () => import('./features/endpoints/endpoints.routes').then(m => m.ENDPOINTS_ROUTES),
         }]
       },
-      { path: 'about', loadChildren: () => import('./features/about/about.routes').then(m => m.ABOUT_ROUTES) },
-      { path: 'user-profile', loadChildren: () => import('./features/user-profile/user-profile.routes').then(m => m.USER_PROFILE_ROUTES) },
+      { path: 'about', title: 'About', loadChildren: () => import('./features/about/about.routes').then(m => m.ABOUT_ROUTES) },
+      { path: 'user-profile', title: 'User Profile', loadChildren: () => import('./features/user-profile/user-profile.routes').then(m => m.USER_PROFILE_ROUTES) },
       {
         path: 'api-keys',
+        title: 'API Keys',
         loadChildren: () => import('./features/api-keys/api-keys.routes').then(m => m.API_KEYS_ROUTES),
         canActivate: [apiKeyAuthGuard]
       },
-      { path: 'events', loadChildren: () => import('./features/event-page/event-page.routes').then(m => m.EVENT_PAGE_ROUTES) },
+      { path: 'events', title: 'Notifications', loadChildren: () => import('./features/event-page/event-page.routes').then(m => m.EVENT_PAGE_ROUTES) },
       {
         path: 'errors/:endpointId',
+        title: endpointTitle(),
         loadChildren: () => import('./features/error-page/error-page.routes').then(m => m.ERROR_PAGE_ROUTES)
       },
     ]

@@ -21,7 +21,7 @@
   </dl>
 
   @if (errorMessage()) {
-    <div class="flex items-start gap-2 p-3 mb-4 rounded bg-warning-shade-50 text-warning-shade-700" role="alert">
+    <div class="flex items-start gap-2 p-3 mb-4 rounded bg-[var(--warning-bg)] text-[var(--warning-text)]" role="alert">
       <span class="material-icons text-warning-shade-500" aria-hidden="true">error_outline</span>
       <span class="text-sm">{{ errorMessage() }}</span>
     </div>

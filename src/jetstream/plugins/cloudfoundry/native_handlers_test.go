@@ -6,9 +6,13 @@ import (
 	"net/http"
 	"net/http/httptest"
 	"net/url"
+	"sync"
+	"sync/atomic"
 	"testing"
+	"time"
 
 	"github.com/cloudfoundry/stratos/src/jetstream/api"
+	"github.com/fivetwenty-io/capi/v3/pkg/capi"
 	"github.com/labstack/echo/v5"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
@@ -724,6 +728,23 @@ func TestGetNativeOrgDetail(t *testing.T) {
 	assert.Equal(t, []StSpace{}, resp.Spaces)
 }
 
+// runSpaceDetail calls getNativeSpaceDetail for spaceGUID against a fake CC.
+func runSpaceDetail(ccURL, spaceGUID string) (*httptest.ResponseRecorder, error) {
+	e := echo.New()
+	req := httptest.NewRequest(http.MethodGet, "/pp/v1/cf/spaces/cnsi-1/"+spaceGUID, nil)
+	rec := httptest.NewRecorder()
+	ctx := e.NewContext(req, rec)
+	ctx.SetPathValues(echo.PathValues{{Name: "cnsiGuid", Value: "cnsi-1"}, {Name: "spaceGuid", Value: spaceGUID}})
+	plugin := &CloudFoundrySpecification{
+		testProxy: &mockNativeCFProxy{
+			userID:      "user-1",
+			cnsiRecord:  api.CNSIRecord{GUID: "cnsi-1", APIEndpoint: mustParseURL(ccURL)},
+			tokenRecord: api.TokenRecord{AuthToken: "test-token"},
+		},
+	}
+	return rec, plugin.getNativeSpaceDetail(ctx)
+}
+
 func TestGetNativeSpaceDetail(t *testing.T) {
 	t.Run("populates allowSsh from features endpoint", func(t *testing.T) {
 		ts := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
@@ -843,6 +864,128 @@ func TestGetNativeSpaceDetail(t *testing.T) {
 		require.NoError(t, json.NewDecoder(rec.Body).Decode(&resp))
 		assert.Equal(t, 2, resp.AppCount)
 		assert.Equal(t, 3, resp.RouteCount)
+	})
+
+	// A space's counts come from total_results on a per_page=1 list: one small
+	// response however many apps or routes it holds, where draining a space
+	// with 1500 apps and 1500 routes took six round-trips.
+	t.Run("reads counts from per_page=1 total_results", func(t *testing.T) {
+		one := func(w http.ResponseWriter, r *http.Request, kind string) {
+			assert.Equal(t, "1", r.URL.Query().Get("per_page"), kind)
+			assert.Equal(t, "sp-4", r.URL.Query().Get("space_guids"), kind)
+			json.NewEncoder(w).Encode(map[string]interface{}{
+				"pagination": map[string]interface{}{"total_results": 1500, "total_pages": 1500},
+				"resources": []map[string]interface{}{
+					{"guid": kind + "-1", "relationships": map[string]interface{}{"space": map[string]interface{}{"data": map[string]interface{}{"guid": "sp-4"}}}},
+				},
+			})
+		}
+		ts := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+			w.Header().Set("Content-Type", "application/json")
+			switch r.URL.Path {
+			case "/v3":
+				w.Write([]byte(`{"links":{}}`))
+			case "/v3/spaces/sp-4":
+				json.NewEncoder(w).Encode(map[string]interface{}{
+					"guid": "sp-4", "name": "large", "created_at": "2024-01-01T00:00:00Z", "updated_at": "2024-01-02T00:00:00Z",
+					"relationships": map[string]interface{}{"organization": map[string]interface{}{"data": map[string]interface{}{"guid": "org-1"}}},
+				})
+			case "/v3/spaces/sp-4/features/ssh":
+				json.NewEncoder(w).Encode(map[string]interface{}{"name": "ssh", "enabled": false})
+			case "/v3/apps":
+				one(w, r, "app")
+			case "/v3/routes":
+				one(w, r, "route")
+			default:
+				http.NotFound(w, r)
+			}
+		}))
+		defer ts.Close()
+
+		rec, err := runSpaceDetail(ts.URL, "sp-4")
+		require.NoError(t, err)
+		var resp StSpaceDetail
+		require.NoError(t, json.NewDecoder(rec.Body).Decode(&resp))
+		assert.Equal(t, 1500, resp.AppCount)
+		assert.Equal(t, 1500, resp.RouteCount)
+	})
+
+	// The space, its two counts and the ssh feature are independent reads; the
+	// page should wait for the slowest, not the sum. Each fake CC read blocks
+	// until all four have arrived, so a sequential handler times out.
+	t.Run("issues the four CC reads concurrently", func(t *testing.T) {
+		var mu sync.Mutex
+		arrived := 0
+		all := make(chan struct{})
+		barrier := func() bool {
+			mu.Lock()
+			arrived++
+			if arrived == 4 {
+				close(all)
+			}
+			mu.Unlock()
+			select {
+			case <-all:
+				return true
+			case <-time.After(2 * time.Second):
+				return false
+			}
+		}
+		var timedOut atomic.Bool
+		ts := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+			w.Header().Set("Content-Type", "application/json")
+			if r.URL.Path != "/v3" && !barrier() {
+				timedOut.Store(true)
+			}
+			switch r.URL.Path {
+			case "/v3":
+				w.Write([]byte(`{"links":{}}`))
+			case "/v3/spaces/sp-5":
+				json.NewEncoder(w).Encode(map[string]interface{}{
+					"guid": "sp-5", "name": "par", "created_at": "2024-01-01T00:00:00Z", "updated_at": "2024-01-02T00:00:00Z",
+					"relationships": map[string]interface{}{"organization": map[string]interface{}{"data": map[string]interface{}{"guid": "org-1"}}},
+				})
+			case "/v3/spaces/sp-5/features/ssh":
+				json.NewEncoder(w).Encode(map[string]interface{}{"name": "ssh", "enabled": true})
+			case "/v3/apps", "/v3/routes":
+				json.NewEncoder(w).Encode(map[string]interface{}{
+					"pagination": map[string]interface{}{"total_results": 0, "total_pages": 0},
+					"resources":  []map[string]interface{}{},
+				})
+			default:
+				http.NotFound(w, r)
+			}
+		}))
+		defer ts.Close()
+
+		rec, err := runSpaceDetail(ts.URL, "sp-5")
+		require.NoError(t, err)
+		assert.Equal(t, http.StatusOK, rec.Code)
+		assert.False(t, timedOut.Load(), "CC reads were issued one after another")
+	})
+
+	t.Run("a missing space is a 404 even with the other reads in flight", func(t *testing.T) {
+		ts := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+			w.Header().Set("Content-Type", "application/json")
+			switch r.URL.Path {
+			case "/v3":
+				w.Write([]byte(`{"links":{}}`))
+			case "/v3/apps", "/v3/routes":
+				json.NewEncoder(w).Encode(map[string]interface{}{
+					"pagination": map[string]interface{}{"total_results": 0, "total_pages": 0},
+					"resources":  []map[string]interface{}{},
+				})
+			default:
+				w.WriteHeader(http.StatusNotFound)
+				w.Write([]byte(`{"errors":[{"code":40004,"title":"CF-ResourceNotFound","detail":"Space not found"}]}`))
+			}
+		}))
+		defer ts.Close()
+
+		_, err := runSpaceDetail(ts.URL, "sp-gone")
+		var he *echo.HTTPError
+		require.ErrorAs(t, err, &he)
+		assert.Equal(t, http.StatusNotFound, he.Code)
 	})
 
 	t.Run("ssh feature failure leaves allowSsh false but succeeds", func(t *testing.T) {
@@ -1352,4 +1495,85 @@ func TestGetNativeApps_GuidsFilter(t *testing.T) {
 	assert.Equal(t, "App One", resp.Resources[0].Name)
 	assert.Equal(t, "app-2", resp.Resources[1].GUID)
 	assert.Equal(t, "App Two", resp.Resources[1].Name)
+}
+
+// TestToStApp_LabelsOnlyWhenPresent verifies that an app without labels
+// leaves the field out of its JSON row, so the apps list (thousands of rows
+// per foundation) carries no empty "labels":{} per app, while an app with
+// labels, including an empty value, keeps all of them.
+func TestToStApp_LabelsOnlyWhenPresent(t *testing.T) {
+	bare, err := json.Marshal(toStApp(capi.App{Resource: capi.Resource{GUID: "app-1"}}, "cnsi-1"))
+	require.NoError(t, err)
+	assert.NotContains(t, string(bare), `"labels"`)
+
+	empty, err := json.Marshal(toStApp(capi.App{Resource: capi.Resource{GUID: "app-1"}, Metadata: &capi.Metadata{}}, "cnsi-1"))
+	require.NoError(t, err)
+	assert.NotContains(t, string(empty), `"labels"`)
+
+	team, blank := "platform", ""
+	labelled := toStApp(capi.App{Resource: capi.Resource{GUID: "app-1"}, Metadata: &capi.Metadata{
+		Labels: map[string]*string{"team": &team, "empty": &blank},
+	}}, "cnsi-1")
+	assert.Equal(t, map[string]string{"team": "platform", "empty": ""}, labelled.Labels)
+}
+
+// TestGetNativeApps_RecentFillsInstancesFromWebProcess covers the home
+// page's recent-apps list. A V3 app carries no instance count, so the
+// count comes from the web process; without it every app read as having
+// 0 instances, which the frontend shows as "Deployed, No Instances".
+func TestGetNativeApps_RecentFillsInstancesFromWebProcess(t *testing.T) {
+	ts := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		w.Header().Set("Content-Type", "application/json")
+		switch r.URL.Path {
+		case "/v3":
+			w.Write([]byte(`{"links":{}}`))
+		case "/v3/apps":
+			json.NewEncoder(w).Encode(map[string]interface{}{
+				"pagination": map[string]interface{}{"total_results": 2, "total_pages": 1},
+				"resources": []map[string]interface{}{
+					{"guid": "app-1", "name": "App One", "state": "STARTED",
+						"created_at": "2024-01-01T00:00:00Z", "updated_at": "2024-01-02T00:00:00Z"},
+					{"guid": "app-2", "name": "App Two", "state": "STOPPED",
+						"created_at": "2024-01-03T00:00:00Z", "updated_at": "2024-01-04T00:00:00Z"},
+				},
+			})
+		case "/v3/processes":
+			assert.Equal(t, "web", r.URL.Query().Get("types"))
+			json.NewEncoder(w).Encode(map[string]interface{}{
+				"pagination": map[string]interface{}{"total_results": 1, "total_pages": 1},
+				"resources": []map[string]interface{}{
+					{"guid": "proc-1", "type": "web", "instances": 2, "memory_in_mb": 64, "disk_in_mb": 128,
+						"relationships": map[string]interface{}{"app": map[string]interface{}{"data": map[string]interface{}{"guid": "app-1"}}}},
+				},
+			})
+		default:
+			http.NotFound(w, r)
+		}
+	}))
+	defer ts.Close()
+
+	e := echo.New()
+	req := httptest.NewRequest(http.MethodGet, "/pp/v1/cf/apps/test-cnsi?return=recent", nil)
+	rec := httptest.NewRecorder()
+	ctx := e.NewContext(req, rec)
+	ctx.SetPathValues(echo.PathValues{{Name: "cnsiGuid", Value: "test-cnsi"}})
+
+	plugin := &CloudFoundrySpecification{
+		testProxy: &mockNativeCFProxy{
+			userID:      "user-1",
+			cnsiRecord:  api.CNSIRecord{GUID: "test-cnsi", APIEndpoint: mustParseURL(ts.URL)},
+			tokenRecord: api.TokenRecord{AuthToken: "test-token"},
+		},
+	}
+
+	require.NoError(t, plugin.getNativeApps(ctx))
+	assert.Equal(t, http.StatusOK, rec.Code)
+
+	var resp StAppsResponse
+	require.NoError(t, json.NewDecoder(rec.Body).Decode(&resp))
+	require.Len(t, resp.Resources, 2)
+	assert.Equal(t, 2, resp.Resources[0].Instances, "app-1 takes its web process's instance count")
+	require.NotNil(t, resp.Resources[0].Memory)
+	assert.Equal(t, 64, *resp.Resources[0].Memory)
+	assert.Equal(t, 0, resp.Resources[1].Instances, "app-2 has no web process")
 }

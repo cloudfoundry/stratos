@@ -43,7 +43,8 @@ Actions"). It builds with `SITE_URL`/`SITE_BASE_URL` set for
 CNAME exists.
 
 Deploy targets follow the Makefile's verb + modifier grammar — the
-component says what is deployed, the destination says where:
+component says what is deployed, the destination says where (also
+listed in the published docs, `docs/build-and-packaging.md`):
 
 ```bash
 make deploy website pages       # preview on your fork's GitHub Pages

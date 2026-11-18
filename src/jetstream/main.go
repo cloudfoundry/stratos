@@ -88,6 +88,11 @@ const (
 //   - default/connect from same origin ('self'); same-origin 'self'
 //     also permits the backend log/stream WebSockets (wss:// on the HTTPS page)
 //
+//   - connect-src names no Git host. With no Git endpoint selected, the deploy
+//     wizard calls the Git host from the browser (scm-base.ts getAPI); a
+//     deployment opts each host in with CONSOLE_CSP_GIT_HOSTS. A registered
+//     endpoint goes through the backend, which 'self' already covers.
+//
 //   - script-src carries the per-response nonce and 'strict-dynamic', which is
 //     the CSP Level 3 mechanism for scripts: the nonce authorises the module
 //     scripts the build appends to index.html (serveIndexHTML stamps them),
@@ -126,6 +131,9 @@ const (
 //
 //   - data: images/fonts (inlined icons) and Google Fonts font files
 //
+//   - img-src also allows the Git avatars the wizard and the app's Git tab
+//     show (avatar_url): GitHub's avatar host, gitlab.com and Gravatar
+//
 //   - worker-src 'self' — Monaco's language workers are same-origin module
 //     workers built from `new Worker(new URL(…), {type: 'module'})`, hashed
 //     chunks like the rest of the app (monaco-loader.ts). It granted blob: as
@@ -158,7 +166,7 @@ const defaultCSPPolicy = "default-src 'self'; " +
 	// repeat every source style-src grants them or it silently withdraws one.
 	"style-src-elem 'self' " + cspNoncePlaceholder + " " + cspReportSample + " https://fonts.googleapis.com; " +
 	"font-src 'self' data: https://fonts.gstatic.com; " +
-	"img-src 'self' data:; " +
+	"img-src 'self' data: https://avatars.githubusercontent.com https://gitlab.com https://secure.gravatar.com; " +
 	// 'self' also covers same-origin WebSocket (wss:// on an HTTPS page), so
 	// the backend log/stream sockets connect without a bare ws:/wss: wildcard
 	// (which scanners flag as overly permissive — it would allow any host).
@@ -728,6 +736,13 @@ func loadPortalConfig(pc api.PortalConfig, env *env.VarSet) (api.PortalConfig, e
 	pc.HTTPS = true
 	pc.PluginConfig = make(map[string]string)
 
+	// Applied once, here: only the lookup can tell an explicit 0 from unset.
+	limit, warning := jobTrackingLimitMins(pc.AsyncJobTrackingLimitMins, env.IsSet("ASYNC_JOB_TRACKING_LIMIT_IN_MINS"))
+	if warning != "" {
+		slog.Warn(warning)
+	}
+	pc.AsyncJobTrackingLimitMins = limit
+
 	// Default to standard timeout if the mutating one is not configured
 	if pc.HTTPClientTimeoutMutatingInSecs == 0 {
 		pc.HTTPClientTimeoutMutatingInSecs = pc.HTTPClientTimeoutInSecs
@@ -754,16 +769,26 @@ func loadPortalConfig(pc api.PortalConfig, env *env.VarSet) (api.PortalConfig, e
 	//   - anything else -> treated as a full policy string, used verbatim
 	// The explicit off-values are normalized to "" so a well-meaning
 	// CONSOLE_CSP=off never leaks as a literal Content-Security-Policy value.
+	// CONSOLE_CSP_GIT_HOSTS adds the deploy wizard's Git hosts to the built-in
+	// policy only; a policy of the operator's own is used as given.
+	gitHosts, err := cspGitHosts(pc.CSPGitHosts)
+	if err != nil {
+		return pc, err
+	}
+	pc.CSPGitHosts = gitHosts
 	switch {
 	case pc.CSPPolicy == "",
 		strings.EqualFold(pc.CSPPolicy, "default"),
 		strings.EqualFold(pc.CSPPolicy, "on"):
-		pc.CSPPolicy = defaultCSPPolicy
+		pc.CSPPolicy = builtInCSPPolicy(gitHosts)
 	case strings.EqualFold(pc.CSPPolicy, "off"),
 		strings.EqualFold(pc.CSPPolicy, "none"),
 		strings.EqualFold(pc.CSPPolicy, "false"),
 		strings.EqualFold(pc.CSPPolicy, "disabled"):
 		pc.CSPPolicy = ""
+	}
+	if len(gitHosts) > 0 && pc.CSPPolicy != builtInCSPPolicy(gitHosts) {
+		slog.Warn("CONSOLE_CSP_GIT_HOSTS is ignored: CONSOLE_CSP replaces or disables the built-in policy, so add the Git hosts to your own policy instead")
 	}
 
 	// Violation reporting. Resolved here rather than per response so that the
@@ -1145,6 +1170,10 @@ func (p *portalProxy) GetEndpointTypeSpec(typeName string) (api.EndpointPlugin, 
 // @Failure 401 {object} api.ErrorResponseBody "Error response"
 // @Security ApiKeyAuth
 // @Router /endpoints [post]
+// unknownEndpointTypeReason marks a register request for a type this server
+// has no register route for.
+const unknownEndpointTypeReason = "unknown_endpoint_type"
+
 func (p *portalProxy) pluginRegisterRouter(c *echo.Context) error {
 	slog.Debug("pluginRegisterRouter")
 
@@ -1154,8 +1183,12 @@ func (p *portalProxy) pluginRegisterRouter(c *echo.Context) error {
 		return err
 	}
 
+	// A request error, not a server one: a plain error reaches the user as a
+	// bare "Internal Server Error (500)". The reason tells the register form
+	// that the address is not at fault.
 	if params.EndpointType == "" {
-		return errors.New("endpoint_type parameter is missing")
+		return api.NewHTTPShadowErrorWithReason(http.StatusBadRequest, unknownEndpointTypeReason,
+			"No endpoint type given", "")
 	}
 
 	if val, ok := p.PluginRegisterRoutes[params.EndpointType]; ok {
@@ -1163,7 +1196,8 @@ func (p *portalProxy) pluginRegisterRouter(c *echo.Context) error {
 		return val(c)
 	}
 
-	return fmt.Errorf("unknown endpoint_type %s", params.EndpointType)
+	return api.NewHTTPShadowErrorWithReason(http.StatusBadRequest, unknownEndpointTypeReason,
+		fmt.Sprintf("This Stratos server cannot register endpoints of type %q yet", params.EndpointType), "")
 }
 
 func (p *portalProxy) registerRoutes(e *echo.Echo, needSetupMiddleware bool) {
@@ -1290,6 +1324,8 @@ func (p *portalProxy) registerRoutes(e *echo.Echo, needSetupMiddleware bool) {
 
 	// CNSI operations
 	stableAPIGroup.GET("/endpoints", p.listCNSIs)
+	stableAPIGroup.POST("/endpoints/certificates/decode", p.decodeCertificatesHandler)
+	stableAPIGroup.POST("/endpoints/:id/trust", p.trustCheckHandler)
 
 	// Proxy single request
 	stableAPIGroup.GET("/proxy/:uuid/*", p.ProxySingleRequest)

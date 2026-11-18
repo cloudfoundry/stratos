@@ -1,9 +1,11 @@
+import { readFileSync } from 'fs';
+import { join } from 'path';
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { importProvidersFrom, provideZonelessChangeDetection, signal } from '@angular/core';
 import { provideHttpClient } from '@angular/common/http';
-import { provideHttpClientTesting } from '@angular/common/http/testing';
+import { HttpTestingController, provideHttpClientTesting } from '@angular/common/http/testing';
 import { ActivatedRoute, provideRouter } from '@angular/router';
-import { firstValueFrom, of } from 'rxjs';
+import { of } from 'rxjs';
 import { describe, it, expect, beforeEach, vi } from 'vitest';
 
 import { generateCfBaseTestModulesNoShared } from "@test-framework/cf";
@@ -11,9 +13,17 @@ import { STORE_TEST_PROVIDERS } from '@stratosui/store/testing';
 import { AppDetailDataService } from '../../../../features/applications/app-detail-data.service';
 import { CloudFoundryUserProvidedServicesService } from '../../../services/cloud-foundry-user-provided-services.service';
 import { ServiceCatalogDataService } from '../../../../services/endpoint-data/service-catalog-data.service';
-import { CsiModeService } from '../csi-mode.service';
+import { CreateServiceFormMode, CsiModeService } from '../csi-mode.service';
 import { CsiStateService } from '../csi-state.service';
 import { SpecifyUserProvidedDetailsComponent } from "./specify-user-provided-details.component";
+
+// onNext waits for the wizard state on a microtask before it sends anything,
+// so a spec that answers the request right after calling it lets that settle
+const settle = async () => {
+  for (let i = 0; i < 5; i++) {
+    await Promise.resolve();
+  }
+};
 
 describe('SpecifyUserProvidedDetailsComponent', () => {
   let component: SpecifyUserProvidedDetailsComponent;
@@ -43,11 +53,11 @@ describe('SpecifyUserProvidedDetailsComponent', () => {
     component = fixture.componentInstance;
 
     // Set required inputs
-    component.cfGuid = 'test-cf-guid';
-    component.spaceGuid = 'test-space-guid';
-    component.appId = 'test-app-id';
+    fixture.componentRef.setInput('cfGuid', 'test-cf-guid');
+    fixture.componentRef.setInput('spaceGuid', 'test-space-guid');
+    fixture.componentRef.setInput('appId', 'test-app-id');
 
-    fixture.detectChanges();
+    await fixture.whenStable();
   });
 
   it('should create', () => {
@@ -98,10 +108,10 @@ describe('SpecifyUserProvidedDetailsComponent.onNextUpdate', () => {
 
     const fixture = TestBed.createComponent(SpecifyUserProvidedDetailsComponent);
     const component = fixture.componentInstance;
-    component.cfGuid = 'cf-1';
-    component.spaceGuid = 'space-1';
-    component.appId = 'app-1';
-    component.serviceInstanceId = 'si-1';
+    fixture.componentRef.setInput('cfGuid', 'cf-1');
+    fixture.componentRef.setInput('spaceGuid', 'space-1');
+    fixture.componentRef.setInput('appId', 'app-1');
+    fixture.componentRef.setInput('serviceInstanceId', 'si-1');
     component.isUpdate = true;
     return { fixture, component, upsServiceStub, refreshSpy };
   }
@@ -111,7 +121,7 @@ describe('SpecifyUserProvidedDetailsComponent.onNextUpdate', () => {
       updateResult: { success: true },
     });
 
-    const result = await firstValueFrom(component.onNext());
+    const result = await component.onNext();
 
     expect(upsServiceStub.updateUserProvidedService).toHaveBeenCalledWith(
       'cf-1', 'si-1', expect.any(Object),
@@ -127,7 +137,7 @@ describe('SpecifyUserProvidedDetailsComponent.onNextUpdate', () => {
       withAppDetailData: false,
     });
 
-    const result = await firstValueFrom(component.onNext());
+    const result = await component.onNext();
 
     expect(upsServiceStub.updateUserProvidedService).toHaveBeenCalledTimes(1);
     expect(result).toEqual({ success: true, redirect: true });
@@ -138,13 +148,14 @@ describe('SpecifyUserProvidedDetailsComponent.onNextUpdate', () => {
       updateResult: { success: false, message: 'broker rejected the update' },
     });
 
-    const result = await firstValueFrom(component.onNext());
+    const result = await component.onNext();
 
     expect(refreshSpy).not.toHaveBeenCalled();
     expect(result).toEqual({
       success: false,
       redirect: false,
       message: 'Failed to update service instance: broker rejected the update',
+      messagePieces: [{ text: 'Failed to update service instance: broker rejected the update', style: 'text' }],
     });
   });
 });
@@ -199,24 +210,24 @@ describe('SpecifyUserProvidedDetailsComponent credentials reveal', () => {
 
     const fixture = TestBed.createComponent(SpecifyUserProvidedDetailsComponent);
     const component = fixture.componentInstance;
-    component.cfGuid = 'cf-1';
-    component.spaceGuid = 'space-1';
-    component.serviceInstanceId = 'si-1';
+    fixture.componentRef.setInput('cfGuid', 'cf-1');
+    fixture.componentRef.setInput('spaceGuid', 'space-1');
+    fixture.componentRef.setInput('serviceInstanceId', 'si-1');
     return { fixture, component, credsSpy };
   }
 
-  it('fetches on load but keeps the textarea blank (blank = keep stored)', () => {
+  it('fetches on load but keeps the textarea blank (blank = keep stored)', async () => {
     const { fixture, component, credsSpy } = setup({ user: 'admin' });
-    fixture.detectChanges();
+    await fixture.whenStable();
 
     expect(credsSpy).toHaveBeenCalledTimes(1);
     expect(credsSpy).toHaveBeenCalledWith('cf-1', 'si-1');
     expect(component.createEditServiceInstance.controls.credentials.value).toBe('');
   });
 
-  it('shows the redacted structure by default, real values only after toggleReveal', () => {
+  it('shows the redacted structure by default, real values only after toggleReveal', async () => {
     const { fixture, component } = setup({ user: 'admin', password: 'p' });
-    fixture.detectChanges();
+    await fixture.whenStable();
 
     expect(component.credsMode()).toBe('redacted');
     expect(component.displayedCredentialsJson()).toContain('"user": "<redacted>"');
@@ -230,9 +241,9 @@ describe('SpecifyUserProvidedDetailsComponent credentials reveal', () => {
     expect(component.displayedCredentialsJson()).not.toContain('admin');
   });
 
-  it('enterEdit fills the textarea from the sub-resource; cancelEdit blanks it', () => {
+  it('enterEdit fills the textarea from the sub-resource; cancelEdit blanks it', async () => {
     const { fixture, component } = setup({ user: 'admin', password: 'p' });
-    fixture.detectChanges();
+    await fixture.whenStable();
 
     component.enterEdit();
     expect(component.credsMode()).toBe('edit');
@@ -244,27 +255,265 @@ describe('SpecifyUserProvidedDetailsComponent credentials reveal', () => {
     expect(component.createEditServiceInstance.controls.credentials.value).toBe('');
   });
 
-  it('reveal and edit round-trips are not edits — Next stays disabled', () => {
+  it('reveal and edit round-trips are not edits — Next stays disabled', async () => {
     const { fixture, component } = setup({ user: 'admin' });
-    fixture.detectChanges();
+    await fixture.whenStable();
 
     component.toggleReveal();
-    fixture.detectChanges();
+    await fixture.whenStable();
     expect(component.validate()).toBe(false);
 
     component.enterEdit();
     component.cancelEdit();
-    fixture.detectChanges();
+    await fixture.whenStable();
     expect(component.validate()).toBe(false);
   });
 
-  it('fetches once — reveal and edit reuse the loaded sub-resource', () => {
+  it('fetches once — reveal and edit reuse the loaded sub-resource', async () => {
     const { fixture, component, credsSpy } = setup({ user: 'admin' });
-    fixture.detectChanges();
+    await fixture.whenStable();
 
     component.toggleReveal();
     component.enterEdit();
 
     expect(credsSpy).toHaveBeenCalledTimes(1);
+  });
+});
+
+// The create form as the user meets it: what app-form-field renders for
+// each field, read from the DOM.
+describe('SpecifyUserProvidedDetailsComponent create form', () => {
+  async function setup() {
+    const upsServiceStub = {
+      getUserProvidedServices: vi.fn().mockReturnValue(of([])),
+      createUserProvidedService: vi.fn().mockReturnValue(of({ success: true, guid: 'ups-1' })),
+    };
+    TestBed.resetTestingModule();
+    TestBed.configureTestingModule({
+      imports: [SpecifyUserProvidedDetailsComponent],
+      providers: [
+        provideZonelessChangeDetection(),
+        provideRouter([]),
+        provideHttpClient(),
+        provideHttpClientTesting(),
+        ...STORE_TEST_PROVIDERS,
+        importProvidersFrom(generateCfBaseTestModulesNoShared()),
+        CsiModeService,
+        CsiStateService,
+        { provide: CloudFoundryUserProvidedServicesService, useValue: upsServiceStub },
+      ],
+    });
+    const fixture = TestBed.createComponent(SpecifyUserProvidedDetailsComponent);
+    const component = fixture.componentInstance;
+    fixture.componentRef.setInput('cfGuid', 'cf-1');
+    fixture.componentRef.setInput('spaceGuid', 'space-1');
+    await fixture.whenStable();
+    const host = fixture.nativeElement as HTMLElement;
+    return { fixture, component, host, upsServiceStub };
+  }
+
+  /** The input a visible label names, as a screen reader pairs them. */
+  function labelledInput(host: HTMLElement, text: string): HTMLInputElement | null {
+    const label = [...host.querySelectorAll('label')].find(l => l.textContent?.trim() === text);
+    return label?.htmlFor ? host.querySelector<HTMLInputElement>(`#${label.htmlFor}`) : null;
+  }
+
+  /** What app-form-field shows for a field, through the input's aria-errormessage. */
+  function errorFor(host: HTMLElement, input: Element): string | undefined {
+    const id = input.getAttribute('aria-errormessage');
+    return id ? host.querySelector(`#${id}`)?.textContent?.trim() : undefined;
+  }
+
+  function type(input: HTMLInputElement | HTMLTextAreaElement, value: string) {
+    input.value = value;
+    input.dispatchEvent(new Event('input', { bubbles: true }));
+  }
+
+  // app-form-field shows one error line per field and does not project
+  // <app-error> children, so each check must carry its own text.
+  it('names what is wrong with a URL or the credentials', async () => {
+    const { fixture, host } = await setup();
+    const route = host.querySelector<HTMLInputElement>('input[placeholder="Route Service URL"]')!;
+    const drain = host.querySelector<HTMLInputElement>('input[placeholder="Syslog Drain URL"]')!;
+    const creds = host.querySelector<HTMLTextAreaElement>('textarea[aria-label="Credentials (JSON)"]')!;
+    type(route, 'not a url');
+    type(drain, 'ftp://logs.example.com');
+    type(creds, '["e2e"]');
+    await fixture.whenStable();
+
+    expect(errorFor(host, route)).toBe('Invalid URL (route services need https)');
+    expect(errorFor(host, drain)).toBe('Invalid URL');
+    expect(errorFor(host, creds)).toBe('Not a valid JSON object.');
+  });
+
+  it('shows the name check in progress, then says the name is taken', async () => {
+    const { fixture, host } = await setup();
+    const http = TestBed.inject(HttpTestingController);
+    const name = host.querySelector<HTMLInputElement>('input[placeholder="Name"]')!;
+    const suffix = name.closest('app-form-field')!.querySelector('.form-field-suffix')!;
+    type(name, 'my-ups');
+    await fixture.whenStable();
+    expect(suffix.querySelector('app-stateful-icon app-busy'), 'busy while checking').toBeTruthy();
+
+    // The check asks CF once typing pauses for 500ms.
+    await new Promise(resolve => setTimeout(resolve, 550));
+    http.expectOne(r => r.url === '/pp/v1/cf/service_instances/cf-1' && r.params.get('names') === 'my-ups')
+      .flush({ resources: [], totalResults: 1 });
+    await fixture.whenStable();
+
+    expect(errorFor(host, name)).toBe('A service instance with this name already exists. Please enter a different one.');
+    expect(suffix.querySelector('app-busy'), 'not busy once answered').toBeNull();
+  });
+
+  it('renders a labelled Tags field; Enter adds a tag and its remove button names it', async () => {
+    const { fixture, host } = await setup();
+    const input = labelledInput(host, 'Tags');
+    expect(input, 'a Tags label tied to an input').toBeTruthy();
+
+    input!.value = 'db';
+    input!.dispatchEvent(new KeyboardEvent('keydown', { key: 'Enter', bubbles: true }));
+    await fixture.whenStable();
+
+    const chips = [...host.querySelectorAll('.stepper-form__tags span.rounded-full')]
+      .map(e => e.textContent?.replace('cancel', '').trim());
+    expect(chips).toEqual(['db']);
+    expect(host.querySelector('button[aria-label="Remove tag db"]')).toBeTruthy();
+  });
+
+  // With no app to bind, a created instance ends the wizard.
+  it('asks the stepper to leave once CF has created the instance', async () => {
+    const { component, upsServiceStub } = await setup();
+    component.createEditServiceInstance.controls.name.setValue('my-ups');
+
+    const result = await component.onNext();
+
+    expect(upsServiceStub.createUserProvidedService).toHaveBeenCalledWith(
+      'cf-1', expect.any(String), expect.objectContaining({ name: 'my-ups', spaceGuid: 'space-1' }));
+    expect(result).toEqual({ success: true, redirect: true });
+  });
+
+  it('says an unknown bind outcome is unknown, and that the instance was created', async () => {
+    const { fixture, component } = await setup();
+    component.createEditServiceInstance.controls.name.setValue('my-ups');
+    TestBed.inject(CsiStateService).setApp('app-1', {});
+    await fixture.whenStable();
+    vi.spyOn(TestBed.inject(CsiModeService), 'createApplicationServiceBinding')
+      .mockReturnValue(of({ success: false, unknown: 'still-running' }));
+
+    const result = await component.onNext();
+
+    expect(result.success).toBe(false);
+    expect(result.message).toContain('User-provided service instance "my-ups" was created. Binding it to the application: still running in Cloud Foundry');
+    expect(result.message).not.toContain('Failed to create service instance binding');
+  });
+
+  it('says the instance was created when the bind after a create fails', async () => {
+    const { fixture, component } = await setup();
+    component.createEditServiceInstance.controls.name.setValue('my-ups');
+    TestBed.inject(CsiStateService).setApp('app-1', {});
+    await fixture.whenStable();
+    vi.spyOn(TestBed.inject(CsiModeService), 'createApplicationServiceBinding')
+      .mockReturnValue(of({ success: false, message: 'bind said no' }));
+
+    const result = await component.onNext();
+
+    expect(result.success).toBe(false);
+    expect(result.message).toBe('User-provided service instance "my-ups" was created, but binding it to the application failed: bind said no');
+  });
+
+  it('says a bind to an existing instance is unknown, not failed', async () => {
+    const { fixture, component } = await setup();
+    component.formMode = CreateServiceFormMode.BindServiceInstance;
+    TestBed.inject(CsiStateService).setApp('app-1', {});
+    await fixture.whenStable();
+    vi.spyOn(TestBed.inject(CsiModeService), 'createApplicationServiceBinding')
+      .mockReturnValue(of({ success: false, unknown: 'ended' }));
+
+    const result = await component.onNext();
+
+    expect(result.message).toContain('Binding the service instance to the application: the operation ended, but its result could not be determined.');
+  });
+
+  // nginx's own 502 page, as a proxy in front of Stratos sends it, through
+  // the real service.
+  const nginx502 = (lead: string) => [
+    { text: `${lead}: `, style: 'text' },
+    { text: '502 Bad Gateway', style: 'heading' },
+    { text: '\nnginx/1.28.0', style: 'text' },
+  ];
+  function answerWithErrorPage(method: string) {
+    const page = readFileSync(join(import.meta.dirname, '../../../../../../store/src/testdata/upstream-errors/nginx-502.body'), 'utf8');
+    TestBed.inject(HttpTestingController).expectOne(r => r.method === method)
+      .flush(page, { status: 502, statusText: 'Bad Gateway' });
+  }
+
+  it('keeps an error page\'s heading when CF does not create the instance', async () => {
+    const { component, upsServiceStub } = await setup();
+    const real = TestBed.runInInjectionContext(() => new CloudFoundryUserProvidedServicesService());
+    upsServiceStub.createUserProvidedService.mockImplementation(
+      (...args: Parameters<typeof real.createUserProvidedService>) => real.createUserProvidedService(...args));
+    component.createEditServiceInstance.controls.name.setValue('my-ups');
+
+    const pending = component.onNext();
+    await settle();
+    answerWithErrorPage('POST');
+    const result = await pending;
+
+    expect(result.success).toBe(false);
+    expect(result.message).toBe('Failed to create User Provided Service Instance. Reason: 502 Bad Gateway\nnginx/1.28.0');
+    expect(result.messagePieces).toEqual(nginx502('Failed to create User Provided Service Instance. Reason'));
+  });
+
+  it('keeps an error page\'s heading when CF does not update the instance', async () => {
+    const { fixture, component } = await setup();
+    const real = TestBed.runInInjectionContext(() => new CloudFoundryUserProvidedServicesService());
+    Object.assign(TestBed.inject(CloudFoundryUserProvidedServicesService), {
+      updateUserProvidedService: real.updateUserProvidedService.bind(real),
+    });
+    component.isUpdate = true;
+    fixture.componentRef.setInput('serviceInstanceId', 'ups-1');
+
+    const pending = component.onNext();
+    await settle();
+    answerWithErrorPage('PATCH');
+    const result = await pending;
+
+    expect(result.success).toBe(false);
+    expect(result.message).toBe('Failed to update service instance: 502 Bad Gateway\nnginx/1.28.0');
+    expect(result.messagePieces).toEqual(nginx502('Failed to update service instance'));
+  });
+
+  // CF takes syslog, syslog-tls and https drains; the route service URL
+  // keeps the shared http(s) check.
+  it('accepts syslog, syslog-tls, http and https drains only', async () => {
+    const { component } = await setup();
+    const drain = component.createEditServiceInstance.controls.syslog_drain_url;
+    for (const url of [
+      'syslog://logs.example.com:514',
+      'syslog-tls://logs.example.com:6514',
+      'https://logs.example.com/drain',
+      'http://logs.example.com/drain',
+    ]) {
+      drain.setValue(url);
+      expect(drain.valid, url).toBe(true);
+    }
+    for (const url of ['ftp://logs.example.com', 'syslog:/logs.example.com', 'logs.example.com:514']) {
+      drain.setValue(url);
+      expect(drain.valid, url).toBe(false);
+    }
+    const route = component.createEditServiceInstance.controls.route_service_url;
+    route.setValue('syslog://logs.example.com:514');
+    expect(route.valid).toBe(false);
+  });
+
+  // CF: the route service URL "must use the https protocol".
+  it('accepts an https route service URL only', async () => {
+    const { component } = await setup();
+    const route = component.createEditServiceInstance.controls.route_service_url;
+    route.setValue('https://route.example.com/service');
+    expect(route.valid).toBe(true);
+    route.setValue('http://route.example.com/service');
+    expect(route.valid).toBe(false);
+    expect(route.errors?.['invalidUrl']?.message).toBe('Invalid URL (route services need https)');
   });
 });

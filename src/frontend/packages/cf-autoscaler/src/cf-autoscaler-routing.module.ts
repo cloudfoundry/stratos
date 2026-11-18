@@ -3,7 +3,7 @@ import { RouterModule, Routes } from '@angular/router';
 
 // Things in this path include add/edit policy stepper, policy metrics page and policy events page
 // They're include like this to ensure those parts are lazy loaded.
-// The core application policy tab is included via CfAutoscalerModule, which is imported in the Application Module
+// The core application policy tab is included via CfAutoscalerModule, which CfAutoscalerPackageModule imports
 const customRoutes: Routes = [
   {
     path: 'autoscaler',

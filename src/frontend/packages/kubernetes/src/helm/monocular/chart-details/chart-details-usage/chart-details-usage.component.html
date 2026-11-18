@@ -1,5 +1,5 @@
 <div class="flex justify-end my-9">
-  @if (endpointsService.hasConnectedEndpointType('k8s') | async) {
+  @if (!noKubeEndpoint()) {
     <button
       class="btn btn-primary"
     [routerLink]="installUrl">Install Chart</button>

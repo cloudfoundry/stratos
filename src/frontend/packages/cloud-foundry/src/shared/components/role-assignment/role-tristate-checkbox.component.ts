@@ -1,4 +1,4 @@
-import { ChangeDetectionStrategy, Component, EventEmitter, Input, Output } from '@angular/core';
+import { ChangeDetectionStrategy, Component, input, output } from '@angular/core';
 import { CustomCheckboxComponent, CustomTooltipDirective } from '@stratosui/core';
 
 /**
@@ -6,8 +6,8 @@ import { CustomCheckboxComponent, CustomTooltipDirective } from '@stratosui/core
  *
  * Renders a checked/unchecked/indeterminate checkbox and emits the new
  * explicit boolean on toggle.  Holds NO dependency on CfRolesService or
- * CfUsersRolesDataService — all state flows in via @Input() and events
- * flow out via @Output().
+ * CfUsersRolesDataService — all state flows in through inputs and events
+ * flow out through outputs.
  */
 @Component({
   selector: 'app-role-tristate-checkbox',
@@ -18,16 +18,16 @@ import { CustomCheckboxComponent, CustomTooltipDirective } from '@stratosui/core
 })
 export class RoleTristateCheckboxComponent {
   /** true = checked, false = unchecked, null = indeterminate */
-  @Input() checked: boolean | null = false;
-  @Input() disabled = false;
-  @Input() label = '';
-  @Input() tooltip = '';
+  readonly checked = input<boolean | null>(false);
+  readonly disabled = input(false);
+  readonly label = input('');
+  readonly tooltip = input('');
 
   /** Emits the new explicit boolean when the user toggles the checkbox. */
-  @Output() toggled = new EventEmitter<boolean>();
+  readonly toggled = output<boolean>();
 
   onChange(next: boolean): void {
-    if (this.disabled) {
+    if (this.disabled()) {
       return;
     }
     this.toggled.emit(next);

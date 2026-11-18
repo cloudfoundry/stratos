@@ -1,4 +1,4 @@
-#!/usr/bin/env node
+#!/usr/bin/env bun
 /**
  * Ensures devkit is built before bun workspace resolution
  * This eliminates the bootstrap requirement

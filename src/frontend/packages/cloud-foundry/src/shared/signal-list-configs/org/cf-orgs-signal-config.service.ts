@@ -1,4 +1,4 @@
-import { DestroyRef, EffectRef, Injectable, Injector, Signal, WritableSignal, computed, effect, inject, runInInjectionContext, signal } from '@angular/core';
+import { EffectRef, Injectable, Injector, Signal, WritableSignal, computed, effect, inject, runInInjectionContext, signal } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { firstValueFrom } from 'rxjs';
 import { ListStateStore } from '@stratosui/core';
@@ -7,6 +7,7 @@ import type { EndpointDataService } from '../../../services/endpoint-data/endpoi
 import { ViewPipeline, SortSpec } from '../../../services/data-sources/view-pipeline';
 import { CnsiOrgsSource } from '../../../services/data-sources/cnsi-orgs-source';
 import { EntityDeleteController } from '../../../services/deletes/entity-delete.controller';
+import type { DeleteOutcome } from '../../../services/deletes/delete-event.types';
 import { runCfDelete } from '../../../services/deletes/run-cf-delete';
 import { organizationEntityType } from '../../../cf-entity-types';
 import type { StOrg } from '../../../services/endpoint-data/stratos-types';
@@ -20,7 +21,6 @@ import type { StOrg } from '../../../services/endpoint-data/stratos-types';
 export class CfOrgsSignalConfigService {
   private readonly http = inject(HttpClient);
   private readonly registry = inject(EndpointDataRegistry);
-  private readonly destroyRef = inject(DestroyRef);
   private readonly injector = inject(Injector);
   private readonly deleteController = inject(EntityDeleteController);
 
@@ -142,9 +142,6 @@ export class CfOrgsSignalConfigService {
         }
       });
     });
-    this.destroyRef.onDestroy(() => {
-      this.registry.release(cnsiGuid);
-    });
   }
 
   clearFilters(): void {
@@ -185,14 +182,21 @@ export class CfOrgsSignalConfigService {
   // no longer depends on initialize() having run — fixing the cold/fallback
   // path where the org summary page is deep-linked without the org list tab
   // ever mounting, which previously left every cache stale (the reproduced bug).
-  async deleteOrg(cnsiGuid: string, orgGuid: string, orgName: string = orgGuid): Promise<void> {
-    await runCfDelete(this.deleteController, this.http, {
+  //
+  // An unknown result leaves the org row in place (the controller only marks
+  // it stale), so the list is re-read to show whether it is still there.
+  async deleteOrg(cnsiGuid: string, orgGuid: string, orgName: string = orgGuid): Promise<DeleteOutcome> {
+    const outcome = await runCfDelete(this.deleteController, this.http, {
       cnsiGuid,
       entityKind: organizationEntityType,
       deleteGuid: orgGuid,
       deleteName: orgName,
       path: `/pp/v1/cf/orgs/${cnsiGuid}/${orgGuid}`,
     });
+    if (outcome !== 'deleted') {
+      await this.refresh();
+    }
+    return outcome;
   }
 
   // Create an org via CnsiOrgsSource. The source POSTs to /pp/v1/cf/orgs,

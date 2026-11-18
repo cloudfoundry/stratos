@@ -1,10 +1,14 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { provideZonelessChangeDetection } from '@angular/core';
-import { describe, it, expect, beforeEach, vi } from 'vitest';
+import { afterEach, describe, it, expect, beforeEach, vi } from 'vitest';
 import { ActivatedRoute } from '@angular/router';
-import { entityCatalog, generateStratosEntities, EntityCatalogHelper, EntityCatalogHelpers, StratosCatalogEndpointEntity } from '@stratosui/store';
+import { EndpointModel, EndpointsDataService, entityCatalog, generateStratosEntities, EntityCatalogHelper, EntityCatalogHelpers, StratosCatalogEndpointEntity } from '@stratosui/store';
 import { createBasicStoreModule, STORE_TEST_PROVIDERS } from '@stratosui/store/testing';
 
+import { ConfirmationDialogService } from '../../../../shared/components/confirmation-dialog.service';
+import { TailwindSnackBarService } from '../../../../shared/services/tailwind-snackbar.service';
+import { EndpointCertificatesService } from '../../certificates/endpoint-certificates.service';
+import { EndpointPermissionsService } from '../../endpoint-permissions.service';
 import { EndpointsSignalConfigService } from '../../endpoints-page/endpoints-signal-config.service';
 import { CreateEndpointCfStep1Component } from './create-endpoint-cf-step-1.component';
 
@@ -21,9 +25,13 @@ describe('CreateEndpointCfStep1Component', () => {
   let component: CreateEndpointCfStep1Component;
   let fixture: ComponentFixture<CreateEndpointCfStep1Component>;
   let stubSignalConfig: ReturnType<typeof makeStubEndpointsSignalConfig>;
+  let canManage: ReturnType<typeof vi.fn>;
+  let confirmAnswer: boolean;
 
   beforeEach(async () => {
     stubSignalConfig = makeStubEndpointsSignalConfig();
+    canManage = vi.fn().mockReturnValue(true);
+    confirmAnswer = true;
     // Clear and register entities BEFORE TestBed configuration for Angular 20
     (entityCatalog as any).clear();
     const entities = generateStratosEntities();
@@ -48,6 +56,11 @@ describe('CreateEndpointCfStep1Component', () => {
       ],
       providers: [
         { provide: EndpointsSignalConfigService, useValue: stubSignalConfig },
+        { provide: EndpointPermissionsService, useValue: { canManage } },
+        {
+          provide: EndpointCertificatesService,
+          useValue: { decode: vi.fn().mockResolvedValue([]), checkTrust: vi.fn().mockResolvedValue([]) },
+        },
         {
           provide: ActivatedRoute,
           useValue: {
@@ -67,14 +80,63 @@ describe('CreateEndpointCfStep1Component', () => {
     EntityCatalogHelpers.SetEntityCatalogHelper(helper);
   });
 
-  beforeEach(() => {
+  beforeEach(async () => {
     fixture = TestBed.createComponent(CreateEndpointCfStep1Component);
     component = fixture.componentInstance;
-    fixture.detectChanges();
+    await fixture.whenStable();
   });
 
   it('should be created', () => {
     expect(component).toBeTruthy();
+  });
+
+  it('fills in and locks an address the host fixes', async () => {
+    const urlField = component.registerForm.controls.urlField;
+    fixture.componentRef.setInput('fixedUrl', 'https://api.fixed.example.com');
+    await fixture.whenStable();
+    expect(urlField.value).toBe('https://api.fixed.example.com');
+    expect(urlField.disabled).toBe(true);
+
+    fixture.componentRef.setInput('fixedUrl', '');
+    await fixture.whenStable();
+    expect(urlField.value).toBe('');
+    expect(urlField.enabled).toBe(true);
+  });
+
+  it('asks for no linked Cloud Foundry when registering a Cloud Foundry', async () => {
+    component.registerForm.controls.urlField.setValue('https://api.sys.example.com');
+    await fixture.whenStable();
+    expect((fixture.nativeElement as HTMLElement).querySelector('#linked-cf')).toBeNull();
+  });
+
+  it('labels the CA certificate box with its caption', () => {
+    const root: HTMLElement = fixture.nativeElement;
+    const box = root.querySelector('textarea[formControlName="caCertField"]');
+    expect(box?.id, 'box has an id').toBeTruthy();
+    expect(root.querySelector(`label[for="${box!.id}"]`)?.textContent?.trim()).toBe('Specify CA Certificate:');
+  });
+
+  // A collapsed section is only 0 px tall: without inert its fields stay in
+  // the tab order and the accessibility tree.
+  it('keeps the fields of a collapsed section out of reach', async () => {
+    const root: HTMLElement = fixture.nativeElement;
+    const inert = (id: string) => root.querySelector(id)!.closest('.create-endpoint__advanced')!.hasAttribute('inert');
+    expect(inert('#client_id')).toBe(true);
+    expect(inert('#ca-cert')).toBe(true);
+
+    component.toggleAdvancedOptions();
+    component.toggleCACertField();
+    await fixture.whenStable();
+    expect(inert('#client_id')).toBe(false);
+    expect(inert('#ca-cert')).toBe(false);
+  });
+
+  // The hidden Advanced Options sit under the Name field, so a browser
+  // with a saved console login filled it in as Client ID and Client Secret.
+  it('keeps the browser from filling the console login into the client credentials', () => {
+    const root: HTMLElement = fixture.nativeElement;
+    expect(root.querySelector('#client_id')?.getAttribute('autocomplete')).toBe('off');
+    expect(root.querySelector('#client_secret')?.getAttribute('autocomplete')).toBe('new-password');
   });
 
   describe('URL Validation', () => {
@@ -219,6 +281,407 @@ describe('CreateEndpointCfStep1Component', () => {
 
     it('should have invalid form when required fields are empty', () => {
       expect(component.registerForm.valid).toBe(false);
+    });
+  });
+  // app-form-field shows a field's <app-error> text as its error line.
+  describe('field errors', () => {
+    function type(input: HTMLInputElement, value: string) {
+      input.value = value;
+      input.dispatchEvent(new Event('input', { bubbles: true }));
+    }
+
+    /** What app-form-field shows for a field, through the input's aria-errormessage. */
+    function errorFor(input: HTMLInputElement): string | undefined {
+      const id = input.getAttribute('aria-errormessage');
+      const host: HTMLElement = fixture.nativeElement;
+      return id ? host.querySelector(`#${id}`)?.textContent?.replace(/\s+/g, ' ').trim() : undefined;
+    }
+
+    it('says the name is required once it is cleared', async () => {
+      const name = fixture.nativeElement.querySelector('#name') as HTMLInputElement;
+      type(name, 'x');
+      type(name, '');
+      await fixture.whenStable();
+
+      expect(errorFor(name)).toBe('Name is required');
+    });
+
+    it('explains a bad API address', async () => {
+      const url = fixture.nativeElement.querySelector('#url') as HTMLInputElement;
+      type(url, 'not a url');
+      await fixture.whenStable();
+
+      expect(errorFor(url)).toBe(
+        'Invalid API URL. Enter a valid hostname or URL (e.g., api.example.com or https://api.example.com)'
+      );
+    });
+  });
+
+  // A page that knows the address can link here with it, as the autoscaler
+  // tab's "Register it" does. The address is checked like a typed one.
+  describe('an address in the link', () => {
+    const open = async (url: string) => {
+      TestBed.inject(ActivatedRoute).snapshot.queryParams = { url };
+      fixture = TestBed.createComponent(CreateEndpointCfStep1Component);
+      component = fixture.componentInstance;
+      await fixture.whenStable();
+    };
+
+    afterEach(() => {
+      TestBed.inject(ActivatedRoute).snapshot.queryParams = {};
+    });
+
+    it('starts the form with it, and leaves the name to the user', async () => {
+      await open('https://autoscaler.sys.x.com');
+      expect(component.registerForm.value.urlField).toBe('https://autoscaler.sys.x.com');
+      expect(component.registerForm.value.nameField).toBe('');
+      expect(component.urlDomain()).toBeTruthy();
+    });
+
+    it('marks an invalid address as it would a typed one', async () => {
+      await open('not a url');
+      expect(component.registerForm.controls.urlField.errors?.invalidUrl).toBeTruthy();
+    });
+  });
+
+  describe('already registered', () => {
+    async function withRegistered(host: string) {
+      const registered = {
+        guid: 'reg', name: 'reg', cnsi_type: 'cf',
+        api_endpoint: { Scheme: 'https', Host: host, Path: '' },
+        creator: { name: 'admin', admin: true, system: true },
+      } as EndpointModel;
+      (TestBed.inject(EndpointsDataService) as any)._endpoints.set(new Map([['reg', registered]]));
+      fixture = TestBed.createComponent(CreateEndpointCfStep1Component);
+      component = fixture.componentInstance;
+      // The scope (system or personal) comes from permissions this test
+      // does not set up; the address comparison is the same in each.
+      component.customEndpointsSignal = component.existingEndpointsSignal;
+      await fixture.whenStable();
+    }
+
+    async function typeUrl(value: string): Promise<string> {
+      const url = fixture.nativeElement.querySelector('#url') as HTMLInputElement;
+      url.value = value;
+      url.dispatchEvent(new Event('input', { bubbles: true }));
+      await fixture.whenStable();
+      return (fixture.nativeElement as HTMLElement).textContent!.replace(/\s+/g, ' ');
+    }
+
+    it('warns when the address is the one registered', async () => {
+      await withRegistered('API.example.com:443');
+      expect(await typeUrl('https://API.example.com:443')).toContain('An endpoint at this address is already registered. You can register it again.');
+    });
+
+    it('warns when the same address is written differently', async () => {
+      await withRegistered('API.example.com:443');
+      expect(await typeUrl('api.example.com/')).toContain('An endpoint at this address is already registered. You can register it again.');
+    });
+
+    it('does not warn for another port', async () => {
+      await withRegistered('api.example.com');
+      expect(await typeUrl('api.example.com:8443')).not.toContain('An endpoint at this address is already registered. You can register it again.');
+    });
+  });
+
+  // Review mode: the step shows what is registered. Name and address are
+  // locked; for those who may manage the endpoint, TLS stays editable.
+  describe('review', () => {
+    const PEM = '-----BEGIN CERTIFICATE-----\nAAAA\n-----END CERTIFICATE-----';
+    let update: ReturnType<typeof vi.fn>;
+
+    function endpoint(over: Partial<EndpointModel> = {}): EndpointModel {
+      return {
+        guid: 'ep-guid',
+        name: 'my-cf',
+        cnsi_type: 'cf',
+        api_endpoint: { Scheme: 'https', Host: 'api.example.com', Path: '' },
+        skip_ssl_validation: false,
+        sso_allowed: false,
+        system_shared_token: false,
+        creator: { name: 'admin', admin: true, system: true },
+        ...over,
+      } as EndpointModel;
+    }
+
+    async function review(ep: EndpointModel) {
+      fixture = TestBed.createComponent(CreateEndpointCfStep1Component);
+      component = fixture.componentInstance;
+      fixture.componentRef.setInput('reviewEndpoint', ep);
+      await fixture.whenStable();
+    }
+
+    const q = (sel: string) => (fixture.nativeElement as HTMLElement).querySelector(sel) as HTMLElement | null;
+    const text = () => (fixture.nativeElement as HTMLElement).textContent!.replace(/\s+/g, ' ');
+
+    beforeEach(() => {
+      update = vi.fn().mockResolvedValue({ busy: false, error: false, message: '' });
+      vi.spyOn(TestBed.inject(EndpointsDataService), 'update').mockImplementation(update as never);
+      vi.spyOn(TestBed.inject(ConfirmationDialogService), 'openWithCancel')
+        .mockImplementation((_c, ok, cancel) => confirmAnswer ? ok() : cancel());
+    });
+
+    it('locks the form after registering', async () => {
+      component.registerForm.controls.nameField.setValue('my-cf');
+      component.registerForm.controls.urlField.setValue('api.example.com');
+      stubSignalConfig.register.mockResolvedValue({ busy: false, error: false, message: '', guid: 'g1' });
+      await component.onNext();
+      await fixture.whenStable();
+
+      expect(component.review()).toBe(true);
+      expect(component.registerForm.controls.nameField.disabled).toBe(true);
+      expect(component.registerForm.controls.urlField.disabled).toBe(true);
+      expect(component.registerForm.controls.skipSSLField.disabled).toBe(false);
+      expect(q('#skipSSL')).toBeTruthy();
+    });
+
+    it('fills the form from the endpoint and locks name and address', async () => {
+      await review(endpoint({ skip_ssl_validation: true }));
+      expect(component.review()).toBe(true);
+      expect(component.registerForm.controls.nameField.value).toBe('my-cf');
+      expect(component.registerForm.controls.urlField.value).toBe('https://api.example.com');
+      expect(component.registerForm.controls.nameField.disabled).toBe(true);
+      expect(component.registerForm.controls.skipSSLField.value).toBe(true);
+    });
+
+    it('saves nothing on Next when TLS is unchanged', async () => {
+      await review(endpoint({ ca_cert: PEM }));
+      const result = await component.onNext();
+      expect(update).not.toHaveBeenCalled();
+      expect(result.success).toBe(true);
+      expect(result.data).toEqual(expect.objectContaining({ guid: 'ep-guid', name: 'my-cf', type: 'cf' }));
+    });
+
+    it('changing only Skip SSL sends the stored ca_cert', async () => {
+      // CA box off: the stored CA is empty, and the request must say so.
+      await review(endpoint());
+      component.registerForm.controls.skipSSLField.setValue(true);
+      await component.onNext();
+      expect(update).toHaveBeenCalledWith('ep-guid', expect.objectContaining({ skipSSL: true, caCert: '', setClientInfo: false }));
+    });
+
+    it('sends the stored PEM when something other than the PEM changes', async () => {
+      // Stored with both a CA and skip-SSL; a CA wins, so Next normalises skip-SSL off.
+      await review(endpoint({ ca_cert: PEM, skip_ssl_validation: true }));
+      await component.onNext();
+      expect(update).toHaveBeenCalledWith('ep-guid', expect.objectContaining({ skipSSL: false, caCert: PEM }));
+    });
+
+    it('sends an empty CA when the CA box is turned off', async () => {
+      await review(endpoint({ ca_cert: PEM }));
+      component.toggleCACertField();
+      await component.onNext();
+      expect(update).toHaveBeenCalledWith('ep-guid', expect.objectContaining({ caCert: '' }));
+    });
+
+    it('reports a failed save', async () => {
+      update.mockResolvedValue({ busy: false, error: true, message: 'nope' });
+      await review(endpoint());
+      component.registerForm.controls.skipSSLField.setValue(true);
+      const result = await component.onNext();
+      expect(result).toEqual(expect.objectContaining({ success: false, message: 'nope' }));
+    });
+
+    it('shows Client ID and the system-endpoint checkbox locked, filled from the endpoint', async () => {
+      TestBed.inject(EndpointsDataService);
+      await review(endpoint({ client_id: 'my-client', creator: { name: 'me', admin: false, system: false } }));
+      expect(component.registerForm.controls.clientIDField.value).toBe('my-client');
+      expect(component.registerForm.controls.clientIDField.disabled).toBe(true);
+      expect(component.registerForm.controls.createSystemEndpointField.value).toBe(false);
+      expect(component.registerForm.controls.createSystemEndpointField.disabled).toBe(true);
+      expect(q('#client_id')).toBeTruthy();
+    });
+
+    it('keeps edits in progress when the same endpoint arrives as a new object', async () => {
+      await review(endpoint());
+      component.registerForm.controls.skipSSLField.setValue(true);
+      fixture.componentRef.setInput('reviewEndpoint', endpoint());
+      await fixture.whenStable();
+      expect(component.registerForm.controls.skipSSLField.value).toBe(true);
+    });
+
+    it('starts clean when a different endpoint is shown', async () => {
+      await review(endpoint({ ca_cert: PEM }));
+      expect(component.registerForm.controls.skipSSLField.disabled).toBe(true);
+      fixture.componentRef.setInput('reviewEndpoint', endpoint({ guid: 'other', name: 'other-cf', skip_ssl_validation: true }));
+      await fixture.whenStable();
+      expect(component.showCACertField()).toBe(false);
+      expect(component.registerForm.controls.skipSSLField.enabled).toBe(true);
+      expect(component.registerForm.controls.skipSSLField.value).toBe(true);
+      expect(component.registerForm.controls.nameField.value).toBe('other-cf');
+    });
+
+    it('never shows the Client Secret in review', async () => {
+      await review(endpoint());
+      expect(q('#client_secret')).toBeNull();
+    });
+
+    it('shows the UAA note under TLS', async () => {
+      await review(endpoint());
+      expect(text()).toContain('Applies to the endpoint address and its login server (UAA).');
+    });
+
+    it('shows no TLS controls to those who cannot manage the endpoint, but still the certificates', async () => {
+      canManage.mockReturnValue(false);
+      await review(endpoint({ ca_cert: PEM }));
+      expect(q('#skipSSL')).toBeNull();
+      expect(q('#useCACert')).toBeNull();
+      expect(q('#ca-cert')).toBeNull();
+      expect(q('app-endpoint-certificates')).toBeTruthy();
+    });
+
+    it('offers Unregister only to managers', async () => {
+      await review(endpoint());
+      expect(text()).toContain('Remove this endpoint for all users. Connections to it end.');
+      const button = q('#unregister') as HTMLButtonElement;
+      expect(button.textContent!.trim()).toBe('Unregister…');
+      expect(button.className).toContain('btn-danger');
+
+      canManage.mockReturnValue(false);
+      await review(endpoint());
+      expect(q('#unregister')).toBeNull();
+    });
+
+    it('says "for you" on a personal endpoint', async () => {
+      await review(endpoint({ creator: { name: 'me', admin: false, system: false } }));
+      expect(text()).toContain('Remove this endpoint for you. Connections to it end.');
+    });
+
+    it('names the autoscalers registered for the Cloud Foundry when asking to unregister it', async () => {
+      const autoscaler = (guid: string, name: string, cf: string) =>
+        ({ ...endpoint({ guid, name, cnsi_type: 'autoscaler' }), endpoint_metadata: { cf_guid: cf } });
+      (TestBed.inject(EndpointsDataService) as any)._endpoints.set(new Map([
+        autoscaler('as-2', 'zeta', 'ep-guid'), autoscaler('as-1', 'alpha', 'ep-guid'), autoscaler('as-3', 'other', 'x'),
+      ].map(e => [e.guid, e])));
+      const ask = vi.spyOn(TestBed.inject(ConfirmationDialogService), 'openWithCancel')
+        .mockImplementation((_c, _ok, cancel) => cancel());
+      await review(endpoint());
+
+      await component.unregister();
+
+      expect(ask.mock.calls[0][0].message).toContain(
+        'You can register it again later. This also unregisters the autoscalers registered for it: alpha, zeta.');
+    });
+
+    it('reopens unlocked after Unregister in the Register flow', async () => {
+      component.registerForm.controls.nameField.setValue('my-cf');
+      component.registerForm.controls.urlField.setValue('api.example.com');
+      stubSignalConfig.register.mockResolvedValue({ busy: false, error: false, message: '', guid: 'g1' });
+      await component.onNext();
+      const emitted = vi.fn();
+      component.unregistered.subscribe(emitted);
+
+      await component.unregister();
+      await fixture.whenStable();
+
+      expect(stubSignalConfig.unregister).toHaveBeenCalledWith('g1', 'cf');
+      expect(component.review()).toBe(false);
+      expect(component.registerForm.controls.nameField.enabled).toBe(true);
+      expect(component.registerForm.controls.nameField.value).toBe('my-cf');
+      expect(emitted).toHaveBeenCalled();
+    });
+
+    // Advanced Options come back as they were at registration
+    describe('Advanced Options after Unregister', () => {
+      const advanced = () => q('#client_id')!.closest('.create-endpoint__advanced')!;
+      const shown = () => advanced().classList.contains('create-endpoint__shown');
+      const showBox = () => q('#showAdvanced .custom-checkbox')?.getAttribute('aria-checked');
+
+      async function registerThenUnregister(clientId = '') {
+        component.registerForm.controls.nameField.setValue('my-cf');
+        component.registerForm.controls.urlField.setValue('api.example.com');
+        component.registerForm.controls.clientIDField.setValue(clientId);
+        if (clientId) component.toggleAdvancedOptions();
+        stubSignalConfig.register.mockResolvedValue({ busy: false, error: false, message: '', guid: 'g1' });
+        await component.onNext();
+        await fixture.whenStable();
+        await component.unregister();
+        await fixture.whenStable();
+      }
+
+      it('stay collapsed when none were entered', async () => {
+        await registerThenUnregister();
+        expect(shown()).toBe(false);
+        expect(showBox()).toBe('false');
+      });
+
+      it('stay open when a Client ID was entered', async () => {
+        await registerThenUnregister('my-client');
+        expect(shown()).toBe(true);
+        expect(showBox()).toBe('true');
+      });
+    });
+
+    // Git hosts take no CA certificate, so their review has no TLS to edit or show.
+    it('reviews a Git endpoint locked, with no TLS and no certificate cards', async () => {
+      await review(endpoint({ cnsi_type: 'git', sub_type: 'github', name: 'my-github' }));
+      expect(component.registerForm.controls.nameField.disabled).toBe(true);
+      expect(component.registerForm.controls.urlField.disabled).toBe(true);
+      expect(q('#skipSSL')).toBeNull();
+      expect(q('#useCACert')).toBeNull();
+      expect(q('#ca-cert')).toBeNull();
+      expect(q('app-endpoint-certificates')).toBeNull();
+      expect(q('#unregister')).toBeTruthy();
+
+      component.registerForm.controls.skipSSLField.setValue(true);
+      const result = await component.onNext();
+      expect(update).not.toHaveBeenCalled();
+      expect(result).toEqual(expect.objectContaining({ success: true, data: expect.objectContaining({ type: 'git' }) }));
+    });
+
+    // As the card menu does: the server's message, and the endpoint stays.
+    it('reports a failed Unregister', async () => {
+      stubSignalConfig.unregister.mockResolvedValue({ busy: false, error: true, message: 'Endpoint in use' });
+      const show = vi.spyOn(TestBed.inject(TailwindSnackBarService), 'show');
+      await review(endpoint());
+      const emitted = vi.fn();
+      component.unregistered.subscribe(emitted);
+      await component.unregister();
+      expect(show).toHaveBeenCalledWith('Endpoint in use');
+      expect(component.review()).toBe(true);
+      expect(emitted).not.toHaveBeenCalled();
+    });
+
+    // The Options heading only heads something.
+    describe('the Options heading', () => {
+      const heading = () => Array.from((fixture.nativeElement as HTMLElement).querySelectorAll('h1'))
+        .find(h => h.textContent!.trim() === 'Options');
+
+      it('shows over the TLS controls', async () => {
+        await review(endpoint({ cnsi_type: 'metrics' }));
+        expect(heading()).toBeTruthy();
+      });
+
+      it('is gone for a Git endpoint', async () => {
+        await review(endpoint({ cnsi_type: 'git', sub_type: 'github', name: 'my-github' }));
+        expect(heading()).toBeUndefined();
+      });
+
+      it('is gone for a non-manager of a type without SSO', async () => {
+        canManage.mockReturnValue(false);
+        await review(endpoint({ cnsi_type: 'metrics' }));
+        expect(heading()).toBeUndefined();
+      });
+
+      it('stays for a non-manager of Cloud Foundry, over SSO', async () => {
+        canManage.mockReturnValue(false);
+        await review(endpoint());
+        expect(q('#ssoAllowed')).toBeTruthy();
+        expect(heading()).toBeTruthy();
+      });
+    });
+
+    it('stays put when the user keeps the endpoint', async () => {
+      confirmAnswer = false;
+      await review(endpoint());
+      const emitted = vi.fn();
+      component.unregistered.subscribe(emitted);
+      const show = vi.spyOn(TestBed.inject(TailwindSnackBarService), 'show');
+      await component.unregister();
+      expect(stubSignalConfig.unregister).not.toHaveBeenCalled();
+      expect(component.review()).toBe(true);
+      expect(emitted).not.toHaveBeenCalled();
+      expect(show).not.toHaveBeenCalled();
     });
   });
 });

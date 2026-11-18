@@ -1,8 +1,12 @@
+import { HttpErrorResponse } from '@angular/common/http';
 import { ComponentFixture, TestBed } from '@angular/core/testing';
-import { provideZonelessChangeDetection } from '@angular/core';
+import { provideZonelessChangeDetection, signal } from '@angular/core';
 import { By } from '@angular/platform-browser';
 import { describe, it, expect, beforeEach } from 'vitest';
-import { of } from 'rxjs';
+import { EMPTY, Observable, of, Subject, throwError } from 'rxjs';
+
+import { CurrentUserPermissionsService } from '../../../../../core/src/core/permissions/current-user-permissions.service';
+import { CfRolesService } from '../../../features/cf/users/manage-users/cf-roles.service';
 
 import { CfCurrentUserPermissions } from '../../../user-permissions/cf-user-permissions-checkers';
 import { OrgUserRoleNames, SpaceUserRoleNames } from '../../../store/types/cf-user.types';
@@ -60,12 +64,58 @@ describe('RoleAssignmentComponent', () => {
     }).compileComponents();
   }
 
-  function createFixture(): ComponentFixture<RoleAssignmentComponent> {
+  /** Default harness, but with fetchOrgs (and optionally fetchSpacesForOrg) driven by the test. */
+  async function setupFetchOrgs(
+    fetchOrgs: () => Observable<unknown>,
+    fetchSpacesForOrg: () => Observable<unknown> = () => of([]),
+  ): Promise<void> {
+    await TestBed.configureTestingModule({
+      imports: [RoleAssignmentComponent],
+      providers: [
+        provideZonelessChangeDetection(),
+        ...provideRoleAssignmentTestDeps(defaultCfg),
+        { provide: CfRolesService, useValue: { fetchOrgs, fetchSpacesForOrg } },
+      ],
+    }).compileComponents();
+  }
+
+  function orgSection(fixture: ComponentFixture<RoleAssignmentComponent>, orgGuid: string): HTMLElement {
+    return fixture.nativeElement.querySelector(`[data-org="${orgGuid}"]`);
+  }
+
+  function picker(fixture: ComponentFixture<RoleAssignmentComponent>): HTMLElement {
+    return fixture.nativeElement.querySelector('[data-testid="org-picker"]');
+  }
+
+  const serverError = () => throwError(() => new HttpErrorResponse({ status: 503, statusText: 'Service Unavailable' }));
+
+  async function createFixture(): Promise<ComponentFixture<RoleAssignmentComponent>> {
     const fixture = TestBed.createComponent(RoleAssignmentComponent);
     fixture.componentRef.setInput('cfGuid', cfGuid);
-    fixture.detectChanges();
+    await fixture.whenStable();
     return fixture;
   }
+
+  it('follows an org check that answers after the orgs load', async () => {
+    const o2Check = signal(false);
+    await TestBed.configureTestingModule({
+      imports: [RoleAssignmentComponent],
+      providers: [
+        provideZonelessChangeDetection(),
+        ...provideRoleAssignmentTestDeps(defaultCfg),
+        {
+          provide: CurrentUserPermissionsService,
+          useValue: { can: (_perm: unknown, _cf: string, org?: string) => org === 'o2' ? o2Check : signal(true) },
+        },
+      ],
+    }).compileComponents();
+    const component = (await createFixture()).componentInstance;
+
+    expect(component.canEditOrg('o2')).toBe(false);
+    // The roles land after the orgs did.
+    o2Check.set(true);
+    expect(component.canEditOrg('o2')).toBe(true);
+  });
 
   it('picker shows all orgs that fetchOrgs returned (fetchOrgs owns the broadened filter)', async () => {
     // The widget trusts fetchOrgs to return only orgs the user can act on.
@@ -73,9 +123,7 @@ describe('RoleAssignmentComponent', () => {
     // exclude space-manager-only users (the dead-end bug).
     // Default cfg: ORGANIZATION_CHANGE_ROLES true only for o1, but fetchOrgs returns both.
     await setup();
-    const fixture = createFixture();
-    await fixture.whenStable();
-    fixture.detectChanges();
+    const fixture = await createFixture();
 
     const component = fixture.componentInstance;
     // Both o1 and o2 must appear in the picker (fetchOrgs result is the source of truth).
@@ -105,9 +153,7 @@ describe('RoleAssignmentComponent', () => {
 
     const fixture = TestBed.createComponent(RoleAssignmentComponent);
     fixture.componentRef.setInput('cfGuid', cfGuid);
-    fixture.detectChanges();
     await fixture.whenStable();
-    fixture.detectChanges();
 
     const component = fixture.componentInstance;
 
@@ -116,9 +162,7 @@ describe('RoleAssignmentComponent', () => {
 
     // Pick the org to trigger space loading + per-space permission resolution
     component.pickOrg(orgX);
-    fixture.detectChanges();
     await fixture.whenStable();
-    fixture.detectChanges();
 
     // Space-level permission resolved per-space
     expect(component.canChangeSpaceRoles('orgX', 'spaceA')).toBe(true);
@@ -127,17 +171,13 @@ describe('RoleAssignmentComponent', () => {
 
   it('materializes a picked org as an accordion section with org + space roles', async () => {
     await setup();
-    const fixture = createFixture();
-    await fixture.whenStable();
-    fixture.detectChanges();
+    const fixture = await createFixture();
 
     const component = fixture.componentInstance;
 
     // Pick o1
     component.pickOrg(o1);
-    fixture.detectChanges();
     await fixture.whenStable();
-    fixture.detectChanges();
 
     // Should have o1 in picked orgs
     expect(component.pickedOrgs()).toEqual([o1]);
@@ -159,9 +199,7 @@ describe('RoleAssignmentComponent', () => {
     const fixture = TestBed.createComponent(RoleAssignmentComponent);
     fixture.componentRef.setInput('cfGuid', cfGuid);
     fixture.componentRef.setInput('lockedOrg', { guid: 'o1', name: 'Org One' });
-    fixture.detectChanges();
     await fixture.whenStable();
-    fixture.detectChanges();
 
     const component = fixture.componentInstance;
 
@@ -174,6 +212,46 @@ describe('RoleAssignmentComponent', () => {
     expect(picker).toBeNull();
   });
 
+  it('lists only the locked space when the wizard opens at space scope', async () => {
+    await setup({
+      ...defaultCfg,
+      spacesByOrg: {
+        o1: [{ guid: 's1', name: 'Space One' }, { guid: 's2', name: 'Space Two' }],
+        o2: [],
+      },
+    });
+    const fixture = TestBed.createComponent(RoleAssignmentComponent);
+    fixture.componentRef.setInput('cfGuid', cfGuid);
+    fixture.componentRef.setInput('lockedOrg', { guid: 'o1', name: 'Org One' });
+    fixture.componentRef.setInput('lockedSpaceGuid', 's2');
+    await fixture.whenStable();
+
+    expect(fixture.componentInstance.filteredSpacesFor('o1').map(s => s.guid)).toEqual(['s2']);
+  });
+
+  it('names the locked org in a change when the org list loads after the widget', async () => {
+    // The wizard opens at org scope before the org's name or the org list
+    // has arrived, so the widget first seeds a placeholder with no name.
+    const orgs$ = new Subject<unknown>();
+    await setupFetchOrgs(() => orgs$);
+    const fixture = TestBed.createComponent(RoleAssignmentComponent);
+    fixture.componentRef.setInput('cfGuid', cfGuid);
+    fixture.componentRef.setInput('users', [makeUser('u1')]);
+    fixture.componentRef.setInput('baseline', {});
+    fixture.componentRef.setInput('lockedOrg', { guid: 'o1', name: '' });
+    await fixture.whenStable();
+    const component = fixture.componentInstance;
+    const emitted: CfRoleChange[][] = [];
+    component.changeSet.subscribe((v: CfRoleChange[]) => emitted.push(v));
+
+    orgs$.next([o1, o2]);
+    await fixture.whenStable();
+    component.onToggleOrgRole(component.pickedOrgs()[0], OrgUserRoleNames.MANAGER, true);
+    await fixture.whenStable();
+
+    expect(emitted[emitted.length - 1][0].orgName).toBe('Org One');
+  });
+
   it('emits a changeSet diff when a role cell is toggled', async () => {
     await setup();
     const user = makeUser('u1');
@@ -181,7 +259,6 @@ describe('RoleAssignmentComponent', () => {
     fixture.componentRef.setInput('cfGuid', cfGuid);
     fixture.componentRef.setInput('users', [user]);
     fixture.componentRef.setInput('baseline', {});
-    fixture.detectChanges();
     await fixture.whenStable();
 
     const component = fixture.componentInstance;
@@ -191,10 +268,10 @@ describe('RoleAssignmentComponent', () => {
 
     // Pick o1 then toggle Manager
     component.pickOrg(o1);
-    fixture.detectChanges();
+    await fixture.whenStable();
 
     component.onToggleOrgRole(o1, OrgUserRoleNames.MANAGER, true);
-    fixture.detectChanges();
+    await fixture.whenStable();
 
     expect(emitted.length).toBeGreaterThan(0);
     const lastEmit = emitted[emitted.length - 1];
@@ -213,21 +290,19 @@ describe('RoleAssignmentComponent', () => {
     fixture.componentRef.setInput('cfGuid', cfGuid);
     fixture.componentRef.setInput('users', [user]);
     fixture.componentRef.setInput('baseline', {});
-    fixture.detectChanges();
     await fixture.whenStable();
 
     const component = fixture.componentInstance;
 
     // Pick o1 (also expands it) and toggle Manager
     component.pickOrg(o1);
-    fixture.detectChanges();
     await fixture.whenStable();
 
     const emitted: CfRoleChange[][] = [];
     component.changeSet.subscribe((v: CfRoleChange[]) => emitted.push(v));
 
     component.onToggleOrgRole(o1, OrgUserRoleNames.MANAGER, true);
-    fixture.detectChanges();
+    await fixture.whenStable();
 
     // Capture the changeSet after toggle
     const changeSetBeforeCollapse = emitted[emitted.length - 1];
@@ -237,12 +312,12 @@ describe('RoleAssignmentComponent', () => {
     // Collapse the org section (same path the template button uses)
     expect(component.isExpanded('o1')).toBe(true);
     component.toggleExpanded('o1');
-    fixture.detectChanges();
+    await fixture.whenStable();
     expect(component.isExpanded('o1')).toBe(false);
 
     // Re-expand
     component.toggleExpanded('o1');
-    fixture.detectChanges();
+    await fixture.whenStable();
     expect(component.isExpanded('o1')).toBe(true);
 
     // (a) selection() still contains the toggled Manager role
@@ -266,17 +341,13 @@ describe('RoleAssignmentComponent', () => {
     fixture.componentRef.setInput('cfGuid', cfGuid);
     fixture.componentRef.setInput('users', [user]);
     fixture.componentRef.setInput('baseline', {});
-    fixture.detectChanges();
     await fixture.whenStable();
-    fixture.detectChanges();
 
     const component = fixture.componentInstance;
 
     // Pick o1 so spaces are loaded (space s1 is available via cfg)
     component.pickOrg(o1);
-    fixture.detectChanges();
     await fixture.whenStable();
-    fixture.detectChanges();
 
     // Initially no roles in baseline → org-user should NOT be disabled
     expect(component.isOrgUserDisabled('o1')).toBe(false);
@@ -303,7 +374,7 @@ describe('RoleAssignmentComponent', () => {
       },
     };
     fixture.componentRef.setInput('baseline', baselineWithSpaceRole);
-    fixture.detectChanges();
+    await fixture.whenStable();
 
     // The computed orgUserDisabledMap must have re-run; org-user is now disabled
     expect(component.isOrgUserDisabled('o1')).toBe(true);
@@ -311,7 +382,7 @@ describe('RoleAssignmentComponent', () => {
 
   it('exposes role defs derived from the registry in the established order', async () => {
     await setup();
-    const fixture = createFixture();
+    const fixture = await createFixture();
     const component = fixture.componentInstance;
 
     expect(component.orgRoleDefs.map(d => d.label)).toEqual(['Manager', 'Auditor', 'Billing Manager', 'User']);
@@ -337,26 +408,165 @@ describe('RoleAssignmentComponent', () => {
     fixture.componentRef.setInput('cfGuid', cfGuid);
     fixture.componentRef.setInput('users', [user]);
     fixture.componentRef.setInput('baseline', {});
-    fixture.detectChanges();
     await fixture.whenStable();
 
     const component = fixture.componentInstance;
 
     // Pick o1 so spaces are loaded (space s1 from the cfg)
     component.pickOrg(o1);
-    fixture.detectChanges();
     await fixture.whenStable();
-    fixture.detectChanges();
 
     // Initially no roles set
     expect(component.roleCountForOrg('o1')).toBe(0);
 
-    // Toggle one org role (Manager) and one space role (Developer in s1)
+    // Toggle one org role (Manager) and one space role (Developer in s1);
+    // the space role also ticks org User.
     component.onToggleOrgRole(o1, OrgUserRoleNames.MANAGER, true);
     component.onToggleSpaceRole(o1, { guid: 's1', name: 'Space One' }, SpaceUserRoleNames.DEVELOPER, true);
-    fixture.detectChanges();
+    await fixture.whenStable();
 
-    expect(component.roleCountForOrg('o1')).toBe(2);
+    expect(component.roleCountForOrg('o1')).toBe(3);
+  });
+
+  it('a space role also adds the org User role the user does not hold', async () => {
+    await setup();
+    const fixture = TestBed.createComponent(RoleAssignmentComponent);
+    fixture.componentRef.setInput('cfGuid', cfGuid);
+    fixture.componentRef.setInput('users', [makeUser('u1')]);
+    fixture.componentRef.setInput('baseline', {});
+    await fixture.whenStable();
+
+    const component = fixture.componentInstance;
+    const emitted: CfRoleChange[][] = [];
+    component.changeSet.subscribe((v: CfRoleChange[]) => emitted.push(v));
+    component.pickOrg(o1);
+    await fixture.whenStable();
+
+    component.onToggleSpaceRole(o1, { guid: 's1', name: 'Space One' }, SpaceUserRoleNames.DEVELOPER, true);
+    await fixture.whenStable();
+
+    const changes = emitted[emitted.length - 1].map(c => `${c.add ? '+' : '-'}${c.role}@${c.spaceGuid ?? c.orgGuid}`);
+    expect(changes.sort()).toEqual([`+${SpaceUserRoleNames.DEVELOPER}@s1`, `+${OrgUserRoleNames.USER}@o1`].sort());
+    expect(component.checkedForOrg('o1', OrgUserRoleNames.USER)).toBe(true);
+  });
+
+  it('removing a space role leaves the org User role alone', async () => {
+    await setup();
+    const fixture = TestBed.createComponent(RoleAssignmentComponent);
+    fixture.componentRef.setInput('cfGuid', cfGuid);
+    fixture.componentRef.setInput('users', [makeUser('u1')]);
+    fixture.componentRef.setInput('baseline', {});
+    await fixture.whenStable();
+
+    const component = fixture.componentInstance;
+    component.pickOrg(o1);
+    await fixture.whenStable();
+
+    component.onToggleSpaceRole(o1, { guid: 's1', name: 'Space One' }, SpaceUserRoleNames.DEVELOPER, false);
+    await fixture.whenStable();
+
+    expect(component.checkedForOrg('o1', OrgUserRoleNames.USER)).toBe(false);
+  });
+
+  describe('org User handling', () => {
+    const s1 = { guid: 's1', name: 'Space One' };
+
+    async function widget(inputs: Record<string, unknown> = {}) {
+      await setup();
+      const fixture = TestBed.createComponent(RoleAssignmentComponent);
+      fixture.componentRef.setInput('cfGuid', cfGuid);
+      fixture.componentRef.setInput('users', [makeUser('u1')]);
+      fixture.componentRef.setInput('baseline', {});
+      for (const [k, v] of Object.entries(inputs)) {
+        fixture.componentRef.setInput(k, v);
+      }
+      await fixture.whenStable();
+      const component = fixture.componentInstance;
+      const emitted: CfRoleChange[][] = [];
+      component.changeSet.subscribe((v: CfRoleChange[]) => emitted.push(v));
+      component.pickOrg(o1);
+      await fixture.whenStable();
+      const last = () => (emitted[emitted.length - 1] ?? []).map(c => `${c.add ? '+' : '-'}${c.role}@${c.spaceGuid ?? c.orgGuid}`);
+      return { fixture, component, last };
+    }
+
+    it('remove mode: ticking a space role does not imply the org User role', async () => {
+      const { fixture, component, last } = await widget({ removeMode: true });
+
+      component.onToggleSpaceRole(o1, s1, SpaceUserRoleNames.DEVELOPER, true);
+      await fixture.whenStable();
+
+      expect(last()).toEqual([`+${SpaceUserRoleNames.DEVELOPER}@s1`]);
+      expect(component.checkedForOrg('o1', OrgUserRoleNames.USER)).toBe(false);
+      expect(component.isOrgUserDisabled('o1')).toBe(false);
+    });
+
+    it('unticking the only space role drops the org User role it implied', async () => {
+      const { fixture, component, last } = await widget();
+
+      component.onToggleSpaceRole(o1, s1, SpaceUserRoleNames.DEVELOPER, true);
+      component.onToggleSpaceRole(o1, s1, SpaceUserRoleNames.DEVELOPER, false);
+      await fixture.whenStable();
+
+      expect(last()).toEqual([]);
+      expect(component.checkedForOrg('o1', OrgUserRoleNames.USER)).toBe(false);
+    });
+
+    it('keeps the implied org User role while another space role is ticked', async () => {
+      const { fixture, component, last } = await widget();
+
+      component.onToggleSpaceRole(o1, s1, SpaceUserRoleNames.DEVELOPER, true);
+      component.onToggleSpaceRole(o1, s1, SpaceUserRoleNames.MANAGER, true);
+      component.onToggleSpaceRole(o1, s1, SpaceUserRoleNames.DEVELOPER, false);
+      await fixture.whenStable();
+
+      expect(last().sort()).toEqual([`+${SpaceUserRoleNames.MANAGER}@s1`, `+${OrgUserRoleNames.USER}@o1`].sort());
+    });
+
+    it('keeps an org User role the user ticked themselves', async () => {
+      const { fixture, component, last } = await widget();
+
+      component.onToggleOrgRole(o1, OrgUserRoleNames.USER, true);
+      component.onToggleSpaceRole(o1, s1, SpaceUserRoleNames.DEVELOPER, true);
+      component.onToggleSpaceRole(o1, s1, SpaceUserRoleNames.DEVELOPER, false);
+      await fixture.whenStable();
+
+      expect(last()).toEqual([`+${OrgUserRoleNames.USER}@o1`]);
+    });
+
+    it('space scope: a role held in another space of the org still disables org User', async () => {
+      await setup({
+        ...defaultCfg,
+        spacesByOrg: { o1: [s1, { guid: 's2', name: 'Space Two' }], o2: [] },
+      });
+      const fixture = TestBed.createComponent(RoleAssignmentComponent);
+      fixture.componentRef.setInput('cfGuid', cfGuid);
+      fixture.componentRef.setInput('users', [makeUser('u1')]);
+      fixture.componentRef.setInput('lockedOrg', { guid: 'o1', name: 'Org One' });
+      fixture.componentRef.setInput('lockedSpaceGuid', 's2');
+      fixture.componentRef.setInput('baseline', {
+        u1: {
+          o1: {
+            name: 'Org One',
+            orgGuid: 'o1',
+            permissions: { managers: false, billing_managers: false, auditors: false, users: true },
+            spaces: {
+              s1: {
+                name: 'Space One',
+                orgGuid: 'o1',
+                orgName: 'Org One',
+                spaceGuid: 's1',
+                permissions: { managers: false, developers: true, auditors: false, supporters: false },
+              },
+            },
+          },
+        },
+      });
+      await fixture.whenStable();
+
+      expect(fixture.componentInstance.filteredSpacesFor('o1').map(s => s.guid)).toEqual(['s2']);
+      expect(fixture.componentInstance.isOrgUserDisabled('o1')).toBe(true);
+    });
   });
 
   it('roleCountForOrg returns 1 for a single checked role', async () => {
@@ -366,18 +576,15 @@ describe('RoleAssignmentComponent', () => {
     fixture.componentRef.setInput('cfGuid', cfGuid);
     fixture.componentRef.setInput('users', [user]);
     fixture.componentRef.setInput('baseline', {});
-    fixture.detectChanges();
     await fixture.whenStable();
 
     const component = fixture.componentInstance;
 
     component.pickOrg(o1);
-    fixture.detectChanges();
     await fixture.whenStable();
-    fixture.detectChanges();
 
     component.onToggleOrgRole(o1, OrgUserRoleNames.AUDITOR, true);
-    fixture.detectChanges();
+    await fixture.whenStable();
 
     expect(component.roleCountForOrg('o1')).toBe(1);
   });
@@ -396,23 +603,33 @@ describe('RoleAssignmentComponent', () => {
         o2: [],
       },
     });
-    const fixture = createFixture();
-    await fixture.whenStable();
-    fixture.detectChanges();
+    const fixture = await createFixture();
 
     const component = fixture.componentInstance;
     component.pickOrg(o1);
-    fixture.detectChanges();
     await fixture.whenStable();
-    fixture.detectChanges();
 
     // Apply filter
     component.setSpaceFilter('o1', 'Alpha');
-    fixture.detectChanges();
+    await fixture.whenStable();
 
     const filtered = component.filteredSpacesFor('o1');
     expect(filtered.length).toBe(1);
     expect(filtered[0].name).toBe('Alpha Space');
+  });
+
+  it('names the org search and space filter fields', async () => {
+    await setup();
+    const fixture = await createFixture();
+
+    const search = picker(fixture).querySelector('input[type="text"]');
+    expect(search?.getAttribute('aria-label')).toBe('Search organizations');
+
+    fixture.componentInstance.pickOrg(o1);
+    await fixture.whenStable();
+    const filter = orgSection(fixture, 'o1')?.querySelector('input.role-assignment__space-search');
+    expect(filter).toBeTruthy();
+    expect(filter!.getAttribute('aria-label')).toBe('Filter spaces in Org One');
   });
 
   // ── New behavior tests (Phase 4 role-widget additions) ─────────────────────
@@ -436,9 +653,7 @@ describe('RoleAssignmentComponent', () => {
         o2: { name: 'o2', orgGuid: 'o2', permissions: { managers: false, billing_managers: false, auditors: false, users: true } },
       },
     });
-    fixture.detectChanges();
     await fixture.whenStable();
-    fixture.detectChanges();
 
     const component = fixture.componentInstance;
     const guids = component.pickedOrgs().map(o => o.metadata.guid);
@@ -468,9 +683,7 @@ describe('RoleAssignmentComponent', () => {
         o1: { name: 'o1', orgGuid: 'o1', permissions: { managers: false, billing_managers: false, auditors: false, users: true } },
       },
     });
-    fixture.detectChanges();
     await fixture.whenStable();
-    fixture.detectChanges();
 
     const component = fixture.componentInstance;
     // lockedOrg path seeds o1; the baseline-seeding effect must not run
@@ -510,9 +723,7 @@ describe('RoleAssignmentComponent', () => {
         },
       },
     });
-    fixture.detectChanges();
     await fixture.whenStable();
-    fixture.detectChanges();
 
     const component = fixture.componentInstance;
 
@@ -541,9 +752,7 @@ describe('RoleAssignmentComponent', () => {
       u1: { o1: { name: 'Org One', orgGuid: 'o1', permissions: { managers: true, billing_managers: false, auditors: false, users: true } } },
       u2: { o1: { name: 'Org One', orgGuid: 'o1', permissions: { managers: false, billing_managers: false, auditors: false, users: true } } },
     });
-    fixture.detectChanges();
     await fixture.whenStable();
-    fixture.detectChanges();
 
     const component = fixture.componentInstance;
 
@@ -569,9 +778,7 @@ describe('RoleAssignmentComponent', () => {
       u1: { o1: { name: 'Org One', orgGuid: 'o1', permissions: { managers: true, billing_managers: false, auditors: false, users: true } } },
       u2: { o1: { name: 'Org One', orgGuid: 'o1', permissions: { managers: false, billing_managers: false, auditors: false, users: true } } },
     });
-    fixture.detectChanges();
     await fixture.whenStable();
-    fixture.detectChanges();
 
     const summary = fixture.debugElement.query(By.css('[data-testid="org-role-summary"]'));
     expect(summary).toBeTruthy();
@@ -583,9 +790,7 @@ describe('RoleAssignmentComponent', () => {
       orgs: [{ guid: 'o1', name: 'Org One' }, { guid: 'o2', name: 'Org Two' }],
       spacesByOrg: { o1: [], o2: [] },
     });
-    const fixture = createFixture();
-    await fixture.whenStable();
-    fixture.detectChanges();
+    const fixture = await createFixture();
     const c = fixture.componentInstance;
 
     c.pickOrg(o1);
@@ -602,9 +807,7 @@ describe('RoleAssignmentComponent', () => {
       orgs: [{ guid: 'o1', name: 'Org One' }, { guid: 'o2', name: 'Org Two' }],
       spacesByOrg: { o1: [], o2: [] },
     });
-    const fixture = createFixture();
-    await fixture.whenStable();
-    fixture.detectChanges();
+    const fixture = await createFixture();
     const c = fixture.componentInstance;
 
     c.pickOrg(o1);
@@ -620,19 +823,16 @@ describe('RoleAssignmentComponent', () => {
   it('H: view mode initializes from the persisted localStorage choice', async () => {
     localStorage.setItem(ROLE_ASSIGNMENT_VIEW_MODE_KEY, 'split');
     await setup({ orgs: [{ guid: 'o1', name: 'Org One' }], spacesByOrg: { o1: [] } });
-    const fixture = createFixture();
-    await fixture.whenStable();
+    const fixture = await createFixture();
     expect(fixture.componentInstance.viewMode()).toBe('split');
   });
 
   it('H2: setViewMode persists the choice to localStorage', async () => {
     await setup({ orgs: [{ guid: 'o1', name: 'Org One' }], spacesByOrg: { o1: [] } });
-    const fixture = createFixture();
-    await fixture.whenStable();
-    fixture.detectChanges();
+    const fixture = await createFixture();
     fixture.componentInstance.pickOrg(o1);
     fixture.componentInstance.setViewMode('split');
-    fixture.detectChanges();
+    await fixture.whenStable();
     expect(localStorage.getItem(ROLE_ASSIGNMENT_VIEW_MODE_KEY)).toBe('split');
   });
 
@@ -641,17 +841,13 @@ describe('RoleAssignmentComponent', () => {
       orgs: [{ guid: 'o1', name: 'Org One' }, { guid: 'o2', name: 'Org Two' }],
       spacesByOrg: { o1: [], o2: [] },
     });
-    const fixture = createFixture();
-    await fixture.whenStable();
-    fixture.detectChanges();
+    const fixture = await createFixture();
     const c = fixture.componentInstance;
 
     c.pickOrg(o1);
     c.pickOrg(o2); // pickedOrgs [o2, o1]
     c.setViewMode('split'); // active = o2
-    fixture.detectChanges();
     await fixture.whenStable();
-    fixture.detectChanges();
 
     const list = fixture.debugElement.query(By.css('[data-testid="role-pane-list"]'));
     const detail = fixture.debugElement.query(By.css('[data-testid="role-pane-detail"]'));
@@ -663,20 +859,18 @@ describe('RoleAssignmentComponent', () => {
 
   it('I2: the view-toggle button flips accordion ↔ split', async () => {
     await setup({ orgs: [{ guid: 'o1', name: 'Org One' }], spacesByOrg: { o1: [] } });
-    const fixture = createFixture();
-    await fixture.whenStable();
-    fixture.detectChanges();
+    const fixture = await createFixture();
     const c = fixture.componentInstance;
 
     c.pickOrg(o1);
-    fixture.detectChanges();
+    await fixture.whenStable();
 
     const toggle = fixture.debugElement.query(By.css('[data-testid="view-toggle"]'));
     expect(toggle).toBeTruthy();
     expect(c.viewMode()).toBe('accordion');
 
     toggle.nativeElement.click();
-    fixture.detectChanges();
+    await fixture.whenStable();
     expect(c.viewMode()).toBe('split');
   });
 
@@ -691,16 +885,14 @@ describe('RoleAssignmentComponent', () => {
     });
 
     const o3 = makeOrg('o3', 'Org Three');
-    const fixture = createFixture();
-    await fixture.whenStable();
-    fixture.detectChanges();
+    const fixture = await createFixture();
 
     const component = fixture.componentInstance;
 
     // Pick o1 first, then o3
     component.pickOrg(o1);
     component.pickOrg(o3);
-    fixture.detectChanges();
+    await fixture.whenStable();
 
     expect(component.pickedOrgs()[0].metadata.guid).toBe('o3');
   });
@@ -729,7 +921,7 @@ describe('RoleAssignmentComponent', () => {
         },
         {
           provide: (await import('../../../../../core/src/core/permissions/current-user-permissions.service')).CurrentUserPermissionsService,
-          useValue: { can: () => of(true) },
+          useValue: { can: () => signal(true) },
         },
       ],
     }).compileComponents();
@@ -741,9 +933,7 @@ describe('RoleAssignmentComponent', () => {
         o1: { name: 'Org One', orgGuid: 'o1', permissions: { managers: false, billing_managers: false, auditors: false, users: true } },
       },
     });
-    fixture.detectChanges();
     await fixture.whenStable();
-    fixture.detectChanges();
 
     const component = fixture.componentInstance;
 
@@ -753,9 +943,7 @@ describe('RoleAssignmentComponent', () => {
 
     // Expand o1 — should trigger lazy space load
     component.toggleExpanded('o1');
-    fixture.detectChanges();
     await fixture.whenStable();
-    fixture.detectChanges();
 
     expect(component.isExpanded('o1')).toBe(true);
     expect(fetchSpacesCalled).toBe(true);
@@ -766,11 +954,97 @@ describe('RoleAssignmentComponent', () => {
     expect(component.spacesLoadingFor('o1')).toBe(false);
   });
 
+  it('clears the org spinner when the org fetch completes without a value', async () => {
+    await setupFetchOrgs(() => EMPTY);
+    const fixture = await createFixture();
+
+    expect(fixture.componentInstance.orgsLoading()).toBe(false);
+    expect(picker(fixture).textContent).not.toContain('Loading organizations');
+    expect(picker(fixture).textContent).toContain('You have no organizations where you can manage roles.');
+  });
+
+  it('shows an error and clears the spinner when the org fetch fails', async () => {
+    await setupFetchOrgs(serverError);
+    const fixture = await createFixture();
+
+    expect(fixture.componentInstance.orgsLoading()).toBe(false);
+    expect(picker(fixture).textContent).not.toContain('Loading organizations');
+    const alert = picker(fixture).querySelector('[role="alert"]');
+    expect(alert?.textContent).toContain('Could not load organizations');
+  });
+
+  it('retry fetches the orgs again after a failure', async () => {
+    const results = [serverError(), of([o1])];
+    let calls = 0;
+    await setupFetchOrgs(() => results[calls++]);
+    const fixture = await createFixture();
+
+    const retry = picker(fixture).querySelector<HTMLButtonElement>('[data-testid="org-retry"]');
+    expect(retry).toBeTruthy();
+    retry!.click();
+    await fixture.whenStable();
+
+    expect(calls).toBe(2);
+    expect(picker(fixture).querySelector('[role="alert"]')).toBeNull();
+    const names = Array.from(picker(fixture).querySelectorAll('.role-assignment__org-btn')).map(b => b.textContent?.trim());
+    expect(names).toEqual(['Org One']);
+  });
+
+  it('says there are no orgs to manage when the list is empty and nothing is searched', async () => {
+    await setupFetchOrgs(() => of([]));
+    const fixture = await createFixture();
+
+    expect(picker(fixture).textContent).toContain('You have no organizations where you can manage roles.');
+    expect(picker(fixture).textContent).not.toContain('No organizations match.');
+  });
+
+  it('says no orgs match when a search has no hits', async () => {
+    await setup();
+    const fixture = await createFixture();
+
+    fixture.componentInstance.orgSearchText.set('zzz');
+    await fixture.whenStable();
+
+    expect(picker(fixture).textContent).toContain('No organizations match.');
+    expect(picker(fixture).textContent).not.toContain('You have no organizations');
+  });
+
+  it('shows an error and clears the space spinner when the space fetch fails', async () => {
+    await setupFetchOrgs(() => of([o1]), serverError);
+    const fixture = await createFixture();
+
+    fixture.componentInstance.pickOrg(o1);
+    await fixture.whenStable();
+
+    expect(fixture.componentInstance.spacesLoadingFor('o1')).toBe(false);
+    const section = orgSection(fixture, 'o1');
+    expect(section.textContent).not.toContain('Loading spaces');
+    expect(section.textContent).not.toContain('No spaces in this organization.');
+    expect(section.querySelector('[role="alert"]')?.textContent).toContain('Could not load spaces.');
+  });
+
+  it('space retry fetches the spaces again after a failure', async () => {
+    const results = [serverError(), of([space1])];
+    let calls = 0;
+    await setupFetchOrgs(() => of([o1]), () => results[calls++]);
+    const fixture = await createFixture();
+    fixture.componentInstance.pickOrg(o1);
+    await fixture.whenStable();
+
+    const retry = orgSection(fixture, 'o1').querySelector<HTMLButtonElement>('[data-testid="space-retry"]');
+    expect(retry).toBeTruthy();
+    retry!.click();
+    await fixture.whenStable();
+
+    expect(calls).toBe(2);
+    expect(orgSection(fixture, 'o1').querySelector('[role="alert"]')).toBeNull();
+    expect(fixture.componentInstance.spacesFor('o1')).toEqual([space1]);
+    expect(orgSection(fixture, 'o1').querySelector('[data-space="s1"]')).toBeTruthy();
+  });
+
   it('E: orgsLoading is false after ngOnInit resolves', async () => {
     await setup();
-    const fixture = createFixture();
-    await fixture.whenStable();
-    fixture.detectChanges();
+    const fixture = await createFixture();
 
     const component = fixture.componentInstance;
     // After the synchronous of() from the harness resolves orgsLoading must be false

@@ -9,6 +9,7 @@ import (
 	"net/url"
 	"os"
 	"strings"
+	"time"
 
 	"errors"
 
@@ -212,6 +213,9 @@ func (c *CloudFoundrySpecification) Init() error {
 		if jobsPlugin, ok := plug.(*stratosjobs.StratosJobs); ok {
 			c.asyncTracker = jobsPlugin.Tracker()
 			c.asyncTranslator = NewCFJobTranslator(c)
+			// Lets this replica resolve CF job ids minted by another one
+			// (or by itself before a restart).
+			c.asyncTracker.Register(c.asyncTranslator)
 			c.restageTranslator = NewRestageJobTranslator(c)
 			c.rollbackTranslator = NewRollbackJobTranslator(c)
 		} else {
@@ -241,14 +245,11 @@ func (c *CloudFoundrySpecification) cfLoginHook(context *echo.Context) error {
 	}
 
 	// CF auto reg cnsi entry missing, attempt to register
-	if cfCnsi.CNSIType == "" {
+	existed := cfCnsi.CNSIType != ""
+	if !existed {
 		cfEndpointSpec, _ := c.portalProxy.GetEndpointTypeSpec("cf")
 
-		// Allow the auto-registration name to be configured
-		autoRegName := c.portalProxy.GetConfig().AutoRegisterCFName
-		if len(autoRegName) == 0 {
-			autoRegName = "Cloud Foundry"
-		}
+		autoRegName := c.portalProxy.GetConfig().AutoRegisterName()
 
 		caCert, err := resolveAutoRegisterCACert(*c.portalProxy.GetConfig())
 		if err != nil {
@@ -268,31 +269,41 @@ func (c *CloudFoundrySpecification) cfLoginHook(context *echo.Context) error {
 		slog.Info("Found an existing Cloud Foundry endpoint, will not auto-register", "url", cfAPI)
 	}
 
+	// The console-wide pick, the same for every user (info, user invites).
 	if c.portalProxy.GetConfig().CloudFoundryInfo == nil {
 		c.portalProxy.GetConfig().CloudFoundryInfo = &api.CFInfo{}
 	}
 	c.portalProxy.GetConfig().CloudFoundryInfo.EndpointGUID = cfCnsi.GUID
 
-	slog.Info("Determining whether the user should auto-connect", "url", cfAPI, "user", userGUID)
+	connectCnsi := cfCnsi
+	if existed {
+		connectCnsi = c.userPreferredEndpoint(cfAPI, cfCnsi, userGUID)
+	}
 
-	cfTokenRecord, ok := c.portalProxy.GetCNSITokenRecordWithDisconnected(cfCnsi.GUID, userGUID)
-	if ok && cfTokenRecord.Disconnected {
+	slog.Info("Determining whether the user should auto-connect", "url", cfAPI, "endpoint", connectCnsi.Name, "user", userGUID)
+
+	cfTokenRecord, ok := c.portalProxy.GetCNSITokenRecordWithDisconnected(connectCnsi.GUID, userGUID)
+	if (ok && cfTokenRecord.Disconnected) || c.disconnectedAnyAt(cfAPI, userGUID) {
 		// There exists a record but it's been cleared. This means user has disconnected manually. Don't auto-reconnect
 		slog.Info("No: the user previously disconnected, so will not auto-connect", "url", cfAPI, "user", userGUID)
+	} else if !c.portalProxy.GetConfig().SSOLogin && hasLiveToken(cfTokenRecord, ok) {
+		// The user already holds a connection, maybe made with other credentials; a
+		// login must not replace it with the login credentials.
+		slog.Info("No: the user is already connected, so will not auto-connect", "url", cfAPI, "user", userGUID)
 	} else {
 		slog.Info("Yes: the user should auto-connect", "url", cfAPI, "user", userGUID)
 
 		// If using SSO login, then copy the tokens, else connect with the same credentials
 		if c.portalProxy.GetConfig().SSOLogin {
 			slog.Info("Auto-connecting to the auto-registered endpoint with the UAA token")
-			err = c.portalProxy.DoLoginToCNSIwithConsoleUAAtoken(context, cfCnsi) // no need to login twice
+			err = c.portalProxy.DoLoginToCNSIwithConsoleUAAtoken(context, connectCnsi) // no need to login twice
 			if err != nil {
 				slog.Warn("could not use the console UAA token to log in to the auto-registered endpoint", "err", err)
 				return err
 			}
 		} else {
 			slog.Info("Auto-connecting to the auto-registered endpoint with credentials")
-			_, err = c.portalProxy.DoLoginToCNSI(context, cfCnsi.GUID, false)
+			_, err = c.portalProxy.DoLoginToCNSI(context, connectCnsi.GUID, false)
 			if err != nil {
 				slog.Warn("could not auto-connect with credentials to the auto-registered endpoint", "err", err)
 				return err
@@ -300,6 +311,54 @@ func (c *CloudFoundrySpecification) cfLoginHook(context *echo.Context) error {
 		}
 	}
 	return nil
+}
+
+// disconnectedAnyAt reports whether the user disconnected a Cloud Foundry
+// endpoint at the auto-register URL. Duplicates are allowed, and a user who
+// disconnects the one they use is left with none connected, so the
+// console-wide pick, never attempted for them, would otherwise be
+// connected in its place.
+func (c *CloudFoundrySpecification) disconnectedAnyAt(cfAPI, userGUID string) bool {
+	all, err := c.portalProxy.ListEndpoints()
+	if err != nil {
+		return false
+	}
+	for _, rec := range all {
+		if rec.CNSIType != EndpointType || rec.APIEndpoint == nil ||
+			!strings.EqualFold(strings.TrimRight(rec.APIEndpoint.String(), "/"), cfAPI) {
+			continue
+		}
+		if tr, ok := c.portalProxy.GetCNSITokenRecordWithDisconnected(rec.GUID, userGUID); ok && tr.Disconnected {
+			return true
+		}
+	}
+	return false
+}
+
+// hasLiveToken reports whether the record is a connection that still works:
+// not cleared, and either refreshable or not yet expired.
+func hasLiveToken(tr api.TokenRecord, found bool) bool {
+	if !found || tr.Disconnected {
+		return false
+	}
+	return tr.RefreshToken != "" || tr.TokenExpiry == 0 || time.Unix(tr.TokenExpiry, 0).After(time.Now())
+}
+
+// userPreferredEndpoint is the admin endpoint at the auto-register URL the
+// user is connected to, or cfCnsi when they use none. Duplicates are
+// allowed, so a user who connected another endpoint there (norm-lab beside
+// Cloud Foundry) got the console-wide pick connected at every login
+// instead of their own. With SSO login the console's token is linked in,
+// which only an endpoint on the console's client can take.
+func (c *CloudFoundrySpecification) userPreferredEndpoint(cfAPI string, cfCnsi api.CNSIRecord, userGUID string) api.CNSIRecord {
+	mine, err := c.portalProxy.GetUserConnectedAdminCNSIRecordByEndpoint(cfAPI, EndpointType, userGUID)
+	if err != nil {
+		return cfCnsi
+	}
+	if c.portalProxy.GetConfig().SSOLogin && mine.ClientId != c.portalProxy.GetConfig().CFClient {
+		return cfCnsi
+	}
+	return mine
 }
 
 // resolveAutoRegisterCACert returns the CA the auto-registered endpoint should
@@ -332,7 +391,7 @@ func (c *CloudFoundrySpecification) fetchAutoRegisterEndpoint() (string, api.CNS
 		return "", api.CNSIRecord{}, nil
 	}
 	// Error is populated if there was an error OR there was no record
-	cfCnsi, err := c.portalProxy.GetAdminCNSIRecordByEndpoint(cfAPI)
+	cfCnsi, err := c.portalProxy.GetAdminCNSIRecordByEndpoint(cfAPI, EndpointType)
 	return cfAPI, cfCnsi, err
 }
 

@@ -18,7 +18,7 @@ describe('TableCellServiceBindableComponent', () => {
 
     fixture = TestBed.createComponent(TableCellServiceBindableComponent);
     component = fixture.componentInstance;
-    component.row = { bindable: true } as StServiceOffering;
+    fixture.componentRef.setInput('row', { bindable: true } as StServiceOffering);
     fixture.detectChanges();
   });
 

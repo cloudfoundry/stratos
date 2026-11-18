@@ -1,9 +1,7 @@
-import { ChangeDetectionStrategy, Component} from '@angular/core';
-import { CommonModule } from '@angular/common';
+import { ChangeDetectionStrategy, Component, signal } from '@angular/core';
 import { PreviewableComponent } from '@stratosui/core';
-import { Observable } from 'rxjs';
 
-import { KubernetesAnalysisService } from '../../../services/kubernetes.analysis.service';
+import { KubernetesAnalysisService, KubernetesAnalysisType } from '../../../services/kubernetes.analysis.service';
 import { AnalysisInfoCardComponent } from './analysis-info-card/analysis-info-card.component';
 import { SidepanelPreviewComponent } from '@stratosui/core';
 
@@ -14,7 +12,6 @@ import { SidepanelPreviewComponent } from '@stratosui/core';
   templateUrl: './kubernetes-analysis-info.component.html',
   standalone: true,
   imports: [
-    CommonModule,
     AnalysisInfoCardComponent,
     SidepanelPreviewComponent
   ],
@@ -24,10 +21,9 @@ import { SidepanelPreviewComponent } from '@stratosui/core';
 })
 export class KubernetesAnalysisInfoComponent implements PreviewableComponent {
 
-  // strict: assigned via setProps before the preview component renders
-  analyzers$!: Observable<any>;
+  readonly analyzers = signal<KubernetesAnalysisType[]>([]);
 
   setProps(props: { [key: string]: any, }) {
-    this.analyzers$ = props.analyzers$;
+    this.analyzers.set(props.analyzers ?? []);
   }
 }

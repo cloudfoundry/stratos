@@ -2,15 +2,17 @@ import {
   ChangeDetectionStrategy,
   Component,
   computed,
+  effect,
   inject,
   signal,
-  ViewChild,
+  untracked,
   WritableSignal,
+  viewChild
 } from '@angular/core';
 import { ActivatedRoute, Router } from '@angular/router';
 import { format, formatDistance } from 'date-fns';
-import { combineLatest, firstValueFrom, Observable } from 'rxjs';
-import { filter, map, take, tap } from 'rxjs/operators';
+import { firstValueFrom, Observable } from 'rxjs';
+import { map, take, tap } from 'rxjs/operators';
 
 import { PageHeaderComponent } from '../../../../../core/src/shared/components/page-header/page-header.component';
 import {
@@ -63,17 +65,17 @@ import { HelmReleaseVersionsSignalConfigService } from './helm-release-versions-
 })
 export class UpgradeReleaseComponent {
 
-  @ViewChild('editor', { static: true }) editor!: ChartValuesEditorComponent; // strict: @ViewChild populated by Angular
+  readonly editor = viewChild.required<ChartValuesEditorComponent>('editor'); // strict: @ViewChild populated by Angular
 
   public cancelUrl;
   // Signal-native list config for the version picker; undefined until the
-  // upgrade target chart resolves (hasUpgrade emits).
+  // upgrade target chart resolves.
   public readonly listConfig: WritableSignal<SignalListConfig<MonocularVersion> | undefined> = signal(undefined);
   private version!: MonocularVersion; // strict: set by the version step's submit() before the overrides step reads it
 
   public config!: ChartValuesConfig; // strict: assigned by fetchVersionDetails$ before the editor renders
 
-  private monocularEndpointId!: string; // strict: assigned in the hasUpgrade subscription before submit reads it
+  private monocularEndpointId!: string; // strict: assigned when the upgrade target resolves before submit reads it
 
   // Future
   public showAdvancedOptions = false;
@@ -108,7 +110,7 @@ export class UpgradeReleaseComponent {
     valid: signal(true).asReadonly(),
     finishButtonText: signal('Upgrade').asReadonly(),
     onEnter: () => {
-      this.editor.resizeEditor();
+      this.editor().resizeEditor();
     },
     submit: async () => {
       // showAdvancedOptions branching from the legacy doUpgrade is preserved
@@ -131,21 +133,25 @@ export class UpgradeReleaseComponent {
   constructor() {
     this.cancelUrl = `/workloads/${this.helper.guid}`;
 
-    this.helper.hasUpgrade(true).pipe(
-      filter(c => !!c),
-      take(1)
-    ).subscribe(chart => {
-      if (!chart) {
+    // The version list is set up once, for the first upgrade target found.
+    const upgrade = this.helper.upgrade(true);
+    let listStarted = false;
+    effect(() => {
+      const chart = upgrade();
+      if (!chart || listStarted) {
         return;
       }
-      const name = chart.upgrade.name;
-      const repoName = chart.upgrade.repo.name;
-      const version = chart.release.chart.metadata.version;
-      this.monocularEndpointId = chart.monocularEndpointId;
+      listStarted = true;
+      untracked(() => {
+        const name = chart.upgrade.name;
+        const repoName = chart.upgrade.repo.name;
+        const version = chart.release.chart.metadata.version;
+        this.monocularEndpointId = chart.monocularEndpointId;
 
-      this.versionsConfig.initialize(repoName, name, version, chart.monocularEndpointId);
-      void this.versionsConfig.loadAll();
-      this.listConfig.set(this.buildListConfig());
+        this.versionsConfig.initialize(repoName, name, version, chart.monocularEndpointId);
+        void this.versionsConfig.loadAll();
+        this.listConfig.set(this.buildListConfig());
+      });
     });
   }
 
@@ -206,11 +212,10 @@ export class UpgradeReleaseComponent {
     const endpointID = this.monocularEndpointId || stratosMonocularEndpointGuid;
 
     // Fetch the release metadata so that we have the values used to install the current release
-    return combineLatest(
-      [this.helper.release$, this.chartsService.getVersionFromEndpoint(endpointID, chart.repo.name, chart.name, version)]
-    ).pipe(
+    return this.chartsService.getVersionFromEndpoint(endpointID, chart.repo.name, chart.name, version).pipe(
       take(1),
-      tap(([release, chartVersionDetail]) => {
+      tap(chartVersionDetail => {
+        const release = this.helper.release();
         if (!release || !chartVersionDetail) {
           return;
         }
@@ -236,7 +241,7 @@ export class UpgradeReleaseComponent {
   // KubeHelmDataService rather than the ngrx upgrade action.
   private doUpgrade$(): Observable<{ success: boolean; message?: string }> {
     const values: HelmUpgradePayload = {
-      values: JSON.stringify(this.editor.getValues()),
+      values: JSON.stringify(this.editor().getValues()),
       restartPods: false,
       chart: {
         name: this.version.relationships.chart.data.name,

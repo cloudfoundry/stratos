@@ -6,6 +6,7 @@ import {
   effect,
   runInInjectionContext,
   signal,
+  untracked,
 } from '@angular/core';
 
 import { ListStateStore, SignalListConfig, SignalListSort } from '@stratosui/core';
@@ -46,6 +47,7 @@ import {
   KubeStorageClass,
   StratosError,
 } from '../../services/endpoint-data/kube-types';
+import { kubeListErrorState, reportKubeListErrors } from '../list-types/kube-list-errors';
 import { KubeSortSpec, KubeViewPipeline } from '../list-types/kube-view-pipeline';
 import { KubernetesSignalConfigContext } from './kubernetes-signal-config-registry';
 
@@ -78,9 +80,11 @@ function formatAge(iso?: string): string {
 //
 // `dataSignal` is a Signal<T[]> that re-emits when the underlying data
 // service updates. `nameFilter` and `sort` are WritableSignals so the
-// signal-list toolbar can drive them directly.
+// signal-list toolbar can drive them directly. `errors` are the list's
+// own load failures for `kubeGuid` (see kubeListErrorState).
 function buildSignalListConfig<T extends { metadata?: { name?: string } }>(
   injector: Injector,
+  kubeGuid: string,
   stateKey: string,
   dataSignal: Signal<T[]>,
   sortExtractors: Map<string, (row: T) => unknown>,
@@ -139,6 +143,9 @@ function buildSignalListConfig<T extends { metadata?: { name?: string } }>(
     });
   });
 
+  const errorState = kubeListErrorState(kubeGuid, errors);
+  reportKubeListErrors(errorState.errorsByCnsi, injector);
+
   return {
     pagedItems: view.pagedItems,
     totalFilteredResults: view.totalFilteredResults,
@@ -146,16 +153,7 @@ function buildSignalListConfig<T extends { metadata?: { name?: string } }>(
     pageIndex: state.pageIndex,
     pageSize: state.pageSize,
     isAnyLoading: isLoading,
-    errorsByCnsi: computed(() => {
-      const map = new Map<string, unknown>();
-      const errs = errors();
-      if (errs.length) {
-        // Group all errors under the first affected guid (or 'unknown').
-        const guid = errs[0]?.affected?.[0] ?? 'unknown';
-        map.set(guid, errs);
-      }
-      return map;
-    }),
+    ...errorState,
     columns,
     getRowKey,
     emptyMessage,
@@ -172,6 +170,58 @@ function buildSignalListConfig<T extends { metadata?: { name?: string } }>(
     viewMode: state.viewMode,
     sort,
   };
+}
+
+// Whether the scope on screen is loading, so an empty list shows the
+// loading state rather than "There are no ..." until its load ends. A
+// workload view is socket-fed and never loads.
+const NOT_LOADING = signal(false).asReadonly();
+function listLoading(
+  ctx: KubernetesSignalConfigContext,
+  namespaced: boolean,
+  scopeLoading: (scope: ListScope) => boolean,
+): Signal<boolean> {
+  return ctx.isWorkloadView ? NOT_LOADING : computed(() => scopeLoading(listScope(ctx, namespaced)));
+}
+
+// The scope a list shows: the selected namespace for a namespaced type,
+// else the whole cluster. The toolbar refresh and Retry reload this scope.
+type ListScope = { kubeGuid: string; namespace?: string };
+function listScope(ctx: KubernetesSignalConfigContext, namespaced: boolean): ListScope {
+  const ns = ctx.selectedNamespace();
+  return ns && namespaced ? { kubeGuid: ctx.kubeGuid, namespace: ns } : { kubeGuid: ctx.kubeGuid };
+}
+
+// Load each namespace as it is selected, the way the shell loads the
+// cluster list on entry: the namespace read is a separate cache that
+// nothing else fills. A workload view is socket-fed and loads nothing.
+function loadSelectedNamespace(
+  ctx: KubernetesSignalConfigContext,
+  injector: Injector,
+  refresh: (scope: ListScope) => Promise<void>,
+): void {
+  if (ctx.isWorkloadView) return;
+  runInInjectionContext(injector, () => {
+    effect(() => {
+      const namespace = ctx.selectedNamespace();
+      if (namespace) {
+        untracked(() => void refresh({ kubeGuid: ctx.kubeGuid, namespace }));
+      }
+    });
+  });
+}
+
+// A list's load failures: the data service's errors for the scope on
+// screen, so a cluster-wide failure does not show on a namespace view
+// (or the reverse). A workload view is socket-fed and has no Retry, so
+// it shows none.
+const NO_ERRORS = signal<StratosError[]>([]).asReadonly();
+function listErrors(
+  ctx: KubernetesSignalConfigContext,
+  namespaced: boolean,
+  scopeErrors: (scope: ListScope) => StratosError[],
+): Signal<StratosError[]> {
+  return ctx.isWorkloadView ? NO_ERRORS : computed(() => scopeErrors(listScope(ctx, namespaced)));
 }
 
 // Factory: Pods (entity type `pod` in kubeEntityCatalog). Switches
@@ -255,6 +305,7 @@ export function buildPodsSignalConfig(
 
   return buildSignalListConfig<KubePod>(
     injector,
+    ctx.kubeGuid,
     'kube-resource-pods',
     dataSignal,
     sortExtractors,
@@ -263,9 +314,9 @@ export function buildPodsSignalConfig(
     'There are no pods',
     'No pods match the current filter',
     'Loading pods…',
-    ctx.isWorkloadView ? undefined : () => podData.refresh({ kubeGuid: ctx.kubeGuid }),
-    podData.errors(),
-    signal(false).asReadonly(),
+    ctx.isWorkloadView ? undefined : () => podData.refresh(listScope(ctx, true)),
+    listErrors(ctx, true, scope => podData.scopeErrors(scope)),
+    listLoading(ctx, true, scope => podData.scopeLoading(scope)),
   );
 }
 
@@ -287,6 +338,7 @@ export function buildServicesSignalConfig(
       : serviceData.servicesInCluster(ctx.kubeGuid);
     return services();
   });
+  loadSelectedNamespace(ctx, injector, scope => serviceData.refresh(scope));
 
   const sortExtractors = new Map<string, (row: KubeService) => unknown>([
     ['name', (s: KubeService) => (s.metadata?.name ?? '').toLowerCase()],
@@ -341,6 +393,7 @@ export function buildServicesSignalConfig(
 
   return buildSignalListConfig<KubeService>(
     injector,
+    ctx.kubeGuid,
     'kube-resource-services',
     dataSignal,
     sortExtractors,
@@ -349,9 +402,9 @@ export function buildServicesSignalConfig(
     'There are no services',
     'No services match the current filter',
     'Loading services…',
-    ctx.isWorkloadView ? undefined : () => serviceData.refresh({ kubeGuid: ctx.kubeGuid }),
-    serviceData.errors(),
-    signal(false).asReadonly(),
+    ctx.isWorkloadView ? undefined : () => serviceData.refresh(listScope(ctx, true)),
+    listErrors(ctx, true, scope => serviceData.scopeErrors(scope)),
+    listLoading(ctx, true, scope => serviceData.scopeLoading(scope)),
   );
 }
 
@@ -396,6 +449,7 @@ export function buildNamespacesSignalConfig(
 
   return buildSignalListConfig<KubeNamespace>(
     injector,
+    ctx.kubeGuid,
     'kube-resource-namespaces',
     dataSignal,
     sortExtractors,
@@ -405,8 +459,8 @@ export function buildNamespacesSignalConfig(
     'No namespaces match the current filter',
     'Loading namespaces…',
     () => namespaceData.refresh({ kubeGuid: ctx.kubeGuid }),
-    namespaceData.errors(),
-    signal(false).asReadonly(),
+    namespaceData.listErrors(ctx.kubeGuid),
+    namespaceData.listLoading(ctx.kubeGuid),
   );
 }
 
@@ -414,7 +468,10 @@ export function buildNamespacesSignalConfig(
 // Wave-3 generic-resource factories
 // ---------------------------------------------------------------------------
 // Each factory mirrors buildServicesSignalConfig — eager-refresh data
-// service, namespace dropdown switches between cluster/namespace fetch.
+// service; the namespace dropdown switches the read between the cluster
+// and namespace caches. The shell loads the cluster list on entry, a
+// selected namespace is loaded when picked (loadSelectedNamespace), and
+// the toolbar refresh and Retry reload whichever scope is shown.
 // `buildGenericResourceConfig` collapses the common (data signal +
 // state-key + buildSignalListConfig) call so each per-entity factory only
 // declares its sortExtractors + columns + labels.
@@ -446,9 +503,11 @@ function buildGenericResourceConfig<T extends GenericRow>(
       : dataSvc.itemsInCluster(ctx.kubeGuid);
     return items();
   });
+  if (namespaced) loadSelectedNamespace(ctx, injector, scope => dataSvc.refresh(scope));
 
   return buildSignalListConfig<T & { kubeGuid: string }>(
     injector,
+    ctx.kubeGuid,
     stateKey,
     dataSignal,
     sortExtractors,
@@ -457,9 +516,9 @@ function buildGenericResourceConfig<T extends GenericRow>(
     emptyMessage,
     emptyFilterMessage,
     loadingMessage,
-    ctx.isWorkloadView ? undefined : () => dataSvc.refresh({ kubeGuid: ctx.kubeGuid }),
-    dataSvc.errors(),
-    signal(false).asReadonly(),
+    ctx.isWorkloadView ? undefined : () => dataSvc.refresh(listScope(ctx, namespaced)),
+    listErrors(ctx, namespaced, scope => dataSvc.scopeErrors(scope)),
+    listLoading(ctx, namespaced, scope => dataSvc.scopeLoading(scope)),
   );
 }
 
