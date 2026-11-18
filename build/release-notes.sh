@@ -313,7 +313,7 @@ cmd_assemble() {
           printf "NOTE: %s: new subcategory [%s: %s]; if it will be used again, add it to the list in changelog.d/README.md\n", FILENAME, s, sc > "/dev/stderr"
         }
       }
-      key = s SUBSEP sc; cur = s; intable = 0
+      key = s SUBSEP sc; cur = s; intable = 0; fence = 0; prose[key] = 0
       delete pending
       next
     }
@@ -351,11 +351,26 @@ cmd_assemble() {
       # Blank lines buffer lazily so they only land between content lines
       # of the same group in the same fragment (e.g. before a table),
       # never at group boundaries or between merged fragments.
-      if ($0 ~ /^[[:space:]]*$/) { pending[key] = pending[key] "\n"; next }
+      if ($0 ~ /^[[:space:]]*$/) { pending[key] = pending[key] "\n"; prose[key] = 0; next }
+      # A GitHub release body draws every newline as a line break, so text
+      # wrapped by hand showed as a narrow column, and a line wrapped inside
+      # a code span (which cannot break) as one long line. An indented line
+      # that continues the text above it joins that line, and the page
+      # wraps the result. Code blocks, table rows, list items and
+      # paragraphs after a blank line keep their own lines.
+      if ($0 ~ /^[[:space:]]*```/) fence = !fence
+      else if (!fence && prose[key] && pending[key] == "" && $0 ~ /^[[:space:]]+[^[:space:]]/ \
+               && $0 !~ /^[[:space:]]*([-*+]|[0-9]+\.)[[:space:]]/ && $0 !~ /^[[:space:]]*\|/) {
+        t = $0; sub(/^[[:space:]]+/, "", t)
+        buf[key] = substr(buf[key], 1, length(buf[key]) - 1) " " t "\n"
+        last[key] = last[key] " " t
+        next
+      }
       if ($0 ~ /^- /) bstart[key] = length(buf[key] pending[key])
       buf[key] = buf[key] pending[key] $0 "\n"
       last[key] = $0
       delete pending[key]
+      prose[key] = !fence && $0 !~ /^[[:space:]]*(```|\|)/
     }
     # One chain per package, in landing order. A step that does not start
     # where the previous one ended (a downgrade, a skipped table) opens a
