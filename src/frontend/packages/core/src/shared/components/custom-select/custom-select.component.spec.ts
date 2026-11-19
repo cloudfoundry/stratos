@@ -361,6 +361,23 @@ describe('CustomSelectComponent as a select-only combobox', () => {
     expect(activeText(fixture)).toBe('delta');
   });
 
+  // Create App: Organization turns disabled while its orgs load. A list
+  // left open then took no keys, Escape included.
+  it('closes the list when the select turns disabled', async () => {
+    const fixture = TestBed.createComponent(DisabledHostComponent);
+    fixture.componentInstance.disabled.set(false);
+    await fixture.whenStable();
+    const trigger = triggerOf(fixture);
+    trigger.focus();
+    key(trigger, 'ArrowDown');
+    await fixture.whenStable();
+    expect(trigger.getAttribute('aria-expanded')).toBe('true');
+
+    fixture.componentInstance.disabled.set(true);
+    await fixture.whenStable();
+    expect(trigger.getAttribute('aria-expanded')).toBe('false');
+  });
+
   // [appFocus] focuses the host, which could not take focus.
   it('forwards focus from the host to the trigger', async () => {
     const fixture = TestBed.createComponent(OrgHostComponent);
