@@ -238,6 +238,20 @@ export class CFApiHelper {
     }
   }
 
+  /**
+   * CF deletes orgs and spaces as a job (202): wait until the resource is
+   * gone, so a caller that checks or reuses the name sees the result.
+   */
+  private async waitUntilGone(url: string, timeoutMs = 60000): Promise<void> {
+    const deadline = Date.now() + timeoutMs;
+    while (await this.exists(url)) {
+      if (Date.now() > deadline) {
+        throw new Error(`Timeout waiting for ${url} to be deleted`);
+      }
+      await new Promise(resolve => setTimeout(resolve, 1000));
+    }
+  }
+
   // ============================================================================
   // Application Operations
   // ============================================================================
@@ -478,6 +492,7 @@ export class CFApiHelper {
   async deleteOrg(orgGuid: string): Promise<void> {
     if (!this.cfApiBase) await this.init();
     await this.pdelete(`${this.cfApiBase}/organizations/${orgGuid}`);
+    await this.waitUntilGone(`${this.cfApiBase}/organizations/${orgGuid}`);
   }
 
   /**
@@ -534,6 +549,7 @@ export class CFApiHelper {
   async deleteSpace(spaceGuid: string): Promise<void> {
     if (!this.cfApiBase) await this.init();
     await this.pdelete(`${this.cfApiBase}/spaces/${spaceGuid}`);
+    await this.waitUntilGone(`${this.cfApiBase}/spaces/${spaceGuid}`);
   }
 
   /**
@@ -948,6 +964,16 @@ export class CFApiHelper {
     await this.pdelete(`${this.cfApiBase}/organization_quotas/${quotaGuid}`);
   }
 
+  /**
+   * Apply an organization quota to an organization
+   */
+  async applyOrgQuota(orgGuid: string, quotaGuid: string): Promise<void> {
+    if (!this.cfApiBase) await this.init();
+    await this.ppost(`${this.cfApiBase}/organization_quotas/${quotaGuid}/relationships/organizations`, {
+      data: [{ guid: orgGuid }]
+    });
+  }
+
   // ============================================================================
   // Space Quota Management
   // ============================================================================
@@ -1067,10 +1093,9 @@ export class CFApiHelper {
    */
   async applySpaceQuota(spaceGuid: string, quotaGuid: string): Promise<void> {
     if (!this.cfApiBase) await this.init();
-    await this.ppatch(`${this.cfApiBase}/spaces/${spaceGuid}/relationships/quota`, {
-      data: {
-        guid: quotaGuid
-      }
+    // CF API v3 applies a space quota from the quota side.
+    await this.ppost(`${this.cfApiBase}/space_quotas/${quotaGuid}/relationships/spaces`, {
+      data: [{ guid: spaceGuid }]
     });
   }
 
