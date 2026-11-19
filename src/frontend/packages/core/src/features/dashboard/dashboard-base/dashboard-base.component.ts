@@ -1,6 +1,7 @@
 import { BreakpointObserver, Breakpoints } from '@angular/cdk/layout';
 import { Portal, PortalModule } from '@angular/cdk/portal';
-import { ChangeDetectionStrategy, AfterViewInit, Component, ElementRef, OnDestroy, OnInit, computed, signal, ViewContainerRef, inject, viewChild } from '@angular/core';
+import { ChangeDetectionStrategy, AfterViewInit, Component, ElementRef, Injector, OnDestroy, OnInit, afterNextRender, computed, effect, signal, ViewContainerRef, inject, viewChild } from '@angular/core';
+import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { CommonModule } from '@angular/common';
 import { ActivatedRoute, ActivatedRouteSnapshot, NavigationEnd, Route, Router, RouterModule } from '@angular/router';
 import {
@@ -61,6 +62,8 @@ export class DashboardBaseComponent implements OnInit, OnDestroy, AfterViewInit 
   private dashboardData = inject(DashboardDataService);
   private userFavorites = inject(UserFavoritesDataService);
   private endpointReauthReport = inject(EndpointReauthReportService);
+  private host = inject<ElementRef<HTMLElement>>(ElementRef);
+  private injector = inject(Injector);
 
   public activeTabLabel$!: Observable<string>;
   public readonly subNavData = computed<[string | null, Portal<any> | undefined, IPageSideNavTab | null, IHeaderBreadcrumbLink[] | undefined]>(() => {
@@ -76,6 +79,9 @@ export class DashboardBaseComponent implements OnInit, OnDestroy, AfterViewInit 
       ? { mode: 'over', opened: state.isMobileNavOpen || false, iconMode: false }
       : { mode: state.sideNavPinned ? 'side' : 'over', opened: true, iconMode: !state.sidenavOpen };
   });
+  // Open on a narrow view, the drawer covers the page and Toggle menu.
+  private readonly drawerOpen = computed(() => this.dashboardSignals.isMobile() && this.dashboardSignals.isMobileNavOpen());
+  private navigatedFromDrawer = false;
   public rightNavState$!: Observable<{ opened: boolean, component?: object, props?: object, }>;
   public noMargin$: Observable<boolean> = of(false);
   private mobileSub: Subscription;
@@ -110,6 +116,52 @@ export class DashboardBaseComponent implements OnInit, OnDestroy, AfterViewInit 
     );
     this.mobileSub = this.isMobile$
       .subscribe(isMobile => isMobile ? this.dashboardData.enableMobileNav() : this.dashboardData.disableMobileNav());
+
+    // Focus follows the drawer: to its first item when it opens, and out
+    // again when it closes with focus inside (WCAG 2.4.3).
+    let wasOpen = false;
+    effect(() => {
+      const open = this.drawerOpen();
+      if (open === wasOpen) {
+        return;
+      }
+      wasOpen = open;
+      afterNextRender(() => open ? this.focusDrawer() : this.leaveDrawer(), { injector: this.injector });
+    });
+    // A link chosen in the drawer closes it.
+    this.router.events.pipe(filter(event => event instanceof NavigationEnd), takeUntilDestroyed()).subscribe(() => {
+      if (this.drawerOpen()) {
+        this.navigatedFromDrawer = true;
+        this.dashboardData.closeSideNav();
+      }
+    });
+  }
+
+  closeDrawer() {
+    if (this.drawerOpen()) {
+      this.dashboardData.closeSideNav();
+    }
+  }
+
+  private drawer(): HTMLElement | null {
+    return this.host.nativeElement.querySelector('#main-nav-drawer');
+  }
+
+  private focusDrawer() {
+    this.drawer()?.querySelector<HTMLElement>(FOCUSABLE)?.focus();
+  }
+
+  // Focus left inside the closed (inert) drawer would be lost: send it to
+  // the new page after a link, otherwise back to Toggle menu.
+  private leaveDrawer() {
+    const toPage = this.navigatedFromDrawer;
+    this.navigatedFromDrawer = false;
+    const active = document.activeElement;
+    if (active && active !== document.body && !this.drawer()?.contains(active)) {
+      return;
+    }
+    const target = toPage ? this.content()?.nativeElement : document.querySelector<HTMLElement>('[aria-controls="main-nav-drawer"]');
+    target?.focus();
   }
 
   ngAfterViewInit() {

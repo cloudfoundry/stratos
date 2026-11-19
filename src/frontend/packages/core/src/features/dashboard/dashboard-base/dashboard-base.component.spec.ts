@@ -1,6 +1,7 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { provideZonelessChangeDetection } from '@angular/core';
 import { afterEach, describe, it, expect, beforeEach, vi } from 'vitest';
+import { Router } from '@angular/router';
 import { EntityCatalogHelper, EntityCatalogHelpers } from '@stratosui/store';
 import { BaseTestModulesNoShared, STORE_TEST_PROVIDERS, BASE_TEST_PROVIDERS } from '@test-framework/core-test.helper';
 import { DashboardDataService } from '../../../core/dashboard-data.service';
@@ -90,6 +91,55 @@ describe('DashboardBaseComponent', () => {
     it('is reachable beside the page on a wide view', async () => {
       await fixture.whenStable();
       expect(drawer().hasAttribute('inert')).toBe(false);
+    });
+
+    // The open drawer covers the page and its own Toggle menu button, so
+    // focus moves with it: in on open, back out on close.
+    describe('open on a narrow view', () => {
+      let data: DashboardDataService;
+      let toggle: HTMLButtonElement;
+
+      beforeEach(async () => {
+        document.body.appendChild(fixture.nativeElement);
+        toggle = document.createElement('button');
+        toggle.setAttribute('aria-controls', 'main-nav-drawer');
+        document.body.appendChild(toggle);
+        data = TestBed.inject(DashboardDataService);
+        data.enableMobileNav();
+        await fixture.whenStable();
+        toggle.focus();
+        data.toggleSideNav();
+        await fixture.whenStable();
+      });
+
+      afterEach(() => {
+        fixture.nativeElement.remove();
+        toggle.remove();
+      });
+
+      it('takes focus to its first item when it opens', () => {
+        expect(drawer().contains(document.activeElement)).toBe(true);
+      });
+
+      it('closes on Escape and returns focus to Toggle menu', async () => {
+        document.activeElement!.dispatchEvent(new KeyboardEvent('keydown', { key: 'Escape', bubbles: true }));
+        await fixture.whenStable();
+        expect(drawer().hasAttribute('inert')).toBe(true);
+        expect(document.activeElement).toBe(toggle);
+      });
+
+      it('returns focus to Toggle menu when a control inside closes it', async () => {
+        data.toggleSideNav();
+        await fixture.whenStable();
+        expect(document.activeElement).toBe(toggle);
+      });
+
+      it('closes when a link is chosen and gives focus to the new page', async () => {
+        await TestBed.inject(Router).navigateByUrl('/');
+        await fixture.whenStable();
+        expect(drawer().hasAttribute('inert')).toBe(true);
+        expect(document.activeElement).toBe(fixture.nativeElement.querySelector('main#main-content'));
+      });
     });
   });
 
