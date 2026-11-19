@@ -186,6 +186,7 @@ describe('PageHeaderComponent', () => {
     view.rootNodes.forEach((node: Node) => host.appendChild(node));
     const toggle = (): HTMLElement => host.querySelector('[aria-label="Toggle menu"]')!;
     expect(toggle().getAttribute('aria-expanded')).toBe('false');
+    expect(toggle().getAttribute('aria-controls')).toBe('main-nav-drawer');
 
     data.toggleSideNav();
     await fixture.whenStable();
