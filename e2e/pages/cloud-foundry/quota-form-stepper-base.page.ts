@@ -7,13 +7,13 @@ import { StepperBase } from '../../helpers/stepper-base';
  */
 export class QuotaFormStepperBase extends StepperBase {
   public name = 'name';
-  public totalServices = 'totalservices';
-  public totalRoutes = 'totalroutes';
-  public memoryLimit = 'memorylimit';
-  public instanceMemoryLimit = 'instancememorylimit';
-  public nonBasicServicesAllowed = 'nonbasicservicesallowed';
-  public totalReservedRoutePorts = 'totalreservedrouteports';
-  public appInstanceLimit = 'appinstancelimit';
+  public totalServices = 'totalServices';
+  public totalRoutes = 'totalRoutes';
+  public memoryLimit = 'memoryLimit';
+  public instanceMemoryLimit = 'instanceMemoryLimit';
+  public nonBasicServicesAllowed = 'nonBasicServicesAllowed';
+  public totalReservedRoutePorts = 'totalReservedRoutePorts';
+  public appInstanceLimit = 'appInstanceLimit';
 
   constructor(page: Page) {
     super(page);

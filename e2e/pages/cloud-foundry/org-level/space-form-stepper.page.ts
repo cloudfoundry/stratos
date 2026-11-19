@@ -6,8 +6,8 @@ import { StepperBase } from '../../../helpers/stepper-base';
  * Stepper for space creation/edit
  */
 export class SpaceFormStepper extends StepperBase {
-  private spaceFieldName = 'spacename';
-  private quotaFieldName = 'quotadefinition';
+  private spaceFieldName = 'spaceName';
+  private quotaFieldName = 'quotaDefinition';
 
   constructor(page: Page) {
     super(page);
