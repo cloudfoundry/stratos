@@ -21,7 +21,7 @@ export class DeployApplicationPage extends BasePage {
     this.stepper = page.locator('app-steppers, mat-horizontal-stepper');
     this.table = page.locator('app-table, table');
     this.deployStatus = page.locator('.deploy-app__title').filter({ hasText: 'Deployed' });
-    this.commitList = page.locator('app-list app-table');
+    this.commitList = page.locator('app-signal-list table');
     this.overridesForm = page.locator('app-deploy-application-options-step form');
     this.redeployCommitLink = page.locator('.deploy-step2-form__commit a');
   }

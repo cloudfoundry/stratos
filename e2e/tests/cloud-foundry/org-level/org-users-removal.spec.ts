@@ -19,7 +19,7 @@ test.describe('Org Users Removal', () => {
     await orgPage.navigateTo();
     await orgPage.goToUsersTab();
 
-    const listComponent = page.locator('app-list');
+    const listComponent = page.locator('app-signal-list');
     await expect(listComponent).toBeVisible();
   });
 
@@ -34,7 +34,7 @@ test.describe('Org Users Removal', () => {
       await orgPage.navigateTo();
       await orgPage.goToUsersTab();
 
-      const listComponent = page.locator('app-list');
+      const listComponent = page.locator('app-signal-list');
       const table = listComponent.locator('app-table, table');
       const rows = table.locator('tbody tr');
 
@@ -86,7 +86,7 @@ test.describe('Org Users Removal', () => {
       await orgPage.navigateTo();
       await orgPage.goToUsersTab();
 
-      const listComponent = page.locator('app-list');
+      const listComponent = page.locator('app-signal-list');
       const table = listComponent.locator('app-table, table');
       const rows = table.locator('tbody tr');
 
@@ -162,7 +162,7 @@ test.describe('Org Users Removal', () => {
       await orgPage.navigateTo();
       await orgPage.goToUsersTab();
 
-      const listComponent = page.locator('app-list');
+      const listComponent = page.locator('app-signal-list');
       const table = listComponent.locator('app-table, table');
       const rows = table.locator('tbody tr');
 

@@ -27,12 +27,11 @@ test.describe('Manage Organization', () => {
       await cfPage.navigateTo();
       await cfPage.goToOrgTab();
 
-      const listComponent = page.locator('app-list');
+      const listComponent = page.locator('app-signal-list');
       await listComponent.waitFor({ state: 'visible' });
 
       // Search for our org
-      const header = listComponent.locator('app-list-header');
-      const searchInput = header.locator('input[placeholder*="Search"], input[type="text"]').first();
+      const searchInput = listComponent.locator('input[placeholder*="Search"], input[type="text"]').first();
       if (await searchInput.isVisible().catch(() => false)) {
         await searchInput.fill(orgName);
         await page.waitForTimeout(1000);
@@ -53,12 +52,7 @@ test.describe('Manage Organization', () => {
       await cfApi.deleteOrg(org.guid);
 
       // Verify deletion
-      try {
-        await cfApi.findOrgByName(orgName);
-        expect(true).toBe(false); // Should not find it
-      } catch (error) {
-        expect(error).toBeTruthy(); // Expected
-      }
+      expect(await cfApi.findOrgByName(orgName)).toBeNull();
     });
   });
 
@@ -90,8 +84,7 @@ test.describe('Manage Organization', () => {
       await orgStepper.setOrg(orgName);
 
       // Check if we can proceed (name is valid)
-      const canProceed = await orgStepper.canNext();
-      expect(canProceed).toBe(true);
+      await expect(orgStepper.getNextButton()).toBeEnabled();
 
       await orgStepper.next();
 
@@ -130,13 +123,11 @@ test.describe('Manage Organization', () => {
 
       // Try with empty name
       await orgStepper.setOrg('');
-      let canProceed = await orgStepper.canNext();
-      expect(canProceed).toBe(false);
+      await expect(orgStepper.getNextButton()).toBeDisabled();
 
       // Try with valid name
       await orgStepper.setOrg('valid-org-name');
-      canProceed = await orgStepper.canNext();
-      expect(canProceed).toBe(true);
+      await expect(orgStepper.getNextButton()).toBeEnabled();
 
       // Cancel the stepper
       await orgStepper.cancel();
@@ -166,7 +157,7 @@ test.describe('Manage Organization', () => {
 
       // Check if quota field is available
       const form = orgStepper.getStepperForm();
-      const quotaField = form.locator('[name="quotadefinition"], [formcontrolname="quotadefinition"]').first();
+      const quotaField = form.locator('[formcontrolname="quotaDefinition"]').first();
       const quotaExists = await quotaField.isVisible({ timeout: 2000 }).catch(() => false);
 
       if (quotaExists) {
@@ -188,7 +179,7 @@ test.describe('Manage Organization', () => {
       try {
         // Navigate to org page
         await page.goto(`/cloud-foundry/${cfGuid}/organizations/${org.guid}/summary`);
-        await page.waitForLoadState('networkidle');
+        await page.locator('app-cloud-foundry-organization-summary').waitFor({ timeout: 30000 });
 
         // Look for edit button
         const editButton = page.locator('button').filter({ hasText: /edit/i }).first();
@@ -205,7 +196,7 @@ test.describe('Manage Organization', () => {
 
         // Verify current name is shown
         const form = orgStepper.getStepperForm();
-        const nameField = form.locator('[name="orgname"], [formcontrolname="orgname"]').first();
+        const nameField = form.locator('[formcontrolname="orgName"]').first();
         const currentName = await nameField.inputValue();
         expect(currentName).toBe(orgName);
 
@@ -228,7 +219,7 @@ test.describe('Manage Organization', () => {
       try {
         // Navigate to org page
         await page.goto(`/cloud-foundry/${cfGuid}/organizations/${org.guid}/summary`);
-        await page.waitForLoadState('networkidle');
+        await page.locator('app-cloud-foundry-organization-summary').waitFor({ timeout: 30000 });
 
         // Look for delete button
         const deleteButton = page.locator('button').filter({ hasText: /delete/i }).first();
@@ -244,19 +235,16 @@ test.describe('Manage Organization', () => {
         const confirmDialog = page.locator('app-dialog-confirm');
         await confirmDialog.waitFor({ state: 'visible', timeout: 5000 });
 
-        const confirmButton = confirmDialog.locator('button').filter({ hasText: /delete|confirm|yes/i });
+        // Deleting an org is type-to-confirm.
+        await confirmDialog.locator('#typeToConfirm').fill(orgName);
+        const confirmButton = confirmDialog.locator('[data-test="confirm-dialog-confirm"]');
         await confirmButton.click();
 
-        // Wait for navigation away from org page
-        await page.waitForURL(/.*cloud-foundry\/.*(?!organizations).*/, { timeout: 10000 });
+        // The console leaves the deleted org's pages (for the Organizations list).
+        await page.waitForURL(url => !url.pathname.includes(org.guid), { timeout: 10000 });
 
-        // Verify org is deleted via API
-        try {
-          await cfApi.findOrgByName(orgName);
-          expect(true).toBe(false); // Should not find it
-        } catch (error) {
-          expect(error).toBeTruthy(); // Expected - org should not exist
-        }
+        // CF deletes the org as a job.
+        await expect.poll(() => cfApi.findOrgByName(orgName), { timeout: 30000 }).toBeNull();
 
       } catch (error) {
         // If test failed, cleanup the org

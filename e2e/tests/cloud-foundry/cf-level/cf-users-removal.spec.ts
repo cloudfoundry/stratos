@@ -20,7 +20,7 @@ test.describe('CF Users Removal', () => {
     await cfPage.goToUsersTab();
 
     // Verify user management interface is available
-    const listComponent = page.locator('app-list');
+    const listComponent = page.locator('app-signal-list');
     await expect(listComponent).toBeVisible();
   });
 
@@ -33,7 +33,7 @@ test.describe('CF Users Removal', () => {
       await cfPage.navigateTo();
       await cfPage.goToUsersTab();
 
-      const listComponent = page.locator('app-list');
+      const listComponent = page.locator('app-signal-list');
       const table = listComponent.locator('app-table, table');
       const rows = table.locator('tbody tr');
 
@@ -108,7 +108,7 @@ test.describe('CF Users Removal', () => {
       await cfPage.navigateTo();
       await cfPage.goToUsersTab();
 
-      const listComponent = page.locator('app-list');
+      const listComponent = page.locator('app-signal-list');
       const table = listComponent.locator('app-table, table');
       const rows = table.locator('tbody tr');
 
@@ -182,7 +182,7 @@ test.describe('CF Users Removal', () => {
       await cfPage.navigateTo();
       await cfPage.goToUsersTab();
 
-      const listComponent = page.locator('app-list');
+      const listComponent = page.locator('app-signal-list');
       const table = listComponent.locator('app-table, table');
       const rows = table.locator('tbody tr');
 
@@ -251,7 +251,7 @@ test.describe('CF Users Removal', () => {
       await cfPage.navigateTo();
       await cfPage.goToUsersTab();
 
-      const listComponent = page.locator('app-list');
+      const listComponent = page.locator('app-signal-list');
       const table = listComponent.locator('app-table, table');
       const rows = table.locator('tbody tr');
 

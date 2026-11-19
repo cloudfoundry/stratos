@@ -16,7 +16,7 @@ export class ApplicationPageGithubTab extends ApplicationBasePage {
   constructor(page: Page, cfGuid: string, appGuid: string) {
     super(page, cfGuid, appGuid, 'gitscm');
 
-    this.commits = page.locator('app-list');
+    this.commits = page.locator('app-signal-list');
     this.cardDeploymentInfo = page.locator('app-card-github-deploy-info');
     this.cardRepoInfo = page.locator('app-card-github-repo-info');
     this.cardCommitInfo = page.locator('app-card-github-commit-info');

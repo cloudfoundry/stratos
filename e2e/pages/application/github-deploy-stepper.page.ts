@@ -31,7 +31,7 @@ export class GitHubDeployStepperPage extends BasePage {
   }
 
   private get repositoryList(): Locator {
-    return this.page.locator('app-list, mat-list').filter({ has: this.page.locator('[role="listitem"]') });
+    return this.page.locator('app-signal-list, mat-list').filter({ has: this.page.locator('[role="listitem"]') });
   }
 
   private get repositorySearchInput(): Locator {

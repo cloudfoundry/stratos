@@ -21,7 +21,7 @@ const LOADING_SELECTORS = [
 
 // Substantive content — at least one should be visible when a page is ready
 const CONTENT_SELECTORS = [
-  'app-list table tbody tr',          // list table rows
+  'app-signal-list table tbody tr',   // list table rows
   '.meta-card',                       // card view cards
   'app-tile-grid',                    // summary tile grids
   'app-info-card',                    // info cards (about/diagnostics)

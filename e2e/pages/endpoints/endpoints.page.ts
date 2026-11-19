@@ -43,8 +43,8 @@ export class EndpointsPage extends BasePage {
     this.welcomeMessage = page.locator('.app-no-content-container');
     this.welcomeFirstLine = this.welcomeMessage.locator('.first-line');
     this.welcomeSecondLine = this.welcomeMessage.locator('.second-line');
-    this.listComponent = page.locator('app-list');
-    this.tableRows = page.locator('app-table tbody tr');
+    this.listComponent = page.locator('app-signal-list');
+    this.tableRows = page.locator('table tbody tr');
     this.cardElements = page.locator('app-card');
 
     this.list = new ListComponent(page);
@@ -147,7 +147,7 @@ export class EndpointsPage extends BasePage {
     const data: EndpointMetadata[] = [];
 
     for (const row of rows) {
-      const cells = await row.locator('app-table-cell').all();
+      const cells = await row.locator('td').all();
       const cellTexts = await Promise.all(cells.map(cell => cell.textContent()));
 
       data.push({
@@ -190,7 +190,7 @@ export class EndpointsPage extends BasePage {
    * Open action menu for a table row
    */
   async openActionMenu(row: Locator): Promise<void> {
-    await row.locator('app-table-cell-actions button').click();
+    await row.locator('button[data-test="row-actions"]').click();
   }
 
   /**

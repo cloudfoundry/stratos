@@ -21,7 +21,7 @@ test.describe('Space Routes', () => {
     await spacePage.goToRoutesTab();
 
     // Verify routes list
-    const listComponent = page.locator('app-list');
+    const listComponent = page.locator('app-signal-list');
     await expect(listComponent).toBeVisible();
   });
 
@@ -93,7 +93,7 @@ test.describe('Space Routes', () => {
       await spacePage.goToRoutesTab();
 
       // Verify routes list exists
-      const listComponent = page.locator('app-list');
+      const listComponent = page.locator('app-signal-list');
       const table = listComponent.locator('app-table, table');
       const rows = table.locator('tbody tr');
 
@@ -158,7 +158,7 @@ test.describe('Space Routes', () => {
       await spacePage.goToRoutesTab();
 
       // Verify routes list exists
-      const listComponent = page.locator('app-list');
+      const listComponent = page.locator('app-signal-list');
       const table = listComponent.locator('app-table, table');
       const rows = table.locator('tbody tr');
 
@@ -206,7 +206,7 @@ test.describe('Space Routes', () => {
       await spacePage.goToRoutesTab();
 
       // Verify routes list exists
-      const listComponent = page.locator('app-list');
+      const listComponent = page.locator('app-signal-list');
       const table = listComponent.locator('app-table, table');
       const rows = table.locator('tbody tr');
 

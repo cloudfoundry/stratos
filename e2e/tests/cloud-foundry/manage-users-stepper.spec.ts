@@ -86,7 +86,7 @@ test.describe('Manage Users Stepper', () => {
       }
 
       // Look for users selection step (might be a list or selection control)
-      const usersStep = wizard.locator(':text("select"), :text("user"), mat-list, app-list').first();
+      const usersStep = wizard.locator(':text("select"), :text("user"), mat-list, app-signal-list').first();
       const usersStepExists = await usersStep.isVisible({ timeout: 5000 }).catch(() => false);
 
       if (!usersStepExists) {

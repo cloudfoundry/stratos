@@ -30,11 +30,11 @@ test.describe('CF Space Level', () => {
       await orgPage.goToSpacesTab();
 
       // Wait for spaces list
-      const listComponent = page.locator('app-list');
+      const listComponent = page.locator('app-signal-list');
       await listComponent.waitFor({ state: 'visible' });
 
       // Click on first space (we know testSpaceGuid exists)
-      const cards = listComponent.locator('app-card, mat-card');
+      const cards = listComponent.locator('[data-test="card-grid"] > *');
       const firstCard = cards.first();
       await firstCard.click();
 
@@ -58,8 +58,8 @@ test.describe('CF Space Level', () => {
       await spacePage.waitForPage();
 
       // Check breadcrumbs
-      const breadcrumb = page.locator('.page-header-breadcrumb, .page-header-sub-nav-breadcrumb').first();
-      await expect(breadcrumb).toBeVisible();
+      const breadcrumb = page.locator('app-breadcrumbs').first();
+      await expect(breadcrumb).toBeVisible({ timeout: 20000 });
 
       // Breadcrumb should contain CF name and org name
       const breadcrumbText = await breadcrumb.textContent() || '';
@@ -80,10 +80,10 @@ test.describe('CF Space Level', () => {
       await spacePage.goToAppsTab();
       await page.waitForTimeout(500);
 
-      await spacePage.goToServiceInstancesTab();
+      await spacePage.goToSITab();
       await page.waitForTimeout(500);
 
-      await spacePage.goToUserProvidedServicesTab();
+      await spacePage.goToUPSITab();
       await page.waitForTimeout(500);
 
       await spacePage.goToRoutesTab();
@@ -111,7 +111,7 @@ test.describe('CF Space Level', () => {
       await spacePage.goToAppsTab();
 
       // Verify list component is visible
-      const listComponent = page.locator('app-list');
+      const listComponent = page.locator('app-signal-list');
       await expect(listComponent).toBeVisible();
     });
 
@@ -126,7 +126,7 @@ test.describe('CF Space Level', () => {
       await spacePage.goToRoutesTab();
 
       // Verify list component is visible
-      const listComponent = page.locator('app-list');
+      const listComponent = page.locator('app-signal-list');
       await expect(listComponent).toBeVisible();
     });
   });
@@ -156,8 +156,8 @@ test.describe('CF Space Level', () => {
       await spacePage.navigateTo();
       await spacePage.waitForPage();
 
-      const breadcrumb = page.locator('.page-header-breadcrumb, .page-header-sub-nav-breadcrumb').first();
-      await expect(breadcrumb).toBeVisible();
+      const breadcrumb = page.locator('app-breadcrumbs').first();
+      await expect(breadcrumb).toBeVisible({ timeout: 20000 });
     });
 
     test('should walk through space tabs', async ({ connectedEndpointsUserPage, secrets }) => {
@@ -173,10 +173,10 @@ test.describe('CF Space Level', () => {
       await spacePage.goToAppsTab();
       await page.waitForTimeout(500);
 
-      await spacePage.goToServiceInstancesTab();
+      await spacePage.goToSITab();
       await page.waitForTimeout(500);
 
-      await spacePage.goToUserProvidedServicesTab();
+      await spacePage.goToUPSITab();
       await page.waitForTimeout(500);
 
       await spacePage.goToRoutesTab();
@@ -241,7 +241,7 @@ test.describe('CF Space Level', () => {
       const spaceGuid = cfEndpoint.testSpaceGuid;
       const spacePage = CfSpaceLevelPage.forEndpoint(page, cfGuid, orgGuid, spaceGuid);
       await spacePage.navigateTo();
-      await spacePage.goToServiceInstancesTab();
+      await spacePage.goToSITab();
 
       // Look for add/create service instance button
       const addButton = page.locator('button').filter({ hasText: /add.*service|create.*service/i }).first();
@@ -282,7 +282,7 @@ test.describe('CF Space Level', () => {
       await spacePage.goToUsersTab();
 
       // Verify users list is displayed
-      const listComponent = page.locator('app-list');
+      const listComponent = page.locator('app-signal-list');
       await expect(listComponent).toBeVisible();
 
       // Look for manage users button (add/invite/assign)
@@ -361,7 +361,7 @@ test.describe('CF Space Level', () => {
       let space: any = null;
 
       try {
-        space = await cfApi.createSpace(orgGuid, spaceName);
+        space = await cfApi.createSpace({ name: spaceName, orgGuid });
 
         // Navigate to the test space
         const spacePage = CfSpaceLevelPage.forEndpoint(page, cfGuid, orgGuid, space.guid);

@@ -13,7 +13,7 @@ export class ApplicationPageEventsTab extends ApplicationBasePage {
   constructor(page: Page, cfGuid: string, appGuid: string) {
     super(page, cfGuid, appGuid, 'events');
 
-    this.listComponent = page.locator('app-list');
+    this.listComponent = page.locator('app-signal-list');
   }
 
   /**

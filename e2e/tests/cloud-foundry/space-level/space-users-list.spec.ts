@@ -21,7 +21,7 @@ test.describe('Space Users List', () => {
     await spacePage.goToUsersTab();
 
     // Verify users list
-    const listComponent = page.locator('app-list');
+    const listComponent = page.locator('app-signal-list');
     await expect(listComponent).toBeVisible();
   });
 
@@ -38,7 +38,7 @@ test.describe('Space Users List', () => {
       await spacePage.goToUsersTab();
 
       // Verify users list is displayed
-      const listComponent = page.locator('app-list');
+      const listComponent = page.locator('app-signal-list');
       await expect(listComponent).toBeVisible();
 
       // Verify we have users
@@ -70,7 +70,7 @@ test.describe('Space Users List', () => {
       await spacePage.goToUsersTab();
 
       // Look for role filter dropdown
-      const listComponent = page.locator('app-list');
+      const listComponent = page.locator('app-signal-list');
       const roleFilter = listComponent.locator('mat-select, select').filter({ hasText: /role|filter/i }).first();
       const filterExists = await roleFilter.isVisible({ timeout: 5000 }).catch(() => false);
 
@@ -113,7 +113,7 @@ test.describe('Space Users List', () => {
       await spacePage.navigateTo();
       await spacePage.goToUsersTab();
 
-      const listComponent = page.locator('app-list');
+      const listComponent = page.locator('app-signal-list');
       const table = listComponent.locator('app-table, table');
       const rows = table.locator('tbody tr');
 

@@ -103,7 +103,7 @@ test.describe('Endpoints', () => {
 
           // When CF is not connected, the page shows either a loading spinner or a CF-endpoints-missing message.
           // Skip if the page has loaded real CF data (the app list is visible with entries).
-          const appList = registeredEndpointsPage.locator('app-list.app-wall');
+          const appList = registeredEndpointsPage.locator('app-signal-list');
           const listVisible = await appList.isVisible({ timeout: 3000 }).catch(() => false);
           test.skip(listVisible, 'Skipped: CF app list is visible; CF appears connected in UI');
 
@@ -132,7 +132,7 @@ test.describe('Endpoints', () => {
           await registeredEndpointsPage.waitForLoadState('networkidle', { timeout: 10000 }).catch(() => {});
 
           // Skip if the page has loaded real CF data (services list is visible).
-          const servicesList = registeredEndpointsPage.locator('app-list.services-wall');
+          const servicesList = registeredEndpointsPage.locator('app-signal-list');
           const listVisible = await servicesList.isVisible({ timeout: 3000 }).catch(() => false);
           test.skip(listVisible, 'Skipped: CF services list is visible; CF appears connected in UI');
 

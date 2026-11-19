@@ -22,7 +22,7 @@ test.describe('CF Users List', () => {
     expect(url).toContain('users');
 
     // Verify list is visible
-    const listComponent = page.locator('app-list');
+    const listComponent = page.locator('app-signal-list');
     await expect(listComponent).toBeVisible();
   });
 
@@ -33,7 +33,7 @@ test.describe('CF Users List', () => {
     await cfPage.navigateTo();
     await cfPage.goToUsersTab();
 
-    const listComponent = page.locator('app-list');
+    const listComponent = page.locator('app-signal-list');
     const table = listComponent.locator('app-table, table');
     await expect(table).toBeVisible();
 
@@ -53,14 +53,14 @@ test.describe('CF Users List', () => {
       await cfPage.goToUsersTab();
 
       // Get initial user count
-      const listComponent = page.locator('app-list');
+      const listComponent = page.locator('app-signal-list');
       const table = listComponent.locator('app-table, table');
       const initialRows = table.locator('tbody tr');
+      await expect(initialRows.first()).toBeVisible({ timeout: 20000 });
       const initialCount = await initialRows.count();
 
       // Look for search/filter input
-      const header = listComponent.locator('app-list-header');
-      const searchInput = header.locator('input[placeholder*="Search"], input[type="text"]').first();
+      const searchInput = listComponent.locator('input[placeholder*="Search"], input[type="text"]').first();
       const searchExists = await searchInput.isVisible({ timeout: 5000 }).catch(() => false);
 
       if (!searchExists) {
@@ -88,7 +88,7 @@ test.describe('CF Users List', () => {
       await cfPage.navigateTo();
       await cfPage.goToUsersTab();
 
-      const listComponent = page.locator('app-list');
+      const listComponent = page.locator('app-signal-list');
       const table = listComponent.locator('app-table, table');
       const rows = table.locator('tbody tr');
 
@@ -134,7 +134,7 @@ test.describe('CF Users List', () => {
       await cfPage.navigateTo();
       await cfPage.goToUsersTab();
 
-      const listComponent = page.locator('app-list');
+      const listComponent = page.locator('app-signal-list');
       const table = listComponent.locator('app-table, table');
       const rows = table.locator('tbody tr');
 

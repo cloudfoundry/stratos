@@ -24,12 +24,15 @@ test.describe('CF Space Delete', () => {
     await cfApi.deleteSpace(space.guid);
 
     // Verify deletion
-    try {
-      await cfApi.getSpace(space.guid);
-      expect(true).toBe(false);
-    } catch (error) {
-      expect(error).toBeTruthy();
-    }
+    // CF deletes as a job: wait for the 404.
+    await expect.poll(async () => {
+      try {
+        await cfApi.getSpace(space.guid);
+        return 'present';
+      } catch (error) {
+        return String(error).includes(' failed: 404 ') ? 'gone' : String(error);
+      }
+    }, { timeout: 30000 }).toBe('gone');
   });
 
   test.describe('Delete Space (UI)', () => {
@@ -50,19 +53,22 @@ test.describe('CF Space Delete', () => {
         await orgPage.goToSpacesTab();
 
         // Wait for spaces list to load
-        const listComponent = page.locator('app-list');
+        const listComponent = page.locator('app-signal-list');
         await listComponent.waitFor({ state: 'visible' });
 
         // Delete space using page object method
         await orgPage.deleteSpace(spaceName);
 
         // Verify space is deleted via API
-        try {
-          await cfApi.getSpace(space.guid);
-          expect(true).toBe(false); // Should not find it
-        } catch (error) {
-          expect(error).toBeTruthy(); // Expected - space should not exist
-        }
+        // CF deletes as a job: wait for the 404.
+        await expect.poll(async () => {
+          try {
+            await cfApi.getSpace(space.guid);
+            return 'present';
+          } catch (error) {
+            return String(error).includes(' failed: 404 ') ? 'gone' : String(error);
+          }
+        }, { timeout: 30000 }).toBe('gone');
 
       } catch (error) {
         // If test failed, cleanup the space
@@ -90,18 +96,18 @@ test.describe('CF Space Delete', () => {
         await orgPage.navigateTo();
         await orgPage.goToSpacesTab();
 
-        const listComponent = page.locator('app-list');
+        const listComponent = page.locator('app-signal-list');
         await listComponent.waitFor({ state: 'visible' });
 
-        const card = listComponent.locator('app-card, mat-card').filter({ hasText: spaceName });
+        const card = listComponent.locator('[data-test="card-grid"] > *').filter({ hasText: spaceName });
         await card.waitFor({ state: 'visible' });
 
         // Open action menu
-        const menuButton = card.locator('.meta-card__header__button, button[aria-label="menu"]');
+        const menuButton = card.locator('[data-test="row-actions"]');
         await menuButton.click();
 
         // Click delete
-        const deleteOption = page.locator('button, mat-option').filter({ hasText: 'Delete' });
+        const deleteOption = page.locator('[data-test=\"row-action-Delete\"]');
         await deleteOption.click();
 
         // Verify confirmation dialog appears
@@ -109,7 +115,7 @@ test.describe('CF Space Delete', () => {
         await confirmDialog.waitFor({ state: 'visible' });
 
         // Verify dialog has confirm/delete button
-        const confirmButton = confirmDialog.locator('button').filter({ hasText: /confirm|delete/i });
+        const confirmButton = confirmDialog.locator('[data-test="confirm-dialog-confirm"]');
         await expect(confirmButton).toBeVisible();
 
         // Actually confirm to clean up
@@ -139,7 +145,7 @@ test.describe('CF Space Delete', () => {
       try {
         // Navigate to space summary page directly
         await page.goto(`/cloud-foundry/${cfGuid}/organizations/${orgGuid}/spaces/${space.guid}/summary`);
-        await page.waitForLoadState('networkidle');
+        await page.locator('app-cloud-foundry-space-summary').waitFor({ timeout: 30000 });
 
         // Look for delete button on space page
         const deleteButton = page.locator('button').filter({ hasText: /delete.*space/i }).first();
