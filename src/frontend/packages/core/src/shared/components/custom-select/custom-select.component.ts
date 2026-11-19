@@ -131,6 +131,10 @@ export class CustomSelectComponent implements ControlValueAccessor {
     return combobox ? [combobox] : [];
   });
 
+  // Value of a multiple select's Clear item: choosing it removes every
+  // choice. No caller's option can equal it.
+  readonly clearAll = {};
+
   readonly expanded = signal(false);
   /**
    * VoiceOver in Safari says nothing about the list opening when
@@ -294,7 +298,7 @@ export class CustomSelectComponent implements ControlValueAccessor {
   /** The listbox changed its value: a click, Enter or Space on an option. */
   onListboxValueChange(values: any[]) {
     if (this.multiple()) {
-      this.commit(values);
+      this.commit(values.includes(this.clearAll) ? [] : values);
       return;
     }
     // Enter or a click on the chosen option toggles it off in the listbox;

@@ -881,6 +881,8 @@ describe('CustomSelectComponent with multiple', () => {
       key(trigger, k);
       await fixture.whenStable();
     };
+    // The list opens on Clear; start on the first name.
+    await press('ArrowDown');
     const shown = () => trigger.querySelector('.select-trigger-value, .select-trigger-placeholder')?.textContent?.trim();
     return { fixture, trigger, press, shown };
   }
@@ -889,12 +891,11 @@ describe('CustomSelectComponent with multiple', () => {
     const { fixture, trigger } = await open();
     expect(trigger.tagName).not.toBe('INPUT');
     expect(fixture.nativeElement.querySelector('[role="listbox"]').getAttribute('aria-multiselectable')).toBe('true');
-    expect(optionTexts(fixture).length).toBe(7);
+    expect(optionTexts(fixture)).toEqual(['Clear', 'alpha', 'bravo', 'charlie', 'delta', 'echo', 'foxtrot', 'golf']);
   });
 
   it('toggles the active option with Enter and Space and keeps the list open', async () => {
     const { fixture, trigger, press } = await open();
-    // The list opens on the first option.
     expect(activeText(fixture)).toBe('alpha');
     await press('Enter');
     expect(fixture.componentInstance.control.value).toEqual(['alpha']);
@@ -993,4 +994,34 @@ describe('CustomSelectComponent with multiple', () => {
       .map((o: Element) => o.textContent?.trim());
     expect(selected).toEqual(['alpha']);
   });
+
+  // Listbox children must be options, and focus stays on the combobox, so
+  // Clear is an option at the top of the list, never itself chosen.
+  it('offers a Clear item first, unavailable while nothing is chosen', async () => {
+    const { fixture } = await open();
+    const first = fixture.nativeElement.querySelector('[role="option"]') as HTMLElement;
+    expect(first.textContent?.trim()).toBe('Clear');
+    expect(first.getAttribute('aria-disabled')).toBe('true');
+    expect(first.getAttribute('aria-selected')).toBe('false');
+  });
+
+  it('removes every choice with the Clear item and keeps the list open', async () => {
+    const { fixture, trigger, press, shown } = await open();
+    await press('Home');
+    await press('ArrowDown');
+    expect(activeText(fixture)).toBe('alpha');
+    await press('Enter');
+    await press('ArrowDown');
+    await press('Enter');
+    expect(fixture.componentInstance.control.value).toEqual(['alpha', 'bravo']);
+
+    await press('Home');
+    expect(activeText(fixture)).toBe('Clear');
+    await press('Enter');
+    expect(fixture.componentInstance.control.value).toEqual([]);
+    expect(shown()).toBe('');
+    expect(trigger.getAttribute('aria-expanded')).toBe('true');
+    expect(fixture.nativeElement.querySelectorAll('[role="option"][aria-selected="true"]').length).toBe(0);
+  });
 });
+
