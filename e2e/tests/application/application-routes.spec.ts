@@ -430,29 +430,29 @@ test.describe('Application Routes', () => {
         host: unmappedHost
       });
       expect(route.guid).toBeTruthy();
+      try {
+        // Navigate to routes tab
+        const appSummary = new ApplicationPageSummary(page, testApp.cfGuid, testApp.app.guid);
+        await appSummary.navigateTo();
+        await appSummary.goToRoutesTab();
+        await page.waitForTimeout(1000);
 
-      // Navigate to routes tab
-      const appSummary = new ApplicationPageSummary(page, testApp.cfGuid, testApp.app.guid);
-      await appSummary.navigateTo();
-      await appSummary.goToRoutesTab();
-      await page.waitForTimeout(1000);
+        // Open map route dialog
+        const routesTab = new ApplicationPageRoutesTab(page, testApp.cfGuid, testApp.app.guid);
+        await routesTab.clickMapRoute();
 
-      // Open map route dialog
-      const routesTab = new ApplicationPageRoutesTab(page, testApp.cfGuid, testApp.app.guid);
-      await routesTab.clickMapRoute();
+        const dialog = new RouteMapDialogPage(page);
+        await dialog.waitForDialog();
 
-      const dialog = new RouteMapDialogPage(page);
-      await dialog.waitForDialog();
+        // Verify dialog shows routes
+        const routeList = dialog.getRouteList();
+        await expect(routeList).toBeVisible({ timeout: 10000 });
 
-      // Verify dialog shows routes
-      const routeList = dialog.getRouteList();
-      await expect(routeList).toBeVisible({ timeout: 10000 });
-
-      // Close dialog
-      await dialog.clickCancel();
-
-      // Cleanup
-      await cfApi.deleteRoute(route.guid);
+        // Close dialog
+        await dialog.clickCancel();
+      } finally {
+        await cfApi.deleteRoute(route.guid);
+      }
     });
 
     test('should filter routes by domain', async ({ withTestApp }) => {
@@ -471,35 +471,35 @@ test.describe('Application Routes', () => {
         host: unmappedHost
       });
       expect(route.guid).toBeTruthy();
+      try {
+        // Navigate to routes tab
+        const appSummary = new ApplicationPageSummary(page, testApp.cfGuid, testApp.app.guid);
+        await appSummary.navigateTo();
+        await appSummary.goToRoutesTab();
+        await page.waitForTimeout(1000);
 
-      // Navigate to routes tab
-      const appSummary = new ApplicationPageSummary(page, testApp.cfGuid, testApp.app.guid);
-      await appSummary.navigateTo();
-      await appSummary.goToRoutesTab();
-      await page.waitForTimeout(1000);
+        // Open map route dialog
+        const routesTab = new ApplicationPageRoutesTab(page, testApp.cfGuid, testApp.app.guid);
+        await routesTab.clickMapRoute();
 
-      // Open map route dialog
-      const routesTab = new ApplicationPageRoutesTab(page, testApp.cfGuid, testApp.app.guid);
-      await routesTab.clickMapRoute();
+        const dialog = new RouteMapDialogPage(page);
+        await dialog.waitForDialog();
 
-      const dialog = new RouteMapDialogPage(page);
-      await dialog.waitForDialog();
+        // Filter by domain
+        await dialog.filterByDomain(domain.name);
 
-      // Filter by domain
-      await dialog.filterByDomain(domain.name);
+        // Wait for filter to apply
+        await page.waitForTimeout(1000);
 
-      // Wait for filter to apply
-      await page.waitForTimeout(1000);
+        // Routes should still be visible (filtered to this domain)
+        const routeList = dialog.getRouteList();
+        await expect(routeList).toBeVisible();
 
-      // Routes should still be visible (filtered to this domain)
-      const routeList = dialog.getRouteList();
-      await expect(routeList).toBeVisible();
-
-      // Close dialog
-      await dialog.clickCancel();
-
-      // Cleanup
-      await cfApi.deleteRoute(route.guid);
+        // Close dialog
+        await dialog.clickCancel();
+      } finally {
+        await cfApi.deleteRoute(route.guid);
+      }
     });
 
     test('should map selected route', async ({ withTestApp }) => {
@@ -517,46 +517,48 @@ test.describe('Application Routes', () => {
         host: unmappedHost
       });
       expect(route.guid).toBeTruthy();
+      try {
+        // Navigate to routes tab
+        const appSummary = new ApplicationPageSummary(page, testApp.cfGuid, testApp.app.guid);
+        await appSummary.navigateTo();
+        await appSummary.goToRoutesTab();
+        await page.waitForTimeout(1000);
 
-      // Navigate to routes tab
-      const appSummary = new ApplicationPageSummary(page, testApp.cfGuid, testApp.app.guid);
-      await appSummary.navigateTo();
-      await appSummary.goToRoutesTab();
-      await page.waitForTimeout(1000);
+        // Open map route dialog
+        const routesTab = new ApplicationPageRoutesTab(page, testApp.cfGuid, testApp.app.guid);
+        await routesTab.clickMapRoute();
 
-      // Open map route dialog
-      const routesTab = new ApplicationPageRoutesTab(page, testApp.cfGuid, testApp.app.guid);
-      await routesTab.clickMapRoute();
+        const dialog = new RouteMapDialogPage(page);
+        await dialog.waitForDialog();
 
-      const dialog = new RouteMapDialogPage(page);
-      await dialog.waitForDialog();
+        // Wait for routes to load
+        await page.waitForTimeout(1500);
 
-      // Wait for routes to load
-      await page.waitForTimeout(1500);
+        // Select the route
+        await dialog.selectRoute(unmappedHost);
 
-      // Select the route
-      await dialog.selectRoute(unmappedHost);
+        // Map the route. isMapEnabled() waits out the picker's transient
+        // disabled frames, so it must resolve true — no silent skip.
+        expect(await dialog.isMapEnabled()).toBeTruthy();
+        await dialog.clickMap();
 
-      // Map the route. isMapEnabled() waits out the picker's transient
-      // disabled frames, so it must resolve true — no silent skip.
-      expect(await dialog.isMapEnabled()).toBeTruthy();
-      await dialog.clickMap();
+        // Wait for the stepper to close (map + nav back to the routes tab).
+        await page.locator('app-add-route-stepper').waitFor({ state: 'hidden', timeout: 60000 }).catch(() => {});
 
-      // Wait for the stepper to close (map + nav back to the routes tab).
-      await page.locator('app-add-route-stepper').waitFor({ state: 'hidden', timeout: 60000 }).catch(() => {});
+        // Teeth: prove the map actually happened at the CF level, not just that
+        // the stepper closed. The route's destinations must now include this app.
+        // Poll — the CC destination write is async and can land after the stepper
+        // closes and navigates.
+        await expect.poll(
+          async () => (await cfApi.getRouteDestinations(route.guid)).some(d => d.app?.guid === testApp.app.guid),
+          { timeout: 30000 }
+        ).toBeTruthy();
 
-      // Teeth: prove the map actually happened at the CF level, not just that
-      // the stepper closed. The route's destinations must now include this app.
-      // Poll — the CC destination write is async and can land after the stepper
-      // closes and navigates.
-      await expect.poll(
-        async () => (await cfApi.getRouteDestinations(route.guid)).some(d => d.app?.guid === testApp.app.guid),
-        { timeout: 30000 }
-      ).toBeTruthy();
-
-      // Cleanup
-      await cfApi.unmapRoute(route.guid, testApp.app.guid).catch(() => {});
-      await cfApi.deleteRoute(route.guid);
+        // Cleanup
+        await cfApi.unmapRoute(route.guid, testApp.app.guid).catch(() => {});
+      } finally {
+        await cfApi.deleteRoute(route.guid);
+      }
     });
 
     test('should update route list', async ({ withTestApp }) => {
@@ -574,39 +576,41 @@ test.describe('Application Routes', () => {
         host: unmappedHost
       });
       expect(route.guid).toBeTruthy();
+      try {
+        // Navigate to routes tab
+        const appSummary = new ApplicationPageSummary(page, testApp.cfGuid, testApp.app.guid);
+        await appSummary.navigateTo();
+        await appSummary.goToRoutesTab();
+        await page.waitForTimeout(1000);
 
-      // Navigate to routes tab
-      const appSummary = new ApplicationPageSummary(page, testApp.cfGuid, testApp.app.guid);
-      await appSummary.navigateTo();
-      await appSummary.goToRoutesTab();
-      await page.waitForTimeout(1000);
+        // Open map route dialog
+        const routesTab = new ApplicationPageRoutesTab(page, testApp.cfGuid, testApp.app.guid);
+        await routesTab.clickMapRoute();
 
-      // Open map route dialog
-      const routesTab = new ApplicationPageRoutesTab(page, testApp.cfGuid, testApp.app.guid);
-      await routesTab.clickMapRoute();
+        const dialog = new RouteMapDialogPage(page);
+        await dialog.waitForDialog();
+        await page.waitForTimeout(1500);
 
-      const dialog = new RouteMapDialogPage(page);
-      await dialog.waitForDialog();
-      await page.waitForTimeout(1500);
+        // Select and map the route
+        await dialog.selectRoute(unmappedHost);
+        const isMapEnabled = await dialog.isMapEnabled();
+        if (isMapEnabled) {
+          await dialog.clickMap();
+          // Mapping navigates back to the routes tab when it completes
+          await page.locator('app-add-route-stepper').waitFor({ state: 'hidden', timeout: 60000 }).catch(() => {});
+        } else {
+          await dialog.clickCancel();
+        }
 
-      // Select and map the route
-      await dialog.selectRoute(unmappedHost);
-      const isMapEnabled = await dialog.isMapEnabled();
-      if (isMapEnabled) {
-        await dialog.clickMap();
-        // Mapping navigates back to the routes tab when it completes
-        await page.locator('app-add-route-stepper').waitFor({ state: 'hidden', timeout: 60000 }).catch(() => {});
-      } else {
-        await dialog.clickCancel();
+        // Verify route appears in the routes list
+        const routeRow = page.locator('mat-row, tr').filter({ hasText: unmappedHost });
+        await expect(routeRow).toBeVisible({ timeout: 10000 });
+
+        // Cleanup
+        await cfApi.unmapRoute(route.guid, testApp.app.guid).catch(() => {});
+      } finally {
+        await cfApi.deleteRoute(route.guid);
       }
-
-      // Verify route appears in the routes list
-      const routeRow = page.locator('mat-row, tr').filter({ hasText: unmappedHost });
-      await expect(routeRow).toBeVisible({ timeout: 10000 });
-
-      // Cleanup
-      await cfApi.unmapRoute(route.guid, testApp.app.guid).catch(() => {});
-      await cfApi.deleteRoute(route.guid);
     });
   });
 
