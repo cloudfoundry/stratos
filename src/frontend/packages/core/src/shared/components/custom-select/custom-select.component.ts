@@ -210,6 +210,14 @@ export class CustomSelectComponent implements ControlValueAccessor {
       this.options();
       untracked(() => this.checkAutoSelect());
     });
+    // A disabled combobox takes no keys, Escape included, so a list left
+    // open when the select turns disabled (Create App's Organization while
+    // its orgs load) could not be closed.
+    effect(() => {
+      if (this.disabled() && untracked(() => this.expanded())) {
+        untracked(() => this.onExpandedChange(false));
+      }
+    });
     // The trigger changes element when the list crosses the filter
     // length (options often arrive after the select renders). Carry focus
     // over so it does not fall to <body>.
