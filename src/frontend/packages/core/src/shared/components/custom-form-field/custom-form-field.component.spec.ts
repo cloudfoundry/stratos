@@ -231,3 +231,40 @@ describe('CustomFormFieldComponent — bound placeholder', () => {
     expect(label()).toBe('Username');
   });
 });
+
+// WCAG 4.1.2 / 1.3.1: the floating label names the input. It was
+// aria-hidden, and Chromium then gives the input no name at all: a hidden
+// <label for> also stops the placeholder from naming it (Add Org, Add
+// Space, Edit Org and Space, Invite). The required star is hidden instead;
+// the input says it is required with aria-required.
+@Component({
+  standalone: true,
+  imports: [CustomFormFieldComponent, AppInputDirective],
+  template: `<app-form-field><input appInput placeholder="Organization Name" required></app-form-field>`,
+})
+class RequiredFieldHostComponent {}
+
+describe('CustomFormFieldComponent — label names the input', () => {
+  it('is a label for the input that assistive tech reads, without the star', async () => {
+    TestBed.configureTestingModule({
+      imports: [RequiredFieldHostComponent],
+      providers: [provideZonelessChangeDetection()],
+    });
+    const fixture = TestBed.createComponent(RequiredFieldHostComponent);
+    await fixture.whenStable();
+    const el = fixture.nativeElement as HTMLElement;
+    const input = el.querySelector('input') as HTMLInputElement;
+    const label = el.querySelector('label') as HTMLLabelElement;
+
+    expect(label.htmlFor).toBe(input.id);
+    expect(label.closest('[aria-hidden="true"]')).toBeNull();
+    expect(input.getAttribute('aria-required')).toBe('true');
+    // The text a screen reader takes from the label: hidden parts left out.
+    const read = label.cloneNode(true) as HTMLElement;
+    read.querySelectorAll('[aria-hidden="true"]').forEach(n => n.remove());
+    expect(read.querySelector('[aria-label]')).toBeNull();
+    expect(read.textContent?.trim()).toBe('Organization Name');
+    // The star is still drawn.
+    expect(label.textContent).toContain('*');
+  });
+});
