@@ -11,8 +11,8 @@
 
 FROM node:24-bookworm
 
-# modrot and osv-scanner require go >= 1.26.4; jetstream's go.mod needs 1.27.1
-ARG GO_VERSION=1.27.1
+# modrot and osv-scanner require go >= 1.26.4; jetstream's go.mod needs 1.27.3
+ARG GO_VERSION=1.27.4
 ARG BUN_VERSION=1.4.5
 ARG TARGETARCH=amd64
 

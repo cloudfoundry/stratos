@@ -113,7 +113,7 @@ user would notice, add one.
 |------|----------------|
 | Node | `^24` or `^26` |
 | bun  | `>= 1.4.5`     |
-| Go   | `1.27.1`       |
+| Go   | `1.27.4`       |
 
 `bun install` at the repository root sets up the frontend and the build
 tooling. `make help` lists every available target.
