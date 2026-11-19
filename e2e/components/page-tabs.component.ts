@@ -8,12 +8,17 @@ import { Page, Locator } from '@playwright/test';
  * vs "User Services" substring collision. The visible-label filter stays on
  * top of the hook so a tab that loses its rendered text goes red instead of
  * matching invisibly through the attribute.
+ *
+ * When the side nav has a header, the label span starts with a screen-reader
+ * prefix (`<span class="sr-only">Application </span>Variables`), so its text
+ * is "Application Variables". The filter therefore requires the label at the
+ * end of the span's text, after the start or a space.
  */
 export function pageTab(page: Page, label: string): Locator {
-  const exact = new RegExp(`^${label.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')}$`);
+  const visibleLabel = new RegExp(`(?:^|\\s)${label.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')}$`);
   return page
     .locator(`app-page-side-nav [data-test="page-tab-${label}"]`)
-    .filter({ has: page.locator('span', { hasText: exact }) });
+    .filter({ has: page.locator('span', { hasText: visibleLabel }) });
 }
 
 /**
@@ -43,9 +48,15 @@ export class PageTabsComponent {
   }
 
   async getActiveTab(): Promise<string> {
-    // Direct child span holds the label; the icon lives in app-custom-icon
+    // Direct child span holds the label; the icon lives in app-custom-icon.
+    // Leave out the screen-reader prefix the span starts with under a header.
     const activeLabel = this.tabs.locator('.page-side-nav__item--active > span');
-    return (await activeLabel.textContent())?.trim() || '';
+    return activeLabel.evaluate(el =>
+      Array.from(el.childNodes)
+        .filter(n => !(n instanceof Element && n.classList.contains('sr-only')))
+        .map(n => n.textContent ?? '')
+        .join('')
+        .trim());
   }
 
   async isTabActive(label: string): Promise<boolean> {
