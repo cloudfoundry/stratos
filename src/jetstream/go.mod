@@ -22,7 +22,7 @@ require (
 	github.com/cloudfoundry/stratos/src/jetstream/plugins/monocular v0.0.0-00010101000000-000000000000
 	github.com/coder/websocket v1.8.15
 	github.com/domodwyer/mailyak v3.1.1+incompatible
-	github.com/fivetwenty-io/capi/v3 v3.229.2
+	github.com/fivetwenty-io/capi/v3 v3.236.2
 	github.com/go-sql-driver/mysql v1.10.1
 	github.com/google/uuid v1.6.0
 	github.com/gorilla/securecookie v1.1.2
@@ -243,9 +243,3 @@ require (
 	sigs.k8s.io/structured-merge-diff/v6 v6.4.2 // indirect
 	sigs.k8s.io/yaml v1.6.0 // indirect
 )
-
-// User-provided service instance deletes answer 204 with no Location;
-// fivetwenty-io/capi#16 accepts that. A CF 5xx that outlasts capi's
-// retries keeps its sentinel, and every mapped error carries its HTTP
-// status (capi.StatusError). Drop this once a release carries both.
-replace github.com/fivetwenty-io/capi/v3 => github.com/norman-abramovitz/fw-capi/v3 v3.216.7-0.20261022071155-a4e9d752d752
