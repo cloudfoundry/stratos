@@ -110,6 +110,15 @@
           (click)="onOptionCommit()"
           (keydown.enter)="onOptionCommit()"
           (keydown.space)="onOptionCommit()">
+          <!-- A listbox holds only options, and focus stays on the
+               combobox, so Clear is an option. It is never chosen itself. -->
+          @if (multiple()) {
+            <div ngOption
+              [value]="clearAll"
+              label="Clear"
+              [disabled]="selectedValues().length === 0"
+              class="custom-option-content py-2 px-3 cursor-pointer whitespace-nowrap text-content-text border-b border-[var(--content-border,#e5e7eb)] hover:bg-content-secondary data-[active=true]:outline-2 data-[active=true]:-outline-offset-2 data-[active=true]:outline-primary aria-disabled:opacity-50 aria-disabled:cursor-not-allowed aria-disabled:hover:bg-transparent">Clear</div>
+          }
           @for (opt of visibleOptions(); track opt) {
             <!-- State styling keys off the attributes the option directive
                  writes (aria-selected, aria-disabled, data-active). -->
