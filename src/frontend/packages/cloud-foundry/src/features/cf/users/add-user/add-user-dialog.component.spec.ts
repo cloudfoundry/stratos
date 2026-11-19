@@ -207,6 +207,9 @@ describe('AddUserDialogComponent', () => {
       await fixture.whenStable();
       expect(trigger.textContent).toContain('uaa');
 
+      // The options render when the list opens.
+      trigger.click();
+      await fixture.whenStable();
       const options = Array.from(select.querySelectorAll('.custom-option-content')) as HTMLElement[];
       expect(options.map(o => o.textContent?.trim())).toEqual(['uaa', 'ldap']);
       options[1].click();
@@ -217,6 +220,9 @@ describe('AddUserDialogComponent', () => {
     it('submit sends the origin chosen in the select', async () => {
       const spy = vi.spyOn(addModule, 'addUsers').mockResolvedValue({ ok: true, total: 1, failed: 0 });
       const { cmp, fixture } = make(DATA, { idpsOrigins: ['uaa', 'ldap'] });
+      await fixture.whenStable();
+      // The options render when the list opens.
+      (fixture.nativeElement as HTMLElement).querySelector<HTMLElement>('app-select#origin-input [role="combobox"]')!.click();
       await fixture.whenStable();
       const options = Array.from(
         (fixture.nativeElement as HTMLElement).querySelectorAll('app-select#origin-input .custom-option-content'),

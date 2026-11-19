@@ -1,6 +1,8 @@
-import { ChangeDetectionStrategy, Component, forwardRef, ElementRef, AfterContentInit, AfterViewInit, HostListener, booleanAttribute, computed, contentChildren, effect, inject, input, model, output, signal, untracked, viewChild } from '@angular/core';
-import { NgClass } from '@angular/common';
+import { ChangeDetectionStrategy, Component, forwardRef, ElementRef, afterRenderEffect, booleanAttribute, computed, contentChildren, effect, inject, input, linkedSignal, model, output, signal, untracked, viewChild } from '@angular/core';
+import { NgClass, NgTemplateOutlet } from '@angular/common';
 import { ControlValueAccessor, NG_VALUE_ACCESSOR } from '@angular/forms';
+import { Combobox, ComboboxPopup, ComboboxWidget } from '@angular/aria/combobox';
+import { Listbox, Option } from '@angular/aria/listbox';
 import { AppBusyComponent } from '../busy-indicator/busy-indicator.component';
 
 
@@ -11,65 +13,64 @@ export interface MatSelectChange {
   value: any;
 }
 
+/**
+ * One choice in an `app-select`. It holds data only: `app-select` renders
+ * the real option (role, id, aria-selected, keys) inside its own listbox,
+ * because the listbox directive cannot be reached through `<ng-content>`.
+ * This view exists to read the projected text, which becomes the option's
+ * label when no `label` is given.
+ */
 @Component({
   selector: 'app-option',
-  template: `<div #optionContent
-    class="custom-option-content py-2 px-3 cursor-pointer whitespace-nowrap"
-    [class.selected]="selected()"
-    [class.disabled]="disabled()"
-    [ngClass]="{
-      'bg-info-50 dark:bg-info-900/40 text-primary': selected(),
-      'text-content-text hover:bg-content-secondary': !selected(),
-      'opacity-50 cursor-not-allowed hover:bg-transparent': disabled()
-    }"
-    ><ng-content></ng-content></div>`,
-  styleUrls: ['./custom-select.component.css'],
+  template: `<span #optionContent><ng-content></ng-content></span>`,
   standalone: true,
-  imports: [NgClass],
   changeDetection: ChangeDetectionStrategy.OnPush,
-  // The host is the listbox's child, so it carries the option semantics
-  host: {
-    role: 'option',
-    '[attr.aria-selected]': 'selected()',
-    '[attr.aria-disabled]': 'disabled() || null',
-  },
 })
-export class CustomOptionComponent implements AfterViewInit {
+export class CustomOptionComponent {
   readonly value = input<any>();
   readonly label = input<string>();
-  readonly disabled = input(false);
-  // A model: the select that owns the option sets it from code.
-  readonly selected = model(false);
+  readonly disabled = input(false, { transform: booleanAttribute });
 
-  readonly optionContent = viewChild<ElementRef>('optionContent');
+  private readonly optionContent = viewChild.required<ElementRef<HTMLElement>>('optionContent');
 
-  // The text projected into the option, read from the DOM once it renders.
-  // A signal, so a select that shows it updates when it arrives.
-  private readonly _displayText = signal<string | undefined>(undefined);
+  // The projected text, read once it renders. A signal, so a select that
+  // shows it updates when it arrives.
+  private readonly projectedText = signal('');
 
-  ngAfterViewInit() {
-    const optionContent = this.optionContent();
-    if (!this.label() && optionContent) {
-      this._displayText.set(optionContent.nativeElement.textContent?.trim());
-    }
-  }
-
-  get displayText(): string {
-    // Only fall back to `value` when it is itself a string: options may
-    // carry object values ([value]="domain"), and returning the object
-    // here crashed applyOptionFilter's .toLowerCase() the moment such an
-    // option had empty projected text.
+  // Only fall back to `value` when it is itself a string: options may
+  // carry object values ([value]="domain"), and the text must always be a
+  // string (the filter lower-cases it).
+  readonly displayText = computed(() => {
     const value = this.value();
-    return this.label() || this._displayText() || (typeof value === 'string' ? value : '');
+    return this.label() || this.projectedText() || (typeof value === 'string' ? value : '');
+  });
+
+  constructor() {
+    afterRenderEffect(() => {
+      this.projectedText.set(this.optionContent().nativeElement.textContent?.trim() ?? '');
+    });
   }
 }
 
+/**
+ * A select built on `@angular/aria` (WAI-ARIA APG combobox). Focus stays
+ * on the combobox; the active option is announced through
+ * aria-activedescendant.
+ *
+ * - Up to five options: a select-only combobox. Down, Enter or Space
+ *   open the list; Up, Down, Home, End, Page Up and Page Down move;
+ *   Enter or Space select; printable characters jump to a match.
+ * - More than five (single select): an editable combobox. Typing filters
+ *   the list; Down opens it; Enter selects the active option.
+ *
+ * Escape closes without a change; Tab closes and moves on.
+ */
 @Component({
   selector: 'app-select',
   templateUrl: './custom-select.component.html',
   styleUrls: ['./custom-select.component.css'],
   standalone: true,
-  imports: [NgClass, AppBusyComponent],
+  imports: [NgClass, NgTemplateOutlet, AppBusyComponent, Combobox, ComboboxPopup, ComboboxWidget, Listbox, Option],
   changeDetection: ChangeDetectionStrategy.OnPush,
   providers: [
     {
@@ -77,9 +78,14 @@ export class CustomOptionComponent implements AfterViewInit {
       useExisting: forwardRef(() => CustomSelectComponent),
       multi: true
     }
-  ]
+  ],
+  host: {
+    // Lets callers ([appFocus]) focus the host; focus goes on to the trigger.
+    tabindex: '-1',
+    '(focus)': 'focusTrigger()',
+  },
 })
-export class CustomSelectComponent implements ControlValueAccessor, AfterContentInit {
+export class CustomSelectComponent implements ControlValueAccessor {
   private elementRef = inject(ElementRef);
 
   // A model: a parent binds it and the form disables the select through it.
@@ -111,6 +117,82 @@ export class CustomSelectComponent implements ControlValueAccessor, AfterContent
     return this.multiple() ? selected : selected[0];
   }
 
+  readonly selectionChange = output<MatSelectChange>();
+  readonly valueChange = output<any>();
+
+  readonly options = contentChildren(CustomOptionComponent);
+  readonly selectTrigger = viewChild<ElementRef<HTMLElement>>('selectTrigger');
+  private readonly listbox = viewChild(Listbox);
+  private readonly comboboxRef = viewChild(Combobox);
+  // The live combobox as a list of one, so the popup is made again for a
+  // new one.
+  readonly combobox = computed(() => {
+    const combobox = this.comboboxRef();
+    return combobox ? [combobox] : [];
+  });
+
+  readonly expanded = signal(false);
+  /**
+   * VoiceOver in Safari says nothing about the list opening when
+   * aria-activedescendant is set in the same update, so the active option
+   * is exposed 300 ms after it opens. Exposing it after one render was not
+   * enough. NOTE: a measured delay, not an event; re-check it with
+   * VoiceOver when Safari or @angular/aria change.
+   */
+  readonly activeShown = signal(false);
+  readonly selectedValues = signal<any[]>([]);
+
+  // More than this many options gives a single select a filter.
+  private readonly filterThreshold = 5;
+  readonly filterable = computed(() => !this.multiple() && this.options().length > this.filterThreshold);
+
+  // Follows the selection and the option list, so text that an option only
+  // learns after it renders reaches the trigger. When the matching option
+  // isn't there yet (async @for not rendered), it is empty so the
+  // placeholder shows instead of a raw value/GUID.
+  readonly displayValue = computed(() => {
+    const selected = this.selectedValues();
+    if (selected.length === 0) {
+      return '';
+    }
+    if (this.multiple() && selected.length > 1) {
+      return `${selected.length} selected`;
+    }
+    return this.options().find(opt => opt.value() === selected[0])?.displayText() ?? '';
+  });
+
+  // The text in the filter field. It shows the chosen option until the
+  // user types; a pick, or closing the list, puts that text back.
+  readonly query = linkedSignal(() => this.displayValue());
+  // True once the user has typed since the list opened.
+  readonly typed = signal(false);
+
+  readonly visibleOptions = computed(() => {
+    const options = this.options();
+    const term = this.typed() ? this.query().trim().toLowerCase() : '';
+    return term ? options.filter(opt => opt.displayText().toLowerCase().includes(term)) : options;
+  });
+
+  /**
+   * Longest option text by character count. Rendered as an invisible
+   * sizer in the trigger so the trigger width stays stable once the
+   * options arrive — picking a shorter value won't shrink the control.
+   */
+  readonly longestOptionText = computed(() =>
+    this.options().reduce((longest, opt) => {
+      const text = opt.displayText();
+      return text.length > longest.length ? text : longest;
+    }, ''));
+
+  readonly accessibleName = computed(() => this.ariaLabel() || this.placeholder() || null);
+
+  readonly dropdownTop = signal('0px');
+  readonly dropdownLeft = signal('0px');
+  readonly dropdownWidth = signal('0px');
+
+  private _onChange = (_value: any) => {};
+  private _onTouched = () => {};
+
   constructor() {
     // A bound [value] is written through like a form value. With nothing
     // bound the input is undefined on the first run, which must not clear a
@@ -124,85 +206,31 @@ export class CustomSelectComponent implements ControlValueAccessor, AfterContent
         untracked(() => this.writeValue(value));
       }
     });
-    // Sync option visual state when the options change (dynamic @for lists).
-    // ngAfterContentInit handles the list the select starts with.
     effect(() => {
-      const options = this.options();
-      untracked(() => {
-        if (options === this.syncedOptions) {
-          return;
-        }
-        this.syncedOptions = options;
-        this.checkAutoSelect();
-        this.updateOptions();
-      });
+      this.options();
+      untracked(() => this.checkAutoSelect());
     });
-  }
-
-  readonly selectionChange = output<MatSelectChange>();
-  readonly valueChange = output<any>();
-
-  readonly options = contentChildren(CustomOptionComponent);
-  // The option list last synced, so the effect in the constructor acts only
-  // on a changed list.
-  private syncedOptions?: readonly CustomOptionComponent[];
-  readonly selectTrigger = viewChild.required<ElementRef>('selectTrigger');
-  readonly selectOptions = viewChild.required<ElementRef>('selectOptions');
-
-  readonly isOpen = signal(false);
-  readonly selectedValues = signal<any[]>([]);
-  readonly searchTerm = signal('');
-
-  // Follows the selection and the option list, so text that an option only
-  // learns after it renders reaches the trigger without a refresh call.
-  // When the matching option isn't found yet (async @for not rendered), it
-  // is empty so the placeholder displays instead of a raw value/GUID.
-  readonly displayValue = computed(() => {
-    const selected = this.selectedValues();
-    if (selected.length === 0) {
-      return '';
-    }
-    if (this.multiple() && selected.length > 1) {
-      return `${selected.length} selected`;
-    }
-    // Single selection, or multi with exactly 1 selected: show the item name.
-    const selectedOption = this.options().find(opt => opt.value() === selected[0]);
-    return selectedOption ? selectedOption.displayText : '';
-  });
-  // Show the type-to-filter input once the list crosses this length —
-  // a 5-option select stays clean without it; a 50-org list desperately
-  // needs it.
-  private readonly searchThreshold = 5;
-
-  /**
-   * Longest projected option text by character count. Rendered as an
-   * invisible sizer in the trigger so the trigger width stays stable
-   * once the option list is populated — picking a shorter value won't
-   * shrink the control. Char-count is a proxy for pixel-width: fine for
-   * proportional fonts when options are similar in style.
-   */
-  get longestOptionText(): string {
-    let longest = '';
-    this.options().forEach(opt => {
-      const t = opt.displayText ?? '';
-      if (t.length > longest.length) longest = t;
+    // The trigger changes element when the list crosses the filter
+    // length (options often arrive after the select renders). Carry focus
+    // over so it does not fall to <body>.
+    let hadFocus = false;
+    effect(() => {
+      this.filterable();
+      const active = document.activeElement;
+      hadFocus = !!active && active !== this.elementRef.nativeElement && this.elementRef.nativeElement.contains(active);
     });
-    return longest;
-  }
-  readonly dropdownTop = signal('0px');
-  readonly dropdownLeft = signal('0px');
-  readonly dropdownWidth = signal('0px');
-
-  // Interaction lock: ignore external writeValue while user is actively selecting in multi-select
-  private _interacting = false;
-
-  private _onChange = (_value: any) => {};
-  private _onTouched = () => {};
-
-  ngAfterContentInit() {
-    this.syncedOptions = this.options();
-    this.checkAutoSelect();
-    this.updateOptions();
+    afterRenderEffect(() => {
+      this.filterable();
+      if (hadFocus && !this.elementRef.nativeElement.contains(document.activeElement)) {
+        this.focusTrigger();
+      }
+      hadFocus = false;
+    });
+    afterRenderEffect(() => {
+      if (this.expanded()) {
+        this.listbox()?.scrollActiveItemIntoView({ block: 'nearest' });
+      }
+    });
   }
 
   private checkAutoSelect() {
@@ -211,145 +239,99 @@ export class CustomSelectComponent implements ControlValueAccessor, AfterContent
     if (this.autoSelectSingleOption() &&
         !this.multiple() &&
         this.selectedValues().length === 0 &&
-        options.length === 1) {
-      const singleOption = options[0];
-      if (singleOption && !singleOption.disabled()) {
-        // Auto-select the single option
-        this.selectOption(singleOption);
-      }
+        options.length === 1 &&
+        !options[0].disabled()) {
+      this.commit([options[0].value()]);
     }
   }
 
-  toggle() {
-    if (this.disabled()) return;
+  focusTrigger() {
+    this.selectTrigger()?.nativeElement.focus();
+  }
 
-    if (!this.isOpen()) {
-      // Calculate position BEFORE opening dropdown to prevent flash at wrong position
-      const rect = this.selectTrigger().nativeElement.getBoundingClientRect();
-      this.dropdownTop.set(`${rect.bottom + 4}px`);  // Add 4px gap for better spacing
-      this.dropdownLeft.set(`${rect.left}px`);
-      // Use trigger width as minimum, but allow dropdown to expand for content
-      this.dropdownWidth.set(`${rect.width}px`);
+  /** The combobox opened or closed the list (keys, a click, focus out). */
+  onExpandedChange(open: boolean) {
+    if (open) {
+      // Position before the list shows, so it does not flash at the wrong place.
+      const trigger = this.selectTrigger()?.nativeElement;
+      const box = (trigger?.closest('.select-trigger') ?? trigger)?.getBoundingClientRect();
+      if (box) {
+        this.dropdownTop.set(`${box.bottom + 4}px`);
+        this.dropdownLeft.set(`${box.left}px`);
+        this.dropdownWidth.set(`${box.width}px`);
+      }
+      setTimeout(() => this.activeShown.set(this.expanded()), 300);
+    } else {
+      // Closing ends the filter and puts the chosen option's text back.
+      this.typed.set(false);
+      this.query.set(this.displayValue());
     }
-
-    this.isOpen.update(open => !open);
-    this._interacting = this.isOpen() && this.multiple();
-    if (!this.isOpen()) {
-      // Clear filter on close so the next open shows the full list.
-      this.searchTerm.set('');
-      this.applyOptionFilter();
-    }
+    this.activeShown.set(false);
+    this.expanded.set(open);
     this._onTouched();
   }
 
-  /** True once the option list crosses the threshold worth showing a
-   *  search input for. */
-  get showSearch(): boolean {
-    return this.options().length > this.searchThreshold;
-  }
-
-  onSearchInput(event: Event) {
-    this.searchTerm.set((event.target as HTMLInputElement).value ?? '');
-    this.applyOptionFilter();
-  }
-
-  /** Hide each option whose displayText doesn't include the (case-
-   *  insensitive) search term. Operates directly on the option's wrapper
-   *  element so we don't need to re-render projected content — selection
-   *  / focus / visual state stay intact. */
-  private applyOptionFilter() {
-    const q = this.searchTerm().trim().toLowerCase();
-    this.options().forEach(opt => {
-      const el = opt.optionContent()?.nativeElement as HTMLElement | undefined;
-      if (!el) return;
-      const text = (opt.displayText ?? '').toLowerCase();
-      el.style.display = !q || text.includes(q) ? '' : 'none';
-    });
-  }
-
-  /**
-   * Event delegation handler for option clicks.
-   * Finds the clicked option by matching the DOM element to the
-   * projected options, bypassing subscription timing issues.
-   */
-  onOptionsClick(event: Event) {
-    const clickTarget = event.target as HTMLElement;
-    const target = clickTarget.closest('.custom-option-content');
-    if (!target) return;
-
-    // Find the matching option component by DOM element match
-    const option = this.options().find(opt =>
-      opt.optionContent()?.nativeElement === target
-    );
-
-    if (option) {
-      this.selectOption(option);
+  open() {
+    if (!this.disabled() && !this.expanded()) {
+      this.onExpandedChange(true);
     }
   }
 
-  selectOption(option: CustomOptionComponent) {
-    if (option.disabled()) return;
+  /** The user typed in the filter field. */
+  onQueryChange(text: string) {
+    this.query.set(text);
+    this.typed.set(true);
+  }
 
-    const multiple = this.multiple();
-    if (multiple) {
-      const current = this.selectedValues();
-      const index = current.indexOf(option.value());
-      if (index === -1) {
-        this.selectedValues.set([...current, option.value()]);
-      } else {
-        this.selectedValues.set(current.filter((_, i) => i !== index));
-      }
-    } else {
-      const valueValue = option.value();
-      if (valueValue === null || valueValue === undefined) {
-        this.selectedValues.set([]);
-      } else {
-        this.selectedValues.set([valueValue]);
-      }
-      this.isOpen.set(false);
+  /** The listbox changed its value: a click, Enter or Space on an option. */
+  onListboxValueChange(values: any[]) {
+    if (this.multiple()) {
+      this.commit(values);
+      return;
     }
+    // Enter or a click on the chosen option toggles it off in the listbox;
+    // a single select keeps it. A new array makes the listbox take it back.
+    if (values.length === 0) {
+      this.selectedValues.set([...this.selectedValues()]);
+      return;
+    }
+    // A null/undefined option (e.g. "None") clears the selection.
+    const picked = values[0];
+    this.commit(picked === null || picked === undefined ? [] : [picked]);
+  }
 
-    this.updateOptions();
+  /** A single select closes once a choice is made, even an unchanged one. */
+  onOptionCommit() {
+    if (this.multiple()) return;
+    this.onExpandedChange(false);
+    this.focusTrigger();
+  }
 
-    const selected = this.selectedValues();
-    const value = multiple ? selected : (selected[0] ?? null);
+  private commit(values: any[]) {
+    this.selectedValues.set(values);
+    const value = this.multiple() ? values : (values[0] ?? null);
     this._onChange(value);
-
-    this.selectionChange.emit({
-      source: this,
-      value: value
-    });
-
+    this.selectionChange.emit({ source: this, value });
     this.valueChange.emit(value);
-  }
-
-  private updateOptions() {
-    this.options().forEach(option => {
-      const isSelected = this.selectedValues().includes(option.value());
-      if (option.selected() !== isSelected) {
-        option.selected.set(isSelected);
-      }
-    });
   }
 
   // ControlValueAccessor implementation
   writeValue(value: any): void {
-    // Interaction lock: ignore external writes while user is actively selecting.
-    // Always allow clears (reset button) even during interaction.
-    if (this._interacting && value !== null && value !== undefined &&
+    // Interaction lock: ignore external writes while the user is choosing
+    // in an open multi-select. Always allow clears (reset button).
+    if (this.multiple() && this.expanded() && value !== null && value !== undefined &&
         (!Array.isArray(value) || value.length > 0)) {
       return;
     }
 
     const multiple = this.multiple();
     if (multiple && Array.isArray(value)) {
-      this.selectedValues.set(value || []);
+      this.selectedValues.set(value);
     } else if (!multiple && value !== undefined && value !== null) {
       this.selectedValues.set([value]);
     } else {
       this.selectedValues.set([]);
     }
-    this.updateOptions();
   }
 
   registerOnChange(fn: any): void {
@@ -362,42 +344,5 @@ export class CustomSelectComponent implements ControlValueAccessor, AfterContent
 
   setDisabledState(isDisabled: boolean): void {
     this.disabled.set(isDisabled);
-  }
-
-  // Escape closes the open list and returns focus to the trigger
-  // (aria-haspopup="listbox"). It is handled on the host, where focus is
-  // while the list is in use, and stopped there: dialogs and the side panel
-  // close on any Escape that reaches the document, and one press should only
-  // close the innermost popup. With the list closed, Escape passes through.
-  @HostListener('keydown.escape', ['$event'])
-  onEscape(event: Event) {
-    if (!this.isOpen()) return;
-    event.stopPropagation();
-    this.toggle();
-    this.selectTrigger().nativeElement.focus();
-  }
-
-  /** The filter input keeps its keys to itself (Enter and Space must not
-   *  reach the option list), except Escape, which closes the list. */
-  onSearchKeydown(event: KeyboardEvent) {
-    if (event.key !== 'Escape') event.stopPropagation();
-  }
-
-  @HostListener('document:click', ['$event'])
-  onDocumentClick(event: MouseEvent) {
-    if (!this.isOpen()) return;
-
-    const target = event.target as HTMLElement;
-
-    // Check if click is inside this component (trigger, dropdown, or option).
-    // The dropdown is rendered inside the host element, so a single
-    // contains() check covers all internal clicks — including option
-    // clicks where stopPropagation doesn't prevent the HostListener.
-    if (this.elementRef.nativeElement.contains(target)) {
-      return;
-    }
-
-    this.isOpen.set(false);
-    this._interacting = false;
   }
 }
