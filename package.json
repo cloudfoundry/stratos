@@ -122,6 +122,7 @@
   },
   "dependencies": {
     "@angular/animations": "22.2.6",
+    "@angular/aria": "~22.2.7",
     "@angular/cdk": "^22.2.7",
     "@angular/common": "22.2.6",
     "@angular/core": "22.2.6",
