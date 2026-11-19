@@ -73,13 +73,19 @@ export class ApplicationTestHelper {
   async createTestApps(count: number, namePrefix?: string): Promise<TestApp[]> {
     const apps: TestApp[] = [];
 
-    for (let i = 0; i < count; i++) {
-      const name = namePrefix
-        ? createCustomName(`${namePrefix}-${i + 1}`)
-        : createCustomName(`test-app-${i + 1}`);
+    try {
+      for (let i = 0; i < count; i++) {
+        const name = namePrefix
+          ? createCustomName(`${namePrefix}-${i + 1}`)
+          : createCustomName(`test-app-${i + 1}`);
 
-      const testApp = await this.createTestApp(name);
-      apps.push(testApp);
+        apps.push(await this.createTestApp(name));
+      }
+    } catch (error) {
+      // The fixture's teardown never sees a list that failed half way, so
+      // remove the apps already created before failing.
+      await this.cleanupTestApps(apps);
+      throw error;
     }
 
     return apps;
