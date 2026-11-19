@@ -826,3 +826,171 @@ describe('CustomSelectComponent trigger text', () => {
     expect(el.querySelector('[role="combobox"]')!.getAttribute('aria-expanded')).toBe('false');
   });
 });
+
+// No template uses a multiple select yet. Seven options: a multiple select
+// takes no filter, however long its list.
+@Component({
+  standalone: true,
+  imports: [CustomSelectComponent, CustomOptionComponent, ReactiveFormsModule],
+  template: `
+    <app-select placeholder="Plans" multiple [formControl]="control">
+      @for (name of names; track name) {
+        <app-option [value]="name">{{ name }}</app-option>
+      }
+    </app-select>
+  `,
+})
+class MultipleHostComponent {
+  names = ['alpha', 'bravo', 'charlie', 'delta', 'echo', 'foxtrot', 'golf'];
+  control = new FormControl<string[]>([]);
+}
+
+// A multiple select whose form has a default to reset to.
+@Component({
+  standalone: true,
+  imports: [CustomSelectComponent, CustomOptionComponent, ReactiveFormsModule],
+  template: `
+    <app-select placeholder="Plans" multiple [formControl]="control">
+      @for (name of names; track name) {
+        <app-option [value]="name">{{ name }}</app-option>
+      }
+    </app-select>
+  `,
+})
+class MultipleDefaultHostComponent {
+  names = ['alpha', 'bravo', 'charlie'];
+  control = new FormControl(['alpha'], { nonNullable: true });
+}
+
+describe('CustomSelectComponent with multiple', () => {
+  beforeEach(() => {
+    TestBed.configureTestingModule({
+      providers: [provideZonelessChangeDetection()],
+    });
+  });
+
+  async function open() {
+    const fixture = TestBed.createComponent(MultipleHostComponent);
+    await fixture.whenStable();
+    const trigger = triggerOf(fixture);
+    trigger.focus();
+    key(trigger, 'ArrowDown');
+    await fixture.whenStable();
+    await activeShown(fixture);
+    const press = async (k: string) => {
+      key(trigger, k);
+      await fixture.whenStable();
+    };
+    const shown = () => trigger.querySelector('.select-trigger-value, .select-trigger-placeholder')?.textContent?.trim();
+    return { fixture, trigger, press, shown };
+  }
+
+  it('is a select-only combobox over a multi-select list', async () => {
+    const { fixture, trigger } = await open();
+    expect(trigger.tagName).not.toBe('INPUT');
+    expect(fixture.nativeElement.querySelector('[role="listbox"]').getAttribute('aria-multiselectable')).toBe('true');
+    expect(optionTexts(fixture).length).toBe(7);
+  });
+
+  it('toggles the active option with Enter and Space and keeps the list open', async () => {
+    const { fixture, trigger, press } = await open();
+    // The list opens on the first option.
+    expect(activeText(fixture)).toBe('alpha');
+    await press('Enter');
+    expect(fixture.componentInstance.control.value).toEqual(['alpha']);
+    expect(trigger.getAttribute('aria-expanded')).toBe('true');
+
+    await press('ArrowDown');
+    await press(' ');
+    expect(fixture.componentInstance.control.value).toEqual(['alpha', 'bravo']);
+
+    await press('Enter');
+    expect(fixture.componentInstance.control.value).toEqual(['alpha']);
+    expect(trigger.getAttribute('aria-expanded')).toBe('true');
+    expect(document.activeElement).toBe(trigger);
+  });
+
+  it('marks each chosen option selected', async () => {
+    const { fixture, press } = await open();
+    await press('Enter');
+    await press('End');
+    await press('Enter');
+    const selected = [...fixture.nativeElement.querySelectorAll('[role="option"][aria-selected="true"]')]
+      .map((o: Element) => o.textContent?.trim());
+    expect(selected).toEqual(['alpha', 'golf']);
+  });
+
+  it('shows one choice by its text and more as a count', async () => {
+    const { press, shown } = await open();
+    expect(shown()).toBe('');
+    await press('Enter');
+    expect(shown()).toBe('alpha');
+    await press('ArrowDown');
+    await press('Enter');
+    expect(shown()).toBe('2 selected');
+  });
+
+  it('closes with Escape and keeps the choices', async () => {
+    const { fixture, trigger, press } = await open();
+    await press('Enter');
+    await press('Escape');
+    expect(trigger.getAttribute('aria-expanded')).toBe('false');
+    expect(fixture.componentInstance.control.value).toEqual(['alpha']);
+    expect(document.activeElement).toBe(trigger);
+  });
+
+  it('shows the choices a form control writes', async () => {
+    const fixture = TestBed.createComponent(MultipleHostComponent);
+    fixture.componentInstance.control.setValue(['charlie', 'echo']);
+    await fixture.whenStable();
+    expect(triggerOf(fixture).querySelector('.select-trigger-value')?.textContent?.trim()).toBe('2 selected');
+    expect(selectOf(fixture).selectedValue).toEqual(['charlie', 'echo']);
+  });
+
+  // A form value that arrives while the user is choosing must not undo
+  // the choices; a reset still clears them.
+  it('ignores a form write while the list is open, except a clear', async () => {
+    const { fixture, press } = await open();
+    await press('Enter');
+    fixture.componentInstance.control.setValue(['golf']);
+    await fixture.whenStable();
+    expect(selectOf(fixture).selectedValue).toEqual(['alpha']);
+
+    fixture.componentInstance.control.setValue([]);
+    await fixture.whenStable();
+    expect(selectOf(fixture).selectedValue).toEqual([]);
+  });
+
+  it('lets the user remove every choice', async () => {
+    const { fixture, trigger, press, shown } = await open();
+    await press('Enter');
+    await press('Enter');
+    expect(fixture.componentInstance.control.value).toEqual([]);
+    await press('Escape');
+    expect(shown()).toBe('');
+    expect(trigger.querySelector('[data-placeholder]')?.getAttribute('data-placeholder')).toBe('Plans');
+  });
+
+  it('goes back to the default on a form reset', async () => {
+    const fixture = TestBed.createComponent(MultipleDefaultHostComponent);
+    await fixture.whenStable();
+    const trigger = triggerOf(fixture);
+    trigger.focus();
+    for (const k of ['ArrowDown', 'End', 'Enter', 'Escape']) {
+      key(trigger, k);
+      await fixture.whenStable();
+      if (k === 'ArrowDown') await activeShown(fixture);
+    }
+    expect(fixture.componentInstance.control.value).toEqual(['alpha', 'charlie']);
+
+    fixture.componentInstance.control.reset();
+    await fixture.whenStable();
+    expect(selectOf(fixture).selectedValue).toEqual(['alpha']);
+    expect(trigger.querySelector('.select-trigger-value')?.textContent?.trim()).toBe('alpha');
+    key(trigger, 'ArrowDown');
+    await fixture.whenStable();
+    const selected = [...fixture.nativeElement.querySelectorAll('[role="option"][aria-selected="true"]')]
+      .map((o: Element) => o.textContent?.trim());
+    expect(selected).toEqual(['alpha']);
+  });
+});
