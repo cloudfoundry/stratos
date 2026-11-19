@@ -11,6 +11,7 @@
                   class="p-2 text-header-text hover:bg-white/10 rounded-md transition-colors"
                   matTooltip="Toggle menu"
                   aria-label="Toggle menu"
+                  [attr.aria-expanded]="isMobileNavOpen()"
                   (click)="toggleSidenav()">
                   <span aria-hidden="true" class="material-icons">menu</span>
                 </button>

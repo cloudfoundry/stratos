@@ -119,6 +119,7 @@ export class PageHeaderComponent implements OnDestroy, AfterViewInit {
   public eventSeverity = InternalEventSeverity;
 
   readonly isMobile = this.dashboardSignals.isMobile;
+  readonly isMobileNavOpen = this.dashboardSignals.isMobileNavOpen;
 
   public environment = environment;
 
