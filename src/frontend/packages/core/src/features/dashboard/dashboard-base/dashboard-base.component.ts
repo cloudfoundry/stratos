@@ -46,7 +46,10 @@ const FOCUSABLE = 'a[href], button:not([disabled]), input:not([disabled]), selec
     ShowPageHeaderComponent,
     RoutingIndicatorComponent
   ],
-  changeDetection: ChangeDetectionStrategy.OnPush
+  changeDetection: ChangeDetectionStrategy.OnPush,
+  host: {
+    '(document:keydown.escape)': 'closeDrawer($event)',
+  },
 })
 
 export class DashboardBaseComponent implements OnInit, OnDestroy, AfterViewInit {
@@ -137,8 +140,11 @@ export class DashboardBaseComponent implements OnInit, OnDestroy, AfterViewInit 
     });
   }
 
-  closeDrawer() {
-    if (this.drawerOpen()) {
+  // Escape from anywhere, not only inside the drawer: Tab still reaches the
+  // page controls it covers, and Escape reveals them without moving focus
+  // (WCAG 2.4.11). A key another control has handled is left alone.
+  closeDrawer(event: Event) {
+    if (this.drawerOpen() && !event.defaultPrevented) {
       this.dashboardData.closeSideNav();
     }
   }

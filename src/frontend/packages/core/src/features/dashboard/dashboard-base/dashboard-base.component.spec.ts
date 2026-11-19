@@ -128,6 +128,19 @@ describe('DashboardBaseComponent', () => {
         expect(document.activeElement).toBe(toggle);
       });
 
+      // WCAG 2.4.11: the open drawer covers page controls that Tab still
+      // reaches; Escape from anywhere reveals them without moving focus.
+      it('closes on Escape from the page and leaves focus where it is', async () => {
+        const outside = document.createElement('button');
+        document.body.appendChild(outside);
+        outside.focus();
+        outside.dispatchEvent(new KeyboardEvent('keydown', { key: 'Escape', bubbles: true }));
+        await fixture.whenStable();
+        expect(drawer().hasAttribute('inert')).toBe(true);
+        expect(document.activeElement).toBe(outside);
+        outside.remove();
+      });
+
       it('returns focus to Toggle menu when a control inside closes it', async () => {
         data.toggleSideNav();
         await fixture.whenStable();
