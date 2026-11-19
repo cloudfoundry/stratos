@@ -175,6 +175,25 @@ describe('PageHeaderComponent', () => {
     view.destroy();
   });
 
+  // WCAG 4.1.2: the menu toggle states whether the drawer it opens is open.
+  it('says whether the navigation drawer is open', async () => {
+    const data = TestBed.inject(DashboardDataService);
+    data.enableMobileNav();
+    await fixture.whenStable();
+    const view = component.pageHeaderTmpl().createEmbeddedView({});
+    const host = document.createElement('div');
+    view.detectChanges();
+    view.rootNodes.forEach((node: Node) => host.appendChild(node));
+    const toggle = (): HTMLElement => host.querySelector('[aria-label="Toggle menu"]')!;
+    expect(toggle().getAttribute('aria-expanded')).toBe('false');
+
+    data.toggleSideNav();
+    await fixture.whenStable();
+    view.detectChanges();
+    expect(toggle().getAttribute('aria-expanded')).toBe('true');
+    view.destroy();
+  });
+
   // The page header holds the site's own controls (menu, favorites, help,
   // user menu), as a banner does: it is the page's header landmark, so a
   // screen reader user can jump to it (WCAG 1.3.6).

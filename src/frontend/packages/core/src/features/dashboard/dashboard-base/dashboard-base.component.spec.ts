@@ -68,6 +68,31 @@ describe('DashboardBaseComponent', () => {
     expect(component.mainNavState()).toEqual({ mode: 'over', opened: false, iconMode: false });
   });
 
+  // WCAG 2.4.3 / 2.4.7: on a narrow view the closed drawer only slides off
+  // screen, so Tab walked its links with the focus drawn nowhere.
+  describe('main navigation drawer', () => {
+    const drawer = (): HTMLElement => fixture.nativeElement.querySelector('.dashboard-side-nav');
+
+    it('is out of the tab order and accessibility tree while closed', async () => {
+      TestBed.inject(DashboardDataService).enableMobileNav();
+      await fixture.whenStable();
+      expect(drawer().hasAttribute('inert')).toBe(true);
+    });
+
+    it('is reachable while open', async () => {
+      const data = TestBed.inject(DashboardDataService);
+      data.enableMobileNav();
+      data.toggleSideNav();
+      await fixture.whenStable();
+      expect(drawer().hasAttribute('inert')).toBe(false);
+    });
+
+    it('is reachable beside the page on a wide view', async () => {
+      await fixture.whenStable();
+      expect(drawer().hasAttribute('inert')).toBe(false);
+    });
+  });
+
   describe('side panel', () => {
     const panel = (): HTMLElement => fixture.nativeElement.querySelector('.dashboard-side-help-outer');
 
