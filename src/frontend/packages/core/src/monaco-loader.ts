@@ -60,6 +60,42 @@ export function installWorkerURLPolicy(): void {
   });
 }
 
+/**
+ * Returns a copy of the monaco API whose editor.createWebWorker also takes
+ * the pre-0.55 options ({ label, moduleId, createData }).
+ *
+ * monaco-yaml starts its worker through monaco-worker-manager, which still
+ * passes those options. Since monaco 0.55 createWebWorker takes a started
+ * worker instead ({ worker }), so the yaml worker never started: monaco fell
+ * back to a main-thread editor worker that has no yaml handlers, and yaml
+ * editors lost validation, hover, completion and folding.
+ *
+ * Monaco's own language services convert the old options in
+ * internal/common/workers.js. Importing that module would bring most editor
+ * features with it (see monaco-features.ts), so this repeats its conversion:
+ * get the worker from MonacoEnvironment, then post 'ignore' and the
+ * createData, the two messages the worker's initialize() reads first.
+ *
+ * Remove when monaco-worker-manager releases its monaco 0.56 fix
+ * (remcohaszing/monaco-worker-manager#4; monaco-yaml#272).
+ */
+export function withLegacyWorkerFactory<T extends { editor: { createWebWorker: (opts: any) => any } }>(monaco: T): T {
+  const createWebWorker = (opts: any) => {
+    if (opts.worker) {
+      return monaco.editor.createWebWorker(opts);
+    }
+    const worker = Promise.resolve(
+      (self as any).MonacoEnvironment.getWorker('workerMain.js', opts.label ?? 'monaco-editor-worker'),
+    ).then((w: Worker) => {
+      w.postMessage('ignore');
+      w.postMessage(opts.createData);
+      return w;
+    });
+    return monaco.editor.createWebWorker({ worker, host: opts.host, keepIdleModels: opts.keepIdleModels });
+  };
+  return { ...monaco, editor: { ...monaco.editor, createWebWorker } };
+}
+
 export function loadMonacoEditor(): Promise<MonacoApi> {
   if (!monacoLoad) {
     monacoLoad = doLoadMonacoEditor();
@@ -159,7 +195,7 @@ async function doLoadMonacoEditor(): Promise<MonacoApi> {
 
   // Baseline YAML support (indentation-aware completion, hover);
   // schema-driven validation is layered on per-editor via configureYaml().
-  monacoYaml = configureMonacoYaml(monaco, { hover: true, completion: true, validate: true });
+  monacoYaml = configureMonacoYaml(withLegacyWorkerFactory(monaco), { hover: true, completion: true, validate: true });
 
   (window as any).monaco = monaco;
   return monaco;
