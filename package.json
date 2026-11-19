@@ -179,7 +179,7 @@
     "@cypress/request": "4.0.1",
     "@eslint/js": "^10.0.1",
     "@oxc-project/runtime": "0.159.0",
-    "@playwright/test": "^1.64.1",
+    "@playwright/test": "^1.65.1",
     "@schematics/angular": "22.3.0",
     "@tailwindcss/forms": "^0.5.11",
     "@tailwindcss/postcss": "^4.3.5",
