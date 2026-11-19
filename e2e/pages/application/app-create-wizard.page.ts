@@ -57,7 +57,7 @@ export class AppCreateWizardPage extends BasePage {
    * async, so retry the open+pick (each trigger click toggles the overlay).
    */
   // Each custom app-select renders its options in a listbox #select-listbox-<id>
-  // that is [class.hidden]="!isOpen". The trigger and options are page-level, so
+  // inside a popup that is hidden while the list is closed. The trigger and options are page-level, so
   // scope option lookups to THIS select's listbox — a page-wide .custom-option-content
   // also matches hidden options in the other (closed) selects.
   private optionsFor(id: 'cf' | 'org' | 'space'): Locator {
@@ -105,13 +105,16 @@ export class AppCreateWizardPage extends BasePage {
   }
 
   private async selectOption(id: 'cf' | 'org' | 'space', label: string): Promise<void> {
-    const trigger = this.page.locator(`app-select#${id} .select-trigger`);
+    const combobox = this.page.locator(`app-select#${id} [role=combobox]`);
     const option = this.optionsFor(id).filter({ hasText: label }).first();
     await expect(async () => {
       await this.openSelect(id);
       await option.waitFor({ state: 'visible', timeout: 3000 });
       await option.click({ timeout: 2000 });
-      await expect(trigger).toContainText(label, { timeout: 2000 });
+      // A select with more than five options is a text field (filter), so
+      // the choice is its value, not its text.
+      const shown = await combobox.evaluate(el => el instanceof HTMLInputElement ? el.value : el.textContent ?? '');
+      expect(shown).toContain(label);
     }).toPass({ timeout: 30000 });
   }
 

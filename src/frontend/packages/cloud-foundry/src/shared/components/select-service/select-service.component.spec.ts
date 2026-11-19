@@ -60,7 +60,9 @@ describe('SelectServiceComponent', () => {
     const trigger = (fixture.nativeElement as HTMLElement).querySelector('[role="combobox"]');
     expect(trigger).toBeTruthy();
     expect(trigger!.getAttribute('aria-label')).toBe('Choose Service');
-    expect(trigger!.textContent).toContain('Choose Service');
+    // The caption is drawn by CSS: WebKit reads the trigger's text as the
+    // chosen value.
+    expect(trigger!.querySelector('[data-placeholder]')?.getAttribute('data-placeholder')).toBe('Choose Service');
   });
 
   it('shows the card of the service picked in the list', async () => {

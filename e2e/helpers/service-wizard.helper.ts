@@ -18,7 +18,8 @@ export interface TestBroker {
 export async function pick(page: Page, index: number, name: string): Promise<void> {
   await page.locator('.steppers [role=combobox]').nth(index).click();
   const exact = new RegExp(`^\\s*${name.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')}\\s*$`);
-  await page.locator('[role=listbox] app-option:visible').filter({ hasText: exact }).first().click();
+  // getByRole skips the hidden lists of closed selects.
+  await page.getByRole('listbox').getByRole('option').filter({ hasText: exact }).first().click();
 }
 
 export async function next(page: Page, label: 'Next' | 'Finish' = 'Next'): Promise<void> {

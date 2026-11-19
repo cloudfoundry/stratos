@@ -159,8 +159,11 @@ describe('SpecifyDetailsStepComponent', () => {
     fixture.componentRef.setInput('showModeSelection', true);
     await fixture.whenStable();
 
+    // The options render when the list opens.
+    (fixture.nativeElement as HTMLElement).querySelector<HTMLElement>('app-select [role="combobox"]')!.click();
+    await fixture.whenStable();
     const texts = Array.from(
-      fixture.nativeElement.querySelectorAll('app-option') as NodeListOf<HTMLElement>,
+      fixture.nativeElement.querySelectorAll('[role="option"]') as NodeListOf<HTMLElement>,
     ).map(o => o.textContent?.trim());
     expect(texts).toContain('instance-one');
     expect(texts).toContain('instance-two');

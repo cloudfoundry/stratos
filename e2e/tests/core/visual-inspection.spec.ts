@@ -153,7 +153,7 @@ test.describe('Visual Inspection', () => {
       });
 
       // Select first option
-      const firstOption = adminPage.locator('app-option').first();
+      const firstOption = adminPage.locator('[role=option]').first();
       if (await firstOption.isVisible()) {
         await firstOption.click();
         await adminPage.waitForTimeout(2000);

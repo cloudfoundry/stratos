@@ -78,8 +78,13 @@ describe('CreateApplicationStep3Component', () => {
     const http = TestBed.inject(HttpTestingController);
     const state = TestBed.inject(CreateAppStateService);
     const domainsUrl = (org: string) => `/pp/v1/cf/org/cf1/${org}/private_domains`;
-    const optionTexts = () => Array.from(fixture.nativeElement.querySelectorAll('app-option') as NodeListOf<HTMLElement>)
-      .map(o => o.textContent?.trim());
+    // The options render when the list opens.
+    const optionTexts = async () => {
+      (fixture.nativeElement as HTMLElement).querySelector<HTMLElement>('app-select [role="combobox"]')!.click();
+      await fixture.whenStable();
+      return Array.from(fixture.nativeElement.querySelectorAll('[role="option"]') as NodeListOf<HTMLElement>)
+        .map(o => o.textContent?.trim());
+    };
 
     state.setName('my-app');
     state.setCFDetails({ cloudFoundry: 'cf1', org: 'org-a', space: 'space-a' } as NewAppCFDetails);
@@ -98,6 +103,6 @@ describe('CreateApplicationStep3Component', () => {
     }
     await fixture.whenStable();
 
-    expect(optionTexts()).toEqual(['b.example.com']);
+    expect(await optionTexts()).toEqual(['b.example.com']);
   });
 });
