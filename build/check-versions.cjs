@@ -8,7 +8,7 @@
  *
  * Required versions (see .tool-versions for the exact pins):
  * - Node.js: 24.x or 26.x
- * - Bun: 1.3.14+ (vitest runs on the bun runtime via `bunx --bun`)
+ * - Bun: 1.4.5 pinned, 1.2 or later accepted here (vitest runs on the bun runtime via `bunx --bun`)
  */
 
 const fs = require('fs');
