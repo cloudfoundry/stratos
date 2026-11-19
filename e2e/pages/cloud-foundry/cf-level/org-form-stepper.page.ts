@@ -6,8 +6,8 @@ import { StepperBase } from '../../../helpers/stepper-base';
  * Stepper for organization creation/edit
  */
 export class OrgFormStepper extends StepperBase {
-  private orgFieldName = 'orgname';
-  private quotaFieldName = 'quotadefinition';
+  private orgFieldName = 'orgName';
+  private quotaFieldName = 'quotaDefinition';
 
   constructor(page: Page) {
     super(page);

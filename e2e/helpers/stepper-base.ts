@@ -8,7 +8,7 @@ export class StepperBase {
   protected stepper: Locator;
 
   constructor(protected page: Page) {
-    this.stepper = page.locator('app-stepper, mat-stepper, mat-horizontal-stepper, mat-vertical-stepper');
+    this.stepper = page.locator('app-steppers');
   }
 
   /**
@@ -31,8 +31,12 @@ export class StepperBase {
       await field.click();
       const option = this.page.locator('mat-option, option').filter({ hasText: value });
       await option.click();
-    } else {
+    } else if (tagName === 'input' || tagName === 'textarea') {
       await field.fill(value);
+    } else {
+      // A wrapper component carrying the name (app-unlimited-input: a number
+      // field plus an "Unlimited" checkbox): fill the text field inside it.
+      await field.locator('input:not([type="checkbox"])').first().fill(value);
     }
   }
 
@@ -40,21 +44,21 @@ export class StepperBase {
    * Get next button
    */
   getNextButton(): Locator {
-    return this.stepper.locator('button').filter({ hasText: /next/i });
+    return this.stepper.locator('#stepper_next');
   }
 
   /**
    * Get previous button
    */
   getPreviousButton(): Locator {
-    return this.stepper.locator('button').filter({ hasText: /previous|back/i });
+    return this.stepper.locator('#stepper_previous');
   }
 
   /**
    * Get cancel button
    */
   getCancelButton(): Locator {
-    return this.stepper.locator('button').filter({ hasText: /cancel/i });
+    return this.stepper.locator('#stepper_cancel');
   }
 
   /**
