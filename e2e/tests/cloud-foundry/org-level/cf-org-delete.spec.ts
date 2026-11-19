@@ -40,7 +40,7 @@ test.describe('CF Org Delete', () => {
       try {
         // Navigate to org summary page
         await page.goto(`/cloud-foundry/${cfGuid}/organizations/${org.guid}/summary`);
-        await page.waitForLoadState('networkidle');
+        await page.locator('app-cloud-foundry-organization-summary').waitFor({ timeout: 30000 });
 
         // Look for delete button
         const deleteButton = page.locator('button').filter({ hasText: /delete/i }).first();
@@ -56,15 +56,16 @@ test.describe('CF Org Delete', () => {
         const confirmDialog = page.locator('app-dialog-confirm');
         await confirmDialog.waitFor({ state: 'visible', timeout: 5000 });
 
-        const confirmButton = confirmDialog.locator('button').filter({ hasText: /delete|confirm|yes/i });
+        // Deleting an org is type-to-confirm.
+        await confirmDialog.locator('#typeToConfirm').fill(orgName);
+        const confirmButton = confirmDialog.locator('[data-test="confirm-dialog-confirm"]');
         await confirmButton.click();
 
-        // Wait for navigation away from org page
-        await page.waitForURL(new RegExp(`.*cloud-foundry/${cfGuid}(?!/organizations).*`), { timeout: 10000 });
+        // The console leaves the deleted org's pages (for the Organizations list).
+        await page.waitForURL(url => !url.pathname.includes(org.guid), { timeout: 10000 });
 
-        // Verify org is deleted via API
-        const found = await cfApi.findOrgByName(orgName);
-        expect(found).toBeNull();
+        // CF deletes the org as a job.
+        await expect.poll(() => cfApi.findOrgByName(orgName), { timeout: 30000 }).toBeNull();
 
       } catch (error) {
         // If test failed, cleanup the org
@@ -87,7 +88,7 @@ test.describe('CF Org Delete', () => {
       try {
         // Navigate to org summary page
         await page.goto(`/cloud-foundry/${cfGuid}/organizations/${org.guid}/summary`);
-        await page.waitForLoadState('networkidle');
+        await page.locator('app-cloud-foundry-organization-summary').waitFor({ timeout: 30000 });
 
         // Look for delete button
         const deleteButton = page.locator('button').filter({ hasText: /delete/i }).first();
@@ -104,12 +105,15 @@ test.describe('CF Org Delete', () => {
         await confirmDialog.waitFor({ state: 'visible' });
 
         // Verify dialog has confirm/delete button
-        const confirmButton = confirmDialog.locator('button').filter({ hasText: /delete|confirm/i });
+        // Deleting an org is type-to-confirm.
+        await confirmDialog.locator('#typeToConfirm').fill(orgName);
+        const confirmButton = confirmDialog.locator('[data-test="confirm-dialog-confirm"]');
         await expect(confirmButton).toBeVisible();
 
         // Actually confirm to clean up
         await confirmButton.click();
-        await page.waitForURL(new RegExp(`.*cloud-foundry/${cfGuid}(?!/organizations).*`), { timeout: 10000 });
+        // The console leaves the deleted org's pages (for the Organizations list).
+        await page.waitForURL(url => !url.pathname.includes(org.guid), { timeout: 10000 });
 
       } catch (error) {
         // Cleanup if test failed
@@ -132,7 +136,7 @@ test.describe('CF Org Delete', () => {
       try {
         // Navigate to org summary page
         await page.goto(`/cloud-foundry/${cfGuid}/organizations/${org.guid}/summary`);
-        await page.waitForLoadState('networkidle');
+        await page.locator('app-cloud-foundry-organization-summary').waitFor({ timeout: 30000 });
 
         // Look for delete button
         const deleteButton = page.locator('button').filter({ hasText: /delete/i }).first();
@@ -148,11 +152,14 @@ test.describe('CF Org Delete', () => {
         const confirmDialog = page.locator('app-dialog-confirm');
         await confirmDialog.waitFor({ state: 'visible', timeout: 5000 });
 
-        const confirmButton = confirmDialog.locator('button').filter({ hasText: /delete|confirm|yes/i });
+        // Deleting an org is type-to-confirm.
+        await confirmDialog.locator('#typeToConfirm').fill(orgName);
+        const confirmButton = confirmDialog.locator('[data-test="confirm-dialog-confirm"]');
         await confirmButton.click();
 
         // Wait for navigation away from org page - should return to CF page
-        await page.waitForURL(new RegExp(`.*cloud-foundry/${cfGuid}(?!/organizations).*`), { timeout: 15000 });
+        // The console leaves the deleted org's pages (for the Organizations list).
+        await page.waitForURL(url => !url.pathname.includes(org.guid), { timeout: 15000 });
 
         const url = page.url();
         expect(url).toContain(`/cloud-foundry/${cfGuid}`);

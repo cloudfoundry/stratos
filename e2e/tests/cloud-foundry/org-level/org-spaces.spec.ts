@@ -20,13 +20,12 @@ test.describe('Org Spaces', () => {
     await orgPage.goToSpacesTab();
 
     // Verify spaces list
-    const listComponent = page.locator('app-list');
+    const listComponent = page.locator('app-signal-list');
     await expect(listComponent).toBeVisible();
 
     // Should have at least testSpace
-    const cards = listComponent.locator('app-card, mat-card');
-    const count = await cards.count();
-    expect(count).toBeGreaterThan(0);
+    const cards = listComponent.locator('[data-test="card-grid"] > *');
+    await expect(cards.first()).toBeVisible({ timeout: 20000 });
   });
 
   test('should navigate to space from spaces list', async ({ connectedEndpointsAdminPage, secrets }) => {
@@ -39,8 +38,8 @@ test.describe('Org Spaces', () => {
     await orgPage.goToSpacesTab();
 
     // Click first space
-    const listComponent = page.locator('app-list');
-    const firstCard = listComponent.locator('app-card, mat-card').first();
+    const listComponent = page.locator('app-signal-list');
+    const firstCard = listComponent.locator('[data-test="card-grid"] > *').first();
     await firstCard.click();
 
     // Verify navigation to space page
@@ -82,9 +81,8 @@ test.describe('Org Spaces', () => {
       await orgPage.goToSpacesTab();
 
       // Look for filter/search input
-      const listComponent = page.locator('app-list');
-      const header = listComponent.locator('app-list-header');
-      const searchInput = header.locator('input[placeholder*="Search"], input[type="text"]').first();
+      const listComponent = page.locator('app-signal-list');
+      const searchInput = listComponent.locator('input[placeholder*="Search"], input[type="text"]').first();
 
       const searchExists = await searchInput.isVisible({ timeout: 5000 }).catch(() => false);
 
@@ -111,10 +109,12 @@ test.describe('Org Spaces', () => {
       await orgPage.goToSpacesTab();
 
       // Wait for spaces to load
-      const listComponent = page.locator('app-list');
+      const listComponent = page.locator('app-signal-list');
       await listComponent.waitFor({ state: 'visible' });
 
-      const cards = listComponent.locator('app-card, mat-card');
+      await expect(listComponent.locator('[data-test="loading"]')).toHaveCount(0, { timeout: 45000 });
+
+      const cards = listComponent.locator('[data-test="card-grid"] > *');
       const count = await cards.count();
 
       if (count === 0) {

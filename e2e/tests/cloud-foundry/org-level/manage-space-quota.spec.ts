@@ -55,10 +55,11 @@ test.describe('Manage Space Quota', () => {
       await quotaStepper.setTotalServices('10');
       await quotaStepper.setTotalRoutes('10');
       await quotaStepper.setMemoryLimit('1024');
+      await quotaStepper.setInstanceMemoryLimit('512');
+      await quotaStepper.setAppInstanceLimit('10');
 
       // Check if we can proceed
-      const canProceed = await quotaStepper.canNext();
-      expect(canProceed).toBe(true);
+      await expect(quotaStepper.getNextButton()).toBeEnabled();
 
       await quotaStepper.next();
 
@@ -99,13 +100,11 @@ test.describe('Manage Space Quota', () => {
 
       // Try with empty name
       await quotaStepper.setName('');
-      let canProceed = await quotaStepper.canNext();
-      expect(canProceed).toBe(false);
+      await expect(quotaStepper.getNextButton()).toBeDisabled();
 
       // Try with valid name
       await quotaStepper.setName('valid-space-quota-name');
-      canProceed = await quotaStepper.canNext();
-      expect(canProceed).toBe(true);
+      await expect(quotaStepper.getNextButton()).toBeEnabled();
 
       // Cancel the stepper
       await quotaStepper.cancel();
@@ -183,21 +182,11 @@ test.describe('Manage Space Quota', () => {
         await orgPage.navigateTo();
         await orgPage.goToSpaceQuotasTab();
 
-        // Wait for table to load
-        const listComponent = page.locator('app-list');
-        const table = listComponent.locator('app-table, table');
-        await table.waitFor({ state: 'visible' });
-
-        // Search for our quota
-        const header = listComponent.locator('app-list-header');
-        const searchInput = header.locator('input[placeholder*="Search"], input[type="text"]').first();
-        if (await searchInput.isVisible().catch(() => false)) {
-          await searchInput.fill(quotaName);
-          await page.waitForTimeout(1000);
-        }
-
-        // Verify quota appears in list
-        const row = table.locator('tbody tr').filter({ hasText: quotaName });
+        // The list shows cards or table rows; both carry the row hooks.
+        const listComponent = page.locator('app-signal-list');
+        await listComponent.locator('[data-test="name-filter"]').fill(quotaName);
+        const row = listComponent.locator('[data-test="card"], tbody tr').filter({ hasText: quotaName });
+        await expect(row).toBeVisible({ timeout: 20000 });
         await expect(row).toBeVisible({ timeout: 5000 });
 
       } finally {
@@ -228,29 +217,13 @@ test.describe('Manage Space Quota', () => {
         await orgPage.navigateTo();
         await orgPage.goToSpaceQuotasTab();
 
-        // Wait for table to load
-        const listComponent = page.locator('app-list');
-        const table = listComponent.locator('app-table, table');
-        await table.waitFor({ state: 'visible' });
-
-        // Search for our quota
-        const header = listComponent.locator('app-list-header');
-        const searchInput = header.locator('input[placeholder*="Search"], input[type="text"]').first();
-        if (await searchInput.isVisible().catch(() => false)) {
-          await searchInput.fill(quotaName);
-          await page.waitForTimeout(1000);
-        }
-
-        // Look for edit button in row
-        const row = table.locator('tbody tr').filter({ hasText: quotaName });
-        const editButton = row.locator('button').filter({ hasText: /edit/i }).first();
-        const editExists = await editButton.isVisible({ timeout: 5000 }).catch(() => false);
-
-        if (!editExists) {
-          test.skip('Edit space quota functionality not available in UI');
-        }
-
-        await editButton.click();
+        // The list shows cards or table rows; both carry the row hooks.
+        const listComponent = page.locator('app-signal-list');
+        await listComponent.locator('[data-test="name-filter"]').fill(quotaName);
+        const row = listComponent.locator('[data-test="card"], tbody tr').filter({ hasText: quotaName });
+        await expect(row).toBeVisible({ timeout: 20000 });
+        await row.locator('[data-test="row-actions"]').click();
+        await page.locator('[data-test="row-action-Edit"]').click();
 
         const quotaStepper = new SpaceQuotaFormStepper(page);
         await quotaStepper.waitUntilShown();
@@ -295,12 +268,15 @@ test.describe('Manage Space Quota', () => {
         await orgPage.deleteSpaceQuota(quotaName, true);
 
         // Verify quota is deleted via API
-        try {
-          await cfApi.getSpaceQuota(quota.guid);
-          expect(true).toBe(false); // Should not find it
-        } catch (error) {
-          expect(error).toBeTruthy(); // Expected - quota should not exist
-        }
+        // CF deletes as a job: wait for the 404.
+        await expect.poll(async () => {
+          try {
+            await cfApi.getSpaceQuota(quota.guid);
+            return 'present';
+          } catch (error) {
+            return String(error).includes(' failed: 404 ') ? 'gone' : String(error);
+          }
+        }, { timeout: 30000 }).toBe('gone');
 
       } catch (error) {
         // If test failed, cleanup the quota

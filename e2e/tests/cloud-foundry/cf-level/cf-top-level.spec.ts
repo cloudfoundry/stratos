@@ -108,13 +108,14 @@ test.describe('CF Top Level', () => {
       await cfPage.goToOrgTab();
 
       // Verify list component is visible
-      const listComponent = page.locator('app-list');
+      const listComponent = page.locator('app-signal-list');
       await expect(listComponent).toBeVisible();
 
       // Verify we have some organizations
-      const cards = listComponent.locator('app-card, mat-card');
-      const count = await cards.count();
-      expect(count).toBeGreaterThan(0);
+      const cards = listComponent.locator('[data-test="card-grid"] > *');
+      // The org cards wait for the foundation's orgs to load: 5-16 s on a
+      // lab foundation with 65 orgs, over 20 s with two workers running.
+      await expect(cards.first()).toBeVisible({ timeout: 45000 });
     });
   });
 
@@ -225,10 +226,12 @@ test.describe('CF Top Level', () => {
       await cfPage.goToOrgTab();
 
       // Wait for organizations to load
-      const listComponent = page.locator('app-list');
+      const listComponent = page.locator('app-signal-list');
       await listComponent.waitFor({ state: 'visible' });
 
-      const cards = listComponent.locator('app-card, mat-card');
+      await expect(listComponent.locator('[data-test="loading"]')).toHaveCount(0, { timeout: 45000 });
+
+      const cards = listComponent.locator('[data-test="card-grid"] > *');
       const count = await cards.count();
 
       if (count === 0) {
@@ -276,10 +279,12 @@ test.describe('CF Top Level', () => {
       await cfPage.goToOrgTab();
 
       // Wait for organizations to load
-      const listComponent = page.locator('app-list');
+      const listComponent = page.locator('app-signal-list');
       await listComponent.waitFor({ state: 'visible' });
 
-      const cards = listComponent.locator('app-card, mat-card');
+      await expect(listComponent.locator('[data-test="loading"]')).toHaveCount(0, { timeout: 45000 });
+
+      const cards = listComponent.locator('[data-test="card-grid"] > *');
       const count = await cards.count();
 
       if (count === 0) {
@@ -368,7 +373,7 @@ test.describe('CF Top Level', () => {
       await page.waitForTimeout(1000);
 
       // Wait for quotas to load
-      const listComponent = page.locator('app-list');
+      const listComponent = page.locator('app-signal-list');
       const listExists = await listComponent.isVisible({ timeout: 5000 }).catch(() => false);
 
       if (!listExists) {
@@ -439,9 +444,8 @@ test.describe('CF Top Level', () => {
         await page.waitForTimeout(1000);
 
         // Search for our quota
-        const listComponent = page.locator('app-list');
-        const header = listComponent.locator('app-list-header');
-        const searchInput = header.locator('input[placeholder*="Search"], input[type="text"]').first();
+        const listComponent = page.locator('app-signal-list');
+        const searchInput = listComponent.locator('input[placeholder*="Search"], input[type="text"]').first();
         const searchExists = await searchInput.isVisible({ timeout: 5000 }).catch(() => false);
 
         if (searchExists) {

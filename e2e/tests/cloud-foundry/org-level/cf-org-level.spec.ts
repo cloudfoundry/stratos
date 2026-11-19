@@ -29,13 +29,14 @@ test.describe('CF Org Level', () => {
       await cfPage.goToOrgTab();
 
       // Wait for organizations list
-      const listComponent = page.locator('app-list');
+      const listComponent = page.locator('app-signal-list');
       await listComponent.waitFor({ state: 'visible' });
 
       // Verify we have at least one org
-      const cards = listComponent.locator('app-card, mat-card');
-      const count = await cards.count();
-      expect(count).toBeGreaterThan(0);
+      const cards = listComponent.locator('[data-test="card-grid"] > *');
+      // The org cards wait for the foundation's orgs to load: 5-16 s on a
+      // lab foundation with 65 orgs, over 20 s with two workers running.
+      await expect(cards.first()).toBeVisible({ timeout: 45000 });
 
       // Click on first org (we know testOrgGuid exists from secrets)
       const firstCard = cards.first();
@@ -45,7 +46,7 @@ test.describe('CF Org Level', () => {
       await page.waitForURL(/.*\/cloud-foundry\/.*\/organizations\/.*/, { timeout: 10000 });
 
       // Verify we're on org page
-      const orgPage = page.locator('app-cloud-foundry-org-summary');
+      const orgPage = page.locator('app-cloud-foundry-organization-summary');
       await expect(orgPage).toBeVisible({ timeout: 10000 });
     });
 
@@ -60,8 +61,8 @@ test.describe('CF Org Level', () => {
       await orgPage.waitForPage();
 
       // Check breadcrumbs
-      const breadcrumb = page.locator('.page-header-breadcrumb, .page-header-sub-nav-breadcrumb').first();
-      await expect(breadcrumb).toBeVisible();
+      const breadcrumb = page.locator('app-breadcrumbs').first();
+      await expect(breadcrumb).toBeVisible({ timeout: 20000 });
 
       // Breadcrumb should contain CF name
       const breadcrumbText = await breadcrumb.textContent() || '';
@@ -102,13 +103,12 @@ test.describe('CF Org Level', () => {
       await orgPage.goToSpacesTab();
 
       // Verify list component is visible
-      const listComponent = page.locator('app-list');
+      const listComponent = page.locator('app-signal-list');
       await expect(listComponent).toBeVisible();
 
       // Verify we have at least one space (testSpaceGuid exists)
-      const cards = listComponent.locator('app-card, mat-card');
-      const count = await cards.count();
-      expect(count).toBeGreaterThan(0);
+      const cards = listComponent.locator('[data-test="card-grid"] > *');
+      await expect(cards.first()).toBeVisible({ timeout: 20000 });
     });
   });
 
@@ -135,8 +135,8 @@ test.describe('CF Org Level', () => {
       await orgPage.navigateTo();
       await orgPage.waitForPage();
 
-      const breadcrumb = page.locator('.page-header-breadcrumb, .page-header-sub-nav-breadcrumb').first();
-      await expect(breadcrumb).toBeVisible();
+      const breadcrumb = page.locator('app-breadcrumbs').first();
+      await expect(breadcrumb).toBeVisible({ timeout: 20000 });
     });
 
     test('should walk through org tabs', async ({ connectedEndpointsUserPage, secrets }) => {
@@ -245,7 +245,7 @@ test.describe('CF Org Level', () => {
       await orgPage.goToUsersTab();
 
       // Verify users list is displayed
-      const listComponent = page.locator('app-list');
+      const listComponent = page.locator('app-signal-list');
       await expect(listComponent).toBeVisible();
 
       // Look for manage users button (add/invite/assign)
@@ -284,7 +284,7 @@ test.describe('CF Org Level', () => {
       let org: any = null;
 
       try {
-        org = await cfApi.createOrg(orgName);
+        org = await cfApi.createOrg({ name: orgName });
 
         // Navigate to the test org
         const orgPage = CfOrgLevelPage.forEndpoint(page, cfGuid, org.guid);

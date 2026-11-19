@@ -13,7 +13,7 @@ export class ManageUsersSelectStep extends BasePage {
   }
 
   getSelectUsersList(): Locator {
-    return this.container.locator('app-list');
+    return this.container.locator('app-signal-list');
   }
 }
 
@@ -59,11 +59,11 @@ export class ManageUsersModifyRolesStep extends BasePage {
   }
 
   getOrgsList(): Locator {
-    return this.container.locator('.modify-users__org-roles app-list');
+    return this.container.locator('.modify-users__org-roles app-signal-list');
   }
 
   getSpacesList(): Locator {
-    return this.container.locator('.modify-users__spaces-roles app-list');
+    return this.container.locator('.modify-users__spaces-roles app-signal-list');
   }
 
   async setOrg(orgName: string): Promise<void> {
@@ -162,7 +162,7 @@ export class ManageUsersPage extends BasePage {
     const url = ManageUsersPage.determineUrl(cfGuid, orgGuid, spaceGuid, userGuid);
 
     this.container = page.locator('app-manage-users');
-    this.stepper = page.locator('app-stepper, mat-stepper');
+    this.stepper = page.locator('app-steppers');
     this.setUsernames = new ManageUsersSetUsernames(page);
     this.selectUsersStep = new ManageUsersSelectStep(page);
     this.modifyUsersStep = new ManageUsersModifyRolesStep(page);

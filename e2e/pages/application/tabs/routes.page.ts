@@ -15,7 +15,7 @@ export class ApplicationPageRoutesTab extends ApplicationBasePage {
   constructor(page: Page, cfGuid: string, appGuid: string) {
     super(page, cfGuid, appGuid, 'routes');
 
-    this.listComponent = page.locator('app-list');
+    this.listComponent = page.locator('app-signal-list');
     this.addRouteButton = page.locator('button').filter({ hasText: /add.*route|create.*route/i });
     this.mapRouteButton = page.locator('button').filter({ hasText: /add.*route/i }); // mapping now lives on the Add Route page
   }

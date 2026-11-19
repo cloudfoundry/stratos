@@ -20,7 +20,7 @@ test.describe('Org Users List', () => {
     await orgPage.goToUsersTab();
 
     // Verify users list
-    const listComponent = page.locator('app-list');
+    const listComponent = page.locator('app-signal-list');
     await expect(listComponent).toBeVisible();
   });
 
@@ -36,7 +36,7 @@ test.describe('Org Users List', () => {
       await orgPage.goToUsersTab();
 
       // Verify users list is displayed
-      const listComponent = page.locator('app-list');
+      const listComponent = page.locator('app-signal-list');
       await expect(listComponent).toBeVisible();
 
       // Verify we have users (at least the admin)
@@ -67,7 +67,7 @@ test.describe('Org Users List', () => {
       await orgPage.goToUsersTab();
 
       // Look for role filter dropdown
-      const listComponent = page.locator('app-list');
+      const listComponent = page.locator('app-signal-list');
       const roleFilter = listComponent.locator('mat-select, select').filter({ hasText: /role|filter/i }).first();
       const filterExists = await roleFilter.isVisible({ timeout: 5000 }).catch(() => false);
 
@@ -109,7 +109,7 @@ test.describe('Org Users List', () => {
       await orgPage.navigateTo();
       await orgPage.goToUsersTab();
 
-      const listComponent = page.locator('app-list');
+      const listComponent = page.locator('app-signal-list');
       const table = listComponent.locator('app-table, table');
       const rows = table.locator('tbody tr');
 

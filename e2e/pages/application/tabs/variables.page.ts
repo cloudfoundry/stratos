@@ -17,11 +17,11 @@ export class ApplicationPageVariablesTab extends ApplicationBasePage {
   constructor(page: Page, cfGuid: string, appGuid: string) {
     super(page, cfGuid, appGuid, 'variables');
 
-    this.listComponent = page.locator('app-list');
+    this.listComponent = page.locator('app-signal-list');
     this.addButton = this.listComponent.locator('button[aria-label="add"]');
     this.inlineForm = this.listComponent.locator('.list-header__inline-add-form');
     this.saveButton = this.inlineForm.locator('button').filter({ hasText: /add|save/i });
-    this.tableRows = this.listComponent.locator('app-table tbody tr');
+    this.tableRows = this.listComponent.locator('table tbody tr');
   }
 
   /**
@@ -77,7 +77,7 @@ export class ApplicationPageVariablesTab extends ApplicationBasePage {
    */
   async deleteVariable(rowIndex: number, variableName: string): Promise<void> {
     const row = this.tableRows.nth(rowIndex);
-    const actionButton = row.locator('app-table-cell-actions button');
+    const actionButton = row.locator('button[data-test="row-actions"]');
 
     await actionButton.click();
 

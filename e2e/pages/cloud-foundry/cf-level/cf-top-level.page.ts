@@ -71,8 +71,11 @@ export class CfTopLevelPage extends BasePage {
     await this.goToTab('Routes', 'routes');
   }
 
+  // The Users tab stays hidden until the foundation's users and their roles
+  // have loaded (one request; 8.5 s for 325 users on a lab foundation, over
+  // 30 s with two workers running), so it gets longer than the other tabs.
   async goToUsersTab(): Promise<void> {
-    await this.goToTab('Users', 'users');
+    await this.goToTab('Users', 'users', 60000);
   }
 
   async goToFirehoseTab(): Promise<void> {
@@ -95,9 +98,9 @@ export class CfTopLevelPage extends BasePage {
     await this.goToTab('Security Groups', 'security-groups');
   }
 
-  private async goToTab(label: string, urlSuffix: string): Promise<void> {
+  private async goToTab(label: string, urlSuffix: string, appearTimeout = 10000): Promise<void> {
     const navLink = pageTab(this.page, label);
-    await navLink.waitFor({ state: 'visible', timeout: 10000 });
+    await navLink.waitFor({ state: 'visible', timeout: appearTimeout });
     await navLink.click();
     await this.page.waitForURL(new RegExp(`${this.navLink}.*/${urlSuffix}`), { timeout: 10000 });
   }
@@ -107,22 +110,21 @@ export class CfTopLevelPage extends BasePage {
    */
   async goToOrgView(): Promise<void> {
     await this.goToOrgTab();
-    const listComponent = this.page.locator('app-list');
+    const listComponent = this.page.locator('app-signal-list');
     await listComponent.waitFor({ state: 'visible' });
   }
 
   async clickOnCard(orgName: string): Promise<void> {
-    const list = this.page.locator('app-list');
+    const list = this.page.locator('app-signal-list');
 
     // Clear filters
-    const header = list.locator('app-list-header');
-    const clearButton = header.locator('button[aria-label="Clear"]');
+    const clearButton = list.locator('[data-test="clear-filters"]');
     if (await clearButton.isVisible().catch(() => false)) {
       await clearButton.click();
     }
 
     // Find and click card
-    const card = list.locator('app-card, mat-card').filter({ hasText: orgName });
+    const card = list.locator('[data-test="card-grid"] > *').filter({ hasText: orgName });
     await card.waitFor({ state: 'visible' });
     await card.click();
   }
@@ -130,8 +132,8 @@ export class CfTopLevelPage extends BasePage {
   async deleteOrg(orgName: string): Promise<void> {
     await this.goToOrgView();
 
-    const list = this.page.locator('app-list');
-    const card = list.locator('app-card, mat-card').filter({ hasText: orgName });
+    const list = this.page.locator('app-signal-list');
+    const card = list.locator('[data-test="card-grid"] > *').filter({ hasText: orgName });
     await card.waitFor({ state: 'visible' });
 
     // Open action menu
@@ -157,13 +159,12 @@ export class CfTopLevelPage extends BasePage {
    * Quota operations
    */
   async clickOnQuota(quotaName: string): Promise<void> {
-    const list = this.page.locator('app-list');
+    const list = this.page.locator('app-signal-list');
     const table = list.locator('app-table, table');
     await table.waitFor({ state: 'visible' });
 
     // Set search text
-    const header = list.locator('app-list-header');
-    const searchInput = header.locator('input[placeholder*="Search"], input[type="text"]');
+    const searchInput = list.locator('input[placeholder*="Search"], input[type="text"]');
     if (await searchInput.isVisible().catch(() => false)) {
       await searchInput.fill(quotaName);
     }
@@ -175,20 +176,19 @@ export class CfTopLevelPage extends BasePage {
   }
 
   async deleteQuota(quotaName: string, waitUntilNotShown: boolean = true): Promise<void> {
-    const list = this.page.locator('app-list');
+    const list = this.page.locator('app-signal-list');
     const table = list.locator('app-table, table');
     await table.waitFor({ state: 'visible' });
 
     // Set search text
-    const header = list.locator('app-list-header');
-    const searchInput = header.locator('input[placeholder*="Search"], input[type="text"]');
+    const searchInput = list.locator('input[placeholder*="Search"], input[type="text"]');
     if (await searchInput.isVisible().catch(() => false)) {
       await searchInput.fill(quotaName);
     }
 
     // Open row action menu
     const row = table.locator('tbody tr').filter({ hasText: quotaName });
-    const actionButton = row.locator('app-table-cell-actions button, button[aria-label="Actions"]');
+    const actionButton = row.locator('button[data-test="row-actions"]');
     await actionButton.click();
 
     // Click delete

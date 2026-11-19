@@ -36,12 +36,15 @@ test.describe('Manage Space', () => {
     await cfApi.deleteSpace(space.guid);
 
     // Verify deletion
-    try {
-      await cfApi.getSpace(space.guid);
-      expect(true).toBe(false);
-    } catch (error) {
-      expect(error).toBeTruthy();
-    }
+    // CF deletes as a job: wait for the 404.
+    await expect.poll(async () => {
+      try {
+        await cfApi.getSpace(space.guid);
+        return 'present';
+      } catch (error) {
+        return String(error).includes(' failed: 404 ') ? 'gone' : String(error);
+      }
+    }, { timeout: 30000 }).toBe('gone');
   });
 
   test.describe('Space Management (UI)', () => {
@@ -74,8 +77,7 @@ test.describe('Manage Space', () => {
       await spaceStepper.setSpaceName(spaceName);
 
       // Check if we can proceed (name is valid)
-      const canProceed = await spaceStepper.canNext();
-      expect(canProceed).toBe(true);
+      await expect(spaceStepper.getNextButton()).toBeEnabled();
 
       await spaceStepper.next();
 
@@ -117,13 +119,11 @@ test.describe('Manage Space', () => {
 
       // Try with empty name
       await spaceStepper.setSpaceName('');
-      let canProceed = await spaceStepper.canNext();
-      expect(canProceed).toBe(false);
+      await expect(spaceStepper.getNextButton()).toBeDisabled();
 
       // Try with valid name
       await spaceStepper.setSpaceName('valid-space-name');
-      canProceed = await spaceStepper.canNext();
-      expect(canProceed).toBe(true);
+      await expect(spaceStepper.getNextButton()).toBeEnabled();
 
       // Cancel the stepper
       await spaceStepper.cancel();
@@ -141,7 +141,7 @@ test.describe('Manage Space', () => {
       try {
         // Navigate to space page
         await page.goto(`/cloud-foundry/${cfGuid}/organizations/${orgGuid}/spaces/${space.guid}/summary`);
-        await page.waitForLoadState('networkidle');
+        await page.locator('app-cloud-foundry-space-summary').waitFor({ timeout: 30000 });
 
         // Look for edit button
         const editButton = page.locator('button').filter({ hasText: /edit/i }).first();
@@ -158,7 +158,7 @@ test.describe('Manage Space', () => {
 
         // Verify current name is shown
         const form = spaceStepper.getStepperForm();
-        const nameField = form.locator('[name="spacename"], [formcontrolname="spacename"]').first();
+        const nameField = form.locator('[formcontrolname="spaceName"]').first();
         const currentName = await nameField.inputValue();
         expect(currentName).toBe(spaceName);
 
@@ -187,19 +187,22 @@ test.describe('Manage Space', () => {
         await orgPage.goToSpacesTab();
 
         // Wait for spaces list to load
-        const listComponent = page.locator('app-list');
+        const listComponent = page.locator('app-signal-list');
         await listComponent.waitFor({ state: 'visible' });
 
         // Delete space using page object method
         await orgPage.deleteSpace(spaceName);
 
         // Verify space is deleted via API
-        try {
-          await cfApi.getSpace(space.guid);
-          expect(true).toBe(false); // Should not find it
-        } catch (error) {
-          expect(error).toBeTruthy(); // Expected - space should not exist
-        }
+        // CF deletes as a job: wait for the 404.
+        await expect.poll(async () => {
+          try {
+            await cfApi.getSpace(space.guid);
+            return 'present';
+          } catch (error) {
+            return String(error).includes(' failed: 404 ') ? 'gone' : String(error);
+          }
+        }, { timeout: 30000 }).toBe('gone');
 
       } catch (error) {
         // If test failed, cleanup the space

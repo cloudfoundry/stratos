@@ -26,7 +26,7 @@ test.describe('Manage Quota', () => {
     expect(url).toContain('quota-definitions');
 
     // Verify list is visible
-    const listComponent = page.locator('app-list');
+    const listComponent = page.locator('app-signal-list');
     await expect(listComponent).toBeVisible();
   });
 
@@ -38,13 +38,9 @@ test.describe('Manage Quota', () => {
     await cfPage.goToQuotasTab();
 
     // There should be at least default quota
-    const listComponent = page.locator('app-list');
-    const table = listComponent.locator('app-table, table');
-    await expect(table).toBeVisible();
-
-    const rows = table.locator('tbody tr');
-    const count = await rows.count();
-    expect(count).toBeGreaterThan(0);
+    const listComponent = page.locator('app-signal-list');
+    const cards = listComponent.locator('[data-test="card-grid"] > *');
+    await expect(cards.first()).toBeVisible({ timeout: 20000 });
   });
 
   test.describe('Quota Management (UI)', () => {
@@ -77,8 +73,7 @@ test.describe('Manage Quota', () => {
       await quotaStepper.setMemoryLimit('1024');
 
       // Check if we can proceed
-      const canProceed = await quotaStepper.canNext();
-      expect(canProceed).toBe(true);
+      await expect(quotaStepper.getNextButton()).toBeEnabled();
 
       await quotaStepper.next();
 
@@ -115,15 +110,21 @@ test.describe('Manage Quota', () => {
       const quotaStepper = new QuotaFormStepper(page);
       await quotaStepper.waitUntilShown();
 
+      // The other required fields hold valid values, so the name alone
+      // decides whether Next is enabled.
+      await quotaStepper.setMemoryLimit('1024');
+      await quotaStepper.setInstanceMemoryLimit('512');
+      await quotaStepper.setAppInstanceLimit('10');
+      await quotaStepper.setTotalServices('10');
+      await quotaStepper.setTotalRoutes('10');
+
       // Try with empty name
       await quotaStepper.setName('');
-      let canProceed = await quotaStepper.canNext();
-      expect(canProceed).toBe(false);
+      await expect(quotaStepper.getNextButton()).toBeDisabled();
 
       // Try with valid name
       await quotaStepper.setName('valid-quota-name');
-      canProceed = await quotaStepper.canNext();
-      expect(canProceed).toBe(true);
+      await expect(quotaStepper.getNextButton()).toBeEnabled();
 
       // Cancel the stepper
       await quotaStepper.cancel();
@@ -189,29 +190,13 @@ test.describe('Manage Quota', () => {
         await cfPage.navigateTo();
         await cfPage.goToQuotasTab();
 
-        // Wait for table to load
-        const listComponent = page.locator('app-list');
-        const table = listComponent.locator('app-table, table');
-        await table.waitFor({ state: 'visible' });
-
-        // Search for our quota
-        const header = listComponent.locator('app-list-header');
-        const searchInput = header.locator('input[placeholder*="Search"], input[type="text"]').first();
-        if (await searchInput.isVisible().catch(() => false)) {
-          await searchInput.fill(quotaName);
-          await page.waitForTimeout(1000);
-        }
-
-        // Look for edit button in row
-        const row = table.locator('tbody tr').filter({ hasText: quotaName });
-        const editButton = row.locator('button').filter({ hasText: /edit/i }).first();
-        const editExists = await editButton.isVisible({ timeout: 5000 }).catch(() => false);
-
-        if (!editExists) {
-          test.skip('Edit quota functionality not available in UI');
-        }
-
-        await editButton.click();
+        // The list shows cards or table rows; both carry the row hooks.
+        const listComponent = page.locator('app-signal-list');
+        await listComponent.locator('[data-test="name-filter"]').fill(quotaName);
+        const row = listComponent.locator('[data-test="card"], tbody tr').filter({ hasText: quotaName });
+        await expect(row).toBeVisible({ timeout: 20000 });
+        await row.locator('[data-test="row-actions"]').click();
+        await page.locator('[data-test="row-action-Edit"]').click();
 
         const quotaStepper = new QuotaFormStepper(page);
         await quotaStepper.waitUntilShown();
@@ -249,47 +234,33 @@ test.describe('Manage Quota', () => {
         await cfPage.navigateTo();
         await cfPage.goToQuotasTab();
 
-        // Wait for table to load
-        const listComponent = page.locator('app-list');
-        const table = listComponent.locator('app-table, table');
-        await table.waitFor({ state: 'visible' });
-
-        // Search for our quota
-        const header = listComponent.locator('app-list-header');
-        const searchInput = header.locator('input[placeholder*="Search"], input[type="text"]').first();
-        if (await searchInput.isVisible().catch(() => false)) {
-          await searchInput.fill(quotaName);
-          await page.waitForTimeout(1000);
-        }
-
-        // Look for delete button
-        const row = table.locator('tbody tr').filter({ hasText: quotaName });
-        const deleteButton = row.locator('button').filter({ hasText: /delete/i }).first();
-        const deleteExists = await deleteButton.isVisible({ timeout: 5000 }).catch(() => false);
-
-        if (!deleteExists) {
-          test.skip('Delete quota functionality not available in UI');
-        }
-
-        await deleteButton.click();
+        // The list shows cards or table rows; both carry the row hooks.
+        const listComponent = page.locator('app-signal-list');
+        await listComponent.locator('[data-test="name-filter"]').fill(quotaName);
+        const row = listComponent.locator('[data-test="card"], tbody tr').filter({ hasText: quotaName });
+        await expect(row).toBeVisible({ timeout: 20000 });
+        await row.locator('[data-test="row-actions"]').click();
+        await page.locator('[data-test="row-action-Delete"]').click();
 
         // Confirm deletion dialog
         const confirmDialog = page.locator('app-dialog-confirm');
         await confirmDialog.waitFor({ state: 'visible', timeout: 5000 });
 
-        const confirmButton = confirmDialog.locator('button').filter({ hasText: /delete|confirm|yes/i });
+        const confirmButton = confirmDialog.locator('[data-test="confirm-dialog-confirm"]');
         await confirmButton.click();
 
         // Wait for row to disappear
         await row.waitFor({ state: 'hidden', timeout: 10000 });
 
-        // Verify quota is deleted via API
-        try {
-          await cfApi.getQuota(quota.guid);
-          expect(true).toBe(false); // Should not find it
-        } catch (error) {
-          expect(error).toBeTruthy(); // Expected - quota should not exist
-        }
+        // Verify quota is deleted via API (CF deletes it as a job)
+        await expect.poll(async () => {
+          try {
+            await cfApi.getQuota(quota.guid);
+            return 'present';
+          } catch (error) {
+            return String(error).includes(' failed: 404 ') ? 'gone' : String(error);
+          }
+        }, { timeout: 30000 }).toBe('gone');
 
       } catch (error) {
         // If test failed, cleanup the quota
@@ -320,49 +291,26 @@ test.describe('Manage Quota', () => {
 
       try {
         // Attach quota to org via API
-        // Note: This would require an additional API method to assign quota to org
-        // For now, we'll test the UI behavior
+        await cfApi.applyOrgQuota(org.guid, quota.guid);
 
         // Navigate to CF quotas page
         const cfPage = CfTopLevelPage.forEndpoint(page, cfGuid);
         await cfPage.navigateTo();
         await cfPage.goToQuotasTab();
 
-        // Wait for table to load
-        const listComponent = page.locator('app-list');
-        const table = listComponent.locator('app-table, table');
-        await table.waitFor({ state: 'visible' });
+        // The list shows cards or table rows; both carry the row hooks.
+        const listComponent = page.locator('app-signal-list');
+        await listComponent.locator('[data-test="name-filter"]').fill(quotaName);
+        const row = listComponent.locator('[data-test="card"], tbody tr').filter({ hasText: quotaName });
+        await expect(row).toBeVisible({ timeout: 20000 });
+        await row.locator('[data-test="row-actions"]').click();
+        await page.locator('[data-test="row-action-Delete"]').click();
+        await page.locator('[data-test="confirm-dialog-confirm"]').click();
 
-        // Search for our quota
-        const header = listComponent.locator('app-list-header');
-        const searchInput = header.locator('input[placeholder*="Search"], input[type="text"]').first();
-        if (await searchInput.isVisible().catch(() => false)) {
-          await searchInput.fill(quotaName);
-          await page.waitForTimeout(1000);
-        }
-
-        // Look for delete button
-        const row = table.locator('tbody tr').filter({ hasText: quotaName });
-        const deleteButton = row.locator('button').filter({ hasText: /delete/i }).first();
-        const deleteExists = await deleteButton.isVisible({ timeout: 5000 }).catch(() => false);
-
-        if (deleteExists) {
-          // Try to delete
-          await deleteButton.click();
-
-          // Should show error or be disabled if quota is attached
-          // This is UI-dependent behavior that we can verify exists
-          const confirmDialog = page.locator('app-dialog-confirm');
-          const dialogAppears = await confirmDialog.isVisible({ timeout: 2000 }).catch(() => false);
-
-          if (dialogAppears) {
-            // Cancel the dialog
-            const cancelButton = confirmDialog.locator('button').filter({ hasText: /cancel/i });
-            if (await cancelButton.isVisible().catch(() => false)) {
-              await cancelButton.click();
-            }
-          }
-        }
+        // Cloud Foundry refuses while an organization uses the quota: it
+        // is still there, and so is its card.
+        await expect(row).toBeVisible();
+        expect((await cfApi.getQuota(quota.guid)).guid).toBe(quota.guid);
 
       } finally {
         // Cleanup

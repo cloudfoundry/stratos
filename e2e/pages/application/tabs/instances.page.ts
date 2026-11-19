@@ -20,8 +20,8 @@ export class ApplicationPageInstancesTab extends ApplicationBasePage {
     this.cardStatus = page.locator('app-card-app-status');
     this.cardInstances = page.locator('app-card-app-instances');
     this.cardUsage = page.locator('app-card-app-usage');
-    this.listComponent = page.locator('app-list');
-    this.tableRows = this.listComponent.locator('app-table tbody tr');
+    this.listComponent = page.locator('app-signal-list');
+    this.tableRows = this.listComponent.locator('table tbody tr');
   }
 
   /**
@@ -67,7 +67,7 @@ export class ApplicationPageInstancesTab extends ApplicationBasePage {
 
     if (index <= rows.length - 1) {
       const row = rows[index];
-      const cells = await row.locator('app-table-cell').all();
+      const cells = await row.locator('td').all();
 
       if (cells.length >= 6) {
         const uptimeText = await cells[5].textContent();

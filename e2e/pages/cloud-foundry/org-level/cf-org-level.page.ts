@@ -88,32 +88,32 @@ export class CfOrgLevelPage extends BasePage {
    * Space operations
    */
   async clickOnCard(cardName: string): Promise<void> {
-    const list = this.page.locator('app-list');
-    const card = list.locator('app-card, mat-card').filter({ hasText: cardName });
+    const list = this.page.locator('app-signal-list');
+    const card = list.locator('[data-test="card-grid"] > *').filter({ hasText: cardName });
     await card.waitFor({ state: 'visible' });
     await card.click();
   }
 
   async deleteSpace(spaceName: string): Promise<void> {
-    const list = this.page.locator('app-list');
-    await list.locator('app-card, mat-card').first().waitFor({ state: 'visible' });
+    const list = this.page.locator('app-signal-list');
+    await list.locator('[data-test="card-grid"] > *').first().waitFor({ state: 'visible' });
 
-    const card = list.locator('app-card, mat-card').filter({ hasText: spaceName });
+    const card = list.locator('[data-test="card-grid"] > *').filter({ hasText: spaceName });
     await card.waitFor({ state: 'visible' });
 
     // Open action menu
-    const menuButton = card.locator('.meta-card__header__button, button[aria-label="menu"]');
+    const menuButton = card.locator('[data-test="row-actions"]');
     await menuButton.click();
 
     // Click delete
-    const deleteOption = this.page.locator('button, mat-option').filter({ hasText: 'Delete' });
+    const deleteOption = this.page.locator('[data-test=\"row-action-Delete\"]');
     await deleteOption.click();
 
     // Confirm dialog
     const confirmDialog = this.page.locator('app-dialog-confirm');
     await confirmDialog.waitFor({ state: 'visible' });
 
-    const confirmButton = confirmDialog.locator('button').filter({ hasText: /confirm|delete/i });
+    const confirmButton = confirmDialog.locator('[data-test="confirm-dialog-confirm"]');
     await confirmButton.click();
 
     // Wait for card to disappear
@@ -124,13 +124,12 @@ export class CfOrgLevelPage extends BasePage {
    * Space quota operations
    */
   async clickOnSpaceQuota(quotaName: string): Promise<void> {
-    const list = this.page.locator('app-list');
+    const list = this.page.locator('app-signal-list');
     const table = list.locator('app-table, table');
     await table.waitFor({ state: 'visible' });
 
     // Set search text
-    const header = list.locator('app-list-header');
-    const searchInput = header.locator('input[placeholder*="Search"], input[type="text"]');
+    const searchInput = list.locator('input[placeholder*="Search"], input[type="text"]');
     if (await searchInput.isVisible().catch(() => false)) {
       await searchInput.fill(quotaName);
     }
@@ -142,31 +141,25 @@ export class CfOrgLevelPage extends BasePage {
   }
 
   async deleteSpaceQuota(quotaName: string, waitUntilNotShown: boolean = true): Promise<void> {
-    const list = this.page.locator('app-list');
-    const table = list.locator('app-table, table');
-    await table.waitFor({ state: 'visible' });
-
-    // Set search text
-    const header = list.locator('app-list-header');
-    const searchInput = header.locator('input[placeholder*="Search"], input[type="text"]');
-    if (await searchInput.isVisible().catch(() => false)) {
-      await searchInput.fill(quotaName);
-    }
+    // The list shows cards or table rows; both carry the row hooks.
+    const list = this.page.locator('app-signal-list');
+    await list.locator('[data-test="name-filter"]').fill(quotaName);
+    const row = list.locator('[data-test="card"], tbody tr').filter({ hasText: quotaName });
+    await row.waitFor({ state: 'visible', timeout: 20000 });
 
     // Open row action menu
-    const row = table.locator('tbody tr').filter({ hasText: quotaName });
-    const actionButton = row.locator('app-table-cell-actions button, button[aria-label="Actions"]');
+    const actionButton = row.locator('[data-test="row-actions"]');
     await actionButton.click();
 
     // Click delete
-    const deleteOption = this.page.locator('button, mat-option').filter({ hasText: 'Delete' });
+    const deleteOption = this.page.locator('[data-test=\"row-action-Delete\"]');
     await deleteOption.click();
 
     // Confirm dialog
     const confirmDialog = this.page.locator('app-dialog-confirm');
     await confirmDialog.waitFor({ state: 'visible' });
 
-    const confirmButton = confirmDialog.locator('button').filter({ hasText: /confirm|delete/i });
+    const confirmButton = confirmDialog.locator('[data-test="confirm-dialog-confirm"]');
     await confirmButton.click();
 
     if (waitUntilNotShown) {
