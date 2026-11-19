@@ -8,7 +8,7 @@ configuration. For step-by-step setup, see the
 
 | Tool | Version | Pinned In | Purpose |
 |------|---------|-----------|---------|
-| Node.js | 26.2.0 | `.tool-versions` (`package.json` engines allows `^24 \|\| ^26`) | Angular CLI, build tooling |
+| Node.js | 26.13.1 | `.tool-versions` (`package.json` engines allows `^24 \|\| ^26`) | Angular CLI, build tooling |
 | Bun | 1.3.14 | `.tool-versions`, `package.json` engines (`>=1.3.14`) | Package manager, script runner |
 | Go | 1.26.5 | `.tool-versions` (`go.mod` requires `>=1.26.3`) | Backend compilation |
 | Git | any | — | Source control, build metadata |
