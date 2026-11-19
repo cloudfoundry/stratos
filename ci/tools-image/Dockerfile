@@ -13,7 +13,7 @@ FROM node:24-bookworm
 
 # modrot and osv-scanner require go >= 1.26.4; jetstream's go.mod needs 1.27.1
 ARG GO_VERSION=1.27.1
-ARG BUN_VERSION=1.3.14
+ARG BUN_VERSION=1.4.5
 ARG TARGETARCH=amd64
 
 RUN apt-get update && apt-get install -y --no-install-recommends \
