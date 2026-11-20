@@ -455,7 +455,7 @@
                 @if (first) {
                   <div class="font-semibold text-base text-content-text mb-2 flex items-center justify-between gap-2">
                     @if (titleColumn(); as tc) {
-                      <span class="truncate min-w-0" [attr.title]="tc.tooltip ? tc.tooltip(row) : tc.render(row)">
+                      <span class="truncate min-w-0 p-1 -m-1" [attr.title]="tc.tooltip ? tc.tooltip(row) : tc.render(row)">
                         @if (tc.externalLink && tc.externalLink(row); as href) {
                           <a [href]="href" target="_blank" rel="noopener" (click)="$event.stopPropagation()" class="text-accent hover:underline">{{ tc.render(row) }}</a>
                         } @else if (tc.kind === 'link' && tc.link && tc.link(row); as target) {
@@ -606,7 +606,7 @@
                 } @else {
                   <div class="flex justify-between items-center gap-2 text-sm py-0.5">
                     <span class="text-content-muted"><app-abbr-text [text]="col.header" /></span>
-                    <span class="text-content-text text-right truncate" [attr.title]="(col.kind === 'pill' || col.kind === 'dot') && col.tooltip ? col.tooltip(row) : col.render(row)">
+                    <span class="text-content-text text-right truncate p-1 -m-1" [attr.title]="(col.kind === 'pill' || col.kind === 'dot') && col.tooltip ? col.tooltip(row) : col.render(row)">
                       @if (col.copyValue?.(row); as cv) {
                         <app-copy-to-clipboard data-test="copy-value" class="inline-flex align-middle mr-1" [compact]="true" [text]="cv" [tooltip]="'Copy ' + cv" [showSuccessText]="false" />
                       }

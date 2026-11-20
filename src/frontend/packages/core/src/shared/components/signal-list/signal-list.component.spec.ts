@@ -206,6 +206,33 @@ describe('SignalListComponent', () => {
     expect(stack.classList.contains('leading-6')).toBe(true);
   });
 
+  // In card view a link sits in a span that cuts off overflowing text. The
+  // span clipped the whole focus outline (2 px, 2 px outside the link), so
+  // a focused link looked the same as an unfocused one (WCAG 2.4.7). The
+  // span has 4 px of padding, taken back by a negative margin, so the
+  // outline fits inside it and the layout does not move.
+  it('leaves room for the focus outline around a link in a card', async () => {
+    const fixture = TestBed.createComponent(Host);
+    fixture.componentInstance.config = {
+      ...fixture.componentInstance.config,
+      viewMode: signal<'table' | 'card'>('card'),
+      columns: [
+        { header: 'Name', kind: 'link', render: r => r.name, link: r => ['/name', r.name] },
+        { header: 'Owner', kind: 'link', render: r => `${r.name}-owner`, link: r => ['/owner', r.name] },
+      ],
+    };
+    await fixture.whenStable();
+    const card = fixture.nativeElement.querySelector('[data-test="card"]') as HTMLElement;
+    const links = [...card.querySelectorAll('a')] as HTMLElement[];
+    expect(links.map(a => a.textContent?.trim())).toEqual(['one', 'one-owner']);
+    for (const a of links) {
+      const clip = a.parentElement as HTMLElement;
+      expect(clip.classList.contains('truncate'), clip.outerHTML.slice(0, 80)).toBe(true);
+      expect(clip.classList.contains('p-1'), clip.outerHTML.slice(0, 80)).toBe(true);
+      expect(clip.classList.contains('-m-1'), clip.outerHTML.slice(0, 80)).toBe(true);
+    }
+  });
+
   describe('row-action menu and the Escape key', () => {
     async function withActions() {
       const fixture = TestBed.createComponent(Host);
