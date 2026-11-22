@@ -7,6 +7,7 @@ import {
   CurrentUserPermissionsService,
   ListSubNavAction,
   ListSubNavComponent,
+  PermissionConfig,
   SignalListColumn,
   SignalListComponent,
   SignalListConfig,
@@ -18,6 +19,8 @@ import { CfUsersSignalConfigService } from '../../../../../shared/signal-list-co
 import { CloudFoundryEndpointService } from '../../../services/cloud-foundry-endpoint.service';
 import { CloudFoundryOrganizationService } from '../../../services/cloud-foundry-organization.service';
 import { CfCurrentUserPermissions } from '../../../../../user-permissions/cf-user-permissions.types';
+import { CfPermissionTypes } from '../../../../../user-permissions/cf-user-permissions-checkers';
+import { CFFeatureFlagTypes } from '../../../../../cf-api.types';
 import type { StUser, StUserOrgRole, StUserSpaceRole } from '../../../../../services/endpoint-data/stratos-types';
 import {
   bulkRemoveUsers,
@@ -44,6 +47,7 @@ import { AddUserDialogComponent } from '../../../users/add-user/add-user-dialog.
 // - Username, Origin, Created retained.
 //
 // Action bar (always-visible, "Total Users" line):
+// - Manage by Username: opens the org-scoped wizard on its Usernames step.
 // - Manage Roles (primary): opens org-scoped manage wizard for selected users.
 // - Remove from Org and Spaces (destructive): bulk-removes all org+space role
 //   grants for selected users within this org; gated on canManageRoles +
@@ -99,6 +103,19 @@ export class CloudFoundryOrganizationUsersComponent {
   private readonly canChangeSpaceRoles = this.perms.can(CfCurrentUserPermissions.SPACE_CHANGE_ROLES, this.cfEndpointService.cfGuid);
   private readonly canManageRoles: Signal<boolean> = computed(() => this.canChangeOrgRoles() || this.canChangeSpaceRoles());
 
+  /** Manage by Username opens the Manage Roles wizard on its Usernames step,
+   *  for users the list cannot select. Shown, as before the signal-list
+   *  rewrite, when the CF lets roles be set or unset by username and the
+   *  user may change roles in this org. */
+  private readonly canRolesByUsername: Signal<boolean> = (() => {
+    const cfGuid = this.cfEndpointService.cfGuid;
+    const flag = (f: CFFeatureFlagTypes) => this.perms.can(new PermissionConfig(CfPermissionTypes.FEATURE_FLAG, f), cfGuid);
+    const canSet = flag(CFFeatureFlagTypes.set_roles_by_username);
+    const canUnset = flag(CFFeatureFlagTypes.unset_roles_by_username);
+    const canChange = this.perms.can(CfCurrentUserPermissions.ORGANIZATION_CHANGE_ROLES, cfGuid, this.cfOrgService.orgGuid);
+    return computed(() => (canSet() || canUnset()) && canChange());
+  })();
+
   /** True when the CF endpoint has the UAA invite feature configured. */
   private readonly userInviteAllowed: Signal<boolean> = this.userInviteService.configured;
 
@@ -126,6 +143,18 @@ export class CloudFoundryOrganizationUsersComponent {
       visible: computed(() => this.canManageRoles()),
       disabled: computed(() => !this.canManageRoles()),
       invoke: () => this.openAddUser(),
+    },
+    {
+      label: 'Manage by Username',
+      icon: 'people',
+      variant: 'default',
+      dataTest: 'cf-org-users-roles-by-username',
+      tooltip: 'Add or remove roles for users by username',
+      visible: this.canRolesByUsername,
+      invoke: () => void this.router.navigate(
+        ['/cloud-foundry', this.cfGuid, 'organizations', this.orgGuid, 'users', 'manage'],
+        { queryParams: { setByUsername: true } },
+      ),
     },
     {
       label: 'Manage Roles',
