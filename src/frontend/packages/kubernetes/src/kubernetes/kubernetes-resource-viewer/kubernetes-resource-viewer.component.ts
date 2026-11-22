@@ -4,6 +4,7 @@ import {
   AfterViewInit,
   Component,
   ComponentRef,
+  Injector,
   OnDestroy,
   TemplateRef,
   ViewContainerRef,
@@ -18,6 +19,7 @@ import { take, filter, map, shareReplay, switchMap } from 'rxjs/operators';
 import { EndpointsService } from '../../../../core/src/core/endpoints.service';
 import { ConfirmationDialogConfig } from '../../../../core/src/shared/components/confirmation-dialog.config';
 import { JsonViewerComponent } from '../../../../core/src/shared/components/json-viewer/json-viewer.component';
+import { SignalListConfig } from '../../../../core/src/shared/components/signal-list/signal-list.component';
 import { MetadataItemComponent } from '../../../../core/src/shared/components/metadata-item/metadata-item.component';
 import { SidepanelPreviewComponent } from '../../../../core/src/shared/components/sidepanel-preview/sidepanel-preview.component';
 import { PreviewableComponent } from '../../../../core/src/shared/previewable-component';
@@ -34,6 +36,7 @@ import {
   ResourceAlertViewComponent,
 } from '../analysis-report-viewer/resource-alert-preview/resource-alert-view/resource-alert-view.component';
 import { KUBERNETES_ENDPOINT_TYPE } from '../kubernetes-entity-factory';
+import { KubernetesUIConfigService } from '../kubernetes-ui-service';
 import { KubernetesEndpointService } from '../services/kubernetes-endpoint.service';
 import { BasicKubeAPIResource, KubeAPIResource, KubeResourceEntityDefinition } from '../store/kube.types';
 import { ConfirmationDialogService } from './../../../../core/src/shared/components/confirmation-dialog.service';
@@ -54,6 +57,30 @@ export interface KubernetesResourceViewerConfig {
   resourceKind: string;
   component?: any;
   definition?: any;
+}
+
+// A Kubernetes list's Name cell opens the row in this viewer, as the lists
+// did before they moved to the signal list. `injector` is the list's own:
+// it carries the Kubernetes tab's endpoint services, which the side-panel
+// host above the routes does not have. A type with a registered preview
+// component (namespaces) shows it inside the viewer.
+export function withResourcePreview<T>(
+  config: SignalListConfig<T>,
+  entityType: string,
+  injector: Injector,
+): SignalListConfig<T> {
+  const entity = entityCatalog.getEntity(KUBERNETES_ENDPOINT_TYPE, entityType) as unknown as
+    { definition?: KubeResourceEntityDefinition } | undefined;
+  const definition = entity?.definition;
+  const component = injector.get(KubernetesUIConfigService).previewComponent.get(entityType);
+  const open = (row: T) => injector.get(SidePanelService).show(KubernetesResourceViewerComponent, {
+    title: (row as { metadata?: { name?: string } }).metadata?.name ?? '',
+    resourceKind: definition?.label ?? entityType,
+    resource$: of(row as unknown as BasicKubeAPIResource),
+    component,
+    definition,
+  } satisfies KubernetesResourceViewerConfig, injector);
+  return { ...config, columns: config.columns.map(c => (c.key === 'name' ? { ...c, open } : c)) };
 }
 
 interface KubernetesResourceViewerResource {
@@ -248,7 +275,7 @@ export class KubernetesResourceViewerComponent implements PreviewableComponent, 
       shareReplay({ bufferSize: 1, refCount: true })
     );
 
-    this.hasPodMetrics$ = props.resourceKind === 'pod' ?
+    this.hasPodMetrics$ = props.resourceKind?.toLowerCase() === 'pod' ?
       this.resource$.pipe(
         switchMap(resource => {
           const endpointId = this.getEndpointId(resource.raw);

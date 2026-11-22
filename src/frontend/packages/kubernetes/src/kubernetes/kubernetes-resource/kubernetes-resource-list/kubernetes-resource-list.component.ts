@@ -20,6 +20,7 @@ import { KUBERNETES_ENDPOINT_TYPE } from '../../kubernetes-entity-factory';
 import { KubeNamespaceDataService } from '../../../services/domain-data/kube-namespace-data.service';
 import { BaseKubeGuid } from '../../kubernetes-page.types';
 import { KubeResourceEntityDefinition } from '../../store/kube.types';
+import { withResourcePreview } from '../../kubernetes-resource-viewer/kubernetes-resource-viewer.component';
 import { getHelmReleaseDetailsFromGuid } from '../../workloads/store/workloads-entity-factory';
 import { KubeCurrentNamespaceService } from '../../../services/domain-data/kube-current-namespace.service';
 import { KubernetesSignalConfigRegistry } from '../kubernetes-signal-config-registry';
@@ -165,7 +166,7 @@ export class KubernetesResourceListComponent implements OnDestroy {
         },
         this.injector,
       );
-      this.signalListConfig.set(config);
+      this.signalListConfig.set(withResourcePreview(config, this.entityCatalogKey, this.injector));
       // Kick the registry-backed cache so the underlying signal
       // populates on first paint. Errors flow into the signal-config's
       // errors() and surface in the toolbar.

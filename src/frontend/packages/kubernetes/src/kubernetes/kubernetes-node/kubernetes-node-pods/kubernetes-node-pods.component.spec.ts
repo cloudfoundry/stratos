@@ -3,9 +3,11 @@ import { provideHttpClient } from '@angular/common/http';
 import { HttpTestingController, provideHttpClientTesting } from '@angular/common/http/testing';
 import { provideZonelessChangeDetection } from '@angular/core';
 import { ActivatedRoute } from '@angular/router';
-import { describe, it, expect, beforeEach, afterEach } from 'vitest';
+import { describe, it, expect, beforeEach, afterEach, vi } from 'vitest';
 
 import { BaseTestModules } from '../../../../../core/test-framework/core-test.helper';
+import { SidePanelService } from '../../../../../core/src/shared/services/side-panel.service';
+import { KubernetesResourceViewerComponent } from '../../kubernetes-resource-viewer/kubernetes-resource-viewer.component';
 import { KubernetesNodePodsComponent } from './kubernetes-node-pods.component';
 import { BaseKubeGuid } from '../../kubernetes-page.types';
 import { KubernetesNodeService } from '../../services/kubernetes-node.service';
@@ -73,6 +75,16 @@ describe('KubernetesNodePodsComponent', () => {
     const pod = { metadata: { kubeId: KUBE_GUID, name: 'p1', namespace: 'ns-a' } } as any;
     expect(col.link!(pod)).toEqual(['/kubernetes', KUBE_GUID, 'namespaces']);
     expect(col.linkQueryParams!(pod)).toEqual({ name: 'ns-a' });
+  });
+
+  it('a pod name opens the pod in the side-panel preview', async () => {
+    const show = vi.spyOn(TestBed.inject(SidePanelService), 'show').mockImplementation(() => undefined);
+    await mount({ [KUBE_GUID]: { items: [] } });
+    const col = component.listConfig()!.columns.find(c => c.key === 'name')!;
+
+    col.open!({ metadata: { kubeId: KUBE_GUID, name: 'p1', namespace: 'ns-a' } } as any);
+
+    expect(show).toHaveBeenCalledWith(KubernetesResourceViewerComponent, expect.objectContaining({ title: 'p1' }), expect.anything());
   });
 
   it('should create', async () => {

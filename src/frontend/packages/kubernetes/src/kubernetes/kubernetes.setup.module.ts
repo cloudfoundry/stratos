@@ -158,9 +158,8 @@ export class KubernetesSetupModule {
       signalRegistry.register('role', buildRolesSignalConfig as any);
       signalRegistry.register('serviceAccount', buildServiceAccountsSignalConfig as any);
 
-      // Side-panel preview component is still wired through the legacy
-      // UI-config service — it's used by the resource-viewer drawer
-      // independent of the list path.
+      // The namespace preview shows inside the resource viewer when a
+      // namespace list opens a row (withResourcePreview reads it here).
       uiConfigService.previewComponent.set(kubernetesNamespacesEntityType, KubernetesNamespacePreviewComponent);
     }
   }

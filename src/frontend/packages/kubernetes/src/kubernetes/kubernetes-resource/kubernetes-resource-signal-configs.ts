@@ -432,7 +432,8 @@ export function buildNamespacesSignalConfig(
 
   const columns: SignalListConfig<KubeNamespace>['columns'] = [
     {
-      // Plain text: a namespace has no page of its own (removed in 2020).
+      // A namespace has no page of its own (removed in 2020): the shell
+      // makes the name open it in the resource preview (withResourcePreview).
       header: 'Name', key: 'name', kind: 'text',
       sortField: (n: KubeNamespace) => (n.metadata?.name ?? '').toLowerCase(),
       render: (n: KubeNamespace) => n.metadata?.name ?? '',
