@@ -5,6 +5,8 @@ import { ActivatedRoute } from '@angular/router';
 import { SignalListComponent, SignalListConfig } from '@stratosui/core';
 
 import { KubernetesEndpointService } from '../../services/kubernetes-endpoint.service';
+import { kubernetesNamespacesEntityType } from '../../kubernetes-entity-factory';
+import { withResourcePreview } from '../../kubernetes-resource-viewer/kubernetes-resource-viewer.component';
 import { KubeNamespace } from '../../../services/endpoint-data/kube-types';
 import { kubeListErrorState, reportKubeListErrors } from '../../list-types/kube-list-errors';
 import {
@@ -52,7 +54,7 @@ export class KubernetesNamespacesTabComponent {
     const errorState = kubeListErrorState(kubeGuid, this.signalConfig.errors());
     reportKubeListErrors(errorState.errorsByCnsi, this.injector);
 
-    this.listConfig.set({
+    this.listConfig.set(withResourcePreview({
       pagedItems: this.signalConfig.view.pagedItems,
       totalFilteredResults: this.signalConfig.view.totalFilteredResults,
       totalPages: this.signalConfig.view.totalPages,
@@ -66,7 +68,8 @@ export class KubernetesNamespacesTabComponent {
           // sortField is a function so it composes against metadata.name
           // (a nested field) rather than a top-level KubeNamespace key.
           sortField: (n: KubeNamespace) => (n.metadata?.name ?? '').toLowerCase(),
-          // Plain text: a namespace has no page of its own (removed in 2020).
+          // A namespace has no page of its own (removed in 2020): the name
+          // opens it in the resource preview (withResourcePreview).
           kind: 'text',
           render: (n: KubeNamespace) => n.metadata.name,
           widthHint: '24rem',
@@ -96,7 +99,7 @@ export class KubernetesNamespacesTabComponent {
       onClear: () => this.signalConfig.clearFilters(),
       viewMode: this.signalConfig.viewMode,
       sort: this.signalConfig.sort,
-    });
+    }, kubernetesNamespacesEntityType, this.injector));
   }
 }
 

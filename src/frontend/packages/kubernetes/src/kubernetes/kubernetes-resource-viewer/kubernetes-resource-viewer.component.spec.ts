@@ -1,20 +1,27 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
-import { provideZonelessChangeDetection } from '@angular/core';
+import { Injector, provideZonelessChangeDetection } from '@angular/core';
 import { describe, it, expect, beforeEach, afterEach, beforeAll, afterAll, vi } from 'vitest';
 import { ActivatedRoute } from '@angular/router';
-import { of } from 'rxjs';
+import { firstValueFrom, of } from 'rxjs';
 
+import { EndpointsService } from '../../../../core/src/core/endpoints.service';
 import { ConfirmationDialogService } from '../../../../core/src/shared/components/confirmation-dialog.service';
 import { TailwindSnackBarService } from '../../../../core/src/shared/services/tailwind-snackbar.service';
 import { SidePanelService } from '../../../../core/src/shared/services/side-panel.service';
 import { UserFavoriteManager } from '../../../../store/src/user-favorite-manager';
+import { entityCatalog, generateStratosEntities, TestEntityCatalog } from '@stratosui/store';
+import { kubeEntityCatalog } from '../kubernetes-entity-generator';
 import { KubePodDataService } from '../../services/domain-data/kube-pod-data.service';
 import { KubeBaseGuidMock, KubernetesBaseTestModules } from '../kubernetes.testing.module';
 import { KubernetesEndpointService } from '../services/kubernetes-endpoint.service';
 import {
   ResourceAlertViewComponent,
 } from './../analysis-report-viewer/resource-alert-preview/resource-alert-view/resource-alert-view.component';
-import { KubernetesResourceViewerComponent } from './kubernetes-resource-viewer.component';
+import {
+  KubernetesNamespacePreviewComponent,
+} from '../kubernetes-namespace/kubernetes-namespace-preview/kubernetes-namespace-preview.component';
+import { KubernetesUIConfigService } from '../kubernetes-ui-service';
+import { KubernetesResourceViewerComponent, withResourcePreview } from './kubernetes-resource-viewer.component';
 
 describe('KubernetesResourceViewerComponent', () => {
   let component: KubernetesResourceViewerComponent;
@@ -132,5 +139,62 @@ describe('KubernetesResourceViewerComponent', () => {
 
     expect(title).toBe('Delete Pod');
     expect(deleteSpy).toHaveBeenCalledWith(expect.anything(), 'p1', 'ns-a');
+  });
+
+  // Lists pass the kind as its label ("Pod"); the helm release graph passes
+  // the Kubernetes kind, also "Pod".
+  it('checks pod metrics for a pod whatever the kind\'s case', async () => {
+    const hasMetrics = vi.spyOn(TestBed.inject(EndpointsService), 'hasMetrics').mockReturnValue(of(true));
+    component.setProps({ title: 'Preview', resource$: of(pod), resourceKind: 'Pod' });
+
+    expect(await firstValueFrom(component.hasPodMetrics$)).toBe(true);
+    expect(hasMetrics).toHaveBeenCalled();
+  });
+
+  // The Kubernetes lists open a row here from its Name cell. The list's
+  // injector carries the Kubernetes tab's endpoint services, which the
+  // side-panel host above the routes does not.
+  describe('withResourcePreview', () => {
+    beforeEach(() => {
+      const catalog = entityCatalog as TestEntityCatalog;
+      catalog.clear();
+      [...generateStratosEntities(), ...kubeEntityCatalog.allKubeEntities()].forEach(e => entityCatalog.register(e));
+    });
+
+    const listConfig = {
+      columns: [
+        { header: 'Name', key: 'name', render: (r: any) => r.metadata.name },
+        { header: 'Age', key: 'age', render: () => '' },
+      ],
+    } as any;
+
+    it('opens a row from the Name cell in the viewer, with the list injector', async () => {
+      const show = vi.spyOn(TestBed.inject(SidePanelService), 'show').mockImplementation(() => undefined);
+      const injector = TestBed.inject(Injector);
+
+      const config = withResourcePreview(listConfig, 'pod', injector);
+      expect(config.columns[1].open).toBeUndefined();
+      config.columns[0].open!(pod);
+
+      expect(show).toHaveBeenCalledWith(KubernetesResourceViewerComponent, expect.anything(), injector);
+      const props = show.mock.calls[0][1] as any;
+      expect(props.title).toBe('p1');
+      expect(props.resourceKind).toBe('Pod');
+      expect(props.definition?.type).toBe('pod');
+      expect(props.component).toBeUndefined();
+      expect(await firstValueFrom(props.resource$)).toBe(pod);
+    });
+
+    it('shows the namespace preview inside the viewer for a namespace', () => {
+      const show = vi.spyOn(TestBed.inject(SidePanelService), 'show').mockImplementation(() => undefined);
+      TestBed.inject(KubernetesUIConfigService).previewComponent.set('namespace', KubernetesNamespacePreviewComponent);
+
+      const config = withResourcePreview(listConfig, 'namespace', TestBed.inject(Injector));
+      config.columns[0].open!({ metadata: { name: 'ns-a' } });
+
+      const props = show.mock.calls[0][1] as any;
+      expect(props.resourceKind).toBe('Namespace');
+      expect(props.component).toBe(KubernetesNamespacePreviewComponent);
+    });
   });
 });

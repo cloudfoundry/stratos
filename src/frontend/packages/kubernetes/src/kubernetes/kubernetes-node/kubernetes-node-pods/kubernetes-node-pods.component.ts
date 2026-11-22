@@ -4,6 +4,8 @@ import { ChangeDetectionStrategy, Component, Injector, WritableSignal, inject, s
 import { SignalListComponent, SignalListConfig } from '@stratosui/core';
 
 import { KubernetesNodeService } from '../../services/kubernetes-node.service';
+import { kubernetesPodsEntityType } from '../../kubernetes-entity-factory';
+import { withResourcePreview } from '../../kubernetes-resource-viewer/kubernetes-resource-viewer.component';
 import { KubePod } from '../../../services/endpoint-data/kube-types';
 import { kubeListErrorState, reportKubeListErrors } from '../../list-types/kube-list-errors';
 import {
@@ -36,7 +38,7 @@ export class KubernetesNodePodsComponent {
     const errorState = kubeListErrorState(kubeGuid, this.signalConfig.errors());
     reportKubeListErrors(errorState.errorsByCnsi, this.injector);
 
-    this.listConfig.set({
+    this.listConfig.set(withResourcePreview({
       pagedItems: this.signalConfig.view.pagedItems,
       totalFilteredResults: this.signalConfig.view.totalFilteredResults,
       totalPages: this.signalConfig.view.totalPages,
@@ -95,7 +97,7 @@ export class KubernetesNodePodsComponent {
       onClear: () => this.signalConfig.clearFilters(),
       viewMode: this.signalConfig.viewMode,
       sort: this.signalConfig.sort,
-    });
+    }, kubernetesPodsEntityType, this.injector));
   }
 }
 

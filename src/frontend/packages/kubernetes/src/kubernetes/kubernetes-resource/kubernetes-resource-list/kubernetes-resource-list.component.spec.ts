@@ -35,7 +35,7 @@ function makeMinimalSignalConfig(): SignalListConfig<unknown> {
     pageSize: signal(10),
     isAnyLoading: signal(false),
     errorsByCnsi: signal(new Map()),
-    columns: [],
+    columns: [{ header: 'Name', key: 'name', render: (row: unknown) => String(row) }],
     getRowKey: (row: unknown) => String(row),
   };
 }
@@ -161,6 +161,12 @@ describe('KubernetesResourceListComponent', () => {
     // strict: this is the namespaced (non-workload) path; the constructor
     // always assigns namespaces here.
     expect(component.namespaces!()).toEqual(['alpha', 'beta']);
+  });
+
+  // Every list the shell builds opens a row from its Name cell in the
+  // resource preview, as the lists did before the signal-list move.
+  it('makes the Name cell open the row in the resource preview', () => {
+    expect(component.signalListConfig()!.columns[0].open).toBeTypeOf('function');
   });
 
   it('follows the namespace the user selects, and "All namespaces" clears it', async () => {
