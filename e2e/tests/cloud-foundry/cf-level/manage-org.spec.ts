@@ -69,11 +69,9 @@ test.describe('Manage Organization', () => {
 
       // Click "Add Organization" button
       const addButton = page.locator('button').filter({ hasText: /add.*organization|create.*organization/i }).first();
-      const buttonExists = await addButton.isVisible({ timeout: 5000 }).catch(() => false);
-
-      if (!buttonExists) {
-        test.skip('Add Organization button not found - UI may have changed');
-      }
+      // The Organizations list takes 5–16 s on a lab foundation (over 20 s
+      // with two workers), and the button waits for it.
+      await expect(addButton).toBeVisible({ timeout: 30000 });
 
       await addButton.click();
 
@@ -110,11 +108,9 @@ test.describe('Manage Organization', () => {
       await cfPage.goToOrgTab();
 
       const addButton = page.locator('button').filter({ hasText: /add.*organization|create.*organization/i }).first();
-      const buttonExists = await addButton.isVisible({ timeout: 5000 }).catch(() => false);
-
-      if (!buttonExists) {
-        test.skip('Add Organization button not found');
-      }
+      // The Organizations list takes 5–16 s on a lab foundation (over 20 s
+      // with two workers), and the button waits for it.
+      await expect(addButton).toBeVisible({ timeout: 30000 });
 
       await addButton.click();
 
@@ -142,11 +138,9 @@ test.describe('Manage Organization', () => {
       await cfPage.goToOrgTab();
 
       const addButton = page.locator('button').filter({ hasText: /add.*organization|create.*organization/i }).first();
-      const buttonExists = await addButton.isVisible({ timeout: 5000 }).catch(() => false);
-
-      if (!buttonExists) {
-        test.skip('Add Organization button not found');
-      }
+      // The Organizations list takes 5–16 s on a lab foundation (over 20 s
+      // with two workers), and the button waits for it.
+      await expect(addButton).toBeVisible({ timeout: 30000 });
 
       await addButton.click();
 
