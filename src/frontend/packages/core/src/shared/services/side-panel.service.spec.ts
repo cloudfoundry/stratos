@@ -1,4 +1,4 @@
-import { provideZonelessChangeDetection, ViewContainerRef } from '@angular/core';
+import { Injector, provideZonelessChangeDetection, ViewContainerRef } from '@angular/core';
 import { TestBed } from '@angular/core/testing';
 import { provideRouter } from '@angular/router';
 import { afterEach, beforeEach, describe, expect, it } from 'vitest';
@@ -26,6 +26,27 @@ describe('SidePanelService', () => {
 
     service.hide();
     expect(document.body.classList.contains(SidePanelService.OPEN_CLASS)).toBe(false);
+  });
+
+  // The panel host sits above the routes, so a component that needs
+  // route-level providers (a Kubernetes resource preview) is created with
+  // the caller's injector.
+  it('creates the component with the injector it is given', () => {
+    const created: { component: unknown; options: unknown }[] = [];
+    service.unsetContainer();
+    service.setContainer({
+      length: 0,
+      createComponent: (component: unknown, options: unknown) => {
+        created.push({ component, options });
+        return { instance: { setProps: () => {} } };
+      },
+    } as unknown as ViewContainerRef);
+    const injector = Injector.create({ providers: [] });
+    class Preview {}
+
+    service.show(Preview, { title: 'x' }, injector);
+
+    expect(created).toEqual([{ component: Preview, options: { injector } }]);
   });
 
   it('clears the mark when the panel is cleared', () => {

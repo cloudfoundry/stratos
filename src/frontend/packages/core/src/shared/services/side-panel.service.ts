@@ -1,5 +1,5 @@
 import { DOCUMENT } from '@angular/common';
-import { ComponentRef, Injectable, ViewContainerRef, signal, inject } from '@angular/core';
+import { ComponentRef, Injectable, Injector, ViewContainerRef, signal, inject } from '@angular/core';
 import { Router } from '@angular/router';
 import { filter, tap } from 'rxjs/operators';
 
@@ -62,21 +62,23 @@ export class SidePanelService {
    * Show the preview panel in the given mode
    */
   public showMode(
-    mode: SidePanelMode, component: object, props?: { [key: string]: any }) {
+    mode: SidePanelMode, component: object, props?: { [key: string]: any }, injector?: Injector) {
     if (!this.container) {
       throw new Error('SidePanelService: container must be set');
     }
 
-    this.render(component, props);
+    this.render(component, props, injector);
     this._previewMode.set(mode);
     this.open();
   }
 
   /**
-   * Show the preview panel in a preview style - does not overlap title bar and colours are more muted
+   * Show the preview panel in a preview style - does not overlap title bar and colours are more muted.
+   * Pass `injector` when the component needs providers from below the panel
+   * host, such as a Kubernetes tab's endpoint services.
    */
-  public show(component: object, props?: { [key: string]: any }) {
-    this.showMode(SidePanelMode.Normal, component, props);
+  public show(component: object, props?: { [key: string]: any }, injector?: Injector) {
+    this.showMode(SidePanelMode.Normal, component, props, injector);
   }
 
   /**
@@ -110,6 +112,7 @@ export class SidePanelService {
   render(
     component: object,
     props?: { [key: string]: any },
+    injector?: Injector,
   ) {
     if (!this.container) {
       throw new Error('SidePanelService: container must be set');
@@ -119,7 +122,7 @@ export class SidePanelService {
       this.container.remove(0);
     }
 
-    const componentRef: ComponentRef<any> = this.container.createComponent(component as any);
+    const componentRef: ComponentRef<any> = this.container.createComponent(component as any, injector ? { injector } : undefined);
 
     if (props) {
       componentRef.instance.setProps(props);
