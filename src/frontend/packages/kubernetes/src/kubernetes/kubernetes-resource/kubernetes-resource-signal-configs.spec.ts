@@ -394,12 +394,22 @@ describe('kubernetes-resource-signal-configs — namespace links', () => {
         KubeNamespaceDataService,
         KubePodDataService,
         KubeServiceDataService,
+        KubeJobDataService,
       ],
     });
   });
 
   const ctx = { kubeGuid: 'cnsi-1', selectedNamespace: signal(undefined).asReadonly(), isWorkloadView: false };
   const column = (cfg: { columns: readonly any[] }, key: string) => cfg.columns.find(c => c.key === key);
+
+  // Config maps, secrets, deployments and the other generic lists share
+  // one Namespace column.
+  it('a job\'s namespace opens the Namespaces tab filtered to it', () => {
+    const col = column(buildJobsSignalConfig(ctx as any, TestBed.inject(Injector)), 'namespace');
+    const job = { kubeGuid: 'cnsi-1', metadata: { kubeId: 'cnsi-1', name: 'j1', namespace: 'ns-c' } };
+    expect(col.link(job)).toEqual(['/kubernetes', 'cnsi-1', 'namespaces']);
+    expect(col.linkQueryParams(job)).toEqual({ name: 'ns-c' });
+  });
 
   it('a pod\'s namespace opens the Namespaces tab filtered to it', () => {
     const col = column(buildPodsSignalConfig(ctx as any, TestBed.inject(Injector)), 'namespace');
