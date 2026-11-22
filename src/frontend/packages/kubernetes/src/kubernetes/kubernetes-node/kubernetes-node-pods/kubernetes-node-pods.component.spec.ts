@@ -67,6 +67,14 @@ describe('KubernetesNodePodsComponent', () => {
     await fixture.whenStable();
   };
 
+  it('a pod\'s namespace opens the Namespaces tab filtered to it', async () => {
+    await mount({ [KUBE_GUID]: { items: [] } });
+    const col = component.listConfig()!.columns.find(c => c.key === 'namespace')!;
+    const pod = { metadata: { kubeId: KUBE_GUID, name: 'p1', namespace: 'ns-a' } } as any;
+    expect(col.link!(pod)).toEqual(['/kubernetes', KUBE_GUID, 'namespaces']);
+    expect(col.linkQueryParams!(pod)).toEqual({ name: 'ns-a' });
+  });
+
   it('should create', async () => {
     await mount({ [KUBE_GUID]: { items: [] } });
     expect(component).toBeTruthy();

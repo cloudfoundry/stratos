@@ -1,6 +1,7 @@
 import { CommonModule } from '@angular/common';
 import { ChangeDetectionStrategy, Component, Injector, WritableSignal, inject, signal } from '@angular/core';
 
+import { ActivatedRoute } from '@angular/router';
 import { SignalListComponent, SignalListConfig } from '@stratosui/core';
 
 import { KubernetesEndpointService } from '../../services/kubernetes-endpoint.service';
@@ -41,6 +42,11 @@ export class KubernetesNamespacesTabComponent {
   constructor() {
     const kubeGuid = this.kubeEndpointService.kubeGuid;
     this.signalConfig.initialize(kubeGuid);
+    // Links from pod and service lists open this tab filtered to one namespace.
+    const name = inject(ActivatedRoute).snapshot.queryParamMap.get('name');
+    if (name) {
+      this.signalConfig.nameFilter.set(name);
+    }
     void this.signalConfig.loadAll();
 
     const errorState = kubeListErrorState(kubeGuid, this.signalConfig.errors());
@@ -60,9 +66,8 @@ export class KubernetesNamespacesTabComponent {
           // sortField is a function so it composes against metadata.name
           // (a nested field) rather than a top-level KubeNamespace key.
           sortField: (n: KubeNamespace) => (n.metadata?.name ?? '').toLowerCase(),
-          kind: 'link',
-          // Relative router link — `<current>/namespaces/:name`.
-          link: (n: KubeNamespace) => [n.metadata.name],
+          // Plain text: a namespace has no page of its own (removed in 2020).
+          kind: 'text',
           render: (n: KubeNamespace) => n.metadata.name,
           widthHint: '24rem',
         },
