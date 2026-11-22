@@ -2,7 +2,7 @@ import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { importProvidersFrom, provideZonelessChangeDetection, signal } from '@angular/core';
 import { provideHttpClient } from '@angular/common/http';
 import { provideHttpClientTesting } from '@angular/common/http/testing';
-import { provideRouter } from '@angular/router';
+import { provideRouter, Router } from '@angular/router';
 import { describe, it, expect, beforeEach, vi } from 'vitest';
 
 import { CurrentUserPermissionsService, TabNavService } from '@stratosui/core';
@@ -175,10 +175,10 @@ async function makeSubNavFixture(canReturn: boolean, filteredItems?: StUser[]): 
 describe('CloudFoundrySpaceUsersComponent — subNavActions', () => {
   beforeEach(() => TestBed.resetTestingModule());
 
-  it('exposes three subNavActions with correct dataTest and variant', async () => {
+  it('exposes four subNavActions with correct dataTest and variant', async () => {
     const { component } = await makeSubNavFixture(true);
     const actions = (component as any).subNavActions as readonly { dataTest?: string; variant?: string }[];
-    expect(actions).toHaveLength(3);
+    expect(actions).toHaveLength(4);
     const addUser = actions.find(a => a.dataTest === 'cf-users-add');
     const manageRoles = actions.find(a => a.dataTest === 'cf-space-users-bulk-manage-roles');
     const removeSpace = actions.find(a => a.dataTest === 'cf-space-users-bulk-remove-space');
@@ -193,7 +193,7 @@ describe('CloudFoundrySpaceUsersComponent — subNavActions', () => {
   it('sets disabledReason on selection-gated subNavActions', async () => {
     const { component } = await makeSubNavFixture(true);
     const actions = (component as any).subNavActions as readonly { dataTest?: string; disabledReason?: string }[];
-    const selectionGated = actions.filter(a => a.dataTest !== 'cf-users-add');
+    const selectionGated = actions.filter(a => a.dataTest !== 'cf-users-add' && a.dataTest !== 'cf-space-users-roles-by-username');
     for (const a of selectionGated) {
       expect(a.disabledReason).toBeTruthy();
     }
@@ -355,5 +355,75 @@ describe('CloudFoundrySpaceUsersComponent — Add User action', () => {
     const add = actions.find(a => a.dataTest === 'cf-users-add');
     expect(add!.visible!()).toBe(true);
     expect(add!.disabled!()).toBe(false);
+  });
+});
+
+// ─── roles by username ────────────────────────────────────────────────────────
+
+// Role checks are passed as string keys, the roles-by-username feature flags
+// as PermissionConfig objects, so the stub can answer each separately.
+async function makeByUsernameFixture(opts: { flagOn: boolean; canChangeRoles: boolean }) {
+  await TestBed.configureTestingModule({
+    imports: [CloudFoundrySpaceUsersComponent],
+    providers: [
+      provideZonelessChangeDetection(),
+      provideRouter([]),
+      provideHttpClient(),
+      provideHttpClientTesting(),
+      ...STORE_TEST_PROVIDERS,
+      importProvidersFrom(generateCfBaseTestModulesNoShared()),
+      TabNavService,
+      { provide: CfUsersSignalConfigService, useValue: makeStubSignalConfigService() },
+      { provide: CloudFoundryEndpointService, useValue: { cfGuid: 'cnsi-1' } },
+      {
+        provide: CloudFoundryOrganizationService,
+        useValue: { orgGuid: 'org-1', cfGuid: 'cnsi-1', orgDataService: { org: signal(null) } },
+      },
+      {
+        provide: CloudFoundrySpaceService,
+        useValue: { spaceGuid: 'space-1', orgGuid: 'org-1', cfGuid: 'cnsi-1', spaceDataService: { space: signal(null) } },
+      },
+      {
+        provide: CurrentUserPermissionsService,
+        useValue: { can: (perm: unknown) => signal(typeof perm === 'string' ? opts.canChangeRoles : opts.flagOn) },
+      },
+      { provide: UserInviteService, useValue: { configured: signal(false) } },
+    ],
+  }).compileComponents();
+  const fixture = TestBed.createComponent(CloudFoundrySpaceUsersComponent);
+  fixture.detectChanges();
+  const actions = (fixture.componentInstance as any).subNavActions as readonly {
+    dataTest?: string; visible?: () => boolean; invoke: () => void;
+  }[];
+  return { action: actions.find(a => a.dataTest === 'cf-space-users-roles-by-username')! };
+}
+
+describe('CloudFoundrySpaceUsersComponent — roles by username', () => {
+  beforeEach(() => TestBed.resetTestingModule());
+
+  it('shows Manage by Username when a roles-by-username flag is on and the user may change space roles', async () => {
+    const { action } = await makeByUsernameFixture({ flagOn: true, canChangeRoles: true });
+    expect(action).toBeDefined();
+    expect(action.visible!()).toBe(true);
+  });
+
+  it('hides it when both roles-by-username feature flags are off', async () => {
+    const { action } = await makeByUsernameFixture({ flagOn: false, canChangeRoles: true });
+    expect(action.visible!()).toBe(false);
+  });
+
+  it('hides it when the user may not change space roles', async () => {
+    const { action } = await makeByUsernameFixture({ flagOn: true, canChangeRoles: false });
+    expect(action.visible!()).toBe(false);
+  });
+
+  it('opens the Manage Roles wizard by username for this space', async () => {
+    const { action } = await makeByUsernameFixture({ flagOn: true, canChangeRoles: true });
+    const navigate = vi.spyOn(TestBed.inject(Router), 'navigate').mockResolvedValue(true);
+    action.invoke();
+    expect(navigate).toHaveBeenCalledWith(
+      ['/cloud-foundry', 'cnsi-1', 'organizations', 'org-1', 'spaces', 'space-1', 'users', 'manage'],
+      { queryParams: { setByUsername: true } },
+    );
   });
 });
