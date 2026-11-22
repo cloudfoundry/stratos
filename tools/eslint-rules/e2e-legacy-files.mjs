@@ -53,8 +53,6 @@ export const E2E_LEGACY_FILES = [
   "e2e/tests/cloud-foundry/org-level/cf-org-level.spec.ts",
   "e2e/tests/cloud-foundry/org-level/org-invite-user.spec.ts",
   "e2e/tests/cloud-foundry/org-level/org-spaces.spec.ts",
-  "e2e/tests/cloud-foundry/org-level/org-users-list.spec.ts",
-  "e2e/tests/cloud-foundry/org-level/org-users-removal.spec.ts",
   "e2e/tests/cloud-foundry/space-level/cf-space-level.spec.ts",
   "e2e/tests/cloud-foundry/space-level/space-invite-user.spec.ts",
   "e2e/tests/cloud-foundry/space-level/space-routes.spec.ts",
