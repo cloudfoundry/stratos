@@ -188,6 +188,11 @@ export interface SignalListColumn<T> {
   // cell the signal-list migration dropped. Does not make the row clickable
   // (rowLink only follows `kind: 'link'` + `link`).
   externalLink?: (row: T) => string | null;
+  // Optional, kind-agnostic. Renders the render() text as a button that
+  // calls this with the row, for a cell that opens something in place
+  // rather than navigating (the Kubernetes lists open a resource preview
+  // in the side panel). Ignored when externalLink returns a URL.
+  open?: (row: T) => void;
   // Optional, kind-agnostic. Returns the text a copy button beside the cell
   // (or card title) puts on the clipboard, or null for no button. Used by the
   // route lists, whose full URL is truncated in the cell.

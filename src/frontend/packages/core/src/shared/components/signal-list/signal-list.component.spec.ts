@@ -1551,6 +1551,61 @@ describe('SignalListComponent', () => {
     });
   });
 
+  // A column with `open` renders its text as a button that calls it with
+  // the row: the Kubernetes lists open a resource preview this way.
+  describe('open column (open)', () => {
+    @Component({
+      standalone: true,
+      imports: [SignalListComponent],
+      template: `<app-signal-list [config]="config" />`,
+    })
+    class OpenHost {
+      opened: string[] = [];
+      readonly configState = signal<SignalListConfig<{ name: string }>>({
+        pagedItems: signal([{ name: 'pod-a' }]).asReadonly(),
+        totalFilteredResults: signal(1).asReadonly(),
+        totalPages: signal(1).asReadonly(),
+        pageIndex: signal(0),
+        pageSize: signal(10),
+        isAnyLoading: signal(false).asReadonly(),
+        errorsByCnsi: signal(new Map<string, unknown>()).asReadonly(),
+        columns: [
+          { header: 'Name', key: 'name', render: r => r.name, open: r => { this.opened.push(r.name); } },
+          { header: 'Other', key: 'other', render: () => 'x' },
+        ],
+        getRowKey: r => r.name,
+      });
+      get config(): SignalListConfig<{ name: string }> { return this.configState(); }
+      set config(value: SignalListConfig<{ name: string }>) { this.configState.set(value); }
+    }
+
+    function openButton(fixture: { nativeElement: HTMLElement }): HTMLButtonElement | null {
+      return fixture.nativeElement.querySelector('button[data-test="cell-open"]');
+    }
+
+    it('renders the cell as a button that opens the row in table view', async () => {
+      const fixture = TestBed.createComponent(OpenHost);
+      await fixture.whenStable();
+      const button = openButton(fixture);
+      expect(button).not.toBeNull();
+      expect(button!.getAttribute('type')).toBe('button');
+      expect(button!.textContent!.trim()).toBe('pod-a');
+      button!.click();
+      expect(fixture.componentInstance.opened).toEqual(['pod-a']);
+    });
+
+    it('renders the card title as a button that opens the row in card view', async () => {
+      const fixture = TestBed.createComponent(OpenHost);
+      fixture.componentInstance.config = { ...fixture.componentInstance.config, viewMode: signal<'table' | 'card'>('card') };
+      await fixture.whenStable();
+      const button = openButton(fixture);
+      expect(button).not.toBeNull();
+      expect(button!.textContent!.trim()).toBe('pod-a');
+      button!.click();
+      expect(fixture.componentInstance.opened).toEqual(['pod-a']);
+    });
+  });
+
   // A pill holds a short state; its column's tooltip can say more on hover
   // (the service-instance lists put a failed operation's reason there).
   describe('pill column hover text (tooltip)', () => {

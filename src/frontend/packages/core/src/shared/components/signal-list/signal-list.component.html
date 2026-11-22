@@ -458,6 +458,8 @@
                       <span class="truncate min-w-0 p-1 -m-1" [attr.title]="tc.tooltip ? tc.tooltip(row) : tc.render(row)">
                         @if (tc.externalLink && tc.externalLink(row); as href) {
                           <a [href]="href" target="_blank" rel="noopener" (click)="$event.stopPropagation()" class="text-accent hover:underline">{{ tc.render(row) }}</a>
+                        } @else if (tc.open; as open) {
+                          <button type="button" data-test="cell-open" (click)="$event.stopPropagation(); open(row)" class="text-accent hover:underline text-left max-w-full truncate">{{ tc.render(row) }}</button>
                         } @else if (tc.kind === 'link' && tc.link && tc.link(row); as target) {
                           <a [routerLink]="target" [queryParams]="tc.linkQueryParams ? tc.linkQueryParams(row) : null" (click)="$event.stopPropagation()" class="text-accent hover:underline">{{ tc.render(row) }}</a>
                         } @else {
@@ -614,6 +616,8 @@
                         <a [href]="href" target="_blank" rel="noopener" (click)="$event.stopPropagation()" class="text-accent hover:underline inline-flex items-center gap-1">
                           <span aria-hidden="true" class="material-icons text-base leading-none">launch</span>{{ col.render(row) }}
                         </a>
+                      } @else if (col.open; as open) {
+                        <button type="button" data-test="cell-open" (click)="$event.stopPropagation(); open(row)" class="text-accent hover:underline text-right max-w-full truncate">{{ col.render(row) }}</button>
                       } @else if (col.kind === 'link' && col.link && col.link(row); as target) {
                         <a [routerLink]="target" [queryParams]="col.linkQueryParams ? col.linkQueryParams(row) : null" (click)="$event.stopPropagation()" class="text-accent hover:underline">{{ col.render(row) }}</a>
                       } @else if (col.kind === 'pill') {
@@ -769,6 +773,8 @@
                     <a [href]="href" target="_blank" rel="noopener" (click)="$event.stopPropagation()" class="text-accent hover:underline inline-flex items-center gap-1">
                       <span aria-hidden="true" class="material-icons text-base leading-none">launch</span>{{ col.render(row) }}
                     </a>
+                  } @else if (col.open; as open) {
+                    <button type="button" data-test="cell-open" (click)="$event.stopPropagation(); open(row)" class="text-accent hover:underline text-left max-w-full truncate">{{ col.render(row) }}</button>
                   } @else if (col.kind === 'link' && col.link) {
                     @if (col.link(row); as target) {
                       <a [routerLink]="target" [queryParams]="col.linkQueryParams ? col.linkQueryParams(row) : null" (click)="$event.stopPropagation()" class="text-accent hover:underline">{{ col.render(row) }}</a>
