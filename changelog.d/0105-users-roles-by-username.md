@@ -9,7 +9,11 @@
 - The organization and space Users tabs show the **Invite Users** card
   again when the endpoint has user invites configured. It was lost in
   5.0.0 along with Manage by Username.
-- Namespace links in Kubernetes pod and service lists open the
-  Namespaces tab filtered to that namespace. They used to lead to a
-  namespace page that no longer exists and showed Page Not Found. In
-  the namespace lists themselves the name is now plain text.
+- Namespace links in the Kubernetes resource lists and the Helm
+  releases list open the Namespaces tab filtered to that namespace.
+  They used to lead to a namespace page that no longer exists and
+  showed Page Not Found.
+- A resource's name in a Kubernetes list opens it in the side-panel
+  preview again, with its YAML, labels and annotations, delete and
+  favorite; a namespace's preview also links to its analysis. The
+  preview was lost in 5.0.0 when the lists were rebuilt.
