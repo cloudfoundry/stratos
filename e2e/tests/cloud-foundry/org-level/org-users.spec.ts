@@ -7,7 +7,8 @@ import { adminCfApi, consoleUrl, userRoles } from '../../roles/roles.fixture';
 
 /**
  * Org-level Users tab, end to end: add a user with an org role, give them a
- * space role through Manage Roles, then remove them from the org.
+ * space role through Manage Roles, remove them from the org, then add and
+ * remove an org role through Manage by Username.
  *
  * Writes only inside a throwaway org that afterAll deletes (its roles go with
  * it). The user is the non-admin console user.
@@ -92,5 +93,33 @@ test.describe('Org Users', () => {
 
     await expect(users.row(username)).toHaveCount(0, { timeout: 30000 });
     await expect.poll(() => userRoles(admin, userGuid, orgGuid, spaceGuid), { timeout: 60000 }).toEqual([]);
+  });
+
+  test('Manage by Username adds an org role by username', async ({ connectedEndpointsAdminPage }) => {
+    const { page, cfGuid } = connectedEndpointsAdminPage;
+    const users = await openUsersTab(page, cfGuid);
+
+    const modify = await users.manageByUsername('cf-org-users-roles-by-username', 'Add Roles', username);
+    await expect(modify).toContainText('Roles will be added to the following users');
+    await users.tick(users.orgRole(modify, 'Billing Manager'));
+    await users.stepperNext().click();
+    await users.applyRoleChanges();
+
+    expect(await userRoles(admin, userGuid, orgGuid, spaceGuid)).toContain('organization_billing_manager');
+  });
+
+  test('Manage by Username removes an org role by username', async ({ connectedEndpointsAdminPage }) => {
+    const { page, cfGuid } = connectedEndpointsAdminPage;
+    const users = await openUsersTab(page, cfGuid);
+
+    const modify = await users.manageByUsername('cf-org-users-roles-by-username', 'Remove Roles', username);
+    await expect(modify).toContainText('Roles will be removed from the following users');
+    await users.tick(users.orgRole(modify, 'Billing Manager'));
+    await users.stepperNext().click();
+    await users.applyRoleChanges();
+
+    await expect
+      .poll(() => userRoles(admin, userGuid, orgGuid, spaceGuid), { timeout: 60000 })
+      .not.toContain('organization_billing_manager');
   });
 });

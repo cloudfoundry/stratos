@@ -7,10 +7,10 @@ import { Page, Locator, expect } from '@playwright/test';
  * Sub-nav action hooks per level:
  *   CF:    cf-users-add, cf-users-bulk-manage-roles,
  *          cf-users-bulk-remove-spaces, cf-users-bulk-remove-org-spaces
- *   org:   cf-users-add, cf-org-users-bulk-manage-roles,
- *          cf-org-users-bulk-remove-org-spaces
- *   space: cf-users-add, cf-space-users-bulk-manage-roles,
- *          cf-space-users-bulk-remove-space
+ *   org:   cf-users-add, cf-org-users-roles-by-username,
+ *          cf-org-users-bulk-manage-roles, cf-org-users-bulk-remove-org-spaces
+ *   space: cf-users-add, cf-space-users-roles-by-username,
+ *          cf-space-users-bulk-manage-roles, cf-space-users-bulk-remove-space
  */
 export class UsersPage {
   readonly list: Locator;
@@ -103,6 +103,22 @@ export class UsersPage {
 
   stepperNext(): Locator {
     return this.stepper().locator('#stepper_next');
+  }
+
+  /**
+   * Manage by Username: open the wizard on its Usernames step, choose Add
+   * Roles or Remove Roles, enter one username and go on to Select Roles.
+   */
+  async manageByUsername(action: string, mode: 'Add Roles' | 'Remove Roles', username: string): Promise<Locator> {
+    await this.action(action).click();
+    await expect(this.page).toHaveURL(/\/users\/manage\?setByUsername=true$/);
+    const step = this.page.locator('app-manage-users-set-usernames');
+    await step.getByRole('radio', { name: mode, exact: true }).check();
+    await step.locator('[data-test="stacked-input"]').first().fill(username);
+    await this.stepperNext().click();
+    const modify = this.page.locator('app-manage-users-modify');
+    await expect(modify).toContainText(username);
+    return modify;
   }
 
   /**

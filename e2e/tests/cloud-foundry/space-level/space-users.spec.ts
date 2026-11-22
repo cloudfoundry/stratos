@@ -7,7 +7,8 @@ import { adminCfApi, consoleUrl, userRoles } from '../../roles/roles.fixture';
 
 /**
  * Space-level Users tab, end to end: add a user with a space role, add a
- * second role through Manage Roles, then remove them from the space.
+ * second role through Manage Roles, remove them from the space, then add
+ * and remove a space role through Manage by Username.
  *
  * Writes only inside a throwaway org that afterAll deletes (its roles go with
  * it). The user is the non-admin console user.
@@ -94,5 +95,33 @@ test.describe('Space Users', () => {
     await expect
       .poll(async () => (await userRoles(admin, userGuid, orgGuid, spaceGuid)).filter(r => r.startsWith('space_')), { timeout: 60000 })
       .toEqual([]);
+  });
+
+  test('Manage by Username adds a space role by username', async ({ connectedEndpointsAdminPage }) => {
+    const { page, cfGuid } = connectedEndpointsAdminPage;
+    const users = await openUsersTab(page, cfGuid);
+
+    const modify = await users.manageByUsername('cf-space-users-roles-by-username', 'Add Roles', username);
+    await expect(modify).toContainText('Roles will be added to the following users');
+    await users.tick(users.spaceRole(modify, spaceGuid, 'Developer'));
+    await users.stepperNext().click();
+    await users.applyRoleChanges();
+
+    expect(await userRoles(admin, userGuid, orgGuid, spaceGuid)).toContain('space_developer');
+  });
+
+  test('Manage by Username removes a space role by username', async ({ connectedEndpointsAdminPage }) => {
+    const { page, cfGuid } = connectedEndpointsAdminPage;
+    const users = await openUsersTab(page, cfGuid);
+
+    const modify = await users.manageByUsername('cf-space-users-roles-by-username', 'Remove Roles', username);
+    await expect(modify).toContainText('Roles will be removed from the following users');
+    await users.tick(users.spaceRole(modify, spaceGuid, 'Developer'));
+    await users.stepperNext().click();
+    await users.applyRoleChanges();
+
+    await expect
+      .poll(() => userRoles(admin, userGuid, orgGuid, spaceGuid), { timeout: 60000 })
+      .not.toContain('space_developer');
   });
 });
