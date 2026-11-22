@@ -7,3 +7,5 @@
   every organization, so those tests open them and cancel. The new
   tests replace eight older specs that skipped themselves against the
   previous user-management screens.
+- The organization and space Users tab tests also add and remove a
+  role through Manage by Username.
