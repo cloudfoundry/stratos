@@ -48,8 +48,6 @@ export const E2E_LEGACY_FILES = [
   "e2e/tests/cloud-foundry/app-wall-signal-migration.spec.ts",
   "e2e/tests/cloud-foundry/cf-level/cf-invite-config.spec.ts",
   "e2e/tests/cloud-foundry/cf-level/cf-top-level.spec.ts",
-  "e2e/tests/cloud-foundry/cf-level/cf-users-list.spec.ts",
-  "e2e/tests/cloud-foundry/cf-level/cf-users-removal.spec.ts",
   "e2e/tests/cloud-foundry/manage-users-by-username-stepper.spec.ts",
   "e2e/tests/cloud-foundry/manage-users-stepper.spec.ts",
   "e2e/tests/cloud-foundry/org-level/cf-org-level.spec.ts",
