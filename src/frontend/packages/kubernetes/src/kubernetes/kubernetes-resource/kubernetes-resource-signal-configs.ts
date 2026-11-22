@@ -543,9 +543,12 @@ function namespaceColumn<T extends GenericRow>(): SignalListConfig<T>['columns']
   return {
     header: 'Namespace', key: 'namespace', kind: 'link',
     sortField: (r: T) => (r.metadata?.namespace ?? '').toLowerCase(),
+    // A namespace has no page of its own (removed in 2020): link to the
+    // Namespaces tab filtered to it.
     link: (r: T) => r.metadata?.namespace
-      ? ['/kubernetes', r.metadata?.kubeId ?? r.kubeGuid, 'namespaces', r.metadata.namespace]
+      ? ['/kubernetes', r.metadata?.kubeId ?? r.kubeGuid, 'namespaces']
       : null,
+    linkQueryParams: (r: T) => r.metadata?.namespace ? { name: r.metadata.namespace } : null,
     render: (r: T) => r.metadata?.namespace ?? '',
     widthHint: '12rem',
   };

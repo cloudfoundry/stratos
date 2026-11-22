@@ -59,4 +59,13 @@ describe('ReleasesTabComponent', () => {
   it('should create', () => {
     expect(component).toBeTruthy();
   });
+
+  // A namespace has no page of its own: the link opens the cluster's
+  // Namespaces tab filtered to it.
+  it('links a release\'s namespace to the Namespaces tab filtered to it', () => {
+    const col = component.listConfig()!.columns.find(c => c.key === 'namespace')!;
+    const release = { endpointId: 'kube-1', namespace: 'ns-a' } as any;
+    expect(col.link!(release)).toEqual(['/kubernetes', 'kube-1', 'namespaces']);
+    expect(col.linkQueryParams!(release)).toEqual({ name: 'ns-a' });
+  });
 });

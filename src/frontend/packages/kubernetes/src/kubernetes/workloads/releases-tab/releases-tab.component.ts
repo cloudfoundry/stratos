@@ -121,7 +121,10 @@ export class HelmReleasesTabComponent {
           header: 'Namespace', key: 'namespace',
           sortField: (r: HelmRelease) => (r.namespace ?? '').toLowerCase(),
           kind: 'link',
-          link: (r: HelmRelease) => ['/kubernetes', r.endpointId, 'namespaces', r.namespace],
+          // A namespace has no page of its own (removed in 2020): link to
+          // the cluster's Namespaces tab filtered to it.
+          link: (r: HelmRelease) => ['/kubernetes', r.endpointId, 'namespaces'],
+          linkQueryParams: (r: HelmRelease) => ({ name: r.namespace }),
           render: (r: HelmRelease) => r.namespace,
           widthHint: '12rem',
         },
