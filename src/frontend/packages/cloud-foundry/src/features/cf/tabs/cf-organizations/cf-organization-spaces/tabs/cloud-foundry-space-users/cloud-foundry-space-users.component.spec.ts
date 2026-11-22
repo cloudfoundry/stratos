@@ -16,6 +16,7 @@ import {
 import { CloudFoundryEndpointService } from '../../../../../services/cloud-foundry-endpoint.service';
 import { CloudFoundryOrganizationService } from '../../../../../services/cloud-foundry-organization.service';
 import { CloudFoundrySpaceService } from '../../../../../services/cloud-foundry-space.service';
+import { ActiveRouteCfOrgSpace } from '../../../../../cf-page.types';
 import { UserInviteService } from '../../../../../user-invites/user-invite.service';
 import type { StUser } from '../../../../../../../services/endpoint-data/stratos-types';
 
@@ -83,13 +84,22 @@ describe('CloudFoundrySpaceUsersComponent', () => {
           provide: CloudFoundrySpaceService,
           useValue: { spaceGuid: 'space-1', orgGuid: 'org-1', cfGuid: 'cnsi-1', spaceDataService: { space: signal(null) } },
         },
-        { provide: UserInviteService, useValue: { configured: signal(false) } },
+        { provide: UserInviteService, useValue: { configured: signal(false), canShowInviteUser: () => signal(false) } },
+        { provide: ActiveRouteCfOrgSpace, useValue: { cfGuid: 'cnsi-1', orgGuid: 'org-1', spaceGuid: 'space-1' } },
       ],
     }).compileComponents();
 
     fixture = TestBed.createComponent(CloudFoundrySpaceUsersComponent);
     component = fixture.componentInstance;
     fixture.detectChanges();
+  });
+
+  it('shows the invite users link above the list', () => {
+    const el: HTMLElement = fixture.nativeElement;
+    const invite = el.querySelector('app-cloud-foundry-invite-user-link');
+    expect(invite).not.toBeNull();
+    // The card sits between the sub-nav bar and the list, as before 5.0.0.
+    expect(invite!.compareDocumentPosition(el.querySelector('app-signal-list')!) & Node.DOCUMENT_POSITION_FOLLOWING).toBeTruthy();
   });
 
   it('initializes the signal config for this space (pinned scope)', () => {
@@ -163,7 +173,8 @@ async function makeSubNavFixture(canReturn: boolean, filteredItems?: StUser[]): 
         useValue: { spaceGuid: 'space-1', orgGuid: 'org-1', cfGuid: 'cnsi-1', spaceDataService: { space: signal(null) } },
       },
       { provide: CurrentUserPermissionsService, useValue: { can: () => signal(canReturn) } },
-      { provide: UserInviteService, useValue: { configured: signal(false) } },
+      { provide: UserInviteService, useValue: { configured: signal(false), canShowInviteUser: () => signal(false) } },
+        { provide: ActiveRouteCfOrgSpace, useValue: { cfGuid: 'cnsi-1', orgGuid: 'org-1', spaceGuid: 'space-1' } },
     ],
   }).compileComponents();
   const fixture = TestBed.createComponent(CloudFoundrySpaceUsersComponent);
@@ -387,7 +398,8 @@ async function makeByUsernameFixture(opts: { flagOn: boolean; canChangeRoles: bo
         provide: CurrentUserPermissionsService,
         useValue: { can: (perm: unknown) => signal(typeof perm === 'string' ? opts.canChangeRoles : opts.flagOn) },
       },
-      { provide: UserInviteService, useValue: { configured: signal(false) } },
+      { provide: UserInviteService, useValue: { configured: signal(false), canShowInviteUser: () => signal(false) } },
+        { provide: ActiveRouteCfOrgSpace, useValue: { cfGuid: 'cnsi-1', orgGuid: 'org-1', spaceGuid: 'space-1' } },
     ],
   }).compileComponents();
   const fixture = TestBed.createComponent(CloudFoundrySpaceUsersComponent);
