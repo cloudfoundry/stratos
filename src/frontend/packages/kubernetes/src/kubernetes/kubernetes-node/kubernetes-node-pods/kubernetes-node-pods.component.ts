@@ -56,7 +56,10 @@ export class KubernetesNodePodsComponent {
           header: 'Namespace', key: 'namespace',
           sortField: (p: KubePod) => (p.metadata?.namespace ?? '').toLowerCase(),
           kind: 'link',
-          link: (p: KubePod) => ['/kubernetes', p.metadata?.kubeId ?? '', 'namespaces', p.metadata?.namespace ?? ''],
+          // A namespace has no page of its own (removed in 2020): link to the
+          // Namespaces tab filtered to it.
+          link: (p: KubePod) => ['/kubernetes', p.metadata?.kubeId ?? '', 'namespaces'],
+          linkQueryParams: (p: KubePod) => ({ name: p.metadata?.namespace ?? '' }),
           render: (p: KubePod) => p.metadata?.namespace ?? '',
           widthHint: '12rem',
         },

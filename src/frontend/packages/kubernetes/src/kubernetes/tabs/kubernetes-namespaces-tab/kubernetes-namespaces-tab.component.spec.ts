@@ -2,7 +2,7 @@ import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { provideHttpClient } from '@angular/common/http';
 import { HttpTestingController, provideHttpClientTesting } from '@angular/common/http/testing';
 import { provideZonelessChangeDetection } from '@angular/core';
-import { provideRouter } from '@angular/router';
+import { ActivatedRoute, convertToParamMap, provideRouter } from '@angular/router';
 import { describe, it, expect, beforeEach, afterEach } from 'vitest';
 
 import { BaseKubeGuid } from '../../kubernetes-page.types';
@@ -76,5 +76,35 @@ describe('KubernetesNamespacesTabComponent', () => {
     expect(el.querySelector('[data-test="empty-error"]')).toBeNull();
     expect(el.querySelector('[data-test="errors"]')).toBeNull();
     expect(el.textContent).toContain('default');
+  });
+
+  it('shows namespace names as text: a namespace has no page of its own', () => {
+    fixture = TestBed.createComponent(KubernetesNamespacesTabComponent);
+    const col = fixture.componentInstance.listConfig()!.columns.find(c => c.key === 'name')!;
+    expect(col.kind).not.toBe('link');
+    expect(col.link).toBeUndefined();
+  });
+});
+
+// Links from pod and service lists carry the namespace as ?name=.
+describe('KubernetesNamespacesTabComponent — ?name=', () => {
+  it('opens filtered to the namespace named in ?name=', async () => {
+    TestBed.resetTestingModule();
+    await TestBed.configureTestingModule({
+      imports: [KubernetesNamespacesTabComponent, ...KubernetesBaseTestModules],
+      providers: [
+        provideHttpClient(),
+        provideHttpClientTesting(),
+        BaseKubeGuid,
+        provideRouter([]),
+        provideZonelessChangeDetection(),
+        { provide: ActivatedRoute, useValue: { snapshot: { queryParamMap: convertToParamMap({ name: 'ns-a' }) } } },
+      ],
+    }).compileComponents();
+    TestBed.overrideProvider(KubernetesEndpointService, { useValue: { kubeGuid: KUBE_GUID } });
+
+    const fixture = TestBed.createComponent(KubernetesNamespacesTabComponent);
+    expect(fixture.componentInstance.signalConfig.nameFilter()).toBe('ns-a');
+    TestBed.inject(HttpTestingController).match(() => true);
   });
 });
