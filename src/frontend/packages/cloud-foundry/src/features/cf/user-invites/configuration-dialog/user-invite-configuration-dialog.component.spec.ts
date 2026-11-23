@@ -31,6 +31,11 @@ describe('UserInviteConfigurationDialogComponent', () => {
     expect(root?.classList).toContain('p-6');
   });
 
+  it('shows the show-secret icon inside its button', () => {
+    const button = (fixture.nativeElement as HTMLElement).querySelector('button[aria-label="Hide Secret"]');
+    expect(button?.textContent?.trim()).toBe('visibility_off');
+  });
+
   it('names the Client ID and Client Secret fields with a visible label', () => {
     const root: HTMLElement = fixture.nativeElement;
     for (const [control, text] of [['clientID', 'Client ID'], ['clientSecret', 'Client Secret']]) {

@@ -13,7 +13,8 @@
     specify a Client ID and Client Secret that has <code>scim.invite</code> access.
   </p>
   <form class="flex flex-col gap-4" [formGroup]="endpointForm" (ngSubmit)="submit()">
-    <div class="flex flex-col">
+    <!-- mt-3: the floating label sits above the field's box -->
+    <div class="flex flex-col mt-3">
       <app-form-field>
         <input class="w-full placeholder:!text-transparent focus:outline-none" appInput id="invite-client-id"
           formControlName="clientID" placeholder="Client ID" autocomplete="off">
