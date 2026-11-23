@@ -96,7 +96,6 @@ import { CloudFoundrySecurityGroupsComponent } from './tabs/cf-security-groups/c
 import { CloudFoundryStacksComponent } from './tabs/cf-stacks/cloud-foundry-stacks.component';
 import { CloudFoundrySummaryTabComponent } from './tabs/cf-summary-tab/cloud-foundry-summary-tab.component';
 import { CloudFoundryUsersComponent } from './tabs/cf-users/cloud-foundry-users.component';
-import { InviteUsersComponent } from './users/invite-users/invite-users.component';
 import { UsersRolesComponent } from './users/manage-users/manage-users.component';
 
 const usersRoles: Routes = [
@@ -113,21 +112,9 @@ const usersRoles: Routes = [
     pathMatch: 'full'
   },
   {
-    path: 'organizations/:orgId/users/invite',
-    title: tabTitle('Invite Users'),
-    component: InviteUsersComponent,
-    pathMatch: 'full'
-  },
-  {
     path: 'organizations/:orgId/spaces/:spaceId/users/manage',
     title: tabTitle('Manage Users'),
     component: UsersRolesComponent,
-    pathMatch: 'full'
-  },
-  {
-    path: 'organizations/:orgId/spaces/:spaceId/users/invite',
-    title: tabTitle('Invite Users'),
-    component: InviteUsersComponent,
     pathMatch: 'full'
   },
 ];

@@ -48,7 +48,7 @@ test.describe('Space Invite User', () => {
       await inviteButton.click();
 
       // Verify invite dialog opened
-      const dialog = page.locator('app-invite-users, app-add-user, [role="dialog"]');
+      const dialog = page.locator('app-add-user, [role="dialog"]');
       const dialogExists = await dialog.isVisible({ timeout: 5000 }).catch(() => false);
 
       if (!dialogExists) {

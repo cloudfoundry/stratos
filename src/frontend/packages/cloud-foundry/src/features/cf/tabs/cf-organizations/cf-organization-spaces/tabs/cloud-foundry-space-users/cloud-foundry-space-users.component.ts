@@ -31,7 +31,6 @@ import {
 } from '../../../../../../../shared/signal-list-configs/user/cf-users-bulk-remove';
 import { CfUsersRolesDataService } from '../../../../../../../services/domain-data/cf-users-roles-data.service';
 import { UserInviteService } from '../../../../../user-invites/user-invite.service';
-import { CloudFoundryInviteUserLinkComponent } from '../../../cf-invite-user-link/cloud-foundry-invite-user-link.component';
 import { AddUserDialogComponent } from '../../../../../users/add-user/add-user-dialog.component';
 
 // Signal-native replacement for the legacy CloudFoundrySpaceUsersComponent.
@@ -65,7 +64,6 @@ import { AddUserDialogComponent } from '../../../../../users/add-user/add-user-d
     RouterModule,
     ListSubNavComponent,
     SignalListComponent,
-    CloudFoundryInviteUserLinkComponent,
   ],
 })
 export class CloudFoundrySpaceUsersComponent {

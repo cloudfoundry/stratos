@@ -1,8 +1,6 @@
 <div class="org-users h-full flex flex-col">
   <app-list-sub-nav title="Total Users" [count]="totalUsers" [loading]="countPending"
     [actions]="subNavActions" [selectedCount]="selectedCount" [onClearSelection]="clearSelection"></app-list-sub-nav>
-  <!-- Shown when the CF has user invites configured and the user may invite here. -->
-  <app-cloud-foundry-invite-user-link></app-cloud-foundry-invite-user-link>
   @if (listConfig(); as config) {
     <app-signal-list [config]="config" class="flex-1 min-h-0"></app-signal-list>
   }
