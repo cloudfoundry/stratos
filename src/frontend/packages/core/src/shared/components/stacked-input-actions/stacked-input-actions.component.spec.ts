@@ -47,6 +47,29 @@ describe('StackedInputActionsComponent', () => {
     expect(component).toBeTruthy();
   });
 
+  // The Add User dialog switches between usernames and email addresses with
+  // its first row already shown; that row must take the new config.
+  it('applies a config change to the rows already shown', async () => {
+    const config = (isEmailInput: boolean, placeholder: string) =>
+      ({ isEmailInput, text: { placeholder, requiredError: 'required', uniqueError: 'not unique' } });
+    const label = () => host().querySelector('app-stacked-input-action label')?.textContent?.trim();
+    const row = fixture.debugElement.query(By.directive(StackedInputActionComponent))
+      .componentInstance as StackedInputActionComponent;
+
+    fixture.componentRef.setInput('stackedActionConfig', config(false, 'Username'));
+    await fixture.whenStable();
+    await fixture.whenStable();
+    expect(label()).toBe('Username');
+    row.textFormControl.setValue('not-an-email');
+    expect(row.textFormControl.hasError('email')).toBe(false);
+
+    fixture.componentRef.setInput('stackedActionConfig', config(true, 'Email address'));
+    await fixture.whenStable();
+    await fixture.whenStable();
+    expect(label()).toBe('Email address');
+    expect(row.textFormControl.hasError('email')).toBe(true);
+  });
+
   it('disables "Add another" while a row is processing', async () => {
     await fixture.whenStable();
     expect(addButton().disabled).toBe(false);

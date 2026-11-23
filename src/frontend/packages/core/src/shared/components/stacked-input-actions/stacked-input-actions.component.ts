@@ -63,6 +63,12 @@ export class StackedInputActionsComponent implements OnInit, OnDestroy {
   constructor() {
     // Push state into the matching rows
     effect(() => this.stateIn().forEach(state => this.components[state.key].stateInUpdate(state)));
+    // A host can change the config while rows are shown (Add User switches
+    // between usernames and email addresses); every row follows it.
+    effect(() => {
+      const config = this.stackedActionConfig();
+      Object.values(this.components).forEach(row => row.componentRef.setInput('config', config));
+    });
   }
 
   addComponent(): void {
