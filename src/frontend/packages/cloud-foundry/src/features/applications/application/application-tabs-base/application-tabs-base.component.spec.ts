@@ -1,6 +1,6 @@
 import { HttpClientTestingModule } from '@angular/common/http/testing';
 import { ComponentFixture, TestBed } from '@angular/core/testing';
-import { provideZonelessChangeDetection, signal, WritableSignal } from '@angular/core';
+import { computed, provideZonelessChangeDetection, signal, WritableSignal } from '@angular/core';
 import { provideRouter } from '@angular/router';
 import { describe, it, expect, beforeEach, vi } from 'vitest';
 import { BehaviorSubject } from 'rxjs';
@@ -107,6 +107,7 @@ describe('ApplicationTabsBaseComponent', () => {
     const mockEndpointsDataService = {
       endpoints: endpointsMap,
       whenReady: () => Promise.resolve(),
+      endpointById: (guid: string) => computed(() => endpointsMap().get(guid) ?? null),
       waitFor: (guid: string) => {
         const ep = endpointsMap().get(guid);
         return ep ? Promise.resolve(ep) : Promise.reject(new Error(`Endpoint ${guid} not found`));
