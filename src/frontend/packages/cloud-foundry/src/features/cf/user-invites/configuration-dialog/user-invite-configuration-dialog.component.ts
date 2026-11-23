@@ -22,7 +22,6 @@ import {
   CustomIconComponent,
   DialogErrorComponent,
   MAT_DIALOG_DATA,
-  MatSuffixDirective,
   TailwindDialogRef,
   TailwindSnackBarService,
 } from '@stratosui/core';
@@ -46,7 +45,6 @@ interface UserInviteConfigForm {
     CustomFormFieldComponent,
     CustomIconComponent,
     DialogErrorComponent,
-    MatSuffixDirective,
   ],
 })
 export class UserInviteConfigurationDialogComponent {
