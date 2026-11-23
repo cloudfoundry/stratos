@@ -1,36 +1,37 @@
-<div class="connection-dialog__loading-wrapper">
-  <app-progress-bar class="connection-dialog__loading"
-    [color]="hasErrored() && !isBusy() ? 'warn' : 'primary'"
-    [mode]="isBusy() ? 'indeterminate' : 'solid'">
-  </app-progress-bar>
-</div>
-<div class="connection-dialog">
-  <h2 class="dialog-title" data-dialog-drag-handle>
+<div class="p-6 flex flex-col gap-4">
+  <!-- Full-width strip along the top edge of the dialog -->
+  <div class="-mx-6 -mt-6">
+    <app-progress-bar
+      [color]="hasErrored() && !isBusy() ? 'warn' : 'primary'"
+      [mode]="isBusy() ? 'indeterminate' : 'solid'">
+    </app-progress-bar>
+  </div>
+  <h2 class="text-lg font-semibold text-content-text" data-dialog-drag-handle>
     Configure User Invite Client
   </h2>
-  <p>In order to allow user invites for this Cloud Foundry, you must
-    specify a Client ID and Client Secret that has <span>scim.invite</span> access.
+  <p class="text-content-muted">In order to allow user invites for this Cloud Foundry, you must
+    specify a Client ID and Client Secret that has <code>scim.invite</code> access.
   </p>
-  <form class="connection-dialog__form" [formGroup]="endpointForm" (ngSubmit)="submit()">
-    <div class="dialog-content connection-dialog__content">
-      <div class="form-field">
-        <label class="form-label" for="invite-client-id">Client ID</label>
-        <input id="invite-client-id" class="form-input w-full" placeholder="Client ID" formControlName="clientID" autocomplete="off">
-      </div>
-      <div class="form-field">
-        <label class="form-label" for="invite-client-secret">Client Secret</label>
-        <input id="invite-client-secret" class="form-input w-full" placeholder="Client Secret" formControlName="clientSecret"
+  <form class="flex flex-col gap-4" [formGroup]="endpointForm" (ngSubmit)="submit()">
+    <div class="flex flex-col">
+      <app-form-field>
+        <input class="w-full placeholder:!text-transparent focus:outline-none" appInput id="invite-client-id"
+          formControlName="clientID" placeholder="Client ID" autocomplete="off">
+      </app-form-field>
+      <app-form-field>
+        <input class="w-full placeholder:!text-transparent focus:outline-none" appInput id="invite-client-secret"
+          formControlName="clientSecret" placeholder="Client Secret"
           [type]="!showSecret() ? 'password' : 'text'" autocomplete="new-password">
-        <button class="btn-icon" (click)="toggleShowSecret()" [attr.aria-label]="'Hide Secret'"
-          [attr.aria-pressed]="!showSecret()" type='button'>
-          <i aria-hidden="true" class="material-icons">{{!showSecret() ? 'visibility_off' : 'visibility'}}</i>
+        <button class="btn btn-icon" type="button" matSuffix (click)="toggleShowSecret()"
+          [attr.aria-label]="'Hide Secret'" [attr.aria-pressed]="!showSecret()">
+          <app-custom-icon>{{!showSecret() ? 'visibility_off' : 'visibility'}}</app-custom-icon>
         </button>
-      </div>
+      </app-form-field>
     </div>
     <app-dialog-error message="Could not connect, please try again." [show]="hasErrored()">
     </app-dialog-error>
-    <div class="dialog-actions connection-dialog__actions">
-      <button (click)="dialogRef.close()" type="button" class="btn btn-warn">Cancel</button>
+    <div class="flex gap-2 justify-end">
+      <button (click)="dialogRef.close()" type="button" class="btn btn-secondary">Cancel</button>
       <button type="submit" [disabled]="!canSubmit()" class="btn btn-primary">Configure</button>
     </div>
   </form>

@@ -25,6 +25,12 @@ describe('UserInviteConfigurationDialogComponent', () => {
     await fixture.whenStable();
   });
 
+  // The dialog panel adds no padding of its own; the content carries it.
+  it('pads its content inside the dialog panel', () => {
+    const root = (fixture.nativeElement as HTMLElement).firstElementChild;
+    expect(root?.classList).toContain('p-6');
+  });
+
   it('names the Client ID and Client Secret fields with a visible label', () => {
     const root: HTMLElement = fixture.nativeElement;
     for (const [control, text] of [['clientID', 'Client ID'], ['clientSecret', 'Client Secret']]) {
