@@ -76,6 +76,11 @@
         Cloud Foundry lets only an administrator add a user without granting a role. Tick at least one role to add this user.
       </p>
     }
+    @if (mode() === 'invite' && !inviteReady()) {
+      <p class="text-xs text-content-muted" data-test="add-user-invite-org-required">
+        Pick an organization you manage. The invitation adds the user to it.
+      </p>
+    }
     <app-role-assignment
       [cfGuid]="data.cfGuid"
       [users]="pendingUsers"

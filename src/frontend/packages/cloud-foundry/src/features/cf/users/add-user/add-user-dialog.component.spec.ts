@@ -14,6 +14,7 @@ import { UserInviteService } from '../../user-invites/user-invite.service';
 import { CfUsersPagedDataService } from '../../../../shared/data-services/cf-users-paged-data.service';
 import { CfRoleChange } from '../../../../store/types/users-roles.types';
 import { OrgUserRoleNames } from '../../../../store/types/cf-user.types';
+import { CfCurrentUserPermissions } from '../../../../user-permissions/cf-user-permissions-checkers';
 import {
   provideRoleAssignmentTestDeps,
   RoleAssignmentDriver,
@@ -55,6 +56,8 @@ interface MakeOpts {
   idpsOrigins?: string[];
   /** Whether the console user is a CF admin on the endpoint (default true). */
   admin?: boolean;
+  /** Permission predicate for CurrentUserPermissionsService.can() (default: all granted). */
+  permissions?: (perm: unknown, cf: string, org?: string, space?: string) => boolean;
 }
 
 function make(data: AddUserDialogData, opts: MakeOpts = {}): {
@@ -81,7 +84,7 @@ function make(data: AddUserDialogData, opts: MakeOpts = {}): {
       { provide: CfUsersPagedDataService, useValue: {} },
       { provide: EndpointsDataService, useValue: { endpointById: () => signal({ user: { admin: opts.admin ?? true } }) } },
       // Real RoleAssignmentComponent services (no stub, no overrideComponent).
-      ...provideRoleAssignmentTestDeps(TEST_HARNESS_CFG),
+      ...provideRoleAssignmentTestDeps({ ...TEST_HARNESS_CFG, permissions: opts.permissions }),
     ],
   });
 
@@ -112,6 +115,59 @@ describe('AddUserDialogComponent', () => {
   it('shows the Invite tab when userInviteAllowed is true', () => {
     const { cmp } = make({ cfGuid: CF_GUID, userInviteAllowed: true });
     expect(cmp.inviteTabVisible()).toBe(true);
+  });
+
+  describe('invite rights (admin or org manager)', () => {
+    // Only an admin or the org's manager may invite (userinvite/invite.go
+    // checkPermissions); ORGANIZATION_CHANGE_ROLES is that check.
+    const managesOnly = (orgs: string[]) => (perm: unknown, _cf: string, org?: string) =>
+      perm !== CfCurrentUserPermissions.ORGANIZATION_CHANGE_ROLES || (org ? orgs.includes(org) : orgs.length > 0);
+    const orgChange = (orgGuid: string): CfRoleChange =>
+      ({ userGuid: '', orgGuid, orgName: orgGuid, add: true, role: OrgUserRoleNames.USER });
+
+    it('hides Invite on an org page from a user who does not manage that org', () => {
+      const { cmp } = make(
+        { cfGuid: CF_GUID, orgGuid: 'org-1', orgName: 'Org One', userInviteAllowed: true },
+        { admin: false, permissions: managesOnly(['org-2']) },
+      );
+      expect(cmp.inviteTabVisible()).toBe(false);
+    });
+
+    it('hides Invite at CF level from a user who manages no org', () => {
+      const { cmp } = make({ cfGuid: CF_GUID, userInviteAllowed: true }, { admin: false, permissions: managesOnly([]) });
+      expect(cmp.inviteTabVisible()).toBe(false);
+    });
+
+    it('at CF level, invites into the org picked in the dialog', async () => {
+      const spy = vi.spyOn(addModule, 'addUsers').mockResolvedValue({ ok: true, total: 1, failed: 0 });
+      const { cmp } = make({ cfGuid: CF_GUID, userInviteAllowed: true });
+      cmp.switchMode('invite');
+      cmp.identities.set(['alice@example.com']);
+      cmp.identitiesValid.set(true);
+      cmp.onRoleChangeSet([orgChange('org-1')]);
+
+      await cmp.submit();
+
+      const [, req] = spy.mock.calls[0];
+      expect(req.mode).toBe('invite');
+      expect(req.orgGuid).toBe('org-1');
+      expect(req.orgName).toBe('org-1');
+      spy.mockRestore();
+    });
+
+    it('at CF level, needs a picked org the user manages before an invite can submit', () => {
+      const { cmp } = make({ cfGuid: CF_GUID, userInviteAllowed: true }, { admin: false, permissions: managesOnly(['org-1']) });
+      cmp.switchMode('invite');
+      cmp.identities.set(['alice@example.com']);
+      cmp.identitiesValid.set(true);
+      expect(cmp.canSubmit()).toBe(false);
+
+      cmp.onRoleChangeSet([orgChange('org-2')]);
+      expect(cmp.canSubmit()).toBe(false);
+
+      cmp.onRoleChangeSet([orgChange('org-1')]);
+      expect(cmp.canSubmit()).toBe(true);
+    });
   });
 
   it('canSubmit is false when there are no valid identities', () => {
