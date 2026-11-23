@@ -49,12 +49,21 @@ describe('LogOutDialogComponent', () => {
     fixture = TestBed.createComponent(LogOutDialogComponent);
     router = TestBed.inject(Router);
     component = fixture.componentInstance;
-    fixture.detectChanges();
+    await fixture.whenStable();
     _element = fixture.nativeElement;
   });
 
   it('should be created', () => {
     expect(component).toBeTruthy();
+  });
+
+  // The dialog panel adds no padding of its own. A negative margin written
+  // for the old padded container pushed the content (and the progress bar
+  // along its top) out past the panel's top and left edges.
+  it('keeps its content inside the dialog panel', () => {
+    const root = _element.firstElementChild as HTMLElement;
+    expect(root.className).not.toContain('m-[-');
+    expect(root.classList).toContain('py-6');
   });
 
   it('should navigate after countdown', async () => {
@@ -64,6 +73,7 @@ describe('LogOutDialogComponent', () => {
     component.data = {
       expiryDate: Date.now() + 1000
     };
+    // whenStable never settles under fake timers; refresh the view directly
     fixture.detectChanges();
     component.ngOnDestroy();
     component.ngOnInit();
