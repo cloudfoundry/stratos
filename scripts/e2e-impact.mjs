@@ -43,7 +43,7 @@ function sourceText(file) {
 
 // Tokens a component contributes to the DOM contract, split by how they may
 // legitimately appear in e2e sources:
-// - selectors ('app-add-user'): distinctive kebab tags that occur inside
+// - selectors ('app-add-user-dialog'): distinctive kebab tags that occur inside
 //   larger CSS selector strings ('app-x form', 'app-x, app-y') — matched on
 //   word boundaries alone.
 // - hook values / prefixes: attribute values that always sit at the start of
