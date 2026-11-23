@@ -9,9 +9,18 @@ import { CfInfoDataRegistry } from '../../../services/endpoint-data/cf-info-data
 import { CfUsersPagedDataService } from '../../../shared/data-services/cf-users-paged-data.service';
 import { EndpointDataRegistry } from '../../../services/endpoint-data/endpoint-data.registry';
 import { ActiveRouteCfOrgSpace } from '../cf-page.types';
-import { EndpointsDataService } from '@stratosui/store';
+import { EndpointModel, EndpointsDataService } from '@stratosui/store';
 import { ICfV2Info } from '../../../cf-api.types';
 import { StApp } from '../../../services/endpoint-data/stratos-types';
+
+/** EndpointsDataService stand-in whose record for the CF can change later. */
+function endpointsStub(record = signal<EndpointModel | null>(null)) {
+  return {
+    whenReady: () => new Promise<void>(() => { /* never resolves */ }),
+    waitFor: async () => record(),
+    endpointById: () => record,
+  };
+}
 
 // A.#1: pins the URL shape of the instance fetchAppCount / fetchRouteCount
 // helpers that replaced the V2 ngrx-pagination statics. The native handlers'
@@ -49,7 +58,7 @@ describe('CloudFoundryEndpointService — fetchAppCount / fetchRouteCount', () =
           useValue: { acquire: () => endpointDataStub, release: vi.fn() },
         },
         { provide: CfInfoDataRegistry, useValue: { acquire: () => cfInfoStub } },
-        { provide: EndpointsDataService, useValue: { waitFor: () => new Promise(() => { /* never resolves */ }) } },
+        { provide: EndpointsDataService, useValue: endpointsStub() },
         CloudFoundryEndpointService,
       ],
     });
@@ -124,7 +133,7 @@ describe('CloudFoundryEndpointService — no-op when cfGuid is falsy', () => {
         { provide: CfUsersPagedDataService, useValue: { users: () => () => null } },
         { provide: EndpointDataRegistry, useValue: { acquire: acquireFn, release: vi.fn() } },
         { provide: CfInfoDataRegistry, useValue: { acquire: cfInfoAcquireFn } },
-        { provide: EndpointsDataService, useValue: { waitFor: () => new Promise(() => { /* never resolves */ }) } },
+        { provide: EndpointsDataService, useValue: endpointsStub() },
         CloudFoundryEndpointService,
       ],
     });
@@ -185,9 +194,11 @@ describe('CloudFoundryEndpointService — signal members', () => {
   const loadingDetails = signal(true);
   const recent = signal<Partial<StApp>[]>([]);
   const appsFetched = signal<Date | null>(null);
+  const endpointRecord = signal<EndpointModel | null>(null);
   let svc: CloudFoundryEndpointService;
 
   beforeEach(() => {
+    endpointRecord.set({ guid: 'cnsi-1', metadata: {} } as EndpointModel);
     apps.set([]);
     users.set(null);
     info.set(null);
@@ -212,7 +223,7 @@ describe('CloudFoundryEndpointService — signal members', () => {
           },
         },
         { provide: CfInfoDataRegistry, useValue: { acquire: () => ({ info, load: () => ({ subscribe: vi.fn() }) }) } },
-        { provide: EndpointsDataService, useValue: { waitFor: () => new Promise(() => { /* never resolves */ }) } },
+        { provide: EndpointsDataService, useValue: endpointsStub(endpointRecord) },
         CloudFoundryEndpointService,
       ],
     });
@@ -255,6 +266,14 @@ describe('CloudFoundryEndpointService — signal members', () => {
     apps.set([{ guid: 'a1' }, { guid: 'a2' }]);
     appsFetched.set(new Date());
     expect(svc.recentApps().map(a => a.metadata.guid)).toEqual(['a1', 'a2']);
+  });
+
+  it('endpoint follows the endpoints list, so a refetch reaches its readers', async () => {
+    await Promise.resolve();
+    expect(svc.endpoint()?.entity.metadata?.userInviteAllowed).toBeUndefined();
+    // A refetch after the invite client is configured replaces the record.
+    endpointRecord.set({ guid: 'cnsi-1', metadata: { userInviteAllowed: 'true' } } as EndpointModel);
+    expect(svc.endpoint()?.entity.metadata?.userInviteAllowed).toBe('true');
   });
 
   it('appsLoading follows the endpoint data loading flag', () => {

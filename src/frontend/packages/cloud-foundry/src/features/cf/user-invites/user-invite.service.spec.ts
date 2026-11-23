@@ -2,14 +2,16 @@ import { provideZonelessChangeDetection, signal } from '@angular/core';
 import { TestBed } from '@angular/core/testing';
 import { provideHttpClient } from '@angular/common/http';
 import { HttpTestingController, provideHttpClientTesting } from '@angular/common/http/testing';
-import { describe, expect, it, beforeEach } from 'vitest';
+import { describe, expect, it, beforeEach, vi } from 'vitest';
 import { firstValueFrom } from 'rxjs';
 
-import { UserInviteService, UserInviteSendSpaceRoles } from './user-invite.service';
+import { UserInviteConfigureService, UserInviteService, UserInviteSendSpaceRoles } from './user-invite.service';
 import { CloudFoundryEndpointService } from '../services/cloud-foundry-endpoint.service';
 import { ActiveRouteCfOrgSpace } from '../cf-page.types';
 import { CfCurrentUserRolesDataService } from '../../../services/cf-current-user-roles-data.service';
-import { AuthDataService } from '@stratosui/store';
+import { TailwindSnackBarService } from '@stratosui/core';
+import { AuthDataService, EndpointsDataService } from '@stratosui/store';
+import { ConfirmationDialogService } from '../../../../../core/src/shared/components/confirmation-dialog.service';
 import { CurrentUserPermissionsService } from '../../../../../core/src/core/permissions/current-user-permissions.service';
 
 // ─── Minimal stubs ────────────────────────────────────────────────────────────
@@ -161,5 +163,51 @@ describe('UserInviteService.canShowInviteUser', () => {
   it('offers invites to no one outside an organization', () => {
     const svc = TestBed.inject(UserInviteService);
     expect(svc.canShowInviteUser('cf1', '', '')()).toBe(false);
+  });
+});
+
+// The endpoint list carries metadata.userInviteAllowed, so after the invite
+// client is configured or removed the list is fetched again; without it the
+// Summary row and the invite links keep the old answer until a reload.
+describe('UserInviteConfigureService refreshes the endpoints', () => {
+  let svc: UserInviteConfigureService;
+  let http: HttpTestingController;
+  const getAll = vi.fn();
+
+  beforeEach(() => {
+    getAll.mockReset().mockResolvedValue([]);
+    TestBed.configureTestingModule({
+      providers: [
+        provideZonelessChangeDetection(),
+        provideHttpClient(),
+        provideHttpClientTesting(),
+        { provide: EndpointsDataService, useValue: { getAll } },
+        { provide: TailwindSnackBarService, useValue: { error: vi.fn() } },
+        // Answers the "Disable" confirmation at once.
+        { provide: ConfirmationDialogService, useValue: { open: (_c: unknown, onConfirm: () => void) => onConfirm() } },
+      ],
+    });
+    svc = TestBed.inject(UserInviteConfigureService);
+    http = TestBed.inject(HttpTestingController);
+  });
+
+  it('after a successful configure', async () => {
+    const result = firstValueFrom(svc.configure('cf-1', 'client', 'secret'));
+    http.expectOne({ method: 'POST', url: '/pp/v1/invite/cf-1' }).flush({});
+    expect((await result).error).toBe(false);
+    expect(getAll).toHaveBeenCalledWith(false);
+  });
+
+  it('not after a failed configure', async () => {
+    const result = firstValueFrom(svc.configure('cf-1', 'client', 'wrong'));
+    http.expectOne('/pp/v1/invite/cf-1').flush({ error: 'bad client' }, { status: 400, statusText: 'Bad Request' });
+    expect((await result).error).toBe(true);
+    expect(getAll).not.toHaveBeenCalled();
+  });
+
+  it('after a successful disable', () => {
+    svc.unconfigure('cf-1');
+    http.expectOne({ method: 'DELETE', url: '/pp/v1/invite/cf-1' }).flush({});
+    expect(getAll).toHaveBeenCalledWith(false);
   });
 });
