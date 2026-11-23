@@ -80,7 +80,7 @@ describe('CloudFoundryOrganizationUsersComponent', () => {
           provide: CloudFoundryOrganizationService,
           useValue: { orgGuid: 'org-1', cfGuid: 'cnsi-1', orgDataService: { org: signal(null) } },
         },
-        { provide: UserInviteService, useValue: { configured: signal(false), canShowInviteUser: () => signal(false) } },
+        { provide: UserInviteService, useValue: { configured: signal(false) } },
         { provide: ActiveRouteCfOrgSpace, useValue: { cfGuid: 'cnsi-1', orgGuid: 'org-1', spaceGuid: '' } },
       ],
     }).compileComponents();
@@ -90,13 +90,6 @@ describe('CloudFoundryOrganizationUsersComponent', () => {
     fixture.detectChanges();
   });
 
-  it('shows the invite users link above the list', () => {
-    const el: HTMLElement = fixture.nativeElement;
-    const invite = el.querySelector('app-cloud-foundry-invite-user-link');
-    expect(invite).not.toBeNull();
-    // The card sits between the sub-nav bar and the list, as before 5.0.0.
-    expect(invite!.compareDocumentPosition(el.querySelector('app-signal-list')!) & Node.DOCUMENT_POSITION_FOLLOWING).toBeTruthy();
-  });
 
   it('initializes the signal config for this org (pinned scope)', () => {
     expect(stubSignalConfig.initializeForOrg).toHaveBeenCalledWith('cnsi-1', 'org-1');
@@ -184,7 +177,7 @@ async function makeSubNavFixture(canReturn: boolean, filteredItems?: StUser[]): 
         useValue: { orgGuid: 'org-1', cfGuid: 'cnsi-1', orgDataService: { org: signal(null) } },
       },
       { provide: CurrentUserPermissionsService, useValue: { can: () => signal(canReturn) } },
-      { provide: UserInviteService, useValue: { configured: signal(false), canShowInviteUser: () => signal(false) } },
+      { provide: UserInviteService, useValue: { configured: signal(false) } },
         { provide: ActiveRouteCfOrgSpace, useValue: { cfGuid: 'cnsi-1', orgGuid: 'org-1', spaceGuid: '' } },
     ],
   }).compileComponents();
@@ -392,7 +385,7 @@ async function makeByUsernameFixture(opts: { flagOn: boolean; canChangeRoles: bo
         provide: CurrentUserPermissionsService,
         useValue: { can: (perm: unknown) => signal(typeof perm === 'string' ? opts.canChangeRoles : opts.flagOn) },
       },
-      { provide: UserInviteService, useValue: { configured: signal(false), canShowInviteUser: () => signal(false) } },
+      { provide: UserInviteService, useValue: { configured: signal(false) } },
         { provide: ActiveRouteCfOrgSpace, useValue: { cfGuid: 'cnsi-1', orgGuid: 'org-1', spaceGuid: '' } },
     ],
   }).compileComponents();

@@ -260,7 +260,7 @@ test.describe('CF Org Level', () => {
       await manageButton.click();
 
       // Verify user management dialog opened
-      const dialog = page.locator('app-add-org-user, app-invite-users, [role="dialog"]');
+      const dialog = page.locator('app-add-org-user, [role="dialog"]');
       const dialogExists = await dialog.isVisible({ timeout: 5000 }).catch(() => false);
 
       if (dialogExists) {
