@@ -1,9 +1,9 @@
 import { HttpClient } from '@angular/common/http';
 import { Injectable, Signal, computed, inject } from '@angular/core';
 import { TailwindSnackBarService } from '@stratosui/core';
-import { AuthDataService } from '@stratosui/store';
+import { AuthDataService, EndpointsDataService } from '@stratosui/store';
 import { Observable, of as observableOf } from 'rxjs';
-import { catchError, map } from 'rxjs/operators';
+import { catchError, map, tap } from 'rxjs/operators';
 
 import { CurrentUserPermissionsService } from '../../../../../core/src/core/permissions/current-user-permissions.service';
 import { environment } from '../../../../../core/src/environments/environment.prod';
@@ -59,7 +59,13 @@ export class UserInviteConfigureService {
   private http = inject(HttpClient);
   private snackBar = inject(TailwindSnackBarService);
   private confirmDialog = inject(ConfirmationDialogService);
+  private endpointsData = inject(EndpointsDataService);
 
+  /** The endpoint list carries metadata.userInviteAllowed; fetch it again so
+   *  the Summary row and the invite links show the new state. */
+  private refreshEndpoints() {
+    void this.endpointsData.getAll(false).catch(() => {/* surfaced on endpointsData.error */});
+  }
 
   configure(cfGUID: string, clientID: string, clientSecret: string): Observable<UserInviteBaseResponse> {
     const formData: FormData = new FormData();
@@ -67,6 +73,7 @@ export class UserInviteConfigureService {
     formData.append('client_secret', clientSecret);
     const url = `/pp/${proxyAPIVersion}/invite/${cfGUID}`;
     const obs$ = this.http.post(url, formData).pipe(
+      tap(() => this.refreshEndpoints()),
       map(_v => {
         return {
           error: false
@@ -114,6 +121,8 @@ export class UserInviteConfigureService {
       ).subscribe(res => {
         if (res.error) {
           this.snackBar.error(res.errorMessage, 'Close');
+        } else {
+          this.refreshEndpoints();
         }
       });
     });

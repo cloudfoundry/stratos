@@ -1,7 +1,6 @@
 import { HttpClient } from '@angular/common/http';
-import { Injectable, Injector, Signal, computed, inject, signal } from '@angular/core';
-import { toSignal } from '@angular/core/rxjs-interop';
-import { Observable, from, of } from 'rxjs';
+import { Injectable, Signal, computed, inject, signal } from '@angular/core';
+import { Observable, of } from 'rxjs';
 import { catchError, map } from 'rxjs/operators';
 
 import { CfInfoDataRegistry } from '../../../services/endpoint-data/cf-info-data.registry';
@@ -44,7 +43,6 @@ export class CloudFoundryEndpointService {
   private cfInfoDataRegistry = inject(CfInfoDataRegistry);
   private endpointsData = inject(EndpointsDataService);
   private http = inject(HttpClient);
-  private injector = inject(Injector);
 
 
   apps!: Signal<APIResource<IApp>[]>;
@@ -145,16 +143,19 @@ export class CloudFoundryEndpointService {
   }
 
   private constructCoreObservables() {
-    // EndpointsDataService.waitFor() resolves once the endpoints list has
-    // the endpoint; wrapped in the EntityInfo envelope readers expect.
-    const endpoint$ = from(this.endpointsData.waitFor(this.cfGuid)).pipe(
-      map((endpoint: EndpointModel) => ({
-        entity: endpoint,
-        entityRequestInfo: getDefaultRequestState(),
-      } as EntityInfo<EndpointModel>)),
-    );
-    // toSignal needs an injection context: this runs in the constructor.
-    this.endpoint = toSignal(endpoint$, { initialValue: undefined, injector: this.injector });
+    // Follow the endpoints list rather than one waitFor() result, so a
+    // refetch (e.g. after the user-invite client is configured, which
+    // changes metadata.userInviteAllowed) reaches every reader. whenReady()
+    // starts the first fetch if nothing has yet. Wrapped in the EntityInfo
+    // envelope readers expect; undefined until the list has the endpoint.
+    void this.endpointsData.whenReady();
+    const record = this.endpointsData.endpointById(this.cfGuid);
+    this.endpoint = computed(() => {
+      const endpoint = record();
+      return endpoint
+        ? { entity: endpoint, entityRequestInfo: getDefaultRequestState() } as EntityInfo<EndpointModel>
+        : undefined;
+    });
 
     this.info = this.cfInfoData.info;
     this.hasSSHAccess = computed(() => {
