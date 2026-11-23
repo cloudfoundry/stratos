@@ -1,15 +1,14 @@
-<div class="m-[-24px_-24px_0] p-[24px_50px] relative">
+<div class="relative px-12 py-6 flex flex-col gap-4">
+  <!-- Full-width strip along the top edge of the dialog -->
   <app-progress-bar class="absolute inset-x-0 top-0" mode="determinate" [value]="percentage()">
   </app-progress-bar>
-  <div class="dialog-content p-5">
-    <div class="flex flex-row items-center" data-dialog-drag-handle>
-      <i aria-hidden="true" class="material-icons">pan_tool</i>
-      <div class="flex-1 text-lg font-bold">
-        Are you still there?
-      </div>
+  <div class="flex flex-row items-center gap-2 p-5" data-dialog-drag-handle>
+    <i aria-hidden="true" class="material-icons">pan_tool</i>
+    <div class="flex-1 text-lg font-bold">
+      Are you still there?
     </div>
   </div>
-  <div class="dialog-actions justify-center">
+  <div class="flex justify-center">
     <button class="btn btn-primary" (click)="dialogRef.close(true)">Yes</button>
   </div>
 </div>
