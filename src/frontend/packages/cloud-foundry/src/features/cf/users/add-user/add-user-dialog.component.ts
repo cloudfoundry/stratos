@@ -27,6 +27,8 @@ import { EndpointsDataService } from '@stratosui/store';
 import { CfUsersPagedDataService } from '../../../../shared/data-services/cf-users-paged-data.service';
 import { CfRoleChange } from '../../../../store/types/users-roles.types';
 import { StUser } from '../../../../services/endpoint-data/stratos-types';
+import { CurrentUserPermissionsService } from '../../../../../../core/src/core/permissions/current-user-permissions.service';
+import { CfCurrentUserPermissions } from '../../../../user-permissions/cf-user-permissions-checkers';
 import { RoleAssignmentComponent } from '../../../../shared/components/role-assignment/role-assignment.component';
 import {
   AddMode,
@@ -45,7 +47,8 @@ export interface AddUserDialogData {
   /** When set, the space picker is locked (opened from a space page). */
   spaceGuid?: string;
   spaceName?: string;
-  /** Whether the UAA invite flow is allowed (feature-flag + admin). */
+  /** Whether user invites are set up for the endpoint. The dialog itself
+   *  checks that the user may invite (admin or org manager). */
   userInviteAllowed: boolean;
 }
 
@@ -96,6 +99,7 @@ export class AddUserDialogComponent {
   private invite = inject(UserInviteService);
   private snackBar = inject(TailwindSnackBarService);
   private paged = inject(CfUsersPagedDataService);
+  private perms = inject(CurrentUserPermissionsService);
 
   // ── Writable signals (field initializers — no `(this as {...})` casts) ────
 
@@ -114,8 +118,38 @@ export class AddUserDialogComponent {
 
   // ── Computed signals ──────────────────────────────────────────────────────
 
-  /** Invite tab is absent (not disabled) when the feature is not available. */
-  protected inviteTabVisible: Signal<boolean> = computed(() => this.data.userInviteAllowed === true);
+  /**
+   * Only an admin or the org's manager may invite (the backend refuses anyone
+   * else). Checked for the locked org, or for any org at CF level, where the
+   * org is picked in the dialog and checked again by canInviteInto.
+   */
+  private canInviteHere: Signal<boolean> = this.perms.can(
+    CfCurrentUserPermissions.ORGANIZATION_CHANGE_ROLES, this.data.cfGuid, this.data.orgGuid,
+  );
+
+  /** Invite tab is absent (not disabled) when invites are not set up or the user may not invite. */
+  protected inviteTabVisible: Signal<boolean> = computed(() => this.data.userInviteAllowed === true && this.canInviteHere());
+
+  /** The org an invite goes to: the locked org, else the first org picked in the role widget. */
+  private inviteOrg: Signal<{ guid: string; name: string } | undefined> = computed(() => {
+    if (this.data.orgGuid) {
+      return { guid: this.data.orgGuid, name: this.data.orgName ?? '' };
+    }
+    const change = this.roleChanges().find(c => c.orgGuid);
+    return change ? { guid: change.orgGuid, name: change.orgName ?? '' } : undefined;
+  });
+
+  /** Per-org invite checks for CF level, created once per org picked. */
+  private orgInviteChecks = new Map<string, Signal<boolean>>();
+
+  private canInviteInto(orgGuid: string): boolean {
+    let check = this.orgInviteChecks.get(orgGuid);
+    if (!check) {
+      check = this.perms.can(CfCurrentUserPermissions.ORGANIZATION_CHANGE_ROLES, this.data.cfGuid, orgGuid);
+      this.orgInviteChecks.set(orgGuid, check);
+    }
+    return check();
+  }
 
   /** Org picker is locked when opened from an org or space page. */
   protected orgLocked: Signal<boolean> = computed(() => !!this.data.orgGuid);
@@ -139,8 +173,15 @@ export class AddUserDialogComponent {
    */
   protected canSubmit: Signal<boolean> = computed(
     () => this.identitiesValid() && this.identities().length > 0 && !this.submitting()
-      && (!this.rolesRequired() || this.roleChanges().length > 0),
+      && (!this.rolesRequired() || this.roleChanges().length > 0)
+      && (this.mode() !== 'invite' || this.inviteReady()),
   );
+
+  /** An invite needs an org the user may invite into. */
+  protected inviteReady: Signal<boolean> = computed(() => {
+    const org = this.inviteOrg();
+    return !!org && this.canInviteInto(org.guid);
+  });
 
   // ── StackedInputActions wiring ────────────────────────────────────────────
 
@@ -223,8 +264,8 @@ export class AddUserDialogComponent {
       // orgGuid/orgName are used by addUsers for synthetic-user guid construction
       // and invite calls. They may be empty when no org is selected (CF-level with
       // no org chosen); the widget embeds org/space info in the changes themselves.
-      orgGuid: this.data.orgGuid ?? '',
-      orgName: this.data.orgName ?? '',
+      orgGuid: (this.mode() === 'invite' ? this.inviteOrg()?.guid : this.data.orgGuid) ?? '',
+      orgName: (this.mode() === 'invite' ? this.inviteOrg()?.name : this.data.orgName) ?? '',
       // selection is kept as empty sentinel — addUsers will use req.changes instead.
       selection: { orgRoles: [], spaceRolesBySpace: {} },
       changes: this.roleChanges(),
