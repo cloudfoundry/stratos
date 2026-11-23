@@ -6,6 +6,7 @@ import {
   OnDestroy,
   OnInit,
   computed,
+  effect,
   input,
   signal,
   output,
@@ -93,13 +94,23 @@ export class StackedInputActionComponent implements OnInit, OnDestroy, AfterCont
   private subs: Subscription[] = [];
   private otherValues!: string[];
 
-  ngOnInit() {
-    const validators = [Validators.required, this.uniqueValidator.bind(this)];
-    if (this.resolvedConfig().isEmailInput) {
-      validators.push(Validators.email);
-    }
-    this.textFormControl = new FormControl<string | null>('', validators);
+  constructor() {
+    // The email check follows the config, which the host can change while
+    // the row is shown (Add User: usernames or email addresses). A change
+    // after the first run re-validates and reports the new validity.
+    let firstRun = true;
+    effect(() => {
+      const validators = [Validators.required, this.uniqueValidator.bind(this)];
+      if (this.resolvedConfig().isEmailInput) {
+        validators.push(Validators.email);
+      }
+      this.textFormControl.setValidators(validators);
+      this.textFormControl.updateValueAndValidity({ emitEvent: !firstRun });
+      firstRun = false;
+    });
+  }
 
+  ngOnInit() {
     // Emit any changes of form state outwards.
     this.subs.push(this.textFormControl.valueChanges.subscribe((value) => {
       this.stateOut.emit({
