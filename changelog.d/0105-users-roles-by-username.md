@@ -6,9 +6,6 @@
   Users tabs were rebuilt; it shows, as in 4.x, when the
   `set_roles_by_username` or `unset_roles_by_username` feature flag is
   on and you may change roles in that organization or space.
-- The organization and space Users tabs show the **Invite Users** card
-  again when the endpoint has user invites configured. It was lost in
-  5.0.0 along with Manage by Username.
 - Namespace links in the Kubernetes resource lists and the Helm
   releases list open the Namespaces tab filtered to that namespace.
   They used to lead to a namespace page that no longer exists and
