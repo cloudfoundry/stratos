@@ -200,7 +200,7 @@ describe('CloudFoundryOrganizationUsersComponent — subNavActions', () => {
     expect(addUser).toBeDefined();
     expect(manageRoles).toBeDefined();
     expect(removeOrgSpaces).toBeDefined();
-    expect(addUser!.variant).toBe('default');
+    expect(addUser!.variant).toBe('primary');
     expect(manageRoles!.variant).toBe('primary');
     expect(removeOrgSpaces!.variant).toBe('destructive');
   });
@@ -337,7 +337,7 @@ describe('CloudFoundryOrganizationUsersComponent — Add User action', () => {
     const actions = (component as any).subNavActions as readonly { dataTest?: string; variant?: string; visible?: () => boolean; disabled?: () => boolean }[];
     const add = actions.find(a => a.dataTest === 'cf-users-add');
     expect(add).toBeTruthy();
-    expect(add!.variant).toBe('default');
+    expect(add!.variant).toBe('primary');
     expect(add!.visible!()).toBe(true);
     expect(add!.disabled!()).toBe(false);
   });
@@ -392,7 +392,7 @@ async function makeByUsernameFixture(opts: { flagOn: boolean; canChangeRoles: bo
   const fixture = TestBed.createComponent(CloudFoundryOrganizationUsersComponent);
   fixture.detectChanges();
   const actions = (fixture.componentInstance as any).subNavActions as readonly {
-    dataTest?: string; visible?: () => boolean; invoke: () => void;
+    dataTest?: string; variant?: string; visible?: () => boolean; invoke: () => void;
   }[];
   return { action: actions.find(a => a.dataTest === 'cf-org-users-roles-by-username')! };
 }
@@ -404,6 +404,7 @@ describe('CloudFoundryOrganizationUsersComponent — roles by username', () => {
     const { action } = await makeByUsernameFixture({ flagOn: true, canChangeRoles: true });
     expect(action).toBeDefined();
     expect(action.visible!()).toBe(true);
+    expect(action.variant).toBe('primary');
   });
 
   it('hides it when both roles-by-username feature flags are off', async () => {

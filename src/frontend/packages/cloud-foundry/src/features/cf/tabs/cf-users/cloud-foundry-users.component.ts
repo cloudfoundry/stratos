@@ -84,14 +84,14 @@ export class CloudFoundryUsersComponent {
   readonly countPending: Signal<boolean> = computed(() => !this.usersConfig.hasLoadedOnce());
 
   /** Action buttons surfaced in the always-visible ListSubNavComponent
-   *  "Total Users" bar. Prepended Add User + Manage Roles (primary) +
+   *  "Total Users" bar. Prepended Add User + Manage Roles (both primary) +
    *  two destructive Remove entries. disabled/invoke semantics are
    *  identical — only the rendering host has changed. */
   protected readonly subNavActions: readonly ListSubNavAction[] = [
     {
       label: 'Add User',
       icon: 'person_add',
-      variant: 'default',
+      variant: 'primary',
       dataTest: 'cf-users-add',
       visible: computed(() => this.canManageRoles()),
       disabled: computed(() => !this.canManageRoles()),

@@ -262,7 +262,7 @@ describe('CloudFoundryUsersComponent — subNavActions', () => {
     expect(manageRoles).toBeDefined();
     expect(removeSpaces).toBeDefined();
     expect(removeOrgSpaces).toBeDefined();
-    expect(addUser!.variant).toBe('default');
+    expect(addUser!.variant).toBe('primary');
     expect(manageRoles!.variant).toBe('primary');
     expect(removeSpaces!.variant).toBe('destructive');
     expect(removeOrgSpaces!.variant).toBe('destructive');
@@ -407,7 +407,7 @@ describe('CloudFoundryUsersComponent — Add User action', () => {
     const actions = (component as any).subNavActions as readonly { dataTest?: string; variant?: string; visible?: () => boolean; disabled?: () => boolean }[];
     const add = actions.find(a => a.dataTest === 'cf-users-add');
     expect(add).toBeTruthy();
-    expect(add!.variant).toBe('default');
+    expect(add!.variant).toBe('primary');
     // visible + enabled when canManageRoles is true
     expect(add!.visible!()).toBe(true);
     expect(add!.disabled!()).toBe(false);
