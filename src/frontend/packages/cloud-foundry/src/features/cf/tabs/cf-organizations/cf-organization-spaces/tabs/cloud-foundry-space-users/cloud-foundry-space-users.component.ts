@@ -136,13 +136,14 @@ export class CloudFoundrySpaceUsersComponent {
   private readonly spaceGuid: string;
 
   /** Action buttons surfaced in the always-visible ListSubNavComponent
-   *  "Total Users" bar. Prepended Add User + Manage Roles (primary) +
+   *  "Total Users" bar. Prepended Add User, Manage by Username,
+   *  Manage Roles (all primary) +
    *  Remove from Space (destructive). */
   protected readonly subNavActions: readonly ListSubNavAction[] = [
     {
       label: 'Add User',
       icon: 'person_add',
-      variant: 'default',
+      variant: 'primary',
       dataTest: 'cf-users-add',
       visible: computed(() => this.canManageRoles()),
       disabled: computed(() => !this.canManageRoles()),
@@ -151,7 +152,7 @@ export class CloudFoundrySpaceUsersComponent {
     {
       label: 'Manage by Username',
       icon: 'people',
-      variant: 'default',
+      variant: 'primary',
       dataTest: 'cf-space-users-roles-by-username',
       tooltip: 'Add or remove roles for users by username',
       visible: this.canRolesByUsername,

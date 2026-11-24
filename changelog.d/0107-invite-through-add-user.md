@@ -4,6 +4,8 @@
   page (`…/users/invite`), which nothing has linked to since 5.0.0, is
   removed; it offered no role at organization level and one role at
   space level.
+- On the Users tabs, **Add User** and **Manage by Username** use the
+  blue action style, like **Manage Roles**.
 
 [BugFixes]
 - In the Add User dialog's Invite mode the user field is labelled
