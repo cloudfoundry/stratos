@@ -96,6 +96,7 @@ describe('CFHomeCardComponent follows the endpoint data (#6021)', () => {
     recentApps: ReturnType<typeof signal<StApp[]>>;
     lastFetched: ReturnType<typeof signal<Date | null>>;
     loaded: ReturnType<typeof signal<boolean>>;
+    errors: ReturnType<typeof signal<{ resource: string; message: string }[]>>;
   };
 
   beforeEach(async () => {
@@ -107,6 +108,7 @@ describe('CFHomeCardComponent follows the endpoint data (#6021)', () => {
       recentApps: signal([app('STARTED')]),
       lastFetched: signal<Date | null>(new Date()),
       loaded: signal(false),
+      errors: signal<{ resource: string; message: string }[]>([]),
     };
     await TestBed.configureTestingModule({
       imports: [CFHomeCardComponent],
@@ -163,5 +165,31 @@ describe('CFHomeCardComponent follows the endpoint data (#6021)', () => {
     eds.loaded.set(true);
     await fixture.whenStable();
     expect(emitted).toEqual([true]);
+  });
+
+  const failure = () => fixture.nativeElement.querySelector('[data-test="cf-card-failure"]');
+
+  it('shows "-" and the reason for a count that failed to load', async () => {
+    eds.errors.set([{ resource: 'orgs', message: 'x509: certificate has expired' }]);
+    await fixture.whenStable();
+    const card = fixture.componentInstance;
+    expect(card.orgCount()).toBeNull();
+    expect(card.appCount()).toBe(1);
+    expect(card.routeCount()).toBe(0);
+    expect(failure()?.textContent).toContain('Failed to load: x509: certificate has expired');
+  });
+
+  it('shows "-" for every count when the endpoint cannot be reached', async () => {
+    eds.errors.set(['orgs', 'apps', 'routes'].map(resource => ({ resource, message: 'unreachable' })));
+    await fixture.whenStable();
+    const card = fixture.componentInstance;
+    expect([card.appCount(), card.orgCount(), card.routeCount()]).toEqual([null, null, null]);
+    expect(failure()?.textContent).toContain('Failed to load: unreachable');
+  });
+
+  it('shows the counts and no failure line after a full load', () => {
+    const card = fixture.componentInstance;
+    expect([card.appCount(), card.orgCount(), card.routeCount()]).toEqual([1, 1, 0]);
+    expect(failure()).toBeNull();
   });
 });

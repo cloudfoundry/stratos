@@ -27,6 +27,9 @@ import { CardNumberMetricComponent } from '@stratosui/core';
 import { CardCfRecentAppsComponent } from '../card-cf-recent-apps/card-cf-recent-apps.component';
 import { TileSelectorComponent } from '@stratosui/core';
 
+// The error tags of the service's summary requests (orgs, apps, routes).
+const SUMMARY_COUNTS = ['orgs', 'apps', 'routes'];
+
 @Component({
   selector: 'app-cfhome-card',
   templateUrl: './cfhome-card.component.html',
@@ -79,6 +82,18 @@ export class CFHomeCardComponent implements HomePageEndpointCard, OnDestroy {
     return 10;
   });
   readonly showDeployAppTiles = computed(() => this.cardLayout().x === 1 && this.cardLayout().y === 1);
+
+  // A count whose summary request failed is null (the tile shows "-"), not
+  // the 0 the service starts with.
+  private readonly failedCounts = computed(() => new Set(
+    (this.endpointDataService()?.errors() ?? [])
+      .filter(e => SUMMARY_COUNTS.includes(e.resource)).map(e => e.resource)));
+  readonly appCount = computed(() => this.failedCounts().has('apps') ? null : this.endpointDataService()?.appCount());
+  readonly orgCount = computed(() => this.failedCounts().has('orgs') ? null : this.endpointDataService()?.orgCount());
+  readonly routeCount = computed(() => this.failedCounts().has('routes') ? null : this.endpointDataService()?.routeCount());
+  // Why a count failed to load, shown under the tiles.
+  readonly failureReason = computed(() => this.endpointDataService()?.errors()
+    .find(e => SUMMARY_COUNTS.includes(e.resource))?.message);
 
   // Follows the service's recent-apps signal, so the list picks up the app
   // mutators (start/stop, create, delete) without another load().
