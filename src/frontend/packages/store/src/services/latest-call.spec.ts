@@ -12,4 +12,15 @@ describe('LatestCall', () => {
     expect(latest.isLatest(b1, 'b')).toBe(true);
     expect(latest.isLatest(latest.begin())).toBe(true);
   });
+
+  it('supersedes the calls of every matching key', () => {
+    const latest = new LatestCall();
+    const a = latest.begin('kube/ns-a');
+    const b = latest.begin('kube');
+    const c = latest.begin('other');
+    latest.supersede(k => k.startsWith('kube'));
+    expect(latest.isLatest(a, 'kube/ns-a')).toBe(false);
+    expect(latest.isLatest(b, 'kube')).toBe(false);
+    expect(latest.isLatest(c, 'other')).toBe(true);
+  });
 });

@@ -121,6 +121,18 @@ describe('KubeGenericResourceDataServiceBase eviction while a load is in flight'
     expect(svc.itemsInNamespace(B, 'ns')()).toHaveLength(1);
   });
 
+  // A list fetched before a delete must not bring the deleted row back.
+  it('drops a list that was in flight when a row was deleted', async () => {
+    const load = svc.refresh({ kubeGuid: A, namespace: 'ns' });
+    const list = pending(NS_URL, A);
+    const del = svc.delete(A, 'x', 'ns');
+    httpMock.expectOne('/pp/v1/proxy/api/v1/namespaces/ns/tests/x').flush({ [A]: {} });
+    await del;
+    list.flush(listOf(A));
+    await load;
+    expect(svc.itemsInNamespace(A, 'ns')()).toEqual([]);
+  });
+
   it('drops the departed endpoint\'s late failure', async () => {
     const load = svc.refresh({ kubeGuid: A });
     const req = pending(CLUSTER_URL, A);

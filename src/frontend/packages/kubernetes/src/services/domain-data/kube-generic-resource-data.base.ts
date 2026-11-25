@@ -2,6 +2,8 @@ import { HttpClient, HttpErrorResponse, HttpHeaders } from '@angular/common/http
 import { Signal, computed, inject, signal } from '@angular/core';
 import { firstValueFrom } from 'rxjs';
 
+import { LatestCall } from '@stratosui/store';
+
 import { KubeEndpointEviction, evictErrors, evictKeys } from '../endpoint-data/kube-endpoint-eviction';
 import { KUBE_LIST_DEFAULT_LIMIT, KubeListResponse } from '../endpoint-data/kube-paged-response';
 import { KubeLoadTracker } from '../endpoint-data/kube-load-tracker';
@@ -46,6 +48,9 @@ export abstract class KubeGenericResourceDataServiceBase<T extends { metadata: {
   private readonly _workloadItems = signal<Map<string, Array<T & { kubeGuid: string }>>>(new Map());
   private readonly _errors = signal<StratosError[]>([]);
   private readonly loads = new KubeLoadTracker();
+  // Orders the loads of each list (cluster or namespace) and drops a list
+  // fetched before a delete (see LatestCall).
+  private readonly latest = new LatestCall();
   private readonly eviction = inject(KubeEndpointEviction);
 
   constructor() {
@@ -115,8 +120,10 @@ export abstract class KubeGenericResourceDataServiceBase<T extends { metadata: {
   async refresh(scope: { kubeGuid: string; namespace?: string }): Promise<void> {
     const live = this.eviction.current(scope.kubeGuid);
     if (scope.namespace && this.config.namespaced) {
+      const k = nsKey(scope.kubeGuid, scope.namespace);
+      const call = this.latest.begin(k);
       const items = await this.fetchNamespaced(scope.kubeGuid, scope.namespace);
-      if (!live()) return;
+      if (!live() || !this.latest.isLatest(call, k)) return;
       this._namespaceItems.update(curr => {
         const next = new Map(curr);
         next.set(nsKey(scope.kubeGuid, scope.namespace as string), items);
@@ -124,8 +131,9 @@ export abstract class KubeGenericResourceDataServiceBase<T extends { metadata: {
       });
       return;
     }
+    const call = this.latest.begin(scope.kubeGuid);
     const items = await this.fetchCluster(scope.kubeGuid);
-    if (!live()) return;
+    if (!live() || !this.latest.isLatest(call, scope.kubeGuid)) return;
     this._clusterItems.update(curr => {
       const next = new Map(curr);
       next.set(scope.kubeGuid, items);
@@ -149,6 +157,8 @@ export abstract class KubeGenericResourceDataServiceBase<T extends { metadata: {
       ? `${base}/namespaces/${encodeURIComponent(namespace)}/${this.config.resourceName}/${encodeURIComponent(name)}`
       : `${base}/${this.config.resourceName}/${encodeURIComponent(name)}`;
     await firstValueFrom(this.http.delete<KubeProxyResponse<unknown>>(url, { headers }).pipe(kubeProxyResult(kubeGuid)));
+    // A list of this endpoint still in flight may hold the deleted row.
+    this.latest.supersede(k => k === kubeGuid || k.startsWith(kubeGuid + '/'));
     this.removeRow(kubeGuid, name);
   }
 

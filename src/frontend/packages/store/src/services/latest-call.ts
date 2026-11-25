@@ -17,4 +17,14 @@ export class LatestCall {
   isLatest(call: number, key = ''): boolean {
     return this.calls.get(key) === call;
   }
+
+  // Drops the result of every call in flight for the keys that match, as
+  // after a change (a delete) that makes those results out of date.
+  supersede(match: (key: string) => boolean): void {
+    for (const key of [...this.calls.keys()]) {
+      if (match(key)) {
+        this.begin(key);
+      }
+    }
+  }
 }
