@@ -66,6 +66,19 @@ describe('CloudFoundryCellService', () => {
     expect(svc.error()).toBeNull();
   });
 
+  // The cell summary page reads the labels in six places.
+  it('sends one cell metric request for all its readers', async () => {
+    const cells = [1, 2, 3].map(() => firstValueFrom(svc.cellMetric$));
+    await flushWhenSent(http, CellMetrics.HEALTHY, vector('0'));
+    for (let i = 0; i < 10; i++) {
+      await new Promise(r => setTimeout(r, 0));
+    }
+    const reqs = http.match(isQuery(CellMetrics.HEALTHY));
+    expect(reqs.length).toBe(1);
+    reqs.forEach(r => r.flush(vector('0', { bosh_job_id: CELL })));
+    expect((await Promise.all(cells)).map(c => c?.bosh_job_id)).toEqual([CELL, CELL, CELL]);
+  });
+
   it('emits null and records the error when the cell metric request fails', async () => {
     const cell = firstValueFrom(svc.cellMetric$);
     // The probe fails on the current metric, falls back to the
