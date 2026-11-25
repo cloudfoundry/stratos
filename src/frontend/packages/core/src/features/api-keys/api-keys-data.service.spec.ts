@@ -65,3 +65,40 @@ describe('ApiKeysDataService.create', () => {
     await expect(result).rejects.toThrow(/^502 Bad Gateway\nnginx$/);
   });
 });
+
+// A list fetched before a key was created or removed must not undo it.
+describe('ApiKeysDataService list after a change', () => {
+  let http: HttpTestingController;
+  let service: ApiKeysDataService;
+
+  beforeEach(() => {
+    TestBed.configureTestingModule({ providers: [...BASE_TEST_PROVIDERS, provideZonelessChangeDetection()] });
+    http = TestBed.inject(HttpTestingController);
+    service = TestBed.inject(ApiKeysDataService);
+  });
+
+  const listReq = () => http.expectOne(r => r.method === 'GET' && r.url === '/pp/v1/api_keys');
+
+  it('keeps a created key when an earlier list lands after it', async () => {
+    const load = service.refresh();
+    const list = listReq();
+    const created = service.create('CI', null);
+    http.expectOne(r => r.method === 'POST').flush({ guid: 'new' });
+    await created;
+    list.flush([]);
+    await load;
+    expect(service.apiKeys().map(k => k.guid)).toEqual(['new']);
+    expect(service.isLoading()).toBe(false);
+  });
+
+  it('keeps the newest list when an older one lands last', async () => {
+    const older = service.refresh();
+    const newer = service.refresh();
+    const [r1, r2] = http.match(r => r.method === 'GET' && r.url === '/pp/v1/api_keys');
+    r2.flush([{ guid: 'b' }]);
+    await newer;
+    r1.flush([{ guid: 'a' }]);
+    await older;
+    expect(service.apiKeys().map(k => k.guid)).toEqual(['b']);
+  });
+});
