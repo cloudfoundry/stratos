@@ -3,12 +3,12 @@ title: Configuring Invite User Support
 sidebar_label: Configuring User Invites
 ---
 
-Stratos provides a way for Cloud Foundry administrators and organization managers to invite users to an organization or space.
+Stratos lets Cloud Foundry administrators and organization managers invite users by email from the **Add User** dialog.
 
 During the invite process the following actions will occur:
 
 - A UAA user and a CF user will be created.
-- Initial roles will be assigned. User will be added as an organization member and, if selected, a space role.
+- The user is added to the organization and given the organization and space roles picked in the dialog.
 - Users will be emailed a verification link. The link directs the user to a UAA site to set their password.
 
 > Note - The user *will not* be able to log in without first setting their password but CF admins, organization managers and space managers *will* be able to set roles for the user.
@@ -22,7 +22,7 @@ In order to enable User Invite support in Stratos:
 1. (Optionally) The email templates used for sending emails should be modified
 1. User Invite support must be enabled in Stratos by an Administrator
 
-Once all of the steps have been completed, CF administrators and organization managers will be able to invite users via the Organization and Space pages under the 'Users' tab.
+Once all of the steps have been completed, CF administrators and organization managers will be able to invite users from the 'Users' tab of a Cloud Foundry, an organization or a space (see [Inviting a user](#inviting-a-user)).
 
 These steps are covered below.
 
@@ -60,6 +60,14 @@ This action must be performed by an Administrator in Stratos.
 1) Supply the uaa client id and secret and click `Configure`
 
 > Note: If Stratos has been deployed via `cf push` and the steps under the `Pre-configure invite UAA client` header in the  [CF deploy guide](../../deploy/cloud-foundry/cloud-foundry.md)  have been followed, you will not follow these steps for the default CF.
+
+## Inviting a user
+
+1) Open the 'Users' tab of a Cloud Foundry, an organization or a space and click `Add User`.
+1) Choose `Invite`. It shows only to a CF administrator or a manager of the organization, once User Invite support is enabled.
+1) Enter the email address of each user to invite.
+1) Tick the roles to give. From the Cloud Foundry 'Users' tab, first pick an organization you manage: the invitation adds the user to the first organization picked.
+1) Click `Add User`.
 
 ## Configuration for CF Push
 
