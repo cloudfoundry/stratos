@@ -100,6 +100,14 @@ describe('extractHttpErrorPieces (plain detail)', () => {
   });
 });
 
+// A native CF handler's error (plugins/cloudfoundry/native_errors.go).
+describe('extractHttpErrorPieces (native CF error)', () => {
+  it('reads the detail of a native CF error, on one line', () => {
+    const body = { reason: 'unreachable', detail: 'token refresh failed: x509: certificate has expired\nStatus: 0', cnsiGuid: 'g' };
+    expect(extractHttpErrorMessage(httpError(body))).toBe('token refresh failed: x509: certificate has expired Status: 0');
+  });
+});
+
 describe('extractHttpErrorPieces (inline tags in a plain detail)', () => {
   it('drops inline HTML tags but keeps other angle-bracket text', () => {
     expect(extractHttpErrorMessage(httpError({ errors: [{ detail: 'unbind <b>failed</b> for <nil>', title: 'T' }] })))
