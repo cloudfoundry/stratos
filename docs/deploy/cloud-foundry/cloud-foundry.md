@@ -76,7 +76,7 @@ applications:
   INVITE_USER_CLIENT_SECRET=<UAA_CLIENT_SECRET>
   ```
 
-This will set the the UAA client and UAA secret used to invite users for the default CF only.
+This will set the UAA client and UAA secret used to invite users for the default CF only.
 
 See the [invite users guide](../../endpoints/cf/invite-user-guide.md) for more information about user invites in Stratos.
 
