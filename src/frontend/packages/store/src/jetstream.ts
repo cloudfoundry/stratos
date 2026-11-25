@@ -81,7 +81,7 @@ const messagePieces = (text: string): ErrorPiece[] => {
 /**
  * The most useful human-readable message in whatever a request threw, for
  * display after a caller's own lead-in, as styled pieces of plain text: an
- * HTML error page keeps its heading and line breaks. Handles four backend
+ * HTML error page keeps its heading and line breaks. Handles five backend
  * body shapes:
  *   - CF passthrough: { errors: [{ detail, title, code }] }
  *   - Stratos job envelope: { state, errors: [{ message, code, detail }] }
@@ -89,6 +89,7 @@ const messagePieces = (text: string): ErrorPiece[] => {
  *   - Jetstream's own wrapped error: { error: { message, status, statusCode },
  *     errorResponse }; with no message it is the proxy's entry for an
  *     endpoint that failed, read as its status line and the endpoint's words
+ *   - A native CF handler's error: { reason, upstreamStatus, detail, cnsiGuid }
  * and a body that is a string: an HTML page from a proxy in front of
  * Stratos is read as one, any other text is kept as it is. An Error that
  * carries `pieces` (StratosJobError) gives those.
@@ -112,6 +113,11 @@ export function extractHttpErrorPieces(err: unknown): ErrorPiece[] {
       const wrapped = top.error as { message?: unknown } | null | undefined;
       if (typeof wrapped?.message === 'string' && wrapped.message) return messagePieces(wrapped.message);
       if (isProxyErrorEntry(body)) return messagePieces(proxyErrorReason(body));
+      const native = (body as { detail?: unknown }).detail;
+      if (typeof native === 'string') {
+        const pieces = detailPieces(native);
+        if (pieces.length) return pieces;
+      }
     }
     if (typeof body === 'string' && body) {
       if (!looksLikeHtml(body)) return textPiece(body);
