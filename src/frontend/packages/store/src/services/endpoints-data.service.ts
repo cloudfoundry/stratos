@@ -8,6 +8,7 @@ import { ActionState, getDefaultActionState } from '../types/entity-pipeline.typ
 import { computeConnectionStatus, EndpointModel } from '../types/endpoint.types';
 import { SystemInfo } from '../types/system.types';
 import { EndpointLastErrorService } from './endpoint-last-error.service';
+import { LatestCall } from './latest-call';
 
 /**
  * Wave-1 (W36-B) signal-native endpoints data service.
@@ -156,6 +157,9 @@ export class EndpointsDataService {
   // Wave 5 will read this. Wave 1 records it but does not act on it.
   private lastGetAllLogin = false;
   private hydrationPromise: Promise<EndpointModel[]> | null = null;
+  // Moves on each list request and on each change (connect, disconnect,
+  // ...), so a list requested before the change does not overwrite it.
+  private readonly latest = new LatestCall();
   private readonly _hydrated = signal<boolean>(false);
   private readyResolvers: Array<() => void> = [];
 
@@ -273,6 +277,7 @@ export class EndpointsDataService {
     }
     this._loading.set(true);
     this._error.set(null);
+    const call = this.latest.begin('list');
     this.hydrationPromise = (async () => {
       try {
         const info = await firstValueFrom(this.http.get<SystemInfo>(SYSTEM_INFO_URL));
@@ -293,7 +298,9 @@ export class EndpointsDataService {
             next.set(merged.guid, merged);
           });
         });
-        this._endpoints.set(next);
+        if (this.latest.isLatest(call, 'list')) {
+          this._endpoints.set(next);
+        }
         this._loading.set(false);
         this.markHydrated();
         return Array.from(next.values());
@@ -307,6 +314,15 @@ export class EndpointsDataService {
       }
     })();
     return this.hydrationPromise;
+  }
+
+  // After a change: a list request still in flight predates it, so its
+  // answer is dropped and a new list is fetched once it settles, instead
+  // of joining it.
+  private async refetch(): Promise<void> {
+    this.latest.begin('list');
+    await this.hydrationPromise?.catch(() => {/* surfaced on _error */});
+    await this.getAll(false).catch(() => {/* surfaced on _error */});
   }
 
   async waitFor(guid: string): Promise<EndpointModel> {
@@ -362,7 +378,7 @@ export class EndpointsDataService {
       // caller (create-endpoint stepper) can carry it into the connect step.
       registeredGuid = endpoint?.guid || '';
       // Refresh full endpoint set so the new entry shows up keyed by real guid.
-      await this.getAll(false).catch(() => {/* surfaced on _error */});
+      await this.refetch();
       return endpoint;
     });
     if (!result.error && registeredGuid) {
@@ -410,7 +426,7 @@ export class EndpointsDataService {
         // Refresh authoritative state so connectionStatus + user fields land.
         // Await so the emitted ConnectEvent reflects post-refresh user data
         // (Wave 4 cleanup orchestration needs `user` to drive userRolesFetch).
-        await this.getAll(false).catch(() => {/* surfaced on _error */});
+        await this.refetch();
         const after = this._endpoints().get(guid);
         if (after) {
           this.emitConnect({
@@ -438,6 +454,7 @@ export class EndpointsDataService {
       this.markDisconnecting(guid, false, state);
       if (!state.error) {
         // Mark local copy disconnected immediately; getAll() refresh follows.
+        this.latest.begin('list');
         const next = new Map(this._endpoints());
         const cur = next.get(guid);
         if (cur) {
@@ -460,6 +477,7 @@ export class EndpointsDataService {
     ).then(state => {
       if (!state.error) {
         this.lastError.clear(guid);
+        this.latest.begin('list');
         const next = new Map(this._endpoints());
         next.delete(guid);
         this._endpoints.set(next);
@@ -494,7 +512,7 @@ export class EndpointsDataService {
       }
       return message;
     }, async () => {
-      await this.getAll(false).catch(() => {/* surfaced on _error */});
+      await this.refetch();
     });
   }
 

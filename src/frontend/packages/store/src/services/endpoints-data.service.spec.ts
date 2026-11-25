@@ -352,6 +352,48 @@ describe('EndpointsDataService', () => {
     expect(state.alsoConnected).toEqual([{ guid: 'cf-1', name: 'CF one' }]);
   });
 
+  // The endpoints page polls every 30 s. A change made while a poll is in
+  // flight must not be undone by the poll's older answer.
+  it('connect fetches the list again after a poll that was in flight', async () => {
+    const p = svc.getAll();
+    httpMock.expectOne(SYSTEM_INFO_URL).flush(makeSystemInfo());
+    await p;
+
+    const poll = svc.getAll(false);
+    const pollReq = httpMock.expectOne(SYSTEM_INFO_URL);
+    const cp = svc.connect('cf-2', {
+      endpointType: 'cf',
+      authType: 'creds',
+      authValues: { username: 'u', password: 'p' },
+      systemShared: false,
+    });
+    httpMock.expectOne('/api/v1/tokens').flush({ guid: 'cf-2' });
+    await new Promise(r => setTimeout(r, 0));
+    pollReq.flush(makeSystemInfo());
+    await poll;
+    await new Promise(r => setTimeout(r, 0));
+    const after = makeSystemInfo();
+    (after.endpoints.cf['cf-2'] as any).user = { guid: 'u1', name: 'admin', admin: true };
+    httpMock.expectOne(SYSTEM_INFO_URL).flush(after);
+    await cp;
+    expect(svc.endpointById('cf-2')()?.connectionStatus).toBe('connected');
+  });
+
+  it('keeps a disconnect when a poll that was in flight lands after it', async () => {
+    const p = svc.getAll();
+    httpMock.expectOne(SYSTEM_INFO_URL).flush(makeSystemInfo());
+    await p;
+
+    const poll = svc.getAll(false);
+    const pollReq = httpMock.expectOne(SYSTEM_INFO_URL);
+    const dp = svc.disconnect('cf-1');
+    httpMock.expectOne('/api/v1/tokens/cf-1').flush({ guid: 'cf-1' });
+    await dp;
+    pollReq.flush(makeSystemInfo());
+    await poll;
+    expect(svc.endpointById('cf-1')()?.connectionStatus).toBe('disconnected');
+  });
+
   it('clearConnected resets the connect delta queue', async () => {
     const p = svc.getAll();
     httpMock.expectOne(SYSTEM_INFO_URL).flush(makeSystemInfo());
