@@ -61,7 +61,7 @@
               [class.nav-item--active]="isActiveRoute(tab.link)"
               [class.bg-nav-active]="isActiveRoute(tab.link)"
               [class.text-nav-text]="isActiveRoute(tab.link)"
-              [routerLink]="[tab.link]"
+              [routerLink]="targets().get(tab.link)"
               [routerLinkActive]="['router-link-active']"
               [title]="isIconMode() ? tab.label : ''"
               >

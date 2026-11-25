@@ -1,6 +1,8 @@
-import { ChangeDetectionStrategy, Component, OnInit, Signal, computed, effect, inject, input, linkedSignal, output } from '@angular/core';
+import { ChangeDetectionStrategy, Component, OnInit, Signal, computed, effect, inject, input, linkedSignal, output, signal } from '@angular/core';
+import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { CommonModule } from '@angular/common';
-import { Router, RouterModule } from '@angular/router';
+import { NavigationEnd, Router, RouterModule, UrlTree } from '@angular/router';
+import { filter } from 'rxjs/operators';
 
 import { StratosBrandingService } from '../../../../../theme/stratos-branding.service';
 import { AuthSignalService } from '../../../core/signals/auth-signal.service';
@@ -101,6 +103,16 @@ export class SideNavComponent implements OnInit {
     this.customizations = cs.get();
 
     // Tell the host each time the bound mode changes.
+    this.router.events.pipe(filter(e => e instanceof NavigationEnd), takeUntilDestroyed())
+      .subscribe(() => this.url.set(this.router.url));
+    effect(() => {
+      const url = this.url();
+      const link = this.itemFor(url);
+      if (link) {
+        this.lastPages.update(pages => ({ ...pages, [link]: url }));
+      }
+    });
+
     let boundMode = true;
     effect(() => {
       const mode = this.iconMode();
@@ -119,6 +131,28 @@ export class SideNavComponent implements OnInit {
 
   readonly tabs = input<SideNavItem[]>([]);
   readonly changedMode = output();
+
+  // The page shown, and the last page visited under each item by its link.
+  // Kept for the dashboard's life only: a reload or the login page forgets it.
+  private readonly url = signal(this.router.url);
+  private readonly lastPages = signal<Record<string, string>>({});
+
+  // The item whose link is the longest match for a page, if any.
+  private itemFor(url: string): string | undefined {
+    const path = url.split(/[?#]/)[0];
+    return this.tabs().map(t => t.link)
+      .filter(link => path === link || path.startsWith(link + '/'))
+      .sort((a, b) => b.length - a.length)[0];
+  }
+
+  // Where each item goes: the last page visited under it, or its top when
+  // that page is unknown or the user is already in its section.
+  readonly targets = computed(() => {
+    const here = this.itemFor(this.url());
+    const last = this.lastPages();
+    return new Map<string, string | UrlTree>(this.tabs().map(t => [t.link,
+      t.link !== here && last[t.link] ? this.router.parseUrl(last[t.link]) : t.link]));
+  });
 
   public toggleSidenav() {
     this.dashboardData.toggleSideNav();
