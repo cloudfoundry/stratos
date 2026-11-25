@@ -2,7 +2,7 @@ import { HttpClient, HttpErrorResponse, HttpParams } from '@angular/common/http'
 import { Injectable, Signal, WritableSignal, inject, signal } from '@angular/core';
 import { firstValueFrom } from 'rxjs';
 
-import { ApiKey, BrowserStandardEncoder, extractHttpErrorMessage } from '@stratosui/store';
+import { ApiKey, BrowserStandardEncoder, LatestCall, extractHttpErrorMessage } from '@stratosui/store';
 
 const apiKeysUrl = '/pp/v1/api_keys';
 
@@ -22,6 +22,9 @@ export class ApiKeysDataService {
   private readonly _apiKeys: WritableSignal<ApiKey[]> = signal([]);
   readonly apiKeys: Signal<ApiKey[]> = this._apiKeys.asReadonly();
 
+  // 'fetch' orders the list requests; 'list' also moves on a create or
+  // remove, so a list fetched before the change is dropped.
+  private readonly latest = new LatestCall();
   private readonly _isLoading: WritableSignal<boolean> = signal(false);
   readonly isLoading: Signal<boolean> = this._isLoading.asReadonly();
 
@@ -57,6 +60,7 @@ export class ApiKeysDataService {
       );
       // The secret lives only in the create stepper, not in this
       // session-long collection.
+      this.latest.begin('list');
       this._apiKeys.update(curr => [...curr, { ...created, secret: '' }]);
       return created;
     } catch (err) {
@@ -74,6 +78,7 @@ export class ApiKeysDataService {
         fromObject: { guid },
       });
       await firstValueFrom(this.http.delete(apiKeysUrl, { params }));
+      this.latest.begin('list');
       this._apiKeys.update(curr => curr.filter(k => k.guid !== guid));
     } catch (err) {
       throw new Error(this.errorMessage(err), { cause: err });
@@ -81,17 +86,25 @@ export class ApiKeysDataService {
   }
 
   private async fetch(): Promise<void> {
+    const fetchCall = this.latest.begin('fetch');
+    const listCall = this.latest.begin('list');
     this._isLoading.set(true);
     this._error.set(null);
     try {
       const resp = await firstValueFrom(this.http.get<ApiKey[]>(apiKeysUrl));
-      this._apiKeys.set(resp ?? []);
+      if (this.latest.isLatest(listCall, 'list')) {
+        this._apiKeys.set(resp ?? []);
+      }
     } catch (err) {
-      this._apiKeys.set([]);
-      this._error.set(this.errorMessage(err));
+      if (this.latest.isLatest(listCall, 'list')) {
+        this._apiKeys.set([]);
+        this._error.set(this.errorMessage(err));
+      }
     } finally {
-      this._isLoading.set(false);
-      this._lastFetched.set(new Date());
+      if (this.latest.isLatest(fetchCall, 'fetch')) {
+        this._isLoading.set(false);
+        this._lastFetched.set(new Date());
+      }
     }
   }
 
