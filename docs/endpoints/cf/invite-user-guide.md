@@ -92,7 +92,7 @@ The following configuration is required in order to configure the SMTP server an
 To use custom email templates, create a folder and add the two templates with the following file names:
 
 1. user-invite-email.txt = Plain text template
-1. user-invite-email.helm = HTML text template
+1. user-invite-email.html = HTML text template
 
 When deploying Stratos with `cf push` set the environment variable `TEMPLATE_DIR` to the folder name where your custom templates are located. This can be done on the command line or by adding this environment variable to the `manifest.yml` file.
 
@@ -127,7 +127,7 @@ kubectl create namespace stratos
 Create a Config Map for the template files - this assumes you have the following two files in the current directory:
 
 1. user-invite-email.txt = Plain text template
-1. user-invite-email.helm = HTML text template
+1. user-invite-email.html = HTML text template
 
 Create the Config Map with:
 
@@ -135,7 +135,7 @@ Create the Config Map with:
 kubectl create configmap stratos-templates --namespace stratos --from-file=./user-invite-email.txt --from-file=./user-invite-email.html
 ```
 
-When deploying Stratos using Helm, ensure you set the the Helm Value:
+When deploying Stratos using Helm, ensure you set the Helm Value:
 
 ```
 console.templatesConfigMapName
@@ -153,7 +153,7 @@ When developing locally, we recommend using [mailcatcher](https://mailcatcher.me
 
 To install mailcatcher via docker, use the following command: `docker run -d -p 1080:80 -p 1025:25 --name mail tophfr/mailcatcher`. Once mailcatcher is installed, continue to follow the instructions below.
 
-SMTP server details can be set via rhe usual environment variable approach or, when running locally, in the `jetstream/config.properties` file (see Backend Development - Configuration in [developers-guide](../../developer/introduction.md)). The config settings, with example values, are as follows:
+SMTP server details can be set via the usual environment variable approach or, when running locally, in the `jetstream/config.properties` file (see Backend Development - Configuration in [developers-guide](../../developer/introduction.md)). The config settings, with example values, are as follows:
 
 ```
 SMTP_FROM_ADDRESS=Stratos<test@test.com>
