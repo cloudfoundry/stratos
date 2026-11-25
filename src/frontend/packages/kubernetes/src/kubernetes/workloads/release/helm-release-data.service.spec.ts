@@ -117,4 +117,26 @@ describe('HelmReleaseDataService', () => {
     expect(svc.releaseDetail(GUID)).toBe(svc.releaseDetail(GUID));
     expect(svc.graph(GUID)).toBe(svc.graph(GUID));
   });
+
+  // A reload after an upgrade or rollback must not be replaced by an
+  // older load that lands last.
+  it('keeps the newest detail and history when an older response lands last', async () => {
+    const olderDetail = svc.loadReleaseDetail('cnsi-1', 'ns-a', 'rel-x');
+    const newerDetail = svc.loadReleaseDetail('cnsi-1', 'ns-a', 'rel-x');
+    const olderHistory = svc.loadHistory('cnsi-1', 'ns-a', 'rel-x');
+    const newerHistory = svc.loadHistory('cnsi-1', 'ns-a', 'rel-x');
+    const [d1, d2] = httpMock.match(DETAIL_URL);
+    const [h1, h2] = httpMock.match(HISTORY_URL);
+    d2.flush({ name: 'rel-x', version: 2 });
+    h2.flush({ revisions: [{ revision: 2 }] });
+    await Promise.all([newerDetail, newerHistory]);
+    // The newest load is done, so the release is no longer loading.
+    expect(svc.isFetchingDetail(GUID)()).toBe(false);
+    d1.flush({ name: 'rel-x', version: 1 });
+    h1.flush({ revisions: [{ revision: 1 }] });
+    await Promise.all([olderDetail, olderHistory]);
+    expect((svc.releaseDetail(GUID)() as any).version).toBe(2);
+    expect(svc.history(GUID)()).toEqual([{ revision: 2 }]);
+    expect(svc.isFetchingDetail(GUID)()).toBe(false);
+  });
 });
