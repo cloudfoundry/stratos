@@ -2,6 +2,8 @@ import { HttpClient } from '@angular/common/http';
 import { Injectable, Signal, WritableSignal, inject, signal } from '@angular/core';
 import { firstValueFrom } from 'rxjs';
 
+import { LatestCall } from '@stratosui/store';
+
 import { KubeEndpointEviction } from '../../../services/endpoint-data/kube-endpoint-eviction';
 import { HelmRelease, HelmReleaseGraph, HelmReleaseResources, HelmReleaseRevision } from '../workload.types';
 
@@ -88,37 +90,49 @@ export class HelmReleaseDataService {
 
   // --- REST loads ---
 
+  // A reload after an upgrade or rollback keeps only the newest response
+  // of each release's detail and history (see LatestCall).
+  private readonly latest = new LatestCall();
+
   async loadReleaseDetail(endpoint: string, namespace: string, name: string): Promise<void> {
     const key = this.guid(endpoint, namespace, name);
     const loading = this.sig(this._detailLoading, key, false);
+    const call = this.latest.begin(`detail:${key}`);
     loading.set(true);
+    let detail: HelmRelease | undefined;
     try {
-      const resp = await firstValueFrom(
+      detail = await firstValueFrom(
         this.http.get<HelmRelease>(`/pp/v1/helm/releases/${endpoint}/${namespace}/${name}`),
       );
-      this.sig(this._detail, key, undefined).set(resp);
     } catch {
       // Blank, not delete (see evictEndpoint): a failed reload, e.g. a 403
       // after reconnecting with narrower credentials, must not keep showing
       // the release fetched before. The page renders the tristate empty.
-      this.sig(this._detail, key, undefined).set(undefined);
-    } finally {
+      detail = undefined;
+    }
+    if (this.latest.isLatest(call, `detail:${key}`)) {
+      this.sig(this._detail, key, undefined).set(detail);
       loading.set(false);
     }
   }
 
   async loadHistory(endpoint: string, namespace: string, name: string): Promise<void> {
     const key = this.guid(endpoint, namespace, name);
+    const call = this.latest.begin(`history:${key}`);
+    let revisions: HelmReleaseRevision[] | undefined;
     try {
       const resp = await firstValueFrom(
         this.http.get<{ revisions?: HelmReleaseRevision[] }>(
           `/pp/v1/helm/releases/${endpoint}/${namespace}/${name}/history`,
         ),
       );
-      this.sig(this._history, key, undefined).set(resp?.revisions ?? []);
+      revisions = resp?.revisions ?? [];
     } catch {
       // Blank on error, as for the detail: never keep an earlier history.
-      this.sig(this._history, key, undefined).set(undefined);
+      revisions = undefined;
+    }
+    if (this.latest.isLatest(call, `history:${key}`)) {
+      this.sig(this._history, key, undefined).set(revisions);
     }
   }
 }
