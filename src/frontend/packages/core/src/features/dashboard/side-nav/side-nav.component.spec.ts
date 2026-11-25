@@ -1,5 +1,6 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
-import { provideZonelessChangeDetection, signal } from '@angular/core';
+import { Component, provideZonelessChangeDetection, signal } from '@angular/core';
+import { Router } from '@angular/router';
 import { describe, it, expect, beforeEach, afterEach, beforeAll, afterAll, vi } from 'vitest';
 import { RouterTestingModule } from '@angular/router/testing';
 import { createBasicStoreModule } from '@stratosui/store/testing';
@@ -11,6 +12,9 @@ import { SideNavComponent } from './side-nav.component';
 import { AuthSignalService } from '../../../core/signals/auth-signal.service';
 import { CurrentUserPermissionsService } from '../../../core/permissions/current-user-permissions.service';
 
+
+@Component({ template: '', standalone: true })
+class PageStubComponent {}
 
 describe('SideNavComponent', () => {
   let component: SideNavComponent;
@@ -182,5 +186,38 @@ describe('SideNavComponent', () => {
     } finally {
       localStorage.removeItem('stratos-show-all-menu-items');
     }
+  });
+
+  describe('menu items remember their section', () => {
+    const hrefs = () => Array.from((fixture.nativeElement as HTMLElement).querySelectorAll('a.nav-item-link'))
+      .map(a => a.getAttribute('href'));
+    const visit = async (url: string) => {
+      await TestBed.inject(Router).navigateByUrl(url);
+      await fixture.whenStable();
+    };
+
+    beforeEach(async () => {
+      TestBed.inject(Router).resetConfig([{ path: '**', component: PageStubComponent }]);
+      fixture.componentRef.setInput('tabs', [
+        { label: 'Home', link: '/home' },
+        { label: 'Applications', link: '/applications' },
+        { label: 'Workloads', link: '/applications/workloads' },
+      ]);
+      await fixture.whenStable();
+    });
+
+    it('opens the last page visited under an item, and the top from inside its section', async () => {
+      await visit('/applications/cf/app-1/routes?page=2');
+      // Inside the section: the item opens its top.
+      expect(hrefs()).toEqual(['/home', '/applications', '/applications/workloads']);
+      await visit('/home');
+      expect(hrefs()).toEqual(['/home', '/applications/cf/app-1/routes?page=2', '/applications/workloads']);
+    });
+
+    it('files a page under the longest matching item and skips pages under none', async () => {
+      await visit('/applications/workloads/w-1');
+      await visit('/about');
+      expect(hrefs()).toEqual(['/home', '/applications', '/applications/workloads/w-1']);
+    });
   });
 });
