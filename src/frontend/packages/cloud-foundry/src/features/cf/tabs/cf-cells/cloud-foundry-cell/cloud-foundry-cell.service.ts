@@ -93,8 +93,11 @@ export class CloudFoundryCellService {
     // Pick the health metric once (see probeHealthMetric), then read the
     // cell's labels and its health value from that metric.
     const healthMetric$ = defer(() => from(this.probeHealthMetric())).pipe(shareReplay(1));
+    // Shared: the cell page reads the labels in several places, and each
+    // subscription would otherwise send its own request.
     this.cellMetric$ = healthMetric$.pipe(
-      switchMap(metric => this.generateForMetric<IMetricVectorResult<IMetricCell>>(metric, true) as Observable<IMetricCell | null>)
+      switchMap(metric => this.generateForMetric<IMetricVectorResult<IMetricCell>>(metric, true) as Observable<IMetricCell | null>),
+      shareReplay(1),
     );
     this.healthy$ = healthMetric$.pipe(
       switchMap(metric => this.generate(metric))
