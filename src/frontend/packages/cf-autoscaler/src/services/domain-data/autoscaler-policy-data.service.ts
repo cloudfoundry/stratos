@@ -2,6 +2,8 @@ import { HttpClient, HttpErrorResponse, HttpHeaders } from '@angular/common/http
 import { Injectable, Signal, computed, inject, signal } from '@angular/core';
 import { firstValueFrom } from 'rxjs';
 
+import { LatestCall } from '@stratosui/store';
+
 import { environment } from '@stratosui/core';
 
 import {
@@ -60,6 +62,8 @@ const EMPTY: PolicyState = {
 export class AutoscalerPolicyDataService {
   private readonly http = inject(HttpClient);
   private readonly state = signal<Map<string, PolicyState>>(new Map());
+  // Orders overlapping loads of one key (see LatestCall).
+  private readonly latest = new LatestCall();
 
   private readonly prefix = `/pp/${environment.proxyAPIVersion}/autoscaler`;
 
@@ -89,26 +93,39 @@ export class AutoscalerPolicyDataService {
 
   async load(endpointGuid: string, appGuid: string): Promise<void> {
     this.patch(endpointGuid, appGuid, { loading: true, error: null });
+    const k = `${endpointGuid}::${appGuid}`;
+    const call = this.latest.begin(k);
     const headers = this.headers(endpointGuid);
     try {
       const wire = await firstValueFrom(
         this.http.get<AppAutoscalerPolicy>(this.url(appGuid), { headers }),
       );
       const policy = autoscalerTransformArrayToMap(wire);
+      if (!this.latest.isLatest(call, k)) {
+        return;
+      }
       this.patch(endpointGuid, appGuid, { policy, loading: false, error: null, noPolicy: false });
     } catch (err) {
       const status = (err as HttpErrorResponse)?.status;
       if (status === 404) {
+        if (!this.latest.isLatest(call, k)) {
+          return;
+        }
         this.patch(endpointGuid, appGuid, { policy: null, loading: false, error: null, noPolicy: true });
         return;
       }
       const message = autoscalerErrorMessage(err);
+      if (!this.latest.isLatest(call, k)) {
+        return;
+      }
       this.patch(endpointGuid, appGuid, { policy: null, loading: false, error: message, noPolicy: false });
     }
   }
 
   async update(endpointGuid: string, appGuid: string, policy: AppAutoscalerPolicyLocal): Promise<void> {
     this.patch(endpointGuid, appGuid, { loading: true, error: null });
+    const k = `${endpointGuid}::${appGuid}`;
+    const call = this.latest.begin(k);
     const headers = this.headers(endpointGuid);
     const body = autoscalerTransformMapToArray(policy);
     try {
@@ -116,9 +133,15 @@ export class AutoscalerPolicyDataService {
         this.http.put<AppAutoscalerPolicy>(this.url(appGuid), body, { headers }),
       );
       const next = autoscalerTransformArrayToMap(wire);
+      if (!this.latest.isLatest(call, k)) {
+        return;
+      }
       this.patch(endpointGuid, appGuid, { policy: next, loading: false, error: null, noPolicy: false });
     } catch (err) {
       const message = autoscalerErrorMessage(err);
+      if (!this.latest.isLatest(call, k)) {
+        return;
+      }
       this.patch(endpointGuid, appGuid, { loading: false, error: message });
       throw err;
     }

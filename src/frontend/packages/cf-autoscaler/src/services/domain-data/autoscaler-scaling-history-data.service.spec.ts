@@ -195,4 +195,17 @@ describe('AutoscalerScalingHistoryDataService', () => {
     expect(svc.events('cf-b', 'app-y')()[0].reason).toBe('ry');
     expect(svc.events('cf-a', 'app-y')()).toEqual([]);
   });
+
+  // Paging: a slow page 1 must not replace page 2.
+  it('keeps the newest load when an older response lands last', async () => {
+    const older = svc.load(ENDPOINT_GUID, APP_GUID, { page: 1 } as any);
+    const newer = svc.load(ENDPOINT_GUID, APP_GUID, { page: 2 } as any);
+    const [r1, r2] = httpMock.match(r => r.url === HISTORY_URL);
+    r2.flush({ ...SAMPLE_RESPONSE, resources: [{ reason: 'page-2' }] });
+    await newer;
+    r1.flush({ ...SAMPLE_RESPONSE, resources: [{ reason: 'page-1' }] });
+    await older;
+    expect(svc.events(ENDPOINT_GUID, APP_GUID)().map(e => e.reason)).toEqual(['page-2']);
+    expect(svc.loading(ENDPOINT_GUID, APP_GUID)()).toBe(false);
+  });
 });

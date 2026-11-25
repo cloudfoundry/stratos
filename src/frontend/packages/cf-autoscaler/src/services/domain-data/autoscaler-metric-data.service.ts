@@ -2,6 +2,8 @@ import { HttpClient, HttpHeaders, HttpParams } from '@angular/common/http';
 import { Injectable, Signal, computed, inject, signal } from '@angular/core';
 import { firstValueFrom } from 'rxjs';
 
+import { LatestCall } from '@stratosui/store';
+
 import { environment } from '@stratosui/core';
 
 import { PaginationResponse } from '../../../../cloud-foundry/src/store/types/cf-api.types';
@@ -55,6 +57,8 @@ const key = (endpointGuid: string, appGuid: string, metricType: string) =>
 export class AutoscalerMetricDataService {
   private readonly http = inject(HttpClient);
   private readonly state = signal<Map<string, MetricState>>(new Map());
+  // Orders overlapping loads of one key (see LatestCall).
+  private readonly latest = new LatestCall();
 
   private url(appGuid: string, metricType: string): string {
     return `/pp/${environment.proxyAPIVersion}/autoscaler/apps/${appGuid}/metric/${metricType}`;
@@ -79,6 +83,8 @@ export class AutoscalerMetricDataService {
     params: AutoscalerMetricQueryParams,
   ): Promise<void> {
     this.patch(endpointGuid, appGuid, metricType, { loading: true, error: null });
+    const k = key(endpointGuid, appGuid, metricType);
+    const call = this.latest.begin(k);
     const headers = this.headers(endpointGuid);
     const httpParams = this.buildParams(params);
     try {
@@ -89,9 +95,15 @@ export class AutoscalerMetricDataService {
         ),
       );
       const metrics = response?.resources ?? [];
+      if (!this.latest.isLatest(call, k)) {
+        return;
+      }
       this.patch(endpointGuid, appGuid, metricType, { metrics, loading: false, error: null });
     } catch (err) {
       const message = autoscalerErrorMessage(err);
+      if (!this.latest.isLatest(call, k)) {
+        return;
+      }
       this.patch(endpointGuid, appGuid, metricType, { metrics: [], loading: false, error: message });
     }
   }

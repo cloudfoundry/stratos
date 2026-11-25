@@ -218,4 +218,20 @@ describe('AutoscalerPolicyDataService', () => {
     expect(svc.policy(ENDPOINT_GUID, 'app-b')()).toBeNull();
     expect(svc.noPolicy(ENDPOINT_GUID, 'app-b')()).toBe(true);
   });
+
+  // A load still in flight when the policy is saved must not bring back
+  // the old policy.
+  it('keeps the saved policy when an earlier load lands after it', async () => {
+    const load = svc.load(ENDPOINT_GUID, APP_GUID);
+    const saved = samplePolicy();
+    const update = svc.update(ENDPOINT_GUID, APP_GUID, saved);
+    const get = httpMock.expectOne(r => r.method === 'GET' && r.url === POLICY_URL);
+    const put = httpMock.expectOne(r => r.method === 'PUT' && r.url === POLICY_URL);
+    put.flush(put.request.body);
+    await update;
+    const savedNow = svc.policy(ENDPOINT_GUID, APP_GUID)();
+    get.flush({ ...put.request.body, instance_min_count: 99 });
+    await load;
+    expect(svc.policy(ENDPOINT_GUID, APP_GUID)()).toEqual(savedNow);
+  });
 });
