@@ -227,6 +227,7 @@ export { AuthDataService } from './services/auth-data.service';
 // `getCurrentRoutingState`; tracks current/previous route from Angular Router
 // NavigationEnd events.
 export { RoutingHistoryService } from './services/routing-history.service';
+export { LatestCall } from './services/latest-call';
 
 // Current-user roles as signals: the Stratos permission checker reads it,
 // and the cf-side `CfCurrentUserRolesDataService` builds on it.

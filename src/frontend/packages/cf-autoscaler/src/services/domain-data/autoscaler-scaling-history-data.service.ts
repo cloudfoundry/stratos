@@ -2,6 +2,8 @@ import { HttpClient, HttpHeaders, HttpParams } from '@angular/common/http';
 import { Injectable, Signal, computed, inject, signal } from '@angular/core';
 import { firstValueFrom } from 'rxjs';
 
+import { LatestCall } from '@stratosui/store';
+
 import { environment } from '@stratosui/core';
 
 import { PaginationResponse } from '../../../../cloud-foundry/src/store/types/cf-api.types';
@@ -58,6 +60,8 @@ export type ScalingHistoryQueryParams = Record<string, string | number | undefin
 export class AutoscalerScalingHistoryDataService {
   private readonly http = inject(HttpClient);
   private readonly state = signal<Map<string, ScalingHistoryState>>(new Map());
+  // Orders overlapping loads of one key (see LatestCall).
+  private readonly latest = new LatestCall();
 
   private url(appGuid: string): string {
     return `/pp/${environment.proxyAPIVersion}/autoscaler/apps/${appGuid}/event`;
@@ -89,6 +93,8 @@ export class AutoscalerScalingHistoryDataService {
     params?: ScalingHistoryQueryParams,
   ): Promise<void> {
     this.patch(endpointGuid, appGuid, { loading: true, error: null });
+    const k = key(endpointGuid, appGuid);
+    const call = this.latest.begin(k);
     const headers = this.headers(endpointGuid);
     const httpParams = this.buildParams(params);
     try {
@@ -98,6 +104,9 @@ export class AutoscalerScalingHistoryDataService {
           params: httpParams,
         }),
       );
+      if (!this.latest.isLatest(call, k)) {
+        return;
+      }
       this.patch(endpointGuid, appGuid, {
         events: resp?.resources ?? [],
         totalResults: resp?.total_results ?? 0,
@@ -107,6 +116,9 @@ export class AutoscalerScalingHistoryDataService {
       });
     } catch (err) {
       const message = autoscalerErrorMessage(err);
+      if (!this.latest.isLatest(call, k)) {
+        return;
+      }
       this.patch(endpointGuid, appGuid, { loading: false, error: message });
       throw err;
     }
@@ -122,6 +134,8 @@ export class AutoscalerScalingHistoryDataService {
     // cannot fire unbounded requests; page on demand if that is too few.
     const MAX_PAGES = 20;
     this.patch(endpointGuid, appGuid, { loading: true, error: null });
+    const k = key(endpointGuid, appGuid);
+    const call = this.latest.begin(k);
     const headers = this.headers(endpointGuid);
     const events: AppAutoscalerEvent[] = [];
     try {
@@ -138,6 +152,9 @@ export class AutoscalerScalingHistoryDataService {
         totalResults = resp?.total_results ?? events.length;
         totalPages = resp?.total_pages ?? 1;
       }
+      if (!this.latest.isLatest(call, k)) {
+        return;
+      }
       this.patch(endpointGuid, appGuid, {
         events,
         totalResults,
@@ -147,6 +164,9 @@ export class AutoscalerScalingHistoryDataService {
       });
     } catch (err) {
       const message = autoscalerErrorMessage(err);
+      if (!this.latest.isLatest(call, k)) {
+        return;
+      }
       this.patch(endpointGuid, appGuid, { loading: false, error: message });
       throw err;
     }

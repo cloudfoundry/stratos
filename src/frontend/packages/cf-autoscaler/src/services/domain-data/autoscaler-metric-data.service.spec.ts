@@ -140,4 +140,18 @@ describe('AutoscalerMetricDataService', () => {
     expect(svc.metrics(ENDPOINT_GUID, APP_GUID, METRIC_TYPE)()).toHaveLength(3);
     expect(svc.metrics(ENDPOINT_GUID, APP_GUID, METRIC_TYPE)()[2].value).toBe('30');
   });
+
+  // The chart reloads on each window change; a slow older window must not
+  // replace the newer one.
+  it('keeps the newest load when an older response lands last', async () => {
+    const older = svc.load(ENDPOINT_GUID, APP_GUID, METRIC_TYPE, { ...PARAMS, 'start-time': '1' });
+    const newer = svc.load(ENDPOINT_GUID, APP_GUID, METRIC_TYPE, { ...PARAMS, 'start-time': '2' });
+    const [r1, r2] = httpMock.match(urlMatcher(baseUrl));
+    r2.flush({ resources: [{ value: 2 }] });
+    await newer;
+    r1.flush({ resources: [{ value: 1 }] });
+    await older;
+    expect(svc.metrics(ENDPOINT_GUID, APP_GUID, METRIC_TYPE)()).toEqual([{ value: 2 }]);
+    expect(svc.loading(ENDPOINT_GUID, APP_GUID, METRIC_TYPE)()).toBe(false);
+  });
 });
