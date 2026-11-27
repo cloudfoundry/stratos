@@ -264,6 +264,30 @@ describe('SignalListComponent', () => {
     }
   });
 
+  // WCAG 2.1.1: a list body that scrolls must be reachable by keyboard so
+  // the arrow keys can scroll it, also when its rows hold nothing
+  // focusable (feature flags, buildpacks). A body that fits gets no tab
+  // stop.
+  it('makes the list body a tab stop only while it scrolls', async () => {
+    const fixture = TestBed.createComponent(Host);
+    await fixture.whenStable();
+    const body = fixture.nativeElement.querySelector('[data-test="scroll-body"]') as HTMLElement;
+    const size = (scrollHeight: number) => {
+      Object.defineProperty(body, 'clientHeight', { configurable: true, value: 100 });
+      Object.defineProperty(body, 'scrollHeight', { configurable: true, value: scrollHeight });
+      body.dispatchEvent(new Event('scroll'));
+    };
+    expect(body.hasAttribute('tabindex')).toBe(false);
+
+    size(500);
+    await fixture.whenStable();
+    expect(body.getAttribute('tabindex')).toBe('0');
+
+    size(100);
+    await fixture.whenStable();
+    expect(body.hasAttribute('tabindex')).toBe(false);
+  });
+
   describe('row-action menu and the Escape key', () => {
     async function withActions() {
       const fixture = TestBed.createComponent(Host);
