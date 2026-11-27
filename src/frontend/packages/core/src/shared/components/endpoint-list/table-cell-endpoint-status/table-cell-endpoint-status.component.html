@@ -24,7 +24,7 @@
       }
       <!-- No dedicated "expired" glyph exists in the stratos-icons font;
            reuse endpoints_disconnected rather than add a new font entry. -->
-      <app-custom-icon fontSet="stratos-icons" class="text-warning-shade-600 dark:text-warning-shade-300" [ariaLabel]="showLabel() ? '' : 'Expired'">endpoints_disconnected</app-custom-icon>
+      <app-custom-icon fontSet="stratos-icons" class="text-warning" [ariaLabel]="showLabel() ? '' : 'Expired'">endpoints_disconnected</app-custom-icon>
     }
     @if (status === 'connecting') {
       @if (showLabel()) {

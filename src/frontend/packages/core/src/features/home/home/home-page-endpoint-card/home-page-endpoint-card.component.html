@@ -30,8 +30,8 @@
                 <app-busy class="text-primary" size="1.25rem" [context]="endpoint().name"></app-busy>
               }
               @if (status === Status.Error) {
-                <div class="text-warning-shade-500" title="Data for this endpoint took too long to load">
-                  <span class="material-icons" role="img" aria-label="Data for this endpoint took too long to load">warning</span>
+                <div title="Data for this endpoint took too long to load">
+                  <span class="material-icons text-warning" role="img" aria-label="Data for this endpoint took too long to load">warning</span>
                 </div>
               }
             </div>
