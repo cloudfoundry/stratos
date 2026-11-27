@@ -1,5 +1,5 @@
 
-import { NgClass } from '@angular/common';
+import { NgClass, NgTemplateOutlet } from '@angular/common';
 import { ChangeDetectionStrategy, Component, Injector, computed, effect, inject, runInInjectionContext, signal, input, untracked } from '@angular/core';
 import { Router } from '@angular/router';
 import { of } from 'rxjs';
@@ -18,6 +18,7 @@ import { ConfirmationDialogService } from '../../../../shared/components/confirm
   standalone: true,
   imports: [
     NgClass,
+    NgTemplateOutlet,
     EntityFavoriteStarComponent
 ],
   changeDetection: ChangeDetectionStrategy.OnPush

@@ -50,6 +50,27 @@ describe('FavoritesMetaCardComponent', () => {
     expect(component).toBeTruthy();
   });
 
+  // WCAG 4.1.2: the card was a button holding the favourite star, also a
+  // button. A screen reader cannot tell the two apart (axe-core
+  // nested-interactive). The name and type are now the open button; the
+  // star sits beside it.
+  it('opens from one button that holds no other control', async () => {
+    fixture.componentRef.setInput('favoriteEntity', makeFavoriteStub('stored name'));
+    await fixture.whenStable();
+    const card = fixture.nativeElement.querySelector('.fav-card') as HTMLElement;
+    expect(card.hasAttribute('role')).toBe(false);
+    expect(card.hasAttribute('tabindex')).toBe(false);
+
+    const open = card.querySelector('button[data-test="fav-open"]') as HTMLButtonElement;
+    expect(open.textContent).toContain('stored name');
+    expect(open.textContent).toContain('Application');
+    expect(open.querySelector('button, a, [role=button], [tabindex]')).toBeNull();
+
+    const spy = vi.spyOn(component, 'openFavorite').mockImplementation(() => {});
+    open.click();
+    expect(spy).toHaveBeenCalledTimes(1);
+  });
+
   it('shows the stored name when no fresh name is available', async () => {
     freshName = null;
     fixture.componentRef.setInput('favoriteEntity', makeFavoriteStub('stored name'));

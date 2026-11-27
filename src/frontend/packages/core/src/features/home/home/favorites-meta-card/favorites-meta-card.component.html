@@ -1,13 +1,10 @@
 @if (favoriteEntity(); as favorite) {
-  <div class="card hover:shadow-md transition-shadow duration-200 fav-card"
+  <!-- The name and type are the open button; its hit area (::after) covers
+       the card, so a click anywhere opens it. The star sits above that
+       area, beside the button and not inside it (WCAG 4.1.2). -->
+  <div class="card relative hover:shadow-md transition-shadow duration-200 fav-card"
     [class.cursor-pointer]="!!routerLink()"
-    [class.fav-card--clickable]="!!routerLink()"
-    [attr.role]="routerLink() ? 'button' : null"
-    [attr.tabindex]="routerLink() ? 0 : null"
-    (click)="openFavorite()"
-    (keydown.enter)="openFavorite()"
-    (keydown.space)="openFavorite(); $event.preventDefault()"
-    >
+    [class.fav-card--clickable]="!!routerLink()">
     <div class="card-body flex items-center gap-3">
       <div class="shrink-0 inline-flex items-center justify-center w-10 h-10 p-2 fav-card__icon-bg rounded-lg">
         @if (icon(); as icon) {
@@ -17,14 +14,24 @@
           }
         }
       </div>
-      <div class="flex-1 min-w-0">
+      <ng-template #label>
         <div class="text-sm font-medium fav-card__name truncate">{{ displayName() }}</div>
         <div class="text-xs fav-card__type mt-1 truncate">{{ favoriteType() }}</div>
-      </div>
-      @if (!valid()) {
-        <span class="material-icons text-warning-shade-500 text-sm shrink-0" title="The entity for this favorite may have been deleted" role="img" aria-label="The entity for this favorite may have been deleted">warning</span>
+      </ng-template>
+      @if (routerLink()) {
+        <button type="button" data-test="fav-open" class="flex-1 min-w-0 text-left after:absolute after:inset-0"
+          (click)="openFavorite()">
+          <ng-container *ngTemplateOutlet="label" />
+        </button>
+      } @else {
+        <div class="flex-1 min-w-0">
+          <ng-container *ngTemplateOutlet="label" />
+        </div>
       }
-      <app-entity-favorite-star class="shrink-0" [favorite]="favorite" [confirmRemoval]="true"></app-entity-favorite-star>
+      @if (!valid()) {
+        <span class="material-icons text-warning-shade-500 text-sm shrink-0 relative" title="The entity for this favorite may have been deleted" role="img" aria-label="The entity for this favorite may have been deleted">warning</span>
+      }
+      <app-entity-favorite-star class="shrink-0 relative" [favorite]="favorite" [confirmRemoval]="true"></app-entity-favorite-star>
     </div>
   </div>
 }
