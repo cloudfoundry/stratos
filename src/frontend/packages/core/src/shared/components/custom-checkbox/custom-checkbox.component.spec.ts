@@ -73,6 +73,31 @@ describe('CustomCheckboxComponent as a form control', () => {
   standalone: true,
   imports: [CustomCheckboxComponent],
   changeDetection: ChangeDetectionStrategy.OnPush,
+  template: `<app-checkbox [ariaLabel]="'Back up lab'" /><app-checkbox>Agree</app-checkbox>`,
+})
+class NamedHostComponent {}
+
+// WCAG 4.1.2: a checkbox with no text beside it (a table cell) takes its
+// name from ariaLabel. The name goes on the box, not on the host element.
+describe('CustomCheckboxComponent ariaLabel', () => {
+  it('names the box, and only when given', async () => {
+    TestBed.configureTestingModule({
+      imports: [NamedHostComponent],
+      providers: [provideZonelessChangeDetection()],
+    });
+    const fixture = TestBed.createComponent(NamedHostComponent);
+    await fixture.whenStable();
+    const [named, plain] = fixture.nativeElement.querySelectorAll('app-checkbox') as NodeListOf<HTMLElement>;
+    expect(named.querySelector('[role=checkbox]')!.getAttribute('aria-label')).toBe('Back up lab');
+    expect(named.hasAttribute('aria-label')).toBe(false);
+    expect(plain.querySelector('[role=checkbox]')!.hasAttribute('aria-label')).toBe(false);
+  });
+});
+
+@Component({
+  standalone: true,
+  imports: [CustomCheckboxComponent],
+  changeDetection: ChangeDetectionStrategy.OnPush,
   template: `<app-checkbox [required]="true">Agree</app-checkbox>`,
 })
 class RequiredHostComponent {}

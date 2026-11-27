@@ -1,6 +1,7 @@
 <div class="custom-checkbox-wrapper">
   <div class="custom-checkbox" role="checkbox"
     [attr.aria-checked]="indeterminate() ? 'mixed' : checked()"
+    [attr.aria-label]="ariaLabel() || null"
     [attr.tabindex]="disabled() ? -1 : 0"
     [class.disabled]="disabled()"
     [class.checked]="checked()"
