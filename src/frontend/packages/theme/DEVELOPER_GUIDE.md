@@ -224,7 +224,7 @@ Use semantic color classes that automatically adapt to the theme:
 ```html
 <!-- Text colors -->
 <p class="text-primary">Primary text</p>
-<p class="text-brand-600">Darker primary</p>
+<p class="text-brand-800 dark:text-brand-400">Darker primary</p>
 
 <!-- Background colors -->
 <div class="bg-primary text-white">Primary background</div>
@@ -235,21 +235,28 @@ Use semantic color classes that automatically adapt to the theme:
 ```
 
 ### **Status Colors**
+
+For status text use `text-success`, `text-warning`, `text-danger` and
+`text-info`. The theme tunes them to pass 4.5:1 on cards and pages in
+both modes, and on an icon they take the icon colours (3:1). Most
+`-shade-*` values fall short of 4.5:1 as text in light or dark mode;
+keep them for backgrounds and borders.
+
 ```html
 <!-- Success -->
-<p class="text-success-shade-600">Success text</p>
+<p class="text-success">Success text</p>
 <div class="bg-success-shade-500">Success background</div>
 
 <!-- Warning -->
-<p class="text-warning-shade-600">Warning text</p>
+<p class="text-warning">Warning text</p>
 <div class="bg-warning-shade-500">Warning background</div>
 
 <!-- Danger -->
-<p class="text-danger-shade-600">Error text</p>
+<p class="text-danger">Error text</p>
 <div class="bg-danger-shade-500">Error background</div>
 
 <!-- Info -->
-<p class="text-info-shade-600">Info text</p>
+<p class="text-info">Info text</p>
 <div class="bg-info-shade-500">Info background</div>
 ```
 
@@ -459,11 +466,11 @@ Use Tailwind's responsive prefixes:
   <div class="card-body">
     <div class="grid grid-cols-2 gap-4 mb-6">
       <div class="text-center">
-        <div class="text-3xl font-bold text-success-shade-600">{{ metrics.healthy }}</div>
+        <div class="text-3xl font-bold text-success">{{ metrics.healthy }}</div>
         <div class="text-sm text-gray-600">Healthy</div>
       </div>
       <div class="text-center">
-        <div class="text-3xl font-bold text-warning-shade-600">{{ metrics.warning }}</div>
+        <div class="text-3xl font-bold text-warning">{{ metrics.warning }}</div>
         <div class="text-sm text-gray-600">Warning</div>
       </div>
     </div>
