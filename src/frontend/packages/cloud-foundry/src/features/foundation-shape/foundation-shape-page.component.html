@@ -1,6 +1,6 @@
 <div class="flex flex-col gap-4">
   <div data-test="poc-notice"
-    class="px-3 py-2 text-sm rounded border border-warning-shade-300 bg-warning-shade-100 text-warning-shade-700 dark:border-warning-shade-700 dark:bg-warning-shade-900/30 dark:text-warning-shade-300">
+    class="px-3 py-2 text-sm rounded border border-warning-shade-300 bg-warning-shade-100 text-warning dark:border-warning-shade-700 dark:bg-warning-shade-900/30">
     Proof of concept &mdash; this page and its metrics are exploratory and may change or be removed.
   </div>
 
@@ -81,7 +81,7 @@
           <span>spaces drained {{ age(section.drains.spaces) }}</span>
           <span>apps drained {{ age(section.drains.apps) }}</span>
           @if (section.drains.orgs.stale || section.drains.spaces.stale || section.drains.apps.stale) {
-            <span class="px-1.5 rounded-full bg-warning-shade-100 text-warning-shade-700 dark:bg-warning-shade-900/30 dark:text-warning-shade-300">stale</span>
+            <span class="px-1.5 rounded-full bg-warning-shade-100 text-warning dark:bg-warning-shade-900/30">stale</span>
           }
           @if (section.loading) {
             <span>loading&hellip;</span>
@@ -239,7 +239,7 @@
                 @for (chip of stackDefinedChips(section, eco); track chip.label) {
                   <span class="px-2 py-0.5 rounded-full border tabular-nums"
                     [class]="chip.unused
-                      ? 'border-warning-shade-300 text-warning-shade-700 dark:border-warning-shade-700 dark:text-warning-shade-300'
+                      ? 'border-warning-shade-300 text-warning dark:border-warning-shade-700'
                       : 'border-content-border'">
                     {{ chip.label }}@if (chip.unused) { <span class="text-[10px] uppercase"> unused</span> }
                   </span>
@@ -284,13 +284,13 @@
             <span class="text-sm">Export named data</span>
             <span class="text-xs text-content-muted">orgs, spaces and apps by name and GUID &mdash; plus whatever is measured above</span>
             <button data-test="export-detail-json" type="button"
-              class="px-2.5 py-1 text-xs font-medium rounded border border-warning-shade-300 text-warning-shade-700 dark:border-warning-shade-700 dark:text-warning-shade-300 hover:bg-content-secondary transition-colors disabled:opacity-50"
+              class="px-2.5 py-1 text-xs font-medium rounded border border-warning-shade-300 text-warning dark:border-warning-shade-700 hover:bg-content-secondary transition-colors disabled:opacity-50"
               [disabled]="!canExportDetail(section)"
               (click)="downloadDetailJson(section)">
               Download detail JSON
             </button>
             <button data-test="export-detail-xlsx" type="button"
-              class="px-2.5 py-1 text-xs font-medium rounded border border-warning-shade-300 text-warning-shade-700 dark:border-warning-shade-700 dark:text-warning-shade-300 hover:bg-content-secondary transition-colors disabled:opacity-50"
+              class="px-2.5 py-1 text-xs font-medium rounded border border-warning-shade-300 text-warning dark:border-warning-shade-700 hover:bg-content-secondary transition-colors disabled:opacity-50"
               [disabled]="!canExportDetail(section)"
               (click)="downloadDetailXlsx(section)">
               Download detail spreadsheet
