@@ -566,6 +566,11 @@ export class SignalListComponent<T> implements AfterViewInit {
   // shows only when scrolling right would reveal more.
   readonly canScrollRight = signal(false);
 
+  // True while the body scrolls either way, wherever the scroll position
+  // is. The body is then a tab stop, so a keyboard user can scroll it
+  // even when its rows hold nothing focusable (WCAG 2.1.1).
+  readonly isScrollable = signal(false);
+
   // True while a refresh-button click is in flight. Used to drive the
   // inline button spinner uniformly across list pages — many config
   // services still wire isAnyLoading to !hasLoadedOnce() (which only
@@ -649,6 +654,7 @@ export class SignalListComponent<T> implements AfterViewInit {
     if (!el) {
       this.hasOverflow.set(false);
       this.canScrollRight.set(false);
+      this.isScrollable.set(false);
       return;
     }
     // 2px tolerance: client/scroll sizes are integer-rounded while scroll
@@ -659,6 +665,7 @@ export class SignalListComponent<T> implements AfterViewInit {
     const atBottom = el.scrollTop + el.clientHeight >= el.scrollHeight - 2;
     this.hasOverflow.set(overflowing && !atBottom);
     this.canScrollRight.set(el.scrollLeft + el.clientWidth < el.scrollWidth - 2);
+    this.isScrollable.set(overflowing || el.scrollWidth > el.clientWidth + 1);
   }
 
   trackByRow = (_: number, row: T) => this.config().getRowKey(row);

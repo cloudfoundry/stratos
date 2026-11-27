@@ -393,7 +393,10 @@
   <!-- Body: loading / empty state / table. The wrapper exists so the
        horizontal edge fades can overlay exactly the scroll area. -->
   <div class="relative flex-1 min-h-0 flex flex-col">
-  <div #scrollBody data-test="scroll-body" class="relative flex-1 overflow-auto scrollbar-none">
+  <!-- A tab stop while it scrolls (WCAG 2.1.1); the focus ring is drawn
+       inside, where the wrapper cannot cut it off. -->
+  <div #scrollBody data-test="scroll-body" class="relative flex-1 overflow-auto scrollbar-none focus-visible:-outline-offset-2"
+       [attr.tabindex]="isScrollable() ? 0 : null">
     @if ((config().isAnyLoading() || isRefreshing()) && config().totalFilteredResults() === 0) {
       <app-area-loader data-test="loading" class="block h-full"
         [message]="config().loadingMessage ?? 'Loading…'"></app-area-loader>
