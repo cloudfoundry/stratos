@@ -9,7 +9,7 @@
           <div class="flex-1">
             <div class="text-lg font-semibold text-content-text mb-1">{{ ep.provider.name }}</div>
             <h2 class="text-sm mb-2">
-              <a target="metrics" href="{{ ep.provider.token_endpoint }}" class="text-brand-600 hover:text-brand-700 underline">{{ ep.provider.token_endpoint }}</a>
+              <a target="metrics" href="{{ ep.provider.token_endpoint }}" class="text-accent underline">{{ ep.provider.token_endpoint }}</a>
             </h2>
             @if (error()) {
               <div class="text-content-muted">
