@@ -6,7 +6,7 @@
        the change is announced. -->
   <span class="sr-only" aria-live="polite">{{ didUserPressCopy() === 'yes and succeeded' ? 'Copied to clipboard' : didUserPressCopy() === 'yes but failed' ? 'Copy failed' : '' }}</span>
   @if (didUserPressCopy() === 'yes and succeeded' && showSuccessText()) {
-    <span class="text-sm text-success-shade-600 whitespace-nowrap">Copied to clipboard</span>
+    <span class="text-sm text-success whitespace-nowrap">Copied to clipboard</span>
   }
   <button
       class="inline-flex"
