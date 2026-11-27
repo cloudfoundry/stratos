@@ -119,7 +119,7 @@
       </div>
     }
     @if (isUpdate && credsMode() !== 'edit' && displayedCredentialSegments(); as segments) {
-      <pre class="w-full min-h-[240px] max-h-[400px] font-mono text-sm border border-content-border rounded-md p-3 bg-content-bg overflow-auto">@for (segment of segments; track $index) {{{ segment }}@if (!$last) {<span class="text-warning-shade-700 font-semibold">"&lt;redacted&gt;"</span>}}</pre>
+      <pre class="w-full min-h-[240px] max-h-[400px] font-mono text-sm border border-content-border rounded-md p-3 bg-content-bg overflow-auto">@for (segment of segments; track $index) {{{ segment }}@if (!$last) {<span class="text-warning font-semibold">"&lt;redacted&gt;"</span>}}</pre>
     } @else {
       <app-form-field class="">
         <!-- In update mode the header row above carries the label; a

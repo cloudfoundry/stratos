@@ -16,9 +16,9 @@
          dialog doesn't show "Name is required" before the user types. -->
     <div class="mt-1 text-sm leading-5 min-h-[1.25rem]">
       @if (visibleNameError()) {
-        <span class="text-danger-shade-500">{{ visibleNameError() }}</span>
+        <span class="text-danger">{{ visibleNameError() }}</span>
       } @else if (visibleNameWarning()) {
-        <span class="text-warning-shade-500">{{ visibleNameWarning() }}</span>
+        <span class="text-warning">{{ visibleNameWarning() }}</span>
       }
     </div>
   </div>
@@ -53,7 +53,7 @@
       </app-monaco-editor>
     </div>
     @if (jsonWarning()) {
-      <div class="mt-1 text-sm text-warning-shade-500">{{ jsonWarning() }}</div>
+      <div class="mt-1 text-sm text-warning">{{ jsonWarning() }}</div>
     }
   </div>
 

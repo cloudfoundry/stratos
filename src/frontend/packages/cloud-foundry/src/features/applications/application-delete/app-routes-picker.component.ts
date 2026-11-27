@@ -50,7 +50,7 @@ import type { StRoute } from '../../../services/endpoint-data/stratos-types';
               @if ((route.appGuids?.length ?? 0) > 1) {
                 <span
                   data-test="route-shared-badge"
-                  class="text-warning-shade-500 text-xs whitespace-nowrap"
+                  class="text-warning text-xs whitespace-nowrap"
                   title="This route is also mapped to other applications - deleting it will remove it for them too.">
                   Shared ({{ route.appGuids!.length }} apps)
                 </span>
