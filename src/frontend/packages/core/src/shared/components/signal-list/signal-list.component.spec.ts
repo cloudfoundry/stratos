@@ -233,6 +233,37 @@ describe('SignalListComponent', () => {
     }
   });
 
+  // WCAG 2.5.8: the copy button (14 px) and the select checkbox (16 px) are
+  // under 24 px, so they pass by spacing: a 24 px circle on each must not
+  // touch the next control. Side by side with 2-4 px between them, the
+  // circles cut into the star. A 6 px gap between every control in the
+  // card header leaves 13-14 px from each small control's centre to its
+  // neighbour.
+  it('spaces the card header controls so the small ones pass by spacing', async () => {
+    const fixture = TestBed.createComponent(Host);
+    fixture.componentInstance.config = {
+      ...fixture.componentInstance.config,
+      viewMode: signal<'table' | 'card'>('card'),
+      columns: [
+        { header: 'Name', render: r => r.name, copyValue: r => r.name },
+        { header: '', kind: 'favorite', render: () => '', favorite: { keys: signal(new Set<string>()), toggle: () => {} } },
+        { header: 'Pick', key: 'pick', kind: 'checkbox', render: () => '', checkbox: { selectedKeys: signal(new Set<string>()) } },
+        { header: '', kind: 'actions', render: () => '', actions: () => [{ label: 'Delete', invoke: () => {} }] },
+      ],
+    };
+    await fixture.whenStable();
+    const card = fixture.nativeElement.querySelector('[data-test="card"]') as HTMLElement;
+    const star = card.querySelector('[data-test="favorite-star"]') as HTMLElement;
+    const cluster = star.parentElement as HTMLElement;
+    const controls = [...cluster.children] as HTMLElement[];
+    expect(controls.map(c => c.getAttribute('data-test') ?? c.firstElementChild?.getAttribute('data-test')))
+      .toEqual(['copy-value', 'favorite-star', 'card-select-checkbox', 'row-actions']);
+    expect(cluster.classList.contains('gap-1.5')).toBe(true);
+    for (const c of controls) {
+      expect([...c.classList].filter(k => /^-?m[xlr]?-/.test(k)), c.outerHTML.slice(0, 80)).toEqual([]);
+    }
+  });
+
   describe('row-action menu and the Escape key', () => {
     async function withActions() {
       const fixture = TestBed.createComponent(Host);
