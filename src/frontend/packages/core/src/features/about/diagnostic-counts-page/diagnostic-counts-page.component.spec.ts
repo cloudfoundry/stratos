@@ -139,4 +139,16 @@ describe('DiagnosticCountsPageComponent', () => {
     expect(fixture.nativeElement.textContent).toContain('100');
     httpMock.verify();
   });
+
+  // WCAG 1.4.3: the palette shades (700 on 100) measured 3.06:1 as chip
+  // text. The status text colours pass in both modes.
+  it('draws the risk chip text in the status text colours', () => {
+    const c = fixture.componentInstance;
+    expect(c.riskChipClass('low').split(' ')).toContain('text-success');
+    expect(c.riskChipClass('medium').split(' ')).toContain('text-warning');
+    expect(c.riskChipClass('high').split(' ')).toContain('text-danger');
+    for (const risk of ['low', 'medium', 'high'] as const) {
+      expect(c.riskChipClass(risk)).not.toMatch(/text-\w+-shade-/);
+    }
+  });
 });

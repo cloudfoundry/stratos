@@ -115,11 +115,11 @@ export class DiagnosticCountsPageComponent {
   riskChipClass(risk: RiskLevel | null): string {
     switch (risk) {
       case 'low':
-        return 'bg-success-shade-100 text-success-shade-700 dark:bg-success-shade-900/30 dark:text-success-shade-300';
+        return 'bg-success-shade-100 text-success dark:bg-success-shade-900/30';
       case 'medium':
-        return 'bg-warning-shade-100 text-warning-shade-700 dark:bg-warning-shade-900/30 dark:text-warning-shade-300';
+        return 'bg-warning-shade-100 text-warning dark:bg-warning-shade-900/30';
       case 'high':
-        return 'bg-danger-shade-100 text-danger-shade-700 dark:bg-danger-shade-900/30 dark:text-danger-shade-300';
+        return 'bg-danger-shade-100 text-danger dark:bg-danger-shade-900/30';
       default:
         return '';
     }
