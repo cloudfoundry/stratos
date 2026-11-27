@@ -15,7 +15,8 @@ import { ProgressBarComponent } from './progress-bar.component';
       [value]="value()"
       [bufferValue]="bufferValue()"
       [color]="color()"
-      [customHeight]="customHeight()">
+      [customHeight]="customHeight()"
+      [label]="label()">
     </lib-progress-bar>
   `,
   changeDetection: ChangeDetectionStrategy.OnPush
