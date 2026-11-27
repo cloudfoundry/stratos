@@ -153,9 +153,9 @@ export class SignalDetailComponent {
   statusPillClasses(color: SignalDetailStatusColor | undefined): string {
     const base = 'px-2 py-0.5 text-xs rounded-full font-medium';
     switch (color) {
-      case 'success': return `${base} bg-success-shade-100 text-success-shade-800 dark:bg-success-shade-900/30 dark:text-success-shade-200`;
-      case 'warning': return `${base} bg-warning-shade-100 text-warning-shade-800 dark:bg-warning-shade-900/30 dark:text-warning-shade-200`;
-      case 'danger':  return `${base} bg-danger-shade-100 text-danger-shade-800 dark:bg-danger-shade-900/30 dark:text-danger-shade-200`;
+      case 'success': return `${base} bg-success-shade-100 text-success dark:bg-success-shade-900/30`;
+      case 'warning': return `${base} bg-warning-shade-100 text-warning dark:bg-warning-shade-900/30`;
+      case 'danger':  return `${base} bg-danger-shade-100 text-danger dark:bg-danger-shade-900/30`;
       default:        return `${base} bg-content-secondary text-content-text`;
     }
   }
