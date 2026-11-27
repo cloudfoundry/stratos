@@ -18,7 +18,7 @@
     }
     @if (status === 'expired') {
       @if (showLabel()) {
-        <span class="mr-2 text-warning-shade-600 dark:text-warning-shade-300">Expired @if (row().local) {
+        <span class="mr-2 text-warning">Expired @if (row().local) {
           <span class="mr-2">(local)</span>
         }</span>
       }
