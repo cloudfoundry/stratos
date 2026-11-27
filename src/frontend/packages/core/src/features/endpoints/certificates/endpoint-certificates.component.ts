@@ -20,7 +20,7 @@ interface CertificateCard {
 }
 
 const PILL = 'inline-block px-2 py-0.5 rounded text-xs font-medium';
-const PILL_WARNING = `${PILL} bg-warning-50 text-warning-900 dark:bg-warning-900/40 dark:text-warning-100`;
+const PILL_WARNING = `${PILL} bg-warning-50 text-warning dark:bg-warning-900/40`;
 const PILL_DANGER = `${PILL} bg-danger-50 text-danger-900 dark:bg-danger-900/40 dark:text-danger-100`;
 
 @Component({
