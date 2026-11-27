@@ -233,6 +233,30 @@ describe('SignalListComponent', () => {
     }
   });
 
+  // WCAG 2.5.8: beside a value, in a table cell or a card row, the 14 px
+  // copy button sat 4 px from the value's link, so its 24 px spacing circle
+  // cut into the link (offset 22 px). 6 px leaves 13 px from its centre.
+  it('spaces the copy button from the value beside it', async () => {
+    const fixture = TestBed.createComponent(Host);
+    const columns = [
+      { header: 'Name', render: (r: { name: string }) => r.name },
+      { header: 'Route', render: (r: { name: string }) => r.name, copyValue: (r: { name: string }) => r.name,
+        externalLink: (r: { name: string }) => `https://${r.name}` },
+    ];
+    fixture.componentInstance.config = { ...fixture.componentInstance.config, columns };
+    await fixture.whenStable();
+    const inTable = fixture.nativeElement.querySelector('[data-test="row"] [data-test="copy-value"]') as HTMLElement;
+    expect(inTable.classList.contains('mr-1.5')).toBe(true);
+
+    fixture.componentInstance.config = { ...fixture.componentInstance.config, viewMode: signal<'table' | 'card'>('card') };
+    await fixture.whenStable();
+    const inCard = [...fixture.nativeElement.querySelectorAll('[data-test="card"] [data-test="copy-value"]')] as HTMLElement[];
+    expect(inCard.length).toBeGreaterThan(0);
+    for (const c of inCard) {
+      expect(c.classList.contains('mr-1.5')).toBe(true);
+    }
+  });
+
   // A long card title link (a route URL) was cut off by its span, but the
   // link's own box ran on under the header controls: its focus outline
   // showed on three sides only, and a target-size check measured the

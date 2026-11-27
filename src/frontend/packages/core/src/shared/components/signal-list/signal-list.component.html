@@ -613,7 +613,7 @@
                     <span class="text-content-muted"><app-abbr-text [text]="col.header" /></span>
                     <span class="text-content-text text-right truncate p-1 -m-1" [attr.title]="(col.kind === 'pill' || col.kind === 'dot') && col.tooltip ? col.tooltip(row) : col.render(row)">
                       @if (col.copyValue?.(row); as cv) {
-                        <app-copy-to-clipboard data-test="copy-value" class="inline-flex align-middle mr-1" [compact]="true" [text]="cv" [tooltip]="'Copy ' + cv" [showSuccessText]="false" />
+                        <app-copy-to-clipboard data-test="copy-value" class="inline-flex align-middle mr-1.5" [compact]="true" [text]="cv" [tooltip]="'Copy ' + cv" [showSuccessText]="false" />
                       }
                       @if (col.externalLink && col.externalLink(row); as href) {
                         <a [href]="href" target="_blank" rel="noopener" (click)="$event.stopPropagation()" class="text-accent hover:underline inline-flex items-center gap-1">
@@ -770,7 +770,7 @@
                     [class.overflow-visible]="col.kind === 'radio' || col.kind === 'checkbox' || col.kind === 'gauge' || col.kind === 'template'"
                     [attr.title]="col.kind === 'radio' || col.kind === 'checkbox' || col.kind === 'gauge' || col.kind === 'template' ? null : (col.kind === 'pill' || col.kind === 'dot') && col.tooltip ? col.tooltip(row) : col.render(row)">
                   @if (col.copyValue?.(row); as cv) {
-                    <app-copy-to-clipboard data-test="copy-value" class="inline-flex align-middle mr-1" [compact]="true" [text]="cv" [tooltip]="'Copy ' + cv" [showSuccessText]="false" />
+                    <app-copy-to-clipboard data-test="copy-value" class="inline-flex align-middle mr-1.5" [compact]="true" [text]="cv" [tooltip]="'Copy ' + cv" [showSuccessText]="false" />
                   }
                   @if (col.externalLink && col.externalLink(row); as href) {
                     <a [href]="href" target="_blank" rel="noopener" (click)="$event.stopPropagation()" class="text-accent hover:underline inline-flex items-center gap-1">
