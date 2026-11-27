@@ -14,7 +14,7 @@
       </app-progress-bar>
     }
     @if (!isFetching() && error(); as error) {
-      <div data-test="metrics-chart-error" class="no-content text-danger-shade-700 break-words">Failed to load metrics: {{ error }}</div>
+      <div data-test="metrics-chart-error" class="no-content text-danger break-words">Failed to load metrics: {{ error }}</div>
     }
     @if (!isFetching()) {
       <div class="metrics-chart">
