@@ -3,7 +3,7 @@
     <h3 class="card-title">Summary of {{title()}} Usage for Last {{period()}}</h3>
   </div>
   @if (errorText(); as error) {
-    <div data-test="node-metric-error" class="card-content p-4 text-sm text-danger-shade-700 break-words">Failed to load: {{ error }}</div>
+    <div data-test="node-metric-error" class="card-content p-4 text-sm text-danger break-words">Failed to load: {{ error }}</div>
   } @else {
   @if (metric()==='container_memory_usage_bytes') {
     <div class="card-content p-4">
