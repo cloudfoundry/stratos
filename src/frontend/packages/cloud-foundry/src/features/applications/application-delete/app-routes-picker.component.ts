@@ -37,13 +37,16 @@ import type { StRoute } from '../../../services/endpoint-data/stratos-types';
         <ul class="divide-y divide-content-border border border-content-border rounded">
           @for (route of routes(); track route.guid) {
             <li class="flex items-center gap-3 px-3 py-2">
-              <input
-                data-test="route-checkbox"
-                type="checkbox"
-                [attr.data-guid]="route.guid"
-                [checked]="isSelected(route.guid)"
-                (change)="toggle(route.guid)" />
-              <span class="flex-1 text-content-text truncate" [attr.title]="route.url">{{ route.url }}</span>
+              <!-- The label names the box by its route (WCAG 4.1.2). -->
+              <label class="flex flex-1 min-w-0 items-center gap-3 cursor-pointer">
+                <input
+                  data-test="route-checkbox"
+                  type="checkbox"
+                  [attr.data-guid]="route.guid"
+                  [checked]="isSelected(route.guid)"
+                  (change)="toggle(route.guid)" />
+                <span class="flex-1 text-content-text truncate" [attr.title]="route.url">{{ route.url }}</span>
+              </label>
               @if ((route.appGuids?.length ?? 0) > 1) {
                 <span
                   data-test="route-shared-badge"

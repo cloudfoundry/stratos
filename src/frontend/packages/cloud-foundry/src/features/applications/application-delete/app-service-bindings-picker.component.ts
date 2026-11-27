@@ -38,15 +38,18 @@ import type { StServiceCredentialBinding } from '../../../services/endpoint-data
         <ul class="divide-y divide-content-border border border-content-border rounded">
           @for (binding of bindings(); track binding.guid) {
             <li class="flex items-center gap-3 px-3 py-2">
-              <input
-                data-test="binding-checkbox"
-                type="checkbox"
-                [attr.data-guid]="binding.guid"
-                [checked]="isSelected(binding.guid)"
-                (change)="toggle(binding.guid)" />
-              <span class="flex-1 text-content-text truncate" [attr.title]="binding.serviceInstance.name">
-                {{ binding.serviceInstance.name }}
-              </span>
+              <!-- The label names the box by its service instance (WCAG 4.1.2). -->
+              <label class="flex flex-1 min-w-0 items-center gap-3 cursor-pointer">
+                <input
+                  data-test="binding-checkbox"
+                  type="checkbox"
+                  [attr.data-guid]="binding.guid"
+                  [checked]="isSelected(binding.guid)"
+                  (change)="toggle(binding.guid)" />
+                <span class="flex-1 text-content-text truncate" [attr.title]="binding.serviceInstance.name">
+                  {{ binding.serviceInstance.name }}
+                </span>
+              </label>
               @if (binding.serviceInstance.type) {
                 <span data-test="binding-type"
                       class="text-xs px-2 py-0.5 rounded bg-content-secondary text-content-text">
