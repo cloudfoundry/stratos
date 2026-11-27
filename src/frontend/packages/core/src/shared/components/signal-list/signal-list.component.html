@@ -467,9 +467,9 @@
                         }
                       </span>
                     }
-                    <div class="flex items-center gap-0 shrink-0">
+                    <div class="flex items-center gap-1.5 shrink-0">
                       @if (titleColumn()?.copyValue?.(row); as cv) {
-                        <app-copy-to-clipboard data-test="copy-value" class="inline-flex align-middle mr-1" [compact]="true" [text]="cv" [tooltip]="'Copy ' + cv" [showSuccessText]="false" />
+                        <app-copy-to-clipboard data-test="copy-value" class="inline-flex align-middle" [compact]="true" [text]="cv" [tooltip]="'Copy ' + cv" [showSuccessText]="false" />
                       }
                       @if (favoriteColumn(); as fc) {
                         <button
@@ -492,7 +492,7 @@
                           [checked]="isCheckboxSelected(cbCol, row)"
                           [disabled]="isCheckboxDisabled(cbCol, row)"
                           (click)="onToggleCheckbox(cbCol, row, $event)"
-                          class="w-4 h-4 mx-0.5 accent-accent"
+                          class="w-4 h-4 accent-accent"
                           [class.cursor-pointer]="!isCheckboxDisabled(cbCol, row)"
                           [class.cursor-not-allowed]="isCheckboxDisabled(cbCol, row)"
                           [class.opacity-40]="isCheckboxDisabled(cbCol, row)" />
