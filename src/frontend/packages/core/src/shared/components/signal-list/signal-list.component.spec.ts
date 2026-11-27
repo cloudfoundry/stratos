@@ -233,6 +233,35 @@ describe('SignalListComponent', () => {
     }
   });
 
+  // A long card title link (a route URL) was cut off by its span, but the
+  // link's own box ran on under the header controls: its focus outline
+  // showed on three sides only, and a target-size check measured the
+  // controls against the hidden part. The link now cuts off its own text,
+  // so its box is the part on screen.
+  it('lets a card title link cut off its own text', async () => {
+    const fixture = TestBed.createComponent(Host);
+    fixture.componentInstance.config = {
+      ...fixture.componentInstance.config,
+      viewMode: signal<'table' | 'card'>('card'),
+      columns: [
+        { header: 'Name', kind: 'link', render: r => r.name, link: r => ['/name', r.name] },
+      ],
+    };
+    await fixture.whenStable();
+    const link = fixture.nativeElement.querySelector('[data-test="card"] a') as HTMLElement;
+    expect(link.classList.contains('block')).toBe(true);
+    expect(link.classList.contains('truncate')).toBe(true);
+
+    fixture.componentInstance.config = {
+      ...fixture.componentInstance.config,
+      columns: [{ header: 'Route', render: r => r.name, externalLink: r => `https://${r.name}` }],
+    };
+    await fixture.whenStable();
+    const external = fixture.nativeElement.querySelector('[data-test="card"] a[target="_blank"]') as HTMLElement;
+    expect(external.classList.contains('block')).toBe(true);
+    expect(external.classList.contains('truncate')).toBe(true);
+  });
+
   // WCAG 2.5.8: the copy button (14 px) and the select checkbox (16 px) are
   // under 24 px, so they pass by spacing: a 24 px circle on each must not
   // touch the next control. Side by side with 2-4 px between them, the
