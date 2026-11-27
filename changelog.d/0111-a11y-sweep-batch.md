@@ -21,10 +21,17 @@
   scroll it when its rows hold nothing focusable (the feature flags
   and buildpacks lists).
 
+[Accessibility: 2.4.7 Focus Visible]
+- A long card title link, such as a route URL, shows its focus outline
+  on all four sides. The link now cuts off its own text; before, the
+  box around it did, and the outline's right side was hidden.
+
 [Accessibility: 2.5.8 Target Size (Minimum)]
 - The controls in a list card header (copy, favourite star, select,
   actions) are spaced so the small ones meet the 24 px spacing rule.
   The copy button and the select checkbox cut into the star before.
+- The copy button beside a value in a table cell or a card row sits
+  6 px from the value's link, so it meets the 24 px spacing rule.
 
 [Accessibility: 4.1.2 Name, Role, Value]
 - Checkboxes in a table cell have a name: "Back up <endpoint>" on
