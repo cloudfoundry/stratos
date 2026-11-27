@@ -39,7 +39,7 @@
           </app-tile-group>
         </app-tile-grid>
         @if (failureReason(); as reason) {
-          <div data-test="cluster-load-failure" class="flex items-start gap-1.5 ml-3 mb-2 text-sm text-danger-shade-700">
+          <div data-test="cluster-load-failure" class="flex items-start gap-1.5 ml-3 mb-2 text-sm text-danger">
             <span aria-hidden="true" class="material-icons text-base leading-5">error_outline</span>
             <span class="break-words">Failed to load some cluster details: {{ reason }}</span>
           </div>
@@ -83,10 +83,10 @@
               <div class="flex items-center">
                 <div>{{ data.updates }}</div>
                 @if (data.securityUpdates > 0) {
-                  <div class="rounded-lg text-xs ml-2.5 px-2 py-px bg-warning-shade-100 text-warning-shade-800">Security: <b>{{ data.securityUpdates }}</b></div>
+                  <div class="rounded-lg text-xs ml-2.5 px-2 py-px bg-warning-shade-100 text-warning dark:bg-warning-shade-900/30">Security: <b>{{ data.securityUpdates }}</b></div>
                 }
                 @if (data.disruptiveUpdates > 0) {
-                  <div class="rounded-lg text-xs ml-2.5 px-2 py-px bg-warning-shade-100 text-warning-shade-800">Disruptive: <b>{{ data.disruptiveUpdates }}</b></div>
+                  <div class="rounded-lg text-xs ml-2.5 px-2 py-px bg-warning-shade-100 text-warning dark:bg-warning-shade-900/30">Disruptive: <b>{{ data.disruptiveUpdates }}</b></div>
                 }
               </div>
             </app-metadata-item>
