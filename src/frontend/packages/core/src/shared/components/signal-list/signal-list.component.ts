@@ -673,7 +673,7 @@ export class SignalListComponent<T> implements AfterViewInit {
   pillClasses(color: SignalListPillColor): string {
     switch (color) {
       case 'success': return 'inline-block px-2 py-0.5 rounded text-xs font-medium bg-success-50 text-success-900 dark:bg-success-900/40 dark:text-success-100';
-      case 'warning': return 'inline-block px-2 py-0.5 rounded text-xs font-medium bg-warning-50 text-warning-900 dark:bg-warning-900/40 dark:text-warning-100';
+      case 'warning': return 'inline-block px-2 py-0.5 rounded text-xs font-medium bg-warning-50 text-warning dark:bg-warning-900/40';
       case 'danger':  return 'inline-block px-2 py-0.5 rounded text-xs font-medium bg-danger-50 text-danger-900 dark:bg-danger-900/40 dark:text-danger-100';
       default:        return 'inline-block px-2 py-0.5 rounded text-xs font-medium bg-content-secondary text-content-text';
     }
