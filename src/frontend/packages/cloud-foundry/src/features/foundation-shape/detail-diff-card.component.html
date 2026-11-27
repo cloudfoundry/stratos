@@ -28,12 +28,12 @@
     </label>
   </div>
   @if (importError(); as error) {
-    <span class="text-xs text-danger-shade-600 dark:text-danger-shade-300" data-test="detail-diff-error">{{ error }}</span>
+    <span class="text-xs text-danger" data-test="detail-diff-error">{{ error }}</span>
   }
 
   @if (diff(); as d) {
     @for (warning of d.warnings; track warning) {
-      <div class="text-xs text-warning-shade-700 dark:text-warning-shade-300" data-test="detail-diff-warning">
+      <div class="text-xs text-warning" data-test="detail-diff-warning">
         {{ warning }}
       </div>
     }
@@ -56,14 +56,14 @@
               <tbody>
                 @for (entry of level.removed; track entry.guid) {
                   <tr data-test="detail-diff-removed">
-                    <td class="pr-2 py-0.5 text-danger-shade-700 dark:text-danger-shade-300">&minus;</td>
+                    <td class="pr-2 py-0.5 text-danger">&minus;</td>
                     <td class="pr-4 py-0.5">{{ entry.name }}</td>
                     <td class="py-0.5 text-content-muted">{{ entry.path }}</td>
                   </tr>
                 }
                 @for (entry of level.added; track entry.guid) {
                   <tr data-test="detail-diff-added">
-                    <td class="pr-2 py-0.5 text-success-shade-700 dark:text-success-shade-300">+</td>
+                    <td class="pr-2 py-0.5 text-success">+</td>
                     <td class="pr-4 py-0.5">{{ entry.name }}</td>
                     <td class="py-0.5 text-content-muted">{{ entry.path }}</td>
                   </tr>
