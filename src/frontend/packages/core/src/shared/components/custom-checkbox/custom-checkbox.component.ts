@@ -36,6 +36,9 @@ export class CustomCheckboxComponent implements ControlValueAccessor {
   readonly color = input<'primary' | 'accent' | 'warn'>('primary');
   readonly invalid = input(false);
   readonly errorMessage = input('');
+  // The box's name when no label text is projected (a table cell). Bound
+  // as [ariaLabel] so the name sits on the box, not on the host element.
+  readonly ariaLabel = input<string>();
 
   // eslint-disable-next-line @angular-eslint/no-output-native -- intentional Material API parity: drop-in for mat-checkbox which emits (change)
   readonly change = output<MatCheckboxChange>();

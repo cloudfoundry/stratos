@@ -70,6 +70,15 @@ describe('KubeConfigTableCertComponent', () => {
     expect(fixture.nativeElement.querySelector('app-checkbox')).not.toBeNull();
   });
 
+  // WCAG 4.1.2: the cell has no text beside the box, so the box says
+  // which cluster it is for.
+  it('names the checkbox after the cluster', async () => {
+    show({ 'insecure-skip-tls-verify': true });
+    await fixture.whenStable();
+    const box = fixture.nativeElement.querySelector('[role=checkbox]') as HTMLElement;
+    expect(box.getAttribute('aria-label')).toBe('Skip SSL validation for c1');
+  });
+
   it('asks whether the server needs a certificate, once, and records the answer on the row', async () => {
     const http = TestBed.inject(HttpTestingController);
     const row = show({});

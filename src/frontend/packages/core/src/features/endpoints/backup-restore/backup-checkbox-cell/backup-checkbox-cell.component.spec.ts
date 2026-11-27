@@ -31,7 +31,7 @@ describe('BackupCheckboxCellComponent', () => {
     TestBed.compileComponents();
   });
 
-  beforeEach(() => {
+  beforeEach(async () => {
     fixture = TestBed.createComponent(BackupCheckboxCellComponent);
     component = fixture.componentInstance;
     fixture.componentRef.setInput('config', {
@@ -39,15 +39,23 @@ describe('BackupCheckboxCellComponent', () => {
     });
     fixture.componentRef.setInput('row', {
       guid: 'test',
+      name: 'lab-cf',
       cnsi_type: 'metrics',
     } as EndpointModel);
     component.service.initialize([{
       guid: 'test'
     } as EndpointModel]);
-    fixture.detectChanges();
+    await fixture.whenStable();
   });
 
   it('should create', () => {
     expect(component).toBeTruthy();
+  });
+
+  // WCAG 4.1.2: the cell has no text beside the box, so the box says
+  // which endpoint it backs up.
+  it('names the checkbox after the endpoint', () => {
+    const box = fixture.nativeElement.querySelector('[role=checkbox]') as HTMLElement;
+    expect(box.getAttribute('aria-label')).toBe('Back up lab-cf');
   });
 });
