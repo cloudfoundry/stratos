@@ -122,4 +122,16 @@ describe('ErrorPageComponent for an endpoint', () => {
     await fixture.whenStable();
     expect(fixture.componentInstance.errorDetails()?.endpoint?.name).toBe('Renamed');
   });
+
+  // WCAG 1.3.1: a list item needs a list around it. "No recent errors" is
+  // a message, not a list item (axe-core aria-required-parent).
+  it('shows the empty message as plain text, not as a list item', async () => {
+    const fixture = TestBed.createComponent(ErrorPageComponent);
+    await fixture.whenStable();
+    const root = fixture.nativeElement as HTMLElement;
+    const message = [...root.querySelectorAll('div')].find(d => d.textContent!.trim() === 'No recent errors')!;
+    expect(message).toBeTruthy();
+    expect(message.hasAttribute('role')).toBe(false);
+    expect(root.querySelector('[role=listitem]')).toBeNull();
+  });
 });
