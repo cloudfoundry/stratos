@@ -460,11 +460,11 @@
                     @if (titleColumn(); as tc) {
                       <span class="truncate min-w-0 p-1 -m-1" [attr.title]="tc.tooltip ? tc.tooltip(row) : tc.render(row)">
                         @if (tc.externalLink && tc.externalLink(row); as href) {
-                          <a [href]="href" target="_blank" rel="noopener" (click)="$event.stopPropagation()" class="text-accent hover:underline">{{ tc.render(row) }}</a>
+                          <a [href]="href" target="_blank" rel="noopener" (click)="$event.stopPropagation()" class="block truncate text-accent hover:underline">{{ tc.render(row) }}</a>
                         } @else if (tc.open; as open) {
                           <button type="button" data-test="cell-open" (click)="$event.stopPropagation(); open(row)" class="text-accent hover:underline text-left max-w-full truncate">{{ tc.render(row) }}</button>
                         } @else if (tc.kind === 'link' && tc.link && tc.link(row); as target) {
-                          <a [routerLink]="target" [queryParams]="tc.linkQueryParams ? tc.linkQueryParams(row) : null" (click)="$event.stopPropagation()" class="text-accent hover:underline">{{ tc.render(row) }}</a>
+                          <a [routerLink]="target" [queryParams]="tc.linkQueryParams ? tc.linkQueryParams(row) : null" (click)="$event.stopPropagation()" class="block truncate text-accent hover:underline">{{ tc.render(row) }}</a>
                         } @else {
                           {{ tc.render(row) }}
                         }
