@@ -39,7 +39,7 @@
         <div class="flex items-center gap-4">
           <button type="button" class="text-link hover:underline disabled:opacity-50"
             [disabled]="busy()" (click)="startRebind()">Rebind</button>
-          <button type="button" class="text-danger-shade-600 hover:underline disabled:opacity-50"
+          <button type="button" class="text-danger hover:underline disabled:opacity-50"
             [disabled]="busy()" (click)="unbind()">{{ busy() ? 'Unbinding…' : 'Unbind' }}</button>
         </div>
       </div>
