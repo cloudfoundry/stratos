@@ -29,7 +29,7 @@
     </label>
   </div>
   @if (importError(); as error) {
-    <span class="text-xs text-danger-shade-600 dark:text-danger-shade-300" data-test="compare-error">{{ error }}</span>
+    <span class="text-xs text-danger" data-test="compare-error">{{ error }}</span>
   }
 
   @if (comparison(); as cmp) {
@@ -60,8 +60,8 @@
                     @for (cell of row.cells; track $index) {
                       <td class="px-3 py-0.5 text-center">
                         @switch (cell) {
-                          @case ('added') { <span class="text-success-shade-700 dark:text-success-shade-300">+&#10003;</span> }
-                          @case ('removed') { <span class="text-danger-shade-700 dark:text-danger-shade-300">&minus;</span> }
+                          @case ('added') { <span class="text-success">+&#10003;</span> }
+                          @case ('removed') { <span class="text-danger">&minus;</span> }
                           @case ('present') { <span class="text-content-muted">&#10003;</span> }
                           @case ('absent') { <span class="text-content-muted">&middot;</span> }
                           @case ('unmeasured') { <span class="text-content-muted text-[10px]">n/m</span> }
