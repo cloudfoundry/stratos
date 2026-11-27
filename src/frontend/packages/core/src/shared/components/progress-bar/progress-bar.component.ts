@@ -28,6 +28,7 @@ import { CommonModule } from "@angular/common";
       [class.h-1]="!customHeight()"
       [style.height]="customHeight()"
       role="progressbar"
+      [attr.aria-label]="label()"
       [attr.aria-valuenow]="mode() === 'determinate' ? value() : null"
       aria-valuemin="0"
       aria-valuemax="100"
@@ -207,6 +208,9 @@ export class ProgressBarComponent implements OnInit, OnChanges {
    * Optional custom height (CSS value like '2px', '4px', etc.)
    */
   readonly customHeight = input<string>();
+
+  /** The bar's name for a screen reader (WCAG 4.1.2). */
+  readonly label = input<string>('Loading');
 
   /**
    * CSS classes for the progress bar based on color
