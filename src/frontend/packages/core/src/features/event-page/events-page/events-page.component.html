@@ -55,8 +55,8 @@
             <app-custom-icon
               class="event-page__event-row-icon shrink-0"
               [ariaLabel]="event.type === 'error' ? 'Error' : event.type === 'warning' ? 'Warning' : 'Information'"
-              [class.text-danger-shade-500]="event.type === 'error'"
-              [class.text-warning-shade-500]="event.type === 'warning'"
+              [class.text-danger]="event.type === 'error'"
+              [class.text-warning]="event.type === 'warning'"
               [class.text-content-muted]="event.type !== 'error' && event.type !== 'warning'">
               {{ event.type === 'error' ? 'error' : event.type === 'warning' ? 'warning' : 'info' }}
             </app-custom-icon>
